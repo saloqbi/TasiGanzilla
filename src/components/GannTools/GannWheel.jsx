@@ -270,7 +270,7 @@ if (showInnerWheels) {
   };
 
   const buttonStyle = { marginRight: '10px', padding: '6px 14px', backgroundColor: '#222', color: '#FFD700', border: '1px solid #444', borderRadius: '4px', cursor: 'pointer' };
-  const svgBoxStyle = { border: '1px solid #333', padding: '8px', backgroundColor: '#f9f9f9' };
+  const svgBoxStyle = { border: '1px solid #333', padding: '8px', backgroundColor: '#1e1e2f' };
 
   return (
     <div style={{ textAlign: 'center', padding: '20px', backgroundColor: '#111', color: '#FFD700', fontFamily: 'sans-serif' }}>
