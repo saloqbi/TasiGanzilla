@@ -1,0 +1,75 @@
+.gann-container {
+  text-align: center;
+  color: yellow;
+  font-family: Arial;
+}
+
+.controls {
+  margin-bottom: 10px;
+}
+
+.pdf-btn {
+  background-color: darkred;
+  color: white;
+  padding: 5px 10px;
+  margin-left: 10px;
+}
+
+.toggles {
+  margin-top: 10px;
+}
+
+.gann-grid {
+  display: inline-block;
+  border: 1px solid #555;
+  margin-top: 10px;
+}
+
+.gann-row {
+  display: flex;
+}
+
+.gann-cell {
+  width: 40px;
+  height: 40px;
+  border: 1px solid gold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #001144;
+  color: white;
+  font-size: 14px;
+}
+
+.angle-45 {
+  background-color: #00ffff;
+  color: black;
+}
+
+.angle-90 {
+  background-color: magenta;
+  color: black;
+}
+
+.angle-180 {
+  background-color: yellow;
+  color: black;
+}
+
+.angle-360 {
+  background-color: limegreen;
+  color: black;
+}
+
+.square {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.prime {
+  border: 2px solid cyan;
+}
+
+.multiple {
+  border: 2px solid orange;
+}
