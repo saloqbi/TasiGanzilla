@@ -4,6 +4,7 @@ const defaultSettings = {
   levels: 12,
   rotation: 0,
   divisions: 360,
+  startValue: 1,
   language: "ar",
 };
 
@@ -84,8 +85,8 @@ const GannCircle360 = () => {
     <div style={{ textAlign: "center", marginTop: 20 }}>
       <h2 style={{ color: "#FFD700" }}>
         {settings.language === "ar"
-          ? "دائرة Gann 360 (سحب وتحريك)"
-          : "Gann 360 Circle (Draggable)"}
+          ? "دائرة Gann 360 (بداية مخصصة)"
+          : "Gann 360 Circle (Custom Start)"}
       </h2>
 
       <div style={{ marginBottom: 10, flexWrap: "wrap" }}>
@@ -135,6 +136,22 @@ const GannCircle360 = () => {
             style={{ marginLeft: 10, width: 60 }}
           />
         </label>
+
+        <label style={{ color: "#FFD700", marginLeft: 15 }}>
+          {settings.language === "ar" ? "بداية الترقيم:" : "Start From:"}
+          <input
+            type="number"
+            min={1}
+            value={settings.startValue}
+            onChange={(e) =>
+              setSettings((prev) => ({
+                ...prev,
+                startValue: parseInt(e.target.value),
+              }))
+            }
+            style={{ marginLeft: 10, width: 60 }}
+          />
+        </label>
       </div>
 
       <svg
@@ -155,7 +172,7 @@ const GannCircle360 = () => {
         >
           {[...Array(settings.levels)].map((_, level) =>
             [...Array(settings.divisions)].map((_, index) => {
-              const value = level * settings.divisions + index + 1;
+              const value = settings.startValue + level * settings.divisions + index;
               const path = getPathForCell(level, index);
 
               const angle =
