@@ -15,7 +15,7 @@ const defaultConfig = {
   center: 0,
   levels: 12,
   customDivisor: 45,
-  visible: true,
+  
   highlights: {
     angle45: true,
     angle90: true,
@@ -148,7 +148,7 @@ const GannSquare144_Final = () => {
       <h2 style={{ color: '#FFD700' }}>كوكبة الأرقام السحرية</h2>
       <div style={{ marginBottom: '10px' }}>
         <button onClick={() => handleChange('center', config.center + 1)} style={buttonStyle}>🔁 تدوير</button>
-        <button onClick={() => handleChange('visible', false)} style={buttonStyle}>🧹 حذف</button>
+        
         <button onClick={exportAsPNG} style={{ ...buttonStyle, backgroundColor: '#004080', color: '#fff' }}>📤 تصدير صورة</button>
         <button onClick={exportAsPDF} style={{ ...buttonStyle, backgroundColor: '#600', color: '#fff' }}>📄 تصدير PDF</button>
         <label style={{ margin: '0 10px' }}>
@@ -174,53 +174,52 @@ const GannSquare144_Final = () => {
         <label><input type="checkbox" checked={config.highlights.corners} onChange={() => toggleHighlight('corners')} /> زوايا</label>
       </div>
 
-      {config.visible && (
-        <div id="gann-square-container" style={containerStyle}>
-          <svg width={svgSize} height={svgSize} viewBox={`0 0 ${svgSize} ${svgSize}`} preserveAspectRatio="xMidYMid meet" style={{ background: '#111' }}>
-            {[...cells.entries()].map(([key, value]) => {
-              const [cx, cy] = key.split(',').map(Number);
-              const x = (cx + config.levels) * 40;
-              const y = (cy + config.levels) * 40;
-              const isCorner = cornerKeys.includes(key);
+     <div id="gann-square-container" style={containerStyle}>
+  <svg width={svgSize} height={svgSize} viewBox={`0 0 ${svgSize} ${svgSize}`} preserveAspectRatio="xMidYMid meet" style={{ background: '#111' }}>
+    {[...cells.entries()].map(([key, value]) => {
+      const [cx, cy] = key.split(',').map(Number);
+      const x = (cx + config.levels) * 40;
+      const y = (cy + config.levels) * 40;
+      const isCorner = cornerKeys.includes(key);
 
-              const fill = (() => {
-                if (diagonalKeys.includes(key)) return '#FFFF0055';
-                if (verticalKeys.includes(key)) return '#00FF0055';
-                if (horizontalKeys.includes(key)) return '#00FFFF55';
-                if (fullCircleKeys.includes(key)) return '#FF00FF55';
-                if (gannAngleKeys.includes(key)) return '#80008055';
-                if (config.highlights.multiples && value % config.customDivisor === 0) return '#FF8C0022';
-                if (config.highlights.squares && isSquare(value)) return '#228B2222';
-                if (config.highlights.primes && isPrime(value)) return '#4682B422';
-                if (config.highlights.corners && isCorner) return '#FFD70022';
-                return 'none';
-              })();
+      const fill = (() => {
+        if (diagonalKeys.includes(key)) return '#FFFF0055';
+        if (verticalKeys.includes(key)) return '#00FF0055';
+        if (horizontalKeys.includes(key)) return '#00FFFF55';
+        if (fullCircleKeys.includes(key)) return '#FF00FF55';
+        if (gannAngleKeys.includes(key)) return '#80008055';
+        if (config.highlights.multiples && value % config.customDivisor === 0) return '#FF8C0022';
+        if (config.highlights.squares && isSquare(value)) return '#228B2222';
+        if (config.highlights.primes && isPrime(value)) return '#4682B422';
+        if (config.highlights.corners && isCorner) return '#FFD70022';
+        return 'none';
+      })();
 
-              const stroke = (() => {
-                if (diagonalKeys.includes(key)) return '#FFFF00';
-                if (verticalKeys.includes(key)) return '#00FF00';
-                if (horizontalKeys.includes(key)) return '#00FFFF';
-                if (fullCircleKeys.includes(key)) return '#FF00FF';
-                if (gannAngleKeys.includes(key)) return '#800080';
-                if (config.highlights.multiples && value % config.customDivisor === 0) return '#FF8C00';
-                if (config.highlights.squares && isSquare(value)) return '#228B22';
-                if (config.highlights.primes && isPrime(value)) return '#4682B4';
-                if (config.highlights.corners && isCorner) return '#FFD700';
-                return '#555';
-              })();
+      const stroke = (() => {
+        if (diagonalKeys.includes(key)) return '#FFFF00';
+        if (verticalKeys.includes(key)) return '#00FF00';
+        if (horizontalKeys.includes(key)) return '#00FFFF';
+        if (fullCircleKeys.includes(key)) return '#FF00FF';
+        if (gannAngleKeys.includes(key)) return '#800080';
+        if (config.highlights.multiples && value % config.customDivisor === 0) return '#FF8C00';
+        if (config.highlights.squares && isSquare(value)) return '#228B22';
+        if (config.highlights.primes && isPrime(value)) return '#4682B4';
+        if (config.highlights.corners && isCorner) return '#FFD700';
+        return '#555';
+      })();
 
-              return (
-                <g key={key}>
-                  <rect x={x} y={y} width={40} height={40} fill={fill} stroke={stroke} strokeWidth={isCorner ? 2 : 1} />
-                  <text x={x + 20} y={y + 24} fontSize={12} fill={fill !== 'none' ? '#fff' : '#FFD700'} textAnchor="middle" fontWeight="bold">
-                    {value}
-                  </text>
-                </g>
-              );
-            })}
-          </svg>
-        </div>
-      )}
+      return (
+        <g key={key}>
+          <rect x={x} y={y} width={40} height={40} fill={fill} stroke={stroke} strokeWidth={isCorner ? 2 : 1} />
+          <text x={x + 20} y={y + 24} fontSize={12} fill={fill !== 'none' ? '#fff' : '#FFD700'} textAnchor="middle" fontWeight="bold">
+            {value}
+          </text>
+        </g>
+      );
+    })}
+  </svg>
+</div>
+
     </div>
   );
 };
