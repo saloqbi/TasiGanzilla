@@ -6,10 +6,11 @@ import GannFan from "../components/GannTools/GannFan";
 import GannBox from "../components/GannTools/GannBox";
 import GannSquare144 from "../components/GannTools/GannSquare144_Final";
 import GannWheel from "../components/GannTools/GannWheel";
+import GannCircle36 from "../components/GannTools/GannCircle36"; // ✅ جديد
 
 const Home = () => {
   const [activeTool, setActiveTool] = useState("GannSquare144");
-  const gannRef = useRef(); // ✅ مرجع لعجلة Gann
+  const gannRef = useRef();
 
   return (
     <div>
@@ -34,6 +35,7 @@ const Home = () => {
           { key: "GannFan", label: "GannFan" },
           { key: "GannBox", label: "GannBox" },
           { key: "GannWheel", label: "GannWheel" },
+          { key: "GannCircle36", label: "GannCircle36" }, // ✅ جديد
         ].map((tool) => (
           <button
             key={tool.key}
@@ -58,14 +60,12 @@ const Home = () => {
       {activeTool === "GannFan" && <GannFan />}
       {activeTool === "GannBox" && <GannBox />}
       {activeTool === "GannWheel" && <GannWheel ref={gannRef} />}
+      {activeTool === "GannCircle36" && <GannCircle36 />} {/* ✅ جديد */}
 
-      {/* ✅ زر تجريبي لمزامنة المركز */}
       {activeTool === "GannWheel" && (
         <div style={{ textAlign: "center", marginTop: "20px" }}>
           <button
-            onClick={() =>
-              gannRef.current?.syncWithChartPoint(200, 300)
-            }
+            onClick={() => gannRef.current?.syncWithChartPoint(200, 300)}
             style={{
               backgroundColor: "#444",
               color: "white",
