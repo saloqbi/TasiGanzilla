@@ -1,6 +1,7 @@
 // ✅ GannWheel.jsx - النسخة النهائية المضمونة بعد دمج الميزات
 // نبدأ بالمحتوى الكامل مع الميزتين الجديدتين مدمجتين:
 import React, { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import GannSquareInline from "./GannSquareInline";
 
 
 const GannWheel = forwardRef(({ width = 600, height = 600, snapSize = 10 }, ref) => {
@@ -30,6 +31,10 @@ useImperativeHandle(ref, () => ({
    const [innerWheels, setInnerWheels] = useState([]);
    const [layers, setLayers] = useState([]);
    const [showInnerWheels, setShowInnerWheels] = useState(true);
+   const [showInlineSquare, setShowInlineSquare] = useState(true);
+
+
+
 
 
    const [anglePoints, setAnglePoints] = useState([]);
@@ -52,6 +57,9 @@ useEffect(() => {
   const [showDegreeGrid, setShowDegreeGrid] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(1); // ✅ Zoom مضاف
    const [showInnerWheel, setShowInnerWheel] = useState(true);
+   const [showAngleLines, setShowAngleLines] = useState(true); // ✅ تحكم في خطوط الزوايا الذهبية
+
+
 
   const [primaryLabels, setPrimaryLabels] = useState([
     { text: 'North', angle: 270, color: '#FF6347' },
@@ -150,6 +158,17 @@ const addLayer = () => {
     ]
   };
 
+const rotateLayer = (layerId, delta) => {
+  setLayers(prevLayers =>
+    prevLayers.map(layer =>
+      layer.id === layerId
+        ? { ...layer, rotation: layer.rotation + delta }
+        : layer
+    )
+  );
+};
+
+
   setLayers([...layers, newLayer]);
 };
 
@@ -166,8 +185,8 @@ const addLayer = () => {
     const a1 = updatedPoints[0];
     const a2 = updatedPoints[1];
     const diff = ((a2 - a1 + 360) % 360).toFixed(1);
-    let label = prompt(`📝 أدخل اسمًا لهذه الزاوية (${diff}°):`, `${diff}°`);
-    if (!label) label = `${diff}°`;
+    //let label = prompt(`📝 أدخل اسمًا لهذه الزاوية (${diff}°):`, `${diff}°`);
+   // if (!label) label = `${diff}°`;
     setMeasuredAngles([...measuredAngles, { from: a1, to: a2, value: diff, label }]);
     setAnglePoints([]);
   } else {
@@ -202,47 +221,66 @@ const addLayer = () => {
     const radius = baseRadius * zoomLevel; // ✅ تطبيق التكبير
     const angleStep = 360 / sectors;
     const lines = [];
-const importantAngles = [30, 60, 90, 120, 135, 144, 180, 225, 270, 300, 315, 360];
 
-importantAngles.forEach((deg, index) => {
-  const angle = ((deg + rotation) % 360) * Math.PI / 180;
-   const x2 = center.x + (radius - 10) * Math.cos(angle);
-   const y2 = center.y + (radius - 10) * Math.sin(angle);
-
-
-  lines.push(
-    <line
-      key={`important-${index}`}
-      x1={center.x}
-      y1={center.y}
-      x2={x2}
-      y2={y2}
-      stroke="#FFD700" // ذهبي لامع
-      strokeWidth="2"
-    />
-  );
-});
-
-    for (let i = 0; i < sectors; i++) {
-      const rawDeg = i * angleStep;
-      const rotatedDeg = (rawDeg + rotation) % 360;
-      const angle = rotatedDeg * Math.PI / 180;
-      const x2 = center.x + radius * Math.cos(angle);
-      const y2 = center.y + radius * Math.sin(angle);
-      let stroke = '#00CED1';
-      let strokeWidth = 0.7;
-      if (rawDeg % highlightStep === 0) {
-        stroke = '#FFD700'; strokeWidth = 1.5;
-      } else if (rawDeg % 22.5 === 0) {
-        stroke = '#6a5acd'; strokeWidth = 1;
-      }
-      lines.push(<line key={i} x1={center.x} y1={center.y} x2={x2} y2={y2} stroke={stroke} strokeWidth={strokeWidth} />);
-      if (rawDeg % highlightStep === 0) {
-        const tx = center.x + (radius + 12) * Math.cos(angle);
-        const ty = center.y + (radius + 12) * Math.sin(angle);
-        lines.push(<text key={`text-${i}`} x={tx} y={ty} fontSize={10} fill="#FFD700" textAnchor="middle" alignmentBaseline="middle">{rawDeg.toFixed(0)}°</text>);
-      }
+if (showAngleLines) {
+  for (let i = 0; i < sectors; i++) {
+    const rawDeg = i * angleStep;
+    const rotatedDeg = (rawDeg + rotation) % 360;
+    const angle = rotatedDeg * Math.PI / 180;
+    const x2 = center.x + radius * Math.cos(angle);
+    const y2 = center.y + radius * Math.sin(angle);
+    let stroke = '#00CED1';
+    let strokeWidth = 0.7;
+    if (rawDeg % highlightStep === 0) {
+      stroke = '#FFD700'; strokeWidth = 1.5;
+    } else if (rawDeg % 22.5 === 0) {
+      stroke = '#6a5acd'; strokeWidth = 1;
     }
+    lines.push(<line key={rawDeg} x1={center.x} y1={center.y} x2={x2} y2={y2} stroke={stroke} strokeWidth={strokeWidth} />);
+    if (rawDeg % highlightStep === 0) {
+      const tx = center.x + (radius + 12) * Math.cos(angle);
+      const ty = center.y + (radius + 12) * Math.sin(angle);
+       lines.push(
+    <text
+      key={`text-${rawDeg}`}
+      x={tx}
+      y={ty}
+      fontSize={10}
+      fill="#FFD700"
+      textAnchor="middle"
+      alignmentBaseline="middle"
+    >
+      {rawDeg.toFixed(0)}°
+    </text>
+  );
+}
+  }
+}
+
+if (showAngleLines) {
+  const importantAngles = [30, 60, 90, 120, 135, 144, 180, 225, 270, 300, 315, 360];
+
+  importantAngles.forEach((deg, index) => {
+    const angle = ((deg + rotation) % 360) * Math.PI / 180;
+    const x2 = center.x + (radius - 10) * Math.cos(angle);
+    const y2 = center.y + (radius - 10) * Math.sin(angle);
+
+    lines.push(
+      <line
+        key={`important-${index}`}
+        x1={center.x}
+        y1={center.y}
+        x2={x2}
+        y2={y2}
+        stroke="#FFD700"
+        strokeWidth="2"
+      />
+    );
+  });
+}
+
+
+
 
     if (showDegreeGrid) {
       const majorAngles = [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
@@ -264,35 +302,58 @@ importantAngles.forEach((deg, index) => {
     }
 
     [...primaryLabels, ...secondaryLabels].forEach((label, idx) => {
-      const a = ((label.angle + rotation) % 360) * Math.PI / 180;
-      const r = secondaryLabels.includes(label) ? radius * 0.4 : radius * 0.6;
-      const x = center.x + r * Math.cos(a);
-      const y = center.y + r * Math.sin(a);
-      lines.push(<text key={`label-${idx}`} x={x} y={y} fill={label.color} fontSize={label.text.length > 2 ? 10 : 14} fontWeight="bold" textAnchor="middle" alignmentBaseline="middle" style={{ textShadow: '1px 1px 2px #000000AA' }}>{label.text}</text>);
-    });
+  const isPrimary = primaryLabels.includes(label);
+  const isSecondary = secondaryLabels.includes(label);
+
+  // إذا كان النوع مخفي، تجاهل الرسم
+  if ((isPrimary && !showPrimary) || (isSecondary && !showSecondary)) return;
+
+  const a = ((label.angle + rotation) % 360) * Math.PI / 180;
+  const r = isSecondary ? radius * 0.4 : radius * 0.6;
+  const x = center.x + r * Math.cos(a);
+  const y = center.y + r * Math.sin(a);
+
+  lines.push(
+    <text
+      key={`label-${idx}`}
+      x={x}
+      y={y}
+      fill={label.color}
+      fontSize={label.text.length > 2 ? 10 : 14}
+      fontWeight="bold"
+      textAnchor="middle"
+      alignmentBaseline="middle"
+      style={{ textShadow: '1px 1px 2px #000000AA' }}
+    >
+      {label.text}
+    </text>
+  );
+});
+
      
 if (showInnerWheel) {
   const innerRadius = baseRadius * 0.5;
   const angleStep = 360 / sectors;
 
-  for (let i = 0; i < sectors; i++) {
-    const rawDeg = i * angleStep;
-    const rotatedDeg = (rawDeg + rotation + innerRotation) % 360;
-    const angle = rotatedDeg * Math.PI / 180;
-    const x2 = center.x + innerRadius * Math.cos(angle);
-    const y2 = center.y + innerRadius * Math.sin(angle);
+ for (let i = 0; i < sectors; i++) {
+   const rawDeg = i * angleStep;
+   const rotatedDeg = (rawDeg + rotation + innerRotation) % 360;
+   const angle = rotatedDeg * Math.PI / 180;
+   const x2 = center.x + innerRadius * Math.cos(angle);
+   const y2 = center.y + innerRadius * Math.sin(angle);
 
-    lines.push(
-      <line
-        key={`single-inner-line-${i}`}
-        x1={center.x}
-        y1={center.y}
-        x2={x2}
-        y2={y2}
-        stroke="#cccccc"
-        strokeWidth="0.5"
-      />
+     lines.push(
+   <line
+     key={`single-inner-line-${i}`}
+     x1={center.x}
+     y1={center.y}
+     x2={x2}
+     y2={y2}
+     stroke="#cccccc"
+     strokeWidth="0.5"
+     />
     );
+
   }
 
   lines.push(
@@ -375,15 +436,32 @@ if (showInnerWheels) {
 
 <button onClick={() => setShowInnerWheels(!showInnerWheels)} style={buttonStyle}> {showInnerWheels ? "🚫 إخفاء العجلات الداخلية" : "🧱 عرض العجلات الداخلية"} </button>
 <button onClick={addLayer} style={buttonStyle}>➕ إضافة طبقة جديدة</button>
+<button onClick={() => setShowInlineSquare(!showInlineSquare)} style={{ ...buttonStyle, border: '1px solid cyan', color: 'cyan' }}> {showInlineSquare ? "🚫 إخفاء مربع جان" : "🔲 إظهار مربع جان"} </button>
+
+
+<div style={{ marginBottom: "10px" }}>
+  {layers.map((layer) => (
+    <div key={layer.id} style={{ display: "inline-block", margin: "5px" }}>
+      <strong>{layer.name}</strong>
+      <button onClick={() => rotateLayer(layer.id, -15)} style={{ margin: "0 5px" }}>⏪ -15°</button>
+      <button onClick={() => rotateLayer(layer.id, 15)}>⏩ +15°</button>
+    </div>
+  ))}
+</div>
+
 
 <button onClick={() => { setMeasuredAngles([]); setAnglePoints([]); }} style={buttonStyle}>❌ مسح الزوايا</button>
 
         <button onClick={() => setRotation((prev) => (prev + 15) % 360)} style={buttonStyle}>🔁 تدوير 15°</button>
         <button onClick={() => setAnimate(!animate)} style={buttonStyle}>{animate ? '⏹️ إيقاف الدوران' : '▶️ تشغيل تلقائي'}</button>
         <button onClick={() => setShowDegreeGrid(!showDegreeGrid)} style={buttonStyle}>{showDegreeGrid ? '🧭 إخفاء الزوايا الزمنية' : '🧭 عرض الزوايا الزمنية'}</button>
-<button onClick={() => setShowInnerWheel(!showInnerWheel)} style={buttonStyle}> {showInnerWheel ? '🚫 إخفاء العجلة الداخلية' : '🧱 عرض عجلة داخلية'} </button>
-<button onClick={() => setInnerRotation((prev) => prev + 15)} style={buttonStyle}> 🔄 تدوير داخلي +15° </button>
-<button onClick={() => setInnerRotation((prev) => prev - 15)} style={buttonStyle}> ↪️ تدوير داخلي -15° </button>
+	<button onClick={() => setShowAngleLines(!showAngleLines)} style={buttonStyle}> {showAngleLines ? '🚫 إخفاء خطوط الزوايا' : '📏 عرض خطوط الزوايا'}</button>
+
+	<button onClick={() => setShowAngleLines(!showAngleLines)} style={buttonStyle}> {showAngleLines ? '🚫 إخفاء خطوط الزوايا' : '📏 عرض خطوط الزوايا'}</button>
+
+	<button onClick={() => setShowInnerWheel(!showInnerWheel)} style={buttonStyle}> {showInnerWheel ? '🚫 إخفاء العجلة الداخلية' : '🧱 عرض عجلة داخلية'} 	</button>
+	<button onClick={() => setInnerRotation((prev) => prev + 15)} style={buttonStyle}> 🔄 تدوير داخلي +15° </button>
+	<button onClick={() => setInnerRotation((prev) => prev - 15)} style={buttonStyle}> ↪️ تدوير داخلي -15° </button>
 
         <button onClick={() => setZoomLevel(zoomLevel * 1.1)} style={buttonStyle}>➕ تكبير</button>
         <button onClick={() => setZoomLevel(zoomLevel / 1.1)} style={buttonStyle}>➖ تصغير</button>
@@ -412,26 +490,20 @@ if (showInnerWheels) {
   onMouseMove={handleMouseMove}
   onMouseUp={handleMouseUp}
   onClick={handleAngleMeasureClick}  // ✅ هذا الجديد
+
   style={{ cursor: dragging ? 'grabbing' : 'crosshair' }}
 >
 
             {renderWheel()}
 
-{layers.map((layer, index) => (
+
+{layers.map((layer) => (
   <g
     key={layer.id}
     transform={`rotate(${layer.rotation}, ${center.x}, ${center.y})`}
-    opacity={layer.visible ? 1 : 0.8}
+    opacity={layer.visible ? 1 : 0.6}
   >
-    {layer.visible && (
-      <circle
-        cx={center.x}
-        cy={center.y}
-        r={4}
-        fill="yellow"
-      />
-    )}
-
+    {/* الرموز */}
     {layer.symbols.map((symbol, idx) => {
       const angleRad = (symbol.angle * Math.PI) / 180;
       const baseRadius = Math.min(width, height) / 2 - 20;
@@ -444,19 +516,34 @@ if (showInnerWheels) {
           key={idx}
           x={x}
           y={y}
-          textAnchor="middle"
-          dominantBaseline="middle"
           fontSize="14"
           fill="white"
+          textAnchor="middle"
+          dominantBaseline="middle"
         >
           {symbol.label}
         </text>
       );
     })}
+
+
+
   </g>
 ))}
 
+{showInlineSquare && (
+ <GannSquareInline
+  x={center.x}
+  y={center.y}
+  movable={true}  // ✅ هذا هو المفتاح
+  initialSize={300}
+  rotation={0}
+  layers={1}
+  highlightMultiplesOf={5}
+  divisionCondition={7}
+/>
 
+)}
             {visible && (
   <circle
     cx={center.x}
@@ -466,35 +553,7 @@ if (showInnerWheels) {
   />
 )}
 
-{measuredAngles.map((a, i) => {
-  const rad = Math.PI / 180;
-  const start = (a.from + rotation) * rad;
-  const end = (a.to + rotation) * rad;
-  const r = 140;
-  const largeArc = ((a.to - a.from + 360) % 360) > 180 ? 1 : 0;
-  const x1 = center.x + r * Math.cos(start);
-  const y1 = center.y + r * Math.sin(start);
-  const x2 = center.x + r * Math.cos(end);
-  const y2 = center.y + r * Math.sin(end);
-  const path = `M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`;
 
-  // لون خاص إن كانت زاوية مهمة
-  const importantAngles = [90, 120, 144, 180, 225];
-  const isImportant = importantAngles.includes(parseFloat(a.value));
-
-  const midAngle = ((a.from + a.to) / 2 + rotation) % 360;
-  const mx = center.x + (r + 20) * Math.cos(midAngle * rad);
-  const my = center.y + (r + 20) * Math.sin(midAngle * rad);
-
-  return (
-    <g key={i}>
-      <path d={path} fill="none" stroke={isImportant ? "#00FF00" : "#FF69B4"} strokeWidth="2" />
-      <text x={mx} y={my} fill={isImportant ? "#00FF00" : "#FF69B4"} fontSize="12" textAnchor="middle">
-        {a.label || `${a.value}°`}
-      </text>
-    </g>
-  );
-})}
 
           </svg>
         </div>
