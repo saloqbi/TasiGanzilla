@@ -228,38 +228,28 @@ const getDigitColor = (digit) => {
       translate(${(1 - zoom) * center}, ${(1 - zoom) * center})
     `}
   >
-// 🧭 حلقة الزوايا من 10 إلى 360 داخل المساحة البيضاء بلون الرقم المختزل
+// 🧭 عرض الزوايا فقط بدون الرقم المختزل
 {Array.from({ length: 36 }).map((_, i) => {
-  const angle = 10 + i * 10; // الزاوية الظاهرة
-  const reduced = reduceToDigit(angle); // الرقم المختزل منها
+  const angle = 10 + i * 10;
+  const angleStart = i * angleStep;
+  const angleMid = angleStart + angleStep / 2;
+  const angleRad = angleMid + (settings.rotation * Math.PI) / 180;
 
-  const angleDeg = angle; // الزاوية نفسها للرسم
-  const index = i; // من 0 إلى 35
-   const angleStart = index * angleStep;
-   const angleMid = angleStart + angleStep / 2;
-   const angleRad = angleMid + (settings.rotation * Math.PI) / 180;
+  const cellIndex = i % 9; // من 0 إلى 8
+  const cellValue = settings.startValue + cellIndex;
+  const reduced = reduceToDigit(cellValue); // اللون حسب الرقم المرتبط بالخلية
 
-
-  const getDigitColor = (digit) => {
-    if ([1, 4, 7].includes(digit)) return "red";
-    if ([2, 5, 8].includes(digit)) return "blue";
-    if ([3, 6, 9].includes(digit)) return "black";
-    return "#aaa";
-  };
-
-  const rMid = innerRadius - 30; // نفس موضع الرقم المختزل تقريبًا
+  const rMid = innerRadius - 20;
   const x = center + rMid * Math.cos(angleRad);
   const y = center + rMid * Math.sin(angleRad);
-
 
   return (
     <text
       key={`angle-${angle}`}
       x={x}
       y={y}
-      transform={`rotate(${angleDeg + settings.rotation}, ${x}, ${y})`}
       fill={getDigitColor(reduced)}
-      fontSize={8}
+      fontSize={5}
       textAnchor="middle"
       dominantBaseline="middle"
       fontWeight="bold"
@@ -268,7 +258,6 @@ const getDigitColor = (digit) => {
     </text>
   );
 })}
-
 
 // 🔵 حلقة داخلية كاملة: كل قطاع يعرض الرقم المختزل لمجموع الخلية في نفس الزاوية
 {[...Array(settings.divisions)].map((_, index) => {
