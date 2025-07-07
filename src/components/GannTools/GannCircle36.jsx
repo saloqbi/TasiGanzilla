@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 
 const defaultSettings = {
@@ -23,20 +24,21 @@ const GannCircle360 = () => {
     localStorage.setItem("gannCircle360Settings", JSON.stringify(settings));
   }, [settings]);
 
-  const size = 800;
-  const center = size / 2;
+
+
   const totalSectors = settings.divisions;
-  const innerRadius = 60;
-  const ringWidth = 28;
+  const innerRadius = 100;
+
   const angleStep = (2 * Math.PI) / totalSectors;
+  const baseRingWidth = 50;
+  const digitScale = 8;
 
-  const getPathForCell = (level, index) => {
-    const startAngle = index * angleStep + (settings.rotation * Math.PI / 180);
-    const endAngle = startAngle + angleStep;
 
-    const r1 = innerRadius + level * ringWidth;
-    const r2 = r1 + ringWidth;
+const dynamicSize = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5 );
+const center = dynamicSize / 2;
 
+
+  const getPathForCell = (r1, r2, startAngle, endAngle) => {
     const x1 = center + r1 * Math.cos(startAngle);
     const y1 = center + r1 * Math.sin(startAngle);
     const x2 = center + r2 * Math.cos(startAngle);
@@ -47,6 +49,7 @@ const GannCircle360 = () => {
     const y4 = center + r1 * Math.sin(endAngle);
 
     return `M${x1},${y1} L${x2},${y2} A${r2},${r2} 0 0,1 ${x3},${y3} L${x4},${y4} A${r1},${r1} 0 0,0 ${x1},${y1} Z`;
+
   };
 
   const handleRotate = () =>
@@ -82,11 +85,25 @@ const GannCircle360 = () => {
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: 20 }}>
+    <div
+  style={{
+    width: "100%",
+    minHeight: "100vh",
+    overflow: "auto",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    padding: 20,
+    background: "#111",
+  }}
+>
+
+
       <h2 style={{ color: "#FFD700" }}>
         {settings.language === "ar"
-          ? "دائرة Gann 360 (بداية مخصصة)"
-          : "Gann 360 Circle (Custom Start)"}
+          ? "دائرة Gann 360 (حجم خلية ذكي)"
+          : "Gann 360 Circle (Auto Cell Size)"}
       </h2>
 
       <div style={{ marginBottom: 10, flexWrap: "wrap" }}>
@@ -153,80 +170,94 @@ const GannCircle360 = () => {
           />
         </label>
       </div>
+<div
+  style={{
+    width: dynamicSize,
+    height: dynamicSize,
+    margin: "0 auto",
+    background: "#111",
+    borderRadius: 0,
+       overflow: "visible",
+    border: "2px solid #444",
+  }}
+>
 
-      <svg
-        width={size}
-        height={size}
-        style={{ background: "#111", cursor: isDragging ? "grabbing" : "grab" }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-      >
-        <g
-          transform={`
-            translate(${drag.x}, ${drag.y})
-            scale(${zoom})
-            translate(${(1 - zoom) * center}, ${(1 - zoom) * center})
-          `}
-        >
-          {[...Array(settings.levels)].map((_, level) =>
-            [...Array(settings.divisions)].map((_, index) => {
-              const value = settings.startValue + level * settings.divisions + index;
-              const path = getPathForCell(level, index);
+ <svg
+    width={dynamicSize}
+    height={dynamicSize}
+    viewBox={`0 0 ${dynamicSize} ${dynamicSize}`}
+    preserveAspectRatio="xMidYMid meet"
+    style={{
+      background: "#000",
+      cursor: isDragging ? "grabbing" : "grab",
+    }}
+    onMouseDown={handleMouseDown}
+    onMouseMove={handleMouseMove}
+    onMouseUp={handleMouseUp}
+    onMouseLeave={handleMouseUp}
+  >
+  <g
+    transform={`
+      translate(${drag.x}, ${drag.y})
+      scale(${zoom})
+      translate(${(1 - zoom) * center}, ${(1 - zoom) * center})
+    `}
+  >
+    {[...Array(settings.levels)].map((_, level) => {
+      const maxDigitsInLevel = Math.max(
+        ...Array.from({ length: settings.divisions }, (_, i) =>
+          (settings.startValue + level * settings.divisions + i).toString().length
+        )
+      );
+      const dynamicWidth = baseRingWidth + maxDigitsInLevel * digitScale;
+      const r1 = innerRadius + [...Array(level)].reduce((acc, l) => {
+        const maxDigits = Math.max(
+          ...Array.from({ length: settings.divisions }, (_, i) =>
+            (settings.startValue + l * settings.divisions + i).toString().length
+          )
+        );
+        return acc + (baseRingWidth + maxDigits * digitScale);
+      }, 0);
+      const r2 = r1 + dynamicWidth;
 
-              const angle =
-                (index + 0.5) * angleStep +
-                (settings.rotation * Math.PI) / 180;
-              const r = innerRadius + level * ringWidth + ringWidth / 2;
-              const x = center + r * Math.cos(angle);
-              const y = center + r * Math.sin(angle);
+      return (
+        <React.Fragment key={level}>
+          {[...Array(settings.divisions)].map((_, index) => {
+            const value = settings.startValue + level * settings.divisions + index;
+            const angleStart = index * angleStep + (settings.rotation * Math.PI) / 180;
+            const angleEnd = angleStart + angleStep;
+            const angleMid = (angleStart + angleEnd) / 2;
+            const path = getPathForCell(r1, r2, angleStart, angleEnd);
+            const rMid = (r1 + r2) / 2;
+            const x = center + rMid * Math.cos(angleMid);
+            const y = center + rMid * Math.sin(angleMid);
+            const fontSize = Math.max(6, 13 - value.toString().length);
+            const isGray = (level + index) % 2 === 0;
 
-              const isGray = (level + index) % 2 === 0;
-              const fontSize = Math.max(6, 11 - level * 0.3);
-
-              return (
-                <g key={`${level}-${index}`}>
-                  <path
-                    d={path}
-                    fill={isGray ? "#f5f5f5" : "#ffffff"}
-                    stroke="#ccc"
-                    strokeWidth={0.5}
-                  />
-                  <text
-                    x={x}
-                    y={y}
-                    fill="#000"
-                    fontSize={fontSize}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fontWeight="bold"
-                  >
-                    {value}
-                  </text>
-                </g>
-              );
-            })
-          )}
-
-          {[0, 90, 180, 270].map((deg) => {
-            const rad = (deg - 90 + settings.rotation) * (Math.PI / 180);
-            const x = center + (innerRadius + settings.levels * ringWidth) * Math.cos(rad);
-            const y = center + (innerRadius + settings.levels * ringWidth) * Math.sin(rad);
             return (
-              <line
-                key={deg}
-                x1={center}
-                y1={center}
-                x2={x}
-                y2={y}
-                stroke="#FF0000"
-                strokeWidth={1}
-              />
+              <g key={`${level}-${index}`}>
+                <path d={path} fill={isGray ? "#f0f0f0" : "#ffffff"} stroke="#aaa" strokeWidth={0.5} />
+                <text
+                  x={x}
+                  y={y}
+                  fill="#000"
+                  fontSize={fontSize}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontWeight="bold"
+                >
+                  {value}
+                </text>
+              </g>
             );
           })}
-        </g>
-      </svg>
+        </React.Fragment>
+      );
+    })}
+  </g>
+</svg>
+</div> {/* إغلاق الـ Box الخارجي */}
+
     </div>
   );
 };
