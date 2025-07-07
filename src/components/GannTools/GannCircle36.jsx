@@ -228,41 +228,42 @@ const getDigitColor = (digit) => {
       translate(${(1 - zoom) * center}, ${(1 - zoom) * center})
     `}
   >
-// 🧭 حلقة الزوايا من 10 إلى 360 مرتبطة بمجموع الخلايا (مضمونة الظهور)
-{[...Array(settings.divisions)].map((_, index) => {
-  const angleDeg = (360 / settings.divisions) * index;
-  const displayAngle = Math.floor(angleDeg); // زاوية صحيحة بدون تقريب
+// 🧭 حلقة الزوايا من 10 إلى 360 داخل المساحة البيضاء بلون الرقم المختزل
+{Array.from({ length: 36 }).map((_, i) => {
+  const angle = 10 + i * 10; // الزاوية الظاهرة
+  const reduced = reduceToDigit(angle); // الرقم المختزل منها
 
-  // عرض الزوايا من 10 إلى 360 فقط
-  if (displayAngle < 10 || displayAngle > 360) return null;
+  const angleDeg = angle; // الزاوية نفسها للرسم
+  const angleRad = (angleDeg * Math.PI) / 180 + (settings.rotation * Math.PI) / 180;
 
-  const value = settings.startValue + index;
-  const reduced = reduceToDigit(value);
+  const getDigitColor = (digit) => {
+    if ([1, 4, 7].includes(digit)) return "red";
+    if ([2, 5, 8].includes(digit)) return "blue";
+    if ([3, 6, 9].includes(digit)) return "black";
+    return "#aaa";
+  };
 
-  const angleRad = angleDeg * (Math.PI / 180) + (settings.rotation * Math.PI / 180);
-  const rMid = innerRadius + 30; // قريب من الحلقة الأولى
-
+  const rMid = innerRadius - 30; // نفس موضع الرقم المختزل تقريبًا
   const x = center + rMid * Math.cos(angleRad);
   const y = center + rMid * Math.sin(angleRad);
 
+
   return (
-    <g key={`angle-${index}`}>
-      <text
-        x={x}
-        y={y}
-        fill={getDigitColor(reduced)}
-        fontSize={11}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontWeight="bold"
-      >
-        {displayAngle}
-      </text>
-    </g>
+    <text
+      key={`angle-${angle}`}
+      x={x}
+      y={y}
+      transform={`rotate(${angleDeg + settings.rotation}, ${x}, ${y})`}
+      fill={getDigitColor(reduced)}
+      fontSize={8}
+      textAnchor="middle"
+      dominantBaseline="middle"
+      fontWeight="bold"
+    >
+      {angle}
+    </text>
   );
 })}
-
-
 
 
 // 🔵 حلقة داخلية كاملة: كل قطاع يعرض الرقم المختزل لمجموع الخلية في نفس الزاوية
@@ -299,7 +300,7 @@ const getDigitColor = (digit) => {
   );
 })}
 
-
+ // 3️⃣ باقي الحلقات الخارجية والخلايا الكبيرة
 
     {[...Array(settings.levels)].map((_, level) => {
       const maxDigitsInLevel = Math.max(
@@ -374,6 +375,7 @@ const getDigitColor = (digit) => {
             );
           })}
         </React.Fragment>
+
       );
     })}
   </g>
