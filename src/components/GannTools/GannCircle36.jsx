@@ -63,6 +63,13 @@ const reduceToDigit = (num) => {
   return current;
 };
 
+const getDigitColor = (digit) => {
+  if ([1, 4, 7].includes(digit)) return "red";
+  if ([2, 5, 8].includes(digit)) return "blue";
+  if ([3, 6, 9].includes(digit)) return "green";
+  return "#000"; // افتراضي (احتياط)
+};
+
   const handleRotate = () =>
     setSettings((prev) => ({
       ...prev,
@@ -248,9 +255,21 @@ const reduceToDigit = (num) => {
             return (
               <g key={`${level}-${index}`}>
                 <path d={path} fill={isGray ? "#f0f0f0" : "#ffffff"} stroke="#aaa" strokeWidth={0.5} />
-               <text
+<text
+ x={x}
+  y={y - fontSize + 1}
+  fill={getDigitColor(reduceToDigit(value))}
+  fontSize={fontSize - 2}
+  textAnchor="middle"
+  dominantBaseline="middle"
+  fontWeight="bold"
+>
+  {reduceToDigit(value)}
+</text>
+
+<text
   x={x}
-  y={y - 5}
+  y={y}
   fill="#000"
   fontSize={fontSize}
   textAnchor="middle"
@@ -258,17 +277,6 @@ const reduceToDigit = (num) => {
   fontWeight="bold"
 >
   {value}
-</text>
-<text
-  x={x}
-  y={y + fontSize}
-  fill="red"
-  fontSize={fontSize - 2}
-  textAnchor="middle"
-  dominantBaseline="middle"
-  fontWeight="bold"
->
-  {reduceToDigit(value)}
 </text>
 
               </g>
