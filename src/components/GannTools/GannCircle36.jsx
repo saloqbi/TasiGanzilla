@@ -109,22 +109,18 @@ const getDigitColor = (digit) => {
     setIsDragging(false);
   };
 
-  return (
-    <div
-  style={{
-    width: "100%",
-    minHeight: "100vh",
-    overflow: "auto",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "flex-start",
-    padding: 20,
-    background: "#111",
-  }}
->
-
-
+ return (
+  <div
+    style={{
+      width: "100vw",
+      height: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      background: "#111",
+    }}
+  >
+    {/* ✅ القسم العلوي: العنوان والأزرار */}
+    <div style={{ padding: 10, flexShrink: 0 }}>
       <h2 style={{ color: "#FFD700" }}>
         {settings.language === "ar"
           ? "دائرة Gann 360 (حجم خلية ذكي)"
@@ -195,39 +191,40 @@ const getDigitColor = (digit) => {
           />
         </label>
       </div>
+    </div>
+
+    {/* ✅ القسم السفلي: الدائرة تملأ المساحة المتبقية فقط */}
 <div
   style={{
-    width: dynamicSize,
-    height: dynamicSize,
-    margin: "0 auto",
+      flex: 1,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     background: "#111",
-    borderRadius: 0,
-       overflow: "visible",
-    border: "2px solid #444",
+    borderTop: "3px solid #FFD700",
   }}
 >
-
- <svg
-    width={dynamicSize}
-    height={dynamicSize}
+  <svg
     viewBox={`0 0 ${dynamicSize} ${dynamicSize}`}
     preserveAspectRatio="xMidYMid meet"
     style={{
+      width: "100%",
+      height: "100%",
+      maxWidth: "200vh",    // ✅ يمنع تجاوز العرض
+      maxHeight: "200vw",   // ✅ يمنع تجاوز الارتفاع
+      aspectRatio: "1 / 1",
       background: "#fff",
       cursor: isDragging ? "grabbing" : "grab",
+      display: "block",
     }}
     onMouseDown={handleMouseDown}
     onMouseMove={handleMouseMove}
     onMouseUp={handleMouseUp}
     onMouseLeave={handleMouseUp}
   >
-  <g
-    transform={`
-      translate(${drag.x}, ${drag.y})
-      scale(${zoom})
-      translate(${(1 - zoom) * center}, ${(1 - zoom) * center})
-    `}
-  >
+        <g
+          transform={`translate(${drag.x}, ${drag.y}) scale(${zoom}) translate(${(1 - zoom) * center}, ${(1 - zoom) * center})`}
+        >
 // 🧭 عرض الزوايا فقط بدون الرقم المختزل
 {Array.from({ length: 36 }).map((_, i) => {
   const angle = 10 + i * 10;
@@ -249,7 +246,7 @@ const getDigitColor = (digit) => {
       x={x}
       y={y}
       fill={getDigitColor(reduced)}
-      fontSize={5}
+      fontSize={8}
       textAnchor="middle"
       dominantBaseline="middle"
       fontWeight="bold"
@@ -371,12 +368,11 @@ const getDigitColor = (digit) => {
 
       );
     })}
-  </g>
-</svg>
-</div> {/* إغلاق الـ Box الخارجي */}
-
+   </g>
+      </svg>
     </div>
-  );
+  </div>
+);
 };
 
 const buttonStyle = {
