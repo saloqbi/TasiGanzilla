@@ -73,7 +73,7 @@ const getCellColor = (digit) => {
 const getDigitColor = (digit) => {
   if ([1, 4, 7].includes(digit)) return "red";
   if ([2, 5, 8].includes(digit)) return "blue";
-  if ([3, 6, 9].includes(digit)) return "green";
+  if ([3, 6, 9].includes(digit)) return "black";
   return "#000"; // افتراضي (احتياط)
 };
 
