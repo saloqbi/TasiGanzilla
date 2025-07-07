@@ -213,7 +213,7 @@ const getDigitColor = (digit) => {
     viewBox={`0 0 ${dynamicSize} ${dynamicSize}`}
     preserveAspectRatio="xMidYMid meet"
     style={{
-      background: "#000",
+      background: "#fff",
       cursor: isDragging ? "grabbing" : "grab",
     }}
     onMouseDown={handleMouseDown}
@@ -228,6 +228,34 @@ const getDigitColor = (digit) => {
       translate(${(1 - zoom) * center}, ${(1 - zoom) * center})
     `}
   >
+// 🔵 حلقة المجموع الرقمي قرب الحلقة الأولى
+{[...Array(settings.divisions)].map((_, index) => {
+  // القيمة الأولى في هذا القطاع
+  const value = settings.startValue + index;
+  const reduced = reduceToDigit(value);
+  const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
+
+  // 📍 اجعل الحلقة أقرب إلى الحلقة الأولى مباشرة
+  const radius = innerRadius - 10; // أصغر من innerRadius بقليل
+  const x = center + radius * Math.cos(angle);
+  const y = center + radius * Math.sin(angle);
+
+  return (
+    <text
+      key={`inner-root-${index}`}
+      x={x}
+      y={y}
+      fill={getDigitColor(reduced)}
+      fontSize={10}
+      textAnchor="middle"
+      dominantBaseline="middle"
+      fontWeight="bold"
+    >
+      {reduced}
+    </text>
+  );
+})}
+
     {[...Array(settings.levels)].map((_, level) => {
       const maxDigitsInLevel = Math.max(
         ...Array.from({ length: settings.divisions }, (_, i) =>
