@@ -256,39 +256,7 @@ const getDigitColor = (digit) => {
   );
 })}
 
-// 🔵 حلقة داخلية كاملة: كل قطاع يعرض الرقم المختزل لمجموع الخلية في نفس الزاوية
-{[...Array(settings.divisions)].map((_, index) => {
-  const value = settings.startValue + index;
-  const reduced = reduceToDigit(value);
-  const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
 
-  // نصف القطر للحلقة الداخلية، قريبة من الحلقة الأولى
-  const r1 = innerRadius - 20;
-  const r2 = innerRadius + 5; // سمك الحلقة = 15
-
-  // منتصف الزاوية
-  const angleMid = angle + angleStep / 2;
-  const rMid = (r1 + r2) / 2;
-
-  const x = center + rMid * Math.cos(angleMid);
-  const y = center + rMid * Math.sin(angleMid);
-
-  return (
-    <g key={`sector-digit-${index}`}>
-      <text
-        x={x}
-        y={y}
-        fill={getDigitColor(reduced)}
-        fontSize={10}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontWeight="bold"
-      >
-        {reduced}
-      </text>
-    </g>
-  );
-})}
 
  // 3️⃣ باقي الحلقات الخارجية والخلايا الكبيرة
 
@@ -315,16 +283,22 @@ const getDigitColor = (digit) => {
             const value = settings.startValue + level * settings.divisions + index;
             const angleStart = index * angleStep + (settings.rotation * Math.PI) / 180;
             const angleEnd = angleStart + angleStep;
-            const angleMid = (angleStart + angleEnd) / 2;
+            const rStart = r1 + 5; // قريب من حافة الخلية الداخلية
             const path = getPathForCell(r1, r2, angleStart, angleEnd);
             const rMid = (r1 + r2) / 2;
-            const x = center + rMid * Math.cos(angleMid);
-            const y = center + rMid * Math.sin(angleMid);
-            const fontSize = Math.max(6, 13 - value.toString().length);
+	       const angleMid = (angleStart + angleEnd) / 2;
+            const xStart = center + rStart * Math.cos(angleMid);
+	       const yStart = center + rStart * Math.sin(angleMid);
+            
+	       // ✅ أضف السطرين التاليين هنا:
+                     const x = center + rMid * Math.cos(angleMid);
+                     const y = center + rMid * Math.sin(angleMid);
+	       
+                     const fontSize = Math.max(6, 13 - value.toString().length);
             const isGray = (level + index) % 2 === 0;
 
   	       const reduced = reduceToDigit(value);
-                   const fillColor = getCellColor(reduced);
+               const fillColor = getCellColor(reduced);
 
             return (
               <g key={`${level}-${index}`}>
@@ -338,13 +312,13 @@ const getDigitColor = (digit) => {
 
 
 <text
- x={x}
-  y={y - fontSize + 1}
-  fill={getDigitColor(reduceToDigit(value))}
-  fontSize={fontSize - 2}
-  textAnchor="middle"
-  dominantBaseline="middle"
-  fontWeight="bold"
+ x={xStart}
+ y={yStart}
+ fill={getDigitColor(reduceToDigit(value))}
+ fontSize={fontSize - 2}
+ textAnchor="middle"
+ dominantBaseline="middle"
+ fontWeight="bold"
 >
   {reduceToDigit(value)}
 </text>
