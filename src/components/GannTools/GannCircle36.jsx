@@ -228,33 +228,78 @@ const getDigitColor = (digit) => {
       translate(${(1 - zoom) * center}, ${(1 - zoom) * center})
     `}
   >
-// 🔵 حلقة المجموع الرقمي قرب الحلقة الأولى
+// 🧭 حلقة الزوايا من 10 إلى 360 مرتبطة بمجموع الخلايا (مضمونة الظهور)
 {[...Array(settings.divisions)].map((_, index) => {
-  // القيمة الأولى في هذا القطاع
+  const angleDeg = (360 / settings.divisions) * index;
+  const displayAngle = Math.floor(angleDeg); // زاوية صحيحة بدون تقريب
+
+  // عرض الزوايا من 10 إلى 360 فقط
+  if (displayAngle < 10 || displayAngle > 360) return null;
+
+  const value = settings.startValue + index;
+  const reduced = reduceToDigit(value);
+
+  const angleRad = angleDeg * (Math.PI / 180) + (settings.rotation * Math.PI / 180);
+  const rMid = innerRadius + 30; // قريب من الحلقة الأولى
+
+  const x = center + rMid * Math.cos(angleRad);
+  const y = center + rMid * Math.sin(angleRad);
+
+  return (
+    <g key={`angle-${index}`}>
+      <text
+        x={x}
+        y={y}
+        fill={getDigitColor(reduced)}
+        fontSize={11}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontWeight="bold"
+      >
+        {displayAngle}
+      </text>
+    </g>
+  );
+})}
+
+
+
+
+// 🔵 حلقة داخلية كاملة: كل قطاع يعرض الرقم المختزل لمجموع الخلية في نفس الزاوية
+{[...Array(settings.divisions)].map((_, index) => {
   const value = settings.startValue + index;
   const reduced = reduceToDigit(value);
   const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
 
-  // 📍 اجعل الحلقة أقرب إلى الحلقة الأولى مباشرة
-  const radius = innerRadius - 10; // أصغر من innerRadius بقليل
-  const x = center + radius * Math.cos(angle);
-  const y = center + radius * Math.sin(angle);
+  // نصف القطر للحلقة الداخلية، قريبة من الحلقة الأولى
+  const r1 = innerRadius - 20;
+  const r2 = innerRadius + 5; // سمك الحلقة = 15
+
+  // منتصف الزاوية
+  const angleMid = angle + angleStep / 2;
+  const rMid = (r1 + r2) / 2;
+
+  const x = center + rMid * Math.cos(angleMid);
+  const y = center + rMid * Math.sin(angleMid);
 
   return (
-    <text
-      key={`inner-root-${index}`}
-      x={x}
-      y={y}
-      fill={getDigitColor(reduced)}
-      fontSize={10}
-      textAnchor="middle"
-      dominantBaseline="middle"
-      fontWeight="bold"
-    >
-      {reduced}
-    </text>
+    <g key={`sector-digit-${index}`}>
+      <text
+        x={x}
+        y={y}
+        fill={getDigitColor(reduced)}
+        fontSize={10}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontWeight="bold"
+      >
+        {reduced}
+      </text>
+    </g>
   );
 })}
+
+
 
     {[...Array(settings.levels)].map((_, level) => {
       const maxDigitsInLevel = Math.max(
