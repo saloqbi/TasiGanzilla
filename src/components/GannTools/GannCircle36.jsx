@@ -52,6 +52,17 @@ const center = dynamicSize / 2;
 
   };
 
+const reduceToDigit = (num) => {
+  let current = num;
+  while (current > 9) {
+    current = current
+      .toString()
+      .split("")
+      .reduce((a, b) => a + Number(b), 0);
+  }
+  return current;
+};
+
   const handleRotate = () =>
     setSettings((prev) => ({
       ...prev,
@@ -237,17 +248,29 @@ const center = dynamicSize / 2;
             return (
               <g key={`${level}-${index}`}>
                 <path d={path} fill={isGray ? "#f0f0f0" : "#ffffff"} stroke="#aaa" strokeWidth={0.5} />
-                <text
-                  x={x}
-                  y={y}
-                  fill="#000"
-                  fontSize={fontSize}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontWeight="bold"
-                >
-                  {value}
-                </text>
+               <text
+  x={x}
+  y={y - 5}
+  fill="#000"
+  fontSize={fontSize}
+  textAnchor="middle"
+  dominantBaseline="middle"
+  fontWeight="bold"
+>
+  {value}
+</text>
+<text
+  x={x}
+  y={y + fontSize}
+  fill="red"
+  fontSize={fontSize - 2}
+  textAnchor="middle"
+  dominantBaseline="middle"
+  fontWeight="bold"
+>
+  {reduceToDigit(value)}
+</text>
+
               </g>
             );
           })}
