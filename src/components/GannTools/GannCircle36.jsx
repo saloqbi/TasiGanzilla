@@ -51,7 +51,6 @@ const center = dynamicSize / 2;
     return `M${x1},${y1} L${x2},${y2} A${r2},${r2} 0 0,1 ${x3},${y3} L${x4},${y4} A${r1},${r1} 0 0,0 ${x1},${y1} Z`;
 
   };
-
 const reduceToDigit = (num) => {
   let current = num;
   while (current > 9) {
@@ -62,6 +61,14 @@ const reduceToDigit = (num) => {
   }
   return current;
 };
+
+const getCellColor = (digit) => {
+  if ([1, 4, 7].includes(digit)) return "red";
+  if ([2, 5, 8].includes(digit)) return "blue";
+  if ([3, 6, 9].includes(digit)) return "black";
+  return "#fff";
+};
+
 
 const getDigitColor = (digit) => {
   if ([1, 4, 7].includes(digit)) return "red";
@@ -252,9 +259,20 @@ const getDigitColor = (digit) => {
             const fontSize = Math.max(6, 13 - value.toString().length);
             const isGray = (level + index) % 2 === 0;
 
+  	       const reduced = reduceToDigit(value);
+                   const fillColor = getCellColor(reduced);
+
             return (
               <g key={`${level}-${index}`}>
-                <path d={path} fill={isGray ? "#f0f0f0" : "#ffffff"} stroke="#aaa" strokeWidth={0.5} />
+              
+<path
+  d={path}
+  fill={isGray ? "#f0f0f0" : "#ffffff"}
+  stroke="#aaa"
+  strokeWidth={0.5}
+/>
+
+
 <text
  x={x}
   y={y - fontSize + 1}
@@ -270,7 +288,7 @@ const getDigitColor = (digit) => {
 <text
   x={x}
   y={y}
-  fill="#000"
+  fill={getDigitColor(reduceToDigit(value))}
   fontSize={fontSize}
   textAnchor="middle"
   dominantBaseline="middle"
