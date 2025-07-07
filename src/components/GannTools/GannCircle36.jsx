@@ -234,7 +234,11 @@ const getDigitColor = (digit) => {
   const reduced = reduceToDigit(angle); // الرقم المختزل منها
 
   const angleDeg = angle; // الزاوية نفسها للرسم
-  const angleRad = (angleDeg * Math.PI) / 180 + (settings.rotation * Math.PI) / 180;
+  const index = i; // من 0 إلى 35
+   const angleStart = index * angleStep;
+   const angleMid = angleStart + angleStep / 2;
+   const angleRad = angleMid + (settings.rotation * Math.PI) / 180;
+
 
   const getDigitColor = (digit) => {
     if ([1, 4, 7].includes(digit)) return "red";
