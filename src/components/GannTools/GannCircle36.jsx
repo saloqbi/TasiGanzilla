@@ -22,6 +22,7 @@ return stored ? JSON.parse(stored) : defaultSettings;
   const [zoom, setZoom] = useState(1);
   const [drag, setDrag] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+   const [clickStates, setClickStates] = useState({});
   const dragStart = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -105,6 +106,22 @@ const getDigitColor = (digit) => {
   if ([2, 5, 8].includes(digit)) return "blue";
   if ([3, 6, 9].includes(digit)) return "black";
   return "#000"; // افتراضي (احتياط)
+};
+
+const getClickColor = (value) => {
+  const clicks = clickStates[value] || 0;
+  if (clicks === 1) return "green";
+  if (clicks === 2) return "pink";
+  if (clicks === 3) return "yellow";
+  if (clicks >= 4) return "gray";
+  return null;
+};
+const handleCellClick = (value) => {
+  setClickStates((prev) => {
+    const current = prev[value] || 0;
+    const next = current >= 4 ? 0 : current + 1;
+    return { ...prev, [value]: next };
+  });
 };
 
   const rotateLeft = () =>
@@ -481,9 +498,11 @@ const RenderZodiacRing = () => {
               
 <path
   d={path}
-  fill={isGray ? "#f0f0f0" : "#ffffff"}
+  fill={getClickColor(value) || (isGray ? "#f0f0f0" : "#ffffff")}
   stroke="#aaa"
   strokeWidth={0.5}
+  onClick={() => handleCellClick(value)}
+  style={{ cursor: "pointer" }}
 />
 
 
