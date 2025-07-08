@@ -135,13 +135,16 @@ const rotateRight = () =>
       </h2>
 
       <div style={{ marginBottom: 10, flexWrap: "wrap" }}>
-        <button onClick={() => rotateLeft()} style={buttonStyle}>
-	  ⬅️ {settings.language === "ar" ? "يسار" : "Left"}
-	</button>
-
+      
 	<button onClick={() => rotateRight()} style={buttonStyle}>
   	➡️ {settings.language === "ar" ? "يمين" : "Right"}
 	</button>
+
+	  <button onClick={() => rotateLeft()} style={buttonStyle}>
+	  ⬅️ {settings.language === "ar" ? "يسار" : "Left"}
+	</button>
+
+
 
         <button onClick={toggleLang} style={buttonStyle}>
           🌐 {settings.language === "ar" ? "English" : "العربية"}
