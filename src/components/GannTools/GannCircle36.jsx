@@ -77,11 +77,18 @@ const getDigitColor = (digit) => {
   return "#000"; // افتراضي (احتياط)
 };
 
-  const handleRotate = () =>
-    setSettings((prev) => ({
-      ...prev,
-      rotation: (prev.rotation + 10) % 360,
-    }));
+  const rotateLeft = () =>
+  setSettings((prev) => ({
+    ...prev,
+    rotation: (prev.rotation - 10 + 360) % 360,
+  }));
+
+const rotateRight = () =>
+  setSettings((prev) => ({
+    ...prev,
+    rotation: (prev.rotation + 10) % 360,
+  }));
+
 
   const toggleLang = () =>
     setSettings((prev) => ({
@@ -128,9 +135,14 @@ const getDigitColor = (digit) => {
       </h2>
 
       <div style={{ marginBottom: 10, flexWrap: "wrap" }}>
-        <button onClick={handleRotate} style={buttonStyle}>
-          🔁 {settings.language === "ar" ? "تدوير" : "Rotate"}
-        </button>
+        <button onClick={() => rotateLeft()} style={buttonStyle}>
+	  ⬅️ {settings.language === "ar" ? "يسار" : "Left"}
+	</button>
+
+	<button onClick={() => rotateRight()} style={buttonStyle}>
+  	➡️ {settings.language === "ar" ? "يمين" : "Right"}
+	</button>
+
         <button onClick={toggleLang} style={buttonStyle}>
           🌐 {settings.language === "ar" ? "English" : "العربية"}
         </button>
@@ -222,39 +234,41 @@ const getDigitColor = (digit) => {
     onMouseUp={handleMouseUp}
     onMouseLeave={handleMouseUp}
   >
+ 
         <g
           transform={`translate(${drag.x}, ${drag.y}) scale(${zoom}) translate(${(1 - zoom) * center}, ${(1 - zoom) * center})`}
         >
-// 🧭 عرض الزوايا فقط بدون الرقم المختزل
-{Array.from({ length: 36 }).map((_, i) => {
-  const angle = 10 + i * 10;
-  const angleStart = i * angleStep;
-  const angleMid = angleStart + angleStep / 2;
-  const angleRad = angleMid + (settings.rotation * Math.PI) / 180;
+// 🔵 حلقة داخلية ثابتة: الأرقام من 1 إلى 36 فقط (بدون تكرار)
+{Array.from({ length: 36 }).map((_, index) => {
+  const fixedValue = index + 1;
+  const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
 
-  const cellIndex = i % 9; // من 0 إلى 8
-  const cellValue = settings.startValue + cellIndex;
-  const reduced = reduceToDigit(cellValue); // اللون حسب الرقم المرتبط بالخلية
+  const r1 = innerRadius - 20;
+  const r2 = innerRadius + 5;
+  const angleMid = angle + angleStep / 2;
+  const rMid = (r1 + r2) / 2;
 
-  const rMid = innerRadius - 20;
-  const x = center + rMid * Math.cos(angleRad);
-  const y = center + rMid * Math.sin(angleRad);
+  const x = center + rMid * Math.cos(angleMid);
+  const y = center + rMid * Math.sin(angleMid);
 
   return (
-    <text
-      key={`angle-${angle}`}
-      x={x}
-      y={y}
-      fill={getDigitColor(reduced)}
-      fontSize={8}
-      textAnchor="middle"
-      dominantBaseline="middle"
-      fontWeight="bold"
-    >
-      {angle}
-    </text>
+    <g key={`fixed-digit-${index}`}>
+      <text
+        x={x}
+        y={y}
+        fill="#008000"
+        fontSize={9}
+        textAnchor="middle"
+        dominantBaseline="middle"
+        fontWeight="bold"
+      >
+        {fixedValue}
+      </text>
+    </g>
   );
 })}
+
+
 
 
 
