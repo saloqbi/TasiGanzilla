@@ -164,13 +164,13 @@ const rotateRight = () =>
       : "Gann 360 Circle (Auto Cell Size)"}
   </h2>
 
-  <div style={{ fontSize: 14, display: "flex", gap: 30 }}>
+  <div style={{ fontSize: 20, display: "flex", gap: 30 }}>
   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#00CED1" }}>
-    <div style={{ fontSize: 12 }}>{getGregorianDate()}</div>
+    <div style={{ fontSize: 20 }}>{getGregorianDate()}</div>
     <div>🕐 GMT: {formatTime(currentTime, 0)}</div>
   </div>
   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#FF8C00" }}>
-    <div style={{ fontSize: 12 }}>{getHijriDate()}</div>
+    <div style={{ fontSize: 20}}>{getHijriDate()}</div>
     <div>🇸🇦 KSA: {formatTime(currentTime, 3)}</div>
   </div>
 </div>
