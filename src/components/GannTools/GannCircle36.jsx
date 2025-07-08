@@ -145,9 +145,23 @@ const rotateRight = () =>
   const handleMouseUp = () => {
     setIsDragging(false);
   };
+const zodiacLabels = [
+  { label: "نار الحمل", color: "red" },
+  { label: "تراب التراب", color: "blue" },
+  { label: "هواء الجوزاء", color: "black" },
+  { label: "ماء السرطان", color: "red" },
+  { label: "نار الاسد", color: "blue" },
+  { label: "تراب السنبله", color: "black" },
+  { label: "هواء الميزان", color: "red" },
+  { label: "ماء العقرب", color: "blue" },
+  { label: "نار القوس", color: "black" },
+  { label: "تراب الجدي", color: "red" },
+  { label: "هواء الدلو", color: "blue" },
+  { label: "ماء الحوت", color: "black" },
+];
+
 const RenderZodiacRing = () => {
-  const zodiacSymbols = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
-  const total = zodiacSymbols.length;
+  const lastLevel = settings.levels - 1;
 
   const outerRadius = innerRadius + [...Array(settings.levels)].reduce((acc, l) => {
     const maxDigits = Math.max(
@@ -160,23 +174,30 @@ const RenderZodiacRing = () => {
 
   return (
     <g>
-      {zodiacSymbols.map((symbol, index) => {
-        const angle = (index * 2 * Math.PI) / total + (settings.rotation * Math.PI) / 180;
-        const x = center + outerRadius * Math.cos(angle);
-        const y = center + outerRadius * Math.sin(angle);
+      {[...Array(settings.divisions)].map((_, index) => {
+        const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
+        const angleMid = angle + angleStep / 2;
+
+        const x = center + outerRadius * Math.cos(angleMid);
+        const y = center + outerRadius * Math.sin(angleMid);
+
+        const value = settings.startValue + lastLevel * settings.divisions + index;
+        const digitSum = reduceToDigit(value);
+        const zodiacIndex = (value - 1) % 12;
+        const { label, color } = zodiacLabels[zodiacIndex];
 
         return (
           <text
             key={`zodiac-${index}`}
             x={x}
             y={y}
-            fill="#663399"
-            fontSize={16}
+            fill={color}
+            fontSize={10}
             textAnchor="middle"
             dominantBaseline="middle"
             fontWeight="bold"
           >
-            {symbol}
+            {label}
           </text>
         );
       })}
@@ -203,6 +224,9 @@ const RenderZodiacRing = () => {
     {settings.language === "ar"
       ? "🌀 ساعة كوكبة تاسي"
       : "🌀 Gann 360 Circle"}
+  <button onClick={toggleLang} style={{ ...buttonStyle, fontSize: 13 }}>
+    🌐 {settings.language === "ar" ? "English" : "العربية"}
+  </button>
   </h2>
 
   <div style={{
@@ -235,8 +259,21 @@ const RenderZodiacRing = () => {
     </filter>
   </defs>
 
-      <div style={{ marginBottom: 10, flexWrap: "wrap" }}>
+      <div style={{ 
+  display: "flex", 
+  flexWrap: "flex-end", 
+  alignItems: "center", 
+  gap: "15px", 
+  marginTop: "15px" 
+}}>
       
+             <button onClick={() => setZoom((z) => z + 0.1)} style={buttonStyle}>
+          🔍 {settings.language === "ar" ? "تكبير" : "Zoom In"}
+        </button>
+        <button onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))} style={buttonStyle}>
+          🔎 {settings.language === "ar" ? "تصغير" : "Zoom Out"}
+        </button>
+
 	<button onClick={() => rotateRight()} style={buttonStyle}>
   	➡️ {settings.language === "ar" ? "يمين" : "Right"}
 	</button>
@@ -246,16 +283,6 @@ const RenderZodiacRing = () => {
 	</button>
 
 
-
-        <button onClick={toggleLang} style={buttonStyle}>
-          🌐 {settings.language === "ar" ? "English" : "العربية"}
-        </button>
-        <button onClick={() => setZoom((z) => z + 0.1)} style={buttonStyle}>
-          🔍 {settings.language === "ar" ? "تكبير" : "Zoom In"}
-        </button>
-        <button onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))} style={buttonStyle}>
-          🔎 {settings.language === "ar" ? "تصغير" : "Zoom Out"}
-        </button>
 
         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
     <label style={{ marginBottom: "5px" }}>
