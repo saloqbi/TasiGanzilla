@@ -319,27 +319,32 @@ const RenderZodiacRing = () => {
   </defs>
 
       <div style={{ 
-  display: "flex", 
-  flexWrap: "flex-end", 
-  alignItems: "center", 
-  gap: "15px", 
-  marginTop: "15px" 
+  position: "absolute",
+  top: "120px",
+  right: "10px",
+  display: "flex",
+  flexDirection: "column",
+  gap: "12px",
+  backgroundColor: "#222",
+  padding: "12px",
+  borderRadius: "10px",
+  border: "1px solid #FFD700",
+  zIndex: 10,
 }}>
       
-             <button onClick={() => setZoom((z) => z + 0.1)} style={buttonStyle}>
-          🔍 {settings.language === "ar" ? "تكبير" : "Zoom In"}
-        </button>
-        <button onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))} style={buttonStyle}>
-          🔎 {settings.language === "ar" ? "تصغير" : "Zoom Out"}
-        </button>
+  <button onClick={() => setZoom((z) => z + 0.1)} style={buttonStyle}>
+    🔍 {settings.language === "ar" ? "تكبير" : "Zoom In"}
+  </button>
+  <button onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))} style={buttonStyle}>
+    🔎 {settings.language === "ar" ? "تصغير" : "Zoom Out"}
+  </button>
+  <button onClick={() => rotateRight()} style={buttonStyle}>
+    ➡️ {settings.language === "ar" ? "يمين" : "Right"}
+  </button>
+  <button onClick={() => rotateLeft()} style={buttonStyle}>
+    ⬅️ {settings.language === "ar" ? "يسار" : "Left"}
+  </button>
 
-	<button onClick={() => rotateRight()} style={buttonStyle}>
-  	➡️ {settings.language === "ar" ? "يمين" : "Right"}
-	</button>
-
-	  <button onClick={() => rotateLeft()} style={buttonStyle}>
-	  ⬅️ {settings.language === "ar" ? "يسار" : "Left"}
-	</button>
 
 
 
@@ -358,16 +363,7 @@ const RenderZodiacRing = () => {
           levels: parseInt(e.target.value),
         }))
       }
-      style={{
-        width: "80px",
-        padding: "6px",
-        borderRadius: "6px",
-        border: "1px solid #FFD700",
-        backgroundColor: "#222",
-        color: "#fff",
-        fontWeight: "bold",
-        textAlign: "center",
-      }}
+style={inputStyle}
     />
   </div>
 
@@ -386,16 +382,7 @@ const RenderZodiacRing = () => {
           divisions: parseInt(e.target.value),
         }))
       }
-      style={{
-        width: "80px",
-        padding: "6px",
-        borderRadius: "6px",
-        border: "1px solid #FFD700",
-        backgroundColor: "#222",
-        color: "#fff",
-        fontWeight: "bold",
-        textAlign: "center",
-      }}
+style={inputStyle}
     />
   </div>
 
@@ -413,16 +400,7 @@ const RenderZodiacRing = () => {
           startValue: parseInt(e.target.value),
         }))
       }
-      style={{
-        width: "80px",
-        padding: "6px",
-        borderRadius: "6px",
-        border: "1px solid #FFD700",
-        backgroundColor: "#222",
-        color: "#fff",
-        fontWeight: "bold",
-        textAlign: "center",
-      }}
+style={inputStyle}
     />
   </div>
 </div>
@@ -430,27 +408,25 @@ const RenderZodiacRing = () => {
 
     {/* ✅ القسم السفلي: الدائرة تملأ المساحة المتبقية فقط */}
 <div
-  style={{
-      flex: 1,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#111",
-    borderTop: "3px solid #FFD700",
+  style={{    
+    border: "2px solid #FFD700",      // ✅ الإطار الذهبي
+    borderRadius: "12px",
+    padding: "8px",
+    background: "#fff",               // خلفية بيضاء حول الدائرة
+    boxShadow: "0 0 10px rgba(255, 215, 0, 0.3)",
   }}
 >
   <svg
     viewBox={`0 0 ${dynamicSize} ${dynamicSize}`}
     preserveAspectRatio="xMidYMid meet"
     style={{
-  width: "100%",
-  height: "100%",
-  maxWidth: "100vw",
-  maxHeight: "100vh",
-  aspectRatio: "1 / 1",
-  display: "block",
-  background: "#fff",
-  cursor: isDragging ? "grabbing" : "grab"
+      width: "100%",
+      height: "100%",
+      maxWidth: "100%",
+      maxHeight: "100%",
+      aspectRatio: "1 / 1",
+      display: "block",
+      cursor: isDragging ? "grabbing" : "grab",
     }}
     onMouseDown={handleMouseDown}
     onMouseMove={handleMouseMove}
@@ -638,4 +614,14 @@ const buttonStyle = {
   cursor: "pointer",
 };
 
+const inputStyle = {
+  width: "80px",
+  padding: "6px",
+  borderRadius: "6px",
+  border: "1px solid #FFD700",
+  backgroundColor: "#222",
+  color: "#fff",
+  fontWeight: "bold",
+  textAlign: "center",
+};
 export default GannCircle360;
