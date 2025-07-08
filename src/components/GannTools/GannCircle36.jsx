@@ -295,36 +295,6 @@ const rotateRight = () =>
   );
 })}
 
-// 🧭 عرض الزوايا فقط بدون الرقم المختزل
-{Array.from({ length: 36 }).map((_, i) => {
-  const angle = 10 + i * 10;
-  const angleStart = i * angleStep;
-  const angleMid = angleStart + angleStep / 2;
-  const angleRad = angleMid + (settings.rotation * Math.PI) / 180;
-
-  const cellIndex = i % 9; // من 0 إلى 8
-  const cellValue = settings.startValue + cellIndex;
-  const reduced = reduceToDigit(cellValue); // اللون حسب الرقم المرتبط بالخلية
-
-  const rMid = innerRadius - 20;
-  const x = center + rMid * Math.cos(angleRad);
-  const y = center + rMid * Math.sin(angleRad);
-
-  return (
-    <text
-      key={`angle-${angle}`}
-      x={x}
-      y={y}
-      fill={getDigitColor(reduced)}
-      fontSize={8}
-      textAnchor="middle"
-      dominantBaseline="middle"
-      fontWeight="bold"
-    >
-      {angle}
-    </text>
-  );
-})}
 
 
 
