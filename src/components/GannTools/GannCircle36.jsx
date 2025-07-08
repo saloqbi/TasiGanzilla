@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 
 
 const defaultSettings = {
-  levels: 12,
+  levels: 8,
   rotation: 0,
   divisions: 360,
   startValue: 1,
@@ -58,10 +58,10 @@ const formatTime = (date, offset = 0) => {
 
 
   const totalSectors = settings.divisions;
-  const innerRadius = 100;
+  const innerRadius = 60;
 
   const angleStep = (2 * Math.PI) / totalSectors;
-  const baseRingWidth = 50;
+  const baseRingWidth = 35;
   const digitScale = 8;
 
 
@@ -187,7 +187,7 @@ const RenderZodiacRing = () => {
       )
     );
     return acc + (baseRingWidth + maxDigits * digitScale);
-  }, 0) + 60;
+  }, 0) + 50;
 
   return (
     <g>
@@ -235,36 +235,78 @@ const RenderZodiacRing = () => {
   >
     {/* ✅ القسم العلوي: العنوان والأزرار */}
     <div style={{ padding: 10, flexShrink: 0 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", flexWrap: "wrap" }}>
+      <div style={{ 
+    position: "absolute",
+    top: "10px",
+    right: "10px", // ✅ دائمًا في الزاوية اليمنى
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    backgroundColor: "#222",
+    padding: "8px 16px",
+    borderRadius: "10px",
+    border: "1px solid #FFD700",
+    zIndex: 10, 
+}}>
 
-  <h2 style={{ color: "#FFD700", margin: 0, fontSize: 26, fontWeight: "bold" }}>
+ <span
+    style={{
+      color: "#FFD700",
+      fontSize: 20,
+      fontWeight: "bold",
+      whiteSpace: "nowrap",
+    }}
+  >
     {settings.language === "ar"
       ? "🌀 ساعة كوكبة تاسي"
       : "🌀 Gann 360 Circle"}
+  </span>
   <button onClick={toggleLang} style={{ ...buttonStyle, fontSize: 13 }}>
     🌐 {settings.language === "ar" ? "English" : "العربية"}
   </button>
-  </h2>
+ 
 
   <div style={{
-  display: "flex",
-  gap: "30px",
-  backgroundColor: "#222",
-  padding: "12px 24px",
-  borderRadius: "10px",
-  color: "#FFD700",
-  border: "1px solid #FFD700",
-  boxShadow: "0 0 10px rgba(255, 215, 0, 0.3)"
+    position: "fixed",
+    top: "10px",
+    left: "10px",
+    backgroundColor: "rgba(34,34,34,0.95)",
+    padding: "8px 16px",
+    borderRadius: "10px",
+    border: "1px solid #FFD700",
+    boxShadow: "0 0 10px rgba(255, 215, 0, 0.4)",
+    display: "flex",
+    flexDirection: "column",
+    zIndex: 9999,
+    minWidth: "200px",
+    textAlign: "center",
+    backdropFilter: "blur(2px)",
   }}>
-    <div style={{ textAlign: "center" , color: "#00CED1"}}>
-    <div style={{ fontSize: "16px" }}>{getGregorianDate()}</div>
-    <div style={{ fontSize: "13px" }}>🕐 GMT: {formatTime(currentTime, 0)}</div>
+ <div style={{ fontSize: "17px", color: "#00CED1", fontWeight: "bold" }}>
+    {getGregorianDate()}
   </div>
-  <div style={{ textAlign: "center", color: "#FFA500" }}>
-    <div style={{ fontSize: "16px" }}>{getHijriDate()}</div>
-    <div style={{ fontSize: "13px" }}>🇸🇦 KSA: {formatTime(currentTime, 3)}</div>
+
+  {/* ✅ السطر الجديد: صف يحتوي على GMT و KSA */}
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      marginTop: "4px",
+      gap: "16px", // ✅ المسافة بين الساعتين
+    }}
+  >
+    <div style={{ fontSize: "10px", color: "#00CED1" }}>
+      GMT: {formatTime(currentTime, 0)}
+    </div>
+    <div style={{ fontSize: "10px", color: "#FFA500" }}>
+      KSA: {formatTime(currentTime, 3)}
+    </div>
   </div>
+
+  <div style={{ fontSize: "10px", color: "#FFA500", marginTop: "3px", fontWeight: "bold" }}>
+    {getHijriDate()}
   </div>
+</div>
 </div>
 <defs>
     <radialGradient id="circleGradient" cx="50%" cy="50%" r="50%">
@@ -422,15 +464,13 @@ const RenderZodiacRing = () => {
 // 🔵 حلقة داخلية ثابتة: الأرقام من 1 إلى 36 فقط (بدون تكرار)
 {Array.from({ length: 36 }).map((_, index) => {
   const fixedValue = index + 1;
+
   const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
-
-  const r1 = innerRadius - 20;
-  const r2 = innerRadius + 5;
   const angleMid = angle + angleStep / 2;
-  const rMid = (r1 + r2) / 2;
 
-  const x = center + rMid * Math.cos(angleMid);
-  const y = center + rMid * Math.sin(angleMid);
+  const radius = innerRadius - 10; // ✅ داخل الدائرة لكن مرئي
+  const x = center + radius * Math.cos(angleMid);
+  const y = center + radius * Math.sin(angleMid);
 
   return (
     <g key={`fixed-digit-${index}`}>
@@ -438,7 +478,7 @@ const RenderZodiacRing = () => {
         x={x}
         y={y}
         fill="#008000"
-        fontSize={9}
+        fontSize={6}
         textAnchor="middle"
         dominantBaseline="middle"
         fontWeight="bold"
@@ -448,7 +488,6 @@ const RenderZodiacRing = () => {
     </g>
   );
 })}
-
 
 
  // 3️⃣ باقي الحلقات الخارجية والخلايا الكبيرة
@@ -487,7 +526,7 @@ const RenderZodiacRing = () => {
                      const x = center + rMid * Math.cos(angleMid);
                      const y = center + rMid * Math.sin(angleMid);
 	       
-                     const fontSize = Math.max(6, 13 - value.toString().length);
+                     const fontSize = Math.max(5, 11 - value.toString().length);
             const isGray = (level + index) % 2 === 0;
 
   	       const reduced = reduceToDigit(value);
