@@ -197,25 +197,32 @@ const RenderZodiacRing = () => {
   >
     {/* ✅ القسم العلوي: العنوان والأزرار */}
     <div style={{ padding: 10, flexShrink: 0 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
-  <h2 style={{ color: "#FFD700", margin: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", flexWrap: "wrap" }}>
+
+  <h2 style={{ color: "#FFD700", margin: 0, fontSize: 26, fontWeight: "bold" }}>
     {settings.language === "ar"
-      ? "ساعة كوكبة تاسي "
-      : "Gann 360 Circle (Auto Cell Size)"}
+      ? "🌀 ساعة كوكبة تاسي"
+      : "🌀 Gann 360 Circle"}
   </h2>
 
-  <div style={{ fontSize: 20, display: "flex", gap: 30 }}>
-  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#00CED1" }}>
-    <div style={{ fontSize: 20 }}>{getGregorianDate()}</div>
-    <div>🕐 GMT: {formatTime(currentTime, 0)}</div>
+  <div style={{
+    display: "flex",
+    gap: 30,
+    backgroundColor: "#1e1e1e",
+    padding: "10px 20px",
+    borderRadius: "10px",
+    boxShadow: "0 0 8px rgba(255, 215, 0, 0.2)",
+    border: "1px solid #FFD700"
+  }}>
+    <div style={{ textAlign: "center", color: "#00CED1" }}>
+      <div style={{ fontSize: 16 }}>{getGregorianDate()}</div>
+      <div style={{ fontSize: 13 }}>🕐 GMT: {formatTime(currentTime, 0)}</div>
+    </div>
+    <div style={{ textAlign: "center", color: "#FF8C00" }}>
+      <div style={{ fontSize: 16 }}>{getHijriDate()}</div>
+      <div style={{ fontSize: 13 }}>🇸🇦 KSA: {formatTime(currentTime, 3)}</div>
+    </div>
   </div>
-  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#FF8C00" }}>
-    <div style={{ fontSize: 20}}>{getHijriDate()}</div>
-    <div>🇸🇦 KSA: {formatTime(currentTime, 3)}</div>
-  </div>
-</div>
-
-
 </div>
 
 
@@ -492,12 +499,15 @@ const RenderZodiacRing = () => {
 };
 
 const buttonStyle = {
-  margin: "6px",
-  padding: "6px 14px",
-  backgroundColor: "#222",
+   margin: "6px",
+  padding: "8px 16px",
+  backgroundColor: "#333",
   color: "#FFD700",
-  border: "1px solid #444",
-  borderRadius: "4px",
+  border: "1px solid #666",
+  borderRadius: "8px",
+  fontWeight: "bold",
+  fontSize: "14px",
+  transition: "all 0.3s ease",
   cursor: "pointer",
 };
 
