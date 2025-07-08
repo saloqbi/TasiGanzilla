@@ -206,25 +206,34 @@ const RenderZodiacRing = () => {
   </h2>
 
   <div style={{
-    display: "flex",
-    gap: 30,
-    backgroundColor: "#1e1e1e",
-    padding: "10px 20px",
-    borderRadius: "10px",
-    boxShadow: "0 0 8px rgba(255, 215, 0, 0.2)",
-    border: "1px solid #FFD700"
+  display: "flex",
+  gap: "30px",
+  backgroundColor: "#222",
+  padding: "12px 24px",
+  borderRadius: "10px",
+  color: "#FFD700",
+  border: "1px solid #FFD700",
+  boxShadow: "0 0 10px rgba(255, 215, 0, 0.3)"
   }}>
-    <div style={{ textAlign: "center", color: "#00CED1" }}>
-      <div style={{ fontSize: 16 }}>{getGregorianDate()}</div>
-      <div style={{ fontSize: 13 }}>🕐 GMT: {formatTime(currentTime, 0)}</div>
-    </div>
-    <div style={{ textAlign: "center", color: "#FF8C00" }}>
-      <div style={{ fontSize: 16 }}>{getHijriDate()}</div>
-      <div style={{ fontSize: 13 }}>🇸🇦 KSA: {formatTime(currentTime, 3)}</div>
-    </div>
+    <div style={{ textAlign: "center" , color: "#00CED1"}}>
+    <div style={{ fontSize: "16px" }}>{getGregorianDate()}</div>
+    <div style={{ fontSize: "13px" }}>🕐 GMT: {formatTime(currentTime, 0)}</div>
+  </div>
+  <div style={{ textAlign: "center", color: "#FFA500" }}>
+    <div style={{ fontSize: "16px" }}>{getHijriDate()}</div>
+    <div style={{ fontSize: "13px" }}>🇸🇦 KSA: {formatTime(currentTime, 3)}</div>
+  </div>
   </div>
 </div>
-
+<defs>
+    <radialGradient id="circleGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stopColor="#ffffff" />
+      <stop offset="100%" stopColor="#dddddd" />
+    </radialGradient>
+    <filter id="shadowFilter">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="#aaa" />
+    </filter>
+  </defs>
 
       <div style={{ marginBottom: 10, flexWrap: "wrap" }}>
       
@@ -248,56 +257,89 @@ const RenderZodiacRing = () => {
           🔎 {settings.language === "ar" ? "تصغير" : "Zoom Out"}
         </button>
 
-        <label style={{ color: "#FFD700", marginLeft: 15 }}>
-          {settings.language === "ar" ? "عدد الحلقات:" : "Levels:"}
-          <input
-            type="number"
-            min={1}
-            max={40}
-            value={settings.levels}
-            onChange={(e) =>
-              setSettings((prev) => ({
-                ...prev,
-                levels: parseInt(e.target.value),
-              }))
-            }
-            style={{ marginLeft: 10, width: 60 }}
-          />
-        </label>
+        <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+    <label style={{ marginBottom: "5px" }}>
+      {settings.language === "ar" ? "عدد الحلقات" : "Levels"}
+    </label>
+    <input
+      type="number"
+      min={1}
+      max={40}
+      value={settings.levels}
+      onChange={(e) =>
+        setSettings((prev) => ({
+          ...prev,
+          levels: parseInt(e.target.value),
+        }))
+      }
+      style={{
+        width: "80px",
+        padding: "6px",
+        borderRadius: "6px",
+        border: "1px solid #FFD700",
+        backgroundColor: "#222",
+        color: "#fff",
+        fontWeight: "bold",
+        textAlign: "center",
+      }}
+    />
+  </div>
 
-        <label style={{ color: "#FFD700", marginLeft: 15 }}>
-          {settings.language === "ar" ? "عدد القطاعات:" : "Divisions:"}
-          <input
-            type="number"
-            min={10}
-            max={720}
-            value={settings.divisions}
-            onChange={(e) =>
-              setSettings((prev) => ({
-                ...prev,
-                divisions: parseInt(e.target.value),
-              }))
-            }
-            style={{ marginLeft: 10, width: 60 }}
-          />
-        </label>
+         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+    <label style={{ marginBottom: "5px" }}>
+      {settings.language === "ar" ? "عدد القطاعات" : "Divisions"}
+    </label>
+    <input
+      type="number"
+      min={10}
+      max={720}
+      value={settings.divisions}
+      onChange={(e) =>
+        setSettings((prev) => ({
+          ...prev,
+          divisions: parseInt(e.target.value),
+        }))
+      }
+      style={{
+        width: "80px",
+        padding: "6px",
+        borderRadius: "6px",
+        border: "1px solid #FFD700",
+        backgroundColor: "#222",
+        color: "#fff",
+        fontWeight: "bold",
+        textAlign: "center",
+      }}
+    />
+  </div>
 
-        <label style={{ color: "#FFD700", marginLeft: 15 }}>
-          {settings.language === "ar" ? "بداية الترقيم:" : "Start From:"}
-          <input
-            type="number"
-            min={1}
-            value={settings.startValue}
-            onChange={(e) =>
-              setSettings((prev) => ({
-                ...prev,
-                startValue: parseInt(e.target.value),
-              }))
-            }
-            style={{ marginLeft: 10, width: 60 }}
-          />
-        </label>
-      </div>
+         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+    <label style={{ marginBottom: "5px" }}>
+      {settings.language === "ar" ? "بداية الترقيم" : "Start From"}
+    </label>
+    <input
+      type="number"
+      min={1}
+      value={settings.startValue}
+      onChange={(e) =>
+        setSettings((prev) => ({
+          ...prev,
+          startValue: parseInt(e.target.value),
+        }))
+      }
+      style={{
+        width: "80px",
+        padding: "6px",
+        borderRadius: "6px",
+        border: "1px solid #FFD700",
+        backgroundColor: "#222",
+        color: "#fff",
+        fontWeight: "bold",
+        textAlign: "center",
+      }}
+    />
+  </div>
+</div>
     </div>
 
     {/* ✅ القسم السفلي: الدائرة تملأ المساحة المتبقية فقط */}
@@ -315,14 +357,14 @@ const RenderZodiacRing = () => {
     viewBox={`0 0 ${dynamicSize} ${dynamicSize}`}
     preserveAspectRatio="xMidYMid meet"
     style={{
-      width: "100%",
-      height: "100%",
-      maxWidth: "200vh",    // ✅ يمنع تجاوز العرض
-      maxHeight: "200vw",   // ✅ يمنع تجاوز الارتفاع
-      aspectRatio: "1 / 1",
-      background: "#fff",
-      cursor: isDragging ? "grabbing" : "grab",
-      display: "block",
+  width: "100%",
+  height: "100%",
+  maxWidth: "100vw",
+  maxHeight: "100vh",
+  aspectRatio: "1 / 1",
+  display: "block",
+  background: "#fff",
+  cursor: isDragging ? "grabbing" : "grab"
     }}
     onMouseDown={handleMouseDown}
     onMouseMove={handleMouseMove}
@@ -330,7 +372,7 @@ const RenderZodiacRing = () => {
     onMouseLeave={handleMouseUp}
   >
  
-        <g
+    background: "#fff",     <g
           transform={`translate(${drag.x}, ${drag.y}) scale(${zoom}) translate(${(1 - zoom) * center}, ${(1 - zoom) * center})`}
         >
 // 🔵 حلقة داخلية ثابتة: الأرقام من 1 إلى 36 فقط (بدون تكرار)
