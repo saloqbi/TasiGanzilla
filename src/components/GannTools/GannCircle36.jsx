@@ -15,7 +15,8 @@ const [currentTime, setCurrentTime] = useState(new Date());
 
   const [settings, setSettings] = useState(() => {
     const stored = localStorage.getItem("gannCircle360Settings");
-    return stored ? JSON.parse(stored) : defaultSettings;
+return stored ? JSON.parse(stored) : defaultSettings;
+
   });
 
   const [zoom, setZoom] = useState(1);
@@ -144,6 +145,45 @@ const rotateRight = () =>
   const handleMouseUp = () => {
     setIsDragging(false);
   };
+const RenderZodiacRing = () => {
+  const zodiacSymbols = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"];
+  const total = zodiacSymbols.length;
+
+  const outerRadius = innerRadius + [...Array(settings.levels)].reduce((acc, l) => {
+    const maxDigits = Math.max(
+      ...Array.from({ length: settings.divisions }, (_, i) =>
+        (settings.startValue + l * settings.divisions + i).toString().length
+      )
+    );
+    return acc + (baseRingWidth + maxDigits * digitScale);
+  }, 0) + 60;
+
+  return (
+    <g>
+      {zodiacSymbols.map((symbol, index) => {
+        const angle = (index * 2 * Math.PI) / total + (settings.rotation * Math.PI) / 180;
+        const x = center + outerRadius * Math.cos(angle);
+        const y = center + outerRadius * Math.sin(angle);
+
+        return (
+          <text
+            key={`zodiac-${index}`}
+            x={x}
+            y={y}
+            fill="#663399"
+            fontSize={16}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontWeight="bold"
+          >
+            {symbol}
+          </text>
+        );
+      })}
+    </g>
+  );
+};
+
 
  return (
   <div
@@ -316,38 +356,6 @@ const rotateRight = () =>
   );
 })}
 
-// 🧭 عرض الزوايا فقط بدون الرقم المختزل
-{Array.from({ length: 36 }).map((_, i) => {
-  const angle = 10 + i * 10;
-  const angleStart = i * angleStep;
-  const angleMid = angleStart + angleStep / 2;
-  const angleRad = angleMid + (settings.rotation * Math.PI) / 180;
-
-  const cellIndex = i % 9; // من 0 إلى 8
-  const cellValue = settings.startValue + cellIndex;
-  const reduced = reduceToDigit(cellValue); // اللون حسب الرقم المرتبط بالخلية
-
-  const rMid = innerRadius - 20;
-  const x = center + rMid * Math.cos(angleRad);
-  const y = center + rMid * Math.sin(angleRad);
-
-  return (
-    <text
-      key={`angle-${angle}`}
-      x={x}
-      y={y}
-      fill={getDigitColor(reduced)}
-      fontSize={8}
-      textAnchor="middle"
-      dominantBaseline="middle"
-      fontWeight="bold"
-    >
-      {angle}
-    </text>
-  );
-})}
-
-
 
 
  // 3️⃣ باقي الحلقات الخارجية والخلايا الكبيرة
@@ -427,6 +435,46 @@ const rotateRight = () =>
   {value}
 </text>
 
+// 🧭 حلقة الزوايا الخارجية المرتبطة بمجموع الرقم
+{[...Array(settings.divisions)].map((_, index) => {
+  const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
+  const angleMid = angle + angleStep / 2;
+
+  const lastLevel = settings.levels - 1;
+  const cellValue = settings.startValue + lastLevel * settings.divisions + index;
+  const reduced = reduceToDigit(cellValue);
+  const angleDeg = ((index + 1) * 360) / settings.divisions;
+
+  const r = innerRadius + [...Array(settings.levels)].reduce((acc, l) => {
+    const maxDigits = Math.max(
+      ...Array.from({ length: settings.divisions }, (_, i) =>
+        (settings.startValue + l * settings.divisions + i).toString().length
+      )
+    );
+    return acc + (baseRingWidth + maxDigits * digitScale);
+  }, 0) + 20; // أبعد من الحلقة الأخيرة
+
+  const x = center + r * Math.cos(angleMid);
+  const y = center + r * Math.sin(angleMid);
+
+  return (
+    <text
+      key={`angle-outside-${index}`}
+      x={x}
+      y={y}
+      fill={getDigitColor(reduced)}
+      fontSize={10}
+      textAnchor="middle"
+      dominantBaseline="middle"
+      fontWeight="bold"
+    >
+      {angleDeg.toFixed(0)}°
+    </text>
+
+  );
+})}
+<RenderZodiacRing />
+
               </g>
             );
           })}
@@ -434,6 +482,8 @@ const rotateRight = () =>
 
       );
     })}
+<RenderZodiacRing />
+
    </g>
       </svg>
     </div>
