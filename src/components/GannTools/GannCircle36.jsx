@@ -110,9 +110,9 @@ const getDigitColor = (digit) => {
 
 const getClickColor = (value) => {
   const clicks = clickStates[value] || 0;
-  if (clicks === 1) return "green";
+  if (clicks === 1) return "#90ee90";
   if (clicks === 2) return "pink";
-  if (clicks === 3) return "yellow";
+  if (clicks === 3) return "#ffff99";
   if (clicks >= 4) return "gray";
   return null;
 };
