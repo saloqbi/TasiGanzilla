@@ -34,6 +34,20 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 
+const getGregorianDate = () => {
+  const today = new Date();
+  return today.toISOString().split("T")[0]; // مثل: 2025-07-08
+};
+
+const getHijriDate = () => {
+  return new Intl.DateTimeFormat("ar-SA-u-ca-islamic", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+};
+
+
 const formatTime = (date, offset = 0) => {
   const local = new Date(date.getTime() + offset * 60 * 60 * 1000);
   return local.toLocaleTimeString("en-GB", { hour12: false });
@@ -146,14 +160,21 @@ const rotateRight = () =>
       <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
   <h2 style={{ color: "#FFD700", margin: 0 }}>
     {settings.language === "ar"
-      ? "دائرة Gann 360 (حجم خلية ذكي)"
+      ? "ساعة كوكبة تاسي "
       : "Gann 360 Circle (Auto Cell Size)"}
   </h2>
 
-  <div style={{ fontSize: 14, display: "flex", gap: 10 }}>
-  <span style={{ color: "#00CED1" }}>🕐 GMT: {formatTime(currentTime, 0)}</span>
-  <span style={{ color: "#FF8C00" }}>🇸🇦 KSA: {formatTime(currentTime, 3)}</span>
+  <div style={{ fontSize: 14, display: "flex", gap: 30 }}>
+  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#00CED1" }}>
+    <div style={{ fontSize: 12 }}>{getGregorianDate()}</div>
+    <div>🕐 GMT: {formatTime(currentTime, 0)}</div>
+  </div>
+  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#FF8C00" }}>
+    <div style={{ fontSize: 12 }}>{getHijriDate()}</div>
+    <div>🇸🇦 KSA: {formatTime(currentTime, 3)}</div>
+  </div>
 </div>
+
 
 </div>
 
@@ -295,6 +316,36 @@ const rotateRight = () =>
   );
 })}
 
+// 🧭 عرض الزوايا فقط بدون الرقم المختزل
+{Array.from({ length: 36 }).map((_, i) => {
+  const angle = 10 + i * 10;
+  const angleStart = i * angleStep;
+  const angleMid = angleStart + angleStep / 2;
+  const angleRad = angleMid + (settings.rotation * Math.PI) / 180;
+
+  const cellIndex = i % 9; // من 0 إلى 8
+  const cellValue = settings.startValue + cellIndex;
+  const reduced = reduceToDigit(cellValue); // اللون حسب الرقم المرتبط بالخلية
+
+  const rMid = innerRadius - 20;
+  const x = center + rMid * Math.cos(angleRad);
+  const y = center + rMid * Math.sin(angleRad);
+
+  return (
+    <text
+      key={`angle-${angle}`}
+      x={x}
+      y={y}
+      fill={getDigitColor(reduced)}
+      fontSize={8}
+      textAnchor="middle"
+      dominantBaseline="middle"
+      fontWeight="bold"
+    >
+      {angle}
+    </text>
+  );
+})}
 
 
 
