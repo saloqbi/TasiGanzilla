@@ -23,7 +23,14 @@ return stored ? JSON.parse(stored) : defaultSettings;
   const [drag, setDrag] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
    const [clickStates, setClickStates] = useState({});
-  const dragStart = useRef({ x: 0, y: 0 });
+     const [showTriangle, setShowTriangle] = useState(false);
+     const [triangleRotation, setTriangleRotation] = useState(0);
+     const [customAngles, setCustomAngles] = useState([0, 120, 240]);
+     const [highlightTriangle, setHighlightTriangle] = useState(true);
+     const [fillTriangle, setFillTriangle] = useState(true);
+
+
+   const dragStart = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     localStorage.setItem("gannCircle360Settings", JSON.stringify(settings));
@@ -178,49 +185,66 @@ const zodiacLabels = [
 ];
 
 const RenderZodiacRing = () => {
-  const lastLevel = settings.levels - 1;
-
-  const outerRadius = innerRadius + [...Array(settings.levels)].reduce((acc, l) => {
-    const maxDigits = Math.max(
-      ...Array.from({ length: settings.divisions }, (_, i) =>
-        (settings.startValue + l * settings.divisions + i).toString().length
-      )
-    );
-    return acc + (baseRingWidth + maxDigits * digitScale);
-  }, 0) + 50;
+  const zodiacCount = 12;
+  const radiusOuter = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5) + 50;
+  const radiusInner = radiusOuter - 50; // سمك الخلية
 
   return (
     <g>
-      {[...Array(settings.divisions)].map((_, index) => {
-        const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
-        const angleMid = angle + angleStep / 2;
+      {[...Array(zodiacCount)].map((_, index) => {
+        const startAngle = (index * 360) / zodiacCount;
+        const endAngle = ((index + 1) * 360) / zodiacCount;
 
-        const x = center + outerRadius * Math.cos(angleMid);
-        const y = center + outerRadius * Math.sin(angleMid);
+        const startRad = (startAngle + settings.rotation) * (Math.PI / 180);
+        const endRad = (endAngle + settings.rotation) * (Math.PI / 180);
+        const midRad = ((startAngle + endAngle) / 2 + settings.rotation) * (Math.PI / 180);
 
-        const value = settings.startValue + lastLevel * settings.divisions + index;
-        const digitSum = reduceToDigit(value);
-        const zodiacIndex = (value - 1) % 12;
+        // نقاط الزاوية
+        const x1 = center + radiusInner * Math.cos(startRad);
+        const y1 = center + radiusInner * Math.sin(startRad);
+        const x2 = center + radiusOuter * Math.cos(startRad);
+        const y2 = center + radiusOuter * Math.sin(startRad);
+        const x3 = center + radiusOuter * Math.cos(endRad);
+        const y3 = center + radiusOuter * Math.sin(endRad);
+        const x4 = center + radiusInner * Math.cos(endRad);
+        const y4 = center + radiusInner * Math.sin(endRad);
+
+        // اسم البرج
+        const zodiacIndex = index % 12;
         const { label, color } = zodiacLabels[zodiacIndex];
 
+        const xText = center + ((radiusInner + radiusOuter) / 2) * Math.cos(midRad);
+        const yText = center + ((radiusInner + radiusOuter) / 2) * Math.sin(midRad);
+
         return (
-          <text
-            key={`zodiac-${index}`}
-            x={x}
-            y={y}
-            fill={color}
-            fontSize={10}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontWeight="bold"
-          >
-            {label}
-          </text>
+          <g key={`zodiac-${index}`}>
+            {/* ✅ خلفية الخلية */}
+            <path
+              d={`M ${x1},${y1} L ${x2},${y2} A ${radiusOuter},${radiusOuter} 0 0,1 ${x3},${y3} L ${x4},${y4} A ${radiusInner},${radiusInner} 0 0,0 ${x1},${y1} Z`}
+              fill="#eee"
+              stroke="#FFD700"
+              strokeWidth={0.9}
+            />
+
+            {/* ✅ اسم البرج */}
+            <text
+              x={xText}
+              y={yText}
+              fill={color}
+              fontSize={10}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              fontWeight="bold"
+            >
+              {label}
+            </text>
+          </g>
         );
       })}
     </g>
   );
 };
+
 
 
  return (
@@ -331,20 +355,113 @@ const RenderZodiacRing = () => {
   border: "1px solid #FFD700",
   zIndex: 10,
 }}>
-      
-  <button onClick={() => setZoom((z) => z + 0.1)} style={buttonStyle}>
-    🔍 {settings.language === "ar" ? "تكبير" : "Zoom In"}
-  </button>
-  <button onClick={() => setZoom((z) => Math.max(0.1, z - 0.1))} style={buttonStyle}>
-    🔎 {settings.language === "ar" ? "تصغير" : "Zoom Out"}
-  </button>
-  <button onClick={() => rotateRight()} style={buttonStyle}>
-    ➡️ {settings.language === "ar" ? "يمين" : "Right"}
-  </button>
-  <button onClick={() => rotateLeft()} style={buttonStyle}>
-    ⬅️ {settings.language === "ar" ? "يسار" : "Left"}
-  </button>
 
+{/* 🔍 تكبير و تصغير الدائره  */}
+  <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+  <label style={{ marginBottom: "5px" }}>
+    {settings.language === "ar" ? "🔍 تكبير و تصغير الدائره" : "Zoom"}
+  </label>
+  <input
+    type="range"
+    min={0.2}
+    max={3}
+    step={0.1}
+    value={zoom}
+    onChange={(e) => setZoom(parseFloat(e.target.value))}
+  />
+  <span style={{ fontSize: "10px", color: "#aaa", marginTop: "4px" }}>
+    {zoom.toFixed(1)}x
+  </span>
+</div>
+
+{/* ♻️ دوران الدائرة  */}
+
+<div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+  <label style={{ marginBottom: "5px" }}>
+    {settings.language === "ar" ? "♻️ دوران الدائرة" : "Circle Rotation"}
+  </label>
+  <input
+    type="range"
+    min={0}
+    max={360}
+    step={1}
+    value={settings.rotation}
+    onChange={(e) =>
+      setSettings((prev) => ({
+        ...prev,
+        rotation: parseInt(e.target.value),
+      }))
+    }
+  />
+  <span style={{ fontSize: "10px", color: "#aaa", marginTop: "4px" }}>
+    {settings.rotation}°
+  </span>
+</div>
+
+
+{/* ✅ أدوات المثلث */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showTriangle} onChange={() => setShowTriangle(!showTriangle)} />
+    🔺 {settings.language === "ar" ? "إظهار المثلث" : "Show Triangle"}
+  </label>
+
+  {showTriangle && (
+    <>
+      <label>
+        🎛 {settings.language === "ar" ? "زوايا المثلث" : "Triangle Angles"}
+      </label>
+{customAngles.map((angle, idx) => {
+  const rotated = (angle + triangleRotation + settings.rotation) % 360;
+
+  return (
+    <input
+      key={idx}
+      type="number"
+      value={rotated.toFixed(0)}
+      onChange={(e) => {
+        const newRotated = parseFloat(e.target.value) || 0;
+        const newOriginal = (newRotated - triangleRotation - settings.rotation + 360) % 360;
+
+        const newAngles = [...customAngles];
+        newAngles[idx] = newOriginal;
+        setCustomAngles(newAngles);
+      }}
+      style={{ ...inputStyle, marginBottom: "6px", direction: "ltr", textAlign: "center" }}
+    />
+  );
+})}
+
+
+      <label>
+        ♻️ {settings.language === "ar" ? "تدوير المثلث" : "Rotate Triangle"}
+      </label>
+      <input
+        type="range"
+        min="0"
+        max="360"
+        value={triangleRotation}
+        onChange={(e) => setTriangleRotation(parseFloat(e.target.value))}
+      />
+
+      <label>
+        <input type="checkbox" checked={highlightTriangle} onChange={() => setHighlightTriangle(!highlightTriangle)} />
+        {settings.language === "ar" ? "تمييز الزوايا" : "Show Highlight"}
+      </label>
+
+<label>
+  <input
+    type="checkbox"
+    checked={fillTriangle}
+    onChange={() => setFillTriangle(!fillTriangle)}
+  />
+  {settings.language === "ar" ? "تعبئة المثلث" : "Fill Triangle"}
+</label>
+
+
+    </>
+  )}
+</div>
 
 
 
@@ -417,6 +534,8 @@ style={inputStyle}
   }}
 >
   <svg
+
+
     viewBox={`0 0 ${dynamicSize} ${dynamicSize}`}
     preserveAspectRatio="xMidYMid meet"
     style={{
@@ -434,7 +553,8 @@ style={inputStyle}
     onMouseLeave={handleMouseUp}
   >
  
-    background: "#fff",     <g
+    background: "#fff",    
+ <g
           transform={`translate(${drag.x}, ${drag.y}) scale(${zoom}) translate(${(1 - zoom) * center}, ${(1 - zoom) * center})`}
         >
 // 🔵 حلقة داخلية ثابتة: الأرقام من 1 إلى 36 فقط (بدون تكرار)
@@ -593,6 +713,70 @@ style={inputStyle}
       );
     })}
 <RenderZodiacRing />
+
+{/* ✅ رسم المثلث داخل الدائرة */}
+{showTriangle && (
+  <g>
+    {(() => {
+      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5); // نصف القطر
+      const trianglePoints = customAngles.map((deg) => {
+        const rad = ((deg + triangleRotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: center + r * Math.cos(rad),
+          y: center + r * Math.sin(rad),
+        };
+      });
+
+      return (
+        <>
+          <polygon
+            points={trianglePoints.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillTriangle ? "rgba(0, 128, 0, 0.2)" : "none"}  // ✅ تعبئة خضراء أو لا شيء
+            stroke="green"
+            strokeWidth={2}
+          />
+          {highlightTriangle &&
+            trianglePoints.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="yellow" />
+            ))}
+{/* ✅ الخطوط الداخلية من كل رأس للمركز */}
+{trianglePoints.map((point, index) => (
+  <line
+    key={`line-${index}`}
+    x1={point.x}
+    y1={point.y}
+    x2={center}
+    y2={center}
+    stroke="green"
+    strokeWidth={3}
+    strokeDasharray="4,2" // خط متقطع (يمكنك تغييره)
+  />
+))}
+
+{/* ✅ عرض الزوايا الجديدة عند كل رأس */}
+{trianglePoints.map((point, i) => {
+  const angle = (customAngles[i] + triangleRotation + settings.rotation) % 360;
+
+  return (
+    <text
+      key={`angle-text-${i}`}
+      x={point.x}
+      y={point.y - 12}
+      fill="green"
+      fontSize={16}
+      fontWeight="bold"
+      textAnchor="middle"
+    >
+      ({angle.toFixed(0)}°)
+    </text>
+  );
+})}
+
+        </>
+      );
+    })()}
+  </g>
+)}
 
    </g>
       </svg>
