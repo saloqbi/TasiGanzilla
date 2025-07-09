@@ -104,6 +104,8 @@ const [patternShape, setPatternShape] = useState("triangle"); // triangle | squa
 const [patternRotation, setPatternRotation] = useState(0);
 const [patternFill, setPatternFill] = useState(true);
 const [patternColor, setPatternColor] = useState("#00CED1");
+const [selectedPatternIndex, setSelectedPatternIndex] = useState(null);
+
 
 
 
@@ -1836,15 +1838,44 @@ onClick={() =>
 
       return (
         <g key={`pattern-${i}`}>
-          <polygon
-            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
-            fill={patternFill ? patternColor + "55" : "none"}
-            stroke={patternColor}
-            strokeWidth={2}
-          />
+<polygon
+  points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+  fill={patternFill ? patternColor + "55" : "none"}
+  stroke={patternColor}
+  strokeWidth={2}
+  onClick={() => {
+    setSelectedPatternIndex(i);
+    alert(
+      `📈 دائرة رقم ${i + 1}\nالشكل: ${patternShape.toUpperCase()}\nنصف القطر: ${radius}px`
+    );
+  }}
+/>
+{selectedPatternIndex === i && (
+  <circle
+    cx={centerX}
+    cy={centerY}
+    r={6}
+    fill="limegreen"
+    stroke="black"
+    strokeWidth={1}
+  />
+)}
+
+
           {points.map((p, idx) => (
             <circle key={idx} cx={p.x} cy={p.y} r={3} fill={patternColor} />
           ))}
+{selectedPatternIndex === i && (
+  <circle
+    cx={centerX}
+    cy={centerY}
+    r={6}
+    fill="limegreen"
+    stroke="black"
+    strokeWidth={1}
+  />
+)}
+
         </g>
       );
     })}
