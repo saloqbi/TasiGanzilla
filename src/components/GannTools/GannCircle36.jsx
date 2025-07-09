@@ -20,6 +20,7 @@ return stored ? JSON.parse(stored) : defaultSettings;
   });
 
   const [zoom, setZoom] = useState(1);
+   const [scale, setScale] = useState(0.3); // ⬅️ يبدأ من 0.2x
   const [drag, setDrag] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
    const [clickStates, setClickStates] = useState({});
@@ -80,12 +81,19 @@ const [fillStarOctagon, setFillStarOctagon] = useState(true);
 // 🧲 دائرة الزوايا (Wheel of 36 Rays)
 const [showAngleWheel, setShowAngleWheel] = useState(false);
 const [angleWheelRotation, setAngleWheelRotation] = useState(0);
-const angleInterval = 10; // كل كم درجة نرسم خط
 const [rayColor, setRayColor] = useState("#FF0000"); // أحمر افتراضي
 const [rayWidth, setRayWidth] = useState(1);
+const [angleStepRad, setAngleStep] = useState(10); // خطوة الزاوية
 
+// 🟡 الدوائر المتداخلة
+const [showNestedCircles, setShowNestedCircles] = useState(false);
+const [nestedCircleCount, setNestedCircleCount] = useState(6);
+const [nestedCircleGap, setNestedCircleGap] = useState(20);
+const [nestedCircleColor, setNestedCircleColor] = useState("#EE82EE");
 
    const dragStart = useRef({ x: 0, y: 0 });
+     const offsetStart = useRef({ x: 0, y: 0 });
+
 
   useEffect(() => {
     localStorage.setItem("gannCircle360Settings", JSON.stringify(settings));
@@ -129,6 +137,7 @@ const formatTime = (date, offset = 0) => {
 
 const dynamicSize = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5 );
 const center = dynamicSize / 2;
+const [offset, setOffset] = useState({ x: dynamicSize / 2, y: dynamicSize / 2 });
 
 
   const getPathForCell = (r1, r2, startAngle, endAngle) => {
@@ -205,25 +214,25 @@ const rotateRight = () =>
       language: prev.language === "ar" ? "en" : "ar",
     }));
 
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    dragStart.current = {
-      x: e.clientX - drag.x,
-      y: e.clientY - drag.y,
-    };
-  };
+const handleMouseDown = (e) => {
+  setIsDragging(true);
+  dragStart.current = { x: e.clientX, y: e.clientY };
+  offsetStart.current = { ...offset };
+};
 
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    setDrag({
-      x: e.clientX - dragStart.current.x,
-      y: e.clientY - dragStart.current.y,
-    });
-  };
+const handleMouseMove = (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - dragStart.current.x;
+  const dy = e.clientY - dragStart.current.y;
+  setOffset({
+    x: offsetStart.current.x + dx,
+    y: offsetStart.current.y + dy,
+  });
+};
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+const handleMouseUp = () => {
+  setIsDragging(false);
+};
 const zodiacLabels = [
   { label: "نار الحمل", color: "red" },
   { label: "تراب التراب", color: "blue" },
@@ -418,15 +427,15 @@ const RenderZodiacRing = () => {
   </label>
   <input
     type="range"
-    min={0.2}
-    max={3}
-    step={0.1}
-    value={zoom}
-    onChange={(e) => setZoom(parseFloat(e.target.value))}
+    min="0.1"
+    max="1.5"
+    step="0.1"
+    value={scale}
+    onChange={(e) => setScale(parseFloat(e.target.value))}
   />
-  <span style={{ fontSize: "10px", color: "#aaa", marginTop: "4px" }}>
-    {zoom.toFixed(1)}x
-  </span>
+
+<span style={{ fontSize: "10px", marginLeft: "6px" }}>{(scale * 100).toFixed(0)}%</span>
+
 </div>
 
 {/* ♻️ دوران الدائرة  */}
@@ -810,6 +819,19 @@ const RenderZodiacRing = () => {
       value={angleWheelRotation}
       onChange={(e) => setAngleWheelRotation(parseFloat(e.target.value))}
     />
+<label>🧮 تكرار كل كم درجة؟</label>
+<select
+  value={angleStepRad}
+  onChange={(e) => setAngleStep(parseInt(e.target.value))}
+  style={{ width: "100%", padding: "4px" }}
+>
+  <option value={5}>كل 5° (72 شعاع)</option>
+  <option value={10}>كل 10° (36 شعاع)</option>
+  <option value={15}>كل 15° (24 شعاع)</option>
+  <option value={30}>كل 30° (12 شعاع)</option>
+  <option value={45}>كل 45° (8 شعاع)</option>
+  <option value={60}>كل 60° (6 شعاع)</option>
+</select>
 
     <label>🎨 لون الشعاع</label>
     <input
@@ -831,7 +853,47 @@ const RenderZodiacRing = () => {
     <span style={{ fontSize: "10px", color: "#aaa" }}>{rayWidth}px</span>
   </>
 )}
+</div>
 
+{/* 🟡 الدوائر المتداخلة */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "12px", color: "#FFD700" }}>
+  <label>
+    <input type="checkbox" checked={showNestedCircles} onChange={() => setShowNestedCircles(!showNestedCircles)} />
+    🟡 {settings.language === "ar" ? "إظهار الدوائر المتداخلة" : "Show Nested Circles"}
+  </label>
+
+  {showNestedCircles && (
+    <>
+      <label>🔢 {settings.language === "ar" ? "عدد الدوائر" : "Number of Circles"}</label>
+      <input
+        type="range"
+        min="1"
+        max="20"
+        value={nestedCircleCount}
+        onChange={(e) => setNestedCircleCount(parseInt(e.target.value))}
+      />
+      <span>{nestedCircleCount}</span>
+
+<label>🎨 {settings.language === "ar" ? "لون الدوائر" : "Circle Color"}</label>
+<input
+  type="color"
+  value={nestedCircleColor}
+  onChange={(e) => setNestedCircleColor(e.target.value)}
+  style={{ width: "60px", height: "25px" }}
+/>
+
+
+      <label>📏 {settings.language === "ar" ? "المسافة بين الدوائر" : "Gap Between Circles"}</label>
+      <input
+        type="range"
+        min="5"
+        max="100"
+        value={nestedCircleGap}
+        onChange={(e) => setNestedCircleGap(parseInt(e.target.value))}
+      />
+      <span>{nestedCircleGap}px</span>
+    </>
+  )}
 </div>
 
 
@@ -903,29 +965,25 @@ style={inputStyle}
     boxShadow: "0 0 10px rgba(255, 215, 0, 0.3)",
   }}
 >
+
   <svg
-
-
-    viewBox={`0 0 ${dynamicSize} ${dynamicSize}`}
-    preserveAspectRatio="xMidYMid meet"
-    style={{
-      width: "100%",
-      height: "100%",
-      maxWidth: "100%",
-      maxHeight: "100%",
-      aspectRatio: "1 / 1",
-      display: "block",
-      cursor: isDragging ? "grabbing" : "grab",
+     width="100%"
+     height="100%"
+     viewBox={`0 0 ${dynamicSize} ${dynamicSize}`}
+     style={{
+    display: "block",
+    margin: "0 auto",
+    background: "#f2f2f2",
+    cursor: isDragging ? "grabbing" : "grab",
     }}
     onMouseDown={handleMouseDown}
     onMouseMove={handleMouseMove}
     onMouseUp={handleMouseUp}
     onMouseLeave={handleMouseUp}
-  >
- 
+  > 
     background: "#fff",    
  <g
-          transform={`translate(${drag.x}, ${drag.y}) scale(${zoom}) translate(${(1 - zoom) * center}, ${(1 - zoom) * center})`}
+           transform={`translate(${offset.x}, ${offset.y}) scale(${scale})`}
         >
 // 🔵 حلقة داخلية ثابتة: الأرقام من 1 إلى 36 فقط (بدون تكرار)
 {Array.from({ length: 36 }).map((_, index) => {
@@ -1453,14 +1511,14 @@ style={inputStyle}
 {showAngleWheel && (
   <g>
     {(() => {
-      const rayCount = 360 / angleInterval;
+        const rayCount = 360 / angleStepRad;
       const outerR = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5) + 60;
       const innerR = innerRadius - 10;
 
       return (
         <>
           {[...Array(rayCount)].map((_, i) => {
-            const angle = (i * angleInterval + angleWheelRotation + settings.rotation) % 360;
+            const angle = (i * angleStepRad + angleWheelRotation + settings.rotation) % 360;
             const rad = (angle * Math.PI) / 180;
             const x1 = center + innerR * Math.cos(rad);
             const y1 = center + innerR * Math.sin(rad);
@@ -1476,7 +1534,7 @@ style={inputStyle}
                 <text
                   x={labelX}
                   y={labelY}
-                  fill="#FFD700"
+                  fill="#996515"
                   fontSize={9}
                   textAnchor="middle"
                   dominantBaseline="middle"
@@ -1489,6 +1547,25 @@ style={inputStyle}
         </>
       );
     })()}
+  </g>
+)}
+
+{showNestedCircles && (
+  <g>
+    {[...Array(nestedCircleCount)].map((_, i) => {
+      const radius = nestedCircleGap * (i + 1);
+      return (
+        <circle
+          key={`nested-${i}`}
+          cx={center}
+          cy={center}
+          r={radius}
+          stroke={nestedCircleColor}
+          strokeWidth={0.7}
+          fill="none"
+        />
+      );
+    })}
   </g>
 )}
 
