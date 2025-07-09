@@ -90,6 +90,18 @@ const [showNestedCircles, setShowNestedCircles] = useState(false);
 const [nestedCircleCount, setNestedCircleCount] = useState(6);
 const [nestedCircleGap, setNestedCircleGap] = useState(20);
 const [nestedCircleColor, setNestedCircleColor] = useState("#EE82EE");
+const [nestedCircleLabels, setNestedCircleLabels] = useState(true);
+const [useGradientColor, setUseGradientColor] = useState(true);
+const [nestedOpacity, setNestedOpacity] = useState(0.5);
+const [nestedStrokeWidth, setNestedStrokeWidth] = useState(1.2);
+const [nestedDashStyle, setNestedDashStyle] = useState("solid"); // solid | dashed
+// ⏱ ربط زمني بالدورات
+const [showTimeLabels, setShowTimeLabels] = useState(false); // عرض النصوص الزمنية
+const [timeStepDays, setTimeStepDays] = useState(7);         // عدد الأيام لكل دائرة
+
+
+
+
 
    const dragStart = useRef({ x: 0, y: 0 });
      const offsetStart = useRef({ x: 0, y: 0 });
@@ -864,15 +876,55 @@ const RenderZodiacRing = () => {
 
   {showNestedCircles && (
     <>
-      <label>🔢 {settings.language === "ar" ? "عدد الدوائر" : "Number of Circles"}</label>
+      <label>🔢 {settings.language === "ar" ? "عدد الدوائر" : "Number of Circles"}
       <input
         type="range"
         min="1"
         max="20"
-        value={nestedCircleCount}
+        value={nestedCircleCount} 
         onChange={(e) => setNestedCircleCount(parseInt(e.target.value))}
       />
       <span>{nestedCircleCount}</span>
+</label>
+
+<label>📏 {settings.language === "ar" ? "المسافة بين الدوائر" : "Gap Between Circles"}</label>
+<input
+  type="range"
+  min="5"
+  max="100"
+  step="1"
+  value={nestedCircleGap}
+  onChange={(e) => setNestedCircleGap(parseInt(e.target.value))}
+/>
+
+<label>{settings.language === "ar" ? "نمط الخط" : "Line Style"}</label>
+<select
+  value={nestedDashStyle}
+  onChange={(e) => setNestedDashStyle(e.target.value)}
+>
+  <option value="solid">متصل</option>
+  <option value="dashed">متقطع</option>
+</select>
+
+<label>
+  {settings.language === "ar" ? "سماكة الخط" : "Stroke Width"}
+</label>
+<input
+  type="range"
+  min="0.5"
+  max="5"
+  step="0.1"
+  value={nestedStrokeWidth}
+  onChange={(e) => setNestedStrokeWidth(parseFloat(e.target.value))}
+/>
+<span style={{ fontSize: "10px", color: "#aaa" }}>
+  {nestedStrokeWidth.toFixed(1)}px
+</span>
+
+
+<span style={{ fontSize: "10px", color: "#aaa" }}>
+  {nestedCircleGap}px
+</span>
 
 <label>🎨 {settings.language === "ar" ? "لون الدوائر" : "Circle Color"}</label>
 <input
@@ -882,16 +934,55 @@ const RenderZodiacRing = () => {
   style={{ width: "60px", height: "25px" }}
 />
 
+<label>
+  <input
+    type="checkbox"
+    checked={nestedCircleLabels}
+    onChange={() => setNestedCircleLabels(!nestedCircleLabels)}
+  />
+  {settings.language === "ar" ? "عرض أسماء الدوائر" : "Show Labels"}
+</label>
 
-      <label>📏 {settings.language === "ar" ? "المسافة بين الدوائر" : "Gap Between Circles"}</label>
-      <input
-        type="range"
-        min="5"
-        max="100"
-        value={nestedCircleGap}
-        onChange={(e) => setNestedCircleGap(parseInt(e.target.value))}
-      />
-      <span>{nestedCircleGap}px</span>
+<label>
+  <input
+    type="checkbox"
+    checked={useGradientColor}
+    onChange={() => setUseGradientColor(!useGradientColor)}
+  />
+  {settings.language === "ar" ? "ألوان تلقائية" : "Auto Gradient Colors"}
+</label>
+
+<label>
+  {settings.language === "ar" ? "الشفافية" : "Opacity"}
+</label>
+
+{/* ⏱ التحكم بعرض الزمن على الدوائر */}
+<label>
+  <input
+    type="checkbox"
+    checked={showTimeLabels}
+    onChange={() => setShowTimeLabels(!showTimeLabels)}
+  />
+  ⏱ {settings.language === "ar" ? "عرض الزمن على الدوائر" : "Show Time Labels"}
+</label>
+
+{showTimeLabels && (
+  <>
+    <label>
+      {settings.language === "ar" ? "عدد الأيام لكل دائرة" : "Days per Circle"}
+    </label>
+    <input
+      type="number"
+      min={1}
+      value={timeStepDays}
+      onChange={(e) => setTimeStepDays(parseInt(e.target.value))}
+      style={inputStyle}
+    />
+  </>
+)}
+
+
+
     </>
   )}
 </div>
@@ -1468,7 +1559,7 @@ style={inputStyle}
   </g>
 )}
 
-{/* ⭐ رسم النجمة المثمنة*/}
+{/* ⭐ رسم النجمة الثمانية*/}
 
 {showStarOctagon && (
   <g>
@@ -1550,26 +1641,123 @@ style={inputStyle}
   </g>
 )}
 
+{/* 🟡  رسم الدوائر المتداخلة  */}
+
+
 {showNestedCircles && (
   <g>
     {[...Array(nestedCircleCount)].map((_, i) => {
       const radius = nestedCircleGap * (i + 1);
+      const color = useGradientColor
+        ? `hsl(${(i * 30) % 360}, 70%, 60%)`
+        : nestedCircleColor;
+
       return (
-        <circle
-          key={`nested-${i}`}
-          cx={center}
-          cy={center}
-          r={radius}
-          stroke={nestedCircleColor}
-          strokeWidth={0.7}
-          fill="none"
-        />
+        <g key={`nested-${i}`}>
+          <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            stroke={color}
+            strokeWidth={nestedStrokeWidth}
+            fill="none"
+            strokeOpacity={nestedOpacity}
+strokeDasharray={nestedDashStyle === "dashed" ? "4,2" : "none"}
+onClick={() =>
+  alert(`🟡 دائرة رقم ${i + 1}\nنصف القطر: ${radius}px`)}
+          />
+          {nestedCircleLabels && (
+            <text
+              x={center}
+              y={center - radius - 4}
+              fill="black" 
+              fontSize={10}
+              textAnchor="middle"
+              fontWeight="bold"
+              opacity={nestedOpacity}
+            >
+              R={radius}
+            </text>
+          )}
+
+{showNestedCircles && showTimeLabels && (
+  <g>
+    {[...Array(nestedCircleCount)].map((_, i) => {
+      const radius = nestedCircleGap * (i + 1);
+      const label = `${(i + 1) * timeStepDays} يوم`;
+      return (
+        <text
+          key={`time-label-${i}`}
+          x={center}
+          y={center - radius - 20}
+          fill="green"
+          fontSize={11}
+          fontWeight="bold"
+          textAnchor="middle"
+        >
+          ⏱ {label}
+        </text>
       );
     })}
   </g>
 )}
 
+        </g>
+      );
+    })}
+  </g>
+)}
 
+{/* 🧭 كتابة الزوايا مرة واحدة حول الدائرة مخ خطوط الشعاع */}
+
+{showNestedCircles && (
+  <g>
+    {[...Array(12)].map((_, j) => {
+      const angle = ((j * 30 - 90) * Math.PI) / 180;
+      const outerRadius = nestedCircleGap * nestedCircleCount + 20;
+      const tx = center + outerRadius * Math.cos(angle);
+      const ty = center + outerRadius * Math.sin(angle);
+
+      return (
+        <text
+          key={`global-angle-${j}`}
+          x={tx}
+          y={ty}
+          fontSize={10}
+          fill="#333"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontWeight="bold"
+        >
+          {j * 30}°
+        </text>
+      );
+    })}
+  </g>
+)}
+{showNestedCircles && (
+  <g>
+    {[...Array(12)].map((_, j) => {
+      const angle = ((j * 30 - 90) * Math.PI) / 180;
+      const outerRadius = nestedCircleGap * nestedCircleCount;
+      const x = center + outerRadius * Math.cos(angle);
+      const y = center + outerRadius * Math.sin(angle);
+
+      return (
+        <line
+          key={`main-ray-${j}`}
+          x1={center}
+          y1={center}
+          x2={x}
+          y2={y}
+          stroke="red"
+          strokeWidth={1}
+          opacity={nestedOpacity}
+        />
+      );
+    })}
+  </g>
+)}
 
    </g>
       </svg>
