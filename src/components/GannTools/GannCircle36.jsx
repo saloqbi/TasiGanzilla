@@ -98,6 +98,12 @@ const [nestedDashStyle, setNestedDashStyle] = useState("solid"); // solid | dash
 // ⏱ ربط زمني بالدورات
 const [showTimeLabels, setShowTimeLabels] = useState(false); // عرض النصوص الزمنية
 const [timeStepDays, setTimeStepDays] = useState(7);         // عدد الأيام لكل دائرة
+// 🔁 تكرار تلقائي بنمط هندسي داخل كل دائرة
+const [showRepeatedPattern, setShowRepeatedPattern] = useState(false);
+const [patternShape, setPatternShape] = useState("triangle"); // triangle | square | star
+const [patternRotation, setPatternRotation] = useState(0);
+const [patternFill, setPatternFill] = useState(true);
+const [patternColor, setPatternColor] = useState("#00CED1");
 
 
 
@@ -981,6 +987,54 @@ const RenderZodiacRing = () => {
   {settings.language === "ar" ? "الشفافية" : "Opacity"}
 </label>
 
+{/* 🔁 تكرار شكل هندسي داخل كل دائرة */}
+<label>
+  <input
+    type="checkbox"
+    checked={showRepeatedPattern}
+    onChange={() => setShowRepeatedPattern(!showRepeatedPattern)}
+  />
+  🔁 {settings.language === "ar" ? "تكرار شكل هندسي داخل كل دائرة" : "Repeat Shape per Circle"}
+</label>
+
+{showRepeatedPattern && (
+  <>
+    <label>🎨 {settings.language === "ar" ? "لون الشكل" : "Shape Color"}</label>
+    <input
+      type="color"
+      value={patternColor}
+      onChange={(e) => setPatternColor(e.target.value)}
+    />
+
+    <label>♻️ {settings.language === "ar" ? "تدوير الشكل" : "Rotation"}</label>
+    <input
+      type="range"
+      min={0}
+      max={360}
+      value={patternRotation}
+      onChange={(e) => setPatternRotation(parseFloat(e.target.value))}
+    />
+
+    <label>
+      <input
+        type="checkbox"
+        checked={patternFill}
+        onChange={() => setPatternFill(!patternFill)}
+      />
+      {settings.language === "ar" ? "تعبئة الشكل" : "Fill Shape"}
+    </label>
+
+    <label>{settings.language === "ar" ? "اختيار الشكل" : "Select Shape"}</label>
+    <select
+      value={patternShape}
+      onChange={(e) => setPatternShape(e.target.value)}
+    >
+      <option value="triangle">🔺 مثلث</option>
+      <option value="square">⬛ مربع</option>
+      <option value="star">⭐ نجمة</option>
+    </select>
+  </>
+)}
 
 
 
@@ -1755,6 +1809,43 @@ onClick={() =>
           strokeWidth={1}
           opacity={nestedOpacity}
         />
+      );
+    })}
+  </g>
+)}
+
+{showNestedCircles && showRepeatedPattern && (
+  <g>
+    {[...Array(nestedCircleCount)].map((_, i) => {
+      const radius = nestedCircleGap * (i + 1);
+      const centerX = center;
+      const centerY = center;
+      let angles = [];
+
+      if (patternShape === "triangle") angles = [0, 120, 240];
+      else if (patternShape === "square") angles = [0, 90, 180, 270];
+      else if (patternShape === "star") angles = [0, 144, 288, 72, 216];
+
+      const points = angles.map((angleDeg) => {
+        const rad = ((angleDeg + patternRotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: centerX + radius * Math.cos(rad),
+          y: centerY + radius * Math.sin(rad),
+        };
+      });
+
+      return (
+        <g key={`pattern-${i}`}>
+          <polygon
+            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={patternFill ? patternColor + "55" : "none"}
+            stroke={patternColor}
+            strokeWidth={2}
+          />
+          {points.map((p, idx) => (
+            <circle key={idx} cx={p.x} cy={p.y} r={3} fill={patternColor} />
+          ))}
+        </g>
       );
     })}
   </g>
