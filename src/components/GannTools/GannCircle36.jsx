@@ -926,6 +926,31 @@ const RenderZodiacRing = () => {
   {nestedCircleGap}px
 </span>
 
+{/* ⏱ التحكم بعرض الزمن على الدوائر */}
+<label>
+  <input
+    type="checkbox"
+    checked={showTimeLabels}
+    onChange={() => setShowTimeLabels(!showTimeLabels)}
+  />
+  ⏱ {settings.language === "ar" ? "عرض الزمن على الدوائر" : "Show Time Labels"}
+</label>
+
+{showTimeLabels && (
+  <>
+    <label>
+      {settings.language === "ar" ? "عدد الأيام لكل دائرة" : "Days per Circle"}
+    </label>
+    <input
+      type="number"
+      min={1}
+      value={timeStepDays}
+      onChange={(e) => setTimeStepDays(parseInt(e.target.value))}
+      style={inputStyle}
+    />
+  </>
+)}
+
 <label>🎨 {settings.language === "ar" ? "لون الدوائر" : "Circle Color"}</label>
 <input
   type="color"
@@ -956,30 +981,6 @@ const RenderZodiacRing = () => {
   {settings.language === "ar" ? "الشفافية" : "Opacity"}
 </label>
 
-{/* ⏱ التحكم بعرض الزمن على الدوائر */}
-<label>
-  <input
-    type="checkbox"
-    checked={showTimeLabels}
-    onChange={() => setShowTimeLabels(!showTimeLabels)}
-  />
-  ⏱ {settings.language === "ar" ? "عرض الزمن على الدوائر" : "Show Time Labels"}
-</label>
-
-{showTimeLabels && (
-  <>
-    <label>
-      {settings.language === "ar" ? "عدد الأيام لكل دائرة" : "Days per Circle"}
-    </label>
-    <input
-      type="number"
-      min={1}
-      value={timeStepDays}
-      onChange={(e) => setTimeStepDays(parseInt(e.target.value))}
-      style={inputStyle}
-    />
-  </>
-)}
 
 
 
