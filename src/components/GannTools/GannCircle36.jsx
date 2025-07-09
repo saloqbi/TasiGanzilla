@@ -29,6 +29,20 @@ return stored ? JSON.parse(stored) : defaultSettings;
      const [highlightTriangle, setHighlightTriangle] = useState(true);
      const [fillTriangle, setFillTriangle] = useState(true);
 const [showSquare, setShowSquare] = useState(false);
+// 🔷 شكل خماسي
+const [showPentagon, setShowPentagon] = useState(false);
+const [pentagonRotation, setPentagonRotation] = useState(0);
+const [customPentagonAngles, setCustomPentagonAngles] = useState([0, 72, 144, 216, 288]);
+const [highlightPentagon, setHighlightPentagon] = useState(true);
+const [fillPentagon, setFillPentagon] = useState(true);
+
+// ⭐ نجمة
+const [showStar, setShowStar] = useState(false);
+const [starRotation, setStarRotation] = useState(0);
+const [customStarAngles, setCustomStarAngles] = useState([0, 144, 288, 72, 216]);
+const [highlightStar, setHighlightStar] = useState(true);
+const [fillStar, setFillStar] = useState(true);
+
 const [squareRotation, setSquareRotation] = useState(0);
 const [customSquareAngles, setCustomSquareAngles] = useState([0, 90, 180, 270]);
 const [highlightSquare, setHighlightSquare] = useState(true);
@@ -525,6 +539,78 @@ const RenderZodiacRing = () => {
   )}
 </div>
 
+{/* 🔷 أدوات الشكل الخماسي */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showPentagon} onChange={() => setShowPentagon(!showPentagon)} />
+    🔷 {settings.language === "ar" ? "إظهار الخماسي" : "Show Pentagon"}
+  </label>
+
+  {showPentagon && (
+    <>
+      {customPentagonAngles.map((angle, idx) => {
+        const rotated = (angle + pentagonRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - pentagonRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customPentagonAngles];
+              newAngles[idx] = newOriginal;
+              setCustomPentagonAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={pentagonRotation}
+        onChange={(e) => setPentagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillPentagon} onChange={() => setFillPentagon(!fillPentagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightPentagon} onChange={() => setHighlightPentagon(!highlightPentagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showStar} onChange={() => setShowStar(!showStar)} />
+    ⭐ {settings.language === "ar" ? "إظهار النجمة" : "Show Star"}
+  </label>
+
+  {showStar && (
+    <>
+      {customStarAngles.map((angle, idx) => {
+        const rotated = (angle + starRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - starRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customStarAngles];
+              newAngles[idx] = newOriginal;
+              setCustomStarAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={starRotation}
+        onChange={(e) => setStarRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStar} onChange={() => setFillStar(!fillStar)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStar} onChange={() => setHighlightStar(!highlightStar)} /> تمييز</label>
+    </>
+  )}
+</div>
+
 
 
         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
@@ -895,6 +981,82 @@ style={inputStyle}
                 fontWeight="bold"
                 textAnchor="middle"
               >
+                ({angle.toFixed(0)}°)
+              </text>
+            );
+          })}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{showPentagon && (
+  <g>
+    {(() => {
+      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const points = customPentagonAngles.map((deg) => {
+        const rad = ((deg + pentagonRotation + settings.rotation) * Math.PI) / 180;
+        return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillPentagon ? "rgba(0, 0, 255, 0.2)" : "none"}
+            stroke="blue"
+            strokeWidth={2}
+          />
+          {highlightPentagon &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="cyan" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="blue" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => {
+            const angle = (customPentagonAngles[i] + pentagonRotation + settings.rotation) % 360;
+            return (
+              <text key={i} x={p.x} y={p.y - 10} fill="blue" fontSize={12} fontWeight="bold" textAnchor="middle">
+                ({angle.toFixed(0)}°)
+              </text>
+            );
+          })}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{showStar && (
+  <g>
+    {(() => {
+      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const points = customStarAngles.map((deg) => {
+        const rad = ((deg + starRotation + settings.rotation) * Math.PI) / 180;
+        return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillStar ? "rgba(255, 165, 0, 0.2)" : "none"}
+            stroke="orange"
+            strokeWidth={2}
+          />
+          {highlightStar &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="orange" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="orange" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => {
+            const angle = (customStarAngles[i] + starRotation + settings.rotation) % 360;
+            return (
+              <text key={i} x={p.x} y={p.y - 10} fill="orange" fontSize={12} fontWeight="bold" textAnchor="middle">
                 ({angle.toFixed(0)}°)
               </text>
             );
