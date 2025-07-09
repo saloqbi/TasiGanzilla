@@ -48,6 +48,42 @@ const [customSquareAngles, setCustomSquareAngles] = useState([0, 90, 180, 270]);
 const [highlightSquare, setHighlightSquare] = useState(true);
 const [fillSquare, setFillSquare] = useState(true);
 
+{/* 🔷 شكل السداسي */}
+const [showHexagon, setShowHexagon] = useState(false);
+const [hexagonRotation, setHexagonRotation] = useState(0);
+const [customHexagonAngles, setCustomHexagonAngles] = useState([0, 60, 120, 180, 240, 300]);
+const [highlightHexagon, setHighlightHexagon] = useState(true);
+const [fillHexagon, setFillHexagon] = useState(true);
+
+{/* ⭐  النجمة السداسية */}
+
+const [showHexagram, setShowHexagram] = useState(false);
+const [hexagramRotation, setHexagramRotation] = useState(0);
+const [customHexagramAngles, setCustomHexagramAngles] = useState([0, 60, 120, 180, 240, 300]);
+const [highlightHexagram, setHighlightHexagram] = useState(true);
+const [fillHexagram, setFillHexagram] = useState(true);
+
+// 🧿 مثمن
+const [showOctagon, setShowOctagon] = useState(false);
+const [octagonRotation, setOctagonRotation] = useState(0);
+const [customOctagonAngles, setCustomOctagonAngles] = useState([0, 45, 90, 135, 180, 225, 270, 315]);
+const [highlightOctagon, setHighlightOctagon] = useState(true);
+const [fillOctagon, setFillOctagon] = useState(true);
+
+// ⭐ نجمة مثمنة
+const [showStarOctagon, setShowStarOctagon] = useState(false);
+const [starOctagonRotation, setStarOctagonRotation] = useState(0);
+const [customStarOctagonAngles, setCustomStarOctagonAngles] = useState([0, 90, 180, 270, 45, 135, 225, 315]);
+const [highlightStarOctagon, setHighlightStarOctagon] = useState(true);
+const [fillStarOctagon, setFillStarOctagon] = useState(true);
+
+// 🧲 دائرة الزوايا (Wheel of 36 Rays)
+const [showAngleWheel, setShowAngleWheel] = useState(false);
+const [angleWheelRotation, setAngleWheelRotation] = useState(0);
+const angleInterval = 10; // كل كم درجة نرسم خط
+const [rayColor, setRayColor] = useState("#FF0000"); // أحمر افتراضي
+const [rayWidth, setRayWidth] = useState(1);
+
 
    const dragStart = useRef({ x: 0, y: 0 });
 
@@ -611,6 +647,192 @@ const RenderZodiacRing = () => {
   )}
 </div>
 
+{/* 🔷 أدوات الشكل السداسي */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showHexagon} onChange={() => setShowHexagon(!showHexagon)} />
+    🛑 {settings.language === "ar" ? "إظهار السداسي" : "Show Hexagon"}
+  </label>
+
+  {showHexagon && (
+    <>
+      {customHexagonAngles.map((angle, idx) => {
+        const rotated = (angle + hexagonRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - hexagonRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customHexagonAngles];
+              newAngles[idx] = newOriginal;
+              setCustomHexagonAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={hexagonRotation}
+        onChange={(e) => setHexagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillHexagon} onChange={() => setFillHexagon(!fillHexagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightHexagon} onChange={() => setHighlightHexagon(!highlightHexagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة السداسية */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showHexagram} onChange={() => setShowHexagram(!showHexagram)} />
+    ⭐ {settings.language === "ar" ? "إظهار النجمة السداسية" : "Show Hexagram"}
+  </label>
+
+  {showHexagram && (
+    <>
+      {customHexagramAngles.map((angle, idx) => {
+        const rotated = (angle + hexagramRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - hexagramRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customHexagramAngles];
+              newAngles[idx] = newOriginal;
+              setCustomHexagramAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={hexagramRotation}
+        onChange={(e) => setHexagramRotation(parseFloat(e.target.value))} />
+
+      <label><input type="checkbox" checked={fillHexagram} onChange={() => setFillHexagram(!fillHexagram)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightHexagram} onChange={() => setHighlightHexagram(!highlightHexagram)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* 🧿 أدوات الشكل المثمن */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showOctagon} onChange={() => setShowOctagon(!showOctagon)} />
+    🧿 {settings.language === "ar" ? "إظهار المثمن" : "Show Octagon"}
+  </label>
+
+  {showOctagon && (
+    <>
+      {customOctagonAngles.map((angle, idx) => {
+        const rotated = (angle + octagonRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - octagonRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customOctagonAngles];
+              newAngles[idx] = newOriginal;
+              setCustomOctagonAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={octagonRotation}
+        onChange={(e) => setOctagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillOctagon} onChange={() => setFillOctagon(!fillOctagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightOctagon} onChange={() => setHighlightOctagon(!highlightOctagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة المثمنة */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showStarOctagon} onChange={() => setShowStarOctagon(!showStarOctagon)} />
+    ⭐ {settings.language === "ar" ? "إظهار نجمة مثمنة" : "Show Star Octagon"}
+  </label>
+
+  {showStarOctagon && (
+    <>
+      {customStarOctagonAngles.map((angle, idx) => {
+        const rotated = (angle + starOctagonRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - starOctagonRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customStarOctagonAngles];
+              newAngles[idx] = newOriginal;
+              setCustomStarOctagonAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={starOctagonRotation}
+        onChange={(e) => setStarOctagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStarOctagon} onChange={() => setFillStarOctagon(!fillStarOctagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStarOctagon} onChange={() => setHighlightStarOctagon(!highlightStarOctagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* 🧲 عجلة الزوايا */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showAngleWheel} onChange={() => setShowAngleWheel(!showAngleWheel)} />
+    🧲 {settings.language === "ar" ? "إظهار عجلة الزوايا" : "Show Angle Wheel"}
+  </label>
+
+  {showAngleWheel && (
+  <>
+    <label>♻️ تدوير</label>
+    <input
+      type="range"
+      min="0"
+      max="360"
+      value={angleWheelRotation}
+      onChange={(e) => setAngleWheelRotation(parseFloat(e.target.value))}
+    />
+
+    <label>🎨 لون الشعاع</label>
+    <input
+      type="color"
+      value={rayColor}
+      onChange={(e) => setRayColor(e.target.value)}
+      style={{ width: "60px", height: "25px" }}
+    />
+
+    <label>📏 سماكة الشعاع</label>
+    <input
+      type="range"
+      min="0.5"
+      max="5"
+      step="0.5"
+      value={rayWidth}
+      onChange={(e) => setRayWidth(parseFloat(e.target.value))}
+    />
+    <span style={{ fontSize: "10px", color: "#aaa" }}>{rayWidth}px</span>
+  </>
+)}
+
+</div>
 
 
         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
@@ -991,6 +1213,7 @@ style={inputStyle}
   </g>
 )}
 
+{/*  رسم الخماسي داخل الدائرة */}
 {showPentagon && (
   <g>
     {(() => {
@@ -1029,6 +1252,8 @@ style={inputStyle}
   </g>
 )}
 
+{/*  رسم النجمه الحماسيه داخل الدائرة */}
+
 {showStar && (
   <g>
     {(() => {
@@ -1066,6 +1291,208 @@ style={inputStyle}
     })()}
   </g>
 )}
+
+{/* رسم السداسي داخل الدائرة */}
+{showHexagon && (
+  <g>
+    {(() => {
+      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const points = customHexagonAngles.map((deg) => {
+        const rad = ((deg + hexagonRotation + settings.rotation) * Math.PI) / 180;
+        return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillHexagon ? "rgba(0, 200, 0, 0.2)" : "none"}
+            stroke="green"
+            strokeWidth={2}
+          />
+          {highlightHexagon &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="green" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="green" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => {
+            const angle = (customHexagonAngles[i] + hexagonRotation + settings.rotation) % 360;
+            return (
+              <text key={i} x={p.x} y={p.y - 10} fill="green" fontSize={12} fontWeight="bold" textAnchor="middle">
+                ({angle.toFixed(0)}°)
+              </text>
+            );
+          })}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/*  رسم النجمه السداسيه داخل الدائرة */}
+{showHexagram && (
+  <g>
+    {(() => {
+      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const points = customHexagramAngles.map((deg) => {
+        const rad = ((deg + hexagramRotation + settings.rotation) * Math.PI) / 180;
+        return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillHexagram ? "rgba(138, 43, 226, 0.2)" : "none"} // بنفسجي فاتح
+            stroke="purple"
+            strokeWidth={2}
+          />
+          {highlightHexagram &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="violet" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="purple" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => {
+            const angle = (customHexagramAngles[i] + hexagramRotation + settings.rotation) % 360;
+            return (
+              <text key={i} x={p.x} y={p.y - 10} fill="purple" fontSize={12} fontWeight="bold" textAnchor="middle">
+                ({angle.toFixed(0)}°)
+              </text>
+            );
+          })}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* 🧿 رسم المثمن*/}
+
+{showOctagon && (
+  <g>
+    {(() => {
+      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const points = customOctagonAngles.map((deg) => {
+        const rad = ((deg + octagonRotation + settings.rotation) * Math.PI) / 180;
+        return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillOctagon ? "rgba(0, 0, 139, 0.2)" : "none"}
+            stroke="darkblue"
+            strokeWidth={2}
+          />
+          {highlightOctagon &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="blue" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="darkblue" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => {
+            const angle = (customOctagonAngles[i] + octagonRotation + settings.rotation) % 360;
+            return (
+              <text key={i} x={p.x} y={p.y - 10} fill="darkblue" fontSize={12} fontWeight="bold" textAnchor="middle">
+                ({angle.toFixed(0)}°)
+              </text>
+            );
+          })}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* ⭐ رسم النجمة المثمنة*/}
+
+{showStarOctagon && (
+  <g>
+    {(() => {
+      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const points = customStarOctagonAngles.map((deg) => {
+        const rad = ((deg + starOctagonRotation + settings.rotation) * Math.PI) / 180;
+        return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillStarOctagon ? "rgba(255, 215, 0, 0.2)" : "none"}
+            stroke="gold"
+            strokeWidth={2}
+          />
+          {highlightStarOctagon &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="gold" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="gold" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => {
+            const angle = (customStarOctagonAngles[i] + starOctagonRotation + settings.rotation) % 360;
+            return (
+              <text key={i} x={p.x} y={p.y - 10} fill="gold" fontSize={12} fontWeight="bold" textAnchor="middle">
+                ({angle.toFixed(0)}°)
+              </text>
+            );
+          })}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{showAngleWheel && (
+  <g>
+    {(() => {
+      const rayCount = 360 / angleInterval;
+      const outerR = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5) + 60;
+      const innerR = innerRadius - 10;
+
+      return (
+        <>
+          {[...Array(rayCount)].map((_, i) => {
+            const angle = (i * angleInterval + angleWheelRotation + settings.rotation) % 360;
+            const rad = (angle * Math.PI) / 180;
+            const x1 = center + innerR * Math.cos(rad);
+            const y1 = center + innerR * Math.sin(rad);
+            const x2 = center + outerR * Math.cos(rad);
+            const y2 = center + outerR * Math.sin(rad);
+
+            const labelX = center + (outerR + 10) * Math.cos(rad);
+            const labelY = center + (outerR + 10) * Math.sin(rad);
+
+            return (
+              <g key={`angle-ray-${i}`}>
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={rayColor} strokeWidth={rayWidth} />
+                <text
+                  x={labelX}
+                  y={labelY}
+                  fill="#FFD700"
+                  fontSize={9}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                >
+                  {angle.toFixed(0)}°
+                </text>
+              </g>
+            );
+          })}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+
 
    </g>
       </svg>
