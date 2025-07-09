@@ -28,6 +28,11 @@ return stored ? JSON.parse(stored) : defaultSettings;
      const [customAngles, setCustomAngles] = useState([0, 120, 240]);
      const [highlightTriangle, setHighlightTriangle] = useState(true);
      const [fillTriangle, setFillTriangle] = useState(true);
+const [showSquare, setShowSquare] = useState(false);
+const [squareRotation, setSquareRotation] = useState(0);
+const [customSquareAngles, setCustomSquareAngles] = useState([0, 90, 180, 270]);
+const [highlightSquare, setHighlightSquare] = useState(true);
+const [fillSquare, setFillSquare] = useState(true);
 
 
    const dragStart = useRef({ x: 0, y: 0 });
@@ -463,6 +468,63 @@ const RenderZodiacRing = () => {
   )}
 </div>
 
+{/* 🟥 أدوات المربع */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showSquare} onChange={() => setShowSquare(!showSquare)} />
+    ⬛ {settings.language === "ar" ? "إظهار المربع" : "Show Square"}
+  </label>
+
+  {showSquare && (
+    <>
+      <label>
+        🎛 {settings.language === "ar" ? "زوايا المربع" : "Square Angles"}
+      </label>
+      {customSquareAngles.map((angle, idx) => {
+        const rotated = (angle + squareRotation + settings.rotation) % 360;
+
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - squareRotation - settings.rotation + 360) % 360;
+
+              const newAngles = [...customSquareAngles];
+              newAngles[idx] = newOriginal;
+              setCustomSquareAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px", direction: "ltr", textAlign: "center" }}
+          />
+        );
+      })}
+
+      <label>
+        ♻️ {settings.language === "ar" ? "تدوير المربع" : "Rotate Square"}
+      </label>
+      <input
+        type="range"
+        min="0"
+        max="360"
+        value={squareRotation}
+        onChange={(e) => setSquareRotation(parseFloat(e.target.value))}
+      />
+
+      <label>
+        <input type="checkbox" checked={highlightSquare} onChange={() => setHighlightSquare(!highlightSquare)} />
+        {settings.language === "ar" ? "تمييز الزوايا" : "Show Highlight"}
+      </label>
+
+      <label>
+        <input type="checkbox" checked={fillSquare} onChange={() => setFillSquare(!fillSquare)} />
+        {settings.language === "ar" ? "تعبئة المربع" : "Fill Square"}
+      </label>
+    </>
+  )}
+</div>
+
 
 
         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
@@ -778,12 +840,78 @@ style={inputStyle}
   </g>
 )}
 
+
+{/* 🟥 رسم المربع داخل الدائرة */}
+{showSquare && (
+  <g>
+    {(() => {
+      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5); // نفس نصف القطر
+      const squarePoints = customSquareAngles.map((deg) => {
+        const rad = ((deg + squareRotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: center + r * Math.cos(rad),
+          y: center + r * Math.sin(rad),
+        };
+      });
+
+      return (
+        <>
+          <polygon
+            points={squarePoints.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillSquare ? "rgba(255, 0, 0, 0.2)" : "none"} // أحمر شفاف
+            stroke="red"
+            strokeWidth={2}
+          />
+
+          {highlightSquare &&
+            squarePoints.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="orange" />
+            ))}
+
+          {/* خطوط من الرؤوس إلى المركز */}
+          {squarePoints.map((point, index) => (
+            <line
+              key={`square-line-${index}`}
+              x1={point.x}
+              y1={point.y}
+              x2={center}
+              y2={center}
+              stroke="red"
+              strokeWidth={2}
+              strokeDasharray="4,2"
+            />
+          ))}
+
+          {/* الزوايا */}
+          {squarePoints.map((point, i) => {
+            const angle = (customSquareAngles[i] + squareRotation + settings.rotation) % 360;
+            return (
+              <text
+                key={`square-angle-${i}`}
+                x={point.x}
+                y={point.y - 12}
+                fill="red"
+                fontSize={14}
+                fontWeight="bold"
+                textAnchor="middle"
+              >
+                ({angle.toFixed(0)}°)
+              </text>
+            );
+          })}
+        </>
+      );
+    })()}
+  </g>
+)}
+
    </g>
       </svg>
     </div>
   </div>
 );
 };
+
 
 const buttonStyle = {
    margin: "6px",
