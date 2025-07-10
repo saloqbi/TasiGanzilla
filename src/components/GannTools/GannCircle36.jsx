@@ -1706,39 +1706,69 @@ style={inputStyle}
   </g>
 )}
 
-{/*  رسم النجمه السداسيه داخل الدائرة */}
+{/*  ⭐ رسم النجمة السداسية بشكل مركب من مثلثين */}
 {showHexagram && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
-      const points = customHexagramAngles.map((deg) => {
+
+      // مثلث أول (0°, 120°, 240°)
+      const triangle1 = [0, 120, 240].map((deg) => {
         const rad = ((deg + hexagramRotation + settings.rotation) * Math.PI) / 180;
-        return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
+        return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad), angle: deg };
       });
+
+      // مثلث ثاني (60°, 180°, 300°)
+      const triangle2 = [60, 180, 300].map((deg) => {
+        const rad = ((deg + hexagramRotation + settings.rotation) * Math.PI) / 180;
+        return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad), angle: deg };
+      });
+
+      const allPoints = [...triangle1, ...triangle2];
 
       return (
         <>
+          {/* مثلث أول */}
           <polygon
-            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
-            fill={fillHexagram ? "rgba(138, 43, 226, 0.2)" : "none"} // بنفسجي فاتح
+            points={triangle1.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillHexagram ? "rgba(138, 43, 226, 0.2)" : "none"}
             stroke="purple"
             strokeWidth={2}
           />
+
+          {/* مثلث ثاني */}
+          <polygon
+            points={triangle2.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillHexagram ? "rgba(138, 43, 226, 0.2)" : "none"}
+            stroke="purple"
+            strokeWidth={2}
+          />
+
+          {/* نقاط الرؤوس */}
           {highlightHexagram &&
-            points.map((p, i) => (
+            allPoints.map((p, i) => (
               <circle key={i} cx={p.x} cy={p.y} r={4} fill="violet" />
             ))}
-          {points.map((p, i) => (
+
+          {/* خطوط من كل رأس إلى المركز */}
+          {allPoints.map((p, i) => (
             <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="purple" strokeDasharray="4,2" />
           ))}
-          {points.map((p, i) => {
-            const angle = (customHexagramAngles[i] + hexagramRotation + settings.rotation) % 360;
-            return (
-              <text key={i} x={p.x} y={p.y - 10} fill="purple" fontSize={12} fontWeight="bold" textAnchor="middle">
-                ({angle.toFixed(0)}°)
-              </text>
-            );
-          })}
+
+          {/* الزوايا */}
+          {allPoints.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="purple"
+              fontSize={12}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({(p.angle + hexagramRotation + settings.rotation) % 360}°)
+            </text>
+          ))}
         </>
       );
     })()}
