@@ -12,11 +12,11 @@ const defaultSettings = {
 
 const GannCircle360 = () => {
 const [currentTime, setCurrentTime] = useState(new Date());
+const svgRef = useRef();
 
   const [settings, setSettings] = useState(() => {
-   const svgRef = useRef();
+  const stored = localStorage.getItem("gannCircle360Settings");
 
-    const stored = localStorage.getItem("gannCircle360Settings");
 return stored ? JSON.parse(stored) : defaultSettings;
 
   });
@@ -416,6 +416,58 @@ const RenderZodiacRing = () => {
   );
 };
 
+const handleExportPNG = () => {
+  const svg = svgRef.current;
+  const svgData = new XMLSerializer().serializeToString(svg);
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  const img = new Image();
+  const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
+
+  canvas.width = svg.clientWidth * 2;
+  canvas.height = svg.clientHeight * 2;
+
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+    const pngImg = canvas.toDataURL("image/png");
+    const link = document.createElement("a");
+    link.download = "gann-circle.png";
+    link.href = pngImg;
+    link.click();
+  };
+  img.src = url;
+};
+
+const handleExportPDF = () => {
+  const svgElement = svgRef.current;
+  const svgData = new XMLSerializer().serializeToString(svgElement);
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  const img = new Image();
+  const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  canvas.width = svgElement.clientWidth * 2;
+  canvas.height = svgElement.clientHeight * 2;
+
+  img.onload = async () => {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(url);
+
+    const imgData = canvas.toDataURL("image/png");
+    const jsPDF = await import("jspdf");
+    const pdf = new jsPDF.jsPDF("landscape", "pt", [
+      canvas.width,
+      canvas.height,
+    ]);
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+    pdf.save("gann-circle.pdf");
+  };
+
+  img.src = url;
+};
 
 
  return (
@@ -527,12 +579,11 @@ const RenderZodiacRing = () => {
   zIndex: 10,
 }}>
 
-
-{/* 🔍 تصدير صورة و  تصدير PDF  */}
 <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-  <button onClick={handleExportPNG}>📷 تصدير صورة</button>
-  <button onClick={handleExportPDF}>📄 تصدير PDF</button>
+  <button onClick={handleExportPNG}>📷 جفظ الصورة</button>
+  <button onClick={handleExportPDF}>📄 طباعة PDF</button>
 </div>
+
 
 {/* 🔍 تكبير و تصغير الدائره  */}
   <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
@@ -1490,7 +1541,7 @@ style={inputStyle}
 >
 
   <svg
-         ref={svgRef}
+        ref={svgRef}
      width="100%"
      height="100%"
      viewBox={`0 0 ${dynamicSize} ${dynamicSize}`}
@@ -1509,60 +1560,6 @@ style={inputStyle}
  <g
            transform={`translate(${offset.x}, ${offset.y}) scale(${scale})`}
         >
-const handleExportPNG = () => {
-  const svg = svgRef.current;
-  const svgData = new XMLSerializer().serializeToString(svg);
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  const img = new Image();
-  const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(svgBlob);
-
-  canvas.width = svg.clientWidth * 2;
-  canvas.height = svg.clientHeight * 2;
-
-  img.onload = () => {
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    URL.revokeObjectURL(url);
-    const pngImg = canvas.toDataURL("image/png");
-    const link = document.createElement("a");
-    link.download = "gann-circle.png";
-    link.href = pngImg;
-    link.click();
-  };
-  img.src = url;
-};
-
-const handleExportPDF = () => {
-  const svgElement = svgRef.current;
-  const svgData = new XMLSerializer().serializeToString(svgElement);
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-  const img = new Image();
-  const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-
-  canvas.width = svgElement.clientWidth * 2;
-  canvas.height = svgElement.clientHeight * 2;
-
-  img.onload = () => {
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    URL.revokeObjectURL(url);
-
-    const imgData = canvas.toDataURL("image/png");
-
-    import("jspdf").then((jsPDF) => {
-      const pdf = new jsPDF.jsPDF("landscape", "pt", [
-        canvas.width,
-        canvas.height,
-      ]);
-      pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-      pdf.save("gann-circle.pdf");
-    });
-  };
-
-  img.src = url;
-};
 
 // 🔵 حلقة داخلية ثابتة: الأرقام من 1 إلى 36 فقط (بدون تكرار)
 {Array.from({ length: 36 }).map((_, index) => {
@@ -1723,6 +1720,7 @@ const handleExportPDF = () => {
       );
     })}
 {showZodiacRing && <RenderZodiacRing />}
+
 
 
 {/* ✅ رسم المثلث داخل الدائرة */}
