@@ -1868,40 +1868,61 @@ style={inputStyle}
   </g>
 )}
 
-{/* ⭐ رسم النجمة الثمانية*/}
-
+{/* ⭐ رسم النجمة الثمانية (8/3 شليفلي) */}
 {showStarOctagon && (
   <g>
     {(() => {
-      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
-      const points = customStarOctagonAngles.map((deg) => {
-        const rad = ((deg + starOctagonRotation + settings.rotation) * Math.PI) / 180;
-        return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
+      const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+
+      // 8 رؤوس منتظمة كل 45°
+      const points = [...Array(8)].map((_, i) => {
+        const angle = ((i * 45 + starOctagonRotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: center + R * Math.cos(angle),
+          y: center + R * Math.sin(angle),
+          angleDeg: (i * 45 + starOctagonRotation + settings.rotation) % 360,
+        };
       });
+
+      // ترتيب النقاط حسب شليفلي 8/3 => كل ثالث نقطة
+      const order = [];
+      let index = 0;
+      for (let i = 0; i < 8; i++) {
+        order.push(points[index]);
+        index = (index + 3) % 8;
+      }
 
       return (
         <>
           <polygon
-            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
-            fill={fillStarOctagon ? "rgba(255, 215, 0, 0.2)" : "none"}
-            stroke="gold"
+            points={order.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillStarOctagon ? "rgba(0, 0, 0, 0.15)" : "none"}
+            stroke="black"
             strokeWidth={2}
           />
+
           {highlightStarOctagon &&
-            points.map((p, i) => (
-              <circle key={i} cx={p.x} cy={p.y} r={4} fill="gold" />
+            order.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="magenta" />
             ))}
-          {points.map((p, i) => (
-            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="gold" strokeDasharray="4,2" />
+
+          {order.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="black" strokeDasharray="4,2" />
           ))}
-          {points.map((p, i) => {
-            const angle = (customStarOctagonAngles[i] + starOctagonRotation + settings.rotation) % 360;
-            return (
-              <text key={i} x={p.x} y={p.y - 10} fill="gold" fontSize={12} fontWeight="bold" textAnchor="middle">
-                ({angle.toFixed(0)}°)
-              </text>
-            );
-          })}
+
+          {order.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="black"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angleDeg)}°)
+            </text>
+          ))}
         </>
       );
     })()}
