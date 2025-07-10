@@ -46,6 +46,14 @@ const [customStarAngles, setCustomStarAngles] = useState([0, 144, 288, 72, 216])
 const [highlightStar, setHighlightStar] = useState(true);
 const [fillStar, setFillStar] = useState(true);
 
+// ⭐ نجمة رباعية
+const [showStar4, setShowStar4] = useState(false);
+const [star4Rotation, setStar4Rotation] = useState(0);
+const [customStar4Angles, setCustomStar4Angles] = useState([0, 180, 90, 270]);
+const [highlightStar4, setHighlightStar4] = useState(true);
+const [fillStar4, setFillStar4] = useState(true);
+
+
 const [squareRotation, setSquareRotation] = useState(0);
 const [customSquareAngles, setCustomSquareAngles] = useState([0, 90, 180, 270]);
 const [highlightSquare, setHighlightSquare] = useState(true);
@@ -66,6 +74,13 @@ const [customHexagramAngles, setCustomHexagramAngles] = useState([0, 60, 120, 18
 const [highlightHexagram, setHighlightHexagram] = useState(true);
 const [fillHexagram, setFillHexagram] = useState(true);
 
+// ⭐ نجمة سباعية
+const [showStar7, setShowStar7] = useState(false);
+const [star7Rotation, setStar7Rotation] = useState(0);
+const [highlightStar7, setHighlightStar7] = useState(true);
+const [fillStar7, setFillStar7] = useState(true);
+
+
 // 🧿 مثمن
 const [showOctagon, setShowOctagon] = useState(false);
 const [octagonRotation, setOctagonRotation] = useState(0);
@@ -83,6 +98,16 @@ const [fillStarOctagon, setFillStarOctagon] = useState(true);
 // 🧲 دائرة الزوايا (Wheel of 36 Rays)
 const [showAngleWheel, setShowAngleWheel] = useState(false);
 const [angleWheelRotation, setAngleWheelRotation] = useState(0);
+
+useEffect(() => {
+  // إعادة ضبط دوران عجلة الزوايا لتبدأ من الأعلى
+  setAngleWheelRotation((prev) => (prev + 270) % 360);
+
+  // إعادة تعيين دوران الإعدادات إلى 0 (لمنع الانحراف بسبب التخزين)
+  setSettings((prev) => ({ ...prev, rotation: 0 }));
+}, []);
+
+
 const [rayColor, setRayColor] = useState("#FF0000"); // أحمر افتراضي
 const [rayWidth, setRayWidth] = useState(1);
 const [angleStepRad, setAngleStep] = useState(10); // خطوة الزاوية
@@ -625,6 +650,42 @@ const RenderZodiacRing = () => {
   )}
 </div>
 
+{/* ⭐ أدوات النجمة الرباعية */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showStar4} onChange={() => setShowStar4(!showStar4)} />
+    ⭐ {settings.language === "ar" ? "إظهار النجمة الرباعية" : "Show 4-Point Star"}
+  </label>
+
+  {showStar4 && (
+    <>
+      {customStar4Angles.map((angle, idx) => {
+        const rotated = (angle + star4Rotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - star4Rotation - settings.rotation + 360) % 360;
+              const newAngles = [...customStar4Angles];
+              newAngles[idx] = newOriginal;
+              setCustomStar4Angles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star4Rotation}
+        onChange={(e) => setStar4Rotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStar4} onChange={() => setFillStar4(!fillStar4)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStar4} onChange={() => setHighlightStar4(!highlightStar4)} /> تمييز</label>
+    </>
+  )}
+</div>
+
 {/* 🔷 أدوات الشكل الخماسي */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
   <label>
@@ -661,7 +722,7 @@ const RenderZodiacRing = () => {
   )}
 </div>
 
-{/* ⭐ أدوات النجمة */}
+{/* ⭐ أدوات النجمة الخماسيه */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
   <label>
     <input type="checkbox" checked={showStar} onChange={() => setShowStar(!showStar)} />
@@ -771,11 +832,38 @@ const RenderZodiacRing = () => {
   )}
 </div>
 
+{/* ⭐ أدوات النجمة السباعية */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showStar7} onChange={() => setShowStar7(!showStar7)} />
+    ⭐ {settings.language === "ar" ? "إظهار النجمة السباعية" : "Show 7-Point Star"}
+  </label>
+
+  {showStar7 && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star7Rotation}
+        onChange={(e) => setStar7Rotation(parseFloat(e.target.value))} />
+
+      <label>
+        <input type="checkbox" checked={fillStar7} onChange={() => setFillStar7(!fillStar7)} />
+        {settings.language === "ar" ? "تعبئة" : "Fill"}
+      </label>
+
+      <label>
+        <input type="checkbox" checked={highlightStar7} onChange={() => setHighlightStar7(!highlightStar7)} />
+        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight Points"}
+      </label>
+    </>
+  )}
+</div>
+
+
 {/* 🧿 أدوات الشكل المثمن */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
   <label>
     <input type="checkbox" checked={showOctagon} onChange={() => setShowOctagon(!showOctagon)} />
-    🧿 {settings.language === "ar" ? "إظهار المثمن" : "Show Octagon"}
+    🧿 {settings.language === "ar" ? "إظهار الثماني" : "Show Octagon"}
   </label>
 
   {showOctagon && (
@@ -1159,7 +1247,7 @@ style={inputStyle}
   const fixedValue = index + 1;
 
   const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
-  const angleMid = angle + angleStep / 2;
+  const angleMid = angle + angleStep / 2 - Math.PI / 2;
 
   const radius = innerRadius - 10; // ✅ داخل الدائرة لكن مرئي
   const x = center + radius * Math.cos(angleMid);
@@ -1267,7 +1355,7 @@ style={inputStyle}
 
 {showDegreeRing && [...Array(settings.divisions)].map((_, index) => {
   const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
-  const angleMid = angle + angleStep / 2;
+   const angleMid = angle + angleStep / 2 - Math.PI / 2;
 
   const lastLevel = settings.levels - 1;
   const cellValue = settings.startValue + lastLevel * settings.divisions + index;
@@ -1444,6 +1532,62 @@ style={inputStyle}
   </g>
 )}
 
+
+{/* ⭐ رسم النجمة الرباعية */}
+{/* ⭐ رسم النجمة الرباعية الحقيقية (شكل كوكسيتير مثل الصورة) */}
+{showStar4 && (
+  <g>
+    {(() => {
+      const R_outer = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const R_inner = R_outer * 0.45; // نصف القطر الداخلي = 45% من الخارجي
+
+      const angles = [...Array(8)].map((_, i) => i * 45 + star4Rotation + settings.rotation);
+      const points = angles.map((deg, i) => {
+        const rad = (deg * Math.PI) / 180;
+        const r = i % 2 === 0 ? R_outer : R_inner;
+        return {
+          x: center + r * Math.cos(rad),
+          y: center + r * Math.sin(rad),
+          angle: deg % 360,
+        };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillStar4 ? "rgba(255, 0, 255, 0.2)" : "none"}
+            stroke="magenta"
+            strokeWidth={2}
+          />
+          {highlightStar4 &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="magenta" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="magenta" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="magenta"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angle)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+
+
 {/*  رسم الخماسي داخل الدائرة */}
 {showPentagon && (
   <g>
@@ -1601,7 +1745,60 @@ style={inputStyle}
   </g>
 )}
 
-{/* 🧿 رسم المثمن*/}
+{/* ⭐ رسم النجمة السباعية */}
+{showStar7 && (
+  <g>
+    {(() => {
+      const R_outer = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const R_inner = R_outer * 0.45;
+
+      const points = [];
+      for (let i = 0; i < 14; i++) {
+        const deg = i * (360 / 14) + star7Rotation + settings.rotation;
+        const rad = (deg * Math.PI) / 180;
+        const r = i % 2 === 0 ? R_outer : R_inner;
+        points.push({
+          x: center + r * Math.cos(rad),
+          y: center + r * Math.sin(rad),
+          angle: deg % 360,
+        });
+      }
+
+      return (
+        <>
+          <polygon
+            points={points.map((p) => `${p.x},${p.y}`).join(" ")}
+            fill={fillStar7 ? "rgba(0, 0, 139, 0.2)" : "none"}
+            stroke="darkblue"
+            strokeWidth={2}
+          />
+          {highlightStar7 &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="darkblue" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="darkblue" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="darkblue"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angle)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* 🧿 رسم المربع الثماني*/}
 
 {showOctagon && (
   <g>
@@ -1693,7 +1890,7 @@ style={inputStyle}
       return (
         <>
           {[...Array(rayCount)].map((_, i) => {
-                      const angle = (i * angleStepRad + angleWheelRotation + settings.rotation - 90 + 360) % 360;
+                     const angle = (i * angleStepRad + angleWheelRotation + settings.rotation) % 360;
             const rad = (angle * Math.PI) / 180;
             const x1 = center + innerR * Math.cos(rad);
             const y1 = center + innerR * Math.sin(rad);
