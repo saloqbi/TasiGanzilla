@@ -20,7 +20,9 @@ return stored ? JSON.parse(stored) : defaultSettings;
   });
 
   const [zoom, setZoom] = useState(1);
-   const [scale, setScale] = useState(0.3); // ⬅️ يبدأ من 0.2x
+   const [showZodiacRing, setShowZodiacRing] = useState(true);
+    const [showDegreeRing, setShowDegreeRing] = useState(true);
+  const [scale, setScale] = useState(0.3); // ⬅️ يبدأ من 0.2x
   const [drag, setDrag] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
    const [clickStates, setClickStates] = useState({});
@@ -481,6 +483,25 @@ const RenderZodiacRing = () => {
     {settings.rotation}°
   </span>
 </div>
+
+{/* ✅ اظهار حلقة الابراج و حلقة الزوايا*/}
+<button
+  onClick={() => setShowDegreeRing(!showDegreeRing)}
+  style={buttonStyle}
+>
+  🧭 {settings.language === "ar"
+    ? (showDegreeRing ? "إخفاء حلقة الزوايا" : "إظهار حلقة الزوايا")
+    : (showDegreeRing ? "Hide Degree Ring" : "Show Degree Ring")}
+</button>
+
+<button
+  onClick={() => setShowZodiacRing(!showZodiacRing)}
+  style={buttonStyle}
+>
+  ♈ {settings.language === "ar"
+    ? (showZodiacRing ? "إخفاء الأبراج" : "إظهار الأبراج")
+    : (showZodiacRing ? "Hide Zodiac" : "Show Zodiac")}
+</button>
 
 
 {/* ✅ أدوات المثلث */}
@@ -1242,7 +1263,9 @@ style={inputStyle}
 </text>
 
 // 🧭 حلقة الزوايا الخارجية المرتبطة بمجموع الرقم
-{[...Array(settings.divisions)].map((_, index) => {
+
+
+{showDegreeRing && [...Array(settings.divisions)].map((_, index) => {
   const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
   const angleMid = angle + angleStep / 2;
 
@@ -1250,6 +1273,7 @@ style={inputStyle}
   const cellValue = settings.startValue + lastLevel * settings.divisions + index;
   const reduced = reduceToDigit(cellValue);
   const angleDeg = ((index + 1) * 360) / settings.divisions;
+  const label = angleDeg === 0 ? "360°" : `${angleDeg.toFixed(0)}°`;
 
   const r = innerRadius + [...Array(settings.levels)].reduce((acc, l) => {
     const maxDigits = Math.max(
@@ -1258,7 +1282,7 @@ style={inputStyle}
       )
     );
     return acc + (baseRingWidth + maxDigits * digitScale);
-  }, 0) + 20; // أبعد من الحلقة الأخيرة
+  }, 0) + 20;
 
   const x = center + r * Math.cos(angleMid);
   const y = center + r * Math.sin(angleMid);
@@ -1274,12 +1298,12 @@ style={inputStyle}
       dominantBaseline="middle"
       fontWeight="bold"
     >
-      {angleDeg.toFixed(0)}°
+      {label}
     </text>
-
   );
 })}
-<RenderZodiacRing />
+
+{showZodiacRing && <RenderZodiacRing />}
 
               </g>
             );
@@ -1288,7 +1312,8 @@ style={inputStyle}
 
       );
     })}
-<RenderZodiacRing />
+{showZodiacRing && <RenderZodiacRing />}
+
 
 {/* ✅ رسم المثلث داخل الدائرة */}
 {showTriangle && (
@@ -1656,25 +1681,27 @@ style={inputStyle}
   </g>
 )}
 
+{/* 🧲 رسم عجلة الزوايا */}
+
 {showAngleWheel && (
   <g>
     {(() => {
-        const rayCount = 360 / angleStepRad;
+        const rayCount = Math.round(360 / angleStepRad);
       const outerR = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5) + 60;
       const innerR = innerRadius - 10;
 
       return (
         <>
           {[...Array(rayCount)].map((_, i) => {
-            const angle = (i * angleStepRad + angleWheelRotation + settings.rotation) % 360;
+                      const angle = (i * angleStepRad + angleWheelRotation + settings.rotation - 90 + 360) % 360;
             const rad = (angle * Math.PI) / 180;
             const x1 = center + innerR * Math.cos(rad);
             const y1 = center + innerR * Math.sin(rad);
             const x2 = center + outerR * Math.cos(rad);
             const y2 = center + outerR * Math.sin(rad);
 
-            const labelX = center + (outerR + 10) * Math.cos(rad);
-            const labelY = center + (outerR + 10) * Math.sin(rad);
+            const labelX = center + (outerR + 12) * Math.cos(rad) +6;
+            const labelY = center + (outerR + 12) * Math.sin(rad) + 6;
 
             return (
               <g key={`angle-ray-${i}`}>
@@ -1687,7 +1714,7 @@ style={inputStyle}
                   textAnchor="middle"
                   dominantBaseline="middle"
                 >
-                  {angle.toFixed(0)}°
+                  {Math.round(angle) === 0 ? "360°" : `${Math.round(angle)}°`}
                 </text>
               </g>
             );
