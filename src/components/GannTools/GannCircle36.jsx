@@ -1678,9 +1678,11 @@ style={inputStyle}
 
   const lastLevel = settings.levels - 1;
   const cellValue = settings.startValue + lastLevel * settings.divisions + index;
-  const reduced = reduceToDigit(cellValue);
+  const reducedLabel = reduceToDigit(cellValue); // الرقم المختزل
   const angleDeg = ((index + 1) * 360) / settings.divisions;
-  const label = angleDeg === 0 ? "360°" : `${angleDeg.toFixed(0)}°`;
+    const angleCustom = reducedLabel === 9 ? 360 : reducedLabel * 10;
+   const label = `${angleCustom}°`;
+
 
   const r = innerRadius + [...Array(settings.levels)].reduce((acc, l) => {
     const maxDigits = Math.max(
