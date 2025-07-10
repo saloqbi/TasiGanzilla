@@ -32,19 +32,6 @@ return stored ? JSON.parse(stored) : defaultSettings;
      const [highlightTriangle, setHighlightTriangle] = useState(true);
      const [fillTriangle, setFillTriangle] = useState(true);
 const [showSquare, setShowSquare] = useState(false);
-// 🔷 شكل خماسي
-const [showPentagon, setShowPentagon] = useState(false);
-const [pentagonRotation, setPentagonRotation] = useState(0);
-const [customPentagonAngles, setCustomPentagonAngles] = useState([0, 72, 144, 216, 288]);
-const [highlightPentagon, setHighlightPentagon] = useState(true);
-const [fillPentagon, setFillPentagon] = useState(true);
-
-// ⭐ نجمة
-const [showStar, setShowStar] = useState(false);
-const [starRotation, setStarRotation] = useState(0);
-const [customStarAngles, setCustomStarAngles] = useState([0, 144, 288, 72, 216]);
-const [highlightStar, setHighlightStar] = useState(true);
-const [fillStar, setFillStar] = useState(true);
 
 // ⭐ نجمة رباعية
 const [showStar4, setShowStar4] = useState(false);
@@ -52,12 +39,26 @@ const [star4Rotation, setStar4Rotation] = useState(0);
 const [customStar4Angles, setCustomStar4Angles] = useState([0, 180, 90, 270]);
 const [highlightStar4, setHighlightStar4] = useState(true);
 const [fillStar4, setFillStar4] = useState(true);
-
-
 const [squareRotation, setSquareRotation] = useState(0);
 const [customSquareAngles, setCustomSquareAngles] = useState([0, 90, 180, 270]);
 const [highlightSquare, setHighlightSquare] = useState(true);
 const [fillSquare, setFillSquare] = useState(true);
+
+// 🔷 شكل خماسي
+const [showPentagon, setShowPentagon] = useState(false);
+const [pentagonRotation, setPentagonRotation] = useState(0);
+const [customPentagonAngles, setCustomPentagonAngles] = useState([0, 72, 144, 216, 288]);
+const [highlightPentagon, setHighlightPentagon] = useState(true);
+const [fillPentagon, setFillPentagon] = useState(true);
+
+// ⭐  نجمة الخماسي 
+const [showStar, setShowStar] = useState(false);
+const [starRotation, setStarRotation] = useState(0);
+const [customStarAngles, setCustomStarAngles] = useState([0, 144, 288, 72, 216]);
+const [highlightStar, setHighlightStar] = useState(true);
+const [fillStar, setFillStar] = useState(true);
+
+
 
 {/* 🔷 شكل السداسي */}
 const [showHexagon, setShowHexagon] = useState(false);
@@ -101,6 +102,56 @@ const [starOctagonRotation, setStarOctagonRotation] = useState(0);
 const [customStarOctagonAngles, setCustomStarOctagonAngles] = useState([0, 90, 180, 270, 45, 135, 225, 315]);
 const [highlightStarOctagon, setHighlightStarOctagon] = useState(true);
 const [fillStarOctagon, setFillStarOctagon] = useState(true);
+
+// 🔷 شكل تساعي منتظم
+const [showNonagon, setShowNonagon] = useState(false);
+const [nonagonRotation, setNonagonRotation] = useState(0);
+const [highlightNonagon, setHighlightNonagon] = useState(true);
+const [fillNonagon, setFillNonagon] = useState(true);
+
+// ⭐ نجمة تساعية منتظمة
+const [showStar9, setShowStar9] = useState(false);
+const [star9Rotation, setStar9Rotation] = useState(0);
+const [highlightStar9, setHighlightStar9] = useState(true);
+const [fillStar9, setFillStar9] = useState(true);
+
+// 🔷 شكل العشاري منتظم
+const [showDecagon, setShowDecagon] = useState(false);
+const [decagonRotation, setDecagonRotation] = useState(0);
+const [highlightDecagon, setHighlightDecagon] = useState(true);
+const [fillDecagon, setFillDecagon] = useState(true);
+
+ // ⭐نجمة عشاريّة منتظمة
+const [showStar10, setShowStar10] = useState(false);
+const [star10Rotation, setStar10Rotation] = useState(0);
+const [highlightStar10, setHighlightStar10] = useState(true);
+const [fillStar10, setFillStar10] = useState(true);
+
+//🔷 الشكل الحادي عشر المنتظم
+const [showHendecagon, setShowHendecagon] = useState(false);
+const [hendecagonRotation, setHendecagonRotation] = useState(0);
+const [highlightHendecagon, setHighlightHendecagon] = useState(true);
+const [fillHendecagon, setFillHendecagon] = useState(true);
+
+//النجمة الحادية عشر ⭐
+const [showStar11, setShowStar11] = useState(false);
+const [star11Rotation, setStar11Rotation] = useState(0);
+const [highlightStar11, setHighlightStar11] = useState(true);
+const [fillStar11, setFillStar11] = useState(true);
+
+//🔷 الشكل الهندسي المنتظم ذو 12 ضلعًا 
+const [showDodecagon, setShowDodecagon] = useState(false);
+const [dodecagonRotation, setDodecagonRotation] = useState(0);
+const [highlightDodecagon, setHighlightDodecagon] = useState(true);
+const [fillDodecagon, setFillDodecagon] = useState(true);
+
+// ⭐ النجمة {12/5} — توصيل كل ثاني نقطة
+const [showStar12, setShowStar12] = useState(false);
+const [star12Rotation, setStar12Rotation] = useState(0);
+const [highlightStar12, setHighlightStar12] = useState(true);
+const [fillStar12, setFillStar12] = useState(true);
+
+
 
 // 🧲 دائرة الزوايا (Wheel of 36 Rays)
 const [showAngleWheel, setShowAngleWheel] = useState(false);
@@ -969,6 +1020,173 @@ const RenderZodiacRing = () => {
     </>
   )}
 </div>
+
+{/* 🔷 أدوات الشكل التساعي */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showNonagon} onChange={() => setShowNonagon(!showNonagon)} />
+    🔷 {settings.language === "ar" ? "إظهار التساعي" : "Show Nonagon"}
+  </label>
+
+  {showNonagon && (
+    <>
+      <label>♻️ تدوير</label>
+      <input
+        type="range"
+        min="0"
+        max="360"
+        value={nonagonRotation}
+        onChange={(e) => setNonagonRotation(parseFloat(e.target.value))}
+      />
+
+      <label>
+        <input type="checkbox" checked={fillNonagon} onChange={() => setFillNonagon(!fillNonagon)} />
+        {settings.language === "ar" ? "تعبئة الشكل" : "Fill"}
+      </label>
+
+      <label>
+        <input type="checkbox" checked={highlightNonagon} onChange={() => setHighlightNonagon(!highlightNonagon)} />
+        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight"}
+      </label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة التساعية */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showStar9} onChange={() => setShowStar9(!showStar9)} />
+    ⭐ {settings.language === "ar" ? "إظهار النجمة التساعية" : "Show 9-Point Star"}
+  </label>
+
+  {showStar9 && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star9Rotation}
+        onChange={(e) => setStar9Rotation(parseFloat(e.target.value))} />
+
+      <label>
+        <input type="checkbox" checked={fillStar9} onChange={() => setFillStar9(!fillStar9)} />
+        {settings.language === "ar" ? "تعبئة" : "Fill"}
+      </label>
+
+      <label>
+        <input type="checkbox" checked={highlightStar9} onChange={() => setHighlightStar9(!highlightStar9)} />
+        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight"}
+      </label>
+    </>
+  )}
+</div>
+
+{/* 🔷 أدوات الشكل العشاري */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showDecagon} onChange={() => setShowDecagon(!showDecagon)} />
+    🔷 {settings.language === "ar" ? "إظهار الشكل العشاري" : "Show Decagon"}
+  </label>
+
+  {showDecagon && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={decagonRotation}
+        onChange={(e) => setDecagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillDecagon} onChange={() => setFillDecagon(!fillDecagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightDecagon} onChange={() => setHighlightDecagon(!highlightDecagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة العشارية */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showStar10} onChange={() => setShowStar10(!showStar10)} />
+    ⭐ {settings.language === "ar" ? "إظهار النجمة العشارية" : "Show 10-Point Star"}
+  </label>
+
+  {showStar10 && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star10Rotation}
+        onChange={(e) => setStar10Rotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStar10} onChange={() => setFillStar10(!fillStar10)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStar10} onChange={() => setHighlightStar10(!highlightStar10)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* 🔷 أدوات الشكل الحادي عشر */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showHendecagon} onChange={() => setShowHendecagon(!showHendecagon)} />
+    🔷 {settings.language === "ar" ? "إظهار الحادي عشر" : "Show 11-gon"}
+  </label>
+
+  {showHendecagon && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={hendecagonRotation}
+        onChange={(e) => setHendecagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillHendecagon} onChange={() => setFillHendecagon(!fillHendecagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightHendecagon} onChange={() => setHighlightHendecagon(!highlightHendecagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة الحادية عشر */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showStar11} onChange={() => setShowStar11(!showStar11)} />
+    ⭐ {settings.language === "ar" ? "إظهار النجمة الحادية عشر" : "Show 11-Point Star"}
+  </label>
+
+  {showStar11 && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star11Rotation}
+        onChange={(e) => setStar11Rotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStar11} onChange={() => setFillStar11(!fillStar11)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStar11} onChange={() => setHighlightStar11(!highlightStar11)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* 🔷 أدوات الشكل الاثني عشر */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showDodecagon} onChange={() => setShowDodecagon(!showDodecagon)} />
+    🔷 {settings.language === "ar" ? "إظهار الاثني عشر" : "Show Dodecagon"}
+  </label>
+
+  {showDodecagon && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={dodecagonRotation}
+        onChange={(e) => setDodecagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillDodecagon} onChange={() => setFillDodecagon(!fillDodecagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightDodecagon} onChange={() => setHighlightDodecagon(!highlightDodecagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة 12/5 */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showStar12} onChange={() => setShowStar12(!showStar12)} />
+    ⭐ {settings.language === "ar" ? "النجمة الإثني عشرية {12/5}" : "Dodecagram {12/5}"}
+  </label>
+
+  {showStar12 && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star12Rotation}
+        onChange={(e) => setStar12Rotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStar12} onChange={() => setFillStar12(!fillStar12)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStar12} onChange={() => setHighlightStar12(!highlightStar12)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+
 
 {/* 🧲 عجلة الزوايا */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
@@ -2006,6 +2224,434 @@ style={inputStyle}
               x={p.x}
               y={p.y - 10}
               fill="black"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angleDeg)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* 🔷 رسم الشكل التساعي المنتظم */}
+{showNonagon && (
+  <g>
+    {(() => {
+      const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const centerX = center;
+      const centerY = center;
+
+      const points = [...Array(9)].map((_, i) => {
+        const angle = ((i * 360 / 9 + nonagonRotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: centerX + R * Math.cos(angle),
+          y: centerY + R * Math.sin(angle),
+          angleDeg: (i * 360 / 9 + nonagonRotation + settings.rotation) % 360
+        };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillNonagon ? "rgba(0, 0, 139, 0.2)" : "none"}
+            stroke="darkblue"
+            strokeWidth={2}
+          />
+          {highlightNonagon &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="darkblue" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={centerX} y2={centerY} stroke="darkblue" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="darkblue"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angleDeg)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* ⭐ رسم النجمة التساعية المنتظمة {9/2} */}
+{showStar9 && (
+  <g>
+    {(() => {
+      const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const basePoints = [...Array(9)].map((_, i) => {
+        const angle = ((i * 360 / 9 + star9Rotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: center + R * Math.cos(angle),
+          y: center + R * Math.sin(angle),
+          angleDeg: (i * 360 / 9 + star9Rotation + settings.rotation) % 360
+        };
+      });
+
+      // ترتيب النجمة {9/2}: كل ثاني نقطة
+      const ordered = [];
+      let index = 0;
+      const visited = new Set();
+      for (let i = 0; i < 9; i++) {
+        ordered.push(basePoints[index]);
+        visited.add(index);
+        index = (index + 2) % 9;
+        if (visited.has(index)) break; // تأمين منع التكرار
+      }
+
+      return (
+        <>
+          <polygon
+            points={ordered.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillStar9 ? "rgba(255, 105, 180, 0.2)" : "none"}
+            stroke="black"
+            strokeWidth={2}
+          />
+          {highlightStar9 &&
+            ordered.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="deeppink" />
+            ))}
+          {ordered.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="black" strokeDasharray="4,2" />
+          ))}
+          {ordered.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="black"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angleDeg)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* 🔷 رسم الشكل العشاري المنتظم */}
+{showDecagon && (
+  <g>
+    {(() => {
+      const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const points = [...Array(10)].map((_, i) => {
+        const angle = ((i * 360 / 10 + decagonRotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: center + R * Math.cos(angle),
+          y: center + R * Math.sin(angle),
+          angleDeg: (i * 360 / 10 + decagonRotation + settings.rotation) % 360
+        };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillDecagon ? "rgba(30, 144, 255, 0.2)" : "none"}
+            stroke="dodgerblue"
+            strokeWidth={2}
+          />
+          {highlightDecagon &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="dodgerblue" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="dodgerblue" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="dodgerblue"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angleDeg)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* ⭐ رسم النجمة العشارية المنتظمة {10/3} */}
+{showStar10 && (
+  <g>
+    {(() => {
+      const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const basePoints = [...Array(10)].map((_, i) => {
+        const angle = ((i * 360 / 10 + star10Rotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: center + R * Math.cos(angle),
+          y: center + R * Math.sin(angle),
+          angleDeg: (i * 360 / 10 + star10Rotation + settings.rotation) % 360
+        };
+      });
+
+      const ordered = [];
+      let index = 0;
+      const visited = new Set();
+      for (let i = 0; i < 10; i++) {
+        ordered.push(basePoints[index]);
+        visited.add(index);
+        index = (index + 3) % 10;
+        if (visited.has(index)) break;
+      }
+
+      return (
+        <>
+          <polygon
+            points={ordered.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillStar10 ? "rgba(139, 0, 0, 0.2)" : "none"}
+            stroke="darkred"
+            strokeWidth={2}
+          />
+          {highlightStar10 &&
+            ordered.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="darkred" />
+            ))}
+          {ordered.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="darkred" strokeDasharray="4,2" />
+          ))}
+          {ordered.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="darkred"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angleDeg)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* 🔷 رسم الشكل الهندسي الحادي عشر المنتظم */}
+{showHendecagon && (
+  <g>
+    {(() => {
+      const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const points = [...Array(11)].map((_, i) => {
+        const angle = ((i * 360 / 11 + hendecagonRotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: center + R * Math.cos(angle),
+          y: center + R * Math.sin(angle),
+          angleDeg: (i * 360 / 11 + hendecagonRotation + settings.rotation) % 360
+        };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillHendecagon ? "rgba(0, 0, 128, 0.2)" : "none"}
+            stroke="navy"
+            strokeWidth={2}
+          />
+          {highlightHendecagon &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="navy" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="navy" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="navy"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angleDeg)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* ⭐ رسم النجمة الحادية عشر {11/3} */}
+{showStar11 && (
+  <g>
+    {(() => {
+      const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const basePoints = [...Array(11)].map((_, i) => {
+        const angle = ((i * 360 / 11 + star11Rotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: center + R * Math.cos(angle),
+          y: center + R * Math.sin(angle),
+          angleDeg: (i * 360 / 11 + star11Rotation + settings.rotation) % 360
+        };
+      });
+
+      const ordered = [];
+      let index = 0;
+      const visited = new Set();
+      for (let i = 0; i < 11; i++) {
+        ordered.push(basePoints[index]);
+        visited.add(index);
+        index = (index + 3) % 11;
+        if (visited.has(index)) break;
+      }
+
+      return (
+        <>
+          <polygon
+            points={ordered.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillStar11 ? "rgba(255, 0, 0, 0.15)" : "none"}
+            stroke="maroon"
+            strokeWidth={2}
+          />
+          {highlightStar11 &&
+            ordered.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="maroon" />
+            ))}
+          {ordered.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="maroon" strokeDasharray="4,2" />
+          ))}
+          {ordered.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="maroon"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angleDeg)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* 🔷 رسم الشكل الهندسي الاثني عشر المنتظم */}
+{showDodecagon && (
+  <g>
+    {(() => {
+      const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const points = [...Array(12)].map((_, i) => {
+        const angle = ((i * 360 / 12 + dodecagonRotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: center + R * Math.cos(angle),
+          y: center + R * Math.sin(angle),
+          angleDeg: (i * 360 / 12 + dodecagonRotation + settings.rotation) % 360
+        };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillDodecagon ? "rgba(75, 0, 130, 0.2)" : "none"}
+            stroke="indigo"
+            strokeWidth={2}
+          />
+          {highlightDodecagon &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="indigo" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="indigo" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="indigo"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angleDeg)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+{/* ⭐ رسم النجمة الإثني عشرية المنتظمة {12/5} */}
+{showStar12 && (
+  <g>
+    {(() => {
+      const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const basePoints = [...Array(12)].map((_, i) => {
+        const angle = ((i * 360 / 12 + star12Rotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: center + R * Math.cos(angle),
+          y: center + R * Math.sin(angle),
+          angleDeg: (i * 360 / 12 + star12Rotation + settings.rotation) % 360
+        };
+      });
+
+      const ordered = [];
+      let index = 0;
+      const visited = new Set();
+      for (let i = 0; i < 12; i++) {
+        ordered.push(basePoints[index]);
+        visited.add(index);
+        index = (index + 5) % 12;
+        if (visited.has(index)) break;
+      }
+
+      return (
+        <>
+          <polygon
+            points={ordered.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillStar12 ? "rgba(0, 128, 0, 0.2)" : "none"}
+            stroke="green"
+            strokeWidth={2}
+          />
+          {highlightStar12 &&
+            ordered.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="green" />
+            ))}
+          {ordered.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="green" strokeDasharray="4,2" />
+          ))}
+          {ordered.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="green"
               fontSize={11}
               fontWeight="bold"
               textAnchor="middle"
