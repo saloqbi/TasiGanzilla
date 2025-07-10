@@ -74,6 +74,13 @@ const [customHexagramAngles, setCustomHexagramAngles] = useState([0, 60, 120, 18
 const [highlightHexagram, setHighlightHexagram] = useState(true);
 const [fillHexagram, setFillHexagram] = useState(true);
 
+// 🔷 شكل سباعي منتظم
+const [showHeptagon, setShowHeptagon] = useState(false);
+const [heptagonRotation, setHeptagonRotation] = useState(0);
+const [highlightHeptagon, setHighlightHeptagon] = useState(true);
+const [fillHeptagon, setFillHeptagon] = useState(true);
+
+
 // ⭐ نجمة سباعية
 const [showStar7, setShowStar7] = useState(false);
 const [star7Rotation, setStar7Rotation] = useState(0);
@@ -832,6 +839,38 @@ const RenderZodiacRing = () => {
   )}
 </div>
 
+{/* 🔷 أدوات الشكل السباعي */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+  <label>
+    <input type="checkbox" checked={showHeptagon} onChange={() => setShowHeptagon(!showHeptagon)} />
+    🔷 {settings.language === "ar" ? "إظهار السباعي" : "Show Heptagon"}
+  </label>
+
+  {showHeptagon && (
+    <>
+      <label>♻️ تدوير</label>
+      <input
+        type="range"
+        min="0"
+        max="360"
+        value={heptagonRotation}
+        onChange={(e) => setHeptagonRotation(parseFloat(e.target.value))}
+      />
+
+      <label>
+        <input type="checkbox" checked={fillHeptagon} onChange={() => setFillHeptagon(!fillHeptagon)} />
+        {settings.language === "ar" ? "تعبئة الشكل" : "Fill"}
+      </label>
+
+      <label>
+        <input type="checkbox" checked={highlightHeptagon} onChange={() => setHighlightHeptagon(!highlightHeptagon)} />
+        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight"}
+      </label>
+    </>
+  )}
+</div>
+
+
 {/* ⭐ أدوات النجمة السباعية */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
   <label>
@@ -863,7 +902,7 @@ const RenderZodiacRing = () => {
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
   <label>
     <input type="checkbox" checked={showOctagon} onChange={() => setShowOctagon(!showOctagon)} />
-    🧿 {settings.language === "ar" ? "إظهار الثماني" : "Show Octagon"}
+    🧿 {settings.language === "ar" ? "إظهار  المربع الثماني" : "Show Octagon"}
   </label>
 
   {showOctagon && (
@@ -1775,6 +1814,58 @@ style={inputStyle}
   </g>
 )}
 
+{/* 🔷 رسم الشكل السباعي المنتظم */}
+{showHeptagon && (
+  <g>
+    {(() => {
+      const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+      const centerX = center;
+      const centerY = center;
+
+      const points = [...Array(7)].map((_, i) => {
+        const angle = ((i * 360 / 7 + heptagonRotation + settings.rotation) * Math.PI) / 180;
+        return {
+          x: centerX + R * Math.cos(angle),
+          y: centerY + R * Math.sin(angle),
+          angleDeg: (i * 360 / 7 + heptagonRotation + settings.rotation) % 360
+        };
+      });
+
+      return (
+        <>
+          <polygon
+            points={points.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillHeptagon ? "rgba(0, 100, 255, 0.2)" : "none"}
+            stroke="blue"
+            strokeWidth={2}
+          />
+          {highlightHeptagon &&
+            points.map((p, i) => (
+              <circle key={i} cx={p.x} cy={p.y} r={4} fill="blue" />
+            ))}
+          {points.map((p, i) => (
+            <line key={i} x1={p.x} y1={p.y} x2={centerX} y2={centerY} stroke="blue" strokeDasharray="4,2" />
+          ))}
+          {points.map((p, i) => (
+            <text
+              key={i}
+              x={p.x}
+              y={p.y - 10}
+              fill="blue"
+              fontSize={11}
+              fontWeight="bold"
+              textAnchor="middle"
+            >
+              ({Math.round(p.angleDeg)}°)
+            </text>
+          ))}
+        </>
+      );
+    })()}
+  </g>
+)}
+
+
 {/* ⭐ رسم النجمة السباعية */}
 {showStar7 && (
   <g>
@@ -1793,7 +1884,6 @@ style={inputStyle}
           angle: deg % 360,
         });
       }
-
       return (
         <>
           <polygon
