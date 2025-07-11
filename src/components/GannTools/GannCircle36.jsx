@@ -366,9 +366,10 @@ const RenderZodiacRing = () => {
         const startAngle = (index * 360) / zodiacCount;
         const endAngle = ((index + 1) * 360) / zodiacCount;
 
-        const startRad = (startAngle + settings.rotation) * (Math.PI / 180);
-        const endRad = (endAngle + settings.rotation) * (Math.PI / 180);
-        const midRad = ((startAngle + endAngle) / 2 + settings.rotation) * (Math.PI / 180);
+	const startRad = startAngle * (Math.PI / 180);
+	const endRad = endAngle * (Math.PI / 180);
+	const midRad = ((startAngle + endAngle) / 2) * (Math.PI / 180);
+
 
         // نقاط الزاوية
         const x1 = center + radiusInner * Math.cos(startRad);
@@ -603,29 +604,6 @@ const handleExportPDF = () => {
 
 </div>
 
-{/* ♻️ دوران الدائرة  */}
-
-<div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
-  <label style={{ marginBottom: "5px" }}>
-    {settings.language === "ar" ? "♻️ دوران الدائرة" : "Circle Rotation"}
-  </label>
-  <input
-    type="range"
-    min={0}
-    max={360}
-    step={1}
-    value={settings.rotation}
-    onChange={(e) =>
-      setSettings((prev) => ({
-        ...prev,
-        rotation: parseInt(e.target.value),
-      }))
-    }
-  />
-  <span style={{ fontSize: "10px", color: "#aaa", marginTop: "4px" }}>
-    {settings.rotation}°
-  </span>
-</div>
 
 {/* ✅ اظهار حلقة الابراج و حلقة الزوايا*/}
 <button
@@ -1565,9 +1543,10 @@ style={inputStyle}
 {Array.from({ length: 36 }).map((_, index) => {
   const fixedValue = index + 1;
 
-  const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
-  const angleMid = angle + angleStep / 2 - Math.PI / 2;
+const angleOffset = Math.PI / 2; // 90 درجة بالراديان
 
+const angle = index * angleStep - angleOffset + angleStep / 2;
+const angleMid = angle;
   const radius = innerRadius - 10; // ✅ داخل الدائرة لكن مرئي
   const x = center + radius * Math.cos(angleMid);
   const y = center + radius * Math.sin(angleMid);
@@ -1613,7 +1592,7 @@ style={inputStyle}
         <React.Fragment key={level}>
           {[...Array(settings.divisions)].map((_, index) => {
             const value = settings.startValue + level * settings.divisions + index;
-            const angleStart = index * angleStep + (settings.rotation * Math.PI) / 180;
+            const angleStart = index * angleStep;
             const angleEnd = angleStart + angleStep;
             const rStart = r1 + 5; // قريب من حافة الخلية الداخلية
             const path = getPathForCell(r1, r2, angleStart, angleEnd);
@@ -1672,18 +1651,22 @@ style={inputStyle}
 // 🧭 حلقة الزوايا الخارجية المرتبطة بمجموع الرقم
 
 
-{showDegreeRing && [...Array(settings.divisions)].map((_, index) => {
-  const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
-   const angleMid = angle + angleStep / 2 - Math.PI / 2;
+{showDegreeRing && [...Array(36)].map((_, index) => {
+  const angleDeg = (index + 1) * 10;
 
-  const lastLevel = settings.levels - 1;
-  const cellValue = settings.startValue + lastLevel * settings.divisions + index;
-  const reducedLabel = reduceToDigit(cellValue); // الرقم المختزل
-  const angleDeg = ((index + 1) * 360) / settings.divisions;
-    const angleCustom = reducedLabel === 9 ? 360 : reducedLabel * 10;
-   const label = `${angleCustom}°`;
+  // 🔢 الرقم المختزل لمجموع الزاوية
+  const digitSum = angleDeg.toString().split('').reduce((sum, d) => sum + parseInt(d), 0);
+  const reduced = digitSum > 9
+    ? digitSum.toString().split('').reduce((sum, d) => sum + parseInt(d), 0)
+    : digitSum;
 
+  // 🎨 اللون حسب الرقم المختزل
+  const getDigitColor = (n) =>
+    n === 1 || n === 4 || n === 7 ? "red" :
+    n === 2 || n === 5 || n === 8 ? "blue" :
+    "black";
 
+  const angleRad = (angleDeg - 90) * (Math.PI / 180); // -90 لجعل البداية من الأعلى
   const r = innerRadius + [...Array(settings.levels)].reduce((acc, l) => {
     const maxDigits = Math.max(
       ...Array.from({ length: settings.divisions }, (_, i) =>
@@ -1693,8 +1676,8 @@ style={inputStyle}
     return acc + (baseRingWidth + maxDigits * digitScale);
   }, 0) + 20;
 
-  const x = center + r * Math.cos(angleMid);
-  const y = center + r * Math.sin(angleMid);
+  const x = center + r * Math.cos(angleRad);
+  const y = center + r * Math.sin(angleRad);
 
   return (
     <text
@@ -1707,7 +1690,7 @@ style={inputStyle}
       dominantBaseline="middle"
       fontWeight="bold"
     >
-      {label}
+      {angleDeg}°
     </text>
   );
 })}
@@ -1988,7 +1971,6 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* رسم السداسي داخل الدائرة */}
 {showHexagon && (
   <g>
@@ -1998,7 +1980,6 @@ style={inputStyle}
         const rad = ((deg + hexagonRotation + settings.rotation) * Math.PI) / 180;
         return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
       });
-
       return (
         <>
           <polygon
@@ -2027,27 +2008,22 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/*  ⭐ رسم النجمة السداسية بشكل مركب من مثلثين */}
 {showHexagram && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
-
       // مثلث أول (0°, 120°, 240°)
       const triangle1 = [0, 120, 240].map((deg) => {
         const rad = ((deg + hexagramRotation + settings.rotation) * Math.PI) / 180;
         return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad), angle: deg };
       });
-
       // مثلث ثاني (60°, 180°, 300°)
       const triangle2 = [60, 180, 300].map((deg) => {
         const rad = ((deg + hexagramRotation + settings.rotation) * Math.PI) / 180;
         return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad), angle: deg };
       });
-
       const allPoints = [...triangle1, ...triangle2];
-
       return (
         <>
           {/* مثلث أول */}
@@ -2057,7 +2033,6 @@ style={inputStyle}
             stroke="purple"
             strokeWidth={2}
           />
-
           {/* مثلث ثاني */}
           <polygon
             points={triangle2.map((p) => `${p.x},${p.y}`).join(" ")}
@@ -2065,13 +2040,11 @@ style={inputStyle}
             stroke="purple"
             strokeWidth={2}
           />
-
           {/* نقاط الرؤوس */}
           {highlightHexagram &&
             allPoints.map((p, i) => (
               <circle key={i} cx={p.x} cy={p.y} r={4} fill="violet" />
             ))}
-
           {/* خطوط من كل رأس إلى المركز */}
           {allPoints.map((p, i) => (
             <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="purple" strokeDasharray="4,2" />
@@ -2096,7 +2069,6 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🔷 رسم الشكل السباعي المنتظم */}
 {showHeptagon && (
   <g>
@@ -2113,7 +2085,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 7 + heptagonRotation + settings.rotation) % 360
         };
       });
-
       return (
         <>
           <polygon
@@ -2147,15 +2118,12 @@ style={inputStyle}
     })()}
   </g>
 )}
-
-
 {/* ⭐ رسم النجمة السباعية */}
 {showStar7 && (
   <g>
     {(() => {
       const R_outer = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
       const R_inner = R_outer * 0.45;
-
       const points = [];
       for (let i = 0; i < 14; i++) {
         const deg = i * (360 / 14) + star7Rotation + settings.rotation;
@@ -2200,9 +2168,7 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🧿 رسم المربع الثماني*/}
-
 {showOctagon && (
   <g>
     {(() => {
@@ -2211,7 +2177,6 @@ style={inputStyle}
         const rad = ((deg + octagonRotation + settings.rotation) * Math.PI) / 180;
         return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
       });
-
       return (
         <>
           <polygon
@@ -2240,13 +2205,11 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* ⭐ رسم النجمة الثمانية (8/3 شليفلي) */}
 {showStarOctagon && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
-
       // 8 رؤوس منتظمة كل 45°
       const points = [...Array(8)].map((_, i) => {
         const angle = ((i * 45 + starOctagonRotation + settings.rotation) * Math.PI) / 180;
@@ -2256,7 +2219,6 @@ style={inputStyle}
           angleDeg: (i * 45 + starOctagonRotation + settings.rotation) % 360,
         };
       });
-
       // ترتيب النقاط حسب شليفلي 8/3 => كل ثالث نقطة
       const order = [];
       let index = 0;
@@ -2264,7 +2226,6 @@ style={inputStyle}
         order.push(points[index]);
         index = (index + 3) % 8;
       }
-
       return (
         <>
           <polygon
@@ -2282,7 +2243,6 @@ style={inputStyle}
           {order.map((p, i) => (
             <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="black" strokeDasharray="4,2" />
           ))}
-
           {order.map((p, i) => (
             <text
               key={i}
@@ -2301,7 +2261,6 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🔷 رسم الشكل التساعي المنتظم */}
 {showNonagon && (
   <g>
@@ -2309,7 +2268,6 @@ style={inputStyle}
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
       const centerX = center;
       const centerY = center;
-
       const points = [...Array(9)].map((_, i) => {
         const angle = ((i * 360 / 9 + nonagonRotation + settings.rotation) * Math.PI) / 180;
         return {
@@ -2318,7 +2276,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 9 + nonagonRotation + settings.rotation) % 360
         };
       });
-
       return (
         <>
           <polygon
@@ -2352,7 +2309,6 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* ⭐ رسم النجمة التساعية المنتظمة {9/2} */}
 {showStar9 && (
   <g>
@@ -2366,7 +2322,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 9 + star9Rotation + settings.rotation) % 360
         };
       });
-
       // ترتيب النجمة {9/2}: كل ثاني نقطة
       const ordered = [];
       let index = 0;
@@ -2377,7 +2332,6 @@ style={inputStyle}
         index = (index + 2) % 9;
         if (visited.has(index)) break; // تأمين منع التكرار
       }
-
       return (
         <>
           <polygon
@@ -2411,7 +2365,6 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🔷 رسم الشكل العشاري المنتظم */}
 {showDecagon && (
   <g>
@@ -2425,7 +2378,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 10 + decagonRotation + settings.rotation) % 360
         };
       });
-
       return (
         <>
           <polygon
@@ -2459,7 +2411,6 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* ⭐ رسم النجمة العشارية المنتظمة {10/3} */}
 {showStar10 && (
   <g>
@@ -2473,7 +2424,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 10 + star10Rotation + settings.rotation) % 360
         };
       });
-
       const ordered = [];
       let index = 0;
       const visited = new Set();
@@ -2483,7 +2433,6 @@ style={inputStyle}
         index = (index + 3) % 10;
         if (visited.has(index)) break;
       }
-
       return (
         <>
           <polygon
@@ -2517,7 +2466,6 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🔷 رسم الشكل الهندسي الحادي عشر المنتظم */}
 {showHendecagon && (
   <g>
@@ -2531,7 +2479,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 11 + hendecagonRotation + settings.rotation) % 360
         };
       });
-
       return (
         <>
           <polygon
@@ -2565,7 +2512,6 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* ⭐ رسم النجمة الحادية عشر {11/3} */}
 {showStar11 && (
   <g>
@@ -2579,7 +2525,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 11 + star11Rotation + settings.rotation) % 360
         };
       });
-
       const ordered = [];
       let index = 0;
       const visited = new Set();
@@ -2589,7 +2534,6 @@ style={inputStyle}
         index = (index + 3) % 11;
         if (visited.has(index)) break;
       }
-
       return (
         <>
           <polygon
@@ -2623,7 +2567,6 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🔷 رسم الشكل الهندسي الاثني عشر المنتظم */}
 {showDodecagon && (
   <g>
@@ -2637,7 +2580,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 12 + dodecagonRotation + settings.rotation) % 360
         };
       });
-
       return (
         <>
           <polygon
@@ -2671,7 +2613,6 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* ⭐ رسم النجمة الإثني عشرية المنتظمة {12/5} */}
 {showStar12 && (
   <g>
@@ -2685,7 +2626,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 12 + star12Rotation + settings.rotation) % 360
         };
       });
-
       const ordered = [];
       let index = 0;
       const visited = new Set();
@@ -2695,7 +2635,6 @@ style={inputStyle}
         index = (index + 5) % 12;
         if (visited.has(index)) break;
       }
-
       return (
         <>
           <polygon
@@ -2729,16 +2668,13 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🧲 رسم عجلة الزوايا */}
-
 {showAngleWheel && (
   <g>
     {(() => {
         const rayCount = Math.round(360 / angleStepRad);
       const outerR = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5) + 60;
       const innerR = innerRadius - 10;
-
       return (
         <>
           {[...Array(rayCount)].map((_, i) => {
@@ -2748,10 +2684,8 @@ style={inputStyle}
             const y1 = center + innerR * Math.sin(rad);
             const x2 = center + outerR * Math.cos(rad);
             const y2 = center + outerR * Math.sin(rad);
-
             const labelX = center + (outerR + 12) * Math.cos(rad) +6;
             const labelY = center + (outerR + 12) * Math.sin(rad) + 6;
-
             return (
               <g key={`angle-ray-${i}`}>
                 <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={rayColor} strokeWidth={rayWidth} />
@@ -2773,10 +2707,7 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🟡  رسم الدوائر المتداخلة  */}
-
-
 {showNestedCircles && (
   <g>
     {[...Array(nestedCircleCount)].map((_, i) => {
@@ -2784,7 +2715,6 @@ style={inputStyle}
       const color = useGradientColor
         ? `hsl(${(i * 30) % 360}, 70%, 60%)`
         : nestedCircleColor;
-
       return (
         <g key={`nested-${i}`}>
           <circle
@@ -2812,7 +2742,6 @@ onClick={() =>
               R={radius}
             </text>
           )}
-
 {showNestedCircles && showTimeLabels && (
   <g>
     {[...Array(nestedCircleCount)].map((_, i) => {
@@ -2834,15 +2763,12 @@ onClick={() =>
     })}
   </g>
 )}
-
-        </g>
+       </g>
       );
     })}
   </g>
 )}
-
 {/* 🧭 كتابة الزوايا مرة واحدة حول الدائرة مخ خطوط الشعاع */}
-
 {showNestedCircles && (
   <g>
     {[...Array(12)].map((_, j) => {
@@ -2850,7 +2776,6 @@ onClick={() =>
       const outerRadius = nestedCircleGap * nestedCircleCount + 20;
       const tx = center + outerRadius * Math.cos(angle);
       const ty = center + outerRadius * Math.sin(angle);
-
       return (
         <text
           key={`global-angle-${j}`}
@@ -2875,7 +2800,6 @@ onClick={() =>
       const outerRadius = nestedCircleGap * nestedCircleCount;
       const x = center + outerRadius * Math.cos(angle);
       const y = center + outerRadius * Math.sin(angle);
-
       return (
         <line
           key={`main-ray-${j}`}
@@ -2891,7 +2815,6 @@ onClick={() =>
     })}
   </g>
 )}
-
 {showNestedCircles && showRepeatedPattern && (
   <g>
     {[...Array(nestedCircleCount)].map((_, i) => {
@@ -2899,11 +2822,9 @@ onClick={() =>
       const centerX = center;
       const centerY = center;
       let angles = [];
-
       if (patternShape === "triangle") angles = [0, 120, 240];
       else if (patternShape === "square") angles = [0, 90, 180, 270];
       else if (patternShape === "star") angles = [0, 144, 288, 72, 216];
-
       const points = angles.map((angleDeg) => {
         const rad = ((angleDeg + patternRotation + settings.rotation) * Math.PI) / 180;
         return {
@@ -2911,7 +2832,6 @@ onClick={() =>
           y: centerY + radius * Math.sin(rad),
         };
       });
-
       return (
         <g key={`pattern-${i}`}>
 <polygon
@@ -2936,8 +2856,6 @@ onClick={() =>
     strokeWidth={1}
   />
 )}
-
-
           {points.map((p, idx) => (
             <circle key={idx} cx={p.x} cy={p.y} r={3} fill={patternColor} />
           ))}
@@ -2951,21 +2869,17 @@ onClick={() =>
     strokeWidth={1}
   />
 )}
-
         </g>
       );
     })}
   </g>
 )}
-
    </g>
       </svg>
     </div>
   </div>
 );
 };
-
-
 const buttonStyle = {
    margin: "6px",
   padding: "8px 16px",
@@ -2978,7 +2892,6 @@ const buttonStyle = {
   transition: "all 0.3s ease",
   cursor: "pointer",
 };
-
 const inputStyle = {
   width: "80px",
   padding: "6px",
