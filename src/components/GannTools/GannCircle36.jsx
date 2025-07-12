@@ -1723,7 +1723,7 @@ const angleMid = angle;
       )
     );
     return acc + (baseRingWidth + maxDigits * digitScale);
-  }, 0) + 20;
+  }, 0) + 40;
 
   const x = center + r * Math.cos(angleRad);
   const y = center + r * Math.sin(angleRad);
