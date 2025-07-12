@@ -1662,7 +1662,7 @@ const angleMid = angle;
 <g key={`${level}-${index}`}>
   <path
     d={path}
-    fill="#fff"
+    fill={getClickColor(value) || "#fff"}
     stroke="#aaa"
     strokeWidth={0.5}
     onClick={() => handleCellClick(value)}
