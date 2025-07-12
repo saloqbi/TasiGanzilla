@@ -1590,64 +1590,113 @@ const angleMid = angle;
 
       return (
         <React.Fragment key={level}>
-          {[...Array(settings.divisions)].map((_, index) => {
-            const value = settings.startValue + level * settings.divisions + index;
-            const angleStart = index * angleStep;
-            const angleEnd = angleStart + angleStep;
-            const rStart = r1 + 5; // قريب من حافة الخلية الداخلية
-            const path = getPathForCell(r1, r2, angleStart, angleEnd);
-            const rMid = (r1 + r2) / 2;
-	       const angleMid = (angleStart + angleEnd) / 2;
-            const xStart = center + rStart * Math.cos(angleMid);
-	       const yStart = center + rStart * Math.sin(angleMid);
-            
-	       // ✅ أضف السطرين التاليين هنا:
-                     const x = center + rMid * Math.cos(angleMid);
-                     const y = center + rMid * Math.sin(angleMid);
-	       
-                     const fontSize = Math.max(5, 11 - value.toString().length);
-            const isGray = (level + index) % 2 === 0;
+{[...Array(settings.divisions)].map((_, index) => {
+  const value = settings.startValue + level * settings.divisions + index;
 
-  	       const reduced = reduceToDigit(value);
-               const fillColor = getCellColor(reduced);
+  // دالة لاختزال الرقم
+  const reduceToDigit = (num) => {
+    while (num > 9) {
+      num = num.toString().split("").reduce((a, b) => a + Number(b), 0);
+    }
+    return num;
+  };
 
-            return (
-              <g key={`${level}-${index}`}>
-              
-<path
-  d={path}
-  fill={getClickColor(value) || (isGray ? "#f0f0f0" : "#ffffff")}
-  stroke="#aaa"
-  strokeWidth={0.5}
-  onClick={() => handleCellClick(value)}
-  style={{ cursor: "pointer" }}
-/>
+  const reduced = reduceToDigit(value);
+  const reducedStart = reduceToDigit(settings.startValue);
+
+  // الزاوية التي يبدأ منها الرقم المختزل الأول
+  const baseAngles = {
+    1: 10,
+    2: 20,
+    3: 30,
+    4: 40,
+    5: 50,
+    6: 60,
+    7: 70,
+    8: 80,
+    9: 90,
+  };
+
+  // الزاوية الفعلية لهذا الرقم ضمن الدورة
+  const sequenceIndex = value - settings.startValue;
+  const baseAngle = baseAngles[reducedStart];
+  const angleDeg = (baseAngle + sequenceIndex * 10) % 360 || 360;
+  const angleRad = (angleDeg - 90) * (Math.PI / 180);
+
+  const angleStart = angleRad - (5 * Math.PI / 180);
+  const angleEnd = angleRad + (5 * Math.PI / 180);
+  const angleMid = angleRad;
+
+  // أنصاف الأقطار
+  const r1 = innerRadius + [...Array(level)].reduce((acc, l) => {
+    const maxDigits = Math.max(
+      ...Array.from({ length: settings.divisions }, (_, i) =>
+        (settings.startValue + l * settings.divisions + i).toString().length
+      )
+    );
+    return acc + (baseRingWidth + maxDigits * digitScale);
+  }, 0);
+
+  const maxDigits = value.toString().length;
+  const dynamicWidth = baseRingWidth + maxDigits * digitScale;
+  const r2 = r1 + dynamicWidth;
+  const rMid = (r1 + r2) / 2;
+
+  // إحداثيات النص
+  const x = center + rMid * Math.cos(angleMid);
+  const y = center + rMid * Math.sin(angleMid);
+
+  const fontSize = 8;
+
+  const getDigitColor = (digit) => {
+    if ([1, 4, 7].includes(digit)) return "red";
+    if ([2, 5, 8].includes(digit)) return "blue";
+    if ([3, 6, 9].includes(digit)) return "black";
+    return "black";
+  };
+
+  const path = getPathForCell(r1, r2, angleStart, angleEnd);
+
+  return (
+// داخل map الخاص بالحلقات والخلايا:
+<g key={`${level}-${index}`}>
+  <path
+    d={path}
+    fill="#fff"
+    stroke="#aaa"
+    strokeWidth={0.5}
+    onClick={() => handleCellClick(value)}
+    style={{ cursor: "pointer" }}
+  />
+
+  {/* الرقم الكامل في مركز الخلية */}
+  <text
+    x={x}
+    y={y}
+    fill={getDigitColor(reduced)}
+    fontSize={fontSize}
+    textAnchor="middle"
+    dominantBaseline="middle"
+    fontWeight="bold"
+  >
+    {value}
+  </text>
+
+  {/* ✅ الرقم المختزل مرفوع للأعلى قليلاً داخل الخلية */}
+  <text
+    x={center + (r1 + 6) * Math.cos(angleMid)}
+    y={center + (r1 + 6) * Math.sin(angleMid)}
+    fill={getDigitColor(reduced)}
+    fontSize={fontSize - 2}
+    textAnchor="middle"
+    dominantBaseline="middle"
+    fontWeight="bold"
+  >
+    {reduced}
+  </text>
 
 
-<text
- x={xStart}
- y={yStart}
- fill={getDigitColor(reduceToDigit(value))}
- fontSize={fontSize - 2}
- textAnchor="middle"
- dominantBaseline="middle"
- fontWeight="bold"
->
-  {reduceToDigit(value)}
-</text>
-
-<text
-  x={x}
-  y={y}
-  fill={getDigitColor(reduceToDigit(value))}
-  fontSize={fontSize}
-  textAnchor="middle"
-  dominantBaseline="middle"
-  fontWeight="bold"
->
-  {value}
-</text>
-
+   
 // 🧭 حلقة الزوايا الخارجية المرتبطة بمجموع الرقم
 
 
