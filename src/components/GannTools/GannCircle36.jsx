@@ -34,6 +34,10 @@ const [selectedShape, setSelectedShape] = useState("");
      const [highlightTriangle, setHighlightTriangle] = useState(true);
      const [fillTriangle, setFillTriangle] = useState(true);
 const [showSquare, setShowSquare] = useState(false);
+//🟡 زر دائري في الزاوية اليمنى العليا
+const [showSettings, setShowSettings] = useState(true);
+
+
 
 // ⭐ نجمة رباعية
 const [showStar4, setShowStar4] = useState(false);
@@ -569,17 +573,40 @@ const handleExportPDF = () => {
   <div style={{
     position: "absolute",
     top: "160px",
-    left: "1px",
+    left: "0px",
     display: "flex",
   flexDirection: "column",
-  gap: "12px",
+  gap: "5px",
   backgroundColor: "#222",
   padding: "12px",
   borderRadius: "10px",
   border: "1px solid #FFD700",
   zIndex: 10,
 }}>
-
+  {/* 🟡 زر دائري في الزاوية اليمنى العليا */}
+<button
+  onClick={() => setShowSettings(!showSettings)}
+  style={{
+    position: "fixed",
+    top: "120px",
+    left: "20px",
+    width: "25px",
+    height: "25px",
+    borderRadius: "50%",
+    backgroundColor: "#ffcc00",
+    color: "#000",
+    fontSize: "10px",
+    border: "none",
+    cursor: "pointer",
+    boxShadow: "0 0 10px #000",
+    zIndex: 9999
+  }}
+  title={showSettings ? "إخفاء الإعدادات" : "عرض الإعدادات"}
+>
+  {showSettings ? "❌" : "⚙️"}
+</button>
+{showSettings && (
+   <>
 <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
   <button onClick={handleExportPNG}>📷 جفظ الصورة</button>
   <button onClick={handleExportPDF}>📄 طباعة PDF</button>
@@ -677,10 +704,75 @@ style={inputStyle}
 style={inputStyle}
     />
   </div>
+  {/* 🧲 عجلة الزوايا */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+  <label>
+    <input type="checkbox" checked={showAngleWheel} onChange={() => setShowAngleWheel(!showAngleWheel)} />
+    🧲 {settings.language === "ar" ? "إظهار عجلة الزوايا" : "Show Angle Wheel"}
+  </label>
 
-<div style={{ margin: "10px", textAlign: "center" }}>
-  <label style={{ fontWeight: "bold", marginRight: "10px" }}>اختيار الأشكال الهندسية:</label>
-  <select value={selectedShape} onChange={(e) => setSelectedShape(e.target.value)}>
+  {showAngleWheel && (
+  <>
+    <label>♻️ تدوير</label>
+    <input
+      type="range"
+      min="0"
+      max="360"
+      value={angleWheelRotation}
+      onChange={(e) => setAngleWheelRotation(parseFloat(e.target.value))}
+    />
+<label>🧮 تكرار كل كم درجة؟</label>
+<select
+  value={angleStepRad}
+  onChange={(e) => setAngleStep(parseInt(e.target.value))}
+  style={{ width: "100%", padding: "4px" }}
+>
+  <option value={5}>كل 5° (72 شعاع)</option>
+  <option value={10}>كل 10° (36 شعاع)</option>
+  <option value={15}>كل 15° (24 شعاع)</option>
+  <option value={30}>كل 30° (12 شعاع)</option>
+  <option value={45}>كل 45° (8 شعاع)</option>
+  <option value={60}>كل 60° (6 شعاع)</option>
+</select>
+
+    <label>🎨 لون الشعاع</label>
+    <input
+      type="color"
+      value={rayColor}
+      onChange={(e) => setRayColor(e.target.value)}
+      style={{ width: "60px", height: "25px" }}
+    />
+
+    <label>📏 سماكة الشعاع</label>
+    <input
+      type="range"
+      min="0.5"
+      max="5"
+      step="0.5"
+      value={rayWidth}
+      onChange={(e) => setRayWidth(parseFloat(e.target.value))}
+    />
+    <span style={{ fontSize: "10px", color: "#aaa" }}>{rayWidth}px</span>
+  </>
+)}
+</div>
+<div style={{ margin: "0px", textAlign: "center", marginBottom: "0px", paddingBottom: "0px" }}>
+  <label style={{ fontWeight: "bold", marginBottom: "4px", display: "block" }}>
+    اختيار الأشكال الهندسية:
+  </label>
+  <select
+    value={selectedShape}
+    onChange={(e) => setSelectedShape(e.target.value)}
+    style={{
+      margin: "0px",
+      padding: "6px",
+      fontSize: "16px",
+      display: "block",
+      width: "100%",
+      maxWidth: "250px",
+      marginInline: "auto",
+    }}
+  >
     <option value="">-- اختر --</option>
     <option value="triangle">🔺 إظهار المثلث</option>
     <option value="square">⬛ إظهار المربع</option>
@@ -707,7 +799,7 @@ style={inputStyle}
 </div>
 
 {/* ✅ أدوات المثلث */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
   {selectedShape === "triangle" && (
     <>
@@ -763,7 +855,7 @@ style={inputStyle}
 </div>
 
 {/* 🟥 أدوات المربع */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
  {selectedShape === "square" && (
     <>
@@ -816,7 +908,7 @@ style={inputStyle}
 </div>
 
 {/* ⭐ أدوات النجمة الرباعية */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
   {selectedShape === "star4" && (
     <>
@@ -848,7 +940,7 @@ style={inputStyle}
 </div>
 
 {/* 🔷 أدوات الشكل الخماسي */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
   {selectedShape === "pentagon" && (
     <>
       {customPentagonAngles.map((angle, idx) => {
@@ -879,7 +971,7 @@ style={inputStyle}
 </div>
 
 {/* ⭐ أدوات النجمة الخماسيه */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
  {selectedShape === "star5" && (
     <>
       {customStarAngles.map((angle, idx) => {
@@ -910,7 +1002,7 @@ style={inputStyle}
 </div>
 
 {/* 🔷 أدوات الشكل السداسي */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
   {selectedShape === "hexagon" && (
     <>
       {customHexagonAngles.map((angle, idx) => {
@@ -941,7 +1033,7 @@ style={inputStyle}
 </div>
 
 {/* ⭐ أدوات النجمة السداسية */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
  {selectedShape === "star6" && (
     <>
       {customHexagramAngles.map((angle, idx) => {
@@ -974,7 +1066,7 @@ style={inputStyle}
 </div>
 
 {/* 🔷 أدوات الشكل السباعي */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
   {selectedShape === "heptagon" && (
     <>
       <label>♻️ تدوير</label>
@@ -1001,7 +1093,7 @@ style={inputStyle}
 
 
 {/* ⭐ أدوات النجمة السباعية */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
 
  {selectedShape === "star7" && (
@@ -1025,7 +1117,7 @@ style={inputStyle}
 
 
 {/* 🧿 أدوات الشكل المثمن */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
  {selectedShape === "octagon" && (
     <>
@@ -1057,7 +1149,7 @@ style={inputStyle}
 </div>
 
 {/* ⭐ أدوات النجمة المثمنة */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 {selectedShape === "star8" && (
     <>
       {customStarOctagonAngles.map((angle, idx) => {
@@ -1088,7 +1180,7 @@ style={inputStyle}
 </div>
 
 {/* 🔷 أدوات الشكل التساعي */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
   {selectedShape === "nonagon" && (
     <>
       <label>♻️ تدوير</label>
@@ -1114,7 +1206,7 @@ style={inputStyle}
 </div>
 
 {/* ⭐ أدوات النجمة التساعية */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
   {selectedShape === "star9" && (
     <>
@@ -1136,7 +1228,7 @@ style={inputStyle}
 </div>
 
 {/* 🔷 أدوات الشكل العشاري */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
  {selectedShape === "decagon" && (
     <>
@@ -1150,7 +1242,7 @@ style={inputStyle}
 </div>
 
 {/* ⭐ أدوات النجمة العشارية */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
   {selectedShape === "star10" && (
     <>
@@ -1164,7 +1256,7 @@ style={inputStyle}
 </div>
 
 {/* 🔷 أدوات الشكل الحادي عشر */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
   {selectedShape === "hendecagon" && (
     <>
@@ -1178,7 +1270,7 @@ style={inputStyle}
 </div>
 
 {/* ⭐ أدوات النجمة الحادية عشر */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
   {selectedShape === "star11" && (
     <>
@@ -1192,7 +1284,7 @@ style={inputStyle}
 </div>
 
 {/* 🔷 أدوات الشكل الاثني عشر */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
   {selectedShape === "dodecagon" && (
     <>
@@ -1206,7 +1298,7 @@ style={inputStyle}
 </div>
 
 {/* ⭐ أدوات النجمة 12/5 */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
 
   {selectedShape === "star12" && (
     <>
@@ -1219,69 +1311,9 @@ style={inputStyle}
   )}
 </div>
 
-
-
-{/* 🧲 عجلة الزوايا */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showAngleWheel} onChange={() => setShowAngleWheel(!showAngleWheel)} />
-    🧲 {settings.language === "ar" ? "إظهار عجلة الزوايا" : "Show Angle Wheel"}
-  </label>
-
-  {showAngleWheel && (
-  <>
-    <label>♻️ تدوير</label>
-    <input
-      type="range"
-      min="0"
-      max="360"
-      value={angleWheelRotation}
-      onChange={(e) => setAngleWheelRotation(parseFloat(e.target.value))}
-    />
-<label>🧮 تكرار كل كم درجة؟</label>
-<select
-  value={angleStepRad}
-  onChange={(e) => setAngleStep(parseInt(e.target.value))}
-  style={{ width: "100%", padding: "4px" }}
->
-  <option value={5}>كل 5° (72 شعاع)</option>
-  <option value={10}>كل 10° (36 شعاع)</option>
-  <option value={15}>كل 15° (24 شعاع)</option>
-  <option value={30}>كل 30° (12 شعاع)</option>
-  <option value={45}>كل 45° (8 شعاع)</option>
-  <option value={60}>كل 60° (6 شعاع)</option>
-</select>
-
-    <label>🎨 لون الشعاع</label>
-    <input
-      type="color"
-      value={rayColor}
-      onChange={(e) => setRayColor(e.target.value)}
-      style={{ width: "60px", height: "25px" }}
-    />
-
-    <label>📏 سماكة الشعاع</label>
-    <input
-      type="range"
-      min="0.5"
-      max="5"
-      step="0.5"
-      value={rayWidth}
-      onChange={(e) => setRayWidth(parseFloat(e.target.value))}
-    />
-    <span style={{ fontSize: "10px", color: "#aaa" }}>{rayWidth}px</span>
-  </>
-)}
-</div>
-
 {/* 🟡 الدوائر المتداخلة */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "12px", color: "#FFD700" }}>
-  <label>
-    <input type="checkbox" checked={showNestedCircles} onChange={() => setShowNestedCircles(!showNestedCircles)} />
-    🟡 {settings.language === "ar" ? "إظهار الدوائر المتداخلة" : "Show Nested Circles"}
-  </label>
-
-  {showNestedCircles && (
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+  {selectedShape === "circles" && (
     <>
       <label>🔢 {settings.language === "ar" ? "عدد الدوائر" : "Number of Circles"}
       <input
@@ -1442,7 +1474,8 @@ style={inputStyle}
     </>
   )}
 </div>
-
+  </>
+)}
 </div>
     </div>
 
@@ -1474,8 +1507,7 @@ style={inputStyle}
     display: "block",
     margin: "0 auto",
     background: "#f2f2f2",
-    cursor: isDragging ? "grabbing" : "grab",
-    }}
+    cursor: isDragging ? "grabbing" : "grab",    }}
     onMouseDown={handleMouseDown}
     onMouseMove={handleMouseMove}
     onMouseUp={handleMouseUp}
@@ -2702,7 +2734,7 @@ const angleMid = angle;
   </g>
 )}
 {/* 🟡  رسم الدوائر المتداخلة  */}
-{showNestedCircles && (
+{selectedShape === "circles" && (
   <g>
     {[...Array(nestedCircleCount)].map((_, i) => {
       const radius = nestedCircleGap * (i + 1);
@@ -2763,7 +2795,7 @@ onClick={() =>
   </g>
 )}
 {/* 🧭 كتابة الزوايا مرة واحدة حول الدائرة مخ خطوط الشعاع */}
-{showNestedCircles && (
+{selectedShape === "circles" && (
   <g>
     {[...Array(12)].map((_, j) => {
       const angle = ((j * 30 - 90) * Math.PI) / 180;
@@ -2787,7 +2819,7 @@ onClick={() =>
     })}
   </g>
 )}
-{showNestedCircles && (
+{selectedShape === "circles" && (
   <g>
     {[...Array(12)].map((_, j) => {
       const angle = ((j * 30 - 90) * Math.PI) / 180;
