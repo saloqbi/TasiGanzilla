@@ -1813,7 +1813,7 @@ const angleMid = angle;
             points={trianglePoints.map(p => `${p.x},${p.y}`).join(" ")}
             fill={fillTriangle ? "rgba(0, 128, 255, 0.2)" : "none"}
             stroke="green"
-            strokeWidth={2}
+            strokeWidth={1}
           />
 
           {/* ✅ تمييز الزوايا بدوائر */}
@@ -1831,7 +1831,7 @@ const angleMid = angle;
               x2={center}
               y2={center}
               stroke="green"
-              strokeWidth={3}
+              strokeWidth={1}
               strokeDasharray="4,2"
             />
           ))}
@@ -2762,7 +2762,7 @@ const angleMid = angle;
         <>
           {[...Array(rayCount)].map((_, i) => {
                      const angle = (i * angleStepRad + angleWheelRotation + settings.rotation) % 360;
-            const rad = (angle * Math.PI) / 180;
+            const rad = ((angle - 90) * Math.PI) / 180;
             const x1 = center + innerR * Math.cos(rad);
             const y1 = center + innerR * Math.sin(rad);
             const x2 = center + outerR * Math.cos(rad);
@@ -2780,7 +2780,7 @@ const angleMid = angle;
                   textAnchor="middle"
                   dominantBaseline="middle"
                 >
-                  {Math.round(angle) === 0 ? "360°" : `${Math.round(angle)}°`}
+                  {Math.round(angle) === 0 ? "0°" : `${Math.round(angle)}°`}
                 </text>
               </g>
             );
