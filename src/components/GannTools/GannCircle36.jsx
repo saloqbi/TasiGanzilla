@@ -686,7 +686,7 @@ style={inputStyle}
     <option value="square">⬛ إظهار المربع</option>
     <option value="star4">⭐ إظهار النجمة الرباعية</option>
     <option value="pentagon">🔷 إظهار الخماسي</option>
-    <option value="star">⭐ إظهار النجمة</option>
+    <option value="star5">⭐  الخماسيةإظهار النجمة</option>
     <option value="hexagon">🛑 إظهار السداسي</option>
     <option value="star6">⭐ إظهار النجمة السداسية</option>
     <option value="heptagon">🔷 إظهار السباعي</option>
@@ -1888,9 +1888,6 @@ const angleMid = angle;
     })()}
   </g>
 )}
-
-
-
 {/*  رسم الخماسي داخل الدائرة */}
  {selectedShape === "pentagon" && (
   <g>
@@ -1931,7 +1928,6 @@ const angleMid = angle;
 )}
 
 {/*  رسم النجمه الحماسيه داخل الدائرة */}
-
  {selectedShape === "star5" && (
   <g>
     {(() => {
