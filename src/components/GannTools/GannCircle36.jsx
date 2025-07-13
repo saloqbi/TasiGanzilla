@@ -20,7 +20,7 @@ const svgRef = useRef();
 return stored ? JSON.parse(stored) : defaultSettings;
 
   });
-
+const [selectedShape, setSelectedShape] = useState("");
   const [zoom, setZoom] = useState(1);
    const [showZodiacRing, setShowZodiacRing] = useState(true);
     const [showDegreeRing, setShowDegreeRing] = useState(true);
@@ -565,12 +565,12 @@ const handleExportPDF = () => {
       <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="#aaa" />
     </filter>
   </defs>
-
-      <div style={{ 
-  position: "absolute",
-  top: "120px",
-  right: "10px",
-  display: "flex",
+  {/* البوكس الخاص بالاعدادات */}
+  <div style={{
+    position: "absolute",
+    top: "160px",
+    left: "1px",
+    display: "flex",
   flexDirection: "column",
   gap: "12px",
   backgroundColor: "#222",
@@ -623,16 +623,93 @@ const handleExportPDF = () => {
     ? (showZodiacRing ? "إخفاء الأبراج" : "إظهار الأبراج")
     : (showZodiacRing ? "Hide Zodiac" : "Show Zodiac")}
 </button>
+       <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+    <label style={{ marginBottom: "5px" }}>
+      {settings.language === "ar" ? "عدد القطاعات" : "Divisions"}
+    </label>
+    <input
+      type="number"
+      min={10}
+      max={720}
+      value={settings.divisions}
+      onChange={(e) =>
+        setSettings((prev) => ({
+          ...prev,
+          divisions: parseInt(e.target.value),
+        }))
+      }
+style={inputStyle}
+    />
+  </div>
 
+         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+    <label style={{ marginBottom: "5px" }}>
+      {settings.language === "ar" ? "بداية الترقيم" : "Start From"}
+    </label>
+    <input
+      type="number"
+      min={1}
+      value={settings.startValue}
+      onChange={(e) =>
+        setSettings((prev) => ({
+          ...prev,
+          startValue: parseInt(e.target.value),
+        }))
+      }
+style={inputStyle}
+    />
+  </div>
+  <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+    <label style={{ marginBottom: "5px" }}>
+      {settings.language === "ar" ? "عدد الحلقات" : "Levels"}
+    </label>
+    <input
+      type="number"
+      min={1}
+      max={40}
+      value={settings.levels}
+      onChange={(e) =>
+        setSettings((prev) => ({
+          ...prev,
+          levels: parseInt(e.target.value),
+        }))
+      }
+style={inputStyle}
+    />
+  </div>
+
+<div style={{ margin: "10px", textAlign: "center" }}>
+  <label style={{ fontWeight: "bold", marginRight: "10px" }}>اختيار الأشكال الهندسية:</label>
+  <select value={selectedShape} onChange={(e) => setSelectedShape(e.target.value)}>
+    <option value="">-- اختر --</option>
+    <option value="triangle">🔺 إظهار المثلث</option>
+    <option value="square">⬛ إظهار المربع</option>
+    <option value="star4">⭐ إظهار النجمة الرباعية</option>
+    <option value="pentagon">🔷 إظهار الخماسي</option>
+    <option value="star">⭐ إظهار النجمة</option>
+    <option value="hexagon">🛑 إظهار السداسي</option>
+    <option value="star6">⭐ إظهار النجمة السداسية</option>
+    <option value="heptagon">🔷 إظهار السباعي</option>
+    <option value="star7">⭐ إظهار النجمة السباعية</option>
+    <option value="octagon">🧿 إظهار المربع الثماني</option>
+    <option value="star8">⭐ إظهار نجمة مثمنة</option>
+    <option value="nonagon">🔷 إظهار التساعي</option>
+    <option value="star9">⭐ إظهار النجمة التساعية</option>
+    <option value="decagon">🔷 إظهار الشكل العشاري</option>
+    <option value="star10">⭐ إظهار النجمة العشارية</option>
+    <option value="eleven">🔷 إظهار الحادي عشر</option>
+    <option value="star11">⭐ إظهار النجمة الحادية عشر</option>
+    <option value="twelve">🔷 إظهار الاثني عشر</option>
+    <option value="star12">⭐ النجمة الإثني عشرية {12/5}</option>
+    <option value="anglewheel">🧲 إظهار عجلة الزوايا</option>
+    <option value="circles">🟡 إظهار الدوائر المتداخلة</option>
+  </select>
+</div>
 
 {/* ✅ أدوات المثلث */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showTriangle} onChange={() => setShowTriangle(!showTriangle)} />
-    🔺 {settings.language === "ar" ? "إظهار المثلث" : "Show Triangle"}
-  </label>
 
-  {showTriangle && (
+  {selectedShape === "triangle" && (
     <>
       <label>
         🎛 {settings.language === "ar" ? "زوايا المثلث" : "Triangle Angles"}
@@ -657,8 +734,6 @@ const handleExportPDF = () => {
     />
   );
 })}
-
-
       <label>
         ♻️ {settings.language === "ar" ? "تدوير المثلث" : "Rotate Triangle"}
       </label>
@@ -683,20 +758,14 @@ const handleExportPDF = () => {
   />
   {settings.language === "ar" ? "تعبئة المثلث" : "Fill Triangle"}
 </label>
-
-
     </>
   )}
 </div>
 
 {/* 🟥 أدوات المربع */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showSquare} onChange={() => setShowSquare(!showSquare)} />
-    ⬛ {settings.language === "ar" ? "إظهار المربع" : "Show Square"}
-  </label>
 
-  {showSquare && (
+ {selectedShape === "square" && (
     <>
       <label>
         🎛 {settings.language === "ar" ? "زوايا المربع" : "Square Angles"}
@@ -748,12 +817,8 @@ const handleExportPDF = () => {
 
 {/* ⭐ أدوات النجمة الرباعية */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar4} onChange={() => setShowStar4(!showStar4)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة الرباعية" : "Show 4-Point Star"}
-  </label>
 
-  {showStar4 && (
+  {selectedShape === "star4" && (
     <>
       {customStar4Angles.map((angle, idx) => {
         const rotated = (angle + star4Rotation + settings.rotation) % 360;
@@ -784,12 +849,7 @@ const handleExportPDF = () => {
 
 {/* 🔷 أدوات الشكل الخماسي */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showPentagon} onChange={() => setShowPentagon(!showPentagon)} />
-    🔷 {settings.language === "ar" ? "إظهار الخماسي" : "Show Pentagon"}
-  </label>
-
-  {showPentagon && (
+  {selectedShape === "pentagon" && (
     <>
       {customPentagonAngles.map((angle, idx) => {
         const rotated = (angle + pentagonRotation + settings.rotation) % 360;
@@ -820,12 +880,7 @@ const handleExportPDF = () => {
 
 {/* ⭐ أدوات النجمة الخماسيه */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar} onChange={() => setShowStar(!showStar)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة" : "Show Star"}
-  </label>
-
-  {showStar && (
+ {selectedShape === "star5" && (
     <>
       {customStarAngles.map((angle, idx) => {
         const rotated = (angle + starRotation + settings.rotation) % 360;
@@ -856,12 +911,7 @@ const handleExportPDF = () => {
 
 {/* 🔷 أدوات الشكل السداسي */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showHexagon} onChange={() => setShowHexagon(!showHexagon)} />
-    🛑 {settings.language === "ar" ? "إظهار السداسي" : "Show Hexagon"}
-  </label>
-
-  {showHexagon && (
+  {selectedShape === "hexagon" && (
     <>
       {customHexagonAngles.map((angle, idx) => {
         const rotated = (angle + hexagonRotation + settings.rotation) % 360;
@@ -892,12 +942,7 @@ const handleExportPDF = () => {
 
 {/* ⭐ أدوات النجمة السداسية */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showHexagram} onChange={() => setShowHexagram(!showHexagram)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة السداسية" : "Show Hexagram"}
-  </label>
-
-  {showHexagram && (
+ {selectedShape === "star6" && (
     <>
       {customHexagramAngles.map((angle, idx) => {
         const rotated = (angle + hexagramRotation + settings.rotation) % 360;
@@ -930,12 +975,7 @@ const handleExportPDF = () => {
 
 {/* 🔷 أدوات الشكل السباعي */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showHeptagon} onChange={() => setShowHeptagon(!showHeptagon)} />
-    🔷 {settings.language === "ar" ? "إظهار السباعي" : "Show Heptagon"}
-  </label>
-
-  {showHeptagon && (
+  {selectedShape === "heptagon" && (
     <>
       <label>♻️ تدوير</label>
       <input
@@ -962,12 +1002,9 @@ const handleExportPDF = () => {
 
 {/* ⭐ أدوات النجمة السباعية */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar7} onChange={() => setShowStar7(!showStar7)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة السباعية" : "Show 7-Point Star"}
-  </label>
 
-  {showStar7 && (
+
+ {selectedShape === "star7" && (
     <>
       <label>♻️ تدوير</label>
       <input type="range" min="0" max="360" value={star7Rotation}
@@ -989,12 +1026,8 @@ const handleExportPDF = () => {
 
 {/* 🧿 أدوات الشكل المثمن */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showOctagon} onChange={() => setShowOctagon(!showOctagon)} />
-    🧿 {settings.language === "ar" ? "إظهار  المربع الثماني" : "Show Octagon"}
-  </label>
 
-  {showOctagon && (
+ {selectedShape === "octagon" && (
     <>
       {customOctagonAngles.map((angle, idx) => {
         const rotated = (angle + octagonRotation + settings.rotation) % 360;
@@ -1025,12 +1058,7 @@ const handleExportPDF = () => {
 
 {/* ⭐ أدوات النجمة المثمنة */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStarOctagon} onChange={() => setShowStarOctagon(!showStarOctagon)} />
-    ⭐ {settings.language === "ar" ? "إظهار نجمة مثمنة" : "Show Star Octagon"}
-  </label>
-
-  {showStarOctagon && (
+{selectedShape === "star8" && (
     <>
       {customStarOctagonAngles.map((angle, idx) => {
         const rotated = (angle + starOctagonRotation + settings.rotation) % 360;
@@ -1061,12 +1089,7 @@ const handleExportPDF = () => {
 
 {/* 🔷 أدوات الشكل التساعي */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showNonagon} onChange={() => setShowNonagon(!showNonagon)} />
-    🔷 {settings.language === "ar" ? "إظهار التساعي" : "Show Nonagon"}
-  </label>
-
-  {showNonagon && (
+  {selectedShape === "nonagon" && (
     <>
       <label>♻️ تدوير</label>
       <input
@@ -1092,12 +1115,8 @@ const handleExportPDF = () => {
 
 {/* ⭐ أدوات النجمة التساعية */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar9} onChange={() => setShowStar9(!showStar9)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة التساعية" : "Show 9-Point Star"}
-  </label>
 
-  {showStar9 && (
+  {selectedShape === "star9" && (
     <>
       <label>♻️ تدوير</label>
       <input type="range" min="0" max="360" value={star9Rotation}
@@ -1118,12 +1137,8 @@ const handleExportPDF = () => {
 
 {/* 🔷 أدوات الشكل العشاري */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showDecagon} onChange={() => setShowDecagon(!showDecagon)} />
-    🔷 {settings.language === "ar" ? "إظهار الشكل العشاري" : "Show Decagon"}
-  </label>
 
-  {showDecagon && (
+ {selectedShape === "decagon" && (
     <>
       <label>♻️ تدوير</label>
       <input type="range" min="0" max="360" value={decagonRotation}
@@ -1136,12 +1151,8 @@ const handleExportPDF = () => {
 
 {/* ⭐ أدوات النجمة العشارية */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar10} onChange={() => setShowStar10(!showStar10)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة العشارية" : "Show 10-Point Star"}
-  </label>
 
-  {showStar10 && (
+  {selectedShape === "star10" && (
     <>
       <label>♻️ تدوير</label>
       <input type="range" min="0" max="360" value={star10Rotation}
@@ -1154,12 +1165,8 @@ const handleExportPDF = () => {
 
 {/* 🔷 أدوات الشكل الحادي عشر */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showHendecagon} onChange={() => setShowHendecagon(!showHendecagon)} />
-    🔷 {settings.language === "ar" ? "إظهار الحادي عشر" : "Show 11-gon"}
-  </label>
 
-  {showHendecagon && (
+  {selectedShape === "hendecagon" && (
     <>
       <label>♻️ تدوير</label>
       <input type="range" min="0" max="360" value={hendecagonRotation}
@@ -1172,12 +1179,8 @@ const handleExportPDF = () => {
 
 {/* ⭐ أدوات النجمة الحادية عشر */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar11} onChange={() => setShowStar11(!showStar11)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة الحادية عشر" : "Show 11-Point Star"}
-  </label>
 
-  {showStar11 && (
+  {selectedShape === "star11" && (
     <>
       <label>♻️ تدوير</label>
       <input type="range" min="0" max="360" value={star11Rotation}
@@ -1190,12 +1193,8 @@ const handleExportPDF = () => {
 
 {/* 🔷 أدوات الشكل الاثني عشر */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showDodecagon} onChange={() => setShowDodecagon(!showDodecagon)} />
-    🔷 {settings.language === "ar" ? "إظهار الاثني عشر" : "Show Dodecagon"}
-  </label>
 
-  {showDodecagon && (
+  {selectedShape === "dodecagon" && (
     <>
       <label>♻️ تدوير</label>
       <input type="range" min="0" max="360" value={dodecagonRotation}
@@ -1208,12 +1207,8 @@ const handleExportPDF = () => {
 
 {/* ⭐ أدوات النجمة 12/5 */}
 <div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar12} onChange={() => setShowStar12(!showStar12)} />
-    ⭐ {settings.language === "ar" ? "النجمة الإثني عشرية {12/5}" : "Dodecagram {12/5}"}
-  </label>
 
-  {showStar12 && (
+  {selectedShape === "star12" && (
     <>
       <label>♻️ تدوير</label>
       <input type="range" min="0" max="360" value={star12Rotation}
@@ -1448,62 +1443,6 @@ const handleExportPDF = () => {
   )}
 </div>
 
-
-        <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
-    <label style={{ marginBottom: "5px" }}>
-      {settings.language === "ar" ? "عدد الحلقات" : "Levels"}
-    </label>
-    <input
-      type="number"
-      min={1}
-      max={40}
-      value={settings.levels}
-      onChange={(e) =>
-        setSettings((prev) => ({
-          ...prev,
-          levels: parseInt(e.target.value),
-        }))
-      }
-style={inputStyle}
-    />
-  </div>
-
-         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
-    <label style={{ marginBottom: "5px" }}>
-      {settings.language === "ar" ? "عدد القطاعات" : "Divisions"}
-    </label>
-    <input
-      type="number"
-      min={10}
-      max={720}
-      value={settings.divisions}
-      onChange={(e) =>
-        setSettings((prev) => ({
-          ...prev,
-          divisions: parseInt(e.target.value),
-        }))
-      }
-style={inputStyle}
-    />
-  </div>
-
-         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
-    <label style={{ marginBottom: "5px" }}>
-      {settings.language === "ar" ? "بداية الترقيم" : "Start From"}
-    </label>
-    <input
-      type="number"
-      min={1}
-      value={settings.startValue}
-      onChange={(e) =>
-        setSettings((prev) => ({
-          ...prev,
-          startValue: parseInt(e.target.value),
-        }))
-      }
-style={inputStyle}
-    />
-  </div>
 </div>
     </div>
 
@@ -1516,8 +1455,16 @@ style={inputStyle}
     background: "#fff",               // خلفية بيضاء حول الدائرة
     boxShadow: "0 0 10px rgba(255, 215, 0, 0.3)",
   }}
+> {/*'🔵 دائرة جان ديفيد'*/}
+<div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "200vh",
+    backgroundColor: "#111", // اختياري: خلفية داكنة
+  }}
 >
-
   <svg
         ref={svgRef}
      width="100%"
@@ -1758,10 +1705,10 @@ const angleMid = angle;
 
 
 {/* ✅ رسم المثلث داخل الدائرة */}
-{showTriangle && (
+{selectedShape === "triangle" && (
   <g>
     {(() => {
-      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5); // نصف القطر
+      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5); // نصف القطر الديناميكي
       const trianglePoints = customAngles.map((deg) => {
         const rad = ((deg + triangleRotation + settings.rotation) * Math.PI) / 180;
         return {
@@ -1772,49 +1719,51 @@ const angleMid = angle;
 
       return (
         <>
+          {/* ✅ المثلث نفسه */}
           <polygon
-            points={trianglePoints.map((p) => `${p.x},${p.y}`).join(" ")}
-            fill={fillTriangle ? "rgba(0, 128, 0, 0.2)" : "none"}  // ✅ تعبئة خضراء أو لا شيء
+            points={trianglePoints.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillTriangle ? "rgba(0, 128, 255, 0.2)" : "none"}
             stroke="green"
             strokeWidth={2}
           />
+
+          {/* ✅ تمييز الزوايا بدوائر */}
           {highlightTriangle &&
             trianglePoints.map((p, i) => (
               <circle key={i} cx={p.x} cy={p.y} r={4} fill="yellow" />
             ))}
-{/* ✅ الخطوط الداخلية من كل رأس للمركز */}
-{trianglePoints.map((point, index) => (
-  <line
-    key={`line-${index}`}
-    x1={point.x}
-    y1={point.y}
-    x2={center}
-    y2={center}
-    stroke="green"
-    strokeWidth={3}
-    strokeDasharray="4,2" // خط متقطع (يمكنك تغييره)
-  />
-))}
 
-{/* ✅ عرض الزوايا الجديدة عند كل رأس */}
-{trianglePoints.map((point, i) => {
-  const angle = (customAngles[i] + triangleRotation + settings.rotation) % 360;
+          {/* ✅ الخطوط الداخلية من الرؤوس إلى المركز */}
+          {trianglePoints.map((point, index) => (
+            <line
+              key={`line-${index}`}
+              x1={point.x}
+              y1={point.y}
+              x2={center}
+              y2={center}
+              stroke="green"
+              strokeWidth={3}
+              strokeDasharray="4,2"
+            />
+          ))}
 
-  return (
-    <text
-      key={`angle-text-${i}`}
-      x={point.x}
-      y={point.y - 12}
-      fill="green"
-      fontSize={16}
-      fontWeight="bold"
-      textAnchor="middle"
-    >
-      ({angle.toFixed(0)}°)
-    </text>
-  );
-})}
-
+          {/* ✅ عرض الزوايا النصية عند الرؤوس */}
+          {trianglePoints.map((point, i) => {
+            const angle = (customAngles[i] + triangleRotation + settings.rotation) % 360;
+            return (
+              <text
+                key={`angle-text-${i}`}
+                x={point.x}
+                y={point.y - 12}
+                fill="green"
+                fontSize={16}
+                fontWeight="bold"
+                textAnchor="middle"
+              >
+                ({angle.toFixed(0)}°)
+              </text>
+            );
+          })}
         </>
       );
     })()}
@@ -1823,7 +1772,7 @@ const angleMid = angle;
 
 
 {/* 🟥 رسم المربع داخل الدائرة */}
-{showSquare && (
+{selectedShape === "square" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5); // نفس نصف القطر
@@ -1889,7 +1838,7 @@ const angleMid = angle;
 
 {/* ⭐ رسم النجمة الرباعية */}
 {/* ⭐ رسم النجمة الرباعية الحقيقية (شكل كوكسيتير مثل الصورة) */}
-{showStar4 && (
+{selectedShape === "star4" && (
   <g>
     {(() => {
       const R_outer = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -1943,7 +1892,7 @@ const angleMid = angle;
 
 
 {/*  رسم الخماسي داخل الدائرة */}
-{showPentagon && (
+ {selectedShape === "pentagon" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -1983,7 +1932,7 @@ const angleMid = angle;
 
 {/*  رسم النجمه الحماسيه داخل الدائرة */}
 
-{showStar && (
+ {selectedShape === "star5" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2021,7 +1970,7 @@ const angleMid = angle;
   </g>
 )}
 {/* رسم السداسي داخل الدائرة */}
-{showHexagon && (
+ {selectedShape === "hexagon" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2058,7 +2007,7 @@ const angleMid = angle;
   </g>
 )}
 {/*  ⭐ رسم النجمة السداسية بشكل مركب من مثلثين */}
-{showHexagram && (
+ {selectedShape === "star6" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2119,7 +2068,7 @@ const angleMid = angle;
   </g>
 )}
 {/* 🔷 رسم الشكل السباعي المنتظم */}
-{showHeptagon && (
+ {selectedShape === "heptagon" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2168,7 +2117,7 @@ const angleMid = angle;
   </g>
 )}
 {/* ⭐ رسم النجمة السباعية */}
-{showStar7 && (
+ {selectedShape === "star7" && (
   <g>
     {(() => {
       const R_outer = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2218,7 +2167,7 @@ const angleMid = angle;
   </g>
 )}
 {/* 🧿 رسم المربع الثماني*/}
-{showOctagon && (
+ {selectedShape === "octagon" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2255,7 +2204,7 @@ const angleMid = angle;
   </g>
 )}
 {/* ⭐ رسم النجمة الثمانية (8/3 شليفلي) */}
-{showStarOctagon && (
+ {selectedShape === "star8" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2311,7 +2260,7 @@ const angleMid = angle;
   </g>
 )}
 {/* 🔷 رسم الشكل التساعي المنتظم */}
-{showNonagon && (
+ {selectedShape === "nonagon" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2359,7 +2308,7 @@ const angleMid = angle;
   </g>
 )}
 {/* ⭐ رسم النجمة التساعية المنتظمة {9/2} */}
-{showStar9 && (
+ {selectedShape === "star9" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2415,7 +2364,7 @@ const angleMid = angle;
   </g>
 )}
 {/* 🔷 رسم الشكل العشاري المنتظم */}
-{showDecagon && (
+ {selectedShape === "decagon" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2461,7 +2410,7 @@ const angleMid = angle;
   </g>
 )}
 {/* ⭐ رسم النجمة العشارية المنتظمة {10/3} */}
-{showStar10 && (
+ {selectedShape === "star10" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2516,7 +2465,7 @@ const angleMid = angle;
   </g>
 )}
 {/* 🔷 رسم الشكل الهندسي الحادي عشر المنتظم */}
-{showHendecagon && (
+ {selectedShape === "hendecagon" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2562,7 +2511,7 @@ const angleMid = angle;
   </g>
 )}
 {/* ⭐ رسم النجمة الحادية عشر {11/3} */}
-{showStar11 && (
+ {selectedShape === "star11" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2617,7 +2566,7 @@ const angleMid = angle;
   </g>
 )}
 {/* 🔷 رسم الشكل الهندسي الاثني عشر المنتظم */}
-{showDodecagon && (
+ {selectedShape === "dodecagon" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2663,7 +2612,7 @@ const angleMid = angle;
   </g>
 )}
 {/* ⭐ رسم النجمة الإثني عشرية المنتظمة {12/5} */}
-{showStar12 && (
+ {selectedShape === "star12" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2926,6 +2875,7 @@ onClick={() =>
    </g>
       </svg>
     </div>
+  </div>
   </div>
 );
 };
