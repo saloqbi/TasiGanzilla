@@ -357,49 +357,41 @@ const handleMouseMove = (e) => {
 const handleMouseUp = () => {
   setIsDragging(false);
 };
-const zodiacLabels = [
-  { label: "نار الحمل", color: "red" },
-  { label: "تراب الثور", color: "blue" },
-  { label: "هواء الجوزاء", color: "black" },
-  { label: "ماء السرطان", color: "red" },
-  { label: "نار الاسد", color: "blue" },
-  { label: "تراب السنبله", color: "black" },
-  { label: "هواء الميزان", color: "red" },
-  { label: "ماء العقرب", color: "blue" },
-  { label: "نار القوس", color: "black" },
-  { label: "تراب الجدي", color: "red" },
-  { label: "هواء الدلو", color: "blue" },
-  { label: "ماء الحوت", color: "black" },
-];
-
 const RenderZodiacRing = () => {
   const radiusOuter = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5) + 50;
   const radiusInner = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
   const zodiacRadius = (radiusInner + radiusOuter) / 2;
 
-  const totalNumbers = settings.divisions;
-  const anglePerNumber = 360 / totalNumbers;
+  const zodiacBase = [
+    { label: "نار الحمل", color: "red" },
+    { label: "تراب الثور", color: "blue" },
+    { label: "هواء الجوزاء", color: "black" },
+    { label: "ماء السرطان", color: "red" },
+    { label: "نار الأسد", color: "blue" },
+    { label: "تراب السنبلة", color: "black" },
+    { label: "هواء الميزان", color: "red" },
+    { label: "ماء العقرب", color: "blue" },
+    { label: "نار القوس", color: "black" },
+    { label: "تراب الجدي", color: "red" },
+    { label: "هواء الدلو", color: "blue" },
+    { label: "ماء الحوت", color: "black" },
+  ];
 
-  // ✅ زاوية وسط أول قطاع = 0.5 * anglePerNumber => نريد أن تكون عند 10°
-  // لذا ندوّر الحلقة لتجعل الزاوية 10° هي بداية أول برج
-  const desiredStartAngle = 10;
-  const rotationOffset = 0.5 * anglePerNumber - desiredStartAngle;
+  const zodiacCycle = [...zodiacBase, ...zodiacBase, ...zodiacBase]; // 36 برج
 
+  const totalSectors = zodiacCycle.length;
+  const angleStep = 10;
+  const angleStart = -85; // هنا التعديل لحل المشكلة
   return (
     <g>
-      {[...Array(totalNumbers)].map((_, index) => {
-        const angle = (index + 0.5) * anglePerNumber - rotationOffset;
-        const angleRad = (angle * Math.PI) / 180;
-
-        // ✅ الأبراج تبدأ من الحمل وتدور مع القطاعات مهما كان عددها
-        const zodiacIndex = index % zodiacLabels.length;
-        const { label, color } = zodiacLabels[zodiacIndex];
-
-        const startAngle = index * anglePerNumber - rotationOffset;
-        const endAngle = (index + 1) * anglePerNumber - rotationOffset;
+      {zodiacCycle.map(({ label, color }, i) => {
+        const startAngle = angleStart + i * angleStep;
+        const endAngle = startAngle + angleStep;
+        const midAngle = (startAngle + endAngle) / 2;
 
         const startRad = (startAngle * Math.PI) / 180;
         const endRad = (endAngle * Math.PI) / 180;
+        const midRad = (midAngle * Math.PI) / 180;
 
         const x1 = center + radiusInner * Math.cos(startRad);
         const y1 = center + radiusInner * Math.sin(startRad);
@@ -410,16 +402,16 @@ const RenderZodiacRing = () => {
         const x4 = center + radiusInner * Math.cos(endRad);
         const y4 = center + radiusInner * Math.sin(endRad);
 
-        const xText = center + zodiacRadius * Math.cos(angleRad);
-        const yText = center + zodiacRadius * Math.sin(angleRad);
+        const xText = center + zodiacRadius * Math.cos(midRad);
+        const yText = center + zodiacRadius * Math.sin(midRad);
 
         return (
-          <g key={`zodiac-${index}`}>
+          <g key={`zodiac-${i}`}>
             <path
               d={`M ${x1},${y1} L ${x2},${y2} A ${radiusOuter},${radiusOuter} 0 0,1 ${x3},${y3} L ${x4},${y4} A ${radiusInner},${radiusInner} 0 0,0 ${x1},${y1} Z`}
               fill="#eee"
               stroke="#FFD700"
-              strokeWidth={0.9}
+              strokeWidth={0.8}
             />
             <text
               x={xText}
@@ -429,6 +421,7 @@ const RenderZodiacRing = () => {
               textAnchor="middle"
               dominantBaseline="middle"
               fontWeight="bold"
+              transform={`rotate(${midAngle + 90}, ${xText}, ${yText})`}
             >
               {label}
             </text>
@@ -505,6 +498,40 @@ const handleExportPDF = () => {
   >
     {/* ✅ القسم العلوي: العنوان والأزرار */}
     <div style={{ padding: 10, flexShrink: 0 }}>
+      {/* 🔍 أزرار التكبير والتصغير على الطرف الأيمن */}
+<div
+  style={{
+    position: "fixed",
+    top: "220px", // موقع عمودي مناسب لبداية الدائرة
+    right: "10px", // الطرف الأيمن
+    backgroundColor: "#222",
+    border: "1px solid #FFD700",
+    borderRadius: "10px",
+    padding: "10px",
+    zIndex: 9999,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "8px",
+  }}
+>
+  <button
+    onClick={() => setScale((prev) => Math.min(prev + 0.1, 2))}
+    style={{ ...buttonStyle, padding: "6px 12px", fontSize: "13px" }}
+  >
+    ➕ {settings.language === "ar" ? "تكبير" : "Zoom In"}
+  </button>
+  <button
+    onClick={() => setScale((prev) => Math.max(prev - 0.1, 0.1))}
+    style={{ ...buttonStyle, padding: "6px 12px", fontSize: "13px" }}
+  >
+    ➖ {settings.language === "ar" ? "تصغير" : "Zoom Out"}
+  </button>
+  <div style={{ fontSize: "11px", color: "#FFD700", marginTop: "4px" }}>
+    {(scale * 100).toFixed(0)}%
+  </div>
+</div>
+
       <div style={{ 
     position: "absolute",
     top: "10px",
@@ -628,25 +655,6 @@ const handleExportPDF = () => {
 <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
   <button onClick={handleExportPNG}>📷 جفظ الصورة</button>
   <button onClick={handleExportPDF}>📄 طباعة PDF</button>
-</div>
-
-
-{/* 🔍 تكبير و تصغير الدائره  */}
-  <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
-  <label style={{ marginBottom: "5px" }}>
-    {settings.language === "ar" ? "🔍 تكبير و تصغير الدائره" : "Zoom"}
-  </label>
-  <input
-    type="range"
-    min="0.1"
-    max="1.5"
-    step="0.1"
-    value={scale}
-    onChange={(e) => setScale(parseFloat(e.target.value))}
-  />
-
-<span style={{ fontSize: "10px", marginLeft: "6px" }}>{(scale * 100).toFixed(0)}%</span>
-
 </div>
 
 
