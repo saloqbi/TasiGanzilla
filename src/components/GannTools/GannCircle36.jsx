@@ -686,7 +686,7 @@ style={inputStyle}
     <option value="square">⬛ إظهار المربع</option>
     <option value="star4">⭐ إظهار النجمة الرباعية</option>
     <option value="pentagon">🔷 إظهار الخماسي</option>
-    <option value="star5">⭐  إظهار النجمةالخماسية</option>
+    <option value="star5">⭐  إظهار النجمة الخماسية</option>
     <option value="hexagon">🛑 إظهار السداسي</option>
     <option value="star6">⭐ إظهار النجمة السداسية</option>
     <option value="heptagon">🔷 إظهار السباعي</option>
