@@ -359,7 +359,7 @@ const handleMouseUp = () => {
 };
 const zodiacLabels = [
   { label: "نار الحمل", color: "red" },
-  { label: "تراب التراب", color: "blue" },
+  { label: "تراب الثور", color: "blue" },
   { label: "هواء الجوزاء", color: "black" },
   { label: "ماء السرطان", color: "red" },
   { label: "نار الاسد", color: "blue" },
@@ -373,22 +373,34 @@ const zodiacLabels = [
 ];
 
 const RenderZodiacRing = () => {
-  const zodiacCount = 12;
   const radiusOuter = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5) + 50;
-  const radiusInner = radiusOuter - 50; // سمك الخلية
+  const radiusInner = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+  const zodiacRadius = (radiusInner + radiusOuter) / 2;
+
+  const totalNumbers = settings.divisions;
+  const anglePerNumber = 360 / totalNumbers;
+
+  // ✅ زاوية وسط أول قطاع = 0.5 * anglePerNumber => نريد أن تكون عند 10°
+  // لذا ندوّر الحلقة لتجعل الزاوية 10° هي بداية أول برج
+  const desiredStartAngle = 10;
+  const rotationOffset = 0.5 * anglePerNumber - desiredStartAngle;
 
   return (
     <g>
-      {[...Array(zodiacCount)].map((_, index) => {
-        const startAngle = (index * 360) / zodiacCount;
-        const endAngle = ((index + 1) * 360) / zodiacCount;
+      {[...Array(totalNumbers)].map((_, index) => {
+        const angle = (index + 0.5) * anglePerNumber - rotationOffset;
+        const angleRad = (angle * Math.PI) / 180;
 
-	const startRad = startAngle * (Math.PI / 180);
-	const endRad = endAngle * (Math.PI / 180);
-	const midRad = ((startAngle + endAngle) / 2) * (Math.PI / 180);
+        // ✅ الأبراج تبدأ من الحمل وتدور مع القطاعات مهما كان عددها
+        const zodiacIndex = index % zodiacLabels.length;
+        const { label, color } = zodiacLabels[zodiacIndex];
 
+        const startAngle = index * anglePerNumber - rotationOffset;
+        const endAngle = (index + 1) * anglePerNumber - rotationOffset;
 
-        // نقاط الزاوية
+        const startRad = (startAngle * Math.PI) / 180;
+        const endRad = (endAngle * Math.PI) / 180;
+
         const x1 = center + radiusInner * Math.cos(startRad);
         const y1 = center + radiusInner * Math.sin(startRad);
         const x2 = center + radiusOuter * Math.cos(startRad);
@@ -398,24 +410,17 @@ const RenderZodiacRing = () => {
         const x4 = center + radiusInner * Math.cos(endRad);
         const y4 = center + radiusInner * Math.sin(endRad);
 
-        // اسم البرج
-        const zodiacIndex = index % 12;
-        const { label, color } = zodiacLabels[zodiacIndex];
-
-        const xText = center + ((radiusInner + radiusOuter) / 2) * Math.cos(midRad);
-        const yText = center + ((radiusInner + radiusOuter) / 2) * Math.sin(midRad);
+        const xText = center + zodiacRadius * Math.cos(angleRad);
+        const yText = center + zodiacRadius * Math.sin(angleRad);
 
         return (
           <g key={`zodiac-${index}`}>
-            {/* ✅ خلفية الخلية */}
             <path
               d={`M ${x1},${y1} L ${x2},${y2} A ${radiusOuter},${radiusOuter} 0 0,1 ${x3},${y3} L ${x4},${y4} A ${radiusInner},${radiusInner} 0 0,0 ${x1},${y1} Z`}
               fill="#eee"
               stroke="#FFD700"
               strokeWidth={0.9}
             />
-
-            {/* ✅ اسم البرج */}
             <text
               x={xText}
               y={yText}
