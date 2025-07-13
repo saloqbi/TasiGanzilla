@@ -36,6 +36,8 @@ const [selectedShape, setSelectedShape] = useState("");
 const [showSquare, setShowSquare] = useState(false);
 //🟡 زر دائري في الزاوية اليمنى العليا
 const [showSettings, setShowSettings] = useState(true);
+{' تغير لون الخلية عند الضغط عليها'}
+const [cellColors, setCellColors] = useState([]);
 
 
 
@@ -290,19 +292,30 @@ const getDigitColor = (digit) => {
   return "#000"; // افتراضي (احتياط)
 };
 
+
 const getClickColor = (value) => {
   const clicks = clickStates[value] || 0;
-  if (clicks === 1) return "#90ee90";
-  if (clicks === 2) return "pink";
-  if (clicks === 3) return "#ffff99";
-  if (clicks >= 4) return "gray";
-  return null;
+
+  if (clicks === 1) return "#90ee90";  // أخضر
+  if (clicks === 2) return "pink";     // وردي
+  if (clicks === 3) return "#ffff99";  // أصفر
+  if (clicks === 4) return "gray";     // رمادي
+  return null;                         // ✅ أي شيء آخر يرجع للون الأصلي
 };
+
 const handleCellClick = (value) => {
   setClickStates((prev) => {
     const current = prev[value] || 0;
     const next = current >= 4 ? 0 : current + 1;
     return { ...prev, [value]: next };
+  });
+};
+
+const handleDoubleClick = (value) => {
+  setClickStates((prev) => {
+    const updated = { ...prev };
+    delete updated[value]; // نحذف اللون (عدد الضغطات) لهذه الخلية
+    return updated;
   });
 };
 
@@ -1645,6 +1658,8 @@ const angleMid = angle;
     stroke="#aaa"
     strokeWidth={0.5}
     onClick={() => handleCellClick(value)}
+    onDoubleClick={() => handleDoubleClick(value)} // ضغطتين لإلغاء اللون
+
     style={{ cursor: "pointer" }}
   />
 
