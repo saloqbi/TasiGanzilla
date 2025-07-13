@@ -38,6 +38,10 @@ const [showSquare, setShowSquare] = useState(false);
 const [showSettings, setShowSettings] = useState(true);
 {' تغير لون الخلية عند الضغط عليها'}
 const [cellColors, setCellColors] = useState([]);
+const [showZoomControls, setShowZoomControls] = useState(false);
+
+
+
 
 
 
@@ -499,38 +503,41 @@ const handleExportPDF = () => {
     {/* ✅ القسم العلوي: العنوان والأزرار */}
     <div style={{ padding: 10, flexShrink: 0 }}>
       {/* 🔍 أزرار التكبير والتصغير على الطرف الأيمن */}
-<div
-  style={{
-    position: "fixed",
-    top: "220px", // موقع عمودي مناسب لبداية الدائرة
-    right: "10px", // الطرف الأيمن
-    backgroundColor: "#222",
-    border: "1px solid #FFD700",
-    borderRadius: "10px",
-    padding: "10px",
-    zIndex: 9999,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: "8px",
-  }}
->
-  <button
-    onClick={() => setScale((prev) => Math.min(prev + 0.1, 2))}
-    style={{ ...buttonStyle, padding: "6px 12px", fontSize: "13px" }}
+
+{showZoomControls && (
+  <div
+    style={{
+      position: "fixed",
+      top: "220px",
+      right: "10px",
+      backgroundColor: "#222",
+      border: "1px solid #FFD700",
+      borderRadius: "10px",
+      padding: "10px",
+      zIndex: 9999,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "8px",
+    }}
   >
-    ➕ {settings.language === "ar" ? "تكبير" : "Zoom In"}
-  </button>
-  <button
-    onClick={() => setScale((prev) => Math.max(prev - 0.1, 0.1))}
-    style={{ ...buttonStyle, padding: "6px 12px", fontSize: "13px" }}
-  >
-    ➖ {settings.language === "ar" ? "تصغير" : "Zoom Out"}
-  </button>
-  <div style={{ fontSize: "11px", color: "#FFD700", marginTop: "4px" }}>
-    {(scale * 100).toFixed(0)}%
+    <button
+      onClick={() => setScale((prev) => Math.min(prev + 0.1, 2))}
+      style={{ ...buttonStyle, padding: "6px 12px", fontSize: "13px" }}
+    >
+      ➕ {settings.language === "ar" ? "تكبير" : "Zoom In"}
+    </button>
+    <button
+      onClick={() => setScale((prev) => Math.max(prev - 0.1, 0.1))}
+      style={{ ...buttonStyle, padding: "6px 12px", fontSize: "13px" }}
+    >
+      ➖ {settings.language === "ar" ? "تصغير" : "Zoom Out"}
+    </button>
+    <div style={{ fontSize: "11px", color: "#FFD700", marginTop: "4px" }}>
+      {(scale * 100).toFixed(0)}%
+    </div>
   </div>
-</div>
+)}
 
       <div style={{ 
     position: "absolute",
@@ -650,6 +657,28 @@ const handleExportPDF = () => {
 >
   {showSettings ? "❌" : "⚙️"}
 </button>
+
+{/* 🎛️ زر إظهار/إخفاء أزرار التكبير */}
+<button
+  onClick={() => setShowZoomControls((prev) => !prev)}
+  style={{
+    position: "fixed",
+    top: "180px",
+    right: "10px",
+    zIndex: 10000,
+    backgroundColor: "#222",
+    color: "#FFD700",
+    border: "1px solid #FFD700",
+    borderRadius: "8px",
+    padding: "6px 10px",
+    cursor: "pointer",
+  }}
+>
+  {showZoomControls
+    ? (settings.language === "ar" ? "إخفاء 🔽" : "Hide 🔽")
+    : (settings.language === "ar" ? "التكبير 🔍" : "Zoom 🔍")}
+</button>
+
 {showSettings && (
    <>
 <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
