@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحسينات دائرة جان - ضمان الترتيب</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 {
+            color: #FFD700;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .info {
+            background-color: #333;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 2px solid #FFD700;
+        }
+        .improvements {
+            text-align: right;
+            line-height: 2;
+        }
+        .success {
+            color: #90ee90;
+            font-weight: bold;
+        }
+        .feature {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+        }
+        .order-feature {
+            background-color: #2a4a2a;
+            border-left: 4px solid #90ee90;
+        }
+        .layout {
+            background: #4a2a4a;
+            border-left: 4px solid #ff6b6b;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .highlight {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 تحسينات دائرة جان 360 - ضمان الترتيب الصحيح</h1>
+        
+        <div class="info">
+            <div class="feature layout">
+                <h2>📐 الترتيب النهائي المضمون للحلقات:</h2>
+                <div style="margin: 20px 0;">
+                    <p><strong>المركز</strong> ← الساعة الرقمية</p>
+                    <p>↓</p>
+                    <p><strong>حلقات الأرقام</strong> (1، 2، 3... حسب العدد المطلوب)</p>
+                    <p>↓</p>
+                    <p><strong>حلقة الدرجات</strong> (0°-360°)</p>
+                    <p>↓</p>
+                    <p><strong>عجلة الزوايا</strong> (إذا كانت مفعلة)</p>
+                    <p>↓</p>
+                    <p><strong>حلقة الأبراج</strong></p>
+                    <p>↓</p>
+                    <p><strong>حلقة أيام الأسبوع</strong> (الأخيرة دائماً)</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info">
+            <div class="improvements">
+                <h2>🔧 التحسينات المطبقة لضمان الترتيب:</h2>
+                
+                <div class="feature order-feature">
+                    <h3 class="success">✅ توحيد حسابات نصف القطر</h3>
+                    <p>• استخدام <span class="highlight">calculateRingWidth()</span> في جميع أجزاء الكود</p>
+                    <p>• ضمان تطابق الحسابات في جميع الدوال (useEffect، onMouseMove، onMouseDown)</p>
+                    <p>• منع التضارب بين الحسابات المختلفة</p>
+                </div>
+
+                <div class="feature order-feature">
+                    <h3 class="success">✅ زيادة المسافات بين الحلقات</h3>
+                    <p>• حلقة الدرجات: <span class="highlight">+20 بكسل</span> بعد آخر حلقة أرقام</p>
+                    <p>• عجلة الزوايا: <span class="highlight">+30 بكسل</span> بعد حلقة الدرجات</p>
+                    <p>• حلقة الأبراج: <span class="highlight">+10/25 بكسل</span> (حسب وجود عجلة الزوايا)</p>
+                    <p>• حلقة الأيام: <span class="highlight">+10 بكسل</span> بعد حلقة الأبراج</p>
+                </div>
+
+                <div class="feature order-feature">
+                    <h3 class="success">✅ ضمان حساب الحجم الكلي</h3>
+                    <p>• حساب <span class="highlight">lastNumberRingRadius</span> بدقة باستخدام الدالة المحسنة</p>
+                    <p>• جميع الحلقات الخارجية تعتمد على هذا الحساب الأساسي</p>
+                    <p>• منع تداخل أي حلقة مع حلقات الأرقام</p>
+                </div>
+
+                <div class="feature order-feature">
+                    <h3 class="success">✅ تحديث جميع نقاط الحساب</h3>
+                    <p>• الحسابات الرئيسية (بداية الكومبوننت)</p>
+                    <p>• useEffect الرئيسي (الرسم)</p>
+                    <p>• onMouseMove (التفاعل)</p>
+                    <p>• onMouseDown (النقر)</p>
+                    <p>• onCellClick و onCellDoubleClick</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info">
+            <h2>📊 المسافات الجديدة المحسنة:</h2>
+            <div class="improvements">
+                <div class="feature">
+                    <p><strong>آخر حلقة أرقام</strong> → <span class="highlight">+20px</span> → <strong>حلقة الدرجات</strong></p>
+                    <p><strong>حلقة الدرجات</strong> → <span class="highlight">+30px</span> → <strong>عجلة الزوايا (اختيارية)</strong></p>
+                    <p><strong>عجلة الزوايا</strong> → <span class="highlight">+10px</span> → <strong>حلقة الأبراج</strong></p>
+                    <p><strong>بدون عجلة زوايا</strong> → حلقة الدرجات <span class="highlight">+25px</span> → <strong>حلقة الأبراج</strong></p>
+                    <p><strong>حلقة الأبراج</strong> → <span class="highlight">+10px</span> → <strong>حلقة الأيام</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info">
+            <h2>🎯 النتائج المتوقعة:</h2>
+            <div class="improvements">
+                <div class="feature">
+                    <p class="success">✅ الحلقات الخارجية ستظهر دائماً بعد آخر حلقة من حلقات الأرقام</p>
+                    <p class="success">✅ مسافات واضحة ومتسقة بين جميع الحلقات</p>
+                    <p class="success">✅ لا يوجد تداخل أو التصاق بين الحلقات</p>
+                    <p class="success">✅ ترتيب ثابت ومضمون مهما كان عدد أو حجم حلقات الأرقام</p>
+                    <p class="success">✅ تطابق مثالي في الحسابات عبر جميع دوال التفاعل</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="info">
+            <h2>🔧 للاختبار:</h2>
+            <div class="improvements">
+                <p><strong>1.</strong> جرب زيادة عدد الحلقات (levels) لأرقام كبيرة</p>
+                <p><strong>2.</strong> تأكد من أن جميع الحلقات الخارجية تظهر في الترتيب الصحيح</p>
+                <p><strong>3.</strong> اختبر مع وبدون عجلة الزوايا</p>
+                <p><strong>4.</strong> تأكد من عدم وجود تداخل أو فجوات غير مرغوبة</p>
+                <p><strong>5.</strong> اختبر التفاعل مع جميع الحلقات</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

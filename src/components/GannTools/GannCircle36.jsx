@@ -20,7 +20,7 @@ const svgRef = useRef();
 return stored ? JSON.parse(stored) : defaultSettings;
 
   });
-
+const [selectedShape, setSelectedShape] = useState("");
   const [zoom, setZoom] = useState(1);
    const [showZodiacRing, setShowZodiacRing] = useState(true);
     const [showDegreeRing, setShowDegreeRing] = useState(true);
@@ -34,6 +34,16 @@ return stored ? JSON.parse(stored) : defaultSettings;
      const [highlightTriangle, setHighlightTriangle] = useState(true);
      const [fillTriangle, setFillTriangle] = useState(true);
 const [showSquare, setShowSquare] = useState(false);
+//🟡 زر دائري في الزاوية اليمنى العليا
+const [showSettings, setShowSettings] = useState(true);
+{' تغير لون الخلية عند الضغط عليها'}
+const [cellColors, setCellColors] = useState([]);
+const [showZoomControls, setShowZoomControls] = useState(false);
+
+
+
+
+
 
 // ⭐ نجمة رباعية
 const [showStar4, setShowStar4] = useState(false);
@@ -286,19 +296,30 @@ const getDigitColor = (digit) => {
   return "#000"; // افتراضي (احتياط)
 };
 
+
 const getClickColor = (value) => {
   const clicks = clickStates[value] || 0;
-  if (clicks === 1) return "#90ee90";
-  if (clicks === 2) return "pink";
-  if (clicks === 3) return "#ffff99";
-  if (clicks >= 4) return "gray";
-  return null;
+
+  if (clicks === 1) return "#90ee90";  // أخضر
+  if (clicks === 2) return "pink";     // وردي
+  if (clicks === 3) return "#ffff99";  // أصفر
+  if (clicks === 4) return "gray";     // رمادي
+  return null;                         // ✅ أي شيء آخر يرجع للون الأصلي
 };
+
 const handleCellClick = (value) => {
   setClickStates((prev) => {
     const current = prev[value] || 0;
     const next = current >= 4 ? 0 : current + 1;
     return { ...prev, [value]: next };
+  });
+};
+
+const handleDoubleClick = (value) => {
+  setClickStates((prev) => {
+    const updated = { ...prev };
+    delete updated[value]; // نحذف اللون (عدد الضغطات) لهذه الخلية
+    return updated;
   });
 };
 
@@ -340,37 +361,42 @@ const handleMouseMove = (e) => {
 const handleMouseUp = () => {
   setIsDragging(false);
 };
-const zodiacLabels = [
-  { label: "نار الحمل", color: "red" },
-  { label: "تراب التراب", color: "blue" },
-  { label: "هواء الجوزاء", color: "black" },
-  { label: "ماء السرطان", color: "red" },
-  { label: "نار الاسد", color: "blue" },
-  { label: "تراب السنبله", color: "black" },
-  { label: "هواء الميزان", color: "red" },
-  { label: "ماء العقرب", color: "blue" },
-  { label: "نار القوس", color: "black" },
-  { label: "تراب الجدي", color: "red" },
-  { label: "هواء الدلو", color: "blue" },
-  { label: "ماء الحوت", color: "black" },
-];
-
 const RenderZodiacRing = () => {
-  const zodiacCount = 12;
   const radiusOuter = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5) + 50;
-  const radiusInner = radiusOuter - 50; // سمك الخلية
+  const radiusInner = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
+  const zodiacRadius = (radiusInner + radiusOuter) / 2;
 
+  const zodiacBase = [
+    { label: "نار الحمل", color: "red" },
+    { label: "تراب الثور", color: "blue" },
+    { label: "هواء الجوزاء", color: "black" },
+    { label: "ماء السرطان", color: "red" },
+    { label: "نار الأسد", color: "blue" },
+    { label: "تراب السنبلة", color: "black" },
+    { label: "هواء الميزان", color: "red" },
+    { label: "ماء العقرب", color: "blue" },
+    { label: "نار القوس", color: "black" },
+    { label: "تراب الجدي", color: "red" },
+    { label: "هواء الدلو", color: "blue" },
+    { label: "ماء الحوت", color: "black" },
+  ];
+
+  const zodiacCycle = [...zodiacBase, ...zodiacBase, ...zodiacBase]; // 36 برج
+
+  const totalSectors = zodiacCycle.length;
+  const angleStep = 10;
+  const angleStart = -85; // هنا التعديل لحل المشكلة
   return (
     <g>
-      {[...Array(zodiacCount)].map((_, index) => {
-        const startAngle = (index * 360) / zodiacCount;
-        const endAngle = ((index + 1) * 360) / zodiacCount;
+      {zodiacCycle.map(({ label, color }, i) => {
+        const startAngle = angleStart + i * angleStep;
+        const endAngle = startAngle + angleStep;
+        const midAngle = (startAngle + endAngle) / 2;
 
-        const startRad = (startAngle + settings.rotation) * (Math.PI / 180);
-        const endRad = (endAngle + settings.rotation) * (Math.PI / 180);
-        const midRad = ((startAngle + endAngle) / 2 + settings.rotation) * (Math.PI / 180);
+        const startRad = (startAngle * Math.PI) / 180;
+        const endRad = (endAngle * Math.PI) / 180;
+        const midRad = (midAngle * Math.PI) / 180;
 
-        // نقاط الزاوية
         const x1 = center + radiusInner * Math.cos(startRad);
         const y1 = center + radiusInner * Math.sin(startRad);
         const x2 = center + radiusOuter * Math.cos(startRad);
@@ -380,24 +406,17 @@ const RenderZodiacRing = () => {
         const x4 = center + radiusInner * Math.cos(endRad);
         const y4 = center + radiusInner * Math.sin(endRad);
 
-        // اسم البرج
-        const zodiacIndex = index % 12;
-        const { label, color } = zodiacLabels[zodiacIndex];
-
-        const xText = center + ((radiusInner + radiusOuter) / 2) * Math.cos(midRad);
-        const yText = center + ((radiusInner + radiusOuter) / 2) * Math.sin(midRad);
+        const xText = center + zodiacRadius * Math.cos(midRad);
+        const yText = center + zodiacRadius * Math.sin(midRad);
 
         return (
-          <g key={`zodiac-${index}`}>
-            {/* ✅ خلفية الخلية */}
+          <g key={`zodiac-${i}`}>
             <path
               d={`M ${x1},${y1} L ${x2},${y2} A ${radiusOuter},${radiusOuter} 0 0,1 ${x3},${y3} L ${x4},${y4} A ${radiusInner},${radiusInner} 0 0,0 ${x1},${y1} Z`}
               fill="#eee"
               stroke="#FFD700"
-              strokeWidth={0.9}
+              strokeWidth={0.8}
             />
-
-            {/* ✅ اسم البرج */}
             <text
               x={xText}
               y={yText}
@@ -406,6 +425,7 @@ const RenderZodiacRing = () => {
               textAnchor="middle"
               dominantBaseline="middle"
               fontWeight="bold"
+              transform={`rotate(${midAngle + 90}, ${xText}, ${yText})`}
             >
               {label}
             </text>
@@ -482,6 +502,43 @@ const handleExportPDF = () => {
   >
     {/* ✅ القسم العلوي: العنوان والأزرار */}
     <div style={{ padding: 10, flexShrink: 0 }}>
+      {/* 🔍 أزرار التكبير والتصغير على الطرف الأيمن */}
+
+{showZoomControls && (
+  <div
+    style={{
+      position: "fixed",
+      top: "220px",
+      right: "10px",
+      backgroundColor: "#222",
+      border: "1px solid #FFD700",
+      borderRadius: "10px",
+      padding: "10px",
+      zIndex: 9999,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: "8px",
+    }}
+  >
+    <button
+      onClick={() => setScale((prev) => Math.min(prev + 0.1, 2))}
+      style={{ ...buttonStyle, padding: "6px 12px", fontSize: "13px" }}
+    >
+      ➕ {settings.language === "ar" ? "تكبير" : "Zoom In"}
+    </button>
+    <button
+      onClick={() => setScale((prev) => Math.max(prev - 0.1, 0.1))}
+      style={{ ...buttonStyle, padding: "6px 12px", fontSize: "13px" }}
+    >
+      ➖ {settings.language === "ar" ? "تصغير" : "Zoom Out"}
+    </button>
+    <div style={{ fontSize: "11px", color: "#FFD700", marginTop: "4px" }}>
+      {(scale * 100).toFixed(0)}%
+    </div>
+  </div>
+)}
+
       <div style={{ 
     position: "absolute",
     top: "10px",
@@ -564,68 +621,71 @@ const handleExportPDF = () => {
       <feDropShadow dx="1" dy="1" stdDeviation="2" floodColor="#aaa" />
     </filter>
   </defs>
-
-      <div style={{ 
-  position: "absolute",
-  top: "120px",
-  right: "10px",
-  display: "flex",
+  {/* البوكس الخاص بالاعدادات */}
+  <div style={{
+    position: "absolute",
+    top: "160px",
+    left: "0px",
+    display: "flex",
   flexDirection: "column",
-  gap: "12px",
+  gap: "5px",
   backgroundColor: "#222",
   padding: "12px",
   borderRadius: "10px",
   border: "1px solid #FFD700",
   zIndex: 10,
 }}>
+  {/* 🟡 زر دائري في الزاوية اليمنى العليا */}
+<button
+  onClick={() => setShowSettings(!showSettings)}
+  style={{
+    position: "fixed",
+    top: "120px",
+    left: "20px",
+    width: "25px",
+    height: "25px",
+    borderRadius: "50%",
+    backgroundColor: "#ffcc00",
+    color: "#000",
+    fontSize: "10px",
+    border: "none",
+    cursor: "pointer",
+    boxShadow: "0 0 10px #000",
+    zIndex: 9999
+  }}
+  title={showSettings ? "إخفاء الإعدادات" : "عرض الإعدادات"}
+>
+  {showSettings ? "❌" : "⚙️"}
+</button>
 
+{/* 🎛️ زر إظهار/إخفاء أزرار التكبير */}
+<button
+  onClick={() => setShowZoomControls((prev) => !prev)}
+  style={{
+    position: "fixed",
+    top: "180px",
+    right: "10px",
+    zIndex: 10000,
+    backgroundColor: "#222",
+    color: "#FFD700",
+    border: "1px solid #FFD700",
+    borderRadius: "8px",
+    padding: "6px 10px",
+    cursor: "pointer",
+  }}
+>
+  {showZoomControls
+    ? (settings.language === "ar" ? "إخفاء 🔽" : "Hide 🔽")
+    : (settings.language === "ar" ? "التكبير 🔍" : "Zoom 🔍")}
+</button>
+
+{showSettings && (
+   <>
 <div style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
   <button onClick={handleExportPNG}>📷 جفظ الصورة</button>
   <button onClick={handleExportPDF}>📄 طباعة PDF</button>
 </div>
 
-
-{/* 🔍 تكبير و تصغير الدائره  */}
-  <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
-  <label style={{ marginBottom: "5px" }}>
-    {settings.language === "ar" ? "🔍 تكبير و تصغير الدائره" : "Zoom"}
-  </label>
-  <input
-    type="range"
-    min="0.1"
-    max="1.5"
-    step="0.1"
-    value={scale}
-    onChange={(e) => setScale(parseFloat(e.target.value))}
-  />
-
-<span style={{ fontSize: "10px", marginLeft: "6px" }}>{(scale * 100).toFixed(0)}%</span>
-
-</div>
-
-{/* ♻️ دوران الدائرة  */}
-
-<div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
-  <label style={{ marginBottom: "5px" }}>
-    {settings.language === "ar" ? "♻️ دوران الدائرة" : "Circle Rotation"}
-  </label>
-  <input
-    type="range"
-    min={0}
-    max={360}
-    step={1}
-    value={settings.rotation}
-    onChange={(e) =>
-      setSettings((prev) => ({
-        ...prev,
-        rotation: parseInt(e.target.value),
-      }))
-    }
-  />
-  <span style={{ fontSize: "10px", color: "#aaa", marginTop: "4px" }}>
-    {settings.rotation}°
-  </span>
-</div>
 
 {/* ✅ اظهار حلقة الابراج و حلقة الزوايا*/}
 <button
@@ -645,611 +705,62 @@ const handleExportPDF = () => {
     ? (showZodiacRing ? "إخفاء الأبراج" : "إظهار الأبراج")
     : (showZodiacRing ? "Hide Zodiac" : "Show Zodiac")}
 </button>
-
-
-{/* ✅ أدوات المثلث */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showTriangle} onChange={() => setShowTriangle(!showTriangle)} />
-    🔺 {settings.language === "ar" ? "إظهار المثلث" : "Show Triangle"}
-  </label>
-
-  {showTriangle && (
-    <>
-      <label>
-        🎛 {settings.language === "ar" ? "زوايا المثلث" : "Triangle Angles"}
-      </label>
-{customAngles.map((angle, idx) => {
-  const rotated = (angle + triangleRotation + settings.rotation) % 360;
-
-  return (
+       <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+    <label style={{ marginBottom: "5px" }}>
+      {settings.language === "ar" ? "عدد القطاعات" : "Divisions"}
+    </label>
     <input
-      key={idx}
       type="number"
-      value={rotated.toFixed(0)}
-      onChange={(e) => {
-        const newRotated = parseFloat(e.target.value) || 0;
-        const newOriginal = (newRotated - triangleRotation - settings.rotation + 360) % 360;
-
-        const newAngles = [...customAngles];
-        newAngles[idx] = newOriginal;
-        setCustomAngles(newAngles);
-      }}
-      style={{ ...inputStyle, marginBottom: "6px", direction: "ltr", textAlign: "center" }}
+      min={10}
+      max={720}
+      value={settings.divisions}
+      onChange={(e) =>
+        setSettings((prev) => ({
+          ...prev,
+          divisions: parseInt(e.target.value),
+        }))
+      }
+style={inputStyle}
     />
-  );
-})}
+  </div>
 
-
-      <label>
-        ♻️ {settings.language === "ar" ? "تدوير المثلث" : "Rotate Triangle"}
-      </label>
-      <input
-        type="range"
-        min="0"
-        max="360"
-        value={triangleRotation}
-        onChange={(e) => setTriangleRotation(parseFloat(e.target.value))}
-      />
-
-      <label>
-        <input type="checkbox" checked={highlightTriangle} onChange={() => setHighlightTriangle(!highlightTriangle)} />
-        {settings.language === "ar" ? "تمييز الزوايا" : "Show Highlight"}
-      </label>
-
-<label>
-  <input
-    type="checkbox"
-    checked={fillTriangle}
-    onChange={() => setFillTriangle(!fillTriangle)}
-  />
-  {settings.language === "ar" ? "تعبئة المثلث" : "Fill Triangle"}
-</label>
-
-
-    </>
-  )}
-</div>
-
-{/* 🟥 أدوات المربع */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showSquare} onChange={() => setShowSquare(!showSquare)} />
-    ⬛ {settings.language === "ar" ? "إظهار المربع" : "Show Square"}
-  </label>
-
-  {showSquare && (
-    <>
-      <label>
-        🎛 {settings.language === "ar" ? "زوايا المربع" : "Square Angles"}
-      </label>
-      {customSquareAngles.map((angle, idx) => {
-        const rotated = (angle + squareRotation + settings.rotation) % 360;
-
-        return (
-          <input
-            key={idx}
-            type="number"
-            value={rotated.toFixed(0)}
-            onChange={(e) => {
-              const newRotated = parseFloat(e.target.value) || 0;
-              const newOriginal = (newRotated - squareRotation - settings.rotation + 360) % 360;
-
-              const newAngles = [...customSquareAngles];
-              newAngles[idx] = newOriginal;
-              setCustomSquareAngles(newAngles);
-            }}
-            style={{ ...inputStyle, marginBottom: "6px", direction: "ltr", textAlign: "center" }}
-          />
-        );
-      })}
-
-      <label>
-        ♻️ {settings.language === "ar" ? "تدوير المربع" : "Rotate Square"}
-      </label>
-      <input
-        type="range"
-        min="0"
-        max="360"
-        value={squareRotation}
-        onChange={(e) => setSquareRotation(parseFloat(e.target.value))}
-      />
-
-      <label>
-        <input type="checkbox" checked={highlightSquare} onChange={() => setHighlightSquare(!highlightSquare)} />
-        {settings.language === "ar" ? "تمييز الزوايا" : "Show Highlight"}
-      </label>
-
-      <label>
-        <input type="checkbox" checked={fillSquare} onChange={() => setFillSquare(!fillSquare)} />
-        {settings.language === "ar" ? "تعبئة المربع" : "Fill Square"}
-      </label>
-    </>
-  )}
-</div>
-
-{/* ⭐ أدوات النجمة الرباعية */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar4} onChange={() => setShowStar4(!showStar4)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة الرباعية" : "Show 4-Point Star"}
-  </label>
-
-  {showStar4 && (
-    <>
-      {customStar4Angles.map((angle, idx) => {
-        const rotated = (angle + star4Rotation + settings.rotation) % 360;
-        return (
-          <input
-            key={idx}
-            type="number"
-            value={rotated.toFixed(0)}
-            onChange={(e) => {
-              const newRotated = parseFloat(e.target.value) || 0;
-              const newOriginal = (newRotated - star4Rotation - settings.rotation + 360) % 360;
-              const newAngles = [...customStar4Angles];
-              newAngles[idx] = newOriginal;
-              setCustomStar4Angles(newAngles);
-            }}
-            style={{ ...inputStyle, marginBottom: "6px" }}
-          />
-        );
-      })}
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={star4Rotation}
-        onChange={(e) => setStar4Rotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillStar4} onChange={() => setFillStar4(!fillStar4)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightStar4} onChange={() => setHighlightStar4(!highlightStar4)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* 🔷 أدوات الشكل الخماسي */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showPentagon} onChange={() => setShowPentagon(!showPentagon)} />
-    🔷 {settings.language === "ar" ? "إظهار الخماسي" : "Show Pentagon"}
-  </label>
-
-  {showPentagon && (
-    <>
-      {customPentagonAngles.map((angle, idx) => {
-        const rotated = (angle + pentagonRotation + settings.rotation) % 360;
-        return (
-          <input
-            key={idx}
-            type="number"
-            value={rotated.toFixed(0)}
-            onChange={(e) => {
-              const newRotated = parseFloat(e.target.value) || 0;
-              const newOriginal = (newRotated - pentagonRotation - settings.rotation + 360) % 360;
-              const newAngles = [...customPentagonAngles];
-              newAngles[idx] = newOriginal;
-              setCustomPentagonAngles(newAngles);
-            }}
-            style={{ ...inputStyle, marginBottom: "6px" }}
-          />
-        );
-      })}
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={pentagonRotation}
-        onChange={(e) => setPentagonRotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillPentagon} onChange={() => setFillPentagon(!fillPentagon)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightPentagon} onChange={() => setHighlightPentagon(!highlightPentagon)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* ⭐ أدوات النجمة الخماسيه */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar} onChange={() => setShowStar(!showStar)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة" : "Show Star"}
-  </label>
-
-  {showStar && (
-    <>
-      {customStarAngles.map((angle, idx) => {
-        const rotated = (angle + starRotation + settings.rotation) % 360;
-        return (
-          <input
-            key={idx}
-            type="number"
-            value={rotated.toFixed(0)}
-            onChange={(e) => {
-              const newRotated = parseFloat(e.target.value) || 0;
-              const newOriginal = (newRotated - starRotation - settings.rotation + 360) % 360;
-              const newAngles = [...customStarAngles];
-              newAngles[idx] = newOriginal;
-              setCustomStarAngles(newAngles);
-            }}
-            style={{ ...inputStyle, marginBottom: "6px" }}
-          />
-        );
-      })}
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={starRotation}
-        onChange={(e) => setStarRotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillStar} onChange={() => setFillStar(!fillStar)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightStar} onChange={() => setHighlightStar(!highlightStar)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* 🔷 أدوات الشكل السداسي */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showHexagon} onChange={() => setShowHexagon(!showHexagon)} />
-    🛑 {settings.language === "ar" ? "إظهار السداسي" : "Show Hexagon"}
-  </label>
-
-  {showHexagon && (
-    <>
-      {customHexagonAngles.map((angle, idx) => {
-        const rotated = (angle + hexagonRotation + settings.rotation) % 360;
-        return (
-          <input
-            key={idx}
-            type="number"
-            value={rotated.toFixed(0)}
-            onChange={(e) => {
-              const newRotated = parseFloat(e.target.value) || 0;
-              const newOriginal = (newRotated - hexagonRotation - settings.rotation + 360) % 360;
-              const newAngles = [...customHexagonAngles];
-              newAngles[idx] = newOriginal;
-              setCustomHexagonAngles(newAngles);
-            }}
-            style={{ ...inputStyle, marginBottom: "6px" }}
-          />
-        );
-      })}
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={hexagonRotation}
-        onChange={(e) => setHexagonRotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillHexagon} onChange={() => setFillHexagon(!fillHexagon)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightHexagon} onChange={() => setHighlightHexagon(!highlightHexagon)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* ⭐ أدوات النجمة السداسية */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showHexagram} onChange={() => setShowHexagram(!showHexagram)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة السداسية" : "Show Hexagram"}
-  </label>
-
-  {showHexagram && (
-    <>
-      {customHexagramAngles.map((angle, idx) => {
-        const rotated = (angle + hexagramRotation + settings.rotation) % 360;
-        return (
-          <input
-            key={idx}
-            type="number"
-            value={rotated.toFixed(0)}
-            onChange={(e) => {
-              const newRotated = parseFloat(e.target.value) || 0;
-              const newOriginal = (newRotated - hexagramRotation - settings.rotation + 360) % 360;
-              const newAngles = [...customHexagramAngles];
-              newAngles[idx] = newOriginal;
-              setCustomHexagramAngles(newAngles);
-            }}
-            style={{ ...inputStyle, marginBottom: "6px" }}
-          />
-        );
-      })}
-
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={hexagramRotation}
-        onChange={(e) => setHexagramRotation(parseFloat(e.target.value))} />
-
-      <label><input type="checkbox" checked={fillHexagram} onChange={() => setFillHexagram(!fillHexagram)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightHexagram} onChange={() => setHighlightHexagram(!highlightHexagram)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* 🔷 أدوات الشكل السباعي */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showHeptagon} onChange={() => setShowHeptagon(!showHeptagon)} />
-    🔷 {settings.language === "ar" ? "إظهار السباعي" : "Show Heptagon"}
-  </label>
-
-  {showHeptagon && (
-    <>
-      <label>♻️ تدوير</label>
-      <input
-        type="range"
-        min="0"
-        max="360"
-        value={heptagonRotation}
-        onChange={(e) => setHeptagonRotation(parseFloat(e.target.value))}
-      />
-
-      <label>
-        <input type="checkbox" checked={fillHeptagon} onChange={() => setFillHeptagon(!fillHeptagon)} />
-        {settings.language === "ar" ? "تعبئة الشكل" : "Fill"}
-      </label>
-
-      <label>
-        <input type="checkbox" checked={highlightHeptagon} onChange={() => setHighlightHeptagon(!highlightHeptagon)} />
-        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight"}
-      </label>
-    </>
-  )}
-</div>
-
-
-{/* ⭐ أدوات النجمة السباعية */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar7} onChange={() => setShowStar7(!showStar7)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة السباعية" : "Show 7-Point Star"}
-  </label>
-
-  {showStar7 && (
-    <>
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={star7Rotation}
-        onChange={(e) => setStar7Rotation(parseFloat(e.target.value))} />
-
-      <label>
-        <input type="checkbox" checked={fillStar7} onChange={() => setFillStar7(!fillStar7)} />
-        {settings.language === "ar" ? "تعبئة" : "Fill"}
-      </label>
-
-      <label>
-        <input type="checkbox" checked={highlightStar7} onChange={() => setHighlightStar7(!highlightStar7)} />
-        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight Points"}
-      </label>
-    </>
-  )}
-</div>
-
-
-{/* 🧿 أدوات الشكل المثمن */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showOctagon} onChange={() => setShowOctagon(!showOctagon)} />
-    🧿 {settings.language === "ar" ? "إظهار  المربع الثماني" : "Show Octagon"}
-  </label>
-
-  {showOctagon && (
-    <>
-      {customOctagonAngles.map((angle, idx) => {
-        const rotated = (angle + octagonRotation + settings.rotation) % 360;
-        return (
-          <input
-            key={idx}
-            type="number"
-            value={rotated.toFixed(0)}
-            onChange={(e) => {
-              const newRotated = parseFloat(e.target.value) || 0;
-              const newOriginal = (newRotated - octagonRotation - settings.rotation + 360) % 360;
-              const newAngles = [...customOctagonAngles];
-              newAngles[idx] = newOriginal;
-              setCustomOctagonAngles(newAngles);
-            }}
-            style={{ ...inputStyle, marginBottom: "6px" }}
-          />
-        );
-      })}
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={octagonRotation}
-        onChange={(e) => setOctagonRotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillOctagon} onChange={() => setFillOctagon(!fillOctagon)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightOctagon} onChange={() => setHighlightOctagon(!highlightOctagon)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* ⭐ أدوات النجمة المثمنة */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStarOctagon} onChange={() => setShowStarOctagon(!showStarOctagon)} />
-    ⭐ {settings.language === "ar" ? "إظهار نجمة مثمنة" : "Show Star Octagon"}
-  </label>
-
-  {showStarOctagon && (
-    <>
-      {customStarOctagonAngles.map((angle, idx) => {
-        const rotated = (angle + starOctagonRotation + settings.rotation) % 360;
-        return (
-          <input
-            key={idx}
-            type="number"
-            value={rotated.toFixed(0)}
-            onChange={(e) => {
-              const newRotated = parseFloat(e.target.value) || 0;
-              const newOriginal = (newRotated - starOctagonRotation - settings.rotation + 360) % 360;
-              const newAngles = [...customStarOctagonAngles];
-              newAngles[idx] = newOriginal;
-              setCustomStarOctagonAngles(newAngles);
-            }}
-            style={{ ...inputStyle, marginBottom: "6px" }}
-          />
-        );
-      })}
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={starOctagonRotation}
-        onChange={(e) => setStarOctagonRotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillStarOctagon} onChange={() => setFillStarOctagon(!fillStarOctagon)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightStarOctagon} onChange={() => setHighlightStarOctagon(!highlightStarOctagon)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* 🔷 أدوات الشكل التساعي */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showNonagon} onChange={() => setShowNonagon(!showNonagon)} />
-    🔷 {settings.language === "ar" ? "إظهار التساعي" : "Show Nonagon"}
-  </label>
-
-  {showNonagon && (
-    <>
-      <label>♻️ تدوير</label>
-      <input
-        type="range"
-        min="0"
-        max="360"
-        value={nonagonRotation}
-        onChange={(e) => setNonagonRotation(parseFloat(e.target.value))}
-      />
-
-      <label>
-        <input type="checkbox" checked={fillNonagon} onChange={() => setFillNonagon(!fillNonagon)} />
-        {settings.language === "ar" ? "تعبئة الشكل" : "Fill"}
-      </label>
-
-      <label>
-        <input type="checkbox" checked={highlightNonagon} onChange={() => setHighlightNonagon(!highlightNonagon)} />
-        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight"}
-      </label>
-    </>
-  )}
-</div>
-
-{/* ⭐ أدوات النجمة التساعية */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar9} onChange={() => setShowStar9(!showStar9)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة التساعية" : "Show 9-Point Star"}
-  </label>
-
-  {showStar9 && (
-    <>
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={star9Rotation}
-        onChange={(e) => setStar9Rotation(parseFloat(e.target.value))} />
-
-      <label>
-        <input type="checkbox" checked={fillStar9} onChange={() => setFillStar9(!fillStar9)} />
-        {settings.language === "ar" ? "تعبئة" : "Fill"}
-      </label>
-
-      <label>
-        <input type="checkbox" checked={highlightStar9} onChange={() => setHighlightStar9(!highlightStar9)} />
-        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight"}
-      </label>
-    </>
-  )}
-</div>
-
-{/* 🔷 أدوات الشكل العشاري */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showDecagon} onChange={() => setShowDecagon(!showDecagon)} />
-    🔷 {settings.language === "ar" ? "إظهار الشكل العشاري" : "Show Decagon"}
-  </label>
-
-  {showDecagon && (
-    <>
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={decagonRotation}
-        onChange={(e) => setDecagonRotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillDecagon} onChange={() => setFillDecagon(!fillDecagon)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightDecagon} onChange={() => setHighlightDecagon(!highlightDecagon)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* ⭐ أدوات النجمة العشارية */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar10} onChange={() => setShowStar10(!showStar10)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة العشارية" : "Show 10-Point Star"}
-  </label>
-
-  {showStar10 && (
-    <>
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={star10Rotation}
-        onChange={(e) => setStar10Rotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillStar10} onChange={() => setFillStar10(!fillStar10)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightStar10} onChange={() => setHighlightStar10(!highlightStar10)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* 🔷 أدوات الشكل الحادي عشر */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showHendecagon} onChange={() => setShowHendecagon(!showHendecagon)} />
-    🔷 {settings.language === "ar" ? "إظهار الحادي عشر" : "Show 11-gon"}
-  </label>
-
-  {showHendecagon && (
-    <>
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={hendecagonRotation}
-        onChange={(e) => setHendecagonRotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillHendecagon} onChange={() => setFillHendecagon(!fillHendecagon)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightHendecagon} onChange={() => setHighlightHendecagon(!highlightHendecagon)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* ⭐ أدوات النجمة الحادية عشر */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar11} onChange={() => setShowStar11(!showStar11)} />
-    ⭐ {settings.language === "ar" ? "إظهار النجمة الحادية عشر" : "Show 11-Point Star"}
-  </label>
-
-  {showStar11 && (
-    <>
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={star11Rotation}
-        onChange={(e) => setStar11Rotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillStar11} onChange={() => setFillStar11(!fillStar11)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightStar11} onChange={() => setHighlightStar11(!highlightStar11)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* 🔷 أدوات الشكل الاثني عشر */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showDodecagon} onChange={() => setShowDodecagon(!showDodecagon)} />
-    🔷 {settings.language === "ar" ? "إظهار الاثني عشر" : "Show Dodecagon"}
-  </label>
-
-  {showDodecagon && (
-    <>
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={dodecagonRotation}
-        onChange={(e) => setDodecagonRotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillDodecagon} onChange={() => setFillDodecagon(!fillDodecagon)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightDodecagon} onChange={() => setHighlightDodecagon(!highlightDodecagon)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-{/* ⭐ أدوات النجمة 12/5 */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
-  <label>
-    <input type="checkbox" checked={showStar12} onChange={() => setShowStar12(!showStar12)} />
-    ⭐ {settings.language === "ar" ? "النجمة الإثني عشرية {12/5}" : "Dodecagram {12/5}"}
-  </label>
-
-  {showStar12 && (
-    <>
-      <label>♻️ تدوير</label>
-      <input type="range" min="0" max="360" value={star12Rotation}
-        onChange={(e) => setStar12Rotation(parseFloat(e.target.value))} />
-      <label><input type="checkbox" checked={fillStar12} onChange={() => setFillStar12(!fillStar12)} /> تعبئة</label>
-      <label><input type="checkbox" checked={highlightStar12} onChange={() => setHighlightStar12(!highlightStar12)} /> تمييز</label>
-    </>
-  )}
-</div>
-
-
-
-{/* 🧲 عجلة الزوايا */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "12px" }}>
+         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+    <label style={{ marginBottom: "5px" }}>
+      {settings.language === "ar" ? "بداية الترقيم" : "Start From"}
+    </label>
+    <input
+      type="number"
+      min={1}
+      value={settings.startValue}
+      onChange={(e) =>
+        setSettings((prev) => ({
+          ...prev,
+          startValue: parseInt(e.target.value),
+        }))
+      }
+style={inputStyle}
+    />
+  </div>
+  <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
+    <label style={{ marginBottom: "5px" }}>
+      {settings.language === "ar" ? "عدد الحلقات" : "Levels"}
+    </label>
+    <input
+      type="number"
+      min={1}
+      max={40}
+      value={settings.levels}
+      onChange={(e) =>
+        setSettings((prev) => ({
+          ...prev,
+          levels: parseInt(e.target.value),
+        }))
+      }
+style={inputStyle}
+    />
+  </div>
+  {/* 🧲 عجلة الزوايا */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
   <label>
     <input type="checkbox" checked={showAngleWheel} onChange={() => setShowAngleWheel(!showAngleWheel)} />
     🧲 {settings.language === "ar" ? "إظهار عجلة الزوايا" : "Show Angle Wheel"}
@@ -1300,15 +811,564 @@ const handleExportPDF = () => {
   </>
 )}
 </div>
+<div style={{ margin: "0px", textAlign: "center", marginBottom: "0px", paddingBottom: "0px" }}>
+  <label style={{ fontWeight: "bold", marginBottom: "4px", display: "block" }}>
+    اختيار الأشكال الهندسية:
+  </label>
+  <select
+    value={selectedShape}
+    onChange={(e) => setSelectedShape(e.target.value)}
+    style={{
+      margin: "0px",
+      padding: "6px",
+      fontSize: "16px",
+      display: "block",
+      width: "100%",
+      maxWidth: "250px",
+      marginInline: "auto",
+    }}
+  >
+    <option value="">-- اختر --</option>
+    <option value="triangle">🔺 إظهار المثلث</option>
+    <option value="square">⬛ إظهار المربع</option>
+    <option value="star4">⭐ إظهار النجمة الرباعية</option>
+    <option value="pentagon">🔷 إظهار الخماسي</option>
+    <option value="star5">⭐  إظهار النجمة الخماسية</option>
+    <option value="hexagon">🛑 إظهار السداسي</option>
+    <option value="star6">⭐ إظهار النجمة السداسية</option>
+    <option value="heptagon">🔷 إظهار السباعي</option>
+    <option value="star7">⭐ إظهار النجمة السباعية</option>
+    <option value="octagon">🧿 إظهار المربع الثماني</option>
+    <option value="star8">⭐ إظهار نجمة مثمنة</option>
+    <option value="nonagon">🔷 إظهار التساعي</option>
+    <option value="star9">⭐ إظهار النجمة التساعية</option>
+    <option value="decagon">🔷 إظهار الشكل العشاري</option>
+    <option value="star10">⭐ إظهار النجمة العشارية</option>
+    <option value="eleven">🔷 إظهار الحادي عشر</option>
+    <option value="star11">⭐ إظهار النجمة الحادية عشر</option>
+    <option value="twelve">🔷 إظهار الاثني عشر</option>
+    <option value="star12">⭐ النجمة الإثني عشرية {12/5}</option>
+    <option value="anglewheel">🧲 إظهار عجلة الزوايا</option>
+    <option value="circles">🟡 إظهار الدوائر المتداخلة</option>
+  </select>
+</div>
+
+{/* ✅ أدوات المثلث */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+  {selectedShape === "triangle" && (
+    <>
+      <label>
+        🎛 {settings.language === "ar" ? "زوايا المثلث" : "Triangle Angles"}
+      </label>
+{customAngles.map((angle, idx) => {
+  const rotated = (angle + triangleRotation + settings.rotation) % 360;
+
+  return (
+    <input
+      key={idx}
+      type="number"
+      value={rotated.toFixed(0)}
+      onChange={(e) => {
+        const newRotated = parseFloat(e.target.value) || 0;
+        const newOriginal = (newRotated - triangleRotation - settings.rotation + 360) % 360;
+
+        const newAngles = [...customAngles];
+        newAngles[idx] = newOriginal;
+        setCustomAngles(newAngles);
+      }}
+      style={{ ...inputStyle, marginBottom: "6px", direction: "ltr", textAlign: "center" }}
+    />
+  );
+})}
+      <label>
+        ♻️ {settings.language === "ar" ? "تدوير المثلث" : "Rotate Triangle"}
+      </label>
+      <input
+        type="range"
+        min="0"
+        max="360"
+        value={triangleRotation}
+        onChange={(e) => setTriangleRotation(parseFloat(e.target.value))}
+      />
+
+      <label>
+        <input type="checkbox" checked={highlightTriangle} onChange={() => setHighlightTriangle(!highlightTriangle)} />
+        {settings.language === "ar" ? "تمييز الزوايا" : "Show Highlight"}
+      </label>
+
+<label>
+  <input
+    type="checkbox"
+    checked={fillTriangle}
+    onChange={() => setFillTriangle(!fillTriangle)}
+  />
+  {settings.language === "ar" ? "تعبئة المثلث" : "Fill Triangle"}
+</label>
+    </>
+  )}
+</div>
+
+{/* 🟥 أدوات المربع */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+ {selectedShape === "square" && (
+    <>
+      <label>
+        🎛 {settings.language === "ar" ? "زوايا المربع" : "Square Angles"}
+      </label>
+      {customSquareAngles.map((angle, idx) => {
+        const rotated = (angle + squareRotation + settings.rotation) % 360;
+
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - squareRotation - settings.rotation + 360) % 360;
+
+              const newAngles = [...customSquareAngles];
+              newAngles[idx] = newOriginal;
+              setCustomSquareAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px", direction: "ltr", textAlign: "center" }}
+          />
+        );
+      })}
+
+      <label>
+        ♻️ {settings.language === "ar" ? "تدوير المربع" : "Rotate Square"}
+      </label>
+      <input
+        type="range"
+        min="0"
+        max="360"
+        value={squareRotation}
+        onChange={(e) => setSquareRotation(parseFloat(e.target.value))}
+      />
+
+      <label>
+        <input type="checkbox" checked={highlightSquare} onChange={() => setHighlightSquare(!highlightSquare)} />
+        {settings.language === "ar" ? "تمييز الزوايا" : "Show Highlight"}
+      </label>
+
+      <label>
+        <input type="checkbox" checked={fillSquare} onChange={() => setFillSquare(!fillSquare)} />
+        {settings.language === "ar" ? "تعبئة المربع" : "Fill Square"}
+      </label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة الرباعية */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+  {selectedShape === "star4" && (
+    <>
+      {customStar4Angles.map((angle, idx) => {
+        const rotated = (angle + star4Rotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - star4Rotation - settings.rotation + 360) % 360;
+              const newAngles = [...customStar4Angles];
+              newAngles[idx] = newOriginal;
+              setCustomStar4Angles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star4Rotation}
+        onChange={(e) => setStar4Rotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStar4} onChange={() => setFillStar4(!fillStar4)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStar4} onChange={() => setHighlightStar4(!highlightStar4)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* 🔷 أدوات الشكل الخماسي */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+  {selectedShape === "pentagon" && (
+    <>
+      {customPentagonAngles.map((angle, idx) => {
+        const rotated = (angle + pentagonRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - pentagonRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customPentagonAngles];
+              newAngles[idx] = newOriginal;
+              setCustomPentagonAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={pentagonRotation}
+        onChange={(e) => setPentagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillPentagon} onChange={() => setFillPentagon(!fillPentagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightPentagon} onChange={() => setHighlightPentagon(!highlightPentagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة الخماسيه */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+ {selectedShape === "star5" && (
+    <>
+      {customStarAngles.map((angle, idx) => {
+        const rotated = (angle + starRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - starRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customStarAngles];
+              newAngles[idx] = newOriginal;
+              setCustomStarAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={starRotation}
+        onChange={(e) => setStarRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStar} onChange={() => setFillStar(!fillStar)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStar} onChange={() => setHighlightStar(!highlightStar)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* 🔷 أدوات الشكل السداسي */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+  {selectedShape === "hexagon" && (
+    <>
+      {customHexagonAngles.map((angle, idx) => {
+        const rotated = (angle + hexagonRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - hexagonRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customHexagonAngles];
+              newAngles[idx] = newOriginal;
+              setCustomHexagonAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={hexagonRotation}
+        onChange={(e) => setHexagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillHexagon} onChange={() => setFillHexagon(!fillHexagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightHexagon} onChange={() => setHighlightHexagon(!highlightHexagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة السداسية */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+ {selectedShape === "star6" && (
+    <>
+      {customHexagramAngles.map((angle, idx) => {
+        const rotated = (angle + hexagramRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - hexagramRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customHexagramAngles];
+              newAngles[idx] = newOriginal;
+              setCustomHexagramAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={hexagramRotation}
+        onChange={(e) => setHexagramRotation(parseFloat(e.target.value))} />
+
+      <label><input type="checkbox" checked={fillHexagram} onChange={() => setFillHexagram(!fillHexagram)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightHexagram} onChange={() => setHighlightHexagram(!highlightHexagram)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* 🔷 أدوات الشكل السباعي */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+  {selectedShape === "heptagon" && (
+    <>
+      <label>♻️ تدوير</label>
+      <input
+        type="range"
+        min="0"
+        max="360"
+        value={heptagonRotation}
+        onChange={(e) => setHeptagonRotation(parseFloat(e.target.value))}
+      />
+
+      <label>
+        <input type="checkbox" checked={fillHeptagon} onChange={() => setFillHeptagon(!fillHeptagon)} />
+        {settings.language === "ar" ? "تعبئة الشكل" : "Fill"}
+      </label>
+
+      <label>
+        <input type="checkbox" checked={highlightHeptagon} onChange={() => setHighlightHeptagon(!highlightHeptagon)} />
+        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight"}
+      </label>
+    </>
+  )}
+</div>
+
+
+{/* ⭐ أدوات النجمة السباعية */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+
+ {selectedShape === "star7" && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star7Rotation}
+        onChange={(e) => setStar7Rotation(parseFloat(e.target.value))} />
+
+      <label>
+        <input type="checkbox" checked={fillStar7} onChange={() => setFillStar7(!fillStar7)} />
+        {settings.language === "ar" ? "تعبئة" : "Fill"}
+      </label>
+
+      <label>
+        <input type="checkbox" checked={highlightStar7} onChange={() => setHighlightStar7(!highlightStar7)} />
+        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight Points"}
+      </label>
+    </>
+  )}
+</div>
+
+
+{/* 🧿 أدوات الشكل المثمن */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+ {selectedShape === "octagon" && (
+    <>
+      {customOctagonAngles.map((angle, idx) => {
+        const rotated = (angle + octagonRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - octagonRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customOctagonAngles];
+              newAngles[idx] = newOriginal;
+              setCustomOctagonAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={octagonRotation}
+        onChange={(e) => setOctagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillOctagon} onChange={() => setFillOctagon(!fillOctagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightOctagon} onChange={() => setHighlightOctagon(!highlightOctagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة المثمنة */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+{selectedShape === "star8" && (
+    <>
+      {customStarOctagonAngles.map((angle, idx) => {
+        const rotated = (angle + starOctagonRotation + settings.rotation) % 360;
+        return (
+          <input
+            key={idx}
+            type="number"
+            value={rotated.toFixed(0)}
+            onChange={(e) => {
+              const newRotated = parseFloat(e.target.value) || 0;
+              const newOriginal = (newRotated - starOctagonRotation - settings.rotation + 360) % 360;
+              const newAngles = [...customStarOctagonAngles];
+              newAngles[idx] = newOriginal;
+              setCustomStarOctagonAngles(newAngles);
+            }}
+            style={{ ...inputStyle, marginBottom: "6px" }}
+          />
+        );
+      })}
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={starOctagonRotation}
+        onChange={(e) => setStarOctagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStarOctagon} onChange={() => setFillStarOctagon(!fillStarOctagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStarOctagon} onChange={() => setHighlightStarOctagon(!highlightStarOctagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* 🔷 أدوات الشكل التساعي */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+  {selectedShape === "nonagon" && (
+    <>
+      <label>♻️ تدوير</label>
+      <input
+        type="range"
+        min="0"
+        max="360"
+        value={nonagonRotation}
+        onChange={(e) => setNonagonRotation(parseFloat(e.target.value))}
+      />
+
+      <label>
+        <input type="checkbox" checked={fillNonagon} onChange={() => setFillNonagon(!fillNonagon)} />
+        {settings.language === "ar" ? "تعبئة الشكل" : "Fill"}
+      </label>
+
+      <label>
+        <input type="checkbox" checked={highlightNonagon} onChange={() => setHighlightNonagon(!highlightNonagon)} />
+        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight"}
+      </label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة التساعية */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+  {selectedShape === "star9" && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star9Rotation}
+        onChange={(e) => setStar9Rotation(parseFloat(e.target.value))} />
+
+      <label>
+        <input type="checkbox" checked={fillStar9} onChange={() => setFillStar9(!fillStar9)} />
+        {settings.language === "ar" ? "تعبئة" : "Fill"}
+      </label>
+
+      <label>
+        <input type="checkbox" checked={highlightStar9} onChange={() => setHighlightStar9(!highlightStar9)} />
+        {settings.language === "ar" ? "تمييز الرؤوس" : "Highlight"}
+      </label>
+    </>
+  )}
+</div>
+
+{/* 🔷 أدوات الشكل العشاري */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+ {selectedShape === "decagon" && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={decagonRotation}
+        onChange={(e) => setDecagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillDecagon} onChange={() => setFillDecagon(!fillDecagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightDecagon} onChange={() => setHighlightDecagon(!highlightDecagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة العشارية */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+  {selectedShape === "star10" && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star10Rotation}
+        onChange={(e) => setStar10Rotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStar10} onChange={() => setFillStar10(!fillStar10)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStar10} onChange={() => setHighlightStar10(!highlightStar10)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* 🔷 أدوات الشكل الحادي عشر */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+  {selectedShape === "hendecagon" && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={hendecagonRotation}
+        onChange={(e) => setHendecagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillHendecagon} onChange={() => setFillHendecagon(!fillHendecagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightHendecagon} onChange={() => setHighlightHendecagon(!highlightHendecagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة الحادية عشر */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+  {selectedShape === "star11" && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star11Rotation}
+        onChange={(e) => setStar11Rotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStar11} onChange={() => setFillStar11(!fillStar11)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStar11} onChange={() => setHighlightStar11(!highlightStar11)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* 🔷 أدوات الشكل الاثني عشر */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+  {selectedShape === "dodecagon" && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={dodecagonRotation}
+        onChange={(e) => setDodecagonRotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillDodecagon} onChange={() => setFillDodecagon(!fillDodecagon)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightDodecagon} onChange={() => setHighlightDodecagon(!highlightDodecagon)} /> تمييز</label>
+    </>
+  )}
+</div>
+
+{/* ⭐ أدوات النجمة 12/5 */}
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+
+  {selectedShape === "star12" && (
+    <>
+      <label>♻️ تدوير</label>
+      <input type="range" min="0" max="360" value={star12Rotation}
+        onChange={(e) => setStar12Rotation(parseFloat(e.target.value))} />
+      <label><input type="checkbox" checked={fillStar12} onChange={() => setFillStar12(!fillStar12)} /> تعبئة</label>
+      <label><input type="checkbox" checked={highlightStar12} onChange={() => setHighlightStar12(!highlightStar12)} /> تمييز</label>
+    </>
+  )}
+</div>
 
 {/* 🟡 الدوائر المتداخلة */}
-<div style={{ display: "flex", flexDirection: "column", gap: "6px", marginTop: "12px", color: "#FFD700" }}>
-  <label>
-    <input type="checkbox" checked={showNestedCircles} onChange={() => setShowNestedCircles(!showNestedCircles)} />
-    🟡 {settings.language === "ar" ? "إظهار الدوائر المتداخلة" : "Show Nested Circles"}
-  </label>
-
-  {showNestedCircles && (
+<div style={{ display: "flex", flexDirection: "column", gap: "6px", color: "#FFD700", marginTop: "1px" }}>
+  {selectedShape === "circles" && (
     <>
       <label>🔢 {settings.language === "ar" ? "عدد الدوائر" : "Number of Circles"}
       <input
@@ -1469,63 +1529,8 @@ const handleExportPDF = () => {
     </>
   )}
 </div>
-
-
-        <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
-    <label style={{ marginBottom: "5px" }}>
-      {settings.language === "ar" ? "عدد الحلقات" : "Levels"}
-    </label>
-    <input
-      type="number"
-      min={1}
-      max={40}
-      value={settings.levels}
-      onChange={(e) =>
-        setSettings((prev) => ({
-          ...prev,
-          levels: parseInt(e.target.value),
-        }))
-      }
-style={inputStyle}
-    />
-  </div>
-
-         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
-    <label style={{ marginBottom: "5px" }}>
-      {settings.language === "ar" ? "عدد القطاعات" : "Divisions"}
-    </label>
-    <input
-      type="number"
-      min={10}
-      max={720}
-      value={settings.divisions}
-      onChange={(e) =>
-        setSettings((prev) => ({
-          ...prev,
-          divisions: parseInt(e.target.value),
-        }))
-      }
-style={inputStyle}
-    />
-  </div>
-
-         <div style={{ display: "flex", flexDirection: "column", color: "#FFD700" }}>
-    <label style={{ marginBottom: "5px" }}>
-      {settings.language === "ar" ? "بداية الترقيم" : "Start From"}
-    </label>
-    <input
-      type="number"
-      min={1}
-      value={settings.startValue}
-      onChange={(e) =>
-        setSettings((prev) => ({
-          ...prev,
-          startValue: parseInt(e.target.value),
-        }))
-      }
-style={inputStyle}
-    />
-  </div>
+  </>
+)}
 </div>
     </div>
 
@@ -1538,8 +1543,16 @@ style={inputStyle}
     background: "#fff",               // خلفية بيضاء حول الدائرة
     boxShadow: "0 0 10px rgba(255, 215, 0, 0.3)",
   }}
+> {/*'🔵 دائرة جان ديفيد'*/}
+<div
+  style={{
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "200vh",
+    backgroundColor: "#111", // اختياري: خلفية داكنة
+  }}
 >
-
   <svg
         ref={svgRef}
      width="100%"
@@ -1549,8 +1562,7 @@ style={inputStyle}
     display: "block",
     margin: "0 auto",
     background: "#f2f2f2",
-    cursor: isDragging ? "grabbing" : "grab",
-    }}
+    cursor: isDragging ? "grabbing" : "grab",    }}
     onMouseDown={handleMouseDown}
     onMouseMove={handleMouseMove}
     onMouseUp={handleMouseUp}
@@ -1565,9 +1577,10 @@ style={inputStyle}
 {Array.from({ length: 36 }).map((_, index) => {
   const fixedValue = index + 1;
 
-  const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
-  const angleMid = angle + angleStep / 2 - Math.PI / 2;
+const angleOffset = Math.PI / 2; // 90 درجة بالراديان
 
+const angle = index * angleStep - angleOffset + angleStep / 2;
+const angleMid = angle;
   const radius = innerRadius - 10; // ✅ داخل الدائرة لكن مرئي
   const x = center + radius * Math.cos(angleMid);
   const y = center + radius * Math.sin(angleMid);
@@ -1611,77 +1624,134 @@ style={inputStyle}
 
       return (
         <React.Fragment key={level}>
-          {[...Array(settings.divisions)].map((_, index) => {
-            const value = settings.startValue + level * settings.divisions + index;
-            const angleStart = index * angleStep + (settings.rotation * Math.PI) / 180;
-            const angleEnd = angleStart + angleStep;
-            const rStart = r1 + 5; // قريب من حافة الخلية الداخلية
-            const path = getPathForCell(r1, r2, angleStart, angleEnd);
-            const rMid = (r1 + r2) / 2;
-	       const angleMid = (angleStart + angleEnd) / 2;
-            const xStart = center + rStart * Math.cos(angleMid);
-	       const yStart = center + rStart * Math.sin(angleMid);
-            
-	       // ✅ أضف السطرين التاليين هنا:
-                     const x = center + rMid * Math.cos(angleMid);
-                     const y = center + rMid * Math.sin(angleMid);
-	       
-                     const fontSize = Math.max(5, 11 - value.toString().length);
-            const isGray = (level + index) % 2 === 0;
+{[...Array(settings.divisions)].map((_, index) => {
+  const value = settings.startValue + level * settings.divisions + index;
 
-  	       const reduced = reduceToDigit(value);
-               const fillColor = getCellColor(reduced);
+  // دالة لاختزال الرقم
+  const reduceToDigit = (num) => {
+    while (num > 9) {
+      num = num.toString().split("").reduce((a, b) => a + Number(b), 0);
+    }
+    return num;
+  };
 
-            return (
-              <g key={`${level}-${index}`}>
-              
-<path
-  d={path}
-  fill={getClickColor(value) || (isGray ? "#f0f0f0" : "#ffffff")}
-  stroke="#aaa"
-  strokeWidth={0.5}
-  onClick={() => handleCellClick(value)}
-  style={{ cursor: "pointer" }}
-/>
+  const reduced = reduceToDigit(value);
+  const reducedStart = reduceToDigit(settings.startValue);
+
+  // الزاوية التي يبدأ منها الرقم المختزل الأول
+  const baseAngles = {
+    1: 10,
+    2: 20,
+    3: 30,
+    4: 40,
+    5: 50,
+    6: 60,
+    7: 70,
+    8: 80,
+    9: 90,
+  };
+
+  // الزاوية الفعلية لهذا الرقم ضمن الدورة
+  const sequenceIndex = value - settings.startValue;
+  const baseAngle = baseAngles[reducedStart];
+  const angleDeg = (baseAngle + sequenceIndex * 10) % 360 || 360;
+  const angleRad = (angleDeg - 90) * (Math.PI / 180);
+
+  const angleStart = angleRad - (5 * Math.PI / 180);
+  const angleEnd = angleRad + (5 * Math.PI / 180);
+  const angleMid = angleRad;
+
+  // أنصاف الأقطار
+  const r1 = innerRadius + [...Array(level)].reduce((acc, l) => {
+    const maxDigits = Math.max(
+      ...Array.from({ length: settings.divisions }, (_, i) =>
+        (settings.startValue + l * settings.divisions + i).toString().length
+      )
+    );
+    return acc + (baseRingWidth + maxDigits * digitScale);
+  }, 0);
+
+  const maxDigits = value.toString().length;
+  const dynamicWidth = baseRingWidth + maxDigits * digitScale;
+  const r2 = r1 + dynamicWidth;
+  const rMid = (r1 + r2) / 2;
+
+  // إحداثيات النص
+  const x = center + rMid * Math.cos(angleMid);
+  const y = center + rMid * Math.sin(angleMid);
+
+  const fontSize = 8;
+
+  const getDigitColor = (digit) => {
+    if ([1, 4, 7].includes(digit)) return "red";
+    if ([2, 5, 8].includes(digit)) return "blue";
+    if ([3, 6, 9].includes(digit)) return "black";
+    return "black";
+  };
+
+  const path = getPathForCell(r1, r2, angleStart, angleEnd);
+
+  return (
+// داخل map الخاص بالحلقات والخلايا:
+<g key={`${level}-${index}`}>
+  <path
+    d={path}
+    fill={getClickColor(value) || "#fff"}
+    stroke="#aaa"
+    strokeWidth={0.5}
+    onClick={() => handleCellClick(value)}
+    onDoubleClick={() => handleDoubleClick(value)} // ضغطتين لإلغاء اللون
+
+    style={{ cursor: "pointer" }}
+  />
+
+  {/* الرقم الكامل في مركز الخلية */}
+  <text
+    x={x}
+    y={y}
+    fill={getDigitColor(reduced)}
+    fontSize={fontSize}
+    textAnchor="middle"
+    dominantBaseline="middle"
+    fontWeight="bold"
+  >
+    {value}
+  </text>
+
+  {/* ✅ الرقم المختزل مرفوع للأعلى قليلاً داخل الخلية */}
+  <text
+    x={center + (r1 + 6) * Math.cos(angleMid)}
+    y={center + (r1 + 6) * Math.sin(angleMid)}
+    fill={getDigitColor(reduced)}
+    fontSize={fontSize - 2}
+    textAnchor="middle"
+    dominantBaseline="middle"
+    fontWeight="bold"
+  >
+    {reduced}
+  </text>
 
 
-<text
- x={xStart}
- y={yStart}
- fill={getDigitColor(reduceToDigit(value))}
- fontSize={fontSize - 2}
- textAnchor="middle"
- dominantBaseline="middle"
- fontWeight="bold"
->
-  {reduceToDigit(value)}
-</text>
-
-<text
-  x={x}
-  y={y}
-  fill={getDigitColor(reduceToDigit(value))}
-  fontSize={fontSize}
-  textAnchor="middle"
-  dominantBaseline="middle"
-  fontWeight="bold"
->
-  {value}
-</text>
-
+   
 // 🧭 حلقة الزوايا الخارجية المرتبطة بمجموع الرقم
 
 
-{showDegreeRing && [...Array(settings.divisions)].map((_, index) => {
-  const angle = index * angleStep + (settings.rotation * Math.PI) / 180;
-   const angleMid = angle + angleStep / 2 - Math.PI / 2;
+{showDegreeRing && [...Array(36)].map((_, index) => {
+  const angleDeg = (index + 1) * 10;
 
-  const lastLevel = settings.levels - 1;
-  const cellValue = settings.startValue + lastLevel * settings.divisions + index;
-  const reduced = reduceToDigit(cellValue);
-  const angleDeg = ((index + 1) * 360) / settings.divisions;
-  const label = angleDeg === 0 ? "360°" : `${angleDeg.toFixed(0)}°`;
+  // 🔢 الرقم المختزل لمجموع الزاوية
+  const digitSum = angleDeg.toString().split('').reduce((sum, d) => sum + parseInt(d), 0);
+  const reduced = digitSum > 9
+    ? digitSum.toString().split('').reduce((sum, d) => sum + parseInt(d), 0)
+    : digitSum;
 
+  // 🎨 اللون حسب الرقم المختزل
+  const getDigitColor = (n) =>
+    n === 1 || n === 4 || n === 7 ? "red" :
+    n === 2 || n === 5 || n === 8 ? "blue" :
+    "black";
+
+  const angleRad = (angleDeg - 90) * (Math.PI / 180); // -90 لجعل البداية من الأعلى
   const r = innerRadius + [...Array(settings.levels)].reduce((acc, l) => {
     const maxDigits = Math.max(
       ...Array.from({ length: settings.divisions }, (_, i) =>
@@ -1689,10 +1759,10 @@ style={inputStyle}
       )
     );
     return acc + (baseRingWidth + maxDigits * digitScale);
-  }, 0) + 20;
+  }, 0) + 40;
 
-  const x = center + r * Math.cos(angleMid);
-  const y = center + r * Math.sin(angleMid);
+  const x = center + r * Math.cos(angleRad);
+  const y = center + r * Math.sin(angleRad);
 
   return (
     <text
@@ -1705,7 +1775,7 @@ style={inputStyle}
       dominantBaseline="middle"
       fontWeight="bold"
     >
-      {label}
+      {angleDeg}°
     </text>
   );
 })}
@@ -1724,10 +1794,10 @@ style={inputStyle}
 
 
 {/* ✅ رسم المثلث داخل الدائرة */}
-{showTriangle && (
+{selectedShape === "triangle" && (
   <g>
     {(() => {
-      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5); // نصف القطر
+      const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5); // نصف القطر الديناميكي
       const trianglePoints = customAngles.map((deg) => {
         const rad = ((deg + triangleRotation + settings.rotation) * Math.PI) / 180;
         return {
@@ -1738,49 +1808,51 @@ style={inputStyle}
 
       return (
         <>
+          {/* ✅ المثلث نفسه */}
           <polygon
-            points={trianglePoints.map((p) => `${p.x},${p.y}`).join(" ")}
-            fill={fillTriangle ? "rgba(0, 128, 0, 0.2)" : "none"}  // ✅ تعبئة خضراء أو لا شيء
+            points={trianglePoints.map(p => `${p.x},${p.y}`).join(" ")}
+            fill={fillTriangle ? "rgba(0, 128, 255, 0.2)" : "none"}
             stroke="green"
-            strokeWidth={2}
+            strokeWidth={1}
           />
+
+          {/* ✅ تمييز الزوايا بدوائر */}
           {highlightTriangle &&
             trianglePoints.map((p, i) => (
               <circle key={i} cx={p.x} cy={p.y} r={4} fill="yellow" />
             ))}
-{/* ✅ الخطوط الداخلية من كل رأس للمركز */}
-{trianglePoints.map((point, index) => (
-  <line
-    key={`line-${index}`}
-    x1={point.x}
-    y1={point.y}
-    x2={center}
-    y2={center}
-    stroke="green"
-    strokeWidth={3}
-    strokeDasharray="4,2" // خط متقطع (يمكنك تغييره)
-  />
-))}
 
-{/* ✅ عرض الزوايا الجديدة عند كل رأس */}
-{trianglePoints.map((point, i) => {
-  const angle = (customAngles[i] + triangleRotation + settings.rotation) % 360;
+          {/* ✅ الخطوط الداخلية من الرؤوس إلى المركز */}
+          {trianglePoints.map((point, index) => (
+            <line
+              key={`line-${index}`}
+              x1={point.x}
+              y1={point.y}
+              x2={center}
+              y2={center}
+              stroke="green"
+              strokeWidth={1}
+              strokeDasharray="4,2"
+            />
+          ))}
 
-  return (
-    <text
-      key={`angle-text-${i}`}
-      x={point.x}
-      y={point.y - 12}
-      fill="green"
-      fontSize={16}
-      fontWeight="bold"
-      textAnchor="middle"
-    >
-      ({angle.toFixed(0)}°)
-    </text>
-  );
-})}
-
+          {/* ✅ عرض الزوايا النصية عند الرؤوس */}
+          {trianglePoints.map((point, i) => {
+            const angle = (customAngles[i] + triangleRotation + settings.rotation) % 360;
+            return (
+              <text
+                key={`angle-text-${i}`}
+                x={point.x}
+                y={point.y - 12}
+                fill="green"
+                fontSize={16}
+                fontWeight="bold"
+                textAnchor="middle"
+              >
+                ({angle.toFixed(0)}°)
+              </text>
+            );
+          })}
         </>
       );
     })()}
@@ -1789,7 +1861,7 @@ style={inputStyle}
 
 
 {/* 🟥 رسم المربع داخل الدائرة */}
-{showSquare && (
+{selectedShape === "square" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5); // نفس نصف القطر
@@ -1855,7 +1927,7 @@ style={inputStyle}
 
 {/* ⭐ رسم النجمة الرباعية */}
 {/* ⭐ رسم النجمة الرباعية الحقيقية (شكل كوكسيتير مثل الصورة) */}
-{showStar4 && (
+{selectedShape === "star4" && (
   <g>
     {(() => {
       const R_outer = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -1905,11 +1977,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
-
-
 {/*  رسم الخماسي داخل الدائرة */}
-{showPentagon && (
+ {selectedShape === "pentagon" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -1948,8 +2017,7 @@ style={inputStyle}
 )}
 
 {/*  رسم النجمه الحماسيه داخل الدائرة */}
-
-{showStar && (
+ {selectedShape === "star5" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -1986,9 +2054,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* رسم السداسي داخل الدائرة */}
-{showHexagon && (
+ {selectedShape === "hexagon" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -1996,7 +2063,6 @@ style={inputStyle}
         const rad = ((deg + hexagonRotation + settings.rotation) * Math.PI) / 180;
         return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
       });
-
       return (
         <>
           <polygon
@@ -2025,27 +2091,22 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/*  ⭐ رسم النجمة السداسية بشكل مركب من مثلثين */}
-{showHexagram && (
+ {selectedShape === "star6" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
-
       // مثلث أول (0°, 120°, 240°)
       const triangle1 = [0, 120, 240].map((deg) => {
         const rad = ((deg + hexagramRotation + settings.rotation) * Math.PI) / 180;
         return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad), angle: deg };
       });
-
       // مثلث ثاني (60°, 180°, 300°)
       const triangle2 = [60, 180, 300].map((deg) => {
         const rad = ((deg + hexagramRotation + settings.rotation) * Math.PI) / 180;
         return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad), angle: deg };
       });
-
       const allPoints = [...triangle1, ...triangle2];
-
       return (
         <>
           {/* مثلث أول */}
@@ -2055,7 +2116,6 @@ style={inputStyle}
             stroke="purple"
             strokeWidth={2}
           />
-
           {/* مثلث ثاني */}
           <polygon
             points={triangle2.map((p) => `${p.x},${p.y}`).join(" ")}
@@ -2063,13 +2123,11 @@ style={inputStyle}
             stroke="purple"
             strokeWidth={2}
           />
-
           {/* نقاط الرؤوس */}
           {highlightHexagram &&
             allPoints.map((p, i) => (
               <circle key={i} cx={p.x} cy={p.y} r={4} fill="violet" />
             ))}
-
           {/* خطوط من كل رأس إلى المركز */}
           {allPoints.map((p, i) => (
             <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="purple" strokeDasharray="4,2" />
@@ -2094,9 +2152,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🔷 رسم الشكل السباعي المنتظم */}
-{showHeptagon && (
+ {selectedShape === "heptagon" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2111,7 +2168,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 7 + heptagonRotation + settings.rotation) % 360
         };
       });
-
       return (
         <>
           <polygon
@@ -2145,15 +2201,12 @@ style={inputStyle}
     })()}
   </g>
 )}
-
-
 {/* ⭐ رسم النجمة السباعية */}
-{showStar7 && (
+ {selectedShape === "star7" && (
   <g>
     {(() => {
       const R_outer = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
       const R_inner = R_outer * 0.45;
-
       const points = [];
       for (let i = 0; i < 14; i++) {
         const deg = i * (360 / 14) + star7Rotation + settings.rotation;
@@ -2198,10 +2251,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🧿 رسم المربع الثماني*/}
-
-{showOctagon && (
+ {selectedShape === "octagon" && (
   <g>
     {(() => {
       const r = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2209,7 +2260,6 @@ style={inputStyle}
         const rad = ((deg + octagonRotation + settings.rotation) * Math.PI) / 180;
         return { x: center + r * Math.cos(rad), y: center + r * Math.sin(rad) };
       });
-
       return (
         <>
           <polygon
@@ -2238,13 +2288,11 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* ⭐ رسم النجمة الثمانية (8/3 شليفلي) */}
-{showStarOctagon && (
+ {selectedShape === "star8" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
-
       // 8 رؤوس منتظمة كل 45°
       const points = [...Array(8)].map((_, i) => {
         const angle = ((i * 45 + starOctagonRotation + settings.rotation) * Math.PI) / 180;
@@ -2254,7 +2302,6 @@ style={inputStyle}
           angleDeg: (i * 45 + starOctagonRotation + settings.rotation) % 360,
         };
       });
-
       // ترتيب النقاط حسب شليفلي 8/3 => كل ثالث نقطة
       const order = [];
       let index = 0;
@@ -2262,7 +2309,6 @@ style={inputStyle}
         order.push(points[index]);
         index = (index + 3) % 8;
       }
-
       return (
         <>
           <polygon
@@ -2280,7 +2326,6 @@ style={inputStyle}
           {order.map((p, i) => (
             <line key={i} x1={p.x} y1={p.y} x2={center} y2={center} stroke="black" strokeDasharray="4,2" />
           ))}
-
           {order.map((p, i) => (
             <text
               key={i}
@@ -2299,15 +2344,13 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🔷 رسم الشكل التساعي المنتظم */}
-{showNonagon && (
+ {selectedShape === "nonagon" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
       const centerX = center;
       const centerY = center;
-
       const points = [...Array(9)].map((_, i) => {
         const angle = ((i * 360 / 9 + nonagonRotation + settings.rotation) * Math.PI) / 180;
         return {
@@ -2316,7 +2359,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 9 + nonagonRotation + settings.rotation) % 360
         };
       });
-
       return (
         <>
           <polygon
@@ -2350,9 +2392,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* ⭐ رسم النجمة التساعية المنتظمة {9/2} */}
-{showStar9 && (
+ {selectedShape === "star9" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2364,7 +2405,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 9 + star9Rotation + settings.rotation) % 360
         };
       });
-
       // ترتيب النجمة {9/2}: كل ثاني نقطة
       const ordered = [];
       let index = 0;
@@ -2375,7 +2415,6 @@ style={inputStyle}
         index = (index + 2) % 9;
         if (visited.has(index)) break; // تأمين منع التكرار
       }
-
       return (
         <>
           <polygon
@@ -2409,9 +2448,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🔷 رسم الشكل العشاري المنتظم */}
-{showDecagon && (
+ {selectedShape === "decagon" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2423,7 +2461,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 10 + decagonRotation + settings.rotation) % 360
         };
       });
-
       return (
         <>
           <polygon
@@ -2457,9 +2494,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* ⭐ رسم النجمة العشارية المنتظمة {10/3} */}
-{showStar10 && (
+ {selectedShape === "star10" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2471,7 +2507,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 10 + star10Rotation + settings.rotation) % 360
         };
       });
-
       const ordered = [];
       let index = 0;
       const visited = new Set();
@@ -2481,7 +2516,6 @@ style={inputStyle}
         index = (index + 3) % 10;
         if (visited.has(index)) break;
       }
-
       return (
         <>
           <polygon
@@ -2515,9 +2549,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🔷 رسم الشكل الهندسي الحادي عشر المنتظم */}
-{showHendecagon && (
+ {selectedShape === "hendecagon" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2529,7 +2562,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 11 + hendecagonRotation + settings.rotation) % 360
         };
       });
-
       return (
         <>
           <polygon
@@ -2563,9 +2595,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* ⭐ رسم النجمة الحادية عشر {11/3} */}
-{showStar11 && (
+ {selectedShape === "star11" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2577,7 +2608,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 11 + star11Rotation + settings.rotation) % 360
         };
       });
-
       const ordered = [];
       let index = 0;
       const visited = new Set();
@@ -2587,7 +2617,6 @@ style={inputStyle}
         index = (index + 3) % 11;
         if (visited.has(index)) break;
       }
-
       return (
         <>
           <polygon
@@ -2621,9 +2650,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🔷 رسم الشكل الهندسي الاثني عشر المنتظم */}
-{showDodecagon && (
+ {selectedShape === "dodecagon" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2635,7 +2663,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 12 + dodecagonRotation + settings.rotation) % 360
         };
       });
-
       return (
         <>
           <polygon
@@ -2669,9 +2696,8 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* ⭐ رسم النجمة الإثني عشرية المنتظمة {12/5} */}
-{showStar12 && (
+ {selectedShape === "star12" && (
   <g>
     {(() => {
       const R = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5);
@@ -2683,7 +2709,6 @@ style={inputStyle}
           angleDeg: (i * 360 / 12 + star12Rotation + settings.rotation) % 360
         };
       });
-
       const ordered = [];
       let index = 0;
       const visited = new Set();
@@ -2693,7 +2718,6 @@ style={inputStyle}
         index = (index + 5) % 12;
         if (visited.has(index)) break;
       }
-
       return (
         <>
           <polygon
@@ -2727,29 +2751,24 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🧲 رسم عجلة الزوايا */}
-
 {showAngleWheel && (
   <g>
     {(() => {
         const rayCount = Math.round(360 / angleStepRad);
       const outerR = innerRadius + settings.levels * (baseRingWidth + digitScale * 5.5) + 60;
       const innerR = innerRadius - 10;
-
       return (
         <>
           {[...Array(rayCount)].map((_, i) => {
                      const angle = (i * angleStepRad + angleWheelRotation + settings.rotation) % 360;
-            const rad = (angle * Math.PI) / 180;
+            const rad = ((angle - 90) * Math.PI) / 180;
             const x1 = center + innerR * Math.cos(rad);
             const y1 = center + innerR * Math.sin(rad);
             const x2 = center + outerR * Math.cos(rad);
             const y2 = center + outerR * Math.sin(rad);
-
             const labelX = center + (outerR + 12) * Math.cos(rad) +6;
             const labelY = center + (outerR + 12) * Math.sin(rad) + 6;
-
             return (
               <g key={`angle-ray-${i}`}>
                 <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={rayColor} strokeWidth={rayWidth} />
@@ -2761,7 +2780,7 @@ style={inputStyle}
                   textAnchor="middle"
                   dominantBaseline="middle"
                 >
-                  {Math.round(angle) === 0 ? "360°" : `${Math.round(angle)}°`}
+                  {Math.round(angle) === 0 ? "0°" : `${Math.round(angle)}°`}
                 </text>
               </g>
             );
@@ -2771,18 +2790,14 @@ style={inputStyle}
     })()}
   </g>
 )}
-
 {/* 🟡  رسم الدوائر المتداخلة  */}
-
-
-{showNestedCircles && (
+{selectedShape === "circles" && (
   <g>
     {[...Array(nestedCircleCount)].map((_, i) => {
       const radius = nestedCircleGap * (i + 1);
       const color = useGradientColor
         ? `hsl(${(i * 30) % 360}, 70%, 60%)`
         : nestedCircleColor;
-
       return (
         <g key={`nested-${i}`}>
           <circle
@@ -2810,7 +2825,6 @@ onClick={() =>
               R={radius}
             </text>
           )}
-
 {showNestedCircles && showTimeLabels && (
   <g>
     {[...Array(nestedCircleCount)].map((_, i) => {
@@ -2832,23 +2846,19 @@ onClick={() =>
     })}
   </g>
 )}
-
-        </g>
+       </g>
       );
     })}
   </g>
 )}
-
 {/* 🧭 كتابة الزوايا مرة واحدة حول الدائرة مخ خطوط الشعاع */}
-
-{showNestedCircles && (
+{selectedShape === "circles" && (
   <g>
     {[...Array(12)].map((_, j) => {
       const angle = ((j * 30 - 90) * Math.PI) / 180;
       const outerRadius = nestedCircleGap * nestedCircleCount + 20;
       const tx = center + outerRadius * Math.cos(angle);
       const ty = center + outerRadius * Math.sin(angle);
-
       return (
         <text
           key={`global-angle-${j}`}
@@ -2866,14 +2876,13 @@ onClick={() =>
     })}
   </g>
 )}
-{showNestedCircles && (
+{selectedShape === "circles" && (
   <g>
     {[...Array(12)].map((_, j) => {
       const angle = ((j * 30 - 90) * Math.PI) / 180;
       const outerRadius = nestedCircleGap * nestedCircleCount;
       const x = center + outerRadius * Math.cos(angle);
       const y = center + outerRadius * Math.sin(angle);
-
       return (
         <line
           key={`main-ray-${j}`}
@@ -2889,7 +2898,6 @@ onClick={() =>
     })}
   </g>
 )}
-
 {showNestedCircles && showRepeatedPattern && (
   <g>
     {[...Array(nestedCircleCount)].map((_, i) => {
@@ -2897,11 +2905,9 @@ onClick={() =>
       const centerX = center;
       const centerY = center;
       let angles = [];
-
       if (patternShape === "triangle") angles = [0, 120, 240];
       else if (patternShape === "square") angles = [0, 90, 180, 270];
       else if (patternShape === "star") angles = [0, 144, 288, 72, 216];
-
       const points = angles.map((angleDeg) => {
         const rad = ((angleDeg + patternRotation + settings.rotation) * Math.PI) / 180;
         return {
@@ -2909,7 +2915,6 @@ onClick={() =>
           y: centerY + radius * Math.sin(rad),
         };
       });
-
       return (
         <g key={`pattern-${i}`}>
 <polygon
@@ -2934,8 +2939,6 @@ onClick={() =>
     strokeWidth={1}
   />
 )}
-
-
           {points.map((p, idx) => (
             <circle key={idx} cx={p.x} cy={p.y} r={3} fill={patternColor} />
           ))}
@@ -2949,21 +2952,18 @@ onClick={() =>
     strokeWidth={1}
   />
 )}
-
         </g>
       );
     })}
   </g>
 )}
-
    </g>
       </svg>
     </div>
   </div>
+  </div>
 );
 };
-
-
 const buttonStyle = {
    margin: "6px",
   padding: "8px 16px",
@@ -2976,7 +2976,6 @@ const buttonStyle = {
   transition: "all 0.3s ease",
   cursor: "pointer",
 };
-
 const inputStyle = {
   width: "80px",
   padding: "6px",

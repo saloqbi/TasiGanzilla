@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار إصلاح التدوير</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .instructions {
+            background: #e2e3e5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            border-left: 4px solid #007bff;
+            margin: 10px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 اختبار إصلاح خاصية التدوير</h1>
+        
+        <div id="serverStatus" class="status warning">
+            🔄 جاري فحص حالة السيرفر...
+        </div>
+
+        <div class="instructions">
+            <h3>📋 خطوات تشغيل السيرفر:</h3>
+            <ol>
+                <li>افتح Terminal جديد</li>
+                <li>انتقل لمجلد المشروع:</li>
+                <div class="code">cd "c:\Users\smartd\Tasi-Project"</div>
+                <li>شغل السيرفر:</li>
+                <div class="code">npm run dev</div>
+                <li>انتظر حتى ترى:</li>
+                <div class="code">Local: http://localhost:3000/</div>
+            </ol>
+        </div>
+
+        <div class="instructions">
+            <h3>🎯 اختبار الإصلاح:</h3>
+            <ol>
+                <li><strong>اختر "triangle" كشكل</strong></li>
+                <li><strong>ستظهر نقاط صفراء على رؤوس المثلث</strong></li>
+                <li><strong>اسحب من أي نقطة لتدوير المثلث</strong></li>
+                <li><strong>فعّل عجلة الزوايا واسحبها أيضاً</strong></li>
+                <li><strong>كلاهما يجب أن يعمل معاً</strong></li>
+            </ol>
+        </div>
+
+        <button onclick="testServer()">🔍 فحص السيرفر</button>
+        <button onclick="openApp()">🌐 فتح التطبيق</button>
+        <button onclick="showConsole()">📊 فتح Console</button>
+
+        <div id="results" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        async function testServer() {
+            const statusDiv = document.getElementById('serverStatus');
+            const resultsDiv = document.getElementById('results');
+            
+            statusDiv.className = 'status warning';
+            statusDiv.innerHTML = '🔄 جاري فحص السيرفر...';
+            
+            try {
+                const response = await fetch('http://localhost:3000');
+                if (response.ok) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '✅ السيرفر يعمل بنجاح على http://localhost:3000';
+                    resultsDiv.innerHTML = '<div class="status success">🎉 يمكنك الآن اختبار إصلاح التدوير!</div>';
+                } else {
+                    throw new Error('Server responded with error');
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '❌ السيرفر لا يعمل. تأكد من تشغيله أولاً.';
+                resultsDiv.innerHTML = `
+                    <div class="status error">
+                        <h4>خطوات إصلاح المشكلة:</h4>
+                        <ol style="text-align: right;">
+                            <li>افتح Terminal</li>
+                            <li>اذهب لمجلد المشروع: <code>cd "c:\\Users\\smartd\\Tasi-Project"</code></li>
+                            <li>شغل: <code>npm run dev</code></li>
+                            <li>انتظر رسالة النجاح ثم أعد المحاولة</li>
+                        </ol>
+                    </div>
+                `;
+            }
+        }
+
+        function openApp() {
+            window.open('http://localhost:3000', '_blank');
+        }
+
+        function showConsole() {
+            alert('اضغط F12 لفتح Developer Tools والذهاب لتبويب Console لرؤية رسائل التدوير');
+        }
+
+        // فحص تلقائي عند تحميل الصفحة
+        testServer();
+    </script>
+</body>
+</html>
