@@ -146,9 +146,17 @@ const GannCircle360Canvas = () => {
   const calculateRingStartNumbers = (startValue, levels, divisions) => {
     let ringStartNumbers = [];
     
+    // التحقق من وجود قطاعات
+    if (divisions === 0) {
+      return ringStartNumbers;
+    }
+    
     // للحلقات الأولى والثانية (فارغة من الأرقام)
     ringStartNumbers[0] = null;
     ringStartNumbers[1] = null;
+    
+    // تحديد خطوة الزيادة بناءً على طبيعة قيمة البداية
+    const step = (startValue % 1 === 0) ? 1 : 0.01;
     
     // للحلقة الثالثة وما بعدها
     for (let level = 2; level < levels; level++) {
@@ -156,10 +164,17 @@ const GannCircle360Canvas = () => {
         // الحلقة الثالثة تبدأ من startValue
         ringStartNumbers[level] = startValue;
       } else {
-        // الحلقات التالية تبدأ من أول رقم بعد انتهاء الحلقة السابقة يعطي رقماً مختزلاً = 1
-        const previousRingEnd = ringStartNumbers[level - 1] + divisions - 1;
-        const nextStart = findNextNumberWithReduced(previousRingEnd + 1, 1);
-        ringStartNumbers[level] = nextStart;
+        // الحلقات التالية تبدأ من أول رقم بعد انتهاء الحلقة السابقة
+        const previousRingEnd = parseFloat((ringStartNumbers[level - 1] + (divisions - 1) * step).toFixed(2));
+        const nextStart = parseFloat((previousRingEnd + step).toFixed(2));
+        
+        // للأرقام العشرية، نستخدم الرقم التالي مباشرة
+        // للأرقام الصحيحة، نستخدم findNextNumberWithReduced
+        if (startValue % 1 === 0) {
+          ringStartNumbers[level] = findNextNumberWithReduced(nextStart, 1);
+        } else {
+          ringStartNumbers[level] = nextStart;
+        }
       }
     }
     
@@ -167,11 +182,24 @@ const GannCircle360Canvas = () => {
   };
 
   // دالة للحصول على القيمة في خلية معينة
-  // مثال: للحلقة 3 والخلية 0 إذا كانت بداية الحلقة 1 ستعطي 1
-  // للحلقة 3 والخلية 35 إذا كانت بداية الحلقة 1 ستعطي 36
-  const getCellValue = (level, index, ringStartNumbers) => {
+  // مثال: للحلقة 3 والخلية 0 إذا كانت بداية الحلقة 3.77 ستعطي 3.77
+  // للحلقة 3 والخلية 1 إذا كانت بداية الحلقة 3.77 ستعطي 3.78
+  const getCellValue = (level, index, ringStartNumbers, startValue = 1) => {
     if (level < 2) return 0; // الحلقات الفارغة
-    return ringStartNumbers[level] + index;
+    
+    const baseValue = ringStartNumbers[level];
+    
+    // تحديد خطوة الزيادة بناءً على طبيعة قيمة البداية
+    let step;
+    if (startValue % 1 === 0) {
+      // إذا كانت قيمة البداية عدد صحيح، الخطوة = 1
+      step = 1;
+    } else {
+      // إذا كانت قيمة البداية عدد عشري، الخطوة = 0.01
+      step = 0.01;
+    }
+    
+    return parseFloat((baseValue + (index * step)).toFixed(2));
   };
 
   const getDigitColor = (digit) => {
@@ -454,9 +482,14 @@ const [selectedPatternIndex, setSelectedPatternIndex] = useState(null);
   // حساب نصف قطر آخر حلقة بنفس منطق الحلقة الفعلية المحسن
   let calculatedLastRadius = innerRadius;
   for (let level = 0; level < totalLevels; level++) {
+    // حماية من حالة عدد القطاعات = 0
+    if (settings.divisions === 0) {
+      break;
+    }
+    
     const maxDigitsInLevel = Math.max(
       ...Array.from({ length: settings.divisions }, (_, i) => {
-        const cellValue = getCellValue(level, i, ringStartNumbers);
+        const cellValue = getCellValue(level, i, ringStartNumbers, settings.startValue);
         return cellValue > 0 ? parseFloat(cellValue.toFixed(2)).toString().length : 1;
       })
     );
@@ -2885,9 +2918,14 @@ useEffect(() => {
   // حساب نصف قطر آخر حلقة بنفس منطق الحلقة الفعلية
   let calculatedLastRadius = innerRadius;
   for (let level = 0; level < totalLevels; level++) {
+    // حماية من حالة عدد القطاعات = 0
+    if (settings.divisions === 0) {
+      break;
+    }
+    
     const maxDigitsInLevel = Math.max(
       ...Array.from({ length: settings.divisions }, (_, i) => {
-        const cellValue = getCellValue(level, i, ringStartNumbers);
+        const cellValue = getCellValue(level, i, ringStartNumbers, settings.startValue);
         return cellValue > 0 ? parseFloat(cellValue.toFixed(2)).toString().length : 1;
       })
     );
@@ -2966,7 +3004,7 @@ useEffect(() => {
     for (let level = 0; level < totalLevels; level++) {
       const maxDigitsInLevel = Math.max(
         ...Array.from({ length: settings.divisions }, (_, i) => {
-          const cellValue = getCellValue(level, i, ringStartNumbers);
+          const cellValue = getCellValue(level, i, ringStartNumbers, settings.startValue);
           return cellValue > 0 ? parseFloat(cellValue.toFixed(2)).toString().length : 1;
         })
       );
@@ -4586,7 +4624,7 @@ useEffect(() => {
     for (let level = 0; level < totalLevels; level++) {
       const maxDigitsInLevel = Math.max(
         ...Array.from({ length: settings.divisions }, (_, i) => {
-          const cellValue = getCellValue(level, i, ringStartNumbers);
+          const cellValue = getCellValue(level, i, ringStartNumbers, settings.startValue);
           return cellValue > 0 ? parseFloat(cellValue.toFixed(2)).toString().length : 1;
         })
       );
@@ -6202,10 +6240,12 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
     const totalLevels = settings.levels + 2;
     const ringStartNumbers = calculateRingStartNumbers(settings.startValue, totalLevels, settings.divisions);
     
+    // التحقق من وجود قطاعات وحلقات لرسمها
+    if (settings.divisions > 0 && settings.levels > 0) {
       for (let level = 0; level < totalLevels; level++) {
         const maxDigitsInLevel = Math.max(
           ...Array.from({ length: settings.divisions }, (_, i) => {
-            const cellValue = getCellValue(level, i, ringStartNumbers);
+            const cellValue = getCellValue(level, i, ringStartNumbers, settings.startValue);
             return cellValue > 0 ? parseFloat(cellValue.toFixed(2)).toString().length : 1;
           })
         );
@@ -6218,15 +6258,15 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
           [...Array(level)].reduce((acc, _, l) => {
             const maxDigits = Math.max(
               ...Array.from({ length: settings.divisions }, (_, i) => {
-                const cellValue = getCellValue(l, i, ringStartNumbers);
+                const cellValue = getCellValue(l, i, ringStartNumbers, settings.startValue);
                 return cellValue > 0 ? parseFloat(cellValue.toFixed(2)).toString().length : 1;
               })
             );
             return acc + calculateRingWidth(maxDigits);
           }, 0);
         const r2 = r1 + dynamicWidth;      for (let index = 0; index < settings.divisions; index++) {
-        // حساب القيمة الجديدة: بداية الحلقة + فهرس الخلية
-        const value = getCellValue(level, index, ringStartNumbers);
+        // حساب القيمة الجديدة: بداية الحلقة + فهرس الخلية (مع مراعاة خطوة الزيادة)
+        const value = getCellValue(level, index, ringStartNumbers, settings.startValue);
         const reduced = value > 0 ? reduceToDigit(value) : 0;
         
         // حساب الزاوية: كل خلية تأخذ (360° / عدد القطاعات) من المساحة
@@ -6267,7 +6307,9 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
           
           // حساب حجم الخط المناسب للخلية بشكل أكثر دقة
           const cellWidth = dynamicWidth;
-          const valueString = value.toString();
+          // تنسيق الرقم بحد أقصى رقمين بعد الفاصلة العشرية
+          const formattedValue = parseFloat(value.toFixed(2)).toString();
+          const valueString = formattedValue;
           
           // حساب حجم الخط بناءً على عرض الخلية وطول النص
           const maxFontSize = Math.min(cellWidth * 0.85, 24); // حد أقصى أكبر 24px
@@ -6292,8 +6334,8 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
           // إضافة خطوط خارجية للنص للوضوح
           ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
           ctx.lineWidth = 1;
-          ctx.strokeText(value, x, y);
-          ctx.fillText(value, x, y);
+          ctx.strokeText(formattedValue, x, y);
+          ctx.fillText(formattedValue, x, y);
           
           // الرقم المختزل بحجم أصغر نسبياً
           const reducedFontSize = Math.max(fontSize * 0.6, 8);
@@ -6308,6 +6350,7 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
         ctx.restore();
       }
     }
+    } // إغلاق شرط settings.divisions > 0 && settings.levels > 0
 
     // رسم خطوط الأشعة فوق حلقات الأرقام
     drawAngleWheelRays(ctx, center);
@@ -7410,7 +7453,7 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
                 </label>
                 <input
                   type="number"
-                  min={10}
+                  min={0}
                   max={720}
                   value={settings.divisions}
                   onChange={(e) =>
@@ -7446,7 +7489,7 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
                 </label>
                 <input
                   type="number"
-                  min={1}
+                  min={0}
                   max={40}
                   value={settings.levels}
                   onChange={(e) =>
