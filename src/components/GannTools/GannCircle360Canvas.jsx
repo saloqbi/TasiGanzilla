@@ -6274,7 +6274,7 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
         const anglePerCell = 360 / settings.divisions;
         const cellAngleDeg = (index + 1) * anglePerCell; // من anglePerCell إلى 360°
         
-        let angleDeg = cellAngleDeg - 90; // تحويل إلى نظام Canvas (-90° للساعة 12)
+        let angleDeg = cellAngleDeg - 90 + settings.rotation; // تحويل إلى نظام Canvas (-90° للساعة 12) مع إضافة التدوير
         const angleRad = (angleDeg * Math.PI) / 180;
         
         // حساب زوايا بداية ونهاية الخلية
@@ -6942,7 +6942,7 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
             return cellValue > 0 ? parseFloat(cellValue.toFixed(2)).toString().length : 1;
           })
         );
-        const dynamicWidth = baseRingWidth + maxDigitsInLevel * digitScale;
+        const dynamicWidth = calculateRingWidth(maxDigitsInLevel);
         const r1 = innerRadius + [...Array(level)].reduce((acc, _, l) => {
           const maxDigits = Math.max(
             ...Array.from({ length: settings.divisions }, (_, i) => {
@@ -6950,27 +6950,45 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
               return cellValue > 0 ? parseFloat(cellValue.toFixed(2)).toString().length : 1;
             })
           );
-          return acc + (baseRingWidth + maxDigits * digitScale);
+          return acc + calculateRingWidth(maxDigits);
         }, 0);
         const r2 = r1 + dynamicWidth;
         
-        // التحقق من أن النقرة داخل هذه الحلقة
-        if (distance >= r1 && distance <= r2) {
-          // حساب الزاوية
+        // إضافة هامش صغير للدقة في النقر
+        const clickMargin = 2;
+        
+        // التحقق من أن النقرة داخل هذه الحلقة (مع الهامش)
+        if (distance >= (r1 - clickMargin) && distance <= (r2 + clickMargin)) {
+          // حساب الزاوية مع نفس المنطق المستخدم في الرسم
           const angle = Math.atan2(canvasMouseY - center, canvasMouseX - center);
-          let angleDeg = (angle * 180 / Math.PI + 90 + 360) % 360;
+          // تحويل الزاوية إلى درجات (في نطاق 0-360)
+          let mouseAngleDeg = (angle * 180 / Math.PI + 360) % 360;
           
           // حساب فهرس الخلية
           const anglePerCell = 360 / settings.divisions;
-          const cellIndex = Math.floor(angleDeg / anglePerCell);
+          
+          // في الرسم: الخلية index تقع في الزاوية (index + 1) * anglePerCell - 90 + settings.rotation
+          // لذا نحتاج لإيجاد الخلية الأقرب لزاوية الماوس
+          
+          // تحويل زاوية الماوس إلى النظام المستخدم في الرسم
+          let adjustedMouseAngle = (mouseAngleDeg + 90 - settings.rotation + 360) % 360;
+          
+          // الآن نحسب أي خلية تحتوي على هذه الزاوية
+          // الخلية index تحتوي على المنطقة حول (index + 1) * anglePerCell
+          let cellIndex = Math.round(adjustedMouseAngle / anglePerCell) - 1;
+          cellIndex = (cellIndex + settings.divisions) % settings.divisions;
+          
+          // تسجيل تفصيلي للتطوير
+          console.log(`🔍 Debug Click - MouseAngle: ${mouseAngleDeg.toFixed(1)}°, AdjustedAngle: ${adjustedMouseAngle.toFixed(1)}°, AnglePerCell: ${anglePerCell.toFixed(1)}°, CalculatedIndex: ${cellIndex}`);
           
           // مفتاح فريد للخلية
           const cellKey = `${level}-${cellIndex}`;
           
-          // تحديث عدد النقرات
+          // تحديث عدد النقرات مع إضافة تأكيد في وحدة التحكم للتطوير
           setCellClickCounts(prev => {
             const currentClicks = prev[cellKey] || 0;
             const newClicks = (currentClicks + 1) % 5; // 0-4 دورة
+            console.log(`🎯 Cell clicked: Level ${level}, Index ${cellIndex}, Clicks: ${newClicks}, MouseAngle: ${mouseAngleDeg.toFixed(1)}°, CellAngle: ${((cellIndex + 1) * anglePerCell - 90 + settings.rotation + 360) % 360}°`);
             return {
               ...prev,
               [cellKey]: newClicks
@@ -7018,7 +7036,7 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
             return cellValue > 0 ? parseFloat(cellValue.toFixed(2)).toString().length : 1;
           })
         );
-        const dynamicWidth = baseRingWidth + maxDigitsInLevel * digitScale;
+        const dynamicWidth = calculateRingWidth(maxDigitsInLevel);
         const r1 = innerRadius + [...Array(level)].reduce((acc, _, l) => {
           const maxDigits = Math.max(
             ...Array.from({ length: settings.divisions }, (_, i) => {
@@ -7026,20 +7044,40 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
               return cellValue > 0 ? parseFloat(cellValue.toFixed(2)).toString().length : 1;
             })
           );
-          return acc + (baseRingWidth + maxDigits * digitScale);
+          return acc + calculateRingWidth(maxDigits);
         }, 0);
         const r2 = r1 + dynamicWidth;
         
-        if (distance >= r1 && distance <= r2) {
+        // إضافة هامش صغير للدقة في النقر
+        const clickMargin = 2;
+        
+        if (distance >= (r1 - clickMargin) && distance <= (r2 + clickMargin)) {
+          // حساب الزاوية مع نفس المنطق المستخدم في الرسم
           const angle = Math.atan2(canvasMouseY - center, canvasMouseX - center);
-          let angleDeg = (angle * 180 / Math.PI + 90 + 360) % 360;
+          // تحويل الزاوية إلى درجات (في نطاق 0-360)
+          let mouseAngleDeg = (angle * 180 / Math.PI + 360) % 360;
           
+          // حساب فهرس الخلية
           const anglePerCell = 360 / settings.divisions;
-          const cellIndex = Math.floor(angleDeg / anglePerCell);
+          
+          // في الرسم: الخلية index تقع في الزاوية (index + 1) * anglePerCell - 90 + settings.rotation
+          // لذا نحتاج لإيجاد الخلية الأقرب لزاوية الماوس
+          
+          // تحويل زاوية الماوس إلى النظام المستخدم في الرسم
+          let adjustedMouseAngle = (mouseAngleDeg + 90 - settings.rotation + 360) % 360;
+          
+          // الآن نحسب أي خلية تحتوي على هذه الزاوية
+          // الخلية index تحتوي على المنطقة حول (index + 1) * anglePerCell
+          let cellIndex = Math.round(adjustedMouseAngle / anglePerCell) - 1;
+          cellIndex = (cellIndex + settings.divisions) % settings.divisions;
+          
+          // تسجيل تفصيلي للتطوير
+          console.log(`🔍 Debug DoubleClick - MouseAngle: ${mouseAngleDeg.toFixed(1)}°, AdjustedAngle: ${adjustedMouseAngle.toFixed(1)}°, AnglePerCell: ${anglePerCell.toFixed(1)}°, CalculatedIndex: ${cellIndex}`);
           
           const cellKey = `${level}-${cellIndex}`;
           
-          // إرجاع للون الأصلي (حذف من state)
+          // إرجاع للون الأصلي (حذف من state) مع تأكيد في وحدة التحكم
+          console.log(`🎯 Cell double-clicked: Level ${level}, Index ${cellIndex}, Reset color, MouseAngle: ${mouseAngleDeg.toFixed(1)}°, CellAngle: ${((cellIndex + 1) * anglePerCell - 90 + settings.rotation + 360) % 360}°`);
           setCellClickCounts(prev => {
             const newState = { ...prev };
             delete newState[cellKey];
