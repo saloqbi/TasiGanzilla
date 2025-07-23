@@ -7268,15 +7268,14 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
 
         <div style={{
           position: "absolute",
-          top: "10px",
-          right: "10px",
+          top: "2px",
+          right: "2px",
           display: "flex",
           alignItems: "center",
-          gap: "12px",
-          backgroundColor: "#222",
+
+
           padding: "8px 16px",
           borderRadius: "10px",
-          border: "1px solid #FFD700",
           zIndex: 10,
         }}>
           <span
@@ -7287,53 +7286,14 @@ if (hoveredPointIndex !== null && trianglePoints[hoveredPointIndex]) {
               whiteSpace: "nowrap",
             }}
           >
-            {settings.language === "ar"
-              ? "🌀 ساعة كوكبة تاسي"
-              : "🌀 Gann 360 Circle"}
+            
           </span>
           <button onClick={toggleLang} style={{ ...buttonStyle, fontSize: 13 }}>
             🌐 {settings.language === "ar" ? "English" : "العربية"}
           </button>
         </div>
 
-        <div style={{
-          position: "fixed",
-          top: "10px",
-          left: "10px",
-          backgroundColor: "rgba(34,34,34,0.95)",
-          padding: "8px 16px",
-          borderRadius: "10px",
-          border: "1px solid #FFD700",
-          boxShadow: "0 0 10px rgba(255, 215, 0, 0.4)",
-          display: "flex",
-          flexDirection: "column",
-          zIndex: 9999,
-          minWidth: "200px",
-          textAlign: "center",
-          backdropFilter: "blur(2px)",
-        }}>
-          <div style={{ fontSize: "17px", color: "#00CED1", fontWeight: "bold" }}>
-            {getGregorianDate()}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: "4px",
-              gap: "16px",
-            }}
-          >
-            <div style={{ fontSize: "10px", color: "#00CED1" }}>
-              GMT: {formatTime(currentTime, 0)}
-            </div>
-            <div style={{ fontSize: "10px", color: "#FFA500" }}>
-              KSA: {formatTime(currentTime, 3)}
-            </div>
-          </div>
-          <div style={{ fontSize: "10px", color: "#FFA500", marginTop: "3px", fontWeight: "bold" }}>
-            {getHijriDate()}
-          </div>
-        </div>
+
 
         {/* البوكس الخاص بالاعدادات */}
         <div style={{
