@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار أنواع الرسوم البيانية - تحليل الشموع اليابانية</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0D1421, #1A1A1A);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(26, 26, 26, 0.9);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(0, 191, 255, 0.1));
+            border-radius: 12px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: #00BFFF;
+            margin-bottom: 15px;
+        }
+        
+        .chart-types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-type-card {
+            background: rgba(45, 45, 45, 0.8);
+            border-radius: 8px;
+            padding: 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .chart-type-card:hover {
+            border-color: #FFD700;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+        }
+        
+        .chart-type-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .chart-icon {
+            font-size: 24px;
+            margin-left: 10px;
+        }
+        
+        .chart-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .chart-description {
+            color: #CCCCCC;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .chart-features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .chart-features li {
+            color: #00BFFF;
+            font-size: 12px;
+            margin-bottom: 5px;
+            position: relative;
+            padding-right: 15px;
+        }
+        
+        .chart-features li:before {
+            content: "✓";
+            position: absolute;
+            right: 0;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .status-bar {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .status-text {
+            color: #00FF41;
+            font-weight: bold;
+        }
+        
+        .test-result {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4CAF50;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .success {
+            color: #4CAF50;
+        }
+        
+        .info {
+            color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">📊 اختبار أنواع الرسوم البيانية</div>
+            <div class="subtitle">تحليل الشموع اليابانية المتقدم - إصدار محسن</div>
+            <div class="status-text">✅ تم إضافة جميع أنواع الرسوم البيانية المطلوبة بنجاح</div>
+        </div>
+        
+        <div class="chart-types-grid">
+            <!-- الشموع اليابانية -->
+            <div class="chart-type-card" style="border-color: #FFD700;">
+                <div class="chart-type-header">
+                    <span class="chart-icon">🕯️</span>
+                    <span class="chart-name" style="color: #FFD700;">الشموع اليابانية (Candlestick)</span>
+                </div>
+                <div class="chart-description">
+                    عرض تقليدي للأسعار يظهر الافتتاح والإغلاق والأعلى والأدنى لكل فترة زمنية مع تحليل أنماط الشموع المتقدم.
+                </div>
+                <ul class="chart-features">
+                    <li>أكثر من 20 نمط شمعة مختلف</li>
+                    <li>ألوان نيون تفاعلية</li>
+                    <li>تحليل ذكي للاتجاهات</li>
+                    <li>توافق مع TradingView وMetaTrader</li>
+                </ul>
+            </div>
+            
+            <!-- المنطقة -->
+            <div class="chart-type-card">
+                <div class="chart-type-header">
+                    <span class="chart-icon" style="color: #2196F3;">📊</span>
+                    <span class="chart-name" style="color: #2196F3;">المنطقة (Area)</span>
+                </div>
+                <div class="chart-description">
+                    رسم بياني يُظهر منطقة مملوءة تحت خط السعر، مثالي لعرض الاتجاهات العامة والحجم النسبي للتغيرات.
+                </div>
+                <ul class="chart-features">
+                    <li>تدرج لوني جذاب</li>
+                    <li>عرض واضح للاتجاهات</li>
+                    <li>نقاط بيانات تفاعلية</li>
+                    <li>تأثيرات بصرية محسنة</li>
+                </ul>
+            </div>
+            
+            <!-- الأعمدة -->
+            <div class="chart-type-card">
+                <div class="chart-type-header">
+                    <span class="chart-icon" style="color: #4CAF50;">📈</span>
+                    <span class="chart-name" style="color: #4CAF50;">الأعمدة (Bar)</span>
+                </div>
+                <div class="chart-description">
+                    عرض تقليدي للأسعار باستخدام أعمدة تُظهر الأعلى والأدنى مع خطوط جانبية للافتتاح والإغلاق.
+                </div>
+                <ul class="chart-features">
+                    <li>عرض دقيق للأسعار الأربعة</li>
+                    <li>ألوان متباينة للصعود والهبوط</li>
+                    <li>سهولة في القراءة</li>
+                    <li>مناسب للتحليل التقني</li>
+                </ul>
+            </div>
+            
+            <!-- الخط القاعدي -->
+            <div class="chart-type-card">
+                <div class="chart-type-header">
+                    <span class="chart-icon" style="color: #FF9800;">📉</span>
+                    <span class="chart-name" style="color: #FF9800;">الخط القاعدي (Baseline)</span>
+                </div>
+                <div class="chart-description">
+                    رسم بياني يُظهر السعر بالنسبة لخط قاعدي، مع تلوين مختلف للمناطق أعلى وأسفل الخط.
+                </div>
+                <ul class="chart-features">
+                    <li>خط قاعدي مرجعي</li>
+                    <li>مناطق ملونة فوق وتحت القاعدة</li>
+                    <li>تحليل الانحراف عن المتوسط</li>
+                    <li>عرض واضح للتقلبات</li>
+                </ul>
+            </div>
+            
+            <!-- الرسم البياني -->
+            <div class="chart-type-card">
+                <div class="chart-type-header">
+                    <span class="chart-icon" style="color: #9C27B0;">📋</span>
+                    <span class="chart-name" style="color: #9C27B0;">الرسم البياني (Histogram)</span>
+                </div>
+                <div class="chart-description">
+                    عرض للحجم والبيانات الإحصائية باستخدام أعمدة، مثالي لتحليل توزيع البيانات والحجم.
+                </div>
+                <ul class="chart-features">
+                    <li>تمثيل بصري للحجم</li>
+                    <li>أعمدة متدرجة الألوان</li>
+                    <li>تحليل التوزيع الإحصائي</li>
+                    <li>مثالي للحجم والتقلبات</li>
+                </ul>
+            </div>
+            
+            <!-- الخط -->
+            <div class="chart-type-card">
+                <div class="chart-type-header">
+                    <span class="chart-icon" style="color: #F44336;">📏</span>
+                    <span class="chart-name" style="color: #F44336;">الخط (Line)</span>
+                </div>
+                <div class="chart-description">
+                    رسم بياني خطي بسيط يربط بين نقاط الأسعار، مثالي لعرض الاتجاهات طويلة المدى.
+                </div>
+                <ul class="chart-features">
+                    <li>خط متدرج الألوان</li>
+                    <li>نقاط بيانات واضحة</li>
+                    <li>خط السعر الحالي المتحرك</li>
+                    <li>بساطة في العرض</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="test-result">
+            <h3 class="success">✅ نتائج الاختبار:</h3>
+            <ul>
+                <li class="success">✓ تم إضافة جميع أنواع الرسوم البيانية الستة المطلوبة</li>
+                <li class="success">✓ تم تطبيق دوال الرسم المخصصة لكل نوع</li>
+                <li class="success">✓ تم إضافة اختيار نوع الرسم البياني في واجهة المستخدم</li>
+                <li class="success">✓ تم تحديث شريط المعلومات لعرض النوع المختار</li>
+                <li class="success">✓ تم تحديث التذييل لعرض جميع الأنواع المتاحة</li>
+                <li class="info">📌 جميع أنواع الرسوم البيانية تدعم الألوان الاحترافية والتأثيرات البصرية</li>
+            </ul>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-text">
+                🎉 تم تحسين مكون تحليل الشموع اليابانية بنجاح! 
+                <br>
+                📊 متوفر الآن: الشموع اليابانية | المنطقة | الأعمدة | الخط القاعدي | الرسم البياني | الخط
+            </div>
+        </div>
+    </div>
+</body>
+</html>

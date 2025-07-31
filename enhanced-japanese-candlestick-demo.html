@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕯️ تحليل الشموع اليابانية المتقدم - تكامل جان الشامل</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+            color: #ffffff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* خلفية متحركة */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 65, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 0, 64, 0.1) 0%, transparent 50%);
+            animation: backgroundAnimation 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes backgroundAnimation {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
+        .main-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+
+        .enhanced-header {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 3px solid #FFD700;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enhanced-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+            animation: headerShine 3s ease-in-out infinite;
+        }
+
+        @keyframes headerShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .enhanced-title {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FF6347, #FFD700);
+            background-size: 400% 400%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientFlow 4s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 2;
+            position: relative;
+        }
+
+        @keyframes gradientFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .enhanced-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            z-index: 2;
+            position: relative;
+        }
+
+        .enhanced-button {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #333, #555, #333);
+            background-size: 200% 200%;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .enhanced-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .enhanced-button:hover {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .enhanced-button:hover::before {
+            left: 100%;
+        }
+
+        .enhanced-button.active {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .app-container {
+            flex: 1;
+            position: relative;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-animation {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .candlestick {
+            position: absolute;
+            bottom: 0;
+            width: 12px;
+            background: linear-gradient(to top, #00FF00, #FFD700, #FF0000);
+            border-radius: 2px;
+            animation: candlestickGrow 2s ease-in-out infinite;
+        }
+
+        .candlestick:nth-child(1) { left: 10px; height: 60px; animation-delay: 0s; }
+        .candlestick:nth-child(2) { left: 30px; height: 80px; animation-delay: 0.2s; }
+        .candlestick:nth-child(3) { left: 50px; height: 40px; animation-delay: 0.4s; }
+        .candlestick:nth-child(4) { left: 70px; height: 70px; animation-delay: 0.6s; }
+        .candlestick:nth-child(5) { left: 90px; height: 50px; animation-delay: 0.8s; }
+
+        @keyframes candlestickGrow {
+            0%, 100% { transform: scaleY(0.8); opacity: 0.7; }
+            50% { transform: scaleY(1.2); opacity: 1; }
+        }
+
+        .loading-text {
+            font-size: 24px;
+            color: #FFD700;
+            margin-bottom: 15px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .loading-subtitle {
+            font-size: 16px;
+            color: #999;
+            margin-bottom: 20px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .progress-bar {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FFD700, #FFA500, #FF6347);
+            border-radius: 3px;
+            animation: progressAnimation 3s ease-in-out infinite;
+        }
+
+        @keyframes progressAnimation {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .feature-grid {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            width: 600px;
+            z-index: 100;
+        }
+
+        .feature-card {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: #FFD700;
+            box-shadow: 0 12px 40px rgba(255, 215, 0, 0.2);
+        }
+
+        .feature-card-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .feature-item:hover {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 5px;
+            padding-left: 10px;
+        }
+
+        .feature-icon {
+            font-size: 18px;
+            width: 25px;
+            text-align: center;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00FF00;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px #00FF00;
+        }
+
+        .analysis-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 25px;
+            width: 400px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .analysis-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analysis-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+
+        .analysis-value {
+            font-weight: bold;
+            color: #00FF00;
+        }
+
+        .market-status-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 20px;
+            width: 320px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .market-status-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .market-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .market-item:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .market-symbol {
+            font-size: 16px;
+            margin-left: 8px;
+        }
+
+        .patterns-showcase {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            padding: 20px;
+            width: 350px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .patterns-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pattern-item {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #FFD700;
+            transition: all 0.3s ease;
+        }
+
+        .pattern-item:hover {
+            background: rgba(255, 215, 0, 0.1);
+            transform: translateX(5px);
+        }
+
+        .pattern-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .pattern-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .pattern-confidence {
+            background: linear-gradient(45deg, #00FF00, #FFD700);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .pattern-description {
+            font-size: 12px;
+            color: #ccc;
+            line-height: 1.4;
+        }
+
+        /* تحسينات للتجاوب */
+        @media (max-width: 1200px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+                width: 300px;
+            }
+            
+            .analysis-panel,
+            .market-status-panel,
+            .patterns-showcase {
+                position: relative;
+                width: 90%;
+                margin: 10px auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .enhanced-header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .enhanced-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .enhanced-title {
+                font-size: 24px;
+                text-align: center;
+            }
+        }
+
+        /* تأثيرات خاصة */
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* شريط التمرير المخصص */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #FFA500, #FF6347);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- رأس الصفحة المحسن -->
+        <div class="enhanced-header">
+            <div class="enhanced-title">
+                🕯️ تحليل الشموع اليابانية المتقدم - تكامل جان الشامل
+            </div>
+            <div class="enhanced-controls">
+                <button class="enhanced-button active" onclick="showDemo()">
+                    🚀 عرض تجريبي
+                </button>
+                <button class="enhanced-button" onclick="toggleAnalysis()">
+                    📊 التحليل المتقدم
+                </button>
+                <button class="enhanced-button" onclick="toggleMarkets()">
+                    🌍 الأسواق العالمية
+                </button>
+                <button class="enhanced-button" onclick="toggleSettings()">
+                    ⚙️ الإعدادات المتقدمة
+                </button>
+                <button class="enhanced-button" onclick="toggleRealTime()">
+                    ⚡ البيانات المباشرة
+                </button>
+            </div>
+        </div>
+
+        <!-- منطقة التطبيق -->
+        <div class="app-container">
+            <!-- شاشة التحميل المحسنة -->
+            <div class="loading-screen" id="loadingScreen">
+                <div class="loading-animation">
+                    <div class="candlestick"></div>
+                    <div class="candlestick"></div>
+                    <div class="candlestick"></div>
+                    <div class="candlestick"></div>
+                    <div class="candlestick"></div>
+                </div>
+                <div class="loading-text">جاري تحميل النظام المتقدم...</div>
+                <div class="loading-subtitle">
+                    تهيئة محرك تحليل الشموع اليابانية مع تكامل جان الفريد<br>
+                    🔄 تحليل الأنماط • 📊 مستويات جان • 🎯 إجماع الأطر الزمنية
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <div style="font-size: 14px; color: #666;">
+                    المميزات: الشموع الملونة • التحليل الفني المتقدم • الأسواق العالمية • التحديث المباشر
+                </div>
+            </div>
+
+            <!-- عرض الميزات -->
+            <div class="feature-grid" id="featureGrid" style="display: none;">
+                <div class="feature-card glow">
+                    <div class="feature-card-title">
+                        🕯️ تحليل الشموع المتقدم
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <span class="feature-icon">🟢</span>
+                            <span>شموع صاعدة (أخضر نيون)</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">🔴</span>
+                            <span>شموع هابطة (أحمر قوي)</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">🟡</span>
+                            <span>شموع انعكاس (ذهبي)</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">🟣</span>
+                            <span>شموع دوجي (بنفسجي)</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="feature-card glow">
+                    <div class="feature-card-title">
+                        🔄 تكامل جان الفريد
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <span class="feature-icon">📐</span>
+                            <span>زوايا جان الكلاسيكية</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">⏰</span>
+                            <span>النقاط الزمنية الحساسة</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">🎯</span>
+                            <span>مستويات الدعم والمقاومة</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">🔥</span>
+                            <span>التجمعات الثلاثية القوية</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="feature-card glow">
+                    <div class="feature-card-title">
+                        📊 التحليل الفني المتقدم
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <span class="feature-icon">🌀</span>
+                            <span>مستويات فيبوناتشي</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">📈</span>
+                            <span>اكتشاف الأنماط التلقائي</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">🎛️</span>
+                            <span>تحليل الحجم المتقدم</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">⚡</span>
+                            <span>التحديث في الوقت الفعلي</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="feature-card glow">
+                    <div class="feature-card-title">
+                        🌍 الأسواق العالمية
+                    </div>
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <span class="feature-icon">₿</span>
+                            <span>العملات الرقمية</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">💱</span>
+                            <span>سوق الفوركس</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">🏛️</span>
+                            <span>السوق السعودي (تاسي)</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                        <li class="feature-item">
+                            <span class="feature-icon">🥇</span>
+                            <span>السلع والمعادن</span>
+                            <span class="status-indicator"></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- لوحة التحليل -->
+            <div class="analysis-panel" id="analysisPanel" style="display: none;">
+                <div class="analysis-title">
+                    📊 تحليل السوق المباشر
+                </div>
+                <div class="analysis-item">
+                    <span>الاتجاه العام:</span>
+                    <span class="analysis-value" id="trendValue">صاعد قوي</span>
+                </div>
+                <div class="analysis-item">
+                    <span>قوة الإشارة:</span>
+                    <span class="analysis-value" id="strengthValue">85%</span>
+                </div>
+                <div class="analysis-item">
+                    <span>عدد الأنماط:</span>
+                    <span class="analysis-value" id="patternsCount">12 نمط</span>
+                </div>
+                <div class="analysis-item">
+                    <span>مستويات جان:</span>
+                    <span class="analysis-value" id="gannLevels">8 مستويات</span>
+                </div>
+                <div class="analysis-item">
+                    <span>التوصية:</span>
+                    <span class="analysis-value" id="recommendation">شراء قوي</span>
+                </div>
+                <div class="analysis-item">
+                    <span>مستوى المخاطر:</span>
+                    <span class="analysis-value" style="color: #FFD700;" id="riskLevel">متوسط</span>
+                </div>
+            </div>
+
+            <!-- لوحة حالة الأسواق -->
+            <div class="market-status-panel" id="marketStatusPanel" style="display: none;">
+                <div class="market-status-title">
+                    🌍 حالة الأسواق العالمية
+                </div>
+                <div class="market-item">
+                    <div>
+                        <span class="market-symbol">₿</span>
+                        <span>Bitcoin</span>
+                    </div>
+                    <div>
+                        <span style="color: #00FF00;">+2.5%</span>
+                    </div>
+                </div>
+                <div class="market-item">
+                    <div>
+                        <span class="market-symbol">🏛️</span>
+                        <span>تاسي السعودي</span>
+                    </div>
+                    <div>
+                        <span style="color: #FF0000;">-1.2%</span>
+                    </div>
+                </div>
+                <div class="market-item">
+                    <div>
+                        <span class="market-symbol">💱</span>
+                        <span>EUR/USD</span>
+                    </div>
+                    <div>
+                        <span style="color: #00FF00;">+0.8%</span>
+                    </div>
+                </div>
+                <div class="market-item">
+                    <div>
+                        <span class="market-symbol">🥇</span>
+                        <span>الذهب</span>
+                    </div>
+                    <div>
+                        <span style="color: #FFD700;">+1.1%</span>
+                    </div>
+                </div>
+                <div class="market-item">
+                    <div>
+                        <span class="market-symbol">🛢️</span>
+                        <span>النفط الخام</span>
+                    </div>
+                    <div>
+                        <span style="color: #FF0000;">-0.5%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- عرض الأنماط -->
+            <div class="patterns-showcase" id="patternsShowcase" style="display: none;">
+                <div class="patterns-title">
+                    🔍 الأنماط المكتشفة
+                </div>
+                <div class="pattern-item">
+                    <div class="pattern-header">
+                        <span style="font-size: 20px;">🔨</span>
+                        <span class="pattern-name">نمط المطرقة</span>
+                        <span class="pattern-confidence">78%</span>
+                    </div>
+                    <div class="pattern-description">
+                        إشارة انعكاس صاعد قوية عند مستوى دعم جان 45°
+                    </div>
+                </div>
+                <div class="pattern-item">
+                    <div class="pattern-header">
+                        <span style="font-size: 20px;">🔥</span>
+                        <span class="pattern-name">الابتلاع الصاعد</span>
+                        <span class="pattern-confidence">85%</span>
+                    </div>
+                    <div class="pattern-description">
+                        تجمع ثلاثي قوي: نمط + جان + فيبوناتشي 61.8%
+                    </div>
+                </div>
+                <div class="pattern-item">
+                    <div class="pattern-header">
+                        <span style="font-size: 20px;">⭐</span>
+                        <span class="pattern-name">نجمة الصباح</span>
+                        <span class="pattern-confidence">92%</span>
+                    </div>
+                    <div class="pattern-description">
+                        انعكاس صاعد قوي جداً مع تأكيد من مستويات جان المتعددة
+                    </div>
+                </div>
+                <div class="pattern-item">
+                    <div class="pattern-header">
+                        <span style="font-size: 20px;">➕</span>
+                        <span class="pattern-name">دوجي اليعسوب</span>
+                        <span class="pattern-confidence">65%</span>
+                    </div>
+                    <div class="pattern-description">
+                        عدم يقين مؤقت مع ميل للانعكاس الصاعد
+                    </div>
+                </div>
+                <div class="pattern-item">
+                    <div class="pattern-header">
+                        <span style="font-size: 20px;">📊</span>
+                        <span class="pattern-name">مثلث صاعد</span>
+                        <span class="pattern-confidence">72%</span>
+                    </div>
+                    <div class="pattern-description">
+                        استمرار الاتجاه الصاعد مع كسر متوقع للمقاومة
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // متغيرات عامة
+        let isLoaded = false;
+        let currentDemo = 'candlesticks';
+        let updateInterval;
+
+        // تحميل النظام
+        function initializeSystem() {
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('featureGrid').style.display = 'grid';
+                document.getElementById('analysisPanel').style.display = 'block';
+                document.getElementById('marketStatusPanel').style.display = 'block';
+                document.getElementById('patternsShowcase').style.display = 'block';
+                isLoaded = true;
+                startRealTimeUpdates();
+            }, 4000);
+        }
+
+        // بدء التحديثات المباشرة
+        function startRealTimeUpdates() {
+            updateInterval = setInterval(() => {
+                updateMarketData();
+                updateAnalysis();
+                updatePatterns();
+            }, 2000);
+        }
+
+        // تحديث بيانات السوق
+        function updateMarketData() {
+            const trends = ['صاعد قوي', 'صاعد', 'محايد', 'هابط', 'هابط قوي'];
+            const strengths = [65, 72, 78, 85, 92];
+            const recommendations = ['شراء قوي', 'شراء', 'انتظار', 'بيع', 'بيع قوي'];
+            const risks = ['منخفض', 'متوسط', 'عالي'];
+
+            document.getElementById('trendValue').textContent = 
+                trends[Math.floor(Math.random() * trends.length)];
+            document.getElementById('strengthValue').textContent = 
+                strengths[Math.floor(Math.random() * strengths.length)] + '%';
+            document.getElementById('patternsCount').textContent = 
+                (8 + Math.floor(Math.random() * 8)) + ' نمط';
+            document.getElementById('gannLevels').textContent = 
+                (5 + Math.floor(Math.random() * 8)) + ' مستويات';
+            document.getElementById('recommendation').textContent = 
+                recommendations[Math.floor(Math.random() * recommendations.length)];
+            document.getElementById('riskLevel').textContent = 
+                risks[Math.floor(Math.random() * risks.length)];
+        }
+
+        // تحديث التحليل
+        function updateAnalysis() {
+            // تحديث مؤشرات الحالة
+            const indicators = document.querySelectorAll('.status-indicator');
+            indicators.forEach(indicator => {
+                const colors = ['#00FF00', '#FFD700', '#FF0000'];
+                indicator.style.background = colors[Math.floor(Math.random() * colors.length)];
+            });
+        }
+
+        // تحديث الأنماط
+        function updatePatterns() {
+            const confidences = document.querySelectorAll('.pattern-confidence');
+            confidences.forEach(confidence => {
+                const value = 60 + Math.floor(Math.random() * 35);
+                confidence.textContent = value + '%';
+                
+                // تغيير اللون حسب الثقة
+                if (value >= 80) {
+                    confidence.style.background = 'linear-gradient(45deg, #00FF00, #FFD700)';
+                } else if (value >= 70) {
+                    confidence.style.background = 'linear-gradient(45deg, #FFD700, #FFA500)';
+                } else {
+                    confidence.style.background = 'linear-gradient(45deg, #FFA500, #FF6347)';
+                }
+            });
+        }
+
+        // دوال التحكم
+        function showDemo() {
+            if (!isLoaded) {
+                alert('النظام قيد التحميل... يرجى الانتظار');
+                return;
+            }
+            alert('🚀 العرض التجريبي نشط!\n\n' +
+                  '✅ تحليل الشموع اليابانية المتقدم\n' +
+                  '✅ تكامل جان الفريد\n' +
+                  '✅ الأسواق العالمية\n' +
+                  '✅ التحديث المباشر\n\n' +
+                  '🎯 النظام يعمل بكامل طاقته!');
+        }
+
+        function toggleAnalysis() {
+            const panel = document.getElementById('analysisPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleMarkets() {
+            const panel = document.getElementById('marketStatusPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleSettings() {
+            alert('⚙️ الإعدادات المتقدمة\n\n' +
+                  '🔧 إعدادات الشموع اليابانية\n' +
+                  '📐 معايير جان\n' +
+                  '🎯 حساسية الأنماط\n' +
+                  '⏰ الأطر الزمنية\n' +
+                  '🌍 اختيار الأسواق\n\n' +
+                  '💡 جميع الإعدادات قابلة للتخصيص');
+        }
+
+        function toggleRealTime() {
+            if (updateInterval) {
+                clearInterval(updateInterval);
+                updateInterval = null;
+                alert('⏸️ تم إيقاف التحديث المباشر');
+            } else {
+                startRealTimeUpdates();
+                alert('▶️ تم تشغيل التحديث المباشر');
+            }
+        }
+
+        // إضافة تأثيرات بصرية
+        function addVisualEffects() {
+            // تأثير التوهج للبطاقات
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('glow');
+                }, index * 500);
+            });
+
+            // تأثير الحركة للمؤشرات
+            const indicators = document.querySelectorAll('.status-indicator');
+            indicators.forEach(indicator => {
+                indicator.addEventListener('animationend', () => {
+                    indicator.style.animationDelay = Math.random() * 2 + 's';
+                });
+            });
+        }
+
+        // تشغيل النظام عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeSystem();
+            addVisualEffects();
+        });
+
+        // تحديث الوقت
+        setInterval(() => {
+            const now = new Date();
+            console.log('⚡ تحديث النظام:', now.toLocaleTimeString('ar-SA'));
+        }, 1000);
+
+        // التعامل مع تغيير حجم النافذة
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                // إعادة تنسيق العناصر عند تغيير الحجم
+                console.log('📐 تم تعديل التخطيط للحجم الجديد');
+            }, 300);
+        });
+
+        // رسائل المساعدة
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'F1') {
+                e.preventDefault();
+                alert('🆘 المساعدة السريعة\n\n' +
+                      '🕯️ الشموع الملونة:\n' +
+                      '   🟢 أخضر = صاعد\n' +
+                      '   🔴 أحمر = هابط\n' +
+                      '   🟡 أصفر = انعكاس\n' +
+                      '   🟣 بنفسجي = دوجي\n\n' +
+                      '🔄 جان: زوايا ومستويات\n' +
+                      '📊 فيبوناتشي: نسب ذهبية\n' +
+                      '🎯 أنماط: اكتشاف تلقائي\n\n' +
+                      'F1 = المساعدة | ESC = إغلاق');
+            }
+        });
+    </script>
+</body>
+</html>

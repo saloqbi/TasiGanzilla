@@ -1,0 +1,110 @@
+/* إضافات لحل مشكلة عدم إمكانية النقر */
+
+/* تأكد من أن الأزرار لها أولوية في التفاعل */
+.gann-market-button {
+  /* إضافة هذه الخصائص للتأكد من التفاعل */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  
+  /* التأكد من أن العنصر قابل للنقر */
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  
+  /* إزالة أي تأثيرات قد تمنع التفاعل */
+  transform: none;
+  will-change: auto;
+  
+  /* التأكد من أن العنصر مرئي بالكامل */
+  visibility: visible;
+  opacity: 1;
+  
+  /* إضافة حد أدنى للحجم لسهولة النقر */
+  min-width: 120px;
+  min-height: 44px;
+  
+  /* التأكد من أن الحدود لا تتداخل */
+  box-sizing: border-box;
+  
+  /* منع أي تداخل مع العناصر الأخرى */
+  isolation: isolate;
+}
+
+/* إضافة تأثير مرئي عند المرور بالفأرة */
+.gann-market-button:hover {
+  background-color: #34495e !important;
+  border-color: #FFD700 !important;
+  color: #FFD700 !important;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4) !important;
+}
+
+/* تأثير عند الضغط */
+.gann-market-button:active {
+  transform: scale(0.98) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* التأكد من أن الحاوي لا يمنع التفاعل */
+.gann-market-main-panel {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+.gann-market-buttons-grid {
+  pointer-events: auto !important;
+  position: relative !important;
+  z-index: 101 !important;
+}
+
+/* إصلاح أي تداخل مع Canvas أو عناصر أخرى */
+canvas {
+  pointer-events: auto;
+  z-index: 1;
+}
+
+/* التأكد من أن لوحة الإعدادات لا تحجب الأزرار */
+.gann-market-main-panel {
+  margin-top: 10px;
+  clear: both;
+  position: relative;
+}
+
+/* حل مشكلة التداخل مع عناصر أخرى */
+.gann-market-button {
+  position: relative;
+  z-index: 1000 !important;
+  background-clip: padding-box;
+}
+
+/* إضافة تباعد إضافي لتجنب التداخل */
+.gann-market-buttons-grid {
+  margin: 20px 0;
+  padding: 10px;
+  clear: both;
+}
+
+/* تحسين التفاعل على الشاشات اللمسية */
+@media (pointer: coarse) {
+  .gann-market-button {
+    min-height: 50px;
+    font-size: 14px;
+    padding: 15px;
+  }
+}
+
+/* التأكد من عدم تأثير backdrop-filter على التفاعل */
+.gann-market-main-panel {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* حل للمتصفحات القديمة */
+.gann-market-button {
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}

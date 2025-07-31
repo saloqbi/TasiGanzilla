@@ -1,0 +1,84 @@
+{
+  "name": "gann-circle-360-trading",
+  "version": "2.0.0", 
+  "description": "دائرة Gann 360 المطورة للأسواق المالية - أداة تحليل تقني متقدمة",
+  "main": "GannCircle360CanvasLifeTrading.jsx",
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build", 
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "keywords": [
+    "gann",
+    "circle", 
+    "trading",
+    "analysis",
+    "crypto",
+    "stocks", 
+    "forex",
+    "تحليل",
+    "تداول",
+    "جان"
+  ],
+  "author": "فريق التحليل المالي المتقدم",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-repo/gann-circle-trading"
+  },
+  "bugs": {
+    "url": "https://github.com/your-repo/gann-circle-trading/issues"
+  },
+  "homepage": "https://your-demo-site.com",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version", 
+      "last 1 safari version"
+    ]
+  },
+  "features": {
+    "markets": [
+      "cryptocurrency",
+      "stocks", 
+      "forex",
+      "commodities",
+      "indices",
+      "metals"
+    ],
+    "apis": [
+      "coingecko",
+      "alpha-vantage", 
+      "twelve-data",
+      "iex-cloud"
+    ],
+    "analysis": [
+      "gann-angles",
+      "support-resistance",
+      "fibonacci-levels",
+      "geometric-patterns",
+      "trading-signals"
+    ],
+    "languages": ["arabic", "english"]
+  },
+  "config": {
+    "defaultMarket": "crypto",
+    "updateInterval": 60000,
+    "maxSymbols": 20,
+    "cacheExpiry": 300000
+  }
+}

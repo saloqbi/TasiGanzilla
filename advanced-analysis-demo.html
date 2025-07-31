@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار لوحة التحكم الشاملة - التحليل الفني المتقدم</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2d2d2d 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            min-height: calc(100vh - 30px);
+            gap: 15px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: #000;
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr 350px;
+            gap: 15px;
+            min-height: 600px;
+        }
+        
+        .sidebar {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 10px;
+            border: 1px solid #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .main-view {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .gann-circle-placeholder {
+            width: 400px;
+            height: 400px;
+            border: 3px solid #FFD700;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+        }
+        
+        .gann-center {
+            width: 60px;
+            height: 60px;
+            background: #FFD700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .gann-degrees {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .degree-mark {
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: #FFD700;
+            transform-origin: center bottom;
+        }
+        
+        .status-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px solid #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        .footer {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #333;
+            backdrop-filter: blur(10px);
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 15px;
+            padding: 5px 10px;
+            background: rgba(76, 175, 80, 0.2);
+            border-radius: 15px;
+            border: 1px solid #4CAF50;
+            font-size: 12px;
+        }
+        
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .feature-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            margin: 2px;
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+        }
+        
+        .demo-content {
+            text-align: center;
+            color: #ccc;
+        }
+        
+        .demo-content h2 {
+            color: #FFD700;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        
+        .demo-content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .feature-card {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid #FFD700;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .feature-card h3 {
+            color: #FFD700;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        
+        .feature-card ul {
+            list-style: none;
+            font-size: 12px;
+            color: #ccc;
+        }
+        
+        .feature-card li {
+            margin: 5px 0;
+            padding-right: 15px;
+        }
+        
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            
+            .gann-circle-placeholder {
+                width: 300px;
+                height: 300px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .gann-circle-placeholder {
+                width: 250px;
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 لوحة التحكم الشاملة في التحليل الفني - جان 360°</h1>
+            <p>تخصيص كامل لجميع معايير التحليل والمؤشرات الفنية مع إعدادات قابلة للتخصيص</p>
+            <div style="margin-top: 15px;">
+                <span class="feature-badge">📅 فترات زمنية مخصصة</span>
+                <span class="feature-badge">📈 معايير الصعود والهبوط</span>
+                <span class="feature-badge">🔄 أنماط الانعكاس</span>
+                <span class="feature-badge">📊 مؤشرات المخاطر</span>
+                <span class="feature-badge">⚙️ إعدادات متقدمة</span>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Sidebar - Trading Control Panel -->
+            <div class="sidebar">
+                <div style="
+                    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+                    border-radius: 12px;
+                    padding: 15px;
+                    height: 100%;
+                    border: 2px solid #FFD700;
+                    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+                ">
+                    <div style="
+                        color: #FFD700;
+                        font-size: 16px;
+                        font-weight: bold;
+                        text-align: center;
+                        margin-bottom: 15px;
+                        border-bottom: 2px solid #FFD700;
+                        padding-bottom: 8px;
+                    ">
+                        🎛️ لوحة التحكم في التداول
+                    </div>
+                    
+                    <!-- Tab Buttons -->
+                    <div style="
+                        display: flex;
+                        margin-bottom: 15px;
+                        background: #2a2a2a;
+                        border-radius: 8px;
+                        padding: 5px;
+                    ">
+                        <button id="markets-tab" style="
+                            flex: 1;
+                            background: #FFD700;
+                            color: #000;
+                            border: none;
+                            border-radius: 6px;
+                            padding: 8px;
+                            font-size: 12px;
+                            font-weight: bold;
+                            cursor: pointer;
+                        ">
+                            🌍 الأسواق
+                        </button>
+                        <button id="settings-tab" style="
+                            flex: 1;
+                            background: transparent;
+                            color: #ccc;
+                            border: none;
+                            border-radius: 6px;
+                            padding: 8px;
+                            font-size: 12px;
+                            font-weight: bold;
+                            cursor: pointer;
+                            margin-right: 5px;
+                        ">
+                            ⚙️ الإعدادات
+                        </button>
+                    </div>
+                    
+                    <!-- Markets Tab Content -->
+                    <div id="markets-content">
+                        <div style="
+                            background: #1e1e1e;
+                            border-radius: 8px;
+                            padding: 12px;
+                            margin-bottom: 15px;
+                            border: 1px solid #4CAF50;
+                        ">
+                            <div style="
+                                color: #4CAF50;
+                                font-size: 14px;
+                                font-weight: bold;
+                                margin-bottom: 10px;
+                            ">
+                                🇸🇦 السوق السعودي (تاسي) - 1/10
+                            </div>
+                            
+                            <div style="
+                                background: #2a4a2a;
+                                padding: 8px;
+                                border-radius: 6px;
+                                border: 1px solid #4CAF50;
+                                font-size: 12px;
+                            ">
+                                <div style="color: #FFD700; font-weight: bold;">
+                                    ✓ 2222 - أرامكو السعودية
+                                </div>
+                                <div style="color: #ccc; font-size: 11px; margin-top: 2px;">
+                                    Saudi Aramco (28.50 ريال)
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            background: #2a2a2a;
+                            border-radius: 8px;
+                            padding: 10px;
+                            text-align: center;
+                            border: 1px solid #444;
+                        ">
+                            <div style="color: #FFD700; font-size: 12px; margin-bottom: 5px;">
+                                📡 البيانات اللحظية متصلة
+                                <span class="pulse" style="display: inline-block; margin-right: 8px;"></span>
+                            </div>
+                            <div style="color: #aaa; font-size: 10px;">
+                                إجمالي الأسواق: <span style="color: #FFD700; font-weight: bold;">1</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Tab Content (Hidden by default) -->
+                    <div id="settings-content" style="display: none;">
+                        <div style="
+                            background: #1e1e1e;
+                            border-radius: 8px;
+                            padding: 10px;
+                            margin-bottom: 10px;
+                            border: 1px solid #4CAF50;
+                        ">
+                            <div style="
+                                color: #4CAF50;
+                                font-size: 13px;
+                                font-weight: bold;
+                                margin-bottom: 8px;
+                            ">
+                                📅 نقاط جان - الفترات الزمنية
+                            </div>
+                            
+                            <div style="font-size: 11px;">
+                                <label style="display: flex; align-items: center; margin-bottom: 5px; color: #ccc;">
+                                    <input type="checkbox" checked style="margin-left: 8px; accent-color: #4CAF50;">
+                                    قصيرة المدى (7 أيام)
+                                </label>
+                                <label style="display: flex; align-items: center; margin-bottom: 5px; color: #ccc;">
+                                    <input type="checkbox" checked style="margin-left: 8px; accent-color: #4CAF50;">
+                                    متوسطة المدى (30 يوم)
+                                </label>
+                                <label style="display: flex; align-items: center; color: #ccc;">
+                                    <input type="checkbox" checked style="margin-left: 8px; accent-color: #4CAF50;">
+                                    طويلة المدى (90 يوم)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            background: #1e1e1e;
+                            border-radius: 8px;
+                            padding: 10px;
+                            margin-bottom: 10px;
+                            border: 1px solid #FF9800;
+                        ">
+                            <div style="
+                                color: #FF9800;
+                                font-size: 13px;
+                                font-weight: bold;
+                                margin-bottom: 8px;
+                            ">
+                                📈 معايير الصعود والهبوط
+                            </div>
+                            
+                            <div style="font-size: 11px;">
+                                <label style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; color: #ccc;">
+                                    <span>
+                                        <input type="checkbox" checked style="margin-left: 8px; accent-color: #FF9800;">
+                                        RSI فوق الشراء
+                                    </span>
+                                    <input type="number" value="70" style="
+                                        width: 40px;
+                                        background: #333;
+                                        border: 1px solid #555;
+                                        border-radius: 3px;
+                                        color: #fff;
+                                        padding: 2px 4px;
+                                        font-size: 10px;
+                                    ">
+                                </label>
+                                <label style="display: flex; align-items: center; justify-content: space-between; color: #ccc;">
+                                    <span>
+                                        <input type="checkbox" checked style="margin-left: 8px; accent-color: #FF9800;">
+                                        RSI فوق البيع
+                                    </span>
+                                    <input type="number" value="30" style="
+                                        width: 40px;
+                                        background: #333;
+                                        border: 1px solid #555;
+                                        border-radius: 3px;
+                                        color: #fff;
+                                        padding: 2px 4px;
+                                        font-size: 10px;
+                                    ">
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            background: #2a2a2a;
+                            border-radius: 8px;
+                            padding: 8px;
+                            text-align: center;
+                            border: 1px solid #4CAF50;
+                        ">
+                            <div style="color: #4CAF50; font-size: 11px; font-weight: bold;">
+                                ⚙️ إعدادات مخصصة نشطة
+                            </div>
+                            <div style="color: #999; font-size: 9px; margin-top: 3px;">
+                                15 مؤشر مفعل | 3 مُعطل
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main View - Gann Circle -->
+            <div class="main-view">
+                <div class="demo-content">
+                    <h2>🎯 دائرة جان 360° - التحليل الفني المتقدم</h2>
+                    <p>لوحة تحكم شاملة لتخصيص جميع معايير التحليل الفني مع إعدادات قابلة للتعديل</p>
+                    
+                    <div class="gann-circle-placeholder">
+                        <div class="gann-degrees">
+                            <!-- Generate degree marks -->
+                        </div>
+                        <div class="gann-center">
+                            GANN<br>360°
+                        </div>
+                    </div>
+                    
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <h3>📅 الفترات الزمنية</h3>
+                            <ul>
+                                <li>✓ قصيرة المدى (1-7 أيام)</li>
+                                <li>✓ متوسطة المدى (7-30 يوم)</li>
+                                <li>✓ طويلة المدى (30-90 يوم)</li>
+                                <li>⚙️ قابلة للتخصيص</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h3>🔄 أنماط الانعكاس</h3>
+                            <ul>
+                                <li>✓ نمط V (انعكاس حاد)</li>
+                                <li>✓ القمة المزدوجة</li>
+                                <li>✓ القاع المزدوج</li>
+                                <li>✓ اختراق المثلث</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h3>📈 معايير الاتجاه</h3>
+                            <ul>
+                                <li>✓ RSI (فوق الشراء/البيع)</li>
+                                <li>✓ ارتفاع الحجم</li>
+                                <li>✓ اختراق السعر</li>
+                                <li>✓ تقاطع المتوسطات</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h3>📊 مؤشرات المخاطر</h3>
+                            <ul>
+                                <li>✓ مؤشر التقلبات</li>
+                                <li>✓ مخاطر الارتباط</li>
+                                <li>✓ مخاطر السيولة</li>
+                                <li>✓ تركز القطاعات</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Status Panel -->
+            <div class="status-panel">
+                <div style="
+                    color: #2196F3;
+                    font-size: 16px;
+                    font-weight: bold;
+                    margin-bottom: 15px;
+                    text-align: center;
+                    border-bottom: 2px solid #2196F3;
+                    padding-bottom: 8px;
+                ">
+                    📊 حالة النظام المباشرة
+                </div>
+                
+                <!-- Current Market Data -->
+                <div style="
+                    background: #1a1a1a;
+                    border-radius: 8px;
+                    padding: 12px;
+                    margin-bottom: 15px;
+                    border: 1px solid #4CAF50;
+                ">
+                    <div style="
+                        color: #FFD700;
+                        font-size: 14px;
+                        font-weight: bold;
+                        margin-bottom: 8px;
+                    ">
+                        📈 أرامكو السعودية (2222)
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px;">
+                        <div style="background: #2a2a2a; padding: 6px; border-radius: 4px;">
+                            <span style="color: #4CAF50;">💰 السعر:</span><br>
+                            <span style="color: #fff; font-weight: bold;">28.50 ريال</span>
+                        </div>
+                        <div style="background: #2a2a2a; padding: 6px; border-radius: 4px;">
+                            <span style="color: #4CAF50;">📊 التغيير:</span><br>
+                            <span style="color: #4CAF50; font-weight: bold;">+0.5%</span>
+                        </div>
+                        <div style="background: #2a2a2a; padding: 6px; border-radius: 4px;">
+                            <span style="color: #FF9800;">⚡ RSI:</span><br>
+                            <span style="color: #fff; font-weight: bold;">65</span>
+                        </div>
+                        <div style="background: #2a2a2a; padding: 6px; border-radius: 4px;">
+                            <span style="color: #f44336;">📈 التقلبات:</span><br>
+                            <span style="color: #fff; font-weight: bold;">2.1%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Active Signals -->
+                <div style="
+                    background: #2a4a2a;
+                    border-radius: 8px;
+                    padding: 10px;
+                    margin-bottom: 15px;
+                    border: 1px solid #4CAF50;
+                ">
+                    <div style="color: #4CAF50; font-size: 12px; font-weight: bold; margin-bottom: 8px;">
+                        🔄 الإشارات النشطة:
+                    </div>
+                    <div style="font-size: 11px; color: #fff;">
+                        • V-Shape Bullish Pattern<br>
+                        • RSI في المنطقة المحايدة<br>
+                        • تقلبات منخفضة
+                    </div>
+                </div>
+                
+                <!-- Applied Settings Summary -->
+                <div style="
+                    background: #1a2e1a;
+                    border-radius: 8px;
+                    padding: 10px;
+                    border: 1px solid #4CAF50;
+                ">
+                    <div style="color: #4CAF50; font-size: 12px; font-weight: bold; margin-bottom: 8px;">
+                        ⚙️ الإعدادات المطبقة:
+                    </div>
+                    <div style="font-size: 10px;">
+                        <span style="
+                            display: inline-block;
+                            background: #333;
+                            padding: 3px 6px;
+                            margin: 2px;
+                            border-radius: 3px;
+                            border: 1px solid #4CAF50;
+                            color: #4CAF50;
+                        ">✓ فترات مخصصة</span>
+                        <span style="
+                            display: inline-block;
+                            background: #333;
+                            padding: 3px 6px;
+                            margin: 2px;
+                            border-radius: 3px;
+                            border: 1px solid #4CAF50;
+                            color: #4CAF50;
+                        ">✓ أنماط الانعكاس</span>
+                        <span style="
+                            display: inline-block;
+                            background: #333;
+                            padding: 3px 6px;
+                            margin: 2px;
+                            border-radius: 3px;
+                            border: 1px solid #4CAF50;
+                            color: #4CAF50;
+                        ">✓ مؤشرات RSI</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div style="margin-bottom: 10px;">
+                <span class="status-indicator">
+                    <span class="pulse"></span>
+                    📡 متصل بالخوادم
+                </span>
+                <span class="status-indicator">
+                    🔄 تحديث لحظي
+                </span>
+                <span class="status-indicator">
+                    ⚙️ إعدادات مخصصة نشطة
+                </span>
+                <span class="status-indicator">
+                    🎯 جان 360° جاهز
+                </span>
+            </div>
+            <div style="font-size: 12px; color: #999;">
+                لوحة التحكم الشاملة للتحليل الفني المتقدم مع معايير قابلة للتخصيص
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        document.getElementById('markets-tab').addEventListener('click', function() {
+            // Switch to markets tab
+            this.style.background = '#FFD700';
+            this.style.color = '#000';
+            document.getElementById('settings-tab').style.background = 'transparent';
+            document.getElementById('settings-tab').style.color = '#ccc';
+            
+            // Show/hide content
+            document.getElementById('markets-content').style.display = 'block';
+            document.getElementById('settings-content').style.display = 'none';
+        });
+        
+        document.getElementById('settings-tab').addEventListener('click', function() {
+            // Switch to settings tab
+            this.style.background = '#4CAF50';
+            this.style.color = '#fff';
+            document.getElementById('markets-tab').style.background = 'transparent';
+            document.getElementById('markets-tab').style.color = '#ccc';
+            
+            // Show/hide content
+            document.getElementById('markets-content').style.display = 'none';
+            document.getElementById('settings-content').style.display = 'block';
+        });
+        
+        // Generate degree marks for Gann circle
+        const gannDegrees = document.querySelector('.gann-degrees');
+        for (let i = 0; i < 360; i += 30) {
+            const mark = document.createElement('div');
+            mark.className = 'degree-mark';
+            mark.style.transform = `rotate(${i}deg)`;
+            mark.style.left = '50%';
+            mark.style.top = '10px';
+            gannDegrees.appendChild(mark);
+        }
+        
+        // Simulate real-time data updates
+        setInterval(() => {
+            const priceElement = document.querySelector('[style*="28.50 ريال"]');
+            if (priceElement) {
+                const basePrice = 28.50;
+                const variation = (Math.random() - 0.5) * 0.20; // ±0.10 ريال
+                const newPrice = (basePrice + variation).toFixed(2);
+                priceElement.textContent = `${newPrice} ريال`;
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

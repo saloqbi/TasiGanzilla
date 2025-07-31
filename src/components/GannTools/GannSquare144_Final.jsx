@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -29,7 +29,7 @@ const defaultConfig = {
   }
 };
 
-const GannSquare144_Final = () => {
+const GannSquare144_Final = forwardRef((props, ref) => {
   const [config, setConfig] = useState(() => {
     const stored = localStorage.getItem('gannSquare144Config');
     return stored ? JSON.parse(stored) : defaultConfig;
@@ -222,7 +222,9 @@ const GannSquare144_Final = () => {
 
     </div>
   );
-};
+});
+
+GannSquare144_Final.displayName = 'GannSquare144_Final';
 
 const buttonStyle = {
   marginRight: '10px',

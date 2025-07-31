@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحليل الشموع اليابانية المتقدم - تاسي جان</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .main-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #333;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .control-button {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #333, #555);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-button:hover {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .control-button.active {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+        }
+
+        .app-container {
+            flex: 1;
+            position: relative;
+            background: #0a0a0a;
+        }
+
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid #333;
+            border-top: 4px solid #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .feature-showcase {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            width: 320px;
+            border: 1px solid #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+            font-size: 14px;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            font-size: 16px;
+            width: 20px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00FF00;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .candlestick-legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            width: 280px;
+            border: 1px solid #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .legend-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0;
+            font-size: 13px;
+        }
+
+        .color-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid #555;
+        }
+
+        .market-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #333;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff4444;
+            color: #ff6666;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        /* تحسينات للتجاوب */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .header-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .feature-showcase,
+            .candlestick-legend,
+            .market-status {
+                position: relative;
+                width: 90%;
+                margin: 10px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- رأس الصفحة -->
+        <div class="header">
+            <div class="header-title">
+                📊 تحليل الشموع اليابانية المتقدم
+            </div>
+            <div class="header-controls">
+                <button class="control-button" onclick="toggleTimeframe()">
+                    ⏰ الإطار الزمني
+                </button>
+                <button class="control-button" onclick="toggleMarkets()">
+                    🌍 الأسواق العالمية
+                </button>
+                <button class="control-button" onclick="toggleAnalysis()">
+                    📈 التحليل المتقدم
+                </button>
+                <button class="control-button" onclick="toggleSettings()">
+                    ⚙️ الإعدادات
+                </button>
+                <button class="control-button" onclick="refreshData()">
+                    🔄 تحديث
+                </button>
+            </div>
+        </div>
+
+        <!-- منطقة التطبيق -->
+        <div class="app-container">
+            <!-- شاشة التحميل -->
+            <div class="loading-screen" id="loadingScreen">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">جاري تحميل تحليل الشموع اليابانية...</div>
+                <div style="font-size: 14px; color: #999;">تهيئة البيانات والأسواق المالية</div>
+            </div>
+
+            <!-- عرض الميزات -->
+            <div class="feature-showcase" id="featureShowcase" style="display: none;">
+                <div class="feature-title">
+                    🚀 الميزات المتقدمة
+                </div>
+                <ul class="feature-list">
+                    <li class="feature-item">
+                        <span class="feature-icon">🕯️</span>
+                        <span>شموع يابانية ملونة (أخضر/أحمر/أصفر)</span>
+                        <span class="status-indicator"></span>
+                    </li>
+                    <li class="feature-item">
+                        <span class="feature-icon">🔄</span>
+                        <span>تحليل جان المتكامل</span>
+                        <span class="status-indicator"></span>
+                    </li>
+                    <li class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        <span>مستويات الدعم والمقاومة</span>
+                        <span class="status-indicator"></span>
+                    </li>
+                    <li class="feature-item">
+                        <span class="feature-icon">📈</span>
+                        <span>اكتشاف الأنماط التلقائي</span>
+                        <span class="status-indicator"></span>
+                    </li>
+                    <li class="feature-item">
+                        <span class="feature-icon">🌍</span>
+                        <span>الأسواق العالمية المتعددة</span>
+                        <span class="status-indicator"></span>
+                    </li>
+                    <li class="feature-item">
+                        <span class="feature-icon">⏰</span>
+                        <span>إجماع الأطر الزمنية</span>
+                        <span class="status-indicator"></span>
+                    </li>
+                    <li class="feature-item">
+                        <span class="feature-icon">🎛️</span>
+                        <span>لوحة التحكم الشاملة</span>
+                        <span class="status-indicator"></span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- حالة الأسواق -->
+            <div class="market-status" id="marketStatus" style="display: none;">
+                <div class="status-title">📊 حالة الأسواق</div>
+                <div class="status-item">
+                    <span>🔴</span>
+                    <span>الأسهم الأمريكية: مفتوح</span>
+                </div>
+                <div class="status-item">
+                    <span>🟢</span>
+                    <span>العملات الرقمية: نشط</span>
+                </div>
+                <div class="status-item">
+                    <span>🟡</span>
+                    <span>تاسي السعودي: مغلق</span>
+                </div>
+                <div class="status-item">
+                    <span>🔵</span>
+                    <span>الفوركس: 24/7</span>
+                </div>
+            </div>
+
+            <!-- دليل الألوان -->
+            <div class="candlestick-legend" id="candlestickLegend" style="display: none;">
+                <div class="legend-title">
+                    🕯️ دليل الشموع اليابانية
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #00FF00;"></div>
+                    <span>شمعة صاعدة (الإغلاق أعلى من الافتتاح)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #FF0000;"></div>
+                    <span>شمعة هابطة (الإغلاق أقل من الافتتاح)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #FFD700;"></div>
+                    <span>شمعة انعكاس (إشارة تغيير الاتجاه)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="color-box" style="background: #808080;"></div>
+                    <span>شمعة دوجي (عدم يقين في السوق)</span>
+                </div>
+            </div>
+
+            <!-- رسالة خطأ في حالة فشل التحميل -->
+            <div class="error-message" id="errorMessage" style="display: none;">
+                ❌ فشل في تحميل مكون الشموع اليابانية. تأكد من أن جميع الملفات موجودة ومكتملة.
+                <br><br>
+                <button class="control-button" onclick="retryLoad()">🔄 إعادة المحاولة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- تحميل React و ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- تحميل Babel للتحويل -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // محاكاة مكون الشموع اليابانية
+        const JapaneseCandlestickDemo = () => {
+            const canvasRef = useRef(null);
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [currentPrice, setCurrentPrice] = useState(45250.75);
+            const [priceChange, setPriceChange] = useState(+1250.25);
+            const [detectedPatterns, setDetectedPatterns] = useState([
+                { name: 'المطرقة', confidence: 75, type: 'bullish' },
+                { name: 'الابتلاع الصاعد', confidence: 85, type: 'bullish' },
+                { name: 'نجمة الصباح', confidence: 70, type: 'bullish' }
+            ]);
+
+            // محاكاة تحميل البيانات
+            useEffect(() => {
+                const timer = setTimeout(() => {
+                    setIsLoaded(true);
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    document.getElementById('featureShowcase').style.display = 'block';
+                    document.getElementById('marketStatus').style.display = 'block';
+                    document.getElementById('candlestickLegend').style.display = 'block';
+                }, 3000);
+
+                return () => clearTimeout(timer);
+            }, []);
+
+            // رسم الشموع التجريبية
+            useEffect(() => {
+                if (!isLoaded) return;
+
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+                const { width, height } = canvas;
+
+                // مسح الكانفاس
+                ctx.clearRect(0, 0, width, height);
+
+                // رسم خلفية متدرجة
+                const gradient = ctx.createLinearGradient(0, 0, 0, height);
+                gradient.addColorStop(0, '#1a1a1a');
+                gradient.addColorStop(1, '#0a0a0a');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+
+                // رسم الشبكة
+                ctx.strokeStyle = '#333333';
+                ctx.lineWidth = 1;
+                
+                // خطوط عمودية
+                for (let i = 50; i < width - 50; i += 50) {
+                    ctx.beginPath();
+                    ctx.moveTo(i, 50);
+                    ctx.lineTo(i, height - 50);
+                    ctx.stroke();
+                }
+                
+                // خطوط أفقية
+                for (let i = 50; i < height - 50; i += 40) {
+                    ctx.beginPath();
+                    ctx.moveTo(50, i);
+                    ctx.lineTo(width - 50, i);
+                    ctx.stroke();
+                }
+
+                // رسم شموع تجريبية
+                const candleCount = 50;
+                const candleWidth = (width - 100) / candleCount * 0.7;
+                const candleSpacing = (width - 100) / candleCount;
+
+                for (let i = 0; i < candleCount; i++) {
+                    const x = 50 + i * candleSpacing;
+                    
+                    // توليد بيانات عشوائية للشمعة
+                    const open = 200 + Math.random() * 200;
+                    const close = open + (Math.random() - 0.5) * 50;
+                    const high = Math.max(open, close) + Math.random() * 30;
+                    const low = Math.min(open, close) - Math.random() * 30;
+
+                    // تحويل إلى إحداثيات الرسم
+                    const openY = height - 50 - (open - 150) * 2;
+                    const closeY = height - 50 - (close - 150) * 2;
+                    const highY = height - 50 - (high - 150) * 2;
+                    const lowY = height - 50 - (low - 150) * 2;
+
+                    // تحديد لون الشمعة
+                    let candleColor = '#00FF00'; // أخضر للصاعد
+                    if (close < open) {
+                        candleColor = '#FF0000'; // أحمر للهابط
+                    } else if (Math.abs(close - open) < 2) {
+                        candleColor = '#FFD700'; // أصفر للدوجي/انعكاس
+                    }
+
+                    // رسم الفتائل
+                    ctx.strokeStyle = '#FFFFFF';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x + candleWidth / 2, highY);
+                    ctx.lineTo(x + candleWidth / 2, lowY);
+                    ctx.stroke();
+
+                    // رسم جسم الشمعة
+                    ctx.fillStyle = candleColor;
+                    ctx.strokeStyle = candleColor;
+                    ctx.lineWidth = 1;
+
+                    if (close >= open) {
+                        // شمعة صاعدة (مجوفة)
+                        ctx.strokeRect(x, Math.min(openY, closeY), candleWidth, Math.abs(closeY - openY));
+                    } else {
+                        // شمعة هابطة (مملوءة)
+                        ctx.fillRect(x, Math.min(openY, closeY), candleWidth, Math.abs(closeY - openY));
+                    }
+
+                    // إضافة أنماط خاصة لبعض الشموع
+                    if (i % 10 === 0) {
+                        ctx.fillStyle = '#FFD700';
+                        ctx.font = 'bold 12px Arial';
+                        ctx.fillText('⭐', x, highY - 10);
+                    }
+                }
+
+                // رسم مستويات الدعم والمقاومة
+                ctx.strokeStyle = '#00FF00';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(50, height - 200);
+                ctx.lineTo(width - 50, height - 200);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#FF0000';
+                ctx.beginPath();
+                ctx.moveTo(50, height - 100);
+                ctx.lineTo(width - 50, height - 100);
+                ctx.stroke();
+
+                ctx.setLineDash([]);
+
+                // إضافة تسميات
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('تحليل الشموع اليابانية - البيانات اللحظية', width / 2, 30);
+
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#00FF00';
+                ctx.fillText('مقاومة: $47,500', width - 55, height - 85);
+                ctx.fillStyle = '#FF0000';
+                ctx.fillText('دعم: $42,000', width - 55, height - 185);
+
+            }, [isLoaded]);
+
+            // تحديث الأسعار كل ثانية
+            useEffect(() => {
+                if (!isLoaded) return;
+
+                const interval = setInterval(() => {
+                    const change = (Math.random() - 0.5) * 100;
+                    setCurrentPrice(prev => prev + change);
+                    setPriceChange(change);
+                }, 1000);
+
+                return () => clearInterval(interval);
+            }, [isLoaded]);
+
+            const styles = {
+                container: {
+                    width: '100%',
+                    height: '100%',
+                    position: 'relative',
+                    backgroundColor: '#0a0a0a'
+                },
+                canvas: {
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'transparent'
+                },
+                priceDisplay: {
+                    position: 'absolute',
+                    bottom: '20px',
+                    left: '20px',
+                    background: 'rgba(26, 26, 26, 0.9)',
+                    padding: '15px',
+                    borderRadius: '8px',
+                    border: '1px solid #333'
+                },
+                price: {
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    color: '#FFD700'
+                },
+                change: {
+                    fontSize: '14px',
+                    color: priceChange >= 0 ? '#00FF00' : '#FF0000'
+                }
+            };
+
+            return (
+                <div style={styles.container}>
+                    <canvas 
+                        ref={canvasRef}
+                        style={styles.canvas}
+                        width={window.innerWidth}
+                        height={window.innerHeight - 140}
+                    />
+                    {isLoaded && (
+                        <div style={styles.priceDisplay}>
+                            <div style={styles.price}>
+                                ${currentPrice.toFixed(2)}
+                            </div>
+                            <div style={styles.change}>
+                                {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)} (
+                                {((priceChange / currentPrice) * 100).toFixed(2)}%)
+                            </div>
+                            <div style={{fontSize: '12px', color: '#999', marginTop: '5px'}}>
+                                آخر تحديث: {new Date().toLocaleTimeString('ar-SA')}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // تصيير المكون
+        const root = ReactDOM.createRoot(document.querySelector('.app-container'));
+        root.render(<JapaneseCandlestickDemo />);
+    </script>
+
+    <script>
+        // دوال التحكم
+        function toggleTimeframe() {
+            alert('تغيير الإطار الزمني - سيتم تحديث البيانات');
+        }
+
+        function toggleMarkets() {
+            alert('فتح قائمة الأسواق العالمية');
+        }
+
+        function toggleAnalysis() {
+            alert('عرض التحليل الفني المتقدم');
+        }
+
+        function toggleSettings() {
+            alert('فتح إعدادات التحليل');
+        }
+
+        function refreshData() {
+            location.reload();
+        }
+
+        function retryLoad() {
+            location.reload();
+        }
+
+        // تحديث الوقت كل ثانية
+        setInterval(() => {
+            const now = new Date();
+            console.log('تحديث البيانات:', now.toLocaleTimeString('ar-SA'));
+        }, 1000);
+
+        // التعامل مع تغيير حجم النافذة
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

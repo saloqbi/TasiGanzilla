@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 تحليل الشموع اليابانية المحترف - البيانات الحقيقية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* خلفية متحركة متطورة */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 65, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 0, 64, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(147, 112, 219, 0.08) 0%, transparent 50%);
+            animation: backgroundFlow 30s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes backgroundFlow {
+            0%, 100% { opacity: 0.3; transform: scale(1) rotate(0deg); }
+            25% { opacity: 0.6; transform: scale(1.1) rotate(5deg); }
+            50% { opacity: 0.8; transform: scale(1.2) rotate(10deg); }
+            75% { opacity: 0.4; transform: scale(1.05) rotate(-5deg); }
+        }
+
+        .main-container {
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(3px);
+        }
+
+        .pro-header {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6347 100%);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.4);
+            border-bottom: 3px solid #FFD700;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pro-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .header-title {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #000, #333);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 2;
+            position: relative;
+        }
+
+        .header-subtitle {
+            font-size: 14px;
+            color: #333;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            z-index: 2;
+            position: relative;
+        }
+
+        .live-dot {
+            width: 12px;
+            height: 12px;
+            background: #4CAF50;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px #4CAF50;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(1.3); }
+        }
+
+        .chart-area {
+            flex: 1;
+            position: relative;
+            min-height: 700px;
+            background: rgba(26, 26, 26, 0.8);
+            border-radius: 15px;
+            margin: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .controls-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            z-index: 100;
+        }
+
+        .control-btn {
+            padding: 12px 18px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #FFD700;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: #000;
+            border-color: #FFD700;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+        }
+
+        .control-btn.real-time {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border-color: #4CAF50;
+        }
+
+        .status-bar {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .status-group {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #ccc;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-value {
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .market-grid {
+            padding: 30px;
+            background: rgba(26, 26, 26, 0.9);
+            margin: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .grid-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .markets-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .market-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 2px solid rgba(255, 215, 0, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .market-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.05), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .market-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .market-card:hover {
+            border-color: #FFD700;
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.3);
+        }
+
+        .market-card.selected {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+            box-shadow: 0 15px 45px rgba(76, 175, 80, 0.3);
+        }
+
+        .market-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(255, 215, 0, 0.3));
+        }
+
+        .market-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+
+        .market-category {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .market-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 8px;
+        }
+
+        .market-change {
+            font-size: 14px;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+
+        .market-change.positive {
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+        }
+
+        .market-change.negative {
+            color: #f44336;
+            background: rgba(244, 67, 54, 0.2);
+        }
+
+        .selected-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .footer-info {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-title {
+                font-size: 24px;
+            }
+            
+            .controls-panel {
+                position: relative;
+                padding: 15px;
+                background: rgba(0, 0, 0, 0.7);
+                border-radius: 10px;
+                margin: 10px;
+            }
+            
+            .markets-container {
+                grid-template-columns: 1fr;
+                padding: 0 10px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+            font-size: 18px;
+            color: #FFD700;
+        }
+
+        .loading::after {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 215, 0, 0.3);
+            border-top: 4px solid #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header المحترف -->
+        <div class="pro-header">
+            <div>
+                <div class="header-title">
+                    🚀 تحليل الشموع اليابانية المحترف
+                </div>
+                <div class="header-subtitle">
+                    تحليل متقدم مع البيانات الحقيقية والمؤشرات الفنية المتطورة
+                </div>
+            </div>
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                <span>البيانات المباشرة</span>
+            </div>
+        </div>
+
+        <!-- منطقة الرسم البياني -->
+        <div class="chart-area">
+            <!-- أزرار التحكم -->
+            <div class="controls-panel">
+                <button class="control-btn active" onclick="toggleRealTimeData()">
+                    📡 البيانات الحقيقية
+                </button>
+                <button class="control-btn" onclick="toggleIndicator('sma')">
+                    📈 SMA
+                </button>
+                <button class="control-btn" onclick="toggleIndicator('ema')">
+                    📊 EMA
+                </button>
+                <button class="control-btn" onclick="toggleIndicator('rsi')">
+                    ⚡ RSI
+                </button>
+                <button class="control-btn" onclick="toggleIndicator('bollinger')">
+                    🎯 Bollinger
+                </button>
+                <button class="control-btn" onclick="togglePatternDetection()">
+                    🔍 كشف الأنماط
+                </button>
+                <button class="control-btn" onclick="resetChart()">
+                    🔄 إعادة تعيين
+                </button>
+            </div>
+
+            <!-- Canvas للرسم البياني -->
+            <canvas class="chart-canvas" id="advancedChart"></canvas>
+            
+            <!-- Loading indicator -->
+            <div id="loadingIndicator" class="loading" style="display: none;">
+                جاري تحميل البيانات المباشرة...
+            </div>
+        </div>
+
+        <!-- شريط الحالة -->
+        <div class="status-bar">
+            <div class="status-group">
+                <div class="status-item">
+                    <span>💰 السعر الحالي:</span>
+                    <span class="status-value" id="currentPrice">$50,343.57</span>
+                </div>
+                <div class="status-item">
+                    <span>📊 التغيير:</span>
+                    <span class="status-value" id="priceChange">-223.78</span>
+                </div>
+                <div class="status-item">
+                    <span>📈 الحجم:</span>
+                    <span class="status-value" id="volume">437,478,074</span>
+                </div>
+            </div>
+            <div class="status-group">
+                <div class="status-item">
+                    <span>🔗 الاتصال:</span>
+                    <span class="status-value" id="connectionStatus">متصل</span>
+                </div>
+                <div class="status-item">
+                    <span>⏰ آخر تحديث:</span>
+                    <span class="status-value" id="lastUpdate">الآن</span>
+                </div>
+                <div class="status-item">
+                    <span>🎯 الأنماط المكتشفة:</span>
+                    <span class="status-value" id="patternsCount">5</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- شبكة الأسواق العالمية -->
+        <div class="market-grid">
+            <div class="grid-title">
+                🌍 الأسواق المالية العالمية
+            </div>
+            <div class="markets-container">
+                <!-- العملات الرقمية -->
+                <div class="market-card" onclick="selectMarket('BTCUSDT')">
+                    <div class="market-icon">₿</div>
+                    <div class="market-name">Bitcoin</div>
+                    <div class="market-category">العملات الرقمية</div>
+                    <div class="market-price">$50,343.57</div>
+                    <div class="market-change negative">-0.44%</div>
+                </div>
+
+                <div class="market-card" onclick="selectMarket('ETHUSDT')">
+                    <div class="market-icon">⟠</div>
+                    <div class="market-name">Ethereum</div>
+                    <div class="market-category">العملات الرقمية</div>
+                    <div class="market-price">$3,245.12</div>
+                    <div class="market-change positive">+1.23%</div>
+                </div>
+
+                <div class="market-card" onclick="selectMarket('BNBUSDT')">
+                    <div class="market-icon">🅱️</div>
+                    <div class="market-name">Binance Coin</div>
+                    <div class="market-category">العملات الرقمية</div>
+                    <div class="market-price">$623.45</div>
+                    <div class="market-change positive">+2.15%</div>
+                </div>
+
+                <!-- الفوركس -->
+                <div class="market-card" onclick="selectMarket('EURUSD')">
+                    <div class="market-icon">💱</div>
+                    <div class="market-name">EUR/USD</div>
+                    <div class="market-category">العملات الأجنبية</div>
+                    <div class="market-price">1.0856</div>
+                    <div class="market-change negative">-0.12%</div>
+                </div>
+
+                <div class="market-card" onclick="selectMarket('GBPUSD')">
+                    <div class="market-icon">💷</div>
+                    <div class="market-name">GBP/USD</div>
+                    <div class="market-category">العملات الأجنبية</div>
+                    <div class="market-price">1.2634</div>
+                    <div class="market-change positive">+0.34%</div>
+                </div>
+
+                <!-- الأسهم -->
+                <div class="market-card" onclick="selectMarket('AAPL')">
+                    <div class="market-icon">🍎</div>
+                    <div class="market-name">Apple Inc.</div>
+                    <div class="market-category">الأسهم الأمريكية</div>
+                    <div class="market-price">$187.23</div>
+                    <div class="market-change positive">+0.89%</div>
+                </div>
+
+                <!-- السوق السعودي -->
+                <div class="market-card" onclick="selectMarket('2222.SR')">
+                    <div class="market-icon">🏛️</div>
+                    <div class="market-name">أرامكو السعودية</div>
+                    <div class="market-category">السوق السعودي</div>
+                    <div class="market-price">34.50 ر.س</div>
+                    <div class="market-change positive">+1.47%</div>
+                </div>
+
+                <!-- السلع -->
+                <div class="market-card" onclick="selectMarket('XAUUSD')">
+                    <div class="market-icon">🥇</div>
+                    <div class="market-name">الذهب</div>
+                    <div class="market-category">السلع</div>
+                    <div class="market-price">$2,034.50</div>
+                    <div class="market-change positive">+0.76%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- معلومات التذييل -->
+        <div class="footer-info">
+            🚀 تحليل الشموع اليابانية المحترف © 2024 | 
+            بيانات حقيقية مباشرة • مؤشرات فنية متقدمة • كشف الأنماط التلقائي • 
+            تكامل مع تحليل جان
+        </div>
+    </div>
+
+    <!-- React and dependencies -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // تطبيق المتقدم
+        function AdvancedCandlestickApp() {
+            const canvasRef = useRef(null);
+            const [realTimeMode, setRealTimeMode] = useState(false);
+            const [selectedMarket, setSelectedMarket] = useState('BTCUSDT');
+            const [indicators, setIndicators] = useState({
+                sma: false,
+                ema: false,
+                rsi: false,
+                bollinger: false
+            });
+            const [candleData, setCandleData] = useState([]);
+            const [wsConnection, setWsConnection] = useState(null);
+            const [isLoading, setIsLoading] = useState(false);
+
+            // توليد بيانات تجريبية
+            const generateMockData = useCallback(() => {
+                const data = [];
+                let price = 50000;
+                const now = Date.now();
+                
+                for (let i = 100; i >= 0; i--) {
+                    const timestamp = now - (i * 60000);
+                    const change = (Math.random() - 0.5) * 1000;
+                    const open = price;
+                    const close = price + change;
+                    const high = Math.max(open, close) + Math.random() * 500;
+                    const low = Math.min(open, close) - Math.random() * 500;
+                    
+                    data.push({
+                        timestamp,
+                        open: Math.max(low, open),
+                        high,
+                        low,
+                        close: Math.max(low, close),
+                        volume: Math.random() * 1000000
+                    });
+                    
+                    price = close;
+                }
+                
+                return data;
+            }, []);
+
+            // رسم الرسم البياني
+            const drawChart = useCallback(() => {
+                const canvas = canvasRef.current;
+                if (!canvas || candleData.length === 0) return;
+
+                const ctx = canvas.getContext('2d');
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+
+                const { width, height } = canvas;
+                const margin = 60;
+                const chartWidth = width - 2 * margin;
+                const chartHeight = height - 2 * margin;
+
+                // مسح الكانفاس
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(0, 0, width, height);
+
+                // رسم الشبكة
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 1;
+                
+                for (let i = 0; i <= 10; i++) {
+                    const x = margin + (i / 10) * chartWidth;
+                    const y = margin + (i / 10) * chartHeight;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(x, margin);
+                    ctx.lineTo(x, height - margin);
+                    ctx.stroke();
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(margin, y);
+                    ctx.lineTo(width - margin, y);
+                    ctx.stroke();
+                }
+
+                // حساب المدى السعري
+                const prices = candleData.flatMap(c => [c.high, c.low]);
+                const maxPrice = Math.max(...prices);
+                const minPrice = Math.min(...prices);
+                const priceRange = maxPrice - minPrice;
+
+                // رسم الشموع
+                const candleWidth = chartWidth / candleData.length * 0.7;
+                const candleSpacing = chartWidth / candleData.length;
+
+                candleData.forEach((candle, index) => {
+                    const x = margin + index * candleSpacing;
+                    const openY = margin + (maxPrice - candle.open) / priceRange * chartHeight;
+                    const closeY = margin + (maxPrice - candle.close) / priceRange * chartHeight;
+                    const highY = margin + (maxPrice - candle.high) / priceRange * chartHeight;
+                    const lowY = margin + (maxPrice - candle.low) / priceRange * chartHeight;
+
+                    // تحديد اللون
+                    const isGreen = candle.close >= candle.open;
+                    ctx.strokeStyle = isGreen ? '#4CAF50' : '#f44336';
+                    ctx.fillStyle = isGreen ? '#4CAF50' : '#f44336';
+
+                    // رسم الفتائل
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x + candleWidth / 2, highY);
+                    ctx.lineTo(x + candleWidth / 2, lowY);
+                    ctx.stroke();
+
+                    // رسم جسم الشمعة
+                    ctx.lineWidth = 1;
+                    if (isGreen) {
+                        ctx.strokeRect(x, Math.min(openY, closeY), candleWidth, Math.abs(closeY - openY));
+                    } else {
+                        ctx.fillRect(x, Math.min(openY, closeY), candleWidth, Math.abs(closeY - openY));
+                    }
+                });
+
+                // رسم المؤشرات
+                if (indicators.sma || indicators.ema) {
+                    drawMovingAverages(ctx, margin, chartWidth, chartHeight, maxPrice, minPrice, priceRange);
+                }
+
+                // تحديث معلومات الحالة
+                if (candleData.length > 0) {
+                    const latestCandle = candleData[candleData.length - 1];
+                    const prevCandle = candleData[candleData.length - 2];
+                    const change = latestCandle.close - (prevCandle?.close || latestCandle.open);
+                    const changePercent = ((change / (prevCandle?.close || latestCandle.open)) * 100).toFixed(2);
+
+                    document.getElementById('currentPrice').textContent = `$${latestCandle.close.toFixed(2)}`;
+                    document.getElementById('priceChange').textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)} (${changePercent}%)`;
+                    document.getElementById('priceChange').style.color = change >= 0 ? '#4CAF50' : '#f44336';
+                    document.getElementById('volume').textContent = latestCandle.volume.toLocaleString();
+                    document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('ar');
+                }
+            }, [candleData, indicators]);
+
+            // رسم المتوسطات المتحركة
+            const drawMovingAverages = (ctx, margin, chartWidth, chartHeight, maxPrice, minPrice, priceRange) => {
+                if (candleData.length < 20) return;
+
+                // SMA(20)
+                if (indicators.sma) {
+                    ctx.strokeStyle = '#FFD700';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+
+                    const smaData = [];
+                    for (let i = 19; i < candleData.length; i++) {
+                        const sum = candleData.slice(i - 19, i + 1).reduce((acc, c) => acc + c.close, 0);
+                        smaData.push(sum / 20);
+                    }
+
+                    smaData.forEach((sma, index) => {
+                        const x = margin + (index + 19) * (chartWidth / candleData.length);
+                        const y = margin + (maxPrice - sma) / priceRange * chartHeight;
+                        
+                        if (index === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    });
+
+                    ctx.stroke();
+                }
+
+                // EMA(12)
+                if (indicators.ema) {
+                    ctx.strokeStyle = '#00BFFF';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+
+                    const emaData = [candleData[0].close];
+                    const multiplier = 2 / (12 + 1);
+
+                    for (let i = 1; i < candleData.length; i++) {
+                        const ema = (candleData[i].close * multiplier) + (emaData[i - 1] * (1 - multiplier));
+                        emaData.push(ema);
+                    }
+
+                    emaData.forEach((ema, index) => {
+                        const x = margin + index * (chartWidth / candleData.length);
+                        const y = margin + (maxPrice - ema) / priceRange * chartHeight;
+                        
+                        if (index === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    });
+
+                    ctx.stroke();
+                }
+            };
+
+            // الاتصال بالبيانات الحقيقية
+            const connectToRealTimeData = useCallback((symbol) => {
+                if (wsConnection) {
+                    wsConnection.close();
+                }
+
+                setIsLoading(true);
+                document.getElementById('loadingIndicator').style.display = 'flex';
+
+                const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@kline_1m`);
+                
+                ws.onopen = () => {
+                    console.log('متصل بالبيانات المباشرة');
+                    setIsLoading(false);
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                    document.getElementById('connectionStatus').textContent = 'متصل';
+                    document.getElementById('connectionStatus').style.color = '#4CAF50';
+                };
+
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    const kline = data.k;
+                    
+                    if (kline && kline.x) {
+                        const newCandle = {
+                            timestamp: kline.t,
+                            open: parseFloat(kline.o),
+                            high: parseFloat(kline.h),
+                            low: parseFloat(kline.l),
+                            close: parseFloat(kline.c),
+                            volume: parseFloat(kline.v)
+                        };
+
+                        setCandleData(prev => [...prev.slice(-99), newCandle]);
+                    }
+                };
+
+                ws.onerror = () => {
+                    console.error('خطأ في الاتصال');
+                    document.getElementById('connectionStatus').textContent = 'خطأ';
+                    document.getElementById('connectionStatus').style.color = '#f44336';
+                    setIsLoading(false);
+                    document.getElementById('loadingIndicator').style.display = 'none';
+                };
+
+                ws.onclose = () => {
+                    document.getElementById('connectionStatus').textContent = 'منقطع';
+                    document.getElementById('connectionStatus').style.color = '#FFA500';
+                };
+
+                setWsConnection(ws);
+            }, [wsConnection]);
+
+            // تهيئة البيانات
+            useEffect(() => {
+                if (!realTimeMode) {
+                    setCandleData(generateMockData());
+                } else {
+                    connectToRealTimeData(selectedMarket);
+                }
+            }, [realTimeMode, selectedMarket, generateMockData, connectToRealTimeData]);
+
+            // رسم الرسم البياني عند تحديث البيانات
+            useEffect(() => {
+                drawChart();
+            }, [candleData, indicators, drawChart]);
+
+            // تنظيف الاتصال
+            useEffect(() => {
+                return () => {
+                    if (wsConnection) {
+                        wsConnection.close();
+                    }
+                };
+            }, [wsConnection]);
+
+            return null; // المكون يتحكم في DOM مباشرة
+        }
+
+        // دوال JavaScript العامة
+        window.toggleRealTimeData = () => {
+            const app = document.querySelector('[data-react-app]');
+            if (app) {
+                app.dataset.realtime = app.dataset.realtime === 'true' ? 'false' : 'true';
+                location.reload(); // إعادة تحميل مؤقتة
+            }
+        };
+
+        window.toggleIndicator = (indicator) => {
+            console.log(`تبديل المؤشر: ${indicator}`);
+            // سيتم تطبيقه في النسخة المتقدمة
+        };
+
+        window.togglePatternDetection = () => {
+            console.log('تبديل كشف الأنماط');
+        };
+
+        window.resetChart = () => {
+            location.reload();
+        };
+
+        window.selectMarket = (symbol) => {
+            // إزالة التحديد السابق
+            document.querySelectorAll('.market-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.selected-badge')?.remove();
+            });
+
+            // إضافة التحديد الجديد
+            const selectedCard = event.currentTarget;
+            selectedCard.classList.add('selected');
+            
+            const badge = document.createElement('div');
+            badge.className = 'selected-badge';
+            badge.textContent = '✅ مُختار';
+            selectedCard.appendChild(badge);
+
+            console.log(`تم اختيار السوق: ${symbol}`);
+        };
+
+        // تشغيل التطبيق
+        ReactDOM.render(
+            React.createElement(AdvancedCandlestickApp), 
+            document.createElement('div')
+        );
+
+        // تهيئة الكانفاس
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('advancedChart');
+            const mockData = [];
+            let price = 50000;
+            
+            for (let i = 100; i >= 0; i--) {
+                const change = (Math.random() - 0.5) * 1000;
+                const open = price;
+                const close = price + change;
+                const high = Math.max(open, close) + Math.random() * 500;
+                const low = Math.min(open, close) - Math.random() * 500;
+                
+                mockData.push({
+                    timestamp: Date.now() - (i * 60000),
+                    open: Math.max(low, open),
+                    high,
+                    low,
+                    close: Math.max(low, close),
+                    volume: Math.random() * 1000000
+                });
+                
+                price = close;
+            }
+
+            // رسم أولي
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            const { width, height } = canvas;
+            const margin = 60;
+            const chartWidth = width - 2 * margin;
+            const chartHeight = height - 2 * margin;
+
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, width, height);
+
+            // رسم الشبكة
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 10; i++) {
+                const x = margin + (i / 10) * chartWidth;
+                const y = margin + (i / 10) * chartHeight;
+                
+                ctx.beginPath();
+                ctx.moveTo(x, margin);
+                ctx.lineTo(x, height - margin);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(margin, y);
+                ctx.lineTo(width - margin, y);
+                ctx.stroke();
+            }
+
+            // رسم الشموع
+            const prices = mockData.flatMap(c => [c.high, c.low]);
+            const maxPrice = Math.max(...prices);
+            const minPrice = Math.min(...prices);
+            const priceRange = maxPrice - minPrice;
+
+            const candleWidth = chartWidth / mockData.length * 0.7;
+            const candleSpacing = chartWidth / mockData.length;
+
+            mockData.forEach((candle, index) => {
+                const x = margin + index * candleSpacing;
+                const openY = margin + (maxPrice - candle.open) / priceRange * chartHeight;
+                const closeY = margin + (maxPrice - candle.close) / priceRange * chartHeight;
+                const highY = margin + (maxPrice - candle.high) / priceRange * chartHeight;
+                const lowY = margin + (maxPrice - candle.low) / priceRange * chartHeight;
+
+                const isGreen = candle.close >= candle.open;
+                ctx.strokeStyle = isGreen ? '#4CAF50' : '#f44336';
+                ctx.fillStyle = isGreen ? '#4CAF50' : '#f44336';
+
+                // الفتائل
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x + candleWidth / 2, highY);
+                ctx.lineTo(x + candleWidth / 2, lowY);
+                ctx.stroke();
+
+                // جسم الشمعة
+                if (isGreen) {
+                    ctx.strokeRect(x, Math.min(openY, closeY), candleWidth, Math.abs(closeY - openY));
+                } else {
+                    ctx.fillRect(x, Math.min(openY, closeY), candleWidth, Math.abs(closeY - openY));
+                }
+            });
+
+            // تحديث المعلومات
+            const latestCandle = mockData[mockData.length - 1];
+            document.getElementById('currentPrice').textContent = `$${latestCandle.close.toFixed(2)}`;
+            document.getElementById('volume').textContent = latestCandle.volume.toLocaleString();
+        });
+    </script>
+</body>
+</html>

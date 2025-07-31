@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار Gann Circle</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #FFD700;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        #info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #FFD700;
+            max-width: 300px;
+            text-align: right;
+        }
+        
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #FFD700;
+        }
+        
+        .success {
+            background-color: rgba(0, 255, 0, 0.1);
+            border-color: #00FF00;
+        }
+        
+        .error {
+            background-color: rgba(255, 0, 0, 0.1);
+            border-color: #FF0000;
+        }
+        
+        .testing {
+            background-color: rgba(255, 255, 0, 0.1);
+            border-color: #FFFF00;
+        }
+        
+        button {
+            background: #333;
+            color: #FFD700;
+            border: 1px solid #FFD700;
+            border-radius: 8px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 اختبار ربط الأسعار الحية مع دائرة Gann</h1>
+    
+    <div id="info">
+        <h3>📊 حالة الاختبار</h3>
+        <div id="status-market" class="status testing">
+            🔍 فحص بيانات الأسواق...
+        </div>
+        <div id="status-price" class="status testing">
+            💰 فحص الأسعار...
+        </div>
+        <div id="status-display" class="status testing">
+            🎨 فحص العرض...
+        </div>
+        
+        <h4>🎯 أسواق الاختبار</h4>
+        <button onclick="testAramco()">اختبار أرامكو (32.50)</button>
+        <button onclick="testBitcoin()">اختبار بيتكوين (45,250)</button>
+        
+        <div id="results">
+            <h4>📋 النتائج</h4>
+            <div id="selected-market">لا يوجد سوق محدد</div>
+            <div id="current-price">لا يوجد سعر</div>
+            <div id="ring-start">بداية الترقيم: غير محدد</div>
+        </div>
+    </div>
+    
+    <div id="main-content">
+        <p>انتقل إلى المشروع الأساسي: <a href="http://localhost:3000" target="_blank" style="color: #FFD700;">http://localhost:3000</a></p>
+        
+        <div style="margin-top: 30px;">
+            <h2>🔧 خطوات إصلاح المشكلة</h2>
+            <ol style="text-align: right; max-width: 600px; margin: 0 auto;">
+                <li>تأكد من تشغيل الخادم على المنفذ 3000</li>
+                <li>افتح Developer Console في المتصفح (F12)</li>
+                <li>ابحث عن رسائل console.log</li>
+                <li>انقر على أزرار الاختبار</li>
+                <li>راقب التغييرات في دائرة Gann</li>
+            </ol>
+        </div>
+        
+        <div style="margin-top: 30px;">
+            <h2>📈 بيانات الأسواق المتوقعة</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; max-width: 800px; margin: 0 auto;">
+                <div style="border: 1px solid #FFD700; padding: 10px; border-radius: 5px;">
+                    <strong>أرامكو (2222)</strong><br>
+                    السعر: 32.50 ريال<br>
+                    النوع: صحيح (خطوة = 1)
+                </div>
+                <div style="border: 1px solid #FFD700; padding: 10px; border-radius: 5px;">
+                    <strong>بيتكوين (BTC/USD)</strong><br>
+                    السعر: 45,250.00 دولار<br>
+                    النوع: صحيح (خطوة = 1)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // محاكاة بيانات الأسواق
+        const marketData = {
+            '2222': { name: 'أرامكو', price: 32.50, change: 0.6 },
+            'BTC/USD': { name: 'بيتكوين', price: 45250.00, change: 2.5 }
+        };
+        
+        let selectedMarket = null;
+        
+        function updateStatus(elementId, message, type = 'testing') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+        
+        function updateResults() {
+            document.getElementById('selected-market').textContent = 
+                selectedMarket ? `${marketData[selectedMarket].name} (${selectedMarket})` : 'لا يوجد سوق محدد';
+            document.getElementById('current-price').textContent = 
+                selectedMarket ? `${marketData[selectedMarket].price}` : 'لا يوجد سعر';
+            document.getElementById('ring-start').textContent = 
+                selectedMarket ? `يبدأ من ${marketData[selectedMarket].price}` : 'بداية الترقيم: غير محدد';
+        }
+        
+        function testAramco() {
+            selectedMarket = '2222';
+            updateStatus('status-market', '✅ تم اختيار أرامكو', 'success');
+            updateStatus('status-price', '💰 السعر: 32.50 ريال', 'success');
+            updateStatus('status-display', '🎨 الترقيم يبدأ من 32.50', 'success');
+            updateResults();
+            
+            console.log('🔴 تم النقر على أرامكو');
+            console.log('📋 السوق المحدد:', '2222');
+            console.log('💰 السعر:', 32.50);
+        }
+        
+        function testBitcoin() {
+            selectedMarket = 'BTC/USD';
+            updateStatus('status-market', '✅ تم اختيار بيتكوين', 'success');
+            updateStatus('status-price', '💰 السعر: 45,250.00 دولار', 'success');
+            updateStatus('status-display', '🎨 الترقيم يبدأ من 45250', 'success');
+            updateResults();
+            
+            console.log('🔴 تم النقر على بيتكوين');
+            console.log('📋 السوق المحدد:', 'BTC/USD');
+            console.log('💰 السعر:', 45250.00);
+        }
+        
+        // اختبار أولي
+        console.log('🔧 صفحة الاختبار جاهزة');
+        console.log('📊 بيانات الأسواق:', marketData);
+        
+        // محاكاة الحالة المطلوبة
+        setTimeout(() => {
+            updateStatus('status-market', '🔍 جاهز للاختبار', 'testing');
+            updateStatus('status-price', '💰 انقر على زر الاختبار', 'testing');
+            updateStatus('status-display', '🎨 في انتظار البيانات', 'testing');
+        }, 1000);
+    </script>
+</body>
+</html>

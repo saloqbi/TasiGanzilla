@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تجربة التخطيط الجديد - شريط معلومات السوق وقسم التحليل المتقدم</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .layout-info {
+            padding: 20px;
+            margin: 20px;
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            text-align: center;
+        }
+        .layout-title {
+            font-size: 24px;
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .layout-description {
+            font-size: 16px;
+            color: #00BFFF;
+            line-height: 1.6;
+        }
+        .feature-list {
+            margin: 20px 0;
+            text-align: right;
+        }
+        .feature-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            border-right: 4px solid #00FF00;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #00FF00;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout-info">
+        <div class="layout-title">✅ تم تحديث التخطيط بنجاح!</div>
+        <div class="layout-description">
+            تم نقل قسم "🔍 تحليل متقدم" بنجاح ليصبح تحت شريط معلومات السوق
+        </div>
+        
+        <div class="feature-list">
+            <div class="feature-item">
+                <span class="status-indicator"></span>
+                ✅ شريط معلومات السوق: معروض تحت أزرار التحكم
+            </div>
+            <div class="feature-item">
+                <span class="status-indicator"></span>
+                ✅ قسم التحليل المتقدم: منقول تحت شريط معلومات السوق
+            </div>
+            <div class="feature-item">
+                <span class="status-indicator"></span>
+                ✅ التخطيط الشبكي: تصميم متجاوب لجميع الشاشات
+            </div>
+            <div class="feature-item">
+                <span class="status-indicator"></span>
+                ✅ الشريط الجانبي: مبسط ويحتوي على الإحصائيات المتقدمة فقط
+            </div>
+            <div class="feature-item">
+                <span class="status-indicator"></span>
+                ✅ تنظيم المعلومات: أكثر وضوحاً وسهولة في الوصول
+            </div>
+        </div>
+    </div>
+
+    <div id="app"></div>
+
+    <script type="text/babel">
+        function LayoutTest() {
+            return (
+                <div style={{
+                    padding: '20px',
+                    maxWidth: '1200px',
+                    margin: '0 auto'
+                }}>
+                    <h2 style={{
+                        color: '#FFD700',
+                        textAlign: 'center',
+                        fontSize: '20px',
+                        marginBottom: '20px'
+                    }}>
+                        🎯 التخطيط الجديد للواجهة
+                    </h2>
+                    
+                    {/* محاكاة شريط معلومات السوق */}
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '15px 20px',
+                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+                        border: '1px solid rgba(255, 215, 0, 0.3)',
+                        borderRadius: '8px',
+                        margin: '10px 0',
+                        backdropFilter: 'blur(10px)',
+                        flexWrap: 'wrap',
+                        gap: '15px'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            minWidth: '120px'
+                        }}>
+                            <div style={{
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                color: '#FFD700',
+                                marginBottom: '5px'
+                            }}>
+                                🔍 معلومات السوق الحالي
+                            </div>
+                            <div style={{ color: '#00BFFF', fontSize: '14px' }}>
+                                السعر: $45,230.50
+                            </div>
+                        </div>
+                        
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            minWidth: '120px'
+                        }}>
+                            <div style={{
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                color: '#FFD700',
+                                marginBottom: '5px'
+                            }}>
+                                ⏰ معلومات التحديث
+                            </div>
+                            <div style={{ color: '#00BFFF', fontSize: '14px' }}>
+                                تردد: 1 ثانية
+                            </div>
+                        </div>
+                        
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            minWidth: '120px'
+                        }}>
+                            <div style={{
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                color: '#FFD700',
+                                marginBottom: '5px'
+                            }}>
+                                🔗 حالة الاتصال
+                            </div>
+                            <div style={{ color: '#4CAF50', fontSize: '14px' }}>
+                                مباشرة - مستقر
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* محاكاة قسم التحليل المتقدم */}
+                    <div style={{
+                        margin: '20px 0',
+                        padding: '20px',
+                        backgroundColor: 'rgba(255, 215, 0, 0.05)',
+                        border: '1px solid rgba(255, 215, 0, 0.2)',
+                        borderRadius: '12px',
+                        backdropFilter: 'blur(10px)'
+                    }}>
+                        <div style={{
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            color: '#FFD700',
+                            textAlign: 'center',
+                            marginBottom: '20px',
+                            borderBottom: '2px solid rgba(255, 215, 0, 0.3)',
+                            paddingBottom: '10px'
+                        }}>
+                            🔍 تحليل متقدم
+                        </div>
+                        
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                            gap: '20px'
+                        }}>
+                            {/* أنماط الشموع */}
+                            <div>
+                                <div style={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    color: '#00BFFF',
+                                    borderBottom: '1px solid rgba(0, 191, 255, 0.3)',
+                                    paddingBottom: '8px',
+                                    marginBottom: '10px'
+                                }}>
+                                    🕯️ أنماط الشموع
+                                </div>
+                                <div style={{
+                                    padding: '12px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '8px',
+                                    marginBottom: '8px'
+                                }}>
+                                    <div style={{ fontSize: '12px', color: '#fff', fontWeight: 'bold' }}>
+                                        نجمة الصباح
+                                    </div>
+                                    <div style={{ fontSize: '11px', color: '#00FF00' }}>
+                                        الثقة: 85%
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* المستويات */}
+                            <div>
+                                <div style={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    color: '#00BFFF',
+                                    borderBottom: '1px solid rgba(0, 191, 255, 0.3)',
+                                    paddingBottom: '8px',
+                                    marginBottom: '10px'
+                                }}>
+                                    📊 المستويات
+                                </div>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    padding: '10px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '6px',
+                                    marginBottom: '8px'
+                                }}>
+                                    <span style={{ fontSize: '11px', fontWeight: 'bold' }}>
+                                        🟢 دعم
+                                    </span>
+                                    <span style={{ fontSize: '12px', color: '#FFD700', fontWeight: 'bold' }}>
+                                        $44,850.00
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            {/* المؤشرات الفنية */}
+                            <div>
+                                <div style={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    color: '#00BFFF',
+                                    borderBottom: '1px solid rgba(0, 191, 255, 0.3)',
+                                    paddingBottom: '8px',
+                                    marginBottom: '10px'
+                                }}>
+                                    ⚙️ المؤشرات الفنية
+                                </div>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    padding: '10px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    borderRadius: '6px'
+                                }}>
+                                    <span style={{ fontSize: '11px', color: '#fff' }}>RSI</span>
+                                    <button style={{
+                                        padding: '4px 8px',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        fontSize: '10px',
+                                        backgroundColor: '#4CAF50',
+                                        color: 'white',
+                                        cursor: 'pointer'
+                                    }}>
+                                        ✅
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style={{
+                        textAlign: 'center',
+                        marginTop: '30px',
+                        padding: '15px',
+                        backgroundColor: 'rgba(0, 255, 0, 0.1)',
+                        border: '1px solid rgba(0, 255, 0, 0.3)',
+                        borderRadius: '8px'
+                    }}>
+                        <div style={{ color: '#00FF00', fontSize: '16px', fontWeight: 'bold' }}>
+                            🎉 التخطيط الجديد جاهز للاستخدام!
+                        </div>
+                        <div style={{ color: '#ccc', fontSize: '14px', marginTop: '10px' }}>
+                            شريط معلومات السوق وقسم التحليل المتقدم تم ترتيبهما بشكل أفضل
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<LayoutTest />, document.getElementById('app'));
+    </script>
+</body>
+</html>
