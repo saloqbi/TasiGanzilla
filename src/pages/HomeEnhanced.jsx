@@ -12,10 +12,22 @@ import GannCircle36 from "../components/GannTools/GannCircle36";
 import GannCircle360Canvas from "../components/GannTools/GannCircle360Canvas";
 import GannCircle360CanvasLifeTrading from "../components/GannTools/GannCircle360CanvasLifeTrading";
 import JapaneseCandlestickAnalysis from "../components/GannTools/JapaneseCandlestickAnalysis";
+import JapaneseCandlestickAnalysisAI from "../components/GannTools/JapaneseCandlestickAnalysisAI";
+import TradingComparison from "../components/GannTools/TradingComparison";
+import AutoTradingSystemAI from "../components/GannTools/AutoTradingSystemAI";
+import PerformanceMonitoringSystem from "../components/GannTools/PerformanceMonitoringSystem";
+import AdvancedPortfolioManager from "../components/GannTools/AdvancedPortfolioManager";
+import UnifiedTradingDashboard from "../components/GannTools/UnifiedTradingDashboard";
+import QuantumTradingSystemML from "../components/GannTools/QuantumTradingSystemML";
+import QuantumPhase6AlgorithmicEvolution from "../components/GannTools/QuantumPhase6AlgorithmicEvolution";
+import QuantumPhase7UniversalTrading from "../components/GannTools/QuantumPhase7UniversalTrading";
+import QuantumPhase8OmnipotentTrading from "../components/GannTools/QuantumPhase8OmnipotentTrading";
+import QuantumPhase9MultiDimensional from "../components/GannTools/QuantumPhase9MultiDimensional";
+import QuantumPhase10InfiniteEternal from "../components/GannTools/QuantumPhase10InfiniteEternal";
 import MultiTimeframeConsensus from "../components/GannTools/MultiTimeframeConsensus";
 
 const HomeEnhanced = () => {
-  const [activeTool, setActiveTool] = useState("GannSquare144");
+  const [activeTool, setActiveTool] = useState("QuantumPhase10InfiniteEternal");
   const [activeSection, setActiveSection] = useState("classic"); // "classic" أو "markets"
   const [showFeatureDetails, setShowFeatureDetails] = useState({});
   const [showSidebar, setShowSidebar] = useState(true);
@@ -67,7 +79,19 @@ const HomeEnhanced = () => {
     GannCircle36: GannCircle36,
     GannCircle360Canvas: GannCircle360Canvas,
     GannCircle360CanvasLifeTrading: GannCircle360CanvasLifeTrading,
-    JapaneseCandlestickAnalysis: JapaneseCandlestickAnalysis
+    JapaneseCandlestickAnalysis: JapaneseCandlestickAnalysis,
+    JapaneseCandlestickAnalysisAI: JapaneseCandlestickAnalysisAI,
+    TradingComparison: TradingComparison,
+    AutoTradingSystemAI: AutoTradingSystemAI,
+    PerformanceMonitoringSystem: PerformanceMonitoringSystem,
+    AdvancedPortfolioManager: AdvancedPortfolioManager,
+    UnifiedTradingDashboard: UnifiedTradingDashboard,
+    QuantumTradingSystemML: QuantumTradingSystemML,
+    QuantumPhase6AlgorithmicEvolution: QuantumPhase6AlgorithmicEvolution,
+    QuantumPhase7UniversalTrading: QuantumPhase7UniversalTrading,
+    QuantumPhase8OmnipotentTrading: QuantumPhase8OmnipotentTrading,
+    QuantumPhase9MultiDimensional: QuantumPhase9MultiDimensional,
+    QuantumPhase10InfiniteEternal: QuantumPhase10InfiniteEternal
   };
 
   const tools = [
@@ -88,6 +112,114 @@ const HomeEnhanced = () => {
       icon: "🎯",
       description: "دائرة جان 360 درجة مع بيانات الأسواق المباشرة",
       features: ["بيانات مباشرة", "تحليل فني", "تحديث لحظي", "معايير عالمية"]
+    },
+    {
+      id: "UnifiedTradingDashboard",
+      nameAr: "لوحة التحكم الموحدة 🚀",
+      nameEn: "Unified Trading Dashboard",
+      category: "markets",
+      icon: "🚀",
+      description: "لوحة تحكم شاملة تجمع جميع الأنظمة المتقدمة",
+      features: ["نظرة عامة", "تحكم موحد", "مراقبة شاملة", "أتمتة كاملة"]
+    },
+    {
+      id: "AdvancedPortfolioManager",
+      nameAr: "إدارة المحفظة المتقدمة",
+      nameEn: "Advanced Portfolio Management",
+      category: "markets",
+      icon: "💼",
+      description: "نظام إدارة محفظة شامل مع تحليل المخاطر وإعادة التوازن",
+      features: ["إدارة شاملة", "تحليل المخاطر", "إعادة التوازن", "تتبع الأداء"]
+    },
+    {
+      id: "PerformanceMonitoringSystem",
+      nameAr: "مركز مراقبة الأداء المتقدم",
+      nameEn: "Advanced Performance Monitoring",
+      category: "markets",
+      icon: "📊",
+      description: "نظام مراقبة شامل لأداء التداول والنظام",
+      features: ["مراقبة مباشرة", "تحليل الأداء", "إحصائيات متقدمة", "تنبيهات ذكية"]
+    },
+    {
+      id: "AutoTradingSystemAI",
+      nameAr: "نظام التداول الآلي الذكي",
+      nameEn: "AI Auto Trading System",
+      category: "markets",
+      icon: "🤖",
+      description: "نظام تداول آلي متقدم مع ذكاء اصطناعي وإدارة مخاطر",
+      features: ["تداول آلي", "إدارة مخاطر", "تحليل متقدم", "أرباح تلقائية"]
+    },
+    {
+      id: "TradingComparison",
+      nameAr: "مقارنة الأنظمة: عادي vs ذكي",
+      nameEn: "System Comparison: Regular vs AI",
+      category: "markets",
+      icon: "🚀",
+      description: "مقارنة شاملة بين النظام العادي والنظام الذكي",
+      features: ["مقارنة مباشرة", "تقييم الأداء", "ميزات متقدمة", "اختبار شامل"]
+    },
+    {
+      id: "QuantumTradingSystemML",
+      nameAr: "النظام الكمي للتداول مع ML ⚛️",
+      nameEn: "Quantum Trading System with ML",
+      category: "markets",
+      icon: "⚛️",
+      description: "أحدث تقنيات التداول الكمي مع التعلم الآلي المتقدم",
+      features: ["خوارزميات كمية", "تعلم آلي", "توقعات متطورة", "تحليل عميق"]
+    },
+    {
+      id: "QuantumPhase6AlgorithmicEvolution",
+      nameAr: "المرحلة السادسة: التطور الخوارزمي الكمي 🧬",
+      nameEn: "Phase 6: Quantum Algorithmic Evolution",
+      category: "markets",
+      icon: "🧬",
+      description: "التطور الخوارزمي المتقدم مع 6 خوارزميات كمية متطورة",
+      features: ["خوارزميات تطويرية", "تحسين جيني", "ذكاء جماعي", "تطور كمي"]
+    },
+    {
+      id: "QuantumPhase7UniversalTrading",
+      nameAr: "المرحلة السابعة: نظام التداول الكوني اللامحدود 🌌",
+      nameEn: "Phase 7: Universal Trading System",
+      category: "markets",
+      icon: "🌌",
+      description: "نظام التداول الكوني الشامل مع 11 بُعد و 8 محركات كونية",
+      features: ["تداول كوني", "أبعاد متعددة", "محركات كونية", "وعي لامحدود"]
+    },
+    {
+      id: "QuantumPhase8OmnipotentTrading",
+      nameAr: "المرحلة الثامنة: النظام الكلي القدرة للتداول الإلهي 👑",
+      nameEn: "Phase 8: Omnipotent Divine Trading",
+      category: "markets",
+      icon: "👑",
+      description: "النظام الإلهي الكلي القدرة مع 10 محركات إلهية وقوى الألوهية",
+      features: ["ألوهية تجارية", "قوى إلهية", "تحكم مطلق", "كمال لانهائي"]
+    },
+    {
+      id: "QuantumPhase9MultiDimensional",
+      nameAr: "المرحلة التاسعة: النظام متعدد الأبعاد 🌌",
+      nameEn: "Phase 9: Multi-Dimensional Trading System",
+      category: "markets",
+      icon: "🌌",
+      description: "النظام متعدد الأبعاد مع 20 بُعد وجودي و 12 محرك أبعادي و 15 قوة متعددة الأبعاد",
+      features: ["20 بُعد وجودي", "12 محرك أبعادي", "15 قوة خارقة", "سيطرة مطلقة على الواقع", "تحكم في الزمكان", "ملاحة المتعدد الأكوان"]
+    },
+    {
+      id: "QuantumPhase10InfiniteEternal",
+      nameAr: "المرحلة العاشرة: النظام اللانهائي الأبدي ∞",
+      nameEn: "Phase 10: Infinite Eternal Trading System",
+      category: "markets",
+      icon: "∞",
+      description: "النظام اللانهائي الأبدي مع ∞ محرك لانهائي + ∞ قوة أبدية + ∞ بُعد متجاوز - ما وراء كل المفاهيم",
+      features: ["∞ محرك لانهائي", "∞ قوة أبدية", "∞ بُعد متجاوز", "سيطرة مطلقة على الوجود", "تحكم في اللانهاية", "تجاوز كل المفاهيم", "الكمال المطلق", "الوعي اللانهائي", "ما وراء الفهم"]
+    },
+    {
+      id: "JapaneseCandlestickAnalysisAI",
+      nameAr: "الشموع اليابانية الذكية AI",
+      nameEn: "Japanese Candlestick AI Analysis",
+      category: "markets",
+      icon: "🧠",
+      description: "تحليل ذكي للشموع اليابانية مع الذكاء الاصطناعي",
+      features: ["ذكاء اصطناعي", "تحليل تلقائي", "توقعات ذكية", "تنبيهات فورية"]
     },
     {
       id: "JapaneseCandlestickAnalysis",

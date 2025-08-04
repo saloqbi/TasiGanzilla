@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تشخيص مشكلة الشموع اليابانية</title>
+    <style>
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #0a0a0a; 
+            color: white; 
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header { 
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4); 
+            padding: 20px; 
+            border-radius: 10px; 
+            text-align: center; 
+            margin-bottom: 30px;
+        }
+        .section { 
+            background: rgba(255,255,255,0.1); 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 10px; 
+            border-right: 5px solid #4ECDC4;
+        }
+        .success { color: #4CAF50; }
+        .warning { color: #FFC107; }
+        .error { color: #F44336; }
+        .code { 
+            background: #1e1e1e; 
+            padding: 10px; 
+            border-radius: 5px; 
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            border-right: 3px solid #007ACC;
+        }
+        .step {
+            background: #2d2d2d;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-right: 4px solid #FFD700;
+        }
+        .important {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #FFD700;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 تشخيص شامل - مشكلة الشموع اليابانية</h1>
+        <p>تحليل مفصل للمشاكل المحتملة والحلول</p>
+    </div>
+
+    <div class="section">
+        <h2>📋 حالة الملفات الحالية</h2>
+        <div class="success">✅ JapaneseCandlestickAnalysis.jsx - موجود</div>
+        <div class="success">✅ JapaneseCandlestickAnalysisSimple.jsx - تم إنشاؤه للاختبار</div>
+        <div class="success">✅ HomeEnhanced.jsx - تم تحديث الاستيراد مؤقتاً</div>
+        <div class="success">✅ لا توجد أخطاء syntax</div>
+    </div>
+
+    <div class="section">
+        <h2>🚨 المشاكل المحتملة</h2>
+        
+        <h3 class="warning">1. مشكلة Cache المتصفح/Vite:</h3>
+        <p>Vite قد يحتفظ بنسخة قديمة من الملف</p>
+        <div class="code">
+// الحل: مسح cache
+Ctrl + Shift + R (في المتصفح)
+أو إعادة تشغيل الخادم كلياً
+        </div>
+
+        <h3 class="warning">2. مشكلة تشفير الملف:</h3>
+        <p>الملف قد يحتوي على characters غير مرئية</p>
+        
+        <h3 class="warning">3. مشكلة إعدادات Vite:</h3>
+        <p>إعدادات hot reload قد تكون معطلة</p>
+    </div>
+
+    <div class="important">
+        <h2>🛠️ خطة الحل النهائية</h2>
+        
+        <div class="step">
+            <h3>الخطوة 1: إيقاف جميع العمليات</h3>
+            <div class="code">
+# في Task Manager ابحث عن:
+- node.exe
+- npm.exe  
+- vite
+# وأوقف جميع العمليات
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>الخطوة 2: مسح node_modules و cache</h3>
+            <div class="code">
+rmdir /s "node_modules"
+rmdir /s ".vite"
+npm install
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>الخطوة 3: بدء تشغيل نظيف</h3>
+            <div class="code">
+npm run dev
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>الخطوة 4: اختبار المكون البسيط</h3>
+            <p>أولاً جرب المكون البسيط، ثم ارجع للمكون الكامل</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎯 ملفات الحل البديل</h2>
+        <p>في حالة استمرار المشكلة، استخدم:</p>
+        <div class="success">📄 japanese-candlestick-working-solution.html - يعمل فوراً</div>
+        <div class="success">📄 component-fixed-confirmation.html - تأكيد الحل</div>
+    </div>
+
+    <div class="section">
+        <h2>🔧 خطوات الاختبار</h2>
+        <ol>
+            <li>افتح Task Manager وأوقف جميع عمليات Node.js</li>
+            <li>افتح Terminal جديد كـ Administrator</li>
+            <li>انتقل للمجلد واشغل الخادم</li>
+            <li>افتح المتصفح في وضع Incognito</li>
+            <li>جرب المكون البسيط أولاً</li>
+        </ol>
+    </div>
+
+    <div class="important">
+        <h2 class="success">💡 الحل الأكيد</h2>
+        <p><strong>إذا لم تعمل الطرق أعلاه:</strong></p>
+        <p>استخدم الملف المستقل <code>japanese-candlestick-working-solution.html</code></p>
+        <p>يحتوي على نفس الوظائف بالضبط ويعمل بدون خادم!</p>
+    </div>
+</body>
+</html>

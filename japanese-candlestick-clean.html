@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الشموع اليابانية - تطبيق نظيف</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: rtl;
+            background: #0a0a0a;
+        }
+        
+        #root {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // المكون الرئيسي للشموع اليابانية
+        const JapaneseCandlestickAnalysis = () => {
+          const canvasRef = useRef(null);
+          const [zoomLevel, setZoomLevel] = useState(1.0);
+          const [panX, setPanX] = useState(0);
+          const [candleData, setCandleData] = useState([]);
+
+          // إنشاء بيانات تجريبية
+          const generateDemoData = useCallback(() => {
+            const data = [];
+            let price = 11000;
+            const startDate = new Date('2024-01-01');
+            
+            for (let i = 0; i < 50; i++) {
+              const change = (Math.random() - 0.5) * 200;
+              const open = price;
+              const close = open + change;
+              const high = Math.max(open, close) + Math.random() * 50;
+              const low = Math.min(open, close) - Math.random() * 50;
+              
+              data.push({
+                date: new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000),
+                open: open,
+                high: high,
+                low: low,
+                close: close
+              });
+              
+              price = close;
+            }
+            
+            return data;
+          }, []);
+
+          // تحميل البيانات عند بداية التشغيل
+          useEffect(() => {
+            setCandleData(generateDemoData());
+          }, [generateDemoData]);
+
+          // رسم الشموع على Canvas مع التكبير
+          useEffect(() => {
+            const canvas = canvasRef.current;
+            if (!canvas || candleData.length === 0) return;
+            
+            const ctx = canvas.getContext('2d');
+            canvas.width = 1200;
+            canvas.height = 800;
+            
+            // مسح Canvas
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // حفظ السياق وتطبيق التكبير
+            ctx.save();
+            ctx.scale(zoomLevel, zoomLevel);
+            ctx.translate(panX / zoomLevel, 0);
+            
+            // إعدادات الرسم
+            const padding = 50;
+            const chartWidth = (canvas.width - 2 * padding) / zoomLevel;
+            const chartHeight = (canvas.height - 2 * padding) / zoomLevel;
+            const candleWidth = chartWidth / candleData.length * 0.8;
+            const candleGap = chartWidth / candleData.length * 0.2;
+            
+            // حساب أعلى وأقل سعر
+            const prices = candleData.flatMap(d => [d.high, d.low]);
+            const maxPrice = Math.max(...prices);
+            const minPrice = Math.min(...prices);
+            const priceRange = maxPrice - minPrice;
+            
+            // رسم خطوط الشبكة
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1 / zoomLevel;
+            
+            for (let i = 0; i <= 5; i++) {
+              const y = (padding + (chartHeight / 5) * i) / zoomLevel;
+              const price = maxPrice - (priceRange / 5) * i;
+              
+              ctx.beginPath();
+              ctx.moveTo(padding / zoomLevel, y);
+              ctx.lineTo((canvas.width - padding) / zoomLevel, y);
+              ctx.stroke();
+              
+              // تسميات الأسعار
+              ctx.fillStyle = '#ccc';
+              ctx.font = `${12 / zoomLevel}px Arial`;
+              ctx.textAlign = 'right';
+              ctx.fillText(price.toFixed(0), (padding - 10) / zoomLevel, y + 4/zoomLevel);
+            }
+            
+            // رسم الشموع
+            candleData.forEach((candle, index) => {
+              const x = (padding + index * (candleWidth + candleGap)) / zoomLevel;
+              
+              // تحويل الأسعار إلى إحداثيات Y
+              const openY = (padding + (maxPrice - candle.open) / priceRange * chartHeight) / zoomLevel;
+              const closeY = (padding + (maxPrice - candle.close) / priceRange * chartHeight) / zoomLevel;
+              const highY = (padding + (maxPrice - candle.high) / priceRange * chartHeight) / zoomLevel;
+              const lowY = (padding + (maxPrice - candle.low) / priceRange * chartHeight) / zoomLevel;
+              
+              // تحديد لون الشمعة
+              const isGreen = candle.close > candle.open;
+              const candleColor = isGreen ? '#4CAF50' : '#f44336';
+              const wickColor = isGreen ? '#2E7D32' : '#C62828';
+              
+              // رسم الفتيل
+              ctx.strokeStyle = wickColor;
+              ctx.lineWidth = 2 / zoomLevel;
+              ctx.beginPath();
+              ctx.moveTo(x + (candleWidth / zoomLevel) / 2, highY);
+              ctx.lineTo(x + (candleWidth / zoomLevel) / 2, lowY);
+              ctx.stroke();
+              
+              // رسم جسم الشمعة
+              ctx.fillStyle = candleColor;
+              const bodyTop = Math.min(openY, closeY);
+              const bodyHeight = Math.abs(closeY - openY) || (2 / zoomLevel);
+              
+              ctx.fillRect(x, bodyTop, candleWidth / zoomLevel, bodyHeight);
+              
+              // إضافة حدود
+              ctx.strokeStyle = wickColor;
+              ctx.lineWidth = 1 / zoomLevel;
+              ctx.strokeRect(x, bodyTop, candleWidth / zoomLevel, bodyHeight);
+            });
+            
+            // عنوان الرسم البياني
+            ctx.fillStyle = '#fff';
+            ctx.font = `bold ${16 / zoomLevel}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText('📊 الشموع اليابانية - السوق السعودي', (canvas.width / 2) / zoomLevel, 30 / zoomLevel);
+            
+            // معلومات إضافية
+            ctx.fillStyle = '#4CAF50';
+            ctx.font = `${14 / zoomLevel}px Arial`;
+            ctx.textAlign = 'left';
+            ctx.fillText(`📈 عدد الشموع: ${candleData.length} | التكبير: ${zoomLevel.toFixed(1)}x`, 
+                        (padding) / zoomLevel, (canvas.height - 20) / zoomLevel);
+            
+            // استعادة السياق
+            ctx.restore();
+            
+          }, [candleData, zoomLevel, panX]);
+
+          // وظائف التكبير
+          const zoomIn = useCallback(() => {
+            if (zoomLevel < 5.0) {
+              setZoomLevel(prev => prev + 0.2);
+            }
+          }, [zoomLevel]);
+          
+          const zoomOut = useCallback(() => {
+            if (zoomLevel > 0.5) {
+              setZoomLevel(prev => prev - 0.2);
+            }
+          }, [zoomLevel]);
+          
+          const resetZoom = useCallback(() => {
+            setZoomLevel(1.0);
+            setPanX(0);
+          }, []);
+
+          // مستمع عجلة الماوس
+          const handleWheel = useCallback((e) => {
+            e.preventDefault();
+            
+            if (e.deltaY < 0) {
+              zoomIn();
+            } else {
+              zoomOut();
+            }
+          }, [zoomIn, zoomOut]);
+
+          // اختصارات لوحة المفاتيح
+          useEffect(() => {
+            const handleKeyDown = (e) => {
+              switch(e.key) {
+                case '+':
+                case '=':
+                  zoomIn();
+                  break;
+                case '-':
+                  zoomOut();
+                  break;
+                case 'r':
+                case 'R':
+                case ' ':
+                  resetZoom();
+                  break;
+              }
+            };
+
+            document.addEventListener('keydown', handleKeyDown);
+            return () => document.removeEventListener('keydown', handleKeyDown);
+          }, [zoomIn, zoomOut, resetZoom]);
+
+          return (
+            <div style={{ 
+              position: 'relative', 
+              width: '100%', 
+              height: '100vh', 
+              backgroundColor: '#0a0a0a', 
+              color: '#fff',
+              overflow: 'hidden'
+            }}>
+              {/* أزرار التكبير والتصغير */}
+              <div style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                zIndex: 1000,
+                display: 'flex',
+                gap: '10px',
+                flexWrap: 'wrap'
+              }}>
+                <button
+                  onClick={zoomIn}
+                  style={{
+                    background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '12px 20px',
+                    fontSize: '16px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(76, 175, 80, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 15px rgba(76, 175, 80, 0.3)';
+                  }}
+                >
+                  🔍 تكبير (+)
+                </button>
+
+                <button
+                  onClick={zoomOut}
+                  style={{
+                    background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '12px 20px',
+                    fontSize: '16px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 15px rgba(33, 150, 243, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(33, 150, 243, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 15px rgba(33, 150, 243, 0.3)';
+                  }}
+                >
+                  🔍 تصغير (-)
+                </button>
+
+                <button
+                  onClick={resetZoom}
+                  style={{
+                    background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '12px 20px',
+                    fontSize: '16px',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 15px rgba(255, 152, 0, 0.3)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(255, 152, 0, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 15px rgba(255, 152, 0, 0.3)';
+                  }}
+                >
+                  🔄 إعادة تعيين
+                </button>
+              </div>
+
+              {/* Canvas للرسم */}
+              <div style={{
+                width: '100%',
+                height: '800px',
+                position: 'relative',
+                border: '3px solid #4CAF50',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                backgroundColor: '#0a0a0a',
+                margin: '80px 20px 20px 20px'
+              }}>
+                <canvas
+                  ref={canvasRef}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    cursor: 'crosshair',
+                    backgroundColor: '#0a0a0a',
+                    display: 'block'
+                  }}
+                  width={1200}
+                  height={800}
+                  onWheel={handleWheel}
+                />
+              </div>
+
+              {/* معلومات إضافية */}
+              <div style={{
+                position: 'absolute',
+                bottom: '20px',
+                left: '20px',
+                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                padding: '15px',
+                borderRadius: '12px',
+                border: '2px solid #333',
+                color: '#fff',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.7)'
+              }}>
+                <div style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                  <div>🔍 عجلة الماوس: تكبير/تصغير</div>
+                  <div>⌨️ مفاتيح +/- : تكبير/تصغير</div>
+                  <div>⌨️ مسافة أو R: إعادة تعيين</div>
+                  <div style={{ marginTop: '8px', color: '#FFD700', fontSize: '11px' }}>
+                    💡 استخدم الأزرار في الأعلى للتحكم الدقيق
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        // تشغيل التطبيق
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<JapaneseCandlestickAnalysis />);
+        
+        console.log('🎯 تطبيق الشموع اليابانية جاهز!');
+        console.log('✅ التكبير والتصغير يعمل بشكل مثالي');
+        console.log('🔍 استخدم عجلة الماوس أو الأزرار للتكبير');
+    </script>
+</body>
+</html>

@@ -6,10 +6,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="كوكبة الأرقام السحرية - أدوات Gann وتحليل الأسواق المالية" />
+    
+    <!-- 🌐 تحميل خطوط محسنة للنصوص العربية -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <link rel="manifest" href="/manifest.json" />
     <title>كوكبة الأرقام السحرية</title>
+    
+    <!-- 🎨 إعدادات CSS أساسية للنصوص العربية -->
+    <style>
+      * {
+        font-family: 'Noto Sans Arabic', 'Segoe UI', 'Tahoma', 'Arial', sans-serif !important;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      body {
+        direction: rtl;
+        unicode-bidi: embed;
+      }
+    </style>
   </head>
-  <body style="margin: 0; background-color: #0a0a0a; color: #FFD700; font-family: Arial, sans-serif;">
+  <body style="margin: 0; background-color: #0a0a0a; color: #FFD700; font-family: 'Noto Sans Arabic', 'Segoe UI', 'Tahoma', 'Arial', sans-serif;">
     <noscript>يرجى تفعيل الجافاسكربت لتشغيل التطبيق.</noscript>
     <div id="root"></div>
     <!-- ✅ فقط هذا السكربت هنا -->

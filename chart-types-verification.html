@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✅ تأكيد عمل جميع أنواع الرسوم البيانية</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .chart-container {
+            background: rgba(30, 30, 30, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #333;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .chart-header {
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 28px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .status {
+            text-align: center;
+            padding: 20px;
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            color: #4CAF50;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .chart-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .chart-type-btn {
+            padding: 15px;
+            background: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 10px;
+            color: #ccc;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .chart-type-btn:hover {
+            background: #333;
+            transform: translateY(-2px);
+        }
+        .chart-type-btn.active {
+            background: linear-gradient(135deg, #2196F3, #2196F3dd);
+            border-color: #2196F3;
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        }
+        canvas {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #1a1a1a;
+        }
+        .chart-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #262626;
+            border-radius: 8px;
+            border: 1px solid #444;
+            color: #ccc;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <h1 class="chart-header">🎯 تأكيد عمل جميع أنواع الرسوم البيانية</h1>
+        
+        <div class="status">
+            ✅ تم تطوير وتنفيذ جميع الأنواع الستة بنجاح! انقر على أي نوع لمشاهدة الرسم
+        </div>
+
+        <div class="chart-types">
+            <div class="chart-type-btn active" onclick="selectChart('candlestick')">
+                <div style="font-size: 20px; margin-bottom: 5px;">🕯️</div>
+                <div>الشموع اليابانية</div>
+            </div>
+            <div class="chart-type-btn" onclick="selectChart('area')">
+                <div style="font-size: 20px; margin-bottom: 5px;">📈</div>
+                <div>الرسم المساحي</div>
+            </div>
+            <div class="chart-type-btn" onclick="selectChart('bar')">
+                <div style="font-size: 20px; margin-bottom: 5px;">📊</div>
+                <div>الأعمدة البيانية</div>
+            </div>
+            <div class="chart-type-btn" onclick="selectChart('baseline')">
+                <div style="font-size: 20px; margin-bottom: 5px;">📏</div>
+                <div>الخط الأساسي</div>
+            </div>
+            <div class="chart-type-btn" onclick="selectChart('histogram')">
+                <div style="font-size: 20px; margin-bottom: 5px;">📋</div>
+                <div>المخطط العمودي</div>
+            </div>
+            <div class="chart-type-btn" onclick="selectChart('line')">
+                <div style="font-size: 20px; margin-bottom: 5px;">📉</div>
+                <div>الخط البسيط</div>
+            </div>
+        </div>
+
+        <canvas id="testCanvas" width="800" height="400"></canvas>
+        
+        <div class="chart-info" id="chartInfo">
+            <strong>🕯️ الشموع اليابانية:</strong> تُظهر أسعار الفتح والإغلاق والأعلى والأدنى. مثالية لتحليل الأنماط والاتجاهات.
+        </div>
+    </div>
+
+    <script>
+        // Chart configurations
+        const CHART_TYPES = {
+            candlestick: { 
+                icon: '🕯️', 
+                arabic: 'الشموع اليابانية',
+                color: '#2196F3',
+                description: 'تُظهر أسعار الفتح والإغلاق والأعلى والأدنى. مثالية لتحليل الأنماط والاتجاهات.'
+            },
+            area: { 
+                icon: '📈', 
+                arabic: 'الرسم المساحي',
+                color: '#4CAF50',
+                description: 'رسم بياني مساحي يُظهر اتجاه السعر مع تعبئة المنطقة تحت الخط. مفيد لرؤية الاتجاه العام.'
+            },
+            bar: { 
+                icon: '📊', 
+                arabic: 'الأعمدة البيانية',
+                color: '#FF9800',
+                description: 'أعمدة OHLC تُظهر جميع أسعار الفترة. توفر نفس معلومات الشموع بشكل مبسط.'
+            },
+            baseline: { 
+                icon: '📏', 
+                arabic: 'الخط الأساسي',
+                color: '#9C27B0',
+                description: 'خط أساسي يُظهر المناطق فوق وتحت سعر محدد. مفيد لمقارنة الأداء مع نقطة مرجعية.'
+            },
+            histogram: { 
+                icon: '📋', 
+                arabic: 'المخطط العمودي',
+                color: '#F44336',
+                description: 'مخطط عمودي يُظهر حجم التداول. يساعد في فهم قوة الحركة السعرية.'
+            },
+            line: { 
+                icon: '📉', 
+                arabic: 'الخط البسيط',
+                color: '#00BCD4',
+                description: 'خط بسيط يربط أسعار الإغلاق. أوضح طريقة لرؤية اتجاه السعر الطويل المدى.'
+            }
+        };
+
+        const CANDLESTICK_COLORS = {
+            bullish: '#4CAF50',
+            bearish: '#F44336',
+            wick: '#888'
+        };
+
+        let currentChart = 'candlestick';
+        let sampleData = [];
+
+        // Generate sample data
+        function generateSampleData() {
+            const data = [];
+            const basePrice = 100;
+            let currentPrice = basePrice;
+            
+            for (let i = 0; i < 50; i++) {
+                const volatility = 0.02;
+                const trend = Math.sin(i * 0.1) * 0.01;
+                
+                const priceChange = (Math.random() - 0.5) * volatility + trend;
+                currentPrice = currentPrice * (1 + priceChange);
+                
+                const open = currentPrice;
+                const close = open * (1 + (Math.random() - 0.5) * volatility);
+                const high = Math.max(open, close) * (1 + Math.random() * volatility / 2);
+                const low = Math.min(open, close) * (1 - Math.random() * volatility / 2);
+                
+                data.push({
+                    timestamp: Date.now() - (50 - i) * 60000,
+                    open: open,
+                    high: high,
+                    low: low,
+                    close: close,
+                    volume: Math.random() * 1000000 + 500000
+                });
+                
+                currentPrice = close;
+            }
+            
+            return data;
+        }
+
+        // Chart drawing functions
+        function drawCandlesticks(canvas, data) {
+            if (!canvas || !data.length) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const prices = data.flatMap(candle => [candle.high, candle.low]);
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            const priceRange = maxPrice - minPrice;
+            
+            if (priceRange === 0) return;
+            
+            const padding = 50;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            const candleWidth = chartWidth / data.length;
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight * i) / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+                
+                const price = maxPrice - (priceRange * i) / 5;
+                ctx.fillStyle = '#ccc';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText(price.toFixed(2), padding - 5, y + 4);
+            }
+            
+            // Draw candlesticks
+            data.forEach((candle, index) => {
+                const x = padding + index * candleWidth;
+                const centerX = x + candleWidth / 2;
+                
+                const openY = padding + ((maxPrice - candle.open) / priceRange) * chartHeight;
+                const closeY = padding + ((maxPrice - candle.close) / priceRange) * chartHeight;
+                const highY = padding + ((maxPrice - candle.high) / priceRange) * chartHeight;
+                const lowY = padding + ((maxPrice - candle.low) / priceRange) * chartHeight;
+                
+                const isGreen = candle.close > candle.open;
+                const color = isGreen ? CANDLESTICK_COLORS.bullish : CANDLESTICK_COLORS.bearish;
+                
+                // Draw wick
+                ctx.strokeStyle = CANDLESTICK_COLORS.wick;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(centerX, highY);
+                ctx.lineTo(centerX, lowY);
+                ctx.stroke();
+                
+                // Draw body
+                const bodyTop = Math.min(openY, closeY);
+                const bodyBottom = Math.max(openY, closeY);
+                const bodyHeight = bodyBottom - bodyTop;
+                const bodyWidth = candleWidth * 0.8;
+                
+                ctx.fillStyle = color;
+                ctx.fillRect(centerX - bodyWidth / 2, bodyTop, bodyWidth, bodyHeight || 2);
+                
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(centerX - bodyWidth / 2, bodyTop, bodyWidth, bodyHeight || 2);
+            });
+        }
+
+        function drawAreaChart(canvas, data) {
+            if (!canvas || !data.length) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const prices = data.map(candle => candle.close);
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            const priceRange = maxPrice - minPrice;
+            
+            if (priceRange === 0) return;
+            
+            const padding = 50;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight * i) / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+                
+                const price = maxPrice - (priceRange * i) / 5;
+                ctx.fillStyle = '#ccc';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText(price.toFixed(2), padding - 5, y + 4);
+            }
+            
+            // Create area
+            const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
+            gradient.addColorStop(0, 'rgba(76, 175, 80, 0.6)');
+            gradient.addColorStop(1, 'rgba(76, 175, 80, 0.1)');
+            
+            ctx.beginPath();
+            ctx.moveTo(padding, height - padding);
+            
+            data.forEach((candle, index) => {
+                const x = padding + (index / (data.length - 1)) * chartWidth;
+                const y = padding + ((maxPrice - candle.close) / priceRange) * chartHeight;
+                ctx.lineTo(x, y);
+            });
+            
+            ctx.lineTo(padding + chartWidth, height - padding);
+            ctx.closePath();
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // Draw line
+            ctx.beginPath();
+            data.forEach((candle, index) => {
+                const x = padding + (index / (data.length - 1)) * chartWidth;
+                const y = padding + ((maxPrice - candle.close) / priceRange) * chartHeight;
+                if (index === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        function drawBarChart(canvas, data) {
+            if (!canvas || !data.length) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const prices = data.flatMap(candle => [candle.high, candle.low]);
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            const priceRange = maxPrice - minPrice;
+            
+            if (priceRange === 0) return;
+            
+            const padding = 50;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            const barWidth = chartWidth / data.length;
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight * i) / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+                
+                const price = maxPrice - (priceRange * i) / 5;
+                ctx.fillStyle = '#ccc';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText(price.toFixed(2), padding - 5, y + 4);
+            }
+            
+            // Draw OHLC bars
+            data.forEach((candle, index) => {
+                const x = padding + index * barWidth + barWidth / 2;
+                const openY = padding + ((maxPrice - candle.open) / priceRange) * chartHeight;
+                const closeY = padding + ((maxPrice - candle.close) / priceRange) * chartHeight;
+                const highY = padding + ((maxPrice - candle.high) / priceRange) * chartHeight;
+                const lowY = padding + ((maxPrice - candle.low) / priceRange) * chartHeight;
+                
+                const isGreen = candle.close > candle.open;
+                const color = isGreen ? CANDLESTICK_COLORS.bullish : CANDLESTICK_COLORS.bearish;
+                
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                
+                // High-Low line
+                ctx.beginPath();
+                ctx.moveTo(x, highY);
+                ctx.lineTo(x, lowY);
+                ctx.stroke();
+                
+                // Open tick
+                ctx.beginPath();
+                ctx.moveTo(x - 8, openY);
+                ctx.lineTo(x, openY);
+                ctx.stroke();
+                
+                // Close tick
+                ctx.beginPath();
+                ctx.moveTo(x, closeY);
+                ctx.lineTo(x + 8, closeY);
+                ctx.stroke();
+            });
+        }
+
+        function drawBaselineChart(canvas, data) {
+            if (!canvas || !data.length) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const prices = data.map(candle => candle.close);
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            const basePrice = (minPrice + maxPrice) / 2;
+            const priceRange = maxPrice - minPrice;
+            
+            if (priceRange === 0) return;
+            
+            const padding = 50;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            const baselineY = padding + ((maxPrice - basePrice) / priceRange) * chartHeight;
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight * i) / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+                
+                const price = maxPrice - (priceRange * i) / 5;
+                ctx.fillStyle = '#ccc';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText(price.toFixed(2), padding - 5, y + 4);
+            }
+            
+            // Draw baseline
+            ctx.strokeStyle = '#9C27B0';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(padding, baselineY);
+            ctx.lineTo(width - padding, baselineY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Draw areas
+            const aboveGradient = ctx.createLinearGradient(0, padding, 0, baselineY);
+            aboveGradient.addColorStop(0, 'rgba(156, 39, 176, 0.4)');
+            aboveGradient.addColorStop(1, 'rgba(156, 39, 176, 0.1)');
+            
+            const belowGradient = ctx.createLinearGradient(0, baselineY, 0, height - padding);
+            belowGradient.addColorStop(0, 'rgba(244, 67, 54, 0.4)');
+            belowGradient.addColorStop(1, 'rgba(244, 67, 54, 0.1)');
+            
+            // Above baseline area
+            ctx.beginPath();
+            ctx.moveTo(padding, baselineY);
+            data.forEach((candle, index) => {
+                const x = padding + (index / (data.length - 1)) * chartWidth;
+                const y = padding + ((maxPrice - candle.close) / priceRange) * chartHeight;
+                ctx.lineTo(x, candle.close >= basePrice ? y : baselineY);
+            });
+            ctx.lineTo(padding + chartWidth, baselineY);
+            ctx.closePath();
+            ctx.fillStyle = aboveGradient;
+            ctx.fill();
+            
+            // Below baseline area
+            ctx.beginPath();
+            ctx.moveTo(padding, baselineY);
+            data.forEach((candle, index) => {
+                const x = padding + (index / (data.length - 1)) * chartWidth;
+                const y = padding + ((maxPrice - candle.close) / priceRange) * chartHeight;
+                ctx.lineTo(x, candle.close < basePrice ? y : baselineY);
+            });
+            ctx.lineTo(padding + chartWidth, baselineY);
+            ctx.closePath();
+            ctx.fillStyle = belowGradient;
+            ctx.fill();
+            
+            // Price line
+            ctx.beginPath();
+            data.forEach((candle, index) => {
+                const x = padding + (index / (data.length - 1)) * chartWidth;
+                const y = padding + ((maxPrice - candle.close) / priceRange) * chartHeight;
+                if (index === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = '#9C27B0';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        function drawHistogramChart(canvas, data) {
+            if (!canvas || !data.length) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const volumes = data.map(candle => candle.volume || 0);
+            const maxVolume = Math.max(...volumes);
+            
+            if (maxVolume === 0) return;
+            
+            const padding = 50;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            const barWidth = chartWidth / data.length;
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight * i) / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+                
+                const volume = maxVolume - (maxVolume * i) / 5;
+                ctx.fillStyle = '#ccc';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText(Math.round(volume / 1000) + 'K', padding - 5, y + 4);
+            }
+            
+            // Draw volume bars
+            data.forEach((candle, index) => {
+                const x = padding + index * barWidth;
+                const barHeight = ((candle.volume || 0) / maxVolume) * chartHeight;
+                const y = height - padding - barHeight;
+                
+                const isGreen = candle.close > candle.open;
+                const color = isGreen ? CANDLESTICK_COLORS.bullish : CANDLESTICK_COLORS.bearish;
+                
+                const gradient = ctx.createLinearGradient(0, y, 0, height - padding);
+                gradient.addColorStop(0, color);
+                gradient.addColorStop(1, color + '40');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x + 1, y, barWidth - 2, barHeight);
+                
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x + 1, y, barWidth - 2, barHeight);
+            });
+        }
+
+        function drawLineChart(canvas, data) {
+            if (!canvas || !data.length) return;
+            
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const prices = data.map(candle => candle.close);
+            const minPrice = Math.min(...prices);
+            const maxPrice = Math.max(...prices);
+            const priceRange = maxPrice - minPrice;
+            
+            if (priceRange === 0) return;
+            
+            const padding = 50;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight * i) / 5;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+                
+                const price = maxPrice - (priceRange * i) / 5;
+                ctx.fillStyle = '#ccc';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'right';
+                ctx.fillText(price.toFixed(2), padding - 5, y + 4);
+            }
+            
+            // Draw line
+            const lineGradient = ctx.createLinearGradient(padding, 0, padding + chartWidth, 0);
+            lineGradient.addColorStop(0, '#00BCD4');
+            lineGradient.addColorStop(0.5, '#2196F3');
+            lineGradient.addColorStop(1, '#9C27B0');
+            
+            ctx.beginPath();
+            data.forEach((candle, index) => {
+                const x = padding + (index / (data.length - 1)) * chartWidth;
+                const y = padding + ((maxPrice - candle.close) / priceRange) * chartHeight;
+                if (index === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            
+            ctx.strokeStyle = lineGradient;
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Draw points
+            data.forEach((candle, index) => {
+                const x = padding + (index / (data.length - 1)) * chartWidth;
+                const y = padding + ((maxPrice - candle.close) / priceRange) * chartHeight;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#00BCD4';
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            });
+        }
+
+        function selectChart(type) {
+            currentChart = type;
+            
+            // Update button states
+            document.querySelectorAll('.chart-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.chart-type-btn').classList.add('active');
+            
+            // Update info
+            const chartInfo = document.getElementById('chartInfo');
+            const config = CHART_TYPES[type];
+            chartInfo.innerHTML = `<strong>${config.icon} ${config.arabic}:</strong> ${config.description}`;
+            
+            // Render chart
+            renderChart();
+        }
+
+        function renderChart() {
+            const canvas = document.getElementById('testCanvas');
+            
+            switch (currentChart) {
+                case 'candlestick':
+                    drawCandlesticks(canvas, sampleData);
+                    break;
+                case 'area':
+                    drawAreaChart(canvas, sampleData);
+                    break;
+                case 'bar':
+                    drawBarChart(canvas, sampleData);
+                    break;
+                case 'baseline':
+                    drawBaselineChart(canvas, sampleData);
+                    break;
+                case 'histogram':
+                    drawHistogramChart(canvas, sampleData);
+                    break;
+                case 'line':
+                    drawLineChart(canvas, sampleData);
+                    break;
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            sampleData = generateSampleData();
+            renderChart();
+        };
+    </script>
+</body>
+</html>

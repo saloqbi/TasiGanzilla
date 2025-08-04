@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار فيبوناتشي</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .toolbar {
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        button.active {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: #FFD700;
+            color: #FFD700;
+        }
+        canvas {
+            border: 1px solid #333;
+            border-radius: 10px;
+            background: #0a0a0a;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 اختبار أداة فيبوناتشي</h1>
+    
+    <div class="toolbar">
+        <button id="fibBtn" onclick="toggleFibonacci()">📊 فيبوناتشي</button>
+        <button onclick="clearAll()">🗑️ مسح الكل</button>
+        <span id="status">الحالة: غير نشط</span>
+    </div>
+    
+    <canvas id="canvas" width="800" height="600"></canvas>
+    
+    <div class="info">
+        <h3>📖 التعليمات:</h3>
+        <ol>
+            <li>انقر على زر "فيبوناتشي" لتفعيل الأداة</li>
+            <li>انقر على النقطة الأولى (بداية الحركة)</li>
+            <li>انقر على النقطة الثانية (نهاية الحركة)</li>
+            <li>ستظهر مستويات فيبوناتشي كاملة</li>
+        </ol>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const fibBtn = document.getElementById('fibBtn');
+        const status = document.getElementById('status');
+        
+        let isActive = false;
+        let isDrawing = false;
+        let startPoint = null;
+        let fibonacciLevels = [];
+        
+        const FIBONACCI_RATIOS = [0, 23.6, 38.2, 50, 61.8, 78.6, 100, 123.6, 161.8, 261.8];
+        
+        function toggleFibonacci() {
+            isActive = !isActive;
+            isDrawing = false;
+            startPoint = null;
+            
+            if (isActive) {
+                fibBtn.classList.add('active');
+                status.textContent = 'الحالة: فيبوناتشي نشط - انقر النقطة الأولى';
+            } else {
+                fibBtn.classList.remove('active');
+                status.textContent = 'الحالة: غير نشط';
+            }
+        }
+        
+        function clearAll() {
+            fibonacciLevels = [];
+            redraw();
+            status.textContent = 'تم مسح جميع الأدوات';
+        }
+        
+        function drawMockChart() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // رسم شموع وهمية
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i < 50; i++) {
+                const x = 50 + i * 15;
+                const high = 100 + Math.random() * 400;
+                const low = high - 50 - Math.random() * 100;
+                const open = low + Math.random() * (high - low);
+                const close = low + Math.random() * (high - low);
+                
+                // رسم الشمعة
+                ctx.strokeStyle = close > open ? '#00FF41' : '#FF1744';
+                ctx.fillStyle = close > open ? '#00FF41' : '#FF1744';
+                
+                // الفتيل
+                ctx.beginPath();
+                ctx.moveTo(x, high);
+                ctx.lineTo(x, low);
+                ctx.stroke();
+                
+                // الجسم
+                const bodyTop = Math.min(open, close);
+                const bodyHeight = Math.abs(close - open);
+                ctx.fillRect(x - 3, bodyTop, 6, bodyHeight);
+            }
+        }
+        
+        function drawFibonacci(startPoint, endPoint) {
+            const high = Math.min(startPoint.y, endPoint.y);
+            const low = Math.max(startPoint.y, endPoint.y);
+            const range = low - high;
+            
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.globalAlpha = 0.8;
+            ctx.font = 'bold 12px Arial';
+            ctx.fillStyle = '#FFD700';
+            
+            FIBONACCI_RATIOS.forEach(ratio => {
+                const y = high + (range * ratio / 100);
+                
+                // رسم الخط
+                ctx.beginPath();
+                ctx.moveTo(Math.min(startPoint.x, endPoint.x), y);
+                ctx.lineTo(Math.max(startPoint.x, endPoint.x), y);
+                ctx.stroke();
+                
+                // رسم النص
+                const price = 100 - (y - 100) / 4; // تحويل Y إلى سعر وهمي
+                ctx.fillText(`${ratio.toFixed(1)}% - $${price.toFixed(2)}`, Math.min(startPoint.x, endPoint.x) + 5, y - 5);
+            });
+            
+            ctx.globalAlpha = 1;
+            ctx.setLineDash([]);
+        }
+        
+        function redraw() {
+            drawMockChart();
+            
+            // رسم جميع مستويات فيبوناتشي
+            fibonacciLevels.forEach(fib => {
+                drawFibonacci(fib.start, fib.end);
+            });
+        }
+        
+        canvas.addEventListener('click', function(e) {
+            if (!isActive) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (!isDrawing) {
+                // النقرة الأولى
+                startPoint = { x, y };
+                isDrawing = true;
+                status.textContent = 'انقر النقطة الثانية لإتمام فيبوناتشي';
+                
+                // رسم نقطة البداية
+                ctx.fillStyle = '#00FFFF';
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // النقرة الثانية
+                const endPoint = { x, y };
+                
+                fibonacciLevels.push({
+                    start: startPoint,
+                    end: endPoint
+                });
+                
+                redraw();
+                
+                isDrawing = false;
+                startPoint = null;
+                status.textContent = '✅ تم إنشاء مستويات فيبوناتشي! انقر النقطة الأولى للتالي';
+            }
+        });
+        
+        // رسم أولي
+        drawMockChart();
+    </script>
+</body>
+</html>

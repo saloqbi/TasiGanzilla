@@ -1,0 +1,300 @@
+﻿  // � تحليل الشمعة الواحدة بالتفصيل
+    const patterns = [];
+    
+    // نمط الابتلاع الصاعد
+    if (prev.close < prev.open && current.close > current.open && 
+        current.close > prev.open && current.open < prev.close) {
+      patterns.push({
+        name: 'bullish_engulfing',
+        arabic: 'الابتلاع الصاعد',
+        type: 'انعكاس صاعد',
+        strength: 0.85,
+        color: '#00FF41',
+        position: index,
+        reliability: 'ممتاز',
+        description: 'نمط انعكاس صاعد قوي جداً'
+      });
+    }
+    
+    // نمط الابتلاع الهابط
+    else if (prev.close > prev.open && current.close < current.open && 
+             current.close < prev.open && current.open > prev.close) {
+      patterns.push({
+        name: 'bearish_engulfing',
+        arabic: 'الابتلاع الهابط',
+        type: 'انعكاس هابط',
+        strength: 0.85,
+        color: '#FF1744',
+        position: index,
+        reliability: 'ممتاز',
+        description: 'نمط انعكاس هابط قوي جداً'
+      });
+    }
+    
+    // نمط الحرامي الصاعد
+    else if (prev.close < prev.open && current.close > current.open &&
+             current.open > prev.close && current.close < prev.open) {
+      patterns.push({
+        name: 'bullish_harami',
+        arabic: 'الحرامي الصاعد',
+        type: 'انعكاس صاعد',
+        strength: 0.67,
+        color: '#00CC33',
+        position: index,
+        reliability: 'جيد',
+        description: 'انعكاس صاعد محتمل'
+      });
+    }
+    
+    // نمط الحرامي الهابط
+    else if (prev.close > prev.open && current.close < current.open &&
+             current.open < prev.close && current.close > prev.open) {
+      patterns.push({
+        name: 'bearish_harami',
+        arabic: 'الحرامي الهابط',
+        type: 'انعكاس هابط',
+        strength: 0.66,
+        color: '#CC1439',
+        position: index,
+        reliability: 'جيد',
+        description: 'انعكاس هابط محتمل'
+      });
+    }
+    
+    // نمط الاختراق (Piercing Pattern)
+    else if (prev.close < prev.open && current.close > current.open &&
+             current.open < prev.close && current.close > (prev.open + prev.close) / 2) {
+      patterns.push({
+        name: 'piercing_pattern',
+        arabic: 'نمط الاختراق',
+        type: 'انعكاس صاعد',
+        strength: 0.73,
+        color: '#00CC33',
+        position: index,
+        reliability: 'جيد',
+        description: 'اختراق صاعد للمقاومة'
+      });
+    }
+    
+    // نمط غطاء السحابة المظلمة
+    else if (prev.close > prev.open && current.close < current.open &&
+             current.open > prev.close && current.close < (prev.open + prev.close) / 2) {
+      patterns.push({
+        name: 'dark_cloud_cover',
+        arabic: 'غطاء السحابة المظلمة',
+        type: 'انعكاس هابط',
+        strength: 0.76,
+        color: '#CC1439',
+        position: index,
+        reliability: 'جيد',
+        description: 'ضغط هابط قوي'
+      });
+    }
+    
+    // نمط الملقط العلوي
+    else if (Math.abs(prev.high - current.high) < (prev.high * 0.005)) {
+      patterns.push({
+        name: 'tweezer_top',
+        arabic: 'الملقط العلوي',
+        type: 'انعكاس هابط',
+        strength: 0.64,
+        color: '#FF4569',
+        position: index,
+        reliability: 'متوسط',
+        description: 'مقاومة قوية في الأعلى'
+      });
+    }
+    
+    // نمط الملقط السفلي
+    else if (Math.abs(prev.low - current.low) < (prev.low * 0.005)) {
+      patterns.push({
+        name: 'tweezer_bottom',
+        arabic: 'الملقط السفلي',
+        type: 'انعكاس صاعد',
+        strength: 0.63,
+        color: '#39FF14',
+        position: index,
+        reliability: 'متوسط',
+        description: 'دعم قوي في الأسفل'
+      });
+    }
+    
+    return patterns;
+  }, []);
+
+  // � تحليل الشمعة الواحدة بالتفصيل
+    const patterns = [];
+    
+    // نمط نجمة الصباح
+    if (first.close < first.open && // شمعة هابطة
+        Math.abs(second.close - second.open) < (second.high - second.low) * 0.3 && // دوجي أو شمعة صغيرة
+        third.close > third.open && // شمعة صاعدة
+        third.close > (first.open + first.close) / 2) {
+      patterns.push({
+        name: 'morning_star',
+        arabic: 'نجمة الصباح',
+        type: 'انعكاس صاعد',
+        strength: 0.82,
+        color: '#39FF14',
+        position: index,
+        reliability: 'ممتاز',
+        description: 'نمط انعكاس صاعد قوي جداً'
+      });
+    }
+    
+    // نمط نجمة المساء
+    else if (first.close > first.open && // شمعة صاعدة
+             Math.abs(second.close - second.open) < (second.high - second.low) * 0.3 && // دوجي أو شمعة صغيرة
+             third.close < third.open && // شمعة هابطة
+             third.close < (first.open + first.close) / 2) {
+      patterns.push({
+        name: 'evening_star',
+        arabic: 'نجمة المساء',
+        type: 'انعكاس هابط',
+        strength: 0.81,
+        color: '#FF4569',
+        position: index,
+        reliability: 'ممتاز',
+        description: 'نمط انعكاس هابط قوي جداً'
+      });
+    }
+    
+    // نمط الجنود البيض الثلاثة
+    else if (first.close > first.open && second.close > second.open && third.close > third.open &&
+             second.close > first.close && third.close > second.close &&
+             second.open > first.close && third.open > second.close) {
+      patterns.push({
+        name: 'three_white_soldiers',
+        arabic: 'الجنود البيض الثلاثة',
+        type: 'استمرار صاعد',
+        strength: 0.88,
+        color: '#00FF41',
+        position: index,
+        reliability: 'ممتاز',
+        description: 'استمرار الاتجاه الصاعد بقوة'
+      });
+    }
+    
+    // نمط الغربان السود الثلاثة
+    else if (first.close < first.open && second.close < second.open && third.close < third.open &&
+             second.close < first.close && third.close < second.close &&
+             second.open < first.close && third.open < second.close) {
+      patterns.push({
+        name: 'three_black_crows',
+        arabic: 'الغربان السود الثلاثة',
+        type: 'استمرار هابط',
+        strength: 0.87,
+        color: '#FF1744',
+        position: index,
+        reliability: 'ممتاز',
+        description: 'استمرار الاتجاه الهابط بقوة'
+      });
+    }
+    
+    // نمط الثلاثة الداخلية الصاعدة
+    else if (first.close < first.open && // شمعة هابطة كبيرة
+             second.close > second.open && second.open > first.close && second.close < first.open && // حرامي صاعد
+             third.close > third.open && third.close > first.open) { // تأكيد صاعد
+      patterns.push({
+        name: 'three_inside_up',
+        arabic: 'الثلاثة الداخلية الصاعدة',
+        type: 'انعكاس صاعد',
+        strength: 0.71,
+        color: '#00CC33',
+        position: index,
+        reliability: 'جيد',
+        description: 'انعكاس صاعد مع تأكيد'
+      });
+    }
+    
+    // نمط الثلاثة الداخلية الهابطة
+    else if (first.close > first.open && // شمعة صاعدة كبيرة
+             second.close < second.open && second.open < first.close && second.close > first.open && // حرامي هابط
+             third.close < third.open && third.close < first.open) { // تأكيد هابط
+      patterns.push({
+        name: 'three_inside_down',
+        arabic: 'الثلاثة الداخلية الهابطة',
+        type: 'انعكاس هابط',
+        strength: 0.69,
+        color: '#CC1439',
+        position: index,
+        reliability: 'جيد',
+        description: 'انعكاس هابط مع تأكيد'
+      });
+    }
+    
+    return patterns;
+  }, []);
+
+  // 🕯️🕯️🕯️🕯️🕯️ كشف الأنماط المعقدة (4-5 شموع)
+  const detectComplexCandlePatterns = useCallback((candles, index, fullData) => {
+    const patterns = [];
+    
+    if (candles.length >= 5) {
+      // نمط الطرق الثلاث الصاعدة
+      const [first, second, third, fourth, fifth] = candles;
+      
+      if (first.close > first.open && // شمعة صاعدة طويلة
+          second.close < second.open && third.close < third.open && fourth.close < fourth.open && // ثلاث شموع هابطة قصيرة
+          fifth.close > fifth.open && fifth.close > first.close) { // شمعة صاعدة تأكيد
+        patterns.push({
+          name: 'rising_three_methods',
+          arabic: 'الطرق الثلاث الصاعدة',
+          type: 'استمرار صاعد',
+          strength: 0.74,
+          color: '#FFD700',
+          position: index,
+          reliability: 'جيد',
+          description: 'استمرار الاتجاه الصاعد بعد تصحيح'
+        });
+      }
+      
+      // نمط الطرق الثلاث الهابطة
+      else if (first.close < first.open && // شمعة هابطة طويلة
+               second.close > second.open && third.close > third.open && fourth.close > fourth.open && // ثلاث شموع صاعدة قصيرة
+               fifth.close < fifth.open && fifth.close < first.close) { // شمعة هابطة تأكيد
+        patterns.push({
+          name: 'falling_three_methods',
+          arabic: 'الطرق الثلاث الهابطة',
+          type: 'استمرار هابط',
+          strength: 0.73,
+          color: '#FFD700',
+          position: index,
+          reliability: 'جيد',
+          description: 'استمرار الاتجاه الهابط بعد تصحيح'
+        });
+      }
+    }
+    
+    return patterns;
+  }, []);
+
+  // 🔍 تحليل الشمعة الواحدة بالتفصيل
+  const analyzeSingleCandle = useCallback((candle, prevCandle) => {
+    if (!candle) return null;
+    
+    const bodySize = Math.abs(candle.close - candle.open);
+    const upperShadow = candle.high - Math.max(candle.open, candle.close);
+    const lowerShadow = Math.min(candle.open, candle.close) - candle.low;
+    const totalRange = candle.high - candle.low;
+    const bodyPercentage = bodySize / totalRange;
+    
+    const analysis = {
+      bodySize,
+      upperShadow,
+      lowerShadow,
+      totalRange,
+      bodyPercentage,
+      candleType: candle.close > candle.open ? 'bullish' : 'bearish',
+      strength: bodyPercentage,
+      shadowAnalysis: {
+        upperShadowPercent: upperShadow / totalRange,
+        lowerShadowPercent: lowerShadow / totalRange,
+        dominantShadow: upperShadow > lowerShadow ? 'upper' : 'lower'
+      }
+    };
+    
+    // تحديد نوع الشمعة
+    if (bodyPercentage < 0.1) {
+      analysis.pattern = 'doji';
+      analysis.patternArabic = 'دوجي';

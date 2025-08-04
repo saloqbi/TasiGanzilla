@@ -1,3 +1,4 @@
+/* 🌐 إعدادات عامة محسنة للنصوص العربية */
 html, body, #root {
   min-width: 0;
   min-height: 0;
@@ -6,18 +7,45 @@ html, body, #root {
   margin: 0;
   padding: 0;
   overflow: visible !important;
-  background: #222; /* لون الخلفية أسود كما طلبت */
-  direction: ltr;   /* لجعل الـ scroll على يمين الصفحة تلقائياً في وضع RTL */
+  background: #222;
+  direction: rtl; /* تغيير إلى RTL للنصوص العربية */
   box-sizing: border-box;
+  
+  /* 🔤 تحسين عرض النصوص العربية */
+  font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  
+  /* 🌍 إعدادات اللغة والترميز */
+  unicode-bidi: embed;
 }
 
 /* اجعل كل العناصر تعتمد على الـ border-box */
 *, *::before, *::after {
   box-sizing: inherit;
+  
+  /* 🔤 تحسين عرض النصوص العربية لجميع العناصر */
+  font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* لإزالة أي هوامش افتراضية من الصفحة */
 body {
   margin: 0;
   padding: 0;
+  
+  /* 🌐 إعدادات النصوص العربية المحسنة */
+  direction: rtl;
+  unicode-bidi: embed;
+}
+
+/* 🔤 إصلاح عرض النصوص العربية في Canvas */
+canvas {
+  font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Helvetica Neue', sans-serif !important;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>اختبار الأداء - الشموع اليابانية</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #0a0a0a;
+            color: white;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .performance-metrics {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+        .test-button {
+            background: #00FF41;
+            color: black;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #00CC34;
+        }
+        #testResults {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🚀 اختبار أداء النظام المحسن</h1>
+        
+        <div class="performance-metrics">
+            <h2>📊 معلومات الأداء الحالية</h2>
+            <div class="metric">
+                <span>استجابة الزوم:</span>
+                <span id="zoomResponse">في الاختبار...</span>
+            </div>
+            <div class="metric">
+                <span>معدل الإطارات:</span>
+                <span id="frameRate">في الاختبار...</span>
+            </div>
+            <div class="metric">
+                <span>استخدام الذاكرة:</span>
+                <span id="memoryUsage">في الاختبار...</span>
+            </div>
+            <div class="metric">
+                <span>زمن الرسم:</span>
+                <span id="renderTime">في الاختبار...</span>
+            </div>
+        </div>
+
+        <div>
+            <button class="test-button" onclick="testZoomPerformance()">اختبار استجابة الزوم</button>
+            <button class="test-button" onclick="testRenderPerformance()">اختبار سرعة الرسم</button>
+            <button class="test-button" onclick="testMemoryUsage()">اختبار استخدام الذاكرة</button>
+            <button class="test-button" onclick="openMainApp()">فتح التطبيق الرئيسي</button>
+        </div>
+
+        <div id="testResults">
+            <h3>نتائج الاختبار:</h3>
+            <p>استخدم الأزرار أعلاه لبدء اختبار الأداء</p>
+        </div>
+    </div>
+
+    <script>
+        let performanceData = {
+            zoomStartTime: 0,
+            renderStartTime: 0,
+            frameCount: 0,
+            lastFrameTime: performance.now()
+        };
+
+        function updateResults(test, result, status = 'نجح') {
+            const resultsDiv = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString('ar-SA');
+            resultsDiv.innerHTML += `
+                <div style="margin: 10px 0; padding: 10px; background: ${status === 'نجح' ? '#004400' : '#440000'}; border-radius: 4px;">
+                    <strong>${test}</strong> - ${status}<br>
+                    النتيجة: ${result}<br>
+                    الوقت: ${timestamp}
+                </div>
+            `;
+        }
+
+        function testZoomPerformance() {
+            const startTime = performance.now();
+            
+            // محاكاة أحداث الزوم
+            let zoomCount = 0;
+            const zoomInterval = setInterval(() => {
+                zoomCount++;
+                
+                if (zoomCount >= 10) {
+                    clearInterval(zoomInterval);
+                    const endTime = performance.now();
+                    const totalTime = endTime - startTime;
+                    const avgResponseTime = totalTime / 10;
+                    
+                    document.getElementById('zoomResponse').textContent = `${avgResponseTime.toFixed(2)} ms`;
+                    updateResults('اختبار استجابة الزوم', `متوسط الاستجابة: ${avgResponseTime.toFixed(2)} ms للحدث الواحد`, 
+                                avgResponseTime < 10 ? 'ممتاز' : avgResponseTime < 20 ? 'جيد' : 'يحتاج تحسين');
+                }
+            }, 50);
+        }
+
+        function testRenderPerformance() {
+            const startTime = performance.now();
+            let frameCount = 0;
+            
+            function countFrames() {
+                frameCount++;
+                
+                if (frameCount < 60) {
+                    requestAnimationFrame(countFrames);
+                } else {
+                    const endTime = performance.now();
+                    const totalTime = endTime - startTime;
+                    const fps = (frameCount / totalTime) * 1000;
+                    
+                    document.getElementById('frameRate').textContent = `${fps.toFixed(1)} FPS`;
+                    updateResults('اختبار سرعة الرسم', `معدل الإطارات: ${fps.toFixed(1)} FPS`, 
+                                fps > 50 ? 'ممتاز' : fps > 30 ? 'جيد' : 'يحتاج تحسين');
+                }
+            }
+            
+            requestAnimationFrame(countFrames);
+        }
+
+        function testMemoryUsage() {
+            if (performance.memory) {
+                const memory = performance.memory;
+                const usedMB = (memory.usedJSHeapSize / 1048576).toFixed(2);
+                const totalMB = (memory.totalJSHeapSize / 1048576).toFixed(2);
+                const limitMB = (memory.jsHeapSizeLimit / 1048576).toFixed(2);
+                
+                document.getElementById('memoryUsage').textContent = `${usedMB} / ${totalMB} MB`;
+                updateResults('اختبار استخدام الذاكرة', 
+                            `المستخدم: ${usedMB} MB، المجموع: ${totalMB} MB، الحد الأقصى: ${limitMB} MB`,
+                            usedMB < 100 ? 'ممتاز' : usedMB < 200 ? 'جيد' : 'يحتاج تحسين');
+            } else {
+                updateResults('اختبار استخدام الذاكرة', 'غير مدعوم في هذا المتصفح', 'تحذير');
+            }
+        }
+
+        function openMainApp() {
+            window.open('http://localhost:3003', '_blank');
+        }
+
+        // اختبار تلقائي عند التحميل
+        window.addEventListener('load', () => {
+            setTimeout(testZoomPerformance, 1000);
+            setTimeout(testRenderPerformance, 2000);
+            setTimeout(testMemoryUsage, 3000);
+        });
+
+        // مراقبة الأداء المستمر
+        function monitorPerformance() {
+            const now = performance.now();
+            const deltaTime = now - performanceData.lastFrameTime;
+            performanceData.lastFrameTime = now;
+            
+            if (deltaTime > 0) {
+                const currentFPS = 1000 / deltaTime;
+                // تحديث العرض كل ثانية
+                if (Math.floor(now / 1000) > Math.floor((now - deltaTime) / 1000)) {
+                    document.getElementById('frameRate').textContent = `${currentFPS.toFixed(1)} FPS (مباشر)`;
+                }
+            }
+            
+            requestAnimationFrame(monitorPerformance);
+        }
+        
+        // بدء مراقبة الأداء
+        monitorPerformance();
+    </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار مكون الشموع اليابانية</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            direction: rtl;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .title {
+            font-size: 24px;
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .success {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .error {
+            background: #f44336;
+            color: white;
+        }
+        
+        .info {
+            background: #2196F3;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="title">🧪 اختبار مكون الشموع اليابانية</div>
+        
+        <div id="test-results">
+            <div class="status info">⏳ جار تحميل المكون...</div>
+        </div>
+        
+        <div id="component-container" style="margin-top: 20px;">
+            <!-- سيتم تحميل المكون هنا -->
+        </div>
+    </div>
+
+    <script type="module">
+        const testResults = document.getElementById('test-results');
+        const componentContainer = document.getElementById('component-container');
+        
+        async function testComponent() {
+            try {
+                testResults.innerHTML = '<div class="status info">🔄 محاولة تحميل المكون من الخادم...</div>';
+                
+                // محاولة تحميل المكون من الخادم
+                const response = await fetch('/src/components/GannTools/JapaneseCandlestickAnalysis.jsx');
+                
+                if (response.ok) {
+                    const componentCode = await response.text();
+                    
+                    testResults.innerHTML = `
+                        <div class="status success">✅ تم تحميل المكون بنجاح!</div>
+                        <div class="status info">📄 حجم الملف: ${componentCode.length} حرف</div>
+                        <div class="status info">📊 الملف يحتوي على: ${componentCode.split('\\n').length} سطر</div>
+                    `;
+                    
+                    // عرض معاينة من الكود
+                    const preview = componentCode.substring(0, 500) + '...';
+                    componentContainer.innerHTML = `
+                        <div style="background: #1a1a1a; padding: 15px; border-radius: 8px; text-align: left; direction: ltr;">
+                            <h3 style="color: #4CAF50;">معاينة من كود المكون:</h3>
+                            <pre style="color: #ccc; font-size: 12px; white-space: pre-wrap;">${preview}</pre>
+                        </div>
+                    `;
+                    
+                } else {
+                    throw new Error(`خطأ HTTP: ${response.status} - ${response.statusText}`);
+                }
+                
+            } catch (error) {
+                testResults.innerHTML = `
+                    <div class="status error">❌ فشل تحميل المكون</div>
+                    <div class="status error">🔍 تفاصيل الخطأ: ${error.message}</div>
+                    <div class="status info">💡 تأكد من تشغيل خادم التطوير بالأمر: npm start</div>
+                `;
+                
+                console.error('خطأ في تحميل المكون:', error);
+            }
+        }
+        
+        // تشغيل الاختبار
+        testComponent();
+        
+        // إعادة الاختبار كل 5 ثوانٍ
+        setInterval(testComponent, 5000);
+    </script>
+</body>
+</html>
