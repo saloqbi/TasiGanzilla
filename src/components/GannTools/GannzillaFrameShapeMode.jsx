@@ -14,7 +14,6 @@ export default function GannzillaFrameShapeMode() {
     };
 
     let currentTool = null;
-    let renderTimer = null;
 
     const notify = (message) => {
       let box = document.querySelector('[data-gannzilla-toast="true"]');
@@ -55,8 +54,10 @@ export default function GannzillaFrameShapeMode() {
     };
 
     const getDivisionsValue = () => {
+      const override = Number(localStorage.getItem('tasi-gannzilla-divisions-override-v1'));
+      if ([12, 24, 36, 60, 90, 360].includes(override)) return override;
       const select = Array.from(document.querySelectorAll('aside select')).find((s) =>
-        Array.from(s.options || []).some((o) => (o.textContent || '').includes('Circle of 36'))
+        Array.from(s.options || []).some((o) => (o.textContent || '').includes('Circle of 36') || (o.textContent || '').includes('Circle of 60') || (o.textContent || '').includes('Circle of 360'))
       );
       const n = Number(select?.value);
       return Number.isFinite(n) && n > 0 ? n : 36;
@@ -84,17 +85,17 @@ export default function GannzillaFrameShapeMode() {
 
     const polygonPoints = (cx, cy, r, sides, rotationDeg) => Array.from({ length: sides }, (_, i) => {
       const rad = ((rotationDeg + (360 / sides) * i) * Math.PI) / 180;
-      return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad), deg: rotationDeg + (360 / sides) * i };
+      return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
     });
 
     const interpolate = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
 
     const pointOnPolygon = (cx, cy, r, sides, rotationDeg, sectorIndex, sectors) => {
-      const sidesPoints = polygonPoints(cx, cy, r, sides, rotationDeg);
+      const pts = polygonPoints(cx, cy, r, sides, rotationDeg);
       const u = (sectorIndex / sectors) * sides;
       const side = Math.floor(u) % sides;
       const t = u - Math.floor(u);
-      return interpolate(sidesPoints[side], sidesPoints[(side + 1) % sides], t);
+      return interpolate(pts[side], pts[(side + 1) % sides], t);
     };
 
     const polygonPath = (cx, cy, r, sides, rotationDeg) => {
@@ -167,7 +168,6 @@ export default function GannzillaFrameShapeMode() {
       layer.width = Math.ceil(w * dpr);
       layer.height = Math.ceil(h * dpr);
 
-      // نخفي العجلة الدائرية فقط بصريًا عند اختيار شكل، حتى يكون التغيير للشكل نفسه.
       canvas.style.opacity = '0.001';
 
       const ctx = layer.getContext('2d');
@@ -195,7 +195,6 @@ export default function GannzillaFrameShapeMode() {
       ctx.textBaseline = 'middle';
       ctx.font = `800 ${Math.max(10, Math.min(16, step * 0.34))}px Segoe UI, Arial, sans-serif`;
 
-      // حلقات الشكل الحقيقي.
       for (let ring = 0; ring <= levels; ring += 1) {
         const r = innerR + ring * step;
         ctx.beginPath();
@@ -210,7 +209,6 @@ export default function GannzillaFrameShapeMode() {
         ctx.stroke();
       }
 
-      // خطوط القطاعات داخل نفس إطار الشكل.
       ctx.strokeStyle = '#ededed';
       ctx.lineWidth = 0.8;
       for (let i = 0; i < divisions; i += 1) {
@@ -222,7 +220,6 @@ export default function GannzillaFrameShapeMode() {
         ctx.stroke();
       }
 
-      // الأرقام داخل خلايا نفس الشكل، وليس overlay فوق العجلة.
       ctx.fillStyle = '#111';
       for (let ring = 1; ring <= levels; ring += 1) {
         const r = innerR + (ring - 0.5) * step;
@@ -234,7 +231,6 @@ export default function GannzillaFrameShapeMode() {
         }
       }
 
-      // مركز الشكل.
       ctx.beginPath();
       const centerPts = polygonPoints(cx, cy, Math.max(9, innerR * 0.34), sides, rotation);
       centerPts.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
@@ -299,7 +295,8 @@ export default function GannzillaFrameShapeMode() {
     document.addEventListener('contextmenu', handleContext, true);
     window.addEventListener('resize', align);
     window.addEventListener('scroll', align, true);
-    const timer = window.setInterval(align, 500);
+    window.addEventListener('gannzilla:division-change', align);
+    const timer = window.setInterval(align, 350);
     align();
 
     return () => {
@@ -308,6 +305,7 @@ export default function GannzillaFrameShapeMode() {
       document.removeEventListener('contextmenu', handleContext, true);
       window.removeEventListener('resize', align);
       window.removeEventListener('scroll', align, true);
+      window.removeEventListener('gannzilla:division-change', align);
       const found = getWheelCanvas();
       if (found?.canvas) found.canvas.style.opacity = '1';
       clearShapeLayers();
