@@ -15,13 +15,96 @@ function GannzillaProCleanToolbarPatch() {
 
     const setImportant = (el, prop, value) => el.style.setProperty(prop, value, 'important');
 
+    const notify = (message) => {
+      let box = document.querySelector('[data-gannzilla-toast="true"]');
+      if (!box) {
+        box = document.createElement('div');
+        box.dataset.gannzillaToast = 'true';
+        document.body.appendChild(box);
+      }
+      Object.assign(box.style, {
+        position: 'fixed',
+        right: '18px',
+        bottom: '18px',
+        zIndex: '9999',
+        background: '#222',
+        color: '#fff',
+        border: '1px solid #999',
+        borderRadius: '8px',
+        padding: '10px 14px',
+        fontSize: '14px',
+        fontWeight: '800',
+        boxShadow: '0 8px 24px rgba(0,0,0,.25)',
+        direction: 'rtl'
+      });
+      box.textContent = message;
+      window.clearTimeout(box._hideTimer);
+      box._hideTimer = window.setTimeout(() => { box.remove(); }, 1800);
+    };
+
+    const dispatchNativeChange = (el) => {
+      if (!el) return;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    const getPanel = () => document.querySelector('aside');
+
+    const getViewSelect = () => Array.from(document.querySelectorAll('aside select')).find((select) =>
+      Array.from(select.options || []).some((option) => (option.textContent || '').includes('Circle of 36'))
+    );
+
+    const setCircle = (value) => {
+      const select = getViewSelect();
+      if (!select) return notify('لم يتم العثور على خيار Circle');
+      const text = `Circle of ${value}`;
+      if (!Array.from(select.options).some((option) => option.value === String(value))) {
+        const option = document.createElement('option');
+        option.value = String(value);
+        option.textContent = text;
+        select.appendChild(option);
+      }
+      select.value = String(value);
+      dispatchNativeChange(select);
+      notify(`تم اختيار ${text}`);
+    };
+
+    const setSize = (value) => {
+      const numberInputs = Array.from(document.querySelectorAll('aside input[type="number"]'));
+      const sizeInput = numberInputs[0];
+      if (!sizeInput) return notify('لم يتم العثور على Size');
+      sizeInput.value = String(value);
+      dispatchNativeChange(sizeInput);
+      notify(`تم ضبط Size = ${value}`);
+    };
+
+    const toggleFirstClockwise = () => {
+      const rows = Array.from(document.querySelectorAll('aside div'));
+      const row = rows.find((el) => (el.textContent || '').trim().startsWith('Clockwise') && el.querySelector('input[type="checkbox"]'));
+      const input = row?.querySelector('input[type="checkbox"]');
+      if (!input) return notify('لم يتم العثور على Clockwise');
+      input.click();
+      notify(input.checked ? 'الاتجاه: مع عقارب الساعة' : 'الاتجاه: عكس عقارب الساعة');
+    };
+
+    const captureWheelSettings = () => {
+      const inputs = Array.from(document.querySelectorAll('aside input, aside select'));
+      const values = inputs.map((input) => ({
+        tag: input.tagName,
+        type: input.type || '',
+        value: input.type === 'checkbox' ? input.checked : input.value
+      }));
+      localStorage.setItem('tasi-gannzilla-wheel-settings-v1', JSON.stringify({ values, savedAt: new Date().toISOString() }));
+      notify('تم حفظ إعدادات العجلة');
+    };
+
     const makeProjectButton = ({ text, title, color, bg = '#f7f7f7', width = '38px', onClick }) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = text;
       button.title = title;
       button.dataset.gannzillaProjectControl = 'true';
-      button.onclick = onClick || (() => {});
+      button.onclick = onClick || (() => notify('الأداة جاهزة بصريًا'));
       setImportant(button, 'width', width);
       setImportant(button, 'height', '34px');
       setImportant(button, 'min-width', width);
@@ -42,14 +125,84 @@ function GannzillaProCleanToolbarPatch() {
       return button;
     };
 
-    const captureWheelSettings = () => {
-      const inputs = Array.from(document.querySelectorAll('aside input, aside select'));
-      const values = inputs.map((input) => ({
-        tag: input.tagName,
-        type: input.type || '',
-        value: input.type === 'checkbox' ? input.checked : input.value
-      }));
-      localStorage.setItem('tasi-gannzilla-wheel-settings-v1', JSON.stringify({ values, savedAt: new Date().toISOString() }));
+    const makeShortcutButton = ({ label, title, action, round = true, muted = false }) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      button.title = title;
+      button.dataset.gannzillaShortcutButton = 'true';
+      button.onclick = () => {
+        Array.from(document.querySelectorAll('[data-gannzilla-shortcut-button="true"]')).forEach((b) => {
+          b.style.background = '#fbfbfb';
+          b.style.borderColor = '#cfcfcf';
+          b.style.color = b.dataset.muted === 'true' ? '#9a9a9a' : '#555';
+        });
+        button.style.background = '#f1f7ff';
+        button.style.borderColor = '#4d7fbd';
+        button.style.color = '#1f4f91';
+        action?.();
+      };
+      button.dataset.muted = muted ? 'true' : 'false';
+      Object.assign(button.style, {
+        width: '42px',
+        height: '42px',
+        minWidth: '42px',
+        minHeight: '42px',
+        border: '2px solid #cfcfcf',
+        borderRadius: round ? '50%' : '5px',
+        background: '#fbfbfb',
+        color: muted ? '#9a9a9a' : '#555',
+        fontSize: '18px',
+        fontWeight: '900',
+        lineHeight: '36px',
+        textAlign: 'center',
+        cursor: 'pointer',
+        boxShadow: '0 1px 2px rgba(0,0,0,.08)'
+      });
+      return button;
+    };
+
+    const ensureShortcutBar = () => {
+      let bar = document.querySelector('[data-gannzilla-shortcut-bar="true"]');
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.dataset.gannzillaShortcutBar = 'true';
+        Object.assign(bar.style, {
+          position: 'fixed',
+          top: '150px',
+          zIndex: '44',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          padding: '9px 7px',
+          background: 'rgba(255,255,255,.78)',
+          border: '1px solid #e1e1e1',
+          borderRadius: '20px',
+          boxShadow: '0 2px 8px rgba(0,0,0,.12)',
+          direction: 'ltr'
+        });
+
+        [
+          { label: '12', title: 'Circle of 12', action: () => setCircle(12), muted: true },
+          { label: '24', title: 'Circle of 24', action: () => setCircle(24), muted: true },
+          { label: '36', title: 'Circle of 36', action: () => setCircle(36) },
+          { label: '↙\n4', title: 'Size 4', action: () => setSize(4), round: false, muted: true },
+          { label: '↖\n9', title: 'Size 9', action: () => setSize(9), round: false, muted: true },
+          { label: 'N', title: 'Toggle clockwise/counter', action: toggleFirstClockwise, round: false, muted: true },
+          { label: '◆', title: 'Diamond marker', action: () => notify('تم اختيار شكل Diamond') },
+          { label: '⬟', title: 'Pentagon marker', action: () => notify('تم اختيار شكل Pentagon') },
+          { label: '⬢', title: 'Hexagon marker', action: () => notify('تم اختيار شكل Hexagon') },
+          { label: '⬣', title: 'Heptagon marker', action: () => notify('تم اختيار شكل Heptagon') },
+          { label: '✺', title: 'Star marker', action: () => notify('تم اختيار شكل Star') }
+        ].forEach((item) => bar.appendChild(makeShortcutButton(item)));
+
+        document.body.appendChild(bar);
+      }
+
+      const panel = getPanel();
+      const panelRect = panel?.getBoundingClientRect();
+      const panelRight = panelRect && panelRect.width > 40 ? panelRect.right : 0;
+      bar.style.left = `${Math.max(14, panelRight + 10)}px`;
     };
 
     const clean = () => {
@@ -66,7 +219,6 @@ function GannzillaProCleanToolbarPatch() {
         if (extraLabels.has(label)) button.remove();
       });
 
-      // ضبط شريط الأدوات العام.
       setImportant(toolbar, 'height', '42px');
       setImportant(toolbar, 'min-height', '42px');
       setImportant(toolbar, 'font-size', '15px');
@@ -84,17 +236,11 @@ function GannzillaProCleanToolbarPatch() {
           defaultSpan.style.marginRight = '4px';
         }
 
-        const menuButton = makeProjectButton({ text: '▾', title: 'Select project item', width: '28px' });
-        const addButton = makeProjectButton({ text: '＋ Add', title: 'Add new wheel/layer', color: '#089b2c', width: '72px' });
-        const deleteButton = makeProjectButton({ text: '−', title: 'Delete selected item', color: '#c42020', width: '34px' });
-        const editButton = makeProjectButton({ text: '✎', title: 'Edit selected item', color: '#d48b00', width: '34px' });
-        const saveButton = makeProjectButton({ text: '▣', title: 'Save current wheel settings', color: '#333', width: '34px', onClick: captureWheelSettings });
-
-        leftGroup.appendChild(menuButton);
-        leftGroup.appendChild(addButton);
-        leftGroup.appendChild(deleteButton);
-        leftGroup.appendChild(editButton);
-        leftGroup.appendChild(saveButton);
+        leftGroup.appendChild(makeProjectButton({ text: '▾', title: 'Select project item', width: '28px' }));
+        leftGroup.appendChild(makeProjectButton({ text: '＋ Add', title: 'Add new wheel/layer', color: '#089b2c', width: '72px', onClick: () => notify('Add جاهز لإضافة عجلة/طبقة جديدة') }));
+        leftGroup.appendChild(makeProjectButton({ text: '−', title: 'Delete selected item', color: '#c42020', width: '34px', onClick: () => notify('Delete جاهز لحذف العنصر المحدد') }));
+        leftGroup.appendChild(makeProjectButton({ text: '✎', title: 'Edit selected item', color: '#d48b00', width: '34px', onClick: () => notify('Edit جاهز لتعديل العنصر المحدد') }));
+        leftGroup.appendChild(makeProjectButton({ text: '▣', title: 'Save current wheel settings', color: '#333', width: '34px', onClick: captureWheelSettings }));
       }
 
       Array.from(toolbar.querySelectorAll('button')).forEach((button) => {
@@ -128,6 +274,8 @@ function GannzillaProCleanToolbarPatch() {
         zoomText.style.fontWeight = '900';
         zoomText.style.textAlign = 'center';
       }
+
+      ensureShortcutBar();
     };
 
     const timer = window.setInterval(clean, 250);
