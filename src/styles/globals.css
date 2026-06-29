@@ -51,68 +51,110 @@ canvas {
 }
 
 /* =========================================================
-   GANNZILLA_PRO_TOOLBAR_VISUAL_SCALE_V2
-   تكبير أقوى لشريط أدوات Gannzilla Pro + أزرار 50% و 200%.
+   GANNZILLA_PRO_UI_REFERENCE_SCALE_V4
+   ضبط الشريط ولوحة التحكم لتطابق ترتيب وحجم Gannzilla المرجعي.
    ========================================================= */
 
-/* الشريط العلوي الرئيسي */
-div[style*="position: fixed"][style*="height: 24px"][style*="border-bottom"] {
-  height: 48px !important;
-  min-height: 48px !important;
-  font-size: 16px !important;
-  line-height: 1.25 !important;
+/* الشريط العلوي مثل المرجع: واضح، غير مزدحم، وبدون تضخيم زائد */
+div[style*="position: fixed"][style*="border-bottom"] {
+  height: 32px !important;
+  min-height: 32px !important;
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
 }
 
-/* تحريك لوحة التحكم للأسفل بعد تكبير الشريط */
-aside[style*="top: 24px"][style*="width: 330px"] {
-  top: 48px !important;
-  height: calc(100vh - 48px) !important;
+/* لوحة التحكم اليسار أكبر قليلًا ومريحة مثل المرجع */
+aside[style*="width: 330px"] {
+  width: 360px !important;
+  top: 32px !important;
+  height: calc(100vh - 32px) !important;
+  font-size: 13px !important;
 }
 
-/* تحريك مساحة العجلة للأسفل بعد تكبير الشريط */
-div[style*="inset: 24px"] {
-  inset: 48px 0 0 0 !important;
+/* مساحة العجلة بعد الشريط */
+div[style*="inset: 24px"],
+div[style*="inset: 36px"],
+div[style*="inset: 48px"] {
+  inset: 32px 0 0 0 !important;
 }
 
-/* زر Hide/Show أسفل الشريط */
+/* تحريك زر Hide بعد ضبط اللوحة */
 button[style*="position: fixed"][style*="top: 30px"] {
-  top: 58px !important;
+  top: 38px !important;
+  left: 366px !important;
+  height: 28px !important;
+  font-size: 13px !important;
+  padding: 3px 10px !important;
 }
 
-/* أيقونات شريط الأدوات مثل المؤشر والخط والتكبير */
+/* أيقونات الشريط العلوي */
 button[style*="width: 22px"][style*="height: 21px"] {
-  width: 42px !important;
-  height: 40px !important;
-  min-width: 42px !important;
-  min-height: 40px !important;
-  font-size: 24px !important;
-  line-height: 36px !important;
-  margin-right: 4px !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  font-size: 17px !important;
+  line-height: 24px !important;
+  margin-right: 2px !important;
   padding: 0 !important;
 }
 
-/* أزرار Add / 50% / 90% / 125% / 200% / Pro Small / Clockwise */
+/* أزرار Add الصغيرة فقط في يسار الشريط */
 button[style*="height: 19px"],
-button[style*="height: 22px"],
-button[title="50% zoom"],
-button[title="200% zoom"] {
-  height: 38px !important;
-  min-height: 38px !important;
-  font-size: 16px !important;
-  line-height: 30px !important;
-  padding: 4px 12px !important;
+button[style*="height: 22px"] {
+  height: 25px !important;
+  min-height: 25px !important;
+  font-size: 12px !important;
+  line-height: 18px !important;
+  padding: 2px 7px !important;
+}
+
+/* نسبة الزوم في الشريط */
+span[style*="min-width: 40px"] {
+  min-width: 46px !important;
+  font-size: 13px !important;
   font-weight: 800 !important;
 }
 
-/* رقم الزوم داخل الشريط */
-span[style*="min-width: 40px"] {
-  min-width: 64px !important;
-  font-size: 17px !important;
-  font-weight: 900 !important;
+/* الجهة اليسرى من الشريط بنفس عرض اللوحة */
+div[style*="width: 330px"][style*="border-right"] {
+  width: 360px !important;
+  height: 32px !important;
+  font-size: 12px !important;
 }
 
-/* توسيع الجهة اليسرى من الشريط لتظهر مثل Gannzilla */
-div[style*="width: 330px"][style*="border-right"] {
-  height: 48px !important;
-  font-size: 15px !important;
+/* صفوف لوحة التحكم */
+div[style*="grid-template-columns: 148px 1fr 18px"] {
+  grid-template-columns: 160px 1fr 20px !important;
+  min-height: 26px !important;
+  font-size: 13px !important;
+}
+
+/* عناوين أقسام اللوحة */
+div[style*="background: rgb(236, 236, 221)"],
+div[style*="background: #ececdd"] {
+  min-height: 25px !important;
+  font-size: 13px !important;
+  padding: 3px 5px !important;
+}
+
+/* حقول الإدخال داخل اللوحة */
+input[style],
+select[style] {
+  height: 23px !important;
+  min-height: 23px !important;
+  font-size: 13px !important;
+}
+
+/* شريط الأشكال يمين الشاشة */
+div[style*="border-radius: 18px"][style*="flex-direction: column"] {
+  top: 150px !important;
+  right: 14px !important;
+}
+
+div[style*="border-radius: 18px"][style*="flex-direction: column"] button {
+  width: 30px !important;
+  height: 30px !important;
+  font-size: 18px !important;
 }
