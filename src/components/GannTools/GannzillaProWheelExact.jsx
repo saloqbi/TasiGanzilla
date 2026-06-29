@@ -61,12 +61,24 @@ function fontSizeForCell(midR, ringWidth, divisions, textLength, compactMode) {
   return clamp(Math.min(byArc, byRadial), compactMode ? 9 : 12, compactMode ? 18 : 28);
 }
 
+const buttonStyle = {
+  border: '1px solid #9b9b9b',
+  background: '#f7f7f7',
+  color: '#222',
+  borderRadius: 2,
+  padding: '2px 7px',
+  fontSize: 12,
+  cursor: 'pointer',
+  height: 22,
+  lineHeight: '16px'
+};
+
 const panelStyle = {
   position: 'fixed',
-  top: 0,
+  top: 24,
   left: 0,
   width: 330,
-  height: '100vh',
+  height: 'calc(100vh - 24px)',
   overflow: 'auto',
   background: '#f2f2f2',
   borderRight: '1px solid #b8b8b8',
@@ -79,57 +91,148 @@ const panelStyle = {
 
 const rowStyle = {
   display: 'grid',
-  gridTemplateColumns: '140px 1fr',
+  gridTemplateColumns: '148px 1fr 18px',
   alignItems: 'center',
-  minHeight: 22,
-  borderBottom: '1px solid #d7d7d7'
+  minHeight: 23,
+  borderBottom: '1px solid #d6d6d6',
+  background: '#f3f3f3'
 };
 
-const labelStyle = { padding: '2px 6px', color: '#333', fontWeight: 600 };
+const labelStyle = { padding: '2px 6px', color: '#333', fontWeight: 500 };
 const fieldStyle = { width: '100%', height: 20, border: '1px solid #aaa', background: '#fff', color: '#111', fontSize: 12 };
-const buttonStyle = { border: '1px solid #aaa', background: '#f7f7f7', color: '#222', borderRadius: 3, padding: '2px 7px', fontSize: 12, cursor: 'pointer' };
 
-function Section({ title, children }) {
+const toolbarIconStyle = {
+  width: 22,
+  height: 21,
+  border: '1px solid #b8b8b8',
+  borderRadius: 2,
+  background: '#f7f7f7',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: '#1c75bc',
+  fontSize: 13,
+  fontWeight: 700,
+  marginRight: 2,
+  cursor: 'pointer'
+};
+
+function SelectArrow() {
+  return <span style={{ color: '#555', textAlign: 'center' }}>▾</span>;
+}
+
+function Section({ title, children, defaultOpen = true, muted = false, icon = '▾' }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <div style={{ borderBottom: '1px solid #c9c9c9' }}>
-      <div style={{ background: '#e7e7dd', color: '#1d1d1d', fontWeight: 800, padding: '3px 6px', borderTop: '1px solid #ccc' }}>
-        ▾ {title}
+    <div style={{ borderBottom: '1px solid #c8c8c8' }}>
+      <div
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          background: muted ? '#eeeeee' : '#ececdd',
+          color: muted ? '#777' : '#1d1d1d',
+          fontWeight: 800,
+          padding: '2px 4px',
+          borderTop: '1px solid #d3d3c7',
+          cursor: 'pointer',
+          userSelect: 'none'
+        }}
+      >
+        <span style={{ color: '#0096a6', width: 10 }}>{open ? '−' : '+'}</span>
+        <span style={{ flex: 1 }}>{title}</span>
+        <span style={{ opacity: 0.55 }}>{icon}</span>
       </div>
-      {children}
+      {open && children}
     </div>
   );
 }
 
-function Field({ label, children }) {
+function Field({ label, children, disabled = false, glyph = '' }) {
   return (
-    <div style={rowStyle}>
+    <div style={{ ...rowStyle, opacity: disabled ? 0.48 : 1 }}>
       <div style={labelStyle}>{label}</div>
-      <div style={{ padding: '1px 6px' }}>{children}</div>
+      <div style={{ padding: '1px 5px' }}>{children}</div>
+      <div style={{ color: '#777', textAlign: 'center', fontSize: 12 }}>{glyph}</div>
+    </div>
+  );
+}
+
+function CheckField({ label, checked, onChange, disabled = false, glyph = '' }) {
+  return (
+    <Field label={label} disabled={disabled} glyph={glyph}>
+      <input type="checkbox" checked={checked} disabled={disabled} onChange={(e) => onChange?.(e.target.checked)} />
+    </Field>
+  );
+}
+
+function TopToolbar({ zoom, setZoom, fitToScreen, proSmallView, clockwise, setClockwise, tool, setTool }) {
+  const icons = [
+    ['cursor', '↖'], ['line', '—'], ['square', '▢'], ['text', 'T'], ['lock', '🔒'], ['zoom', '⌕'], ['fit', '⛶']
+  ];
+  return (
+    <div style={{ position: 'fixed', left: 0, top: 0, right: 0, height: 24, background: '#efefef', borderBottom: '1px solid #bdbdbd', zIndex: 50, display: 'flex', alignItems: 'center', direction: 'ltr', fontFamily: 'Segoe UI, Arial, sans-serif', fontSize: 12, color: '#222' }}>
+      <div style={{ width: 330, display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 5, borderRight: '1px solid #c9c9c9', height: '100%' }}>
+        <span style={{ fontWeight: 700 }}>Gannzilla Pro</span>
+        <span style={{ marginLeft: 'auto', color: '#333' }}>Default</span>
+        <button style={{ ...buttonStyle, height: 19, padding: '0 4px', color: '#13a332', fontWeight: 800 }}>＋ Add</button>
+        <button style={{ ...buttonStyle, height: 19, padding: '0 5px', color: '#c82020', fontWeight: 800 }}>−</button>
+        <button style={{ ...buttonStyle, height: 19, padding: '0 5px' }}>✎</button>
+        <button style={{ ...buttonStyle, height: 19, padding: '0 5px' }}>▣</button>
+      </div>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 8 }}>
+        {icons.map(([key, label]) => (
+          <button key={key} onClick={() => key === 'fit' ? fitToScreen() : setTool(key)} style={{ ...toolbarIconStyle, background: tool === key ? '#dceeff' : '#f7f7f7' }}>{label}</button>
+        ))}
+        <button onClick={() => setZoom((z) => clamp(z - 0.05, 0.06, 2))} style={toolbarIconStyle}>−</button>
+        <span style={{ minWidth: 38, textAlign: 'center', fontWeight: 700 }}>{Math.round(zoom * 100)}%</span>
+        <button onClick={() => setZoom((z) => clamp(z + 0.05, 0.06, 2))} style={toolbarIconStyle}>＋</button>
+        <button onClick={proSmallView} style={{ ...buttonStyle, marginLeft: 5 }}>Pro Small</button>
+        <button onClick={() => setClockwise((v) => !v)} style={{ ...buttonStyle, marginLeft: 5 }}>{clockwise ? 'Clockwise' : 'Counter'}</button>
+        <span style={{ marginLeft: 8 }}>🇬🇧 English</span>
+        <span style={{ marginLeft: 8, color: '#235ba8', fontWeight: 800 }}>ⓘ</span>
+      </div>
+    </div>
+  );
+}
+
+function SideShapeBar() {
+  const shapes = ['◁', '□', '⬠', '⬡', '⬟', '◯', '△', '◢', '◎'];
+  return (
+    <div style={{ position: 'fixed', right: 18, top: 168, zIndex: 12, background: 'rgba(255,255,255,0.78)', border: '1px solid #e2e2e2', borderRadius: 18, padding: 7, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {shapes.map((s, i) => <button key={i} style={{ width: 28, height: 28, border: '1px solid #d2d2d2', borderRadius: i === shapes.length - 1 ? '50%' : 3, background: '#fafafa', color: '#9aa', fontSize: 18 }}>{s}</button>)}
     </div>
   );
 }
 
 export default function GannzillaProWheelExact() {
   const params = getSearchParams();
-  const initialCompactMode = params.get('compact') === 'true' || params.get('view') === 'compact' || params.get('proSmall') === 'true';
+  const initialProUi = params.get('proUI') === 'true' || params.get('ui') === 'pro';
+  const initialCompactMode = initialProUi || params.get('compact') === 'true' || params.get('view') === 'compact' || params.get('proSmall') === 'true';
   const canvasRef = useRef(null);
   const viewportRef = useRef(null);
 
   const [compactMode, setCompactMode] = useState(initialCompactMode);
-  const [visiblePanel, setVisiblePanel] = useState(!initialCompactMode);
+  const [visiblePanel, setVisiblePanel] = useState(initialProUi ? true : !initialCompactMode);
   const [levels, setLevels] = useState(5);
   const [divisions, setDivisions] = useState(36);
   const [startValue, setStartValue] = useState(1);
+  const [findValue, setFindValue] = useState(1);
   const [increment, setIncrement] = useState(1);
   const [clockwise, setClockwise] = useState(true);
+  const [layoutVisible, setLayoutVisible] = useState(true);
   const [showMarks, setShowMarks] = useState(true);
   const [showNumbers, setShowNumbers] = useState(true);
   const [showProtractor, setShowProtractor] = useState(true);
   const [showChronometer, setShowChronometer] = useState(true);
-  const [highlightVisible, setHighlightVisible] = useState(true);
+  const [showCosmogram, setShowCosmogram] = useState(false);
+  const [highlightVisible, setHighlightVisible] = useState(false);
+  const [highlightFill, setHighlightFill] = useState('Levels');
   const [zoom, setZoom] = useState(initialCompactMode ? 0.48 : 0.9);
   const [angle, setAngle] = useState(90);
   const [chronoAngle, setChronoAngle] = useState(30);
+  const [tool, setTool] = useState('cursor');
 
   const geometry = useMemo(() => {
     const innerRadius = compactMode ? 92 : 170;
@@ -159,6 +262,8 @@ export default function GannzillaProWheelExact() {
     ctx.clearRect(0, 0, geometry.size, geometry.size);
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, geometry.size, geometry.size);
+
+    if (!layoutVisible) return;
 
     const cx = geometry.size / 2;
     const cy = geometry.size / 2;
@@ -205,13 +310,13 @@ export default function GannzillaProWheelExact() {
       }
     }
 
-    if (highlightVisible && !compactMode) {
-      const hiIndex = Math.max(0, Math.min(divisions - 1, startValue % divisions));
+    if (highlightVisible) {
+      const hiIndex = Math.max(0, Math.min(divisions - 1, Number(findValue) % divisions));
       const inner = geometry.innerRadius;
       const outer = inner + geometry.ringWidth;
       ctx.save();
       wedge(ctx, cx, cy, inner, outer, direction * hiIndex * sector, direction * (hiIndex + 1) * sector);
-      ctx.fillStyle = 'rgba(239, 74, 74, 0.42)';
+      ctx.fillStyle = highlightFill === 'Levels' ? 'rgba(239, 74, 74, 0.35)' : 'rgba(86, 170, 255, 0.25)';
       ctx.fill();
       ctx.restore();
     }
@@ -263,6 +368,17 @@ export default function GannzillaProWheelExact() {
       ctx.restore();
     }
 
+    if (showCosmogram) {
+      ctx.save();
+      ctx.strokeStyle = '#87cfa3';
+      ctx.globalAlpha = 0.28;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, geometry.outerRadius - 16, 0, TWO_PI);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     ctx.save();
     const pointerDeg = clockwise ? angle : -angle;
     const pp = polar(cx, cy, geometry.wheelRadius + (compactMode ? 43 : 80), pointerDeg);
@@ -280,7 +396,7 @@ export default function GannzillaProWheelExact() {
 
   useEffect(() => {
     render();
-  }, [geometry, zoom, levels, divisions, startValue, increment, clockwise, showMarks, showNumbers, showProtractor, showChronometer, highlightVisible, angle, chronoAngle, compactMode]);
+  }, [geometry, zoom, levels, divisions, startValue, findValue, increment, clockwise, showMarks, showNumbers, showProtractor, showChronometer, showCosmogram, highlightVisible, highlightFill, angle, chronoAngle, compactMode, layoutVisible]);
 
   const centerViewport = () => {
     const vp = viewportRef.current;
@@ -303,7 +419,7 @@ export default function GannzillaProWheelExact() {
 
   const proSmallView = () => {
     setCompactMode(true);
-    setVisiblePanel(false);
+    setVisiblePanel(true);
     setShowChronometer(true);
     setShowProtractor(true);
     setShowMarks(true);
@@ -324,52 +440,79 @@ export default function GannzillaProWheelExact() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', background: '#ffffff', overflow: 'hidden', direction: 'ltr' }}>
+      <TopToolbar zoom={zoom} setZoom={setZoom} fitToScreen={fitToScreen} proSmallView={proSmallView} clockwise={clockwise} setClockwise={setClockwise} tool={tool} setTool={setTool} />
+
       {visiblePanel && (
         <aside style={panelStyle}>
-          <div style={{ padding: '4px 6px', background: '#e5e5e5', borderBottom: '1px solid #aaa', fontWeight: 800 }}>Default</div>
-          <Section title="View">
-            <Field label="Size"><input style={fieldStyle} type="number" min="1" max="12" value={levels} onChange={(e) => setLevels(clamp(Number(e.target.value) || 1, 1, 12))} /></Field>
-            <Field label="View"><select style={fieldStyle} value={divisions} onChange={(e) => setDivisions(Number(e.target.value))}><option value={36}>Circle of 36</option><option value={60}>Circle of 60</option><option value={90}>Circle of 90</option><option value={360}>Circle of 360</option></select></Field>
-            <Field label="Data type"><select style={fieldStyle}><option>Price</option><option>Time</option></select></Field>
+          <Section title="Layout" icon="▦">
+            <CheckField label="Visible" checked={layoutVisible} onChange={setLayoutVisible} />
+            <CheckField label="Clockwise" checked={clockwise} onChange={setClockwise} />
+            <Field label="Size" glyph="↔"><input style={fieldStyle} type="number" min="1" max="12" value={levels} onChange={(e) => setLevels(clamp(Number(e.target.value) || 1, 1, 12))} /></Field>
+            <Field label="View" glyph={<SelectArrow />}><select style={fieldStyle} value={divisions} onChange={(e) => setDivisions(Number(e.target.value))}><option value={36}>Circle of 36</option><option value={60}>Circle of 60</option><option value={90}>Circle of 90</option><option value={360}>Circle of 360</option></select></Field>
+            <Field label="Data type" glyph={<SelectArrow />}><select style={fieldStyle}><option>Price</option><option>Time</option></select></Field>
           </Section>
-          <Section title="Price">
-            <Field label="Value"><input style={fieldStyle} type="number" value={startValue} onChange={(e) => setStartValue(Number(e.target.value) || 0)} /></Field>
-            <Field label="Find"><input style={fieldStyle} type="number" defaultValue="1" /></Field>
+
+          <Section title="Price" icon="🟡">
+            <Field label="Value" glyph="‹›"><input style={fieldStyle} type="number" value={startValue} onChange={(e) => setStartValue(Number(e.target.value) || 0)} /></Field>
+            <Field label="Find" glyph="🔍"><input style={fieldStyle} type="number" value={findValue} onChange={(e) => setFindValue(Number(e.target.value) || 0)} /></Field>
             <Field label="Increment"><input style={fieldStyle} type="number" value={increment} onChange={(e) => setIncrement(Number(e.target.value) || 1)} /></Field>
           </Section>
-          <Section title="Highlight">
-            <Field label="Visible"><input type="checkbox" checked={highlightVisible} onChange={(e) => setHighlightVisible(e.target.checked)} /></Field>
-            <Field label="Show marks"><input type="checkbox" checked={showMarks} onChange={(e) => setShowMarks(e.target.checked)} /></Field>
-            <Field label="Show numbers"><input type="checkbox" checked={showNumbers} onChange={(e) => setShowNumbers(e.target.checked)} /></Field>
+
+          <Section title="Highlight" icon="▦">
+            <CheckField label="Visible" checked={highlightVisible} onChange={setHighlightVisible} />
+            <Field label="Fill" glyph={<SelectArrow />}><select style={fieldStyle} value={highlightFill} onChange={(e) => setHighlightFill(e.target.value)}><option>Levels</option><option>Cell</option></select></Field>
+            <CheckField label="Show marks" checked={showMarks} onChange={setShowMarks} />
+            <CheckField label="Show numbers" checked={showNumbers} onChange={setShowNumbers} />
           </Section>
-          <Section title="Protractor">
-            <Field label="Visible"><input type="checkbox" checked={showProtractor} onChange={(e) => setShowProtractor(e.target.checked)} /></Field>
-            <Field label="Clockwise"><input type="checkbox" checked={clockwise} onChange={(e) => setClockwise(e.target.checked)} /></Field>
+
+          <Section title="Protractor" icon="◴">
+            <CheckField label="Visible" checked={showProtractor} onChange={setShowProtractor} />
+            <CheckField label="Clockwise" checked={clockwise} onChange={setClockwise} />
             <Field label="Angle"><input style={fieldStyle} type="number" value={angle} onChange={(e) => setAngle(Number(e.target.value) || 0)} /></Field>
           </Section>
-          <Section title="Chronometer">
-            <Field label="Visible"><input type="checkbox" checked={showChronometer} onChange={(e) => setShowChronometer(e.target.checked)} /></Field>
-            <Field label="Clockwise"><input type="checkbox" checked={clockwise} onChange={(e) => setClockwise(e.target.checked)} /></Field>
+
+          <Section title="Counter" defaultOpen={false} muted icon="▣"><Field label="Visible" disabled><input type="checkbox" disabled /></Field></Section>
+          <Section title="Secondary scale" defaultOpen={false} muted icon="⚙"><Field label="Visible" disabled><input type="checkbox" disabled /></Field></Section>
+          <Section title="Marker" defaultOpen={false} muted icon="◇"><Field label="Visible" disabled><input type="checkbox" disabled /></Field></Section>
+
+          <Section title="Chronometer" icon="◷">
+            <CheckField label="Visible" checked={showChronometer} onChange={setShowChronometer} />
+            <CheckField label="Clockwise" checked={clockwise} onChange={setClockwise} />
             <Field label="Angle"><input style={fieldStyle} type="number" value={chronoAngle} onChange={(e) => setChronoAngle(Number(e.target.value) || 0)} /></Field>
-            <Field label="Range"><select style={fieldStyle}><option>Annual</option><option>Daily</option><option>Weekly</option></select></Field>
+            <Field label="Range" glyph={<SelectArrow />}><select style={fieldStyle}><option>Annual</option><option>Monthly</option><option>Weekly</option><option>Daily</option></select></Field>
+          </Section>
+
+          <Section title="Secondary scale" defaultOpen={false} muted icon="⚙"><Field label="Visible" disabled><input type="checkbox" disabled /></Field></Section>
+          <Section title="Marker" defaultOpen={false} muted icon="◇"><Field label="Visible" disabled><input type="checkbox" disabled /></Field></Section>
+
+          <Section title="Cosmogram" icon="★">
+            <CheckField label="Visible" checked={showCosmogram} onChange={setShowCosmogram} />
+            <CheckField label="Clockwise" checked={clockwise} onChange={setClockwise} />
+            <Field label="Angle"><input style={fieldStyle} type="number" defaultValue={0} /></Field>
+            <Field label="System" glyph={<SelectArrow />}><select style={fieldStyle}><option>Geocentric</option><option>Heliocentric</option></select></Field>
+          </Section>
+
+          <Section title="Location" defaultOpen={true} muted icon="▣">
+            <Field label="City" glyph={<SelectArrow />}><input style={fieldStyle} defaultValue="New York" /></Field>
+            <Field label="Latitude"><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3 }}><input style={fieldStyle} defaultValue="40°" /><input style={fieldStyle} defaultValue="43′" /><select style={fieldStyle}><option>North</option><option>South</option></select></div></Field>
+            <Field label="Longitude"><div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3 }}><input style={fieldStyle} defaultValue="74°" /><input style={fieldStyle} defaultValue="1′" /><select style={fieldStyle}><option>West</option><option>East</option></select></div></Field>
+          </Section>
+
+          <Section title="Moon phases" defaultOpen={true} muted icon="○">
+            <CheckField label="Visible" checked={false} disabled />
+            <CheckField label="Show eclipses" checked={false} disabled />
+            <Field label="Date" disabled><input style={fieldStyle} defaultValue="31.12.2019" disabled /></Field>
           </Section>
         </aside>
       )}
 
-      <button onClick={() => setVisiblePanel((v) => !v)} style={{ ...buttonStyle, position: 'fixed', left: visiblePanel ? 336 : 10, top: 10, zIndex: 40 }}>
+      <button onClick={() => setVisiblePanel((v) => !v)} style={{ ...buttonStyle, position: 'fixed', left: visiblePanel ? 336 : 10, top: 30, zIndex: 40 }}>
         {visiblePanel ? 'Hide' : 'Show'}
       </button>
 
-      <div style={{ position: 'fixed', right: 12, top: 8, zIndex: 30, display: 'flex', gap: 8, alignItems: 'center', background: '#f8f8f8', border: '1px solid #bcbcbc', borderRadius: 4, padding: '4px 8px', color: '#333', direction: 'ltr' }}>
-        <button style={buttonStyle} onClick={() => { setZoom((z) => clamp(z - 0.04, 0.06, 2)); centerViewport(); }}>−</button>
-        <span>{Math.round(zoom * 100)}%</span>
-        <button style={buttonStyle} onClick={() => { setZoom((z) => clamp(z + 0.04, 0.06, 2)); centerViewport(); }}>+</button>
-        <button style={buttonStyle} onClick={fitToScreen}>Fit</button>
-        <button style={buttonStyle} onClick={proSmallView}>Pro Small</button>
-        <button style={buttonStyle} onClick={() => setClockwise((v) => !v)}>{clockwise ? 'Clockwise' : 'Counter'}</button>
-      </div>
+      <SideShapeBar />
 
-      <div ref={viewportRef} style={{ position: 'absolute', inset: 0, left: viewportLeft, overflow: 'auto', background: '#ffffff' }}>
+      <div ref={viewportRef} style={{ position: 'absolute', inset: '24px 0 0 0', left: viewportLeft, overflow: 'auto', background: '#ffffff' }}>
         <div style={{ minWidth: '100%', minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: compactMode ? 22 : 30 }}>
           <canvas ref={canvasRef} style={{ display: 'block', background: '#fff' }} />
         </div>
