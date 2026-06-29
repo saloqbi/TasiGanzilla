@@ -12,6 +12,7 @@ import GannzillaFrameShapeMode from './components/GannTools/GannzillaFrameShapeM
 import GannzillaShapeGuard from './components/GannTools/GannzillaShapeGuard';
 import GannzillaSpiralDrawingFix from './components/GannTools/GannzillaSpiralDrawingFix';
 import GannzillaProUiPatch from './components/GannTools/GannzillaProUiPatch';
+import GannzillaOptionsClarityBinding from './components/GannTools/GannzillaOptionsClarityBinding';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -32,6 +33,7 @@ const App = () => {
               <GannzillaShapeGuard />
               <GannzillaSpiralDrawingFix />
               <GannzillaProUiPatch />
+              <GannzillaOptionsClarityBinding />
             </>
           ) : isTestMode ? (
             <TestPage />
