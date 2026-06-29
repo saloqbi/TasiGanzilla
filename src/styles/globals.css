@@ -49,3 +49,67 @@ canvas {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* =========================================================
+   GANNZILLA_PRO_TOOLBAR_VISUAL_SCALE_V1
+   تكبير شريط أدوات Gannzilla Pro ليطابق وضوح وحجم المرجع.
+   ========================================================= */
+
+/* الشريط العلوي الرئيسي */
+div[style*="position: fixed"][style*="height: 24px"][style*="border-bottom"] {
+  height: 36px !important;
+  min-height: 36px !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+}
+
+/* تحريك لوحة التحكم للأسفل بعد تكبير الشريط */
+aside[style*="top: 24px"][style*="width: 330px"] {
+  top: 36px !important;
+  height: calc(100vh - 36px) !important;
+}
+
+/* تحريك مساحة العجلة للأسفل بعد تكبير الشريط */
+div[style*="inset: 24px"] {
+  inset: 36px 0 0 0 !important;
+}
+
+/* زر Hide/Show أسفل الشريط */
+button[style*="position: fixed"][style*="top: 30px"] {
+  top: 43px !important;
+}
+
+/* أيقونات شريط الأدوات مثل المؤشر والخط والتكبير */
+button[style*="width: 22px"][style*="height: 21px"] {
+  width: 32px !important;
+  height: 31px !important;
+  min-width: 32px !important;
+  min-height: 31px !important;
+  font-size: 18px !important;
+  line-height: 28px !important;
+  margin-right: 3px !important;
+  padding: 0 !important;
+}
+
+/* أزرار Add / 90% / 125% / Pro Small / Clockwise */
+button[style*="height: 19px"],
+button[style*="height: 22px"] {
+  height: 28px !important;
+  min-height: 28px !important;
+  font-size: 13px !important;
+  line-height: 22px !important;
+  padding: 2px 8px !important;
+}
+
+/* رقم الزوم داخل الشريط */
+span[style*="min-width: 40px"] {
+  min-width: 50px !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+/* توسيع الجهة اليسرى من الشريط لتظهر مثل Gannzilla */
+div[style*="width: 330px"][style*="border-right"] {
+  height: 36px !important;
+  font-size: 13px !important;
+}
