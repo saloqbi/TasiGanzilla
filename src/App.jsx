@@ -6,17 +6,22 @@ import HomeEnhanced from './pages/HomeEnhanced';
 import TestPage from './pages/TestPage';
 import SimpleTriangleTest from './components/GannTools/SimpleTriangleTest';
 import InteractiveTriangle from './components/InteractiveTriangle';
+import GannzillaProWheelExact from './components/GannTools/GannzillaProWheelExact';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
-  const isTestMode = window.location.search.includes('test=true');
-  const isEnhancedMode = window.location.search.includes('enhanced=true') || true; // افتراضياً الإصدار المحسن
+  const search = window.location.search;
+  const isTestMode = search.includes('test=true');
+  const isGannzillaProWheelMode = search.includes('gannzillaPro=true') || search.includes('wheelPro=true');
+  const isEnhancedMode = search.includes('enhanced=true') || true; // افتراضياً الإصدار المحسن
   
   return (
     <ToolProvider>
       <LanguageProvider>
         <div>
-          {isTestMode ? (
+          {isGannzillaProWheelMode ? (
+            <GannzillaProWheelExact />
+          ) : isTestMode ? (
             <TestPage />
           ) : isEnhancedMode ? (
             <HomeEnhanced />
