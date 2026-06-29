@@ -98,11 +98,6 @@ export default function GannzillaProUiPatch() {
       notify('تم حفظ إعدادات العجلة');
     };
 
-    const polar = (cx, cy, r, deg) => {
-      const rad = ((deg - 90) * Math.PI) / 180;
-      return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
-    };
-
     const polygonPoints = (cx, cy, r, sides, startDeg = -90) => Array.from({ length: sides }, (_, i) => {
       const rad = ((startDeg + (360 / sides) * i) * Math.PI) / 180;
       return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
@@ -114,6 +109,14 @@ export default function GannzillaProUiPatch() {
       const canvas = getWheelCanvas();
       if (!canvas) return null;
       return { canvas, rect: canvas.getBoundingClientRect() };
+    };
+
+    const resetRightSelection = () => {
+      Array.from(document.querySelectorAll('[data-gannzilla-right-shape-button="true"]')).forEach((button) => {
+        const shape = button.dataset.shape || '';
+        button.innerHTML = makeRightIcon(shape, false);
+        Object.assign(button.style, { background: '#fbfbfb', border: '1px solid #d2d2d2', boxShadow: 'none' });
+      });
     };
 
     const clearDrawing = () => {
@@ -173,11 +176,9 @@ export default function GannzillaProUiPatch() {
       const radialLines = (pts) => pts.map((p) => line(cx, cy, p.x, p.y, blue, sw * 0.7)).join('');
       let inner = '';
 
-      if (shape === 'line') {
-        inner = line(cx - r, cy, cx + r, cy);
-      } else if (shape === 'text') {
-        inner = `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#245f9b" font-size="${Math.max(18, r * 0.18)}" font-weight="800">TEXT</text>`;
-      } else if (shape === '◎') {
+      if (shape === 'line') inner = line(cx - r, cy, cx + r, cy);
+      else if (shape === 'text') inner = `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" fill="#245f9b" font-size="${Math.max(18, r * 0.18)}" font-weight="800">TEXT</text>`;
+      else if (shape === '◎') {
         const outer = base * 0.47;
         const start = base * 0.045;
         const green = '#55d8b1';
@@ -191,90 +192,90 @@ export default function GannzillaProUiPatch() {
           <path d="${spiralPath({ cx, cy, startR: start, endR: outer * 0.96, turns: 1.78, phaseDeg: 180, direction: -1 })}" fill="none" stroke="${green}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" opacity="0.86" />
           <path d="${spiralPath({ cx, cy, startR: start * 1.18, endR: outer * 1.04, turns: 1.72, phaseDeg: -12, direction: 1 })}" fill="none" stroke="${pink}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" opacity="0.86" />
         `;
-      } else if (shape === '◯') {
-        inner = `<circle cx="${cx}" cy="${cy}" r="${r}" ${common} />${line(cx - r, cy, cx + r, cy)}${line(cx, cy - r, cx, cy + r)}`;
-      } else if (shape === '◢') {
-        inner = `<path d="M ${cx} ${cy} L ${cx + r} ${cy} L ${cx} ${cy + r} Z" ${common} />`;
-      } else {
-        const sidesMap = { '◁': 3, '△': 3, '□': 4, '▢': 4, '⬠': 5, '⬟': 5, '⬡': 6, '⬢': 6, '⬣': 7 };
-        const startMap = { '◁': 180, '△': -90, '□': -45, '▢': -45, '⬠': -90, '⬟': -90, '⬡': -90, '⬢': -90, '⬣': -90 };
+      } else if (shape === '◯') inner = `<circle cx="${cx}" cy="${cy}" r="${r}" ${common} />${line(cx - r, cy, cx + r, cy)}${line(cx, cy - r, cx, cy + r)}`;
+      else if (shape === '◢') inner = `<path d="M ${cx} ${cy} L ${cx + r} ${cy} L ${cx} ${cy + r} Z" ${common} />`;
+      else {
+        const sidesMap = { '◁': 3, '△': 3, '□': 4, '⬠': 5, '⬟': 5, '⬡': 6 };
+        const startMap = { '◁': 180, '△': -90, '□': -45, '⬠': -90, '⬟': -90, '⬡': -90 };
         const pts = polygonPoints(cx, cy, r, sidesMap[shape] || 4, startMap[shape] ?? -90);
         inner = `<polygon points="${pointsAttr(pts)}" ${common} />${radialLines(pts)}`;
       }
-
       svg.innerHTML = inner;
       localStorage.setItem('tasi-gannzilla-selected-shape-v1', shape);
       notify(shape === '◎' ? 'تم رسم الحلزون' : `تم اختيار الشكل ${shape}`);
     };
 
-    const makeRightIcon = (shape, active) => {
+    function makeRightIcon(shape, active) {
       const cx = 16, cy = 16;
       const stroke = active ? '#5e9ad3' : '#aeb8bd';
       const fill = active ? 'rgba(94,154,211,.12)' : 'rgba(250,250,250,.9)';
       const sw = active ? 2 : 1.5;
       if (shape === '◯') return `<svg viewBox="0 0 32 32" width="24" height="24"><circle cx="16" cy="16" r="10" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/></svg>`;
-      if (shape === '◎') return `<svg viewBox="0 0 32 32" width="24" height="24"><path d="M16 16m-1 0a1 1 0 1 0 2 0a1 1 0 1 0-2 0" fill="${stroke}"/><path d="M16 16c8-9 13 1 4 5s-13-4-4-10s17 1 7 12" fill="none" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="round"/></svg>`;
+      if (shape === '◎') return `<svg viewBox="0 0 32 32" width="24" height="24"><circle cx="16" cy="16" r="2" fill="${stroke}"/><path d="M16 16c8-9 13 1 4 5s-13-4-4-10s17 1 7 12" fill="none" stroke="${stroke}" stroke-width="${sw}" stroke-linecap="round"/></svg>`;
       if (shape === '◢') return `<svg viewBox="0 0 32 32" width="24" height="24"><path d="M9 23 L23 23 L23 9 Z" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/></svg>`;
-      const sidesMap = { '◁': 3, '△': 3, '□': 4, '⬠': 5, '⬡': 6, '⬟': 5 };
-      const startMap = { '◁': 180, '△': -90, '□': -45, '⬠': -90, '⬡': -90, '⬟': -90 };
+      const sidesMap = { '◁': 3, '△': 3, '□': 4, '⬠': 5, '⬟': 5, '⬡': 6 };
+      const startMap = { '◁': 180, '△': -90, '□': -45, '⬠': -90, '⬟': -90, '⬡': -90 };
       const pts = polygonPoints(cx, cy, 10.5, sidesMap[shape] || 4, startMap[shape] ?? -90);
       return `<svg viewBox="0 0 32 32" width="24" height="24"><polygon points="${pointsAttr(pts)}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"/></svg>`;
-    };
-
-    function resetRightSelection() {
-      Array.from(document.querySelectorAll('[data-gannzilla-right-shape-ready="true"]')).forEach((button) => {
-        const shape = button.dataset.gannzillaRightShapeLabel || '';
-        button.innerHTML = makeRightIcon(shape, false);
-        Object.assign(button.style, { background: '#fbfbfb', border: '1px solid #d2d2d2', boxShadow: 'none' });
-      });
     }
 
-    const markRightSelected = (button) => {
-      resetRightSelection();
-      const shape = button.dataset.gannzillaRightShapeLabel || '';
-      button.innerHTML = makeRightIcon(shape, true);
-      Object.assign(button.style, { background: '#eaf3ff', border: '1px solid #2f72bd', boxShadow: '0 0 0 2px rgba(47,114,189,.18)' });
+    const makeButton = (shape) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.gannzillaRightShapeButton = 'true';
+      button.dataset.shape = shape;
+      button.title = `Gannzilla shape ${shape}`;
+      button.innerHTML = makeRightIcon(shape, false);
+      Object.assign(button.style, {
+        width: '28px', height: '28px', minWidth: '28px', minHeight: '28px',
+        border: '1px solid #d2d2d2', borderRadius: shape === '◎' ? '50%' : '3px',
+        background: '#fbfbfb', padding: '1px', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', cursor: 'pointer', pointerEvents: 'auto'
+      });
+      button.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        resetRightSelection();
+        button.innerHTML = makeRightIcon(shape, true);
+        Object.assign(button.style, { background: '#eaf3ff', border: '1px solid #2f72bd', boxShadow: '0 0 0 2px rgba(47,114,189,.18)' });
+        drawRightShape(shape);
+      };
+      return button;
     };
 
-    const patchRightShapeBar = () => {
-      const shapes = ['◁', '□', '⬠', '⬡', '⬟', '◯', '△', '◢', '◎'];
-      const bars = Array.from(document.querySelectorAll('div')).filter((div) => {
-        const style = window.getComputedStyle(div);
-        const buttons = Array.from(div.querySelectorAll(':scope > button'));
-        const labels = buttons.map((button) => (button.dataset.gannzillaRightShapeLabel || button.textContent || '').trim());
-        return style.position === 'fixed' && buttons.length >= 8 && labels.some((label) => shapes.includes(label));
-      });
-      bars.forEach((bar) => {
+    const ensureRightShapeBar = () => {
+      let bar = document.querySelector('[data-gannzilla-safe-shape-toolbar="true"]');
+      if (!bar) {
+        bar = document.createElement('div');
+        bar.dataset.gannzillaSafeShapeToolbar = 'true';
         Object.assign(bar.style, {
-          zIndex: '95', pointerEvents: 'auto', background: 'rgba(255,255,255,.94)',
-          border: '1px solid #e2e2e2', borderRadius: '18px', padding: '7px', gap: '10px',
-          boxShadow: '0 2px 10px rgba(0,0,0,.12)'
+          position: 'fixed', right: '18px', top: '150px', zIndex: '95',
+          display: 'flex', flexDirection: 'column', gap: '8px', padding: '7px',
+          width: '44px', background: 'rgba(255,255,255,.94)', border: '1px solid #e2e2e2',
+          borderRadius: '18px', boxShadow: '0 2px 10px rgba(0,0,0,.12)', pointerEvents: 'auto'
         });
-        Array.from(bar.querySelectorAll('button')).forEach((button, index) => {
-          const existing = (button.dataset.gannzillaRightShapeLabel || button.textContent || '').trim();
-          const shape = shapes.includes(existing) ? existing : shapes[index];
-          if (!shape) return;
-          button.dataset.gannzillaRightShapeLabel = shape;
-          button.dataset.gannzillaRightShapeReady = 'true';
-          button.title = `Gannzilla shape ${shape}`;
-          button.innerHTML = makeRightIcon(shape, localStorage.getItem('tasi-gannzilla-selected-shape-v1') === shape);
-          Object.assign(button.style, {
-            width: '28px', height: '28px', minWidth: '28px', minHeight: '28px',
-            border: localStorage.getItem('tasi-gannzilla-selected-shape-v1') === shape ? '1px solid #2f72bd' : '1px solid #d2d2d2',
-            borderRadius: shape === '◎' ? '50%' : '3px', background: localStorage.getItem('tasi-gannzilla-selected-shape-v1') === shape ? '#eaf3ff' : '#fbfbfb',
-            color: '#9aa', padding: '1px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', pointerEvents: 'auto'
-          });
-          if (button.dataset.gannzillaRightClickBound === 'true') return;
-          button.dataset.gannzillaRightClickBound = 'true';
-          button.addEventListener('click', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            event.stopImmediatePropagation();
-            markRightSelected(button);
-            drawRightShape(shape);
-          }, true);
-        });
+        ['◁', '□', '⬠', '⬡', '⬟', '◯', '△', '◢', '◎'].forEach((shape) => bar.appendChild(makeButton(shape)));
+        document.body.appendChild(bar);
+      }
+    };
+
+    const neutralizeBadShapePanels = () => {
+      const shapeTokens = ['◁', '□', '⬠', '⬡', '⬟', '◯', '△', '◢', '◎'];
+      Array.from(document.querySelectorAll('div')).forEach((div) => {
+        if (div.dataset.gannzillaSafeShapeToolbar === 'true') return;
+        const style = window.getComputedStyle(div);
+        if (style.position !== 'fixed') return;
+        const rect = div.getBoundingClientRect();
+        if (rect.width < 120) return;
+        const labels = Array.from(div.querySelectorAll('button')).map((b) => (b.textContent || b.dataset.shape || '').trim());
+        if (!labels.some((label) => shapeTokens.includes(label))) return;
+        div.style.background = 'transparent';
+        div.style.border = 'none';
+        div.style.boxShadow = 'none';
+        div.style.borderRadius = '0';
+        div.style.padding = '0';
+        div.style.pointerEvents = 'none';
+        Array.from(div.querySelectorAll('button')).forEach((button) => { button.style.pointerEvents = 'none'; });
       });
     };
 
@@ -397,8 +398,9 @@ export default function GannzillaProUiPatch() {
     };
 
     const run = () => {
+      neutralizeBadShapePanels();
       ensureLeftShortcutBar();
-      patchRightShapeBar();
+      ensureRightShapeBar();
       patchToolbar();
     };
 
@@ -416,6 +418,7 @@ export default function GannzillaProUiPatch() {
       window.removeEventListener('resize', alignDrawing);
       window.removeEventListener('scroll', alignDrawing, true);
       document.querySelector('[data-gannzilla-shortcut-bar="true"]')?.remove();
+      document.querySelector('[data-gannzilla-safe-shape-toolbar="true"]')?.remove();
       document.querySelector('[data-gannzilla-drawing-overlay="true"]')?.remove();
     };
   }, []);
