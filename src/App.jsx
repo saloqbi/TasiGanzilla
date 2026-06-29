@@ -21,35 +21,56 @@ function GannzillaProCleanToolbarPatch() {
       });
       if (!toolbar) return;
 
-      // حذف كل الأزرار الإضافية التي أضفناها سابقًا حتى يصبح الشريط مثل Gannzilla فقط.
+      // حذف كل الأزرار الإضافية حتى يبقى شريط أدوات نظيف مثل Gannzilla.
       const extraLabels = new Set(['50%', '90%', '110%', '125%', '200%', 'Pro Small', 'Clockwise', 'Counter']);
       Array.from(toolbar.querySelectorAll('button')).forEach((button) => {
         const label = (button.textContent || '').trim();
         if (extraLabels.has(label)) button.remove();
       });
 
-      // ترتيب وتهذيب زر النسبة فقط بدون أزرار نصية إضافية.
-      toolbar.style.height = '32px';
-      toolbar.style.minHeight = '32px';
-      toolbar.style.fontSize = '13px';
+      // تكبير مريح بصريًا بدون ازدحام.
+      toolbar.style.height = '42px';
+      toolbar.style.minHeight = '42px';
+      toolbar.style.fontSize = '15px';
       toolbar.style.alignItems = 'center';
+      toolbar.style.padding = '0 8px 0 0';
 
       Array.from(toolbar.querySelectorAll('button')).forEach((button) => {
         const text = (button.textContent || '').trim();
         const isIconButton = text.length <= 2 || ['↖', '—', '▢', 'T', '🔒', '⌕', '⛶', '＋', '−'].includes(text);
         if (isIconButton) {
           Object.assign(button.style, {
-            width: '28px',
-            height: '28px',
-            minWidth: '28px',
-            minHeight: '28px',
+            width: '36px',
+            height: '36px',
+            minWidth: '36px',
+            minHeight: '36px',
             padding: '0',
-            marginRight: '2px',
-            fontSize: '17px',
-            lineHeight: '24px'
+            marginRight: '4px',
+            fontSize: '22px',
+            lineHeight: '32px',
+            borderRadius: '3px'
+          });
+        } else {
+          Object.assign(button.style, {
+            height: '34px',
+            minHeight: '34px',
+            padding: '3px 10px',
+            fontSize: '14px',
+            lineHeight: '24px',
+            borderRadius: '3px'
           });
         }
       });
+
+      const zoomText = Array.from(toolbar.querySelectorAll('span')).find((span) => /^\d+%$/.test((span.textContent || '').trim()));
+      if (zoomText) {
+        Object.assign(zoomText.style, {
+          minWidth: '58px',
+          fontSize: '16px',
+          fontWeight: '900',
+          textAlign: 'center'
+        });
+      }
     };
 
     const timer = window.setInterval(clean, 250);
