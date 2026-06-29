@@ -7,7 +7,6 @@ export default function GannzillaIconActionBinding() {
 
     const STORE_KEY = 'tasi-gannzilla-icon-actions-v1';
     const SETTINGS_KEY = 'tasi-gannzilla-complete-settings-v1';
-    const ZOOM_KEY = 'tasi-gannzilla-wheel-zoom-v1';
 
     const notify = (message) => {
       let box = document.querySelector('[data-gannzilla-toast="true"]');
@@ -53,13 +52,6 @@ export default function GannzillaIconActionBinding() {
       .filter(({ rect }) => rect.width > 120 && rect.height > 120)
       .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
 
-    const getWheelLayers = () => [
-      getWheelCanvas(),
-      document.querySelector('[data-gannzilla-frame-shape-layer="true"]'),
-      document.querySelector('[data-gannzilla-drawing-overlay="true"]'),
-      document.querySelector('[data-gannzilla-true-spiral-overlay="true"]')
-    ].filter(Boolean);
-
     const allControls = () => Array.from(document.querySelectorAll('aside input, aside select, [data-gz-name], [data-gannzilla-shortcut-button], [data-gannzilla-right-shape-button]'));
 
     const collectSettings = () => {
@@ -86,52 +78,15 @@ export default function GannzillaIconActionBinding() {
       window.dispatchEvent(new CustomEvent('gannzilla:clear-drawing', { detail: { at: new Date().toISOString() } }));
     };
 
-    const textOf = (node) => (node?.textContent || '').trim();
-    const buttonText = (button) => textOf(button).replace(/\s+/g, ' ');
-    const isPlainPlus = (label) => ['+', '＋'].includes(label);
-    const isPlainMinus = (label) => ['-', '−', '–', '—'].includes(label);
-
-    const isPercentNode = (node) => /^\d{1,3}%$/.test(textOf(node));
-
-    const updateZoomDisplay = (zoom) => {
-      const pct = `${Math.round(zoom * 100)}%`;
-      Array.from(document.querySelectorAll('span, button, div')).forEach((node) => {
-        if (!isPercentNode(node)) return;
-        const prev = node.previousElementSibling;
-        const next = node.nextElementSibling;
-        const nearMinus = prev && isPlainMinus(buttonText(prev));
-        const nearPlus = next && isPlainPlus(buttonText(next));
-        const hasZoomClass = (node.className || '').toString().toLowerCase().includes('zoom');
-        if (nearMinus || nearPlus || hasZoomClass || textOf(node) === localStorage.getItem('tasi-gannzilla-last-zoom-label-v1')) {
-          node.textContent = pct;
-        }
-      });
-      localStorage.setItem('tasi-gannzilla-last-zoom-label-v1', pct);
-    };
-
-    const applyZoom = (zoom) => {
-      const safeZoom = Math.max(0.35, Math.min(3, Number(zoom) || 1));
-      localStorage.setItem(ZOOM_KEY, String(safeZoom));
-      getWheelLayers().forEach((layer) => {
-        layer.style.transformOrigin = 'center center';
-        layer.style.transform = `scale(${safeZoom})`;
-      });
-      updateZoomDisplay(safeZoom);
-      window.dispatchEvent(new CustomEvent('gannzilla:zoom-change', { detail: { zoom: safeZoom } }));
-      window.dispatchEvent(new Event('resize'));
-      return safeZoom;
-    };
-
     const zoomWheel = (step) => {
       const canvas = getWheelCanvas();
       if (!canvas) return notify('لم يتم العثور على العجلة');
-      const current = Number(localStorage.getItem(ZOOM_KEY) || '1');
-      const next = applyZoom(current + step);
-      notify(`التكبير ${(next * 100).toFixed(0)}%`);
-    };
-
-    const setZoomPercent = (percent) => {
-      const next = applyZoom(Number(percent) / 100);
+      const current = Number(localStorage.getItem('tasi-gannzilla-wheel-zoom-v1') || '1');
+      const next = Math.max(0.35, Math.min(3, current + step));
+      localStorage.setItem('tasi-gannzilla-wheel-zoom-v1', String(next));
+      canvas.style.transformOrigin = 'center center';
+      canvas.style.transform = `scale(${next})`;
+      window.dispatchEvent(new CustomEvent('gannzilla:zoom-change', { detail: { zoom: next } }));
       notify(`التكبير ${(next * 100).toFixed(0)}%`);
     };
 
@@ -207,45 +162,33 @@ export default function GannzillaIconActionBinding() {
       return true;
     };
 
-    const labelOfButton = (button) => (buttonText(button) || (button?.title || button?.ariaLabel || '').trim());
-
-    const buttonHasAdjacentPercent = (button) => {
-      const prev = button.previousElementSibling;
-      const next = button.nextElementSibling;
-      return isPercentNode(prev) || isPercentNode(next);
-    };
+    const labelOfButton = (button) => ((button?.textContent || button?.title || button?.ariaLabel || '').trim());
 
     const handleButton = (button, event) => {
       const label = labelOfButton(button);
       const title = (button.title || '').trim().toLowerCase();
       const html = (button.innerHTML || '').trim();
-      const numericPct = label.match(/^(\d{1,3})%$/)?.[1];
 
-      const isZoomIn = title.includes('zoom in') || (isPlainPlus(label) && buttonHasAdjacentPercent(button));
-      const isZoomOut = title.includes('zoom out') || (isPlainMinus(label) && buttonHasAdjacentPercent(button));
-      const isZoomPreset = numericPct && Number(numericPct) >= 25 && Number(numericPct) <= 300;
-
-      // مهم: زر + الصغير الخاص بالتكبير ليس Add. Add فقط إذا مكتوب Add أو العنوان Add.
-      const isAdd = !isZoomIn && (/\badd\b/i.test(label) || label.includes('＋ Add') || title.includes('add'));
-      const isDelete = !isZoomOut && (title.includes('delete') || title.includes('remove') || label === '🗑' || label.includes('حذف'));
+      const isAdd = /add/i.test(label) || label.includes('＋') || label === '+' || title.includes('add');
+      const isDelete = label === '−' || label === '-' || title.includes('delete') || title.includes('remove');
       const isEdit = label.includes('✎') || title.includes('edit');
-      const isSave = label.includes('▣') || label.includes('💾') || title.includes('save') || (html.includes('svg') && title.includes('save'));
+      const isSave = label.includes('▣') || label.includes('💾') || title.includes('save') || html.includes('svg') && title.includes('save');
       const isLock = label.includes('🔒') || title.includes('lock');
+      const isZoomIn = (label === '+' || title.includes('zoom in')) && !isAdd;
+      const isZoomOut = (label === '-' || title.includes('zoom out')) && !isDelete;
 
-      if (isAdd || isDelete || isEdit || isSave || isLock || isZoomIn || isZoomOut || isZoomPreset) {
+      if (isAdd || isDelete || isEdit || isSave || isLock || isZoomIn || isZoomOut) {
         event.preventDefault();
         event.stopPropagation();
-        event.stopImmediatePropagation?.();
       }
 
-      if (isZoomIn) return zoomWheel(0.1);
-      if (isZoomOut) return zoomWheel(-0.1);
-      if (isZoomPreset) return setZoomPercent(Number(numericPct));
       if (isAdd) return addLayer();
       if (isDelete) return deleteLayerOrDrawing();
       if (isEdit) return toggleEdit();
       if (isSave) { collectSettings(); return notify('تم حفظ إعدادات البرنامج'); }
       if (isLock) return toggleLock();
+      if (isZoomIn) return zoomWheel(0.1);
+      if (isZoomOut) return zoomWheel(-0.1);
 
       if (['↖', '⟵', '←'].includes(label)) return applyTool('Select');
       if (label === '—' || title.includes('line')) return applyTool('Line');
@@ -290,13 +233,11 @@ export default function GannzillaIconActionBinding() {
       Array.from(document.querySelectorAll('aside .gz-header, aside [class*="header"]')).forEach((header) => {
         header.style.cursor = 'pointer';
       });
-      const savedZoom = Number(localStorage.getItem(ZOOM_KEY) || '1');
-      applyZoom(savedZoom);
     };
 
     prepareIcons();
     collectSettings();
-    const timer = window.setInterval(prepareIcons, 600);
+    const timer = window.setInterval(prepareIcons, 500);
     document.addEventListener('click', handleClick, true);
     document.addEventListener('change', handleChange, true);
     document.addEventListener('input', handleChange, true);
