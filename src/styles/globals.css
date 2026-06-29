@@ -40,8 +40,8 @@ canvas {
 }
 
 /* =========================================================
-   GANNZILLA_PRO_UI_CLEAR_SCALE_V6
-   تكبير أوضح ومريح بصريًا للشريط ولوحة التحكم بدون الأزرار الزائدة.
+   GANNZILLA_PRO_UI_CLEAR_SCALE_V7
+   تكبير قوي للوحة التحكم حتى تصبح مريحة بصريًا مثل Gannzilla.
    ========================================================= */
 
 div[style*="position: fixed"][style*="border-bottom"] {
@@ -53,10 +53,10 @@ div[style*="position: fixed"][style*="border-bottom"] {
 }
 
 aside[style*="width: 330px"] {
-  width: 420px !important;
+  width: 520px !important;
   top: 52px !important;
   height: calc(100vh - 52px) !important;
-  font-size: 16px !important;
+  font-size: 19px !important;
 }
 
 div[style*="inset: 24px"],
@@ -67,12 +67,17 @@ div[style*="inset: 48px"] {
   inset: 52px 0 0 0 !important;
 }
 
+/* إزاحة مساحة العجلة بعد تكبير لوحة اليسار */
+div[style*="left: 330px"][style*="overflow: auto"] {
+  left: 520px !important;
+}
+
 button[style*="position: fixed"][style*="top: 30px"] {
   top: 62px !important;
-  left: 426px !important;
-  height: 38px !important;
-  font-size: 16px !important;
-  padding: 5px 14px !important;
+  left: 526px !important;
+  height: 42px !important;
+  font-size: 18px !important;
+  padding: 6px 16px !important;
 }
 
 button[style*="width: 22px"][style*="height: 21px"] {
@@ -104,29 +109,30 @@ span[style*="min-width: 40px"] {
 }
 
 div[style*="width: 330px"][style*="border-right"] {
-  width: 420px !important;
+  width: 520px !important;
   height: 52px !important;
   font-size: 16px !important;
 }
 
 div[style*="grid-template-columns: 148px 1fr 18px"] {
-  grid-template-columns: 190px 1fr 24px !important;
-  min-height: 34px !important;
-  font-size: 16px !important;
+  grid-template-columns: 240px 1fr 28px !important;
+  min-height: 44px !important;
+  font-size: 19px !important;
 }
 
 div[style*="background: rgb(236, 236, 221)"],
 div[style*="background: #ececdd"] {
-  min-height: 34px !important;
-  font-size: 16px !important;
-  padding: 5px 8px !important;
+  min-height: 42px !important;
+  font-size: 19px !important;
+  padding: 7px 10px !important;
+  font-weight: 700 !important;
 }
 
 input[style],
 select[style] {
-  height: 30px !important;
-  min-height: 30px !important;
-  font-size: 16px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  font-size: 19px !important;
 }
 
 div[style*="border-radius: 18px"][style*="flex-direction: column"] {
@@ -135,7 +141,7 @@ div[style*="border-radius: 18px"][style*="flex-direction: column"] {
 }
 
 div[style*="border-radius: 18px"][style*="flex-direction: column"] button {
-  width: 38px !important;
-  height: 38px !important;
+  width: 40px !important;
+  height: 40px !important;
   font-size: 22px !important;
 }
