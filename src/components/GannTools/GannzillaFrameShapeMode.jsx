@@ -5,6 +5,7 @@ export default function GannzillaFrameShapeMode() {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true');
     if (!isWheelMode) return undefined;
 
+    const DIVISION_BUTTONS = new Set(['12', '24', '36']);
     const TOOL_MAP = {
       '◆': { sides: 4, rotation: -45, name: 'Diamond' },
       '⬟': { sides: 5, rotation: -90, name: 'Pentagon' },
@@ -47,6 +48,45 @@ export default function GannzillaFrameShapeMode() {
       .filter(({ rect }) => rect.width > 120 && rect.height > 120)
       .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0] || null;
 
+    const findViewSelect = () => Array.from(document.querySelectorAll('aside select')).find((s) =>
+      Array.from(s.options || []).some((o) => (o.textContent || '').includes('Circle of 36') || (o.textContent || '').includes('Circle of 60') || (o.textContent || '').includes('Circle of 360'))
+    );
+
+    const setNativeValue = (element, value) => {
+      const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(element), 'value');
+      if (descriptor?.set) descriptor.set.call(element, value);
+      else element.value = value;
+    };
+
+    const ensureDivisionOptions = (select) => {
+      if (!select) return;
+      ['12', '24', '36', '60', '90', '360'].forEach((value) => {
+        if (!Array.from(select.options || []).some((option) => option.value === value)) {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = `Circle of ${value}`;
+          const before = Array.from(select.options || []).find((o) => Number(o.value) > Number(value));
+          select.insertBefore(option, before || null);
+        }
+      });
+    };
+
+    const setDivisions = (value) => {
+      const text = String(value);
+      localStorage.setItem('tasi-gannzilla-divisions-override-v1', text);
+      const select = findViewSelect();
+      if (select) {
+        ensureDivisionOptions(select);
+        setNativeValue(select, text);
+        select.dispatchEvent(new Event('input', { bubbles: true }));
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      restyleIcons();
+      if (currentTool) drawFrameShape();
+      window.dispatchEvent(new CustomEvent('gannzilla:division-change', { detail: { divisions: Number(value) } }));
+      notify(`تم اختيار Circle of ${text}`);
+    };
+
     const getSizeValue = () => {
       const firstNumber = Array.from(document.querySelectorAll('aside input[type="number"]'))[0];
       const n = Number(firstNumber?.value);
@@ -56,9 +96,7 @@ export default function GannzillaFrameShapeMode() {
     const getDivisionsValue = () => {
       const override = Number(localStorage.getItem('tasi-gannzilla-divisions-override-v1'));
       if ([12, 24, 36, 60, 90, 360].includes(override)) return override;
-      const select = Array.from(document.querySelectorAll('aside select')).find((s) =>
-        Array.from(s.options || []).some((o) => (o.textContent || '').includes('Circle of 36') || (o.textContent || '').includes('Circle of 60') || (o.textContent || '').includes('Circle of 360'))
-      );
+      const select = findViewSelect();
       const n = Number(select?.value);
       return Number.isFinite(n) && n > 0 ? n : 36;
     };
@@ -115,7 +153,23 @@ export default function GannzillaFrameShapeMode() {
     };
 
     const restyleIcons = () => {
+      const activeDivisions = String(getDivisionsValue());
       Array.from(document.querySelectorAll('[data-gannzilla-shortcut-button="true"]')).forEach((button) => {
+        const divisionLabel = (button.dataset.gannzillaCircleValue || button.textContent || '').trim();
+        if (DIVISION_BUTTONS.has(divisionLabel)) {
+          button.dataset.gannzillaCircleValue = divisionLabel;
+          const active = divisionLabel === activeDivisions;
+          Object.assign(button.style, {
+            border: active ? '2px solid #3e6ea8' : '2px solid #cfcfcf',
+            background: active ? '#f1f7ff' : '#fbfbfb',
+            color: active ? '#1f4f91' : '#777',
+            boxShadow: active ? '0 0 0 2px rgba(62,110,168,.16)' : '0 1px 2px rgba(0,0,0,.08)',
+            fontWeight: '900',
+            cursor: 'pointer'
+          });
+          return;
+        }
+
         const label = (button.dataset.gannzillaFrameShapeLabel || button.dataset.gannzillaPolygonLabel || button.textContent || '').trim();
         const tool = TOOL_MAP[label];
         if (!tool) return;
@@ -167,7 +221,6 @@ export default function GannzillaFrameShapeMode() {
       });
       layer.width = Math.ceil(w * dpr);
       layer.height = Math.ceil(h * dpr);
-
       canvas.style.opacity = '0.001';
 
       const ctx = layer.getContext('2d');
@@ -199,10 +252,7 @@ export default function GannzillaFrameShapeMode() {
         const r = innerR + ring * step;
         ctx.beginPath();
         const pts = polygonPoints(cx, cy, r, sides, rotation);
-        pts.forEach((p, i) => {
-          if (i === 0) ctx.moveTo(p.x, p.y);
-          else ctx.lineTo(p.x, p.y);
-        });
+        pts.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
         ctx.closePath();
         ctx.strokeStyle = ring === levels ? '#bdbdbd' : '#dedede';
         ctx.lineWidth = ring === levels ? Math.max(2, step * 0.05) : 1;
@@ -230,14 +280,6 @@ export default function GannzillaFrameShapeMode() {
           ctx.fillText(text, p.x, p.y);
         }
       }
-
-      ctx.beginPath();
-      const centerPts = polygonPoints(cx, cy, Math.max(9, innerR * 0.34), sides, rotation);
-      centerPts.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y); });
-      ctx.closePath();
-      ctx.strokeStyle = '#d0d0d0';
-      ctx.lineWidth = 1;
-      ctx.stroke();
     };
 
     const selectTool = (label) => {
@@ -261,8 +303,18 @@ export default function GannzillaFrameShapeMode() {
 
     const handleClick = (event) => {
       const button = event.target.closest('[data-gannzilla-shortcut-button="true"]');
-      const label = (button?.dataset.gannzillaFrameShapeLabel || button?.dataset.gannzillaPolygonLabel || button?.textContent || '').trim();
-      if (!button || !TOOL_MAP[label]) return;
+      if (!button) return;
+      const divisionLabel = (button.dataset.gannzillaCircleValue || button.textContent || '').trim();
+      if (DIVISION_BUTTONS.has(divisionLabel)) {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        setDivisions(divisionLabel);
+        return;
+      }
+
+      const label = (button.dataset.gannzillaFrameShapeLabel || button.dataset.gannzillaPolygonLabel || button.textContent || '').trim();
+      if (!TOOL_MAP[label]) return;
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
@@ -281,6 +333,7 @@ export default function GannzillaFrameShapeMode() {
     };
 
     const align = () => {
+      ensureDivisionOptions(findViewSelect());
       const saved = localStorage.getItem('tasi-gannzilla-frame-shape-v1');
       if (saved && TOOL_MAP[saved]) currentTool = saved;
       restyleIcons();
