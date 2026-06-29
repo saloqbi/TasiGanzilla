@@ -8,7 +8,7 @@ html, body, #root {
   padding: 0;
   overflow: visible !important;
   background: #222;
-  direction: rtl; /* تغيير إلى RTL للنصوص العربية */
+  direction: rtl;
   box-sizing: border-box;
   font-family: 'Segoe UI', 'Tahoma', 'Arial', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -40,113 +40,102 @@ canvas {
 }
 
 /* =========================================================
-   GANNZILLA_PRO_UI_CLEAR_SCALE_V5
-   شريط أكبر وواضح بدون ازدحام، مع حذف الأزرار الزائدة من App patch.
+   GANNZILLA_PRO_UI_CLEAR_SCALE_V6
+   تكبير أوضح ومريح بصريًا للشريط ولوحة التحكم بدون الأزرار الزائدة.
    ========================================================= */
 
-/* الشريط العلوي */
 div[style*="position: fixed"][style*="border-bottom"] {
-  height: 42px !important;
-  min-height: 42px !important;
-  font-size: 15px !important;
-  line-height: 1.2 !important;
+  height: 52px !important;
+  min-height: 52px !important;
+  font-size: 17px !important;
+  line-height: 1.25 !important;
   white-space: nowrap !important;
 }
 
-/* لوحة التحكم اليسار */
 aside[style*="width: 330px"] {
-  width: 380px !important;
-  top: 42px !important;
-  height: calc(100vh - 42px) !important;
-  font-size: 14px !important;
+  width: 420px !important;
+  top: 52px !important;
+  height: calc(100vh - 52px) !important;
+  font-size: 16px !important;
 }
 
-/* مساحة العجلة بعد الشريط */
 div[style*="inset: 24px"],
 div[style*="inset: 32px"],
 div[style*="inset: 36px"],
+div[style*="inset: 42px"],
 div[style*="inset: 48px"] {
-  inset: 42px 0 0 0 !important;
+  inset: 52px 0 0 0 !important;
 }
 
-/* زر Hide/Show */
 button[style*="position: fixed"][style*="top: 30px"] {
-  top: 50px !important;
-  left: 386px !important;
-  height: 32px !important;
-  font-size: 14px !important;
-  padding: 4px 12px !important;
+  top: 62px !important;
+  left: 426px !important;
+  height: 38px !important;
+  font-size: 16px !important;
+  padding: 5px 14px !important;
 }
 
-/* أيقونات الشريط العلوي */
 button[style*="width: 22px"][style*="height: 21px"] {
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
-  min-height: 36px !important;
-  font-size: 22px !important;
-  line-height: 32px !important;
-  margin-right: 4px !important;
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  min-height: 46px !important;
+  font-size: 28px !important;
+  line-height: 41px !important;
+  margin-right: 5px !important;
   padding: 0 !important;
-  border-radius: 3px !important;
+  border-radius: 4px !important;
 }
 
-/* أزرار Add الصغيرة فقط في يسار الشريط */
 button[style*="height: 19px"],
 button[style*="height: 22px"] {
-  height: 32px !important;
-  min-height: 32px !important;
-  font-size: 14px !important;
-  line-height: 24px !important;
-  padding: 3px 10px !important;
-  border-radius: 3px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  font-size: 16px !important;
+  line-height: 30px !important;
+  padding: 4px 13px !important;
+  border-radius: 4px !important;
 }
 
-/* نسبة الزوم في الشريط */
 span[style*="min-width: 40px"] {
-  min-width: 58px !important;
-  font-size: 16px !important;
+  min-width: 72px !important;
+  font-size: 18px !important;
   font-weight: 900 !important;
 }
 
-/* الجهة اليسرى من الشريط بنفس عرض اللوحة */
 div[style*="width: 330px"][style*="border-right"] {
-  width: 380px !important;
-  height: 42px !important;
-  font-size: 14px !important;
+  width: 420px !important;
+  height: 52px !important;
+  font-size: 16px !important;
 }
 
-/* صفوف لوحة التحكم */
 div[style*="grid-template-columns: 148px 1fr 18px"] {
-  grid-template-columns: 170px 1fr 22px !important;
-  min-height: 29px !important;
-  font-size: 14px !important;
+  grid-template-columns: 190px 1fr 24px !important;
+  min-height: 34px !important;
+  font-size: 16px !important;
 }
 
-/* عناوين أقسام اللوحة */
 div[style*="background: rgb(236, 236, 221)"],
 div[style*="background: #ececdd"] {
-  min-height: 29px !important;
-  font-size: 14px !important;
-  padding: 4px 6px !important;
+  min-height: 34px !important;
+  font-size: 16px !important;
+  padding: 5px 8px !important;
 }
 
-/* حقول الإدخال داخل اللوحة */
 input[style],
 select[style] {
-  height: 26px !important;
-  min-height: 26px !important;
-  font-size: 14px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  font-size: 16px !important;
 }
 
-/* شريط الأشكال يمين الشاشة */
 div[style*="border-radius: 18px"][style*="flex-direction: column"] {
-  top: 165px !important;
-  right: 14px !important;
+  top: 185px !important;
+  right: 16px !important;
 }
 
 div[style*="border-radius: 18px"][style*="flex-direction: column"] button {
-  width: 32px !important;
-  height: 32px !important;
-  font-size: 19px !important;
+  width: 38px !important;
+  height: 38px !important;
+  font-size: 22px !important;
 }
