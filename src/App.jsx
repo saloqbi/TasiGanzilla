@@ -7,6 +7,7 @@ import TestPage from './pages/TestPage';
 import SimpleTriangleTest from './components/GannTools/SimpleTriangleTest';
 import InteractiveTriangle from './components/InteractiveTriangle';
 import GannzillaProWheelExact from './components/GannTools/GannzillaProWheelExact';
+import GannzillaCellHighlightFix from './components/GannTools/GannzillaCellHighlightFix';
 import GannzillaProUiPatch from './components/GannTools/GannzillaProUiPatch';
 
 const App = () => {
@@ -23,6 +24,7 @@ const App = () => {
           {isGannzillaProWheelMode ? (
             <>
               <GannzillaProWheelExact />
+              <GannzillaCellHighlightFix />
               <GannzillaProUiPatch />
             </>
           ) : isTestMode ? (
