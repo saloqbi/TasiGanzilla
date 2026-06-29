@@ -3,6 +3,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const TWO_PI = Math.PI * 2;
 
+function getSearchParams() {
+  if (typeof window === 'undefined') return new URLSearchParams();
+  return new URLSearchParams(window.location.search);
+}
+
 function polar(cx, cy, radius, deg) {
   const rad = ((deg - 90) * Math.PI) / 180;
   return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
@@ -30,11 +35,16 @@ function numberAtRing(startValue, ringIndex, sectorIndex, divisions, increment) 
   return startValue + ((ringIndex - 1) * divisions + sectorIndex) * increment;
 }
 
+function formatNumber(value) {
+  if (Number.isInteger(value)) return String(value);
+  return String(Number(value.toFixed(4)));
+}
+
 function drawRotatedText(ctx, text, x, y, angleDeg, fontSize, color = '#111') {
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
   ctx.rotate(normalizeRotation(angleDeg));
-  ctx.font = `700 ${fontSize}px Arial, Helvetica, Segoe UI, sans-serif`;
+  ctx.font = `700 ${fontSize}px Segoe UI, Arial, Helvetica, sans-serif`;
   ctx.fillStyle = color;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -42,14 +52,13 @@ function drawRotatedText(ctx, text, x, y, angleDeg, fontSize, color = '#111') {
   ctx.restore();
 }
 
-function fontSizeForCell(midR, ringWidth, divisions, textLength, compact = false) {
-  const sectorArc = (TWO_PI * midR) / divisions;
-  const arcRoom = sectorArc * (compact ? 0.58 : 0.62);
-  const radialRoom = ringWidth * (compact ? 0.64 : 0.70);
+function fontSizeForCell(midR, ringWidth, divisions, textLength, compactMode) {
+  const arcRoom = (TWO_PI * midR / divisions) * (compactMode ? 0.66 : 0.62);
+  const radialRoom = ringWidth * (compactMode ? 0.82 : 0.72);
   const charFactor = textLength >= 6 ? 0.68 : textLength === 5 ? 0.63 : textLength === 4 ? 0.58 : 0.54;
   const byArc = arcRoom / Math.max(2, textLength * charFactor);
   const byRadial = radialRoom / Math.max(2, textLength * 0.55);
-  return clamp(Math.min(byArc, byRadial), compact ? 9.5 : 11, compact ? 16 : 22);
+  return clamp(Math.min(byArc, byRadial), compactMode ? 9 : 12, compactMode ? 18 : 28);
 }
 
 const panelStyle = {
@@ -78,6 +87,7 @@ const rowStyle = {
 
 const labelStyle = { padding: '2px 6px', color: '#333', fontWeight: 600 };
 const fieldStyle = { width: '100%', height: 20, border: '1px solid #aaa', background: '#fff', color: '#111', fontSize: 12 };
+const buttonStyle = { border: '1px solid #aaa', background: '#f7f7f7', color: '#222', borderRadius: 3, padding: '2px 7px', fontSize: 12, cursor: 'pointer' };
 
 function Section({ title, children }) {
   return (
@@ -100,12 +110,13 @@ function Field({ label, children }) {
 }
 
 export default function GannzillaProWheelExact() {
+  const params = getSearchParams();
+  const initialCompactMode = params.get('compact') === 'true' || params.get('view') === 'compact' || params.get('proSmall') === 'true';
   const canvasRef = useRef(null);
   const viewportRef = useRef(null);
-  const params = new URLSearchParams(window.location.search);
-  const compactMode = params.has('compact') || params.has('proSmall') || params.has('clean');
 
-  const [visiblePanel, setVisiblePanel] = useState(!compactMode);
+  const [compactMode, setCompactMode] = useState(initialCompactMode);
+  const [visiblePanel, setVisiblePanel] = useState(!initialCompactMode);
   const [levels, setLevels] = useState(5);
   const [divisions, setDivisions] = useState(36);
   const [startValue, setStartValue] = useState(1);
@@ -115,28 +126,28 @@ export default function GannzillaProWheelExact() {
   const [showNumbers, setShowNumbers] = useState(true);
   const [showProtractor, setShowProtractor] = useState(true);
   const [showChronometer, setShowChronometer] = useState(true);
-  const [highlightVisible, setHighlightVisible] = useState(false);
-  const [zoom, setZoom] = useState(compactMode ? 0.62 : 0.82);
+  const [highlightVisible, setHighlightVisible] = useState(true);
+  const [zoom, setZoom] = useState(initialCompactMode ? 0.48 : 0.9);
   const [angle, setAngle] = useState(90);
   const [chronoAngle, setChronoAngle] = useState(30);
 
   const geometry = useMemo(() => {
-    const innerRadius = compactMode ? 118 : 150;
-    const ringWidth = compactMode ? 58 : 76;
-    const protractorGap = compactMode ? 14 : 16;
-    const protractorWidth = compactMode ? 28 : 34;
-    const chronoGap = compactMode ? 12 : 14;
-    const chronoWidth = compactMode ? 38 : 44;
+    const innerRadius = compactMode ? 92 : 170;
+    const ringWidth = compactMode ? 48 : 88;
+    const protractorGap = compactMode ? 11 : 18;
+    const protractorWidth = compactMode ? 24 : 34;
+    const chronoGap = compactMode ? 11 : 16;
+    const chronoWidth = compactMode ? 32 : 46;
     const wheelRadius = innerRadius + levels * ringWidth;
-    const outerRadius = wheelRadius + protractorGap + (showProtractor ? protractorWidth : 0) + chronoGap + (showChronometer ? chronoWidth : 0) + (compactMode ? 52 : 64);
-    const size = Math.ceil(outerRadius * 2 + (compactMode ? 54 : 70));
+    const outerRadius = wheelRadius + protractorGap + (showProtractor ? protractorWidth : 0) + chronoGap + (showChronometer ? chronoWidth : 0) + (compactMode ? 44 : 72);
+    const size = Math.ceil(outerRadius * 2 + (compactMode ? 42 : 60));
     return { innerRadius, ringWidth, wheelRadius, protractorGap, protractorWidth, chronoGap, chronoWidth, outerRadius, size };
   }, [levels, showProtractor, showChronometer, compactMode]);
 
   const render = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const dpr = Math.max(2, window.devicePixelRatio || 1);
+    const dpr = window.devicePixelRatio || 1;
     const cssSize = geometry.size * zoom;
     canvas.style.width = `${cssSize}px`;
     canvas.style.height = `${cssSize}px`;
@@ -159,8 +170,8 @@ export default function GannzillaProWheelExact() {
     ctx.arc(cx, cy, geometry.innerRadius, 0, TWO_PI);
     ctx.fillStyle = '#ffffff';
     ctx.fill();
-    ctx.strokeStyle = '#d2d2d2';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#d4d4d4';
+    ctx.lineWidth = compactMode ? 0.8 : 1;
     ctx.stroke();
     ctx.restore();
 
@@ -175,14 +186,14 @@ export default function GannzillaProWheelExact() {
         const endDeg = direction * (i + 1) * sector;
         const centerDeg = direction * (i + 0.5) * sector;
         const value = numberAtRing(startValue, ring, i, divisions, increment);
-        const text = Number.isInteger(value) ? String(value) : String(Number(value.toFixed(4)));
+        const text = formatNumber(value);
 
         ctx.save();
         wedge(ctx, cx, cy, inner, outer, startDeg, endDeg);
         ctx.fillStyle = bandFill;
         ctx.fill();
-        ctx.strokeStyle = '#d4d4d4';
-        ctx.lineWidth = compactMode ? 0.85 : 1;
+        ctx.strokeStyle = '#d2d2d2';
+        ctx.lineWidth = compactMode ? 0.82 : 1;
         ctx.stroke();
         ctx.restore();
 
@@ -194,7 +205,7 @@ export default function GannzillaProWheelExact() {
       }
     }
 
-    if (highlightVisible) {
+    if (highlightVisible && !compactMode) {
       const hiIndex = Math.max(0, Math.min(divisions - 1, startValue % divisions));
       const inner = geometry.innerRadius;
       const outer = inner + geometry.ringWidth;
@@ -209,8 +220,8 @@ export default function GannzillaProWheelExact() {
       const inner = geometry.wheelRadius + geometry.protractorGap;
       const outer = inner + geometry.protractorWidth;
       ctx.save();
-      ctx.strokeStyle = '#c8c8c8';
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#c7c7c7';
+      ctx.lineWidth = compactMode ? 0.9 : 1;
       ctx.beginPath();
       ctx.arc(cx, cy, inner, 0, TWO_PI);
       ctx.stroke();
@@ -219,17 +230,17 @@ export default function GannzillaProWheelExact() {
       ctx.stroke();
       for (let deg = 0; deg < 360; deg += 5) {
         const major = deg % 30 === 0;
-        const p1 = polar(cx, cy, major ? inner - 3 : inner, direction * deg);
-        const p2 = polar(cx, cy, outer + (major ? 6 : 0), direction * deg);
+        const p1 = polar(cx, cy, major ? inner - 2 : inner, direction * deg);
+        const p2 = polar(cx, cy, outer + (major ? 5 : 0), direction * deg);
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
         ctx.strokeStyle = major ? '#dd4040' : '#b8b8b8';
-        ctx.lineWidth = major ? 1.5 : 1;
+        ctx.lineWidth = major ? 1.2 : 0.8;
         ctx.stroke();
         if (major && showMarks) {
-          const pt = polar(cx, cy, outer + (compactMode ? 17 : 22), direction * deg);
-          drawRotatedText(ctx, `${deg}°`, pt.x, pt.y, direction * deg, compactMode ? 10 : 12, '#555');
+          const pt = polar(cx, cy, outer + (compactMode ? 14 : 22), direction * deg);
+          drawRotatedText(ctx, `${deg}°`, pt.x, pt.y, direction * deg, compactMode ? 8.5 : 14, '#666');
         }
       }
       ctx.restore();
@@ -238,30 +249,30 @@ export default function GannzillaProWheelExact() {
     if (showChronometer) {
       const r = geometry.wheelRadius + geometry.protractorGap + geometry.protractorWidth + geometry.chronoGap;
       ctx.save();
-      ctx.strokeStyle = '#b8cfbf';
-      ctx.lineWidth = compactMode ? 1.35 : 2;
+      ctx.strokeStyle = '#b7cfc1';
+      ctx.lineWidth = compactMode ? 1.2 : 2;
       ctx.beginPath();
       ctx.arc(cx, cy, r, 0, TWO_PI);
       ctx.stroke();
       const labels = ['21 MAR', '5 APR', '21 APR', '6 MAY', '21 MAY', '6 JUN', '21 JUN', '6 JUL', '22 JUL', '6 AUG', '22 AUG', '6 SEP', '22 SEP', '7 OCT', '22 OCT', '6 NOV', '21 NOV', '6 DEC', '21 DEC', '5 JAN', '20 JAN', '4 FEB', '19 FEB', '6 MAR'];
       labels.forEach((label, idx) => {
         const deg = direction * (idx * 360 / labels.length);
-        const p = polar(cx, cy, r + (compactMode ? 21 : 28), deg);
-        drawRotatedText(ctx, label, p.x, p.y, deg, compactMode ? 9 : 12, '#777');
+        const p = polar(cx, cy, r + (compactMode ? 17 : 28), deg);
+        drawRotatedText(ctx, label, p.x, p.y, deg, compactMode ? 7.8 : 13, '#777');
       });
       ctx.restore();
     }
 
     ctx.save();
     const pointerDeg = clockwise ? angle : -angle;
-    const pp = polar(cx, cy, geometry.wheelRadius + (compactMode ? 60 : 80), pointerDeg);
+    const pp = polar(cx, cy, geometry.wheelRadius + (compactMode ? 43 : 80), pointerDeg);
     ctx.translate(pp.x, pp.y);
     ctx.rotate(((pointerDeg - 90) * Math.PI) / 180);
     ctx.fillStyle = '#e93020';
     ctx.beginPath();
-    ctx.moveTo(0, -8);
-    ctx.lineTo(7, 9);
-    ctx.lineTo(-7, 9);
+    ctx.moveTo(0, compactMode ? -7 : -10);
+    ctx.lineTo(compactMode ? 6 : 8, compactMode ? 8 : 10);
+    ctx.lineTo(compactMode ? -6 : -8, compactMode ? 8 : 10);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
@@ -271,17 +282,45 @@ export default function GannzillaProWheelExact() {
     render();
   }, [geometry, zoom, levels, divisions, startValue, increment, clockwise, showMarks, showNumbers, showProtractor, showChronometer, highlightVisible, angle, chronoAngle, compactMode]);
 
+  const centerViewport = () => {
+    const vp = viewportRef.current;
+    const canvas = canvasRef.current;
+    if (!vp || !canvas) return;
+    requestAnimationFrame(() => {
+      vp.scrollLeft = Math.max(0, (canvas.offsetWidth - vp.clientWidth) / 2);
+      vp.scrollTop = Math.max(0, (canvas.offsetHeight - vp.clientHeight) / 2);
+    });
+  };
+
   const fitToScreen = () => {
     const vp = viewportRef.current;
     if (!vp) return;
-    const fit = Math.min((vp.clientWidth - 80) / geometry.size, (vp.clientHeight - 80) / geometry.size) * (compactMode ? 0.78 : 0.86);
-    setZoom(clamp(fit, 0.08, 2));
+    const fit = Math.min((vp.clientWidth - 120) / geometry.size, (vp.clientHeight - 120) / geometry.size);
+    const next = compactMode ? Math.min(fit, 0.52) : fit;
+    setZoom(clamp(next, 0.06, 2));
+    centerViewport();
+  };
+
+  const proSmallView = () => {
+    setCompactMode(true);
+    setVisiblePanel(false);
+    setShowChronometer(true);
+    setShowProtractor(true);
+    setShowMarks(true);
+    setShowNumbers(true);
+    setZoom(0.48);
+    centerViewport();
   };
 
   useEffect(() => {
-    const id = setTimeout(fitToScreen, 100);
+    const id = setTimeout(() => {
+      if (initialCompactMode) proSmallView();
+      else fitToScreen();
+    }, 120);
     return () => clearTimeout(id);
-  }, [geometry.size, compactMode, visiblePanel]);
+  }, [geometry.size]);
+
+  const viewportLeft = visiblePanel ? 330 : 0;
 
   return (
     <div style={{ width: '100vw', height: '100vh', background: '#ffffff', overflow: 'hidden', direction: 'ltr' }}>
@@ -317,20 +356,21 @@ export default function GannzillaProWheelExact() {
         </aside>
       )}
 
-      <button onClick={() => setVisiblePanel((v) => !v)} style={{ position: 'fixed', left: visiblePanel ? 336 : 10, top: 10, zIndex: 40, background: '#fff', border: '1px solid #aaa', borderRadius: 4, color: '#333' }}>
+      <button onClick={() => setVisiblePanel((v) => !v)} style={{ ...buttonStyle, position: 'fixed', left: visiblePanel ? 336 : 10, top: 10, zIndex: 40 }}>
         {visiblePanel ? 'Hide' : 'Show'}
       </button>
 
       <div style={{ position: 'fixed', right: 12, top: 8, zIndex: 30, display: 'flex', gap: 8, alignItems: 'center', background: '#f8f8f8', border: '1px solid #bcbcbc', borderRadius: 4, padding: '4px 8px', color: '#333', direction: 'ltr' }}>
-        <button onClick={() => setZoom((z) => clamp(z - 0.05, 0.08, 2))}>−</button>
+        <button style={buttonStyle} onClick={() => { setZoom((z) => clamp(z - 0.04, 0.06, 2)); centerViewport(); }}>−</button>
         <span>{Math.round(zoom * 100)}%</span>
-        <button onClick={() => setZoom((z) => clamp(z + 0.05, 0.08, 2))}>+</button>
-        <button onClick={fitToScreen}>Fit</button>
-        <button onClick={() => setClockwise((v) => !v)}>{clockwise ? 'Clockwise' : 'Counter'}</button>
+        <button style={buttonStyle} onClick={() => { setZoom((z) => clamp(z + 0.04, 0.06, 2)); centerViewport(); }}>+</button>
+        <button style={buttonStyle} onClick={fitToScreen}>Fit</button>
+        <button style={buttonStyle} onClick={proSmallView}>Pro Small</button>
+        <button style={buttonStyle} onClick={() => setClockwise((v) => !v)}>{clockwise ? 'Clockwise' : 'Counter'}</button>
       </div>
 
-      <div ref={viewportRef} style={{ position: 'absolute', inset: 0, left: visiblePanel ? 330 : 0, overflow: 'auto', background: '#fff' }}>
-        <div style={{ minWidth: '100%', minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: compactMode ? 20 : 30 }}>
+      <div ref={viewportRef} style={{ position: 'absolute', inset: 0, left: viewportLeft, overflow: 'auto', background: '#ffffff' }}>
+        <div style={{ minWidth: '100%', minHeight: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: compactMode ? 22 : 30 }}>
           <canvas ref={canvasRef} style={{ display: 'block', background: '#fff' }} />
         </div>
       </div>
