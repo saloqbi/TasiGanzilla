@@ -8,6 +8,7 @@ import SimpleTriangleTest from './components/GannTools/SimpleTriangleTest';
 import InteractiveTriangle from './components/InteractiveTriangle';
 import GannzillaProWheelExact from './components/GannTools/GannzillaProWheelExact';
 import GannzillaCellHighlightFix from './components/GannTools/GannzillaCellHighlightFix';
+import GannzillaShapeGuard from './components/GannTools/GannzillaShapeGuard';
 import GannzillaSpiralDrawingFix from './components/GannTools/GannzillaSpiralDrawingFix';
 import GannzillaProUiPatch from './components/GannTools/GannzillaProUiPatch';
 
@@ -26,6 +27,7 @@ const App = () => {
             <>
               <GannzillaProWheelExact />
               <GannzillaCellHighlightFix />
+              <GannzillaShapeGuard />
               <GannzillaSpiralDrawingFix />
               <GannzillaProUiPatch />
             </>
