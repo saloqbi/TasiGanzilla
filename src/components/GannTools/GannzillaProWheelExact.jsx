@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const TWO_PI = Math.PI * 2;
+const MIN_ZOOM = 0.05;
+const MAX_ZOOM = 5;
 
 function getSearchParams() {
   if (typeof window === 'undefined') return new URLSearchParams();
@@ -171,6 +173,8 @@ function TopToolbar({ zoom, setZoom, fitToScreen, proSmallView, clockwise, setCl
   const icons = [
     ['cursor', '↖'], ['line', '—'], ['square', '▢'], ['text', 'T'], ['lock', '🔒'], ['zoom', '⌕'], ['fit', '⛶']
   ];
+  const zoomOut = () => setZoom((z) => clamp(z - (z >= 1 ? 0.1 : 0.05), MIN_ZOOM, MAX_ZOOM));
+  const zoomIn = () => setZoom((z) => clamp(z + (z >= 1 ? 0.1 : 0.05), MIN_ZOOM, MAX_ZOOM));
   return (
     <div style={{ position: 'fixed', left: 0, top: 0, right: 0, height: 24, background: '#efefef', borderBottom: '1px solid #bdbdbd', zIndex: 50, display: 'flex', alignItems: 'center', direction: 'ltr', fontFamily: 'Segoe UI, Arial, sans-serif', fontSize: 12, color: '#222' }}>
       <div style={{ width: 330, display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 5, borderRight: '1px solid #c9c9c9', height: '100%' }}>
@@ -185,9 +189,11 @@ function TopToolbar({ zoom, setZoom, fitToScreen, proSmallView, clockwise, setCl
         {icons.map(([key, label]) => (
           <button key={key} onClick={() => key === 'fit' ? fitToScreen() : setTool(key)} style={{ ...toolbarIconStyle, background: tool === key ? '#dceeff' : '#f7f7f7' }}>{label}</button>
         ))}
-        <button onClick={() => setZoom((z) => clamp(z - 0.05, 0.06, 2))} style={toolbarIconStyle}>−</button>
-        <span style={{ minWidth: 38, textAlign: 'center', fontWeight: 700 }}>{Math.round(zoom * 100)}%</span>
-        <button onClick={() => setZoom((z) => clamp(z + 0.05, 0.06, 2))} style={toolbarIconStyle}>＋</button>
+        <button onClick={zoomOut} style={toolbarIconStyle}>−</button>
+        <span style={{ minWidth: 40, textAlign: 'center', fontWeight: 700 }}>{Math.round(zoom * 100)}%</span>
+        <button onClick={zoomIn} style={toolbarIconStyle}>＋</button>
+        <button onClick={() => setZoom(0.9)} style={{ ...buttonStyle, marginLeft: 5 }}>90%</button>
+        <button onClick={() => setZoom(1.25)} style={{ ...buttonStyle, marginLeft: 3 }}>125%</button>
         <button onClick={proSmallView} style={{ ...buttonStyle, marginLeft: 5 }}>Pro Small</button>
         <button onClick={() => setClockwise((v) => !v)} style={{ ...buttonStyle, marginLeft: 5 }}>{clockwise ? 'Clockwise' : 'Counter'}</button>
         <span style={{ marginLeft: 8 }}>🇬🇧 English</span>
@@ -251,13 +257,15 @@ export default function GannzillaProWheelExact() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const dpr = window.devicePixelRatio || 1;
-    const cssSize = geometry.size * zoom;
+    const cssSize = Math.max(1, geometry.size * zoom);
+
     canvas.style.width = `${cssSize}px`;
     canvas.style.height = `${cssSize}px`;
-    canvas.width = Math.ceil(geometry.size * dpr);
-    canvas.height = Math.ceil(geometry.size * dpr);
+    canvas.width = Math.ceil(cssSize * dpr);
+    canvas.height = Math.ceil(cssSize * dpr);
+
     const ctx = canvas.getContext('2d');
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.setTransform(dpr * zoom, 0, 0, dpr * zoom, 0, 0);
     ctx.imageSmoothingEnabled = true;
     ctx.clearRect(0, 0, geometry.size, geometry.size);
     ctx.fillStyle = '#ffffff';
@@ -413,7 +421,7 @@ export default function GannzillaProWheelExact() {
     if (!vp) return;
     const fit = Math.min((vp.clientWidth - 120) / geometry.size, (vp.clientHeight - 120) / geometry.size);
     const next = compactMode ? Math.min(fit, 0.52) : fit;
-    setZoom(clamp(next, 0.06, 2));
+    setZoom(clamp(next, MIN_ZOOM, MAX_ZOOM));
     centerViewport();
   };
 
