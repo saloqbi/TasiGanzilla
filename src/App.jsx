@@ -14,6 +14,7 @@ import GannzillaSpiralDrawingFix from './components/GannTools/GannzillaSpiralDra
 import GannzillaProUiPatch from './components/GannTools/GannzillaProUiPatch';
 import GannzillaOptionsClarityBinding from './components/GannTools/GannzillaOptionsClarityBinding';
 import GannzillaPanelReadableScale from './components/GannTools/GannzillaPanelReadableScale';
+import GannzillaAdvancedOptionSections from './components/GannTools/GannzillaAdvancedOptionSections';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -36,6 +37,7 @@ const App = () => {
               <GannzillaProUiPatch />
               <GannzillaOptionsClarityBinding />
               <GannzillaPanelReadableScale />
+              <GannzillaAdvancedOptionSections />
             </>
           ) : isTestMode ? (
             <TestPage />
