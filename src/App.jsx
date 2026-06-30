@@ -18,6 +18,7 @@ import GannzillaAdvancedOptionSections from './components/GannTools/GannzillaAdv
 import GannzillaAdvancedColorsPatch from './components/GannTools/GannzillaAdvancedColorsPatch';
 import GannzillaExtraPanelsBinding from './components/GannTools/GannzillaExtraPanelsBinding';
 import GannzillaLanguageSwitch from './components/GannTools/GannzillaLanguageSwitch';
+import GannzillaQuickStripRemovePatch from './components/GannTools/GannzillaQuickStripRemovePatch';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -44,6 +45,7 @@ const App = () => {
               <GannzillaAdvancedColorsPatch />
               <GannzillaExtraPanelsBinding />
               <GannzillaLanguageSwitch />
+              <GannzillaQuickStripRemovePatch />
             </>
           ) : isTestMode ? (
             <TestPage />
