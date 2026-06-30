@@ -15,6 +15,7 @@ import GannzillaProUiPatch from './components/GannTools/GannzillaProUiPatch';
 import GannzillaOptionsClarityBinding from './components/GannTools/GannzillaOptionsClarityBinding';
 import GannzillaPanelReadableScale from './components/GannTools/GannzillaPanelReadableScale';
 import GannzillaAdvancedOptionSections from './components/GannTools/GannzillaAdvancedOptionSections';
+import GannzillaAdvancedColorsPatch from './components/GannTools/GannzillaAdvancedColorsPatch';
 import GannzillaExtraPanelsBinding from './components/GannTools/GannzillaExtraPanelsBinding';
 import GannzillaLanguageSwitch from './components/GannTools/GannzillaLanguageSwitch';
 
@@ -40,6 +41,7 @@ const App = () => {
               <GannzillaOptionsClarityBinding />
               <GannzillaPanelReadableScale />
               <GannzillaAdvancedOptionSections />
+              <GannzillaAdvancedColorsPatch />
               <GannzillaExtraPanelsBinding />
               <GannzillaLanguageSwitch />
             </>
