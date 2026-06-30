@@ -1,18 +1,27 @@
 import React from 'react';
 
-const STORE_KEY = 'tasi-gannzilla-wheel-pan-buttons-v3';
+const STORE_KEY = 'tasi-gannzilla-wheel-pan-buttons-v4';
 
-function readPan() {
+function readState() {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {};
-    return Number(saved.panX || 0);
+    return { panX: 0, toolsHidden: false, ...(JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {}) };
   } catch {
-    return 0;
+    return { panX: 0, toolsHidden: false };
   }
 }
 
+function writeState(patch) {
+  const next = { ...readState(), ...patch, updatedAt: new Date().toISOString() };
+  localStorage.setItem(STORE_KEY, JSON.stringify(next));
+  return next;
+}
+
+function readPan() {
+  return Number(readState().panX || 0);
+}
+
 function writePan(panX) {
-  localStorage.setItem(STORE_KEY, JSON.stringify({ panX, updatedAt: new Date().toISOString() }));
+  writeState({ panX });
 }
 
 function getWheelLayers() {
@@ -40,7 +49,7 @@ function applyPan(panX) {
 }
 
 function installStyle() {
-  const styleId = 'gannzilla-wheel-pan-buttons-patch-style-v3';
+  const styleId = 'gannzilla-wheel-pan-buttons-patch-style-v4';
   if (document.getElementById(styleId)) return;
   const style = document.createElement('style');
   style.id = styleId;
@@ -82,7 +91,12 @@ function installStyle() {
       background:#dceeff!important;
       border-color:#6fa4ca!important;
     }
-    [data-gannzilla-hide-old-quick-control="true"]{
+    .gannzilla-wheel-pan-btn.tools-hidden{
+      color:#8a8a8a!important;
+      background:#eeeeee!important;
+    }
+    [data-gannzilla-hide-old-quick-control="true"],
+    [data-gannzilla-tools-toggle-hidden="true"]{
       display:none!important;
       visibility:hidden!important;
       width:0!important;
@@ -148,7 +162,7 @@ function findExactToolbarAnchor() {
   return toolbar ? { parent: toolbar, anchor: null } : null;
 }
 
-function makeButton(label, title, delta) {
+function makePanButton(label, title, delta) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'gannzilla-wheel-pan-btn';
@@ -165,11 +179,65 @@ function makeButton(label, title, delta) {
   return button;
 }
 
+function findToolBars() {
+  const direct = [
+    document.querySelector('[data-gannzilla-shortcut-bar="true"]'),
+    document.querySelector('[data-gannzilla-safe-shape-toolbar="true"]')
+  ].filter(Boolean);
+
+  const heuristic = Array.from(document.querySelectorAll('div'))
+    .filter((node) => {
+      if (node.id === 'gannzilla-wheel-pan-buttons-host-v2' || node.closest?.('#gannzilla-wheel-pan-buttons-host-v2')) return false;
+      if (direct.includes(node)) return false;
+      const rect = node.getBoundingClientRect?.();
+      if (!rect || rect.height < 120 || rect.width > 90 || rect.width < 18) return false;
+      const text = textOf(node);
+      const nearLeftWheel = rect.left > 220 && rect.left < 430 && /12|24|36|4|9|N/.test(text);
+      const nearRightShapes = rect.right > window.innerWidth - 95 && /◁|□|⬠|⬡|⬟|◯|△|◎|◢/.test(text);
+      return nearLeftWheel || nearRightShapes;
+    });
+
+  return Array.from(new Set([...direct, ...heuristic]));
+}
+
+function applyToolsVisibility() {
+  const hidden = !!readState().toolsHidden;
+  findToolBars().forEach((node) => {
+    if (hidden) node.dataset.gannzillaToolsToggleHidden = 'true';
+    else delete node.dataset.gannzillaToolsToggleHidden;
+  });
+
+  const toggleButton = document.querySelector('[data-gannzilla-tools-toggle-button="true"]');
+  if (toggleButton) {
+    toggleButton.classList.toggle('tools-hidden', hidden);
+    toggleButton.textContent = hidden ? '☷' : '☰';
+    toggleButton.title = hidden ? 'إظهار أدوات الصفحة الجانبية' : 'إخفاء أدوات الصفحة الجانبية';
+  }
+}
+
+function makeToolsToggleButton() {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'gannzilla-wheel-pan-btn';
+  button.dataset.gannzillaToolsToggleButton = 'true';
+  button.textContent = readState().toolsHidden ? '☷' : '☰';
+  button.title = readState().toolsHidden ? 'إظهار أدوات الصفحة الجانبية' : 'إخفاء أدوات الصفحة الجانبية';
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation?.();
+    writeState({ toolsHidden: !readState().toolsHidden });
+    applyToolsVisibility();
+  }, true);
+  return button;
+}
+
 function mountPanButtons() {
   installStyle();
   const found = findExactToolbarAnchor();
   if (!found?.parent) {
     hideOldQuickControls();
+    applyToolsVisibility();
     return;
   }
 
@@ -179,8 +247,9 @@ function mountPanButtons() {
     host.id = 'gannzilla-wheel-pan-buttons-host-v2';
     host.className = 'gannzilla-wheel-pan-host';
     host.dataset.gannzillaPanButtons = 'true';
-    host.appendChild(makeButton('◀', 'تحريك العجلة يسار', -40));
-    host.appendChild(makeButton('▶', 'تحريك العجلة يمين', 40));
+    host.appendChild(makeToolsToggleButton());
+    host.appendChild(makePanButton('◀', 'تحريك العجلة يسار', -40));
+    host.appendChild(makePanButton('▶', 'تحريك العجلة يمين', 40));
   }
 
   if (host.parentElement !== found.parent || host.nextSibling !== found.anchor) {
@@ -188,6 +257,7 @@ function mountPanButtons() {
   }
 
   hideOldQuickControls();
+  applyToolsVisibility();
 }
 
 export default function GannzillaWheelPanButtonsPatch() {
@@ -198,6 +268,7 @@ export default function GannzillaWheelPanButtonsPatch() {
     document.getElementById('gannzilla-wheel-pan-buttons-host-v1')?.remove();
     document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v1')?.remove();
     document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v2')?.remove();
+    document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v3')?.remove();
 
     mountPanButtons();
     applyPan(readPan());
@@ -209,9 +280,12 @@ export default function GannzillaWheelPanButtonsPatch() {
     return () => {
       window.clearInterval(timer);
       document.getElementById('gannzilla-wheel-pan-buttons-host-v2')?.remove();
-      document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v3')?.remove();
+      document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v4')?.remove();
       document.querySelectorAll('[data-gannzilla-hide-old-quick-control="true"]').forEach((node) => {
         delete node.dataset.gannzillaHideOldQuickControl;
+      });
+      document.querySelectorAll('[data-gannzilla-tools-toggle-hidden="true"]').forEach((node) => {
+        delete node.dataset.gannzillaToolsToggleHidden;
       });
     };
   }, []);
