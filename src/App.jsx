@@ -38,8 +38,8 @@ const App = () => {
               <GannzillaProUiPatch />
               <GannzillaOptionsClarityBinding />
               <GannzillaPanelReadableScale />
-              <GannzillaExtraPanelsBinding />
               <GannzillaAdvancedOptionSections />
+              <GannzillaExtraPanelsBinding />
             </>
           ) : isTestMode ? (
             <TestPage />
