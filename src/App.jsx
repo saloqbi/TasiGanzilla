@@ -25,7 +25,6 @@ import GannzillaPanelToggleTopbarPatch from './components/GannTools/GannzillaPan
 import GannzillaWheelLineDrawPatch from './components/GannTools/GannzillaWheelLineDrawPatch';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 import GannzillaDigitalNumberClarityPatch from './components/GannTools/GannzillaDigitalNumberClarityPatch';
-import GannzillaInnerNumbersClarityPatch from './components/GannTools/GannzillaInnerNumbersClarityPatch';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -58,7 +57,6 @@ const App = () => {
               <GannzillaLanguageSwitch />
               <GannzillaWheelPanButtonsPatch />
               <GannzillaCardinalBalancePatch />
-              <GannzillaInnerNumbersClarityPatch />
               <GannzillaOptionsBadgeHidePatch />
               <GannzillaPanelToggleTopbarPatch />
               <GannzillaWheelLineDrawPatch />
