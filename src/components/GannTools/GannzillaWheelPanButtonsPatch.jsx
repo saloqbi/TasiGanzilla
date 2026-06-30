@@ -1,6 +1,6 @@
 import React from 'react';
 
-const STORE_KEY = 'tasi-gannzilla-wheel-pan-buttons-v4';
+const STORE_KEY = 'tasi-gannzilla-wheel-pan-buttons-v5';
 
 function readState() {
   try {
@@ -49,7 +49,7 @@ function applyPan(panX) {
 }
 
 function installStyle() {
-  const styleId = 'gannzilla-wheel-pan-buttons-patch-style-v4';
+  const styleId = 'gannzilla-wheel-pan-buttons-patch-style-v5';
   if (document.getElementById(styleId)) return;
   const style = document.createElement('style');
   style.id = styleId;
@@ -119,7 +119,16 @@ function textOf(node) {
 
 function hideNode(node) {
   if (!node || node.closest?.('#gannzilla-wheel-pan-buttons-host-v2')) return;
+  if (node.closest?.('#gannzilla-drawing-ribbon-v1')) return;
   node.dataset.gannzillaHideOldQuickControl = 'true';
+}
+
+function isTopSmallToolbarButton(button) {
+  const rect = button.getBoundingClientRect?.();
+  if (!rect || rect.top > 36 || rect.height > 32 || rect.width > 42) return false;
+  if (button.closest?.('#gannzilla-drawing-ribbon-v1')) return false;
+  if (button.closest?.('#gannzilla-wheel-pan-buttons-host-v2')) return false;
+  return true;
 }
 
 function hideOldQuickControls() {
@@ -128,11 +137,17 @@ function hideOldQuickControls() {
     const text = textOf(button);
     if (text === '90%' || text === '125%' || text === 'Pro Small' || text === 'Clockwise' || text === 'Counter') {
       hideNode(button);
+      return;
+    }
+
+    if (['↖', '—', '▢', '□', 'T'].includes(text) && isTopSmallToolbarButton(button)) {
+      hideNode(button);
     }
   });
 
   Array.from(document.querySelectorAll('span, div')).forEach((node) => {
     if (node.id === 'gannzilla-wheel-pan-buttons-host-v2' || node.closest?.('#gannzilla-wheel-pan-buttons-host-v2')) return;
+    if (node.closest?.('#gannzilla-drawing-ribbon-v1')) return;
     const text = textOf(node);
     const rect = node.getBoundingClientRect?.();
     if (!rect || rect.top > 36 || rect.height > 36) return;
@@ -269,6 +284,7 @@ export default function GannzillaWheelPanButtonsPatch() {
     document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v1')?.remove();
     document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v2')?.remove();
     document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v3')?.remove();
+    document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v4')?.remove();
 
     mountPanButtons();
     applyPan(readPan());
@@ -280,7 +296,7 @@ export default function GannzillaWheelPanButtonsPatch() {
     return () => {
       window.clearInterval(timer);
       document.getElementById('gannzilla-wheel-pan-buttons-host-v2')?.remove();
-      document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v4')?.remove();
+      document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v5')?.remove();
       document.querySelectorAll('[data-gannzilla-hide-old-quick-control="true"]').forEach((node) => {
         delete node.dataset.gannzillaHideOldQuickControl;
       });
