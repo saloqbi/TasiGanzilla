@@ -1,5 +1,7 @@
 import React from 'react';
 
+const CARDINAL_ROTATION_DEG = 5;
+
 export default function GannzillaCellHighlightFix() {
   React.useEffect(() => {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true');
@@ -56,10 +58,26 @@ export default function GannzillaCellHighlightFix() {
       return Number.isFinite(n) && n > 0 ? n : 36;
     };
 
+    const rotationForCanvas = (canvas) => {
+      if (!canvas) return 0;
+      return canvas.dataset.gannzillaCardinalBalanced === 'true' ? CARDINAL_ROTATION_DEG : 0;
+    };
+
+    const getUnrotatedRect = (canvas) => {
+      const visual = canvas.getBoundingClientRect();
+      const width = canvas.offsetWidth || Number.parseFloat(canvas.style.width) || visual.width;
+      const height = canvas.offsetHeight || Number.parseFloat(canvas.style.height) || visual.height;
+      const centerX = visual.left + visual.width / 2;
+      const centerY = visual.top + visual.height / 2;
+      const left = centerX - width / 2;
+      const top = centerY - height / 2;
+      return { left, top, width, height, right: left + width, bottom: top + height };
+    };
+
     const getGeometry = () => {
       const canvas = getWheelCanvas();
       if (!canvas) return null;
-      const rect = canvas.getBoundingClientRect();
+      const rect = getUnrotatedRect(canvas);
       const levels = getSizeValue();
       const divisions = getDivisionsValue();
       const designSize = 470 + 96 * levels;
@@ -74,7 +92,23 @@ export default function GannzillaCellHighlightFix() {
         innerR: 92 * scale,
         ringW: 48 * scale,
         levels,
-        divisions
+        divisions,
+        rotationDeg: rotationForCanvas(canvas)
+      };
+    };
+
+    const inverseRotateClientPoint = (event, g) => {
+      const cxClient = g.rect.left + g.w / 2;
+      const cyClient = g.rect.top + g.h / 2;
+      const x = event.clientX - cxClient;
+      const y = event.clientY - cyClient;
+      if (!g.rotationDeg) return { x: g.cx + x, y: g.cy + y };
+      const rad = (-g.rotationDeg * Math.PI) / 180;
+      const cos = Math.cos(rad);
+      const sin = Math.sin(rad);
+      return {
+        x: g.cx + x * cos - y * sin,
+        y: g.cy + x * sin + y * cos
       };
     };
 
@@ -86,10 +120,9 @@ export default function GannzillaCellHighlightFix() {
     const getCellFromEvent = (event) => {
       const g = getGeometry();
       if (!g) return null;
-      const x = event.clientX - g.rect.left;
-      const y = event.clientY - g.rect.top;
-      const dx = x - g.cx;
-      const dy = y - g.cy;
+      const point = inverseRotateClientPoint(event, g);
+      const dx = point.x - g.cx;
+      const dy = point.y - g.cy;
       const radius = Math.sqrt(dx * dx + dy * dy);
       if (radius < g.innerR || radius > g.innerR + g.ringW * g.levels) return null;
       const ring = Math.floor((radius - g.innerR) / g.ringW) + 1;
@@ -155,7 +188,9 @@ export default function GannzillaCellHighlightFix() {
         zIndex: '42',
         pointerEvents: 'none',
         overflow: 'visible',
-        mixBlendMode: 'multiply'
+        mixBlendMode: 'multiply',
+        transformOrigin: 'center center',
+        transform: g.rotationDeg ? `rotate(${g.rotationDeg}deg)` : 'none'
       });
       return { svg, g };
     };
@@ -224,7 +259,7 @@ export default function GannzillaCellHighlightFix() {
     document.addEventListener('contextmenu', handleRightClick, true);
     window.addEventListener('resize', align);
     window.addEventListener('scroll', align, true);
-    const timer = window.setInterval(align, 500);
+    const timer = window.setInterval(align, 250);
     render();
 
     return () => {
