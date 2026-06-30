@@ -9,7 +9,7 @@ const labels = {
   Protractor: 'المنقلة', Angle: 'الزاوية', Counter: 'العداد', 'Secondary scale': 'المقياس الثانوي',
   Marker: 'المؤشر', Chronometer: 'المؤقت', Range: 'النطاق', Cosmogram: 'الخريطة الكونية',
   Location: 'الموقع', City: 'المدينة', Latitude: 'خط العرض', Longitude: 'خط الطول',
-  'Moon phases': 'أطوار القمر', Cycles: 'الدورات', Tetragram: 'رباعي', Pentagram: 'خماسي', Hexagram: 'سداسي',
+  'Moon phases': 'أطوار القمر', 'Show eclipses': 'إظهار الكسوف', Cycles: 'الدورات', Tetragram: 'رباعي', Pentagram: 'خماسي', Hexagram: 'سداسي',
   Ruler: 'الحاكم', Reverse: 'عكسي', Today: 'اليوم', Date: 'التاريخ', Time: 'الوقت', Now: 'الآن',
   Projections: 'الإسقاطات', Planets: 'الكواكب', Aspects: 'الاتصالات', Inspector: 'المفتش', Figures: 'الأشكال',
   Colors: 'الألوان', Background: 'الخلفية', Grid: 'الشبكة', Circle: 'الدائرة', Zodiac: 'الأبراج', System: 'النظام',
@@ -37,10 +37,10 @@ function translateRaw(text, lang) {
   if (!clean) return text;
   if (lang === 'ar') {
     if (labels[clean]) return labels[clean];
-    return clean.replace(/\b(Layout|Visible|Clockwise|Size|View|Data type|Price|Value|Find|Increment|Highlight|Fill|Levels|Show marks|Show numbers|Protractor|Angle|Counter|Secondary scale|Marker|Chronometer|Range|Cosmogram|Location|Moon phases|Cycles|Tetragram|Pentagram|Hexagram|Projections|Planets|Aspects|Inspector|Figures|Colors|Background|Grid|Circle|Zodiac|System|City|Latitude|Longitude|Now|Date|Time|Today|Reverse|Ruler|Quote|Start|Step|Count|Label|Lock|Hide|Sun|Moon|Mercury|Venus|Mars|Ceres|Jupiter|Saturn|Uranus|Neptune|Pluto|Eris|Summary|Average|White|Smoke|Cream|Red|Green|Plum|Blue|Gold|Black|Annual|Monthly|Weekly|Daily|Custom|Geocentric|Heliocentric|Topocentric|None|Radix|Transit|Default|Add|solid|dashed|dashdot|thin|Solid|Dashed|Dashdot|Thin)\b/g, (m) => labels[m] || m);
+    return clean.replace(/\b(Layout|Visible|Clockwise|Size|View|Data type|Price|Value|Find|Increment|Highlight|Fill|Levels|Show marks|Show numbers|Protractor|Angle|Counter|Secondary scale|Marker|Chronometer|Range|Cosmogram|Location|Moon phases|Show eclipses|Cycles|Tetragram|Pentagram|Hexagram|Projections|Planets|Aspects|Inspector|Figures|Colors|Background|Grid|Circle|Zodiac|System|City|Latitude|Longitude|Now|Date|Time|Today|Reverse|Ruler|Quote|Start|Step|Count|Label|Lock|Hide|Sun|Moon|Mercury|Venus|Mars|Ceres|Jupiter|Saturn|Uranus|Neptune|Pluto|Eris|Summary|Average|White|Smoke|Cream|Red|Green|Plum|Blue|Gold|Black|Annual|Monthly|Weekly|Daily|Custom|Geocentric|Heliocentric|Topocentric|None|Radix|Transit|Default|Add|solid|dashed|dashdot|thin|Solid|Dashed|Dashdot|Thin)\b/g, (m) => labels[m] || m);
   }
   if (reverseLabels[clean]) return reverseLabels[clean];
-  return clean.replace(/التخطيط|ظاهر|مع عقارب الساعة|الحجم|العرض|نوع البيانات|السعر|القيمة|بحث|الزيادة|التمييز|التعبئة|المستويات|إظهار العلامات|إظهار الأرقام|المنقلة|الزاوية|العداد|المقياس الثانوي|المؤشر|المؤقت|النطاق|الخريطة الكونية|الموقع|أطوار القمر|الدورات|رباعي|خماسي|سداسي|الإسقاطات|الكواكب|الاتصالات|المفتش|الأشكال|الألوان|الخلفية|الشبكة|الدائرة|الأبراج|النظام|المدينة|خط العرض|خط الطول|الآن|التاريخ|الوقت|اليوم|عكسي|الحاكم|الاقتباس|البداية|الخطوة|العدد|التسمية|قفل|إخفاء|الشمس|القمر|عطارد|الزهرة|المريخ|سيريس|المشتري|زحل|أورانوس|نبتون|بلوتو|إيريس|المجموع|المتوسط|أبيض|دخاني|كريمي|أحمر|أخضر|بنفسجي|أزرق|ذهبي|أسود|سنوي|شهري|أسبوعي|يومي|مخصص|مركز الأرض|مركز الشمس|مركزي موضعي|لا يوجد|الراديكس|العبور|افتراضي|إضافة|متصل|متقطع|شرطة ونقطة|رفيع/g, (m) => reverseLabels[m] || m);
+  return clean.replace(/التخطيط|ظاهر|مع عقارب الساعة|الحجم|العرض|نوع البيانات|السعر|القيمة|بحث|الزيادة|التمييز|التعبئة|المستويات|إظهار العلامات|إظهار الأرقام|المنقلة|الزاوية|العداد|المقياس الثانوي|المؤشر|المؤقت|النطاق|الخريطة الكونية|الموقع|أطوار القمر|إظهار الكسوف|الدورات|رباعي|خماسي|سداسي|الإسقاطات|الكواكب|الاتصالات|المفتش|الأشكال|الألوان|الخلفية|الشبكة|الدائرة|الأبراج|النظام|المدينة|خط العرض|خط الطول|الآن|التاريخ|الوقت|اليوم|عكسي|الحاكم|الاقتباس|البداية|الخطوة|العدد|التسمية|قفل|إخفاء|الشمس|القمر|عطارد|الزهرة|المريخ|سيريس|المشتري|زحل|أورانوس|نبتون|بلوتو|إيريس|المجموع|المتوسط|أبيض|دخاني|كريمي|أحمر|أخضر|بنفسجي|أزرق|ذهبي|أسود|سنوي|شهري|أسبوعي|يومي|مخصص|مركز الأرض|مركز الشمس|مركزي موضعي|لا يوجد|الراديكس|العبور|افتراضي|إضافة|متصل|متقطع|شرطة ونقطة|رفيع/g, (m) => reverseLabels[m] || m);
 }
 
 function applyLanguage(lang) {
@@ -97,20 +97,29 @@ export default function GannzillaLanguageSwitch() {
     if (!isWheelMode) return undefined;
 
     const style = document.createElement('style');
-    style.id = 'gannzilla-language-switch-style-v3';
+    style.id = 'gannzilla-language-switch-style-v4';
     style.textContent = `
       .gannzilla-lang-switch{position:fixed;top:6px;left:78px;z-index:9998;display:flex;align-items:center;gap:6px;background:#ececec;border:1px solid #9d9d9d;border-radius:2px;padding:3px 6px;box-shadow:0 1px 3px rgba(0,0,0,.18);}
       .gannzilla-lang-flag{font-size:30px;line-height:1;transform:scale(1.15);transform-origin:center;}
       .gannzilla-lang-select{height:32px;min-width:142px;font-size:18px;font-weight:800;border:1px solid #777;background:#fff;color:#111;padding:2px 6px;}
       body[data-gannzilla-language="ar"] aside{direction:rtl;}
-      body[data-gannzilla-language="ar"] aside .gz-label,body[data-gannzilla-language="ar"] aside .gzx-label{padding-left:0!important;padding-right:30px!important;text-align:right;}
-      body[data-gannzilla-language="ar"] aside .gz-value,body[data-gannzilla-language="ar"] aside .gzx-value{border-left:0!important;border-right:1px solid #cfcfcf!important;}
-      body[data-gannzilla-language="ar"] aside .gz-aspect-row{grid-template-columns:1fr 70px 34px 172px!important;direction:ltr!important;}
-      body[data-gannzilla-language="ar"] aside .gz-aspect-name{direction:rtl!important;text-align:right!important;justify-content:flex-end!important;padding-left:0!important;padding-right:32px!important;}
+      body[data-gannzilla-language="ar"] aside .gz-row,body[data-gannzilla-language="ar"] aside .gzx-row{grid-template-columns:260px 1fr 36px!important;min-height:52px!important;}
+      body[data-gannzilla-language="ar"] aside .gz-label,body[data-gannzilla-language="ar"] aside .gzx-label{padding-left:0!important;padding-right:34px!important;text-align:right!important;font-size:26px!important;font-weight:900!important;line-height:1.35!important;color:#222!important;}
+      body[data-gannzilla-language="ar"] aside .gz-header,body[data-gannzilla-language="ar"] aside .gzx-header{min-height:54px!important;grid-template-columns:36px 1fr 36px!important;}
+      body[data-gannzilla-language="ar"] aside .gz-header b,body[data-gannzilla-language="ar"] aside .gzx-header b{font-size:28px!important;font-weight:950!important;line-height:1.25!important;}
+      body[data-gannzilla-language="ar"] aside .gz-toggle,body[data-gannzilla-language="ar"] aside .gzx-toggle{font-size:30px!important;}
+      body[data-gannzilla-language="ar"] aside .gz-value,body[data-gannzilla-language="ar"] aside .gzx-value{border-left:0!important;border-right:1px solid #cfcfcf!important;font-size:24px!important;min-height:48px!important;}
+      body[data-gannzilla-language="ar"] aside input,body[data-gannzilla-language="ar"] aside select{height:44px!important;min-height:44px!important;font-size:24px!important;font-weight:850!important;}
+      body[data-gannzilla-language="ar"] aside option{font-size:24px!important;font-weight:850!important;}
+      body[data-gannzilla-language="ar"] aside input[type="checkbox"]{width:26px!important;height:26px!important;min-height:26px!important;}
+      body[data-gannzilla-language="ar"] aside .gz-aspect-row{grid-template-columns:1fr 90px 46px 260px!important;min-height:58px!important;direction:ltr!important;}
+      body[data-gannzilla-language="ar"] aside .gz-aspect-name{direction:rtl!important;text-align:right!important;justify-content:flex-end!important;padding-left:0!important;padding-right:34px!important;font-size:24px!important;font-weight:900!important;}
       body[data-gannzilla-language="ar"] aside .gz-aspect-style{direction:rtl!important;}
+      body[data-gannzilla-language="ar"] aside .gz-aspect-orb{font-size:22px!important;font-weight:900!important;}
     `;
     document.getElementById('gannzilla-language-switch-style-v1')?.remove();
     document.getElementById('gannzilla-language-switch-style-v2')?.remove();
+    document.getElementById('gannzilla-language-switch-style-v3')?.remove();
     document.head.appendChild(style);
 
     let el = document.getElementById('gannzilla-language-switch-v1');
@@ -129,7 +138,7 @@ export default function GannzillaLanguageSwitch() {
     return () => {
       window.clearInterval(timer);
       document.getElementById('gannzilla-language-switch-v1')?.remove();
-      document.getElementById('gannzilla-language-switch-style-v3')?.remove();
+      document.getElementById('gannzilla-language-switch-style-v4')?.remove();
     };
   }, [lang]);
 
