@@ -21,6 +21,7 @@ import GannzillaLanguageSwitch from './components/GannTools/GannzillaLanguageSwi
 import GannzillaWheelPanButtonsPatch from './components/GannTools/GannzillaWheelPanButtonsPatch';
 import GannzillaCardinalBalancePatch from './components/GannTools/GannzillaCardinalBalancePatch';
 import GannzillaOptionsBadgeHidePatch from './components/GannTools/GannzillaOptionsBadgeHidePatch';
+import GannzillaPanelToggleTopbarPatch from './components/GannTools/GannzillaPanelToggleTopbarPatch';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -50,6 +51,7 @@ const App = () => {
               <GannzillaWheelPanButtonsPatch />
               <GannzillaCardinalBalancePatch />
               <GannzillaOptionsBadgeHidePatch />
+              <GannzillaPanelToggleTopbarPatch />
             </>
           ) : isTestMode ? (
             <TestPage />
