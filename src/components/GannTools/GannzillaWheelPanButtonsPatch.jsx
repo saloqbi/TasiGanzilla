@@ -1,6 +1,6 @@
 import React from 'react';
 
-const STORE_KEY = 'tasi-gannzilla-wheel-pan-buttons-v1';
+const STORE_KEY = 'tasi-gannzilla-wheel-pan-buttons-v2';
 
 function readPan() {
   try {
@@ -40,23 +40,33 @@ function applyPan(panX) {
 }
 
 function installStyle() {
-  const styleId = 'gannzilla-wheel-pan-buttons-patch-style-v1';
+  const styleId = 'gannzilla-wheel-pan-buttons-patch-style-v2';
   if (document.getElementById(styleId)) return;
   const style = document.createElement('style');
   style.id = styleId;
   style.textContent = `
+    .gannzilla-wheel-pan-host{
+      display:inline-flex!important;
+      align-items:center!important;
+      direction:ltr!important;
+      margin-left:5px!important;
+      margin-right:3px!important;
+      gap:2px!important;
+      vertical-align:middle!important;
+    }
     .gannzilla-wheel-pan-btn{
-      height:23px!important;
-      min-width:25px!important;
-      width:25px!important;
-      border:1px solid #98a8b5!important;
-      background:linear-gradient(#ffffff,#dfe8ef)!important;
-      color:#1d5f95!important;
+      height:22px!important;
+      min-width:26px!important;
+      width:26px!important;
+      border:1px solid #9b9b9b!important;
+      border-radius:2px!important;
+      background:#f7f7f7!important;
+      color:#1c75bc!important;
       font-size:14px!important;
       font-weight:900!important;
       line-height:1!important;
       padding:0!important;
-      margin:0 1px 0 0!important;
+      margin:0!important;
       display:inline-flex!important;
       align-items:center!important;
       justify-content:center!important;
@@ -66,10 +76,11 @@ function installStyle() {
       direction:ltr!important;
       visibility:visible!important;
       opacity:1!important;
+      pointer-events:auto!important;
     }
     .gannzilla-wheel-pan-btn:hover{
-      background:linear-gradient(#eaf5ff,#cfe7ff)!important;
-      border-color:#5e9acc!important;
+      background:#dceeff!important;
+      border-color:#6fa4ca!important;
     }
   `;
   document.head.appendChild(style);
@@ -79,70 +90,60 @@ function textOf(node) {
   return (node?.textContent || '').replace(/\s+/g, ' ').trim();
 }
 
-function findExistingToolbar() {
-  const nodes = Array.from(document.querySelectorAll('div, span'));
-  const candidates = nodes
-    .map((node) => ({ node, rect: node.getBoundingClientRect?.(), text: textOf(node) }))
-    .filter(({ node, rect, text }) => {
-      if (!rect || rect.height < 18 || rect.height > 48 || rect.width < 120 || rect.width > 900) return false;
-      if (node.id === 'gannzilla-wheel-pan-buttons-host-v1') return false;
-      if (node.closest?.('#gannzilla-wheel-pan-buttons-host-v1')) return false;
-      const hasToolbarText = /70%|90%|125%|Clockwise|Pro Small|English/.test(text);
-      const hasToolIcons = /↖|—|□|T|⊖|⊕|⛶/.test(text);
-      return hasToolbarText || hasToolIcons;
-    })
-    .sort((a, b) => {
-      const ay = a.rect.top;
-      const by = b.rect.top;
-      if (Math.abs(ay - by) > 5) return ay - by;
-      return a.rect.left - b.rect.left;
-    });
+function findExactToolbarAnchor() {
+  const buttons = Array.from(document.querySelectorAll('button'));
+  const button90 = buttons.find((button) => textOf(button) === '90%');
+  if (button90?.parentElement) return { parent: button90.parentElement, anchor: button90 };
 
-  return candidates[0]?.node || null;
+  const button125 = buttons.find((button) => textOf(button) === '125%');
+  if (button125?.parentElement) return { parent: button125.parentElement, anchor: button125 };
+
+  const proSmall = buttons.find((button) => textOf(button) === 'Pro Small');
+  if (proSmall?.parentElement) return { parent: proSmall.parentElement, anchor: proSmall };
+
+  const toolbar = Array.from(document.querySelectorAll('div'))
+    .map((node) => ({ node, text: textOf(node), rect: node.getBoundingClientRect?.() }))
+    .filter(({ text, rect }) => rect && rect.top <= 28 && rect.height >= 18 && rect.height <= 40 && /90%|125%|Pro Small|Clockwise/.test(text))
+    .sort((a, b) => b.text.length - a.text.length)[0]?.node;
+
+  return toolbar ? { parent: toolbar, anchor: null } : null;
+}
+
+function makeButton(label, title, delta) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'gannzilla-wheel-pan-btn';
+  button.title = title;
+  button.textContent = label;
+  button.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation?.();
+    const next = Math.max(-700, Math.min(700, readPan() + delta));
+    writePan(next);
+    applyPan(next);
+  }, true);
+  return button;
 }
 
 function mountPanButtons() {
   installStyle();
+  const found = findExactToolbarAnchor();
+  if (!found?.parent) return;
 
-  const toolbar = findExistingToolbar();
-  if (!toolbar) return;
-  if (toolbar.querySelector?.('[data-gannzilla-pan-buttons="true"]')) return;
+  let host = document.getElementById('gannzilla-wheel-pan-buttons-host-v2');
+  if (!host) {
+    host = document.createElement('span');
+    host.id = 'gannzilla-wheel-pan-buttons-host-v2';
+    host.className = 'gannzilla-wheel-pan-host';
+    host.dataset.gannzillaPanButtons = 'true';
+    host.appendChild(makeButton('◀', 'تحريك العجلة يسار', -40));
+    host.appendChild(makeButton('▶', 'تحريك العجلة يمين', 40));
+  }
 
-  const host = document.createElement('span');
-  host.id = 'gannzilla-wheel-pan-buttons-host-v1';
-  host.dataset.gannzillaPanButtons = 'true';
-  host.style.display = 'inline-flex';
-  host.style.alignItems = 'center';
-  host.style.direction = 'ltr';
-  host.style.marginRight = '2px';
-
-  const left = document.createElement('button');
-  left.type = 'button';
-  left.className = 'gannzilla-wheel-pan-btn';
-  left.title = 'تحريك العجلة يسار';
-  left.textContent = '◀';
-
-  const right = document.createElement('button');
-  right.type = 'button';
-  right.className = 'gannzilla-wheel-pan-btn';
-  right.title = 'تحريك العجلة يمين';
-  right.textContent = '▶';
-
-  const move = (delta, event) => {
-    event?.preventDefault();
-    event?.stopPropagation();
-    event?.stopImmediatePropagation?.();
-    const next = Math.max(-700, Math.min(700, readPan() + delta));
-    writePan(next);
-    applyPan(next);
-  };
-
-  left.addEventListener('click', (event) => move(-40, event), true);
-  right.addEventListener('click', (event) => move(40, event), true);
-
-  host.appendChild(left);
-  host.appendChild(right);
-  toolbar.insertBefore(host, toolbar.firstChild);
+  if (host.parentElement !== found.parent || host.nextSibling !== found.anchor) {
+    found.parent.insertBefore(host, found.anchor || found.parent.firstChild);
+  }
 }
 
 export default function GannzillaWheelPanButtonsPatch() {
@@ -150,17 +151,20 @@ export default function GannzillaWheelPanButtonsPatch() {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true');
     if (!isWheelMode) return undefined;
 
+    document.getElementById('gannzilla-wheel-pan-buttons-host-v1')?.remove();
+    document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v1')?.remove();
+
     mountPanButtons();
     applyPan(readPan());
     const timer = window.setInterval(() => {
       mountPanButtons();
       applyPan(readPan());
-    }, 350);
+    }, 250);
 
     return () => {
       window.clearInterval(timer);
-      document.getElementById('gannzilla-wheel-pan-buttons-host-v1')?.remove();
-      document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v1')?.remove();
+      document.getElementById('gannzilla-wheel-pan-buttons-host-v2')?.remove();
+      document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v2')?.remove();
     };
   }, []);
 
