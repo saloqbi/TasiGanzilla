@@ -1,12 +1,12 @@
 import React from 'react';
 
-const STORE_KEY = 'tasi-gannzilla-wheel-pan-buttons-v5';
+const STORE_KEY = 'tasi-gannzilla-wheel-pan-buttons-v6';
 
 function readState() {
   try {
-    return { panX: 0, toolsHidden: false, ...(JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {}) };
+    return { panX: 0, panY: 0, toolsHidden: false, ...(JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {}) };
   } catch {
-    return { panX: 0, toolsHidden: false };
+    return { panX: 0, panY: 0, toolsHidden: false };
   }
 }
 
@@ -17,11 +17,12 @@ function writeState(patch) {
 }
 
 function readPan() {
-  return Number(readState().panX || 0);
+  const state = readState();
+  return { x: Number(state.panX || 0), y: Number(state.panY || 0) };
 }
 
-function writePan(panX) {
-  writeState({ panX });
+function writePan(panX, panY) {
+  writeState({ panX, panY });
 }
 
 function getWheelLayers() {
@@ -40,16 +41,16 @@ function getWheelLayers() {
   ].filter(Boolean);
 }
 
-function applyPan(panX) {
+function applyPan(panX, panY) {
   getWheelLayers().forEach((layer) => {
     layer.style.setProperty('transform-origin', 'center center', 'important');
-    layer.style.setProperty('translate', `${panX}px 0`, 'important');
+    layer.style.setProperty('translate', `${panX}px ${panY}px`, 'important');
   });
-  window.dispatchEvent(new CustomEvent('gannzilla:wheel-pan-change', { detail: { panX } }));
+  window.dispatchEvent(new CustomEvent('gannzilla:wheel-pan-change', { detail: { panX, panY } }));
 }
 
 function installStyle() {
-  const styleId = 'gannzilla-wheel-pan-buttons-patch-style-v5';
+  const styleId = 'gannzilla-wheel-pan-buttons-patch-style-v6';
   if (document.getElementById(styleId)) return;
   const style = document.createElement('style');
   style.id = styleId;
@@ -177,7 +178,7 @@ function findExactToolbarAnchor() {
   return toolbar ? { parent: toolbar, anchor: null } : null;
 }
 
-function makePanButton(label, title, delta) {
+function makePanButton(label, title, deltaX, deltaY) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'gannzilla-wheel-pan-btn';
@@ -187,9 +188,11 @@ function makePanButton(label, title, delta) {
     event.preventDefault();
     event.stopPropagation();
     event.stopImmediatePropagation?.();
-    const next = Math.max(-700, Math.min(700, readPan() + delta));
-    writePan(next);
-    applyPan(next);
+    const current = readPan();
+    const nextX = Math.max(-700, Math.min(700, current.x + deltaX));
+    const nextY = Math.max(-700, Math.min(700, current.y + deltaY));
+    writePan(nextX, nextY);
+    applyPan(nextX, nextY);
   }, true);
   return button;
 }
@@ -263,8 +266,10 @@ function mountPanButtons() {
     host.className = 'gannzilla-wheel-pan-host';
     host.dataset.gannzillaPanButtons = 'true';
     host.appendChild(makeToolsToggleButton());
-    host.appendChild(makePanButton('◀', 'تحريك العجلة يسار', -40));
-    host.appendChild(makePanButton('▶', 'تحريك العجلة يمين', 40));
+    host.appendChild(makePanButton('▲', 'تحريك العجلة للأعلى', 0, -40));
+    host.appendChild(makePanButton('▼', 'تحريك العجلة للأسفل', 0, 40));
+    host.appendChild(makePanButton('◀', 'تحريك العجلة يسار', -40, 0));
+    host.appendChild(makePanButton('▶', 'تحريك العجلة يمين', 40, 0));
   }
 
   if (host.parentElement !== found.parent || host.nextSibling !== found.anchor) {
@@ -285,18 +290,21 @@ export default function GannzillaWheelPanButtonsPatch() {
     document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v2')?.remove();
     document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v3')?.remove();
     document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v4')?.remove();
+    document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v5')?.remove();
 
     mountPanButtons();
-    applyPan(readPan());
+    const pan = readPan();
+    applyPan(pan.x, pan.y);
     const timer = window.setInterval(() => {
       mountPanButtons();
-      applyPan(readPan());
+      const current = readPan();
+      applyPan(current.x, current.y);
     }, 250);
 
     return () => {
       window.clearInterval(timer);
       document.getElementById('gannzilla-wheel-pan-buttons-host-v2')?.remove();
-      document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v5')?.remove();
+      document.getElementById('gannzilla-wheel-pan-buttons-patch-style-v6')?.remove();
       document.querySelectorAll('[data-gannzilla-hide-old-quick-control="true"]').forEach((node) => {
         delete node.dataset.gannzillaHideOldQuickControl;
       });
