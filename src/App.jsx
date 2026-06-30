@@ -24,6 +24,7 @@ import GannzillaOptionsBadgeHidePatch from './components/GannTools/GannzillaOpti
 import GannzillaPanelToggleTopbarPatch from './components/GannTools/GannzillaPanelToggleTopbarPatch';
 import GannzillaWheelLineDrawPatch from './components/GannTools/GannzillaWheelLineDrawPatch';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
+import GannzillaDigitalNumberClarityPatch from './components/GannTools/GannzillaDigitalNumberClarityPatch';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -41,6 +42,7 @@ const App = () => {
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
             <>
+              <GannzillaDigitalNumberClarityPatch />
               <GannzillaProWheelExact />
               <GannzillaCellHighlightFix />
               <GannzillaFrameShapeMode />
