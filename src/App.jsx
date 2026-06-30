@@ -16,6 +16,7 @@ import GannzillaOptionsClarityBinding from './components/GannTools/GannzillaOpti
 import GannzillaPanelReadableScale from './components/GannTools/GannzillaPanelReadableScale';
 import GannzillaAdvancedOptionSections from './components/GannTools/GannzillaAdvancedOptionSections';
 import GannzillaExtraPanelsBinding from './components/GannTools/GannzillaExtraPanelsBinding';
+import GannzillaLanguageSwitch from './components/GannTools/GannzillaLanguageSwitch';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -40,6 +41,7 @@ const App = () => {
               <GannzillaPanelReadableScale />
               <GannzillaAdvancedOptionSections />
               <GannzillaExtraPanelsBinding />
+              <GannzillaLanguageSwitch />
             </>
           ) : isTestMode ? (
             <TestPage />
