@@ -23,11 +23,13 @@ import GannzillaCardinalBalancePatch from './components/GannTools/GannzillaCardi
 import GannzillaOptionsBadgeHidePatch from './components/GannTools/GannzillaOptionsBadgeHidePatch';
 import GannzillaPanelToggleTopbarPatch from './components/GannTools/GannzillaPanelToggleTopbarPatch';
 import GannzillaWheelLineDrawPatch from './components/GannTools/GannzillaWheelLineDrawPatch';
+import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
+  const isArabicAiWheelMode = search.includes('gannzillaArabicAI=true') || search.includes('aiWheel=true');
   const isGannzillaProWheelMode = search.includes('gannzillaPro=true') || search.includes('wheelPro=true');
   const isEnhancedMode = search.includes('enhanced=true') || true; // افتراضياً الإصدار المحسن
   
@@ -35,7 +37,9 @@ const App = () => {
     <ToolProvider>
       <LanguageProvider>
         <div>
-          {isGannzillaProWheelMode ? (
+          {isArabicAiWheelMode ? (
+            <GannzillaArabicAiWheelSystemV1 />
+          ) : isGannzillaProWheelMode ? (
             <>
               <GannzillaProWheelExact />
               <GannzillaCellHighlightFix />
