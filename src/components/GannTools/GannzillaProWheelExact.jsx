@@ -42,6 +42,15 @@ function formatNumber(value) {
   return String(Number(value.toFixed(4)));
 }
 
+function wheelNumberColor(value) {
+  const n = Math.trunc(Number(value));
+  if (!Number.isFinite(n)) return '#111111';
+  const mod = ((n % 3) + 3) % 3;
+  if (mod === 1) return '#d71920';
+  if (mod === 2) return '#0b45c5';
+  return '#111111';
+}
+
 function drawRotatedText(ctx, text, x, y, angleDeg, fontSize, color = '#111') {
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
@@ -313,7 +322,7 @@ export default function GannzillaProWheelExact() {
         if (showNumbers) {
           const p = polar(cx, cy, mid, centerDeg);
           const fs = fontSizeForCell(mid, geometry.ringWidth, divisions, text.length, compactMode);
-          drawRotatedText(ctx, text, p.x, p.y, centerDeg, fs, '#111');
+          drawRotatedText(ctx, text, p.x, p.y, centerDeg, fs, wheelNumberColor(value));
         }
       }
     }
