@@ -56,37 +56,6 @@ function polar(cx, cy, radius, deg) {
   return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
 }
 
-function textRotation(deg) {
-  let rot = deg - 90;
-  while (rot > 180) rot -= 360;
-  while (rot < -180) rot += 360;
-  if (rot > 90) rot -= 180;
-  if (rot < -90) rot += 180;
-  return rot;
-}
-
-function wheelColor(value) {
-  const mod = ((Math.trunc(Number(value)) % 3) + 3) % 3;
-  if (mod === 1) return '#e71921';
-  if (mod === 2) return '#083fc2';
-  return '#111111';
-}
-
-function arcPath(cx, cy, innerR, outerR, startDeg, endDeg) {
-  const startOuter = polar(cx, cy, outerR, startDeg);
-  const endOuter = polar(cx, cy, outerR, endDeg);
-  const startInner = polar(cx, cy, innerR, startDeg);
-  const endInner = polar(cx, cy, innerR, endDeg);
-  const large = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
-  return [
-    `M ${startOuter.x.toFixed(2)} ${startOuter.y.toFixed(2)}`,
-    `A ${outerR.toFixed(2)} ${outerR.toFixed(2)} 0 ${large} 1 ${endOuter.x.toFixed(2)} ${endOuter.y.toFixed(2)}`,
-    `L ${endInner.x.toFixed(2)} ${endInner.y.toFixed(2)}`,
-    `A ${innerR.toFixed(2)} ${innerR.toFixed(2)} 0 ${large} 0 ${startInner.x.toFixed(2)} ${startInner.y.toFixed(2)}`,
-    'Z'
-  ].join(' ');
-}
-
 export default function GannzillaCenterClockRingPatch() {
   const [tick, setTick] = React.useState(0);
   const [box, setBox] = React.useState(null);
@@ -125,61 +94,22 @@ export default function GannzillaCenterClockRingPatch() {
   const cx = box.width / 2;
   const cy = box.height / 2;
   const scale = box.scale;
-  const centerR = Math.max(46, 78 * scale);
-  const numbersInner = Math.max(centerR + 5, 88 * scale);
-  const numbersOuter = Math.max(numbersInner + 28, 140 * scale);
-  const anglesInner = numbersOuter + Math.max(4, 5 * scale);
-  const anglesOuter = anglesInner + Math.max(24, 36 * scale);
+  const centerR = Math.max(72, 122 * scale);
+  const innerCircleR = centerR * 0.58;
+  const numbersR = centerR * 0.82;
   const now = getKsaParts();
   void tick;
 
-  const numberFont = Math.max(10, 17 * scale);
-  const angleFont = Math.max(12, 25 * scale);
-  const timeFont = Math.max(15, 42 * scale);
-
-  const angleSectors = Array.from({ length: 36 }, (_, i) => {
-    const start = i * 10;
-    const end = start + 10;
-    return (
-      <path
-        key={`s-${i}`}
-        d={arcPath(cx, cy, anglesInner, anglesOuter, start, end)}
-        fill="rgba(196,196,196,.92)"
-        stroke="rgba(255,255,255,.88)"
-        strokeWidth={Math.max(0.7, 1.1 * scale)}
-      />
-    );
-  });
-
-  const angleLabels = Array.from({ length: 36 }, (_, i) => {
-    const deg = (i + 1) * 10;
-    const angle = deg === 360 ? 0 : deg;
-    const p = polar(cx, cy, (anglesInner + anglesOuter) / 2, angle);
-    return (
-      <text
-        key={`a-${deg}`}
-        x={p.x}
-        y={p.y}
-        transform={`rotate(${textRotation(angle)} ${p.x} ${p.y})`}
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontFamily="Segoe UI, Tahoma, Arial, sans-serif"
-        fontWeight="900"
-        fontSize={angleFont}
-        fill={wheelColor(deg / 10)}
-        stroke="rgba(255,255,255,.78)"
-        strokeWidth={Math.max(0.6, 0.9 * scale)}
-        paintOrder="stroke fill"
-      >
-        {deg}
-      </text>
-    );
-  });
+  const numberFont = Math.max(10, 13.2 * scale);
+  const timeFont = Math.max(16, 30 * scale);
+  const titleFont = Math.max(11, 16.5 * scale);
+  const smallFont = Math.max(8.5, 12.2 * scale);
+  const ksaFont = Math.max(9, 12.4 * scale);
 
   const ringNumbers = Array.from({ length: 36 }, (_, i) => {
     const n = i + 1;
     const angle = n === 36 ? 0 : n * 10;
-    const p = polar(cx, cy, (numbersInner + numbersOuter) / 2, angle);
+    const p = polar(cx, cy, numbersR, angle);
     return (
       <text
         key={`n-${n}`}
@@ -190,10 +120,11 @@ export default function GannzillaCenterClockRingPatch() {
         fontFamily="Segoe UI, Tahoma, Arial, sans-serif"
         fontWeight="950"
         fontSize={numberFont}
-        fill="#e8f6ff"
-        stroke="rgba(8,17,28,.44)"
-        strokeWidth={Math.max(0.5, 1 * scale)}
+        fill="#d8f0ff"
+        stroke="rgba(18,30,42,.42)"
+        strokeWidth={Math.max(0.45, 0.82 * scale)}
         paintOrder="stroke fill"
+        style={{ filter: 'drop-shadow(0 0 4px rgba(70,165,255,.48))' }}
       >
         {n}
       </text>
@@ -217,42 +148,26 @@ export default function GannzillaCenterClockRingPatch() {
         overflow: 'visible',
         textRendering: 'geometricPrecision',
         shapeRendering: 'geometricPrecision',
-        filter: 'drop-shadow(0 7px 18px rgba(0,0,0,.16))'
+        filter: 'drop-shadow(0 6px 16px rgba(0,0,0,.18))'
       }}
     >
       <defs>
-        <radialGradient id="gzCenterClockGradV1" cx="48%" cy="42%" r="66%">
-          <stop offset="0%" stopColor="#3a3a3a" />
-          <stop offset="48%" stopColor="#171717" />
-          <stop offset="100%" stopColor="#4b4b4b" />
-        </radialGradient>
-        <radialGradient id="gzNumberRingGradV1" cx="52%" cy="42%" r="70%">
-          <stop offset="0%" stopColor="#5c5c5c" />
-          <stop offset="55%" stopColor="#303030" />
+        <radialGradient id="gzCenterClockGradV2" cx="48%" cy="42%" r="67%">
+          <stop offset="0%" stopColor="#353535" />
+          <stop offset="48%" stopColor="#161616" />
           <stop offset="100%" stopColor="#686868" />
         </radialGradient>
       </defs>
 
-      {angleSectors}
-      <path
-        d={arcPath(cx, cy, numbersInner, numbersOuter, 0, 359.99)}
-        fill="url(#gzNumberRingGradV1)"
-        stroke="rgba(255,255,255,.86)"
-        strokeWidth={Math.max(0.9, 1.35 * scale)}
-      />
-      <circle cx={cx} cy={cy} r={centerR} fill="url(#gzCenterClockGradV1)" stroke="rgba(255,255,255,.56)" strokeWidth={Math.max(0.9, 1.35 * scale)} />
-      <circle cx={cx} cy={cy} r={centerR * 0.73} fill="none" stroke="rgba(255,255,255,.18)" strokeWidth={Math.max(0.9, 1.35 * scale)} />
-      <circle cx={cx} cy={cy} r={numbersOuter} fill="none" stroke="rgba(25,25,25,.28)" strokeWidth={Math.max(1, 2 * scale)} />
-      <circle cx={cx} cy={cy} r={numbersInner} fill="none" stroke="rgba(255,255,255,.44)" strokeWidth={Math.max(0.9, 1.35 * scale)} />
-      {angleLabels}
+      <circle cx={cx} cy={cy} r={centerR} fill="url(#gzCenterClockGradV2)" stroke="rgba(255,255,255,.42)" strokeWidth={Math.max(0.9, 1.2 * scale)} />
+      <circle cx={cx} cy={cy} r={innerCircleR} fill="none" stroke="rgba(255,255,255,.22)" strokeWidth={Math.max(0.8, 1.05 * scale)} />
       {ringNumbers}
 
-      <text x={cx} y={cy - centerR * 0.46} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="900" fontSize={Math.max(14, 24 * scale)} fill="#fff" stroke="rgba(0,0,0,.35)" strokeWidth="0.8" paintOrder="stroke fill">كوكبة تاسي</text>
-      <text x={cx} y={cy - centerR * 0.22} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="950" fontSize={Math.max(11, 18 * scale)} fill="#0795ff" style={{ filter: 'drop-shadow(0 0 7px rgba(0,145,255,.92))' }}>{now.date}</text>
-      <text x={cx} y={cy - centerR * 0.02} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="950" fontSize={Math.max(10, 17 * scale)} fill="#0795ff" style={{ filter: 'drop-shadow(0 0 7px rgba(0,145,255,.92))' }}>{now.weekday}</text>
-      <text x={cx} y={cy + centerR * 0.23} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="950" fontSize={timeFont} fill="#0795ff" style={{ filter: 'drop-shadow(0 0 8px rgba(0,145,255,.94))' }}>{now.time}</text>
-      <text x={cx} y={cy + centerR * 0.48} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="950" fontSize={Math.max(10, 18 * scale)} fill="#0795ff" style={{ filter: 'drop-shadow(0 0 7px rgba(0,145,255,.92))' }}>KSA</text>
-      <text x={cx} y={cy + centerR * 0.75} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="900" fontSize={Math.max(11, 19 * scale)} fill="#f7f7f7" stroke="rgba(0,0,0,.36)" strokeWidth="0.7" paintOrder="stroke fill">سحر الرقم</text>
+      <text x={cx} y={cy - innerCircleR * 0.36} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="900" fontSize={titleFont} fill="#f4f4f4" stroke="rgba(0,0,0,.30)" strokeWidth="0.65" paintOrder="stroke fill">كوكبة تاسي</text>
+      <text x={cx} y={cy - innerCircleR * 0.12} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="900" fontSize={smallFont} fill="#0795ff" style={{ filter: 'drop-shadow(0 0 6px rgba(0,145,255,.80))' }}>{now.date}</text>
+      <text x={cx} y={cy + innerCircleR * 0.07} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="900" fontSize={smallFont * 0.92} fill="#0795ff" style={{ filter: 'drop-shadow(0 0 6px rgba(0,145,255,.80))' }}>{now.weekday}</text>
+      <text x={cx} y={cy + innerCircleR * 0.29} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="950" fontSize={timeFont} fill="#0795ff" style={{ filter: 'drop-shadow(0 0 7px rgba(0,145,255,.88))' }}>{now.time}</text>
+      <text x={cx} y={cy + innerCircleR * 0.53} textAnchor="middle" fontFamily="Segoe UI, Tahoma, Arial, sans-serif" fontWeight="900" fontSize={ksaFont} fill="#0795ff" style={{ filter: 'drop-shadow(0 0 6px rgba(0,145,255,.80))' }}>KSA</text>
     </svg>
   );
 }
