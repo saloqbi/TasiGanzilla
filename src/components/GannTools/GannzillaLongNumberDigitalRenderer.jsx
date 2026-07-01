@@ -14,15 +14,6 @@ function polar(cx, cy, radius, deg) {
   return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
 }
 
-function normalizeRotation(angle) {
-  let rot = ((angle - 90) * Math.PI) / 180;
-  while (rot > Math.PI) rot -= TWO_PI;
-  while (rot < -Math.PI) rot += TWO_PI;
-  if (rot > Math.PI / 2) rot -= Math.PI;
-  if (rot < -Math.PI / 2) rot += Math.PI;
-  return rot;
-}
-
 function drawWedge(ctx, cx, cy, innerR, outerR, startDeg, endDeg) {
   const start = ((startDeg - 90) * Math.PI) / 180;
   const end = ((endDeg - 90) * Math.PI) / 180;
@@ -107,24 +98,25 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 }
 
 function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode) {
-  const arcRoom = (TWO_PI * midR / divisions) * (longMode ? 0.98 : 0.78);
-  const radialRoom = ringWidth * (longMode ? 0.78 : 0.70);
-  const charFactor = textLength >= 8 ? 0.39 : textLength >= 7 ? 0.41 : textLength >= 6 ? 0.45 : textLength === 5 ? 0.54 : 0.58;
+  const arcRoom = (TWO_PI * midR / divisions) * (longMode ? 0.92 : 0.76);
+  const radialRoom = ringWidth * (longMode ? 0.74 : 0.68);
+  const charFactor = textLength >= 8 ? 0.42 : textLength >= 7 ? 0.44 : textLength >= 6 ? 0.48 : textLength === 5 ? 0.56 : 0.60;
   const byArc = arcRoom / Math.max(2, textLength * charFactor);
   const byRadial = radialRoom;
-  const maxSize = textLength >= 8 ? 16.6 : textLength >= 7 ? 17.4 : textLength >= 6 ? 16.8 : 20;
-  const minSize = textLength >= 8 ? 11.2 : textLength >= 7 ? 11.6 : textLength >= 6 ? 10.8 : 9.6;
+  const maxSize = textLength >= 8 ? 15.8 : textLength >= 7 ? 16.6 : textLength >= 6 ? 16.2 : 20;
+  const minSize = textLength >= 8 ? 10.4 : textLength >= 7 ? 10.8 : textLength >= 6 ? 10.2 : 9.6;
   return clamp(Math.min(byArc, byRadial), minSize, maxSize);
 }
 
 function drawReadableText(ctx, text, x, y, angleDeg, fontSize, color, longMode) {
   const label = String(text);
-  const squeeze = longMode ? 0.82 : 0.94;
+  const squeeze = longMode ? 0.84 : 0.96;
   const weight = longMode ? 900 : 850;
+  void angleDeg;
 
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
-  ctx.rotate(normalizeRotation(angleDeg));
+  // كل الأرقام أصبحت أفقية ومقروءة مثل 36 / 2 / 3 / 4 / 5 في المرجع.
   ctx.scale(squeeze, 1);
   ctx.font = `${weight} ${fontSize}px ${DIGITAL_FONT_STACK}`;
   ctx.textAlign = 'center';
