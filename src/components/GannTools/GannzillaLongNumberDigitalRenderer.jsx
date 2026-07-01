@@ -92,15 +92,23 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
   return { inner, outer: inner + width, width, mid: inner + width / 2 };
 }
 
-function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode) {
-  const arcRoom = (TWO_PI * midR / divisions) * 0.70;
-  const radialRoom = ringWidth * 0.54;
-  const charFactor = textLength >= 8 ? 0.58 : textLength >= 7 ? 0.60 : textLength >= 6 ? 0.62 : 0.66;
-  const byArc = arcRoom / Math.max(2, textLength * charFactor);
-  const byRadial = radialRoom;
-  const maxSize = longMode || textLength >= 7 ? 24 : 27;
-  const minSize = longMode || textLength >= 7 ? 15 : 17;
-  return clamp(Math.min(byArc, byRadial), minSize, maxSize);
+function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring) {
+  const arcRoom = (TWO_PI * midR / divisions) * 0.68;
+  const radialRoom = ringWidth * 0.50;
+  const charFactor = textLength >= 8 ? 0.60 : textLength >= 7 ? 0.62 : textLength >= 6 ? 0.64 : 0.68;
+  const natural = Math.min(arcRoom / Math.max(2, textLength * charFactor), radialRoom);
+
+  // Ring-aware cap: keep the first ring strong, then reduce outer rings so labels do not crowd.
+  const ringCap = ring === 1
+    ? (longMode || textLength >= 7 ? 21 : 23)
+    : ring === 2
+      ? (longMode || textLength >= 7 ? 17.2 : 19)
+      : ring === 3
+        ? (longMode || textLength >= 7 ? 14.2 : 16)
+        : (longMode || textLength >= 7 ? 12.4 : 14.2);
+
+  const ringMin = ring === 1 ? 14 : ring === 2 ? 12 : ring === 3 ? 10.8 : 9.6;
+  return clamp(Math.min(natural, ringCap), ringMin, ringCap);
 }
 
 function drawReadableText(ctx, text, x, y, angleDeg, fontSize, color, longMode) {
@@ -117,8 +125,8 @@ function drawReadableText(ctx, text, x, y, angleDeg, fontSize, color, longMode) 
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
 
-  ctx.lineWidth = Math.max(0.75, fontSize * 0.055);
-  ctx.strokeStyle = 'rgba(255,255,255,0.88)';
+  ctx.lineWidth = Math.max(0.55, fontSize * 0.040);
+  ctx.strokeStyle = 'rgba(255,255,255,0.86)';
   ctx.strokeText(label, 0, 0);
   ctx.fillStyle = color;
   ctx.fillText(label, 0, 0);
@@ -196,7 +204,7 @@ function renderOverlay(overlay, sourceCanvas) {
       ctx.restore();
 
       const p = polar(cx, cy, metrics.mid, centerDeg);
-      const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, text.length, longMode);
+      const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, text.length, longMode, ring);
       drawReadableText(ctx, text, p.x, p.y, centerDeg, fs, wheelNumberColor(value), longMode || text.length >= 6);
     }
   }
