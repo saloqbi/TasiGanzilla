@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_SUM_RESULT_ANGLE_TOP_V7';
+const SUM_RESULT_STYLE_VERSION = 'CELL_SUM_RESULT_ANGLE_DEGREE_SIGN_V8';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -145,8 +145,8 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const result = digitalRoot(value);
   const angleVal = angleSequenceValue(value);
 
-  // V7 layout: angle at outer/top side, main in the middle, sum/result at inner edge.
-  // Example: 36 has 0 above and 9 toward the inner circle; 37 has 1 above and 1 inside.
+  // V8 layout: angle with degree mark at outer/top side, main in the middle,
+  // sum/result at inner edge. Example: 36 has 0° above and 9 toward the inner circle.
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
   const distance = Math.hypot(toCenterX, toCenterY) || 1;
@@ -154,10 +154,10 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const uy = toCenterY / distance;
 
   const resultSize = clamp(fontSize * 0.62, 7.6, 12.8);
-  const angleSize = clamp(fontSize * 0.46, 6.0, 9.6);
+  const angleSize = clamp(fontSize * 0.64, 8.2, 13.2);
   const mainOutwardOffset = clamp(ringWidth * 0.02, 0.4, 2.4);
   const resultInnerOffset = clamp(ringWidth * 0.39, 9.5, ringWidth * 0.48);
-  const angleOuterOffset = clamp(ringWidth * 0.38, 8.5, ringWidth * 0.47);
+  const angleOuterOffset = clamp(ringWidth * 0.40, 9.2, ringWidth * 0.49);
 
   const mainX = x - ux * mainOutwardOffset;
   const mainY = y - uy * mainOutwardOffset;
@@ -166,7 +166,7 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const angleX = x - ux * angleOuterOffset;
   const angleY = y - uy * angleOuterOffset;
 
-  drawReadableText(ctx, String(angleVal), angleX, angleY, angleSize, '#111111', 700, 0.9);
+  drawReadableText(ctx, `${angleVal}°`, angleX, angleY, angleSize, '#111111', 700, 0.94);
   drawReadableText(ctx, formatNumber(value), mainX, mainY, fontSize, color, 700, 1);
   drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
 }
