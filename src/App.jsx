@@ -26,7 +26,6 @@ import GannzillaWheelLineDrawPatch from './components/GannTools/GannzillaWheelLi
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 import GannzillaDigitalNumberClarityPatch from './components/GannTools/GannzillaDigitalNumberClarityPatch';
 import GannzillaLongNumberDigitalRenderer from './components/GannTools/GannzillaLongNumberDigitalRenderer';
-import GannzillaAngleLowerLeftPatch from './components/GannTools/GannzillaAngleLowerLeftPatch';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -60,7 +59,6 @@ const App = () => {
               <GannzillaWheelPanButtonsPatch />
               <GannzillaCardinalBalancePatch />
               <GannzillaLongNumberDigitalRenderer />
-              <GannzillaAngleLowerLeftPatch />
               <GannzillaOptionsBadgeHidePatch />
               <GannzillaPanelToggleTopbarPatch />
               <GannzillaWheelLineDrawPatch />
