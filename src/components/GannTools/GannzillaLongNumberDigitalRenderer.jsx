@@ -4,6 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
+const SUM_RESULT_STYLE_VERSION = 'CELL_SUM_RESULT_VISUAL_ALIGNMENT_V3';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -99,21 +100,20 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 }
 
 function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring) {
-  const arcRoom = (TWO_PI * midR / divisions) * 0.68;
-  const radialRoom = ringWidth * 0.43;
+  const arcRoom = (TWO_PI * midR / divisions) * 0.72;
+  const radialRoom = ringWidth * 0.42;
   const charFactor = textLength >= 8 ? 0.60 : textLength >= 7 ? 0.62 : textLength >= 6 ? 0.64 : 0.68;
   const natural = Math.min(arcRoom / Math.max(2, textLength * charFactor), radialRoom);
 
-  // Slightly smaller than the single-line version, because every cell now has a result number beneath it.
   const ringCap = ring === 1
-    ? (longMode || textLength >= 7 ? 18.5 : 21)
+    ? (longMode || textLength >= 7 ? 18.0 : 20.5)
     : ring === 2
-      ? (longMode || textLength >= 7 ? 15.4 : 17.2)
+      ? (longMode || textLength >= 7 ? 15.0 : 16.8)
       : ring === 3
-        ? (longMode || textLength >= 7 ? 12.8 : 14.6)
-        : (longMode || textLength >= 7 ? 11.2 : 13);
+        ? (longMode || textLength >= 7 ? 12.4 : 14.0)
+        : (longMode || textLength >= 7 ? 10.8 : 12.6);
 
-  const ringMin = ring === 1 ? 12.5 : ring === 2 ? 10.8 : ring === 3 ? 9.6 : 8.8;
+  const ringMin = ring === 1 ? 12.2 : ring === 2 ? 10.4 : ring === 3 ? 9.2 : 8.4;
   return clamp(Math.min(natural, ringCap), ringMin, ringCap);
 }
 
@@ -128,8 +128,8 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
 
-  ctx.lineWidth = Math.max(0.45, fontSize * 0.035);
-  ctx.strokeStyle = `rgba(255,255,255,${0.86 * alpha})`;
+  ctx.lineWidth = Math.max(0.4, fontSize * 0.032);
+  ctx.strokeStyle = `rgba(255,255,255,${0.88 * alpha})`;
   ctx.strokeText(label, 0, 0);
   ctx.fillStyle = color;
   ctx.globalAlpha = alpha;
@@ -139,16 +139,23 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
 
 function drawCellNumberWithResult(ctx, value, x, y, fontSize, color, ringWidth) {
   const result = digitalRoot(value);
-  const resultSize = clamp(fontSize * 0.58, 6.2, 11.5);
-  const gap = clamp(fontSize * 0.42, 4.2, 8.2);
-  const blockHalf = (fontSize + resultSize + gap) / 2;
-  const maxHalf = ringWidth * 0.42;
-  const compress = blockHalf > maxHalf ? maxHalf / blockHalf : 1;
-  const mainY = y - ((resultSize + gap) / 2) * compress;
-  const resultY = y + ((fontSize + gap) / 2) * compress;
 
-  drawReadableText(ctx, formatNumber(value), x, mainY, fontSize * compress, color, 700, 1);
-  drawReadableText(ctx, String(result), x, resultY, resultSize * compress, color, 700, 0.92);
+  // Reference layout: main number is dominant, the sum/result sits directly below it
+  // inside the same cell, small and aligned with the main label.
+  const resultSize = clamp(fontSize * 0.44, 5.8, 9.0);
+  const gap = clamp(fontSize * 0.18, 2.0, 4.2);
+  const blockHeight = fontSize + gap + resultSize;
+  const maxBlockHeight = ringWidth * 0.68;
+  const scale = blockHeight > maxBlockHeight ? maxBlockHeight / blockHeight : 1;
+
+  const mainSize = fontSize * scale;
+  const smallSize = resultSize * scale;
+  const localGap = gap * scale;
+  const mainY = y - (smallSize + localGap) / 2;
+  const resultY = y + (mainSize + localGap) / 2;
+
+  drawReadableText(ctx, formatNumber(value), x, mainY, mainSize, color, 700, 1);
+  drawReadableText(ctx, String(result), x, resultY, smallSize, color, 700, 0.96);
 }
 
 function renderOverlay(overlay, sourceCanvas) {
@@ -298,6 +305,7 @@ export default function GannzillaLongNumberDigitalRenderer() {
       document.body.appendChild(overlay);
     }
     window[MARKER] = true;
+    window.__gannzillaSumResultStyleVersion = SUM_RESULT_STYLE_VERSION;
 
     const render = () => {
       const sourceCanvas = getWheelCanvas();
