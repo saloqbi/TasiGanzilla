@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_SUM_RESULT_RING_EDGE_OFFSET_V5';
+const SUM_RESULT_STYLE_VERSION = 'CELL_SUM_RESULT_LARGER_RING_EDGE_V6';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -140,19 +140,18 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
 function drawCellNumberWithResult(ctx, value, x, y, fontSize, color, ringWidth, wheelCx, wheelCy) {
   const result = digitalRoot(value);
 
-  // V5: keep the main number readable in the cell, but push the sum/result
-  // closer to the inner circular edge of each ring. This creates the wider
-  // separation requested in the 36-45 example while preserving the direction rule:
-  // top -> result below, right -> result left, bottom -> result above, left -> result right.
+  // V6: larger result digits while keeping the V5 ring-edge separation.
+  // The sum/result stays close to the inner circular edge of each ring and
+  // remains readable like the 36-45 reference crop.
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
   const distance = Math.hypot(toCenterX, toCenterY) || 1;
   const ux = toCenterX / distance;
   const uy = toCenterY / distance;
 
-  const resultSize = clamp(fontSize * 0.42, 5.8, 8.8);
+  const resultSize = clamp(fontSize * 0.62, 7.6, 12.8);
   const mainOutwardOffset = clamp(ringWidth * 0.08, 1.8, 5.4);
-  const resultInnerOffset = clamp(ringWidth * 0.38, 9.0, ringWidth * 0.47);
+  const resultInnerOffset = clamp(ringWidth * 0.39, 9.5, ringWidth * 0.48);
 
   const mainX = x - ux * mainOutwardOffset;
   const mainY = y - uy * mainOutwardOffset;
@@ -160,7 +159,7 @@ function drawCellNumberWithResult(ctx, value, x, y, fontSize, color, ringWidth, 
   const resultY = y + uy * resultInnerOffset;
 
   drawReadableText(ctx, formatNumber(value), mainX, mainY, fontSize, color, 700, 1);
-  drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.96);
+  drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
 }
 
 function renderOverlay(overlay, sourceCanvas) {
