@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_SUM_RESULT_VISUAL_ALIGNMENT_V3';
+const SUM_RESULT_STYLE_VERSION = 'CELL_SUM_RESULT_DIRECTIONAL_RADIAL_V4';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -137,25 +137,38 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
   ctx.restore();
 }
 
-function drawCellNumberWithResult(ctx, value, x, y, fontSize, color, ringWidth) {
+function drawCellNumberWithResult(ctx, value, x, y, fontSize, color, ringWidth, wheelCx, wheelCy) {
   const result = digitalRoot(value);
 
-  // Reference layout: main number is dominant, the sum/result sits directly below it
-  // inside the same cell, small and aligned with the main label.
+  // Directional radial rule:
+  // 36/top => result under the main number.
+  // 9/east => result left of the main number.
+  // 18/south => result above the main number.
+  // 27/west => result right of the main number.
+  // In all cases the result sits on the side facing the wheel center.
+  const toCenterX = wheelCx - x;
+  const toCenterY = wheelCy - y;
+  const distance = Math.hypot(toCenterX, toCenterY) || 1;
+  const ux = toCenterX / distance;
+  const uy = toCenterY / distance;
+
   const resultSize = clamp(fontSize * 0.44, 5.8, 9.0);
-  const gap = clamp(fontSize * 0.18, 2.0, 4.2);
-  const blockHeight = fontSize + gap + resultSize;
-  const maxBlockHeight = ringWidth * 0.68;
-  const scale = blockHeight > maxBlockHeight ? maxBlockHeight / blockHeight : 1;
+  const gap = clamp(fontSize * 0.20, 2.2, 4.4);
+  const rawSpacing = (fontSize / 2) + (resultSize / 2) + gap;
+  const maxSpacing = ringWidth * 0.42;
+  const scale = rawSpacing > maxSpacing ? maxSpacing / rawSpacing : 1;
 
   const mainSize = fontSize * scale;
   const smallSize = resultSize * scale;
-  const localGap = gap * scale;
-  const mainY = y - (smallSize + localGap) / 2;
-  const resultY = y + (mainSize + localGap) / 2;
+  const spacing = ((mainSize / 2) + (smallSize / 2) + (gap * scale));
 
-  drawReadableText(ctx, formatNumber(value), x, mainY, mainSize, color, 700, 1);
-  drawReadableText(ctx, String(result), x, resultY, smallSize, color, 700, 0.96);
+  const mainX = x - ux * (spacing / 2);
+  const mainY = y - uy * (spacing / 2);
+  const resultX = x + ux * (spacing / 2);
+  const resultY = y + uy * (spacing / 2);
+
+  drawReadableText(ctx, formatNumber(value), mainX, mainY, mainSize, color, 700, 1);
+  drawReadableText(ctx, String(result), resultX, resultY, smallSize, color, 700, 0.96);
 }
 
 function renderOverlay(overlay, sourceCanvas) {
@@ -230,7 +243,7 @@ function renderOverlay(overlay, sourceCanvas) {
 
       const p = polar(cx, cy, metrics.mid, centerDeg);
       const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, text.length, longMode, ring);
-      drawCellNumberWithResult(ctx, value, p.x, p.y, fs, wheelNumberColor(value), metrics.width);
+      drawCellNumberWithResult(ctx, value, p.x, p.y, fs, wheelNumberColor(value), metrics.width, cx, cy);
     }
   }
 
