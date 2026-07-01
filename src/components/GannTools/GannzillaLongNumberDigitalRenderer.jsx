@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_SUM_RESULT_LARGER_RING_EDGE_V6';
+const SUM_RESULT_STYLE_VERSION = 'CELL_SUM_RESULT_ANGLE_TOP_V7';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -37,6 +37,10 @@ function digitalRoot(value) {
   const n = Math.abs(Math.trunc(Number(value)) || 0);
   if (n === 0) return 0;
   return ((n - 1) % 9) + 1;
+}
+
+function angleSequenceValue(value) {
+  return Math.trunc(Number(value)) - 36;
 }
 
 function formatNumber(value) {
@@ -101,19 +105,19 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 
 function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring) {
   const arcRoom = (TWO_PI * midR / divisions) * 0.72;
-  const radialRoom = ringWidth * 0.42;
+  const radialRoom = ringWidth * 0.38;
   const charFactor = textLength >= 8 ? 0.60 : textLength >= 7 ? 0.62 : textLength >= 6 ? 0.64 : 0.68;
   const natural = Math.min(arcRoom / Math.max(2, textLength * charFactor), radialRoom);
 
   const ringCap = ring === 1
-    ? (longMode || textLength >= 7 ? 18.0 : 20.5)
+    ? (longMode || textLength >= 7 ? 17.0 : 19.5)
     : ring === 2
-      ? (longMode || textLength >= 7 ? 15.0 : 16.8)
+      ? (longMode || textLength >= 7 ? 14.2 : 16.0)
       : ring === 3
-        ? (longMode || textLength >= 7 ? 12.4 : 14.0)
-        : (longMode || textLength >= 7 ? 10.8 : 12.6);
+        ? (longMode || textLength >= 7 ? 11.8 : 13.4)
+        : (longMode || textLength >= 7 ? 10.2 : 12.0);
 
-  const ringMin = ring === 1 ? 12.2 : ring === 2 ? 10.4 : ring === 3 ? 9.2 : 8.4;
+  const ringMin = ring === 1 ? 11.8 : ring === 2 ? 10.0 : ring === 3 ? 8.8 : 8.0;
   return clamp(Math.min(natural, ringCap), ringMin, ringCap);
 }
 
@@ -137,12 +141,12 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
   ctx.restore();
 }
 
-function drawCellNumberWithResult(ctx, value, x, y, fontSize, color, ringWidth, wheelCx, wheelCy) {
+function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, ringWidth, wheelCx, wheelCy) {
   const result = digitalRoot(value);
+  const angleVal = angleSequenceValue(value);
 
-  // V6: larger result digits while keeping the V5 ring-edge separation.
-  // The sum/result stays close to the inner circular edge of each ring and
-  // remains readable like the 36-45 reference crop.
+  // V7 layout: angle at outer/top side, main in the middle, sum/result at inner edge.
+  // Example: 36 has 0 above and 9 toward the inner circle; 37 has 1 above and 1 inside.
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
   const distance = Math.hypot(toCenterX, toCenterY) || 1;
@@ -150,14 +154,19 @@ function drawCellNumberWithResult(ctx, value, x, y, fontSize, color, ringWidth, 
   const uy = toCenterY / distance;
 
   const resultSize = clamp(fontSize * 0.62, 7.6, 12.8);
-  const mainOutwardOffset = clamp(ringWidth * 0.08, 1.8, 5.4);
+  const angleSize = clamp(fontSize * 0.46, 6.0, 9.6);
+  const mainOutwardOffset = clamp(ringWidth * 0.02, 0.4, 2.4);
   const resultInnerOffset = clamp(ringWidth * 0.39, 9.5, ringWidth * 0.48);
+  const angleOuterOffset = clamp(ringWidth * 0.38, 8.5, ringWidth * 0.47);
 
   const mainX = x - ux * mainOutwardOffset;
   const mainY = y - uy * mainOutwardOffset;
   const resultX = x + ux * resultInnerOffset;
   const resultY = y + uy * resultInnerOffset;
+  const angleX = x - ux * angleOuterOffset;
+  const angleY = y - uy * angleOuterOffset;
 
+  drawReadableText(ctx, String(angleVal), angleX, angleY, angleSize, '#111111', 700, 0.9);
   drawReadableText(ctx, formatNumber(value), mainX, mainY, fontSize, color, 700, 1);
   drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
 }
@@ -200,7 +209,7 @@ function renderOverlay(overlay, sourceCanvas) {
   const wheelRadius = minSide / 2 - extraRings;
   const innerRadius = clamp(minSide * (longMode ? 0.225 : 0.198), 112, wheelRadius * 0.52);
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
-  const baseRingWidth = Math.max(18, (wheelRadius - innerRadius) / Math.max(1, weightSum));
+  const baseRingWidth = Math.max(20, (wheelRadius - innerRadius) / Math.max(1, weightSum));
 
   ctx.save();
   ctx.beginPath();
@@ -234,7 +243,7 @@ function renderOverlay(overlay, sourceCanvas) {
 
       const p = polar(cx, cy, metrics.mid, centerDeg);
       const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, text.length, longMode, ring);
-      drawCellNumberWithResult(ctx, value, p.x, p.y, fs, wheelNumberColor(value), metrics.width, cx, cy);
+      drawCellNumberWithResultAndAngle(ctx, value, p.x, p.y, fs, wheelNumberColor(value), metrics.width, cx, cy);
     }
   }
 
