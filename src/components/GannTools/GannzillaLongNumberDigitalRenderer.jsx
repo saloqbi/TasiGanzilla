@@ -3,7 +3,7 @@ import React from 'react';
 const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
-const DIGITAL_FONT_STACK = 'Bahnschrift Condensed, Aptos Narrow, Arial Narrow, Roboto Condensed, Segoe UI, Arial, Helvetica, sans-serif';
+const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -27,8 +27,8 @@ function wheelNumberColor(value) {
   const n = Math.trunc(Number(value));
   if (!Number.isFinite(n)) return '#111111';
   const mod = ((n % 3) + 3) % 3;
-  if (mod === 1) return '#d71920';
-  if (mod === 2) return '#053fbf';
+  if (mod === 1) return '#e01818';
+  if (mod === 2) return '#0a48c9';
   return '#050505';
 }
 
@@ -74,19 +74,14 @@ function getUnrotatedRect(canvas) {
   const height = canvas.offsetHeight || Number.parseFloat(canvas.style.height) || visual.height;
   const centerX = visual.left + visual.width / 2;
   const centerY = visual.top + visual.height / 2;
-  return {
-    left: centerX - width / 2,
-    top: centerY - height / 2,
-    width,
-    height
-  };
+  return { left: centerX - width / 2, top: centerY - height / 2, width, height };
 }
 
 function ringWeight(ring, longMode) {
-  if (!longMode) return ring === 1 ? 1.80 : ring === 2 ? 1.28 : ring === 3 ? 1.08 : 1;
-  if (ring === 1) return 2.28;
-  if (ring === 2) return 1.56;
-  if (ring === 3) return 1.18;
+  if (!longMode) return ring === 1 ? 1.72 : ring === 2 ? 1.24 : ring === 3 ? 1.08 : 1;
+  if (ring === 1) return 2.06;
+  if (ring === 2) return 1.48;
+  if (ring === 3) return 1.16;
   return 1;
 }
 
@@ -97,43 +92,30 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
   return { inner, outer: inner + width, width, mid: inner + width / 2 };
 }
 
-function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode) {
-  const arcRoom = (TWO_PI * midR / divisions) * (longMode ? 0.92 : 0.76);
-  const radialRoom = ringWidth * (longMode ? 0.74 : 0.68);
-  const charFactor = textLength >= 8 ? 0.42 : textLength >= 7 ? 0.44 : textLength >= 6 ? 0.48 : textLength === 5 ? 0.56 : 0.60;
-  const byArc = arcRoom / Math.max(2, textLength * charFactor);
-  const byRadial = radialRoom;
-  const maxSize = textLength >= 8 ? 15.8 : textLength >= 7 ? 16.6 : textLength >= 6 ? 16.2 : 20;
-  const minSize = textLength >= 8 ? 10.4 : textLength >= 7 ? 10.8 : textLength >= 6 ? 10.2 : 9.6;
-  return clamp(Math.min(byArc, byRadial), minSize, maxSize);
+function fontSizeForCell(textLength, longMode) {
+  if (longMode || textLength >= 6) return 10;
+  if (textLength >= 4) return 10.6;
+  return 11.4;
 }
 
 function drawReadableText(ctx, text, x, y, angleDeg, fontSize, color, longMode) {
   const label = String(text);
-  const squeeze = longMode ? 0.84 : 0.96;
-  const weight = longMode ? 900 : 850;
   void angleDeg;
+  void longMode;
 
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
-  // كل الأرقام أصبحت أفقية ومقروءة مثل 36 / 2 / 3 / 4 / 5 في المرجع.
-  ctx.scale(squeeze, 1);
-  ctx.font = `${weight} ${fontSize}px ${DIGITAL_FONT_STACK}`;
+  ctx.font = `700 ${fontSize}px ${DIGITAL_FONT_STACK}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
-  ctx.miterLimit = 2;
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
 
-  ctx.lineWidth = Math.max(longMode ? 0.85 : 0.7, fontSize * (longMode ? 0.085 : 0.075));
-  ctx.strokeStyle = 'rgba(255,255,255,0.88)';
+  // A very light white edge only; no compression and no dark outline, to keep 7-digit values crisp like the reference.
+  ctx.lineWidth = 0.55;
+  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
   ctx.strokeText(label, 0, 0);
-
-  if (longMode) {
-    ctx.lineWidth = Math.max(0.22, fontSize * 0.025);
-    ctx.strokeStyle = 'rgba(0,0,0,0.24)';
-    ctx.strokeText(label, 0, 0);
-  }
-
   ctx.fillStyle = color;
   ctx.fillText(label, 0, 0);
   ctx.restore();
@@ -161,8 +143,7 @@ function renderOverlay(overlay, sourceCanvas) {
   ctx.clearRect(0, 0, rect.width, rect.height);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, rect.width, rect.height);
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
+  ctx.imageSmoothingEnabled = false;
 
   const { levels, startValue, increment, divisions, clockwise } = settings;
   const sector = 360 / divisions;
@@ -175,7 +156,7 @@ function renderOverlay(overlay, sourceCanvas) {
   const longMode = Math.max(formatNumber(startValue).length, formatNumber(sampleMax).length) >= 7;
   const extraRings = 96;
   const wheelRadius = minSide / 2 - extraRings;
-  const innerRadius = clamp(minSide * (longMode ? 0.235 : 0.205), 118, wheelRadius * 0.54);
+  const innerRadius = clamp(minSide * (longMode ? 0.225 : 0.198), 112, wheelRadius * 0.52);
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
   const baseRingWidth = Math.max(18, (wheelRadius - innerRadius) / Math.max(1, weightSum));
 
@@ -184,7 +165,7 @@ function renderOverlay(overlay, sourceCanvas) {
   ctx.arc(cx, cy, innerRadius, 0, TWO_PI);
   ctx.fillStyle = '#ffffff';
   ctx.fill();
-  ctx.strokeStyle = '#dadada';
+  ctx.strokeStyle = '#dcdcdc';
   ctx.lineWidth = 1;
   ctx.stroke();
   ctx.restore();
@@ -210,7 +191,7 @@ function renderOverlay(overlay, sourceCanvas) {
       ctx.restore();
 
       const p = polar(cx, cy, metrics.mid, centerDeg);
-      const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, text.length, longMode);
+      const fs = fontSizeForCell(text.length, longMode);
       drawReadableText(ctx, text, p.x, p.y, centerDeg, fs, wheelNumberColor(value), longMode || text.length >= 6);
     }
   }
