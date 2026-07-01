@@ -32,6 +32,12 @@ function wheelNumberColor(value) {
   return '#050505';
 }
 
+function digitalRoot(value) {
+  const n = Math.abs(Math.trunc(Number(value)) || 0);
+  if (n === 0) return 0;
+  return ((n - 1) % 9) + 1;
+}
+
 function formatNumber(value) {
   if (Number.isInteger(value)) return String(value);
   return String(Number(value.toFixed(4)));
@@ -94,43 +100,55 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 
 function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring) {
   const arcRoom = (TWO_PI * midR / divisions) * 0.68;
-  const radialRoom = ringWidth * 0.50;
+  const radialRoom = ringWidth * 0.43;
   const charFactor = textLength >= 8 ? 0.60 : textLength >= 7 ? 0.62 : textLength >= 6 ? 0.64 : 0.68;
   const natural = Math.min(arcRoom / Math.max(2, textLength * charFactor), radialRoom);
 
-  // Ring-aware cap: keep the first ring strong, then reduce outer rings so labels do not crowd.
+  // Slightly smaller than the single-line version, because every cell now has a result number beneath it.
   const ringCap = ring === 1
-    ? (longMode || textLength >= 7 ? 21 : 23)
+    ? (longMode || textLength >= 7 ? 18.5 : 21)
     : ring === 2
-      ? (longMode || textLength >= 7 ? 17.2 : 19)
+      ? (longMode || textLength >= 7 ? 15.4 : 17.2)
       : ring === 3
-        ? (longMode || textLength >= 7 ? 14.2 : 16)
-        : (longMode || textLength >= 7 ? 12.4 : 14.2);
+        ? (longMode || textLength >= 7 ? 12.8 : 14.6)
+        : (longMode || textLength >= 7 ? 11.2 : 13);
 
-  const ringMin = ring === 1 ? 14 : ring === 2 ? 12 : ring === 3 ? 10.8 : 9.6;
+  const ringMin = ring === 1 ? 12.5 : ring === 2 ? 10.8 : ring === 3 ? 9.6 : 8.8;
   return clamp(Math.min(natural, ringCap), ringMin, ringCap);
 }
 
-function drawReadableText(ctx, text, x, y, angleDeg, fontSize, color, longMode) {
+function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha = 1) {
   const label = String(text);
-  void angleDeg;
-  void longMode;
-
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
-  ctx.font = `700 ${fontSize}px ${DIGITAL_FONT_STACK}`;
+  ctx.font = `${weight} ${fontSize}px ${DIGITAL_FONT_STACK}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
 
-  ctx.lineWidth = Math.max(0.55, fontSize * 0.040);
-  ctx.strokeStyle = 'rgba(255,255,255,0.86)';
+  ctx.lineWidth = Math.max(0.45, fontSize * 0.035);
+  ctx.strokeStyle = `rgba(255,255,255,${0.86 * alpha})`;
   ctx.strokeText(label, 0, 0);
   ctx.fillStyle = color;
+  ctx.globalAlpha = alpha;
   ctx.fillText(label, 0, 0);
   ctx.restore();
+}
+
+function drawCellNumberWithResult(ctx, value, x, y, fontSize, color, ringWidth) {
+  const result = digitalRoot(value);
+  const resultSize = clamp(fontSize * 0.58, 6.2, 11.5);
+  const gap = clamp(fontSize * 0.42, 4.2, 8.2);
+  const blockHalf = (fontSize + resultSize + gap) / 2;
+  const maxHalf = ringWidth * 0.42;
+  const compress = blockHalf > maxHalf ? maxHalf / blockHalf : 1;
+  const mainY = y - ((resultSize + gap) / 2) * compress;
+  const resultY = y + ((fontSize + gap) / 2) * compress;
+
+  drawReadableText(ctx, formatNumber(value), x, mainY, fontSize * compress, color, 700, 1);
+  drawReadableText(ctx, String(result), x, resultY, resultSize * compress, color, 700, 0.92);
 }
 
 function renderOverlay(overlay, sourceCanvas) {
@@ -205,7 +223,7 @@ function renderOverlay(overlay, sourceCanvas) {
 
       const p = polar(cx, cy, metrics.mid, centerDeg);
       const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, text.length, longMode, ring);
-      drawReadableText(ctx, text, p.x, p.y, centerDeg, fs, wheelNumberColor(value), longMode || text.length >= 6);
+      drawCellNumberWithResult(ctx, value, p.x, p.y, fs, wheelNumberColor(value), metrics.width);
     }
   }
 
@@ -233,7 +251,7 @@ function renderOverlay(overlay, sourceCanvas) {
     ctx.stroke();
     if (major) {
       const pt = polar(cx, cy, protractorOuter + 15, direction * deg);
-      drawReadableText(ctx, `${deg}°`, pt.x, pt.y, direction * deg, 8.2, '#666', true);
+      drawReadableText(ctx, `${deg}°`, pt.x, pt.y, 8.2, '#666', 700, 1);
     }
   }
   ctx.restore();
@@ -249,7 +267,7 @@ function renderOverlay(overlay, sourceCanvas) {
   labels.forEach((label, idx) => {
     const deg = direction * (idx * 360 / labels.length);
     const p = polar(cx, cy, chronoR + 16, deg);
-    drawReadableText(ctx, label, p.x, p.y, deg, 7.4, '#777', true);
+    drawReadableText(ctx, label, p.x, p.y, 7.4, '#777', 700, 1);
   });
   ctx.restore();
 
