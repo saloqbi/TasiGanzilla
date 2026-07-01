@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_CYCLE_36_ZERO_COLOR_V9';
+const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_VISUAL_CLARITY_V10';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -135,8 +135,8 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
 
-  ctx.lineWidth = Math.max(0.4, fontSize * 0.032);
-  ctx.strokeStyle = `rgba(255,255,255,${0.88 * alpha})`;
+  ctx.lineWidth = Math.max(0.45, fontSize * 0.038);
+  ctx.strokeStyle = `rgba(255,255,255,${0.9 * alpha})`;
   ctx.strokeText(label, 0, 0);
   ctx.fillStyle = color;
   ctx.globalAlpha = alpha;
@@ -148,9 +148,9 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const result = digitalRoot(value);
   const angleVal = angleSequenceValue(value);
 
-  // V9 layout:
+  // V10 layout:
   // 36 = 0°, 1 = 1°, 2 = 2°, ... 360 = 360°, then repeat.
-  // Angle label uses the same red/blue/black color family as the main cell number.
+  // Angle labels are larger, bolder, and use the same red/blue/black color as the cell.
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
   const distance = Math.hypot(toCenterX, toCenterY) || 1;
@@ -158,10 +158,10 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const uy = toCenterY / distance;
 
   const resultSize = clamp(fontSize * 0.62, 7.6, 12.8);
-  const angleSize = clamp(fontSize * 0.64, 8.2, 13.2);
+  const angleSize = clamp(fontSize * 0.98, 11.2, 18.0);
   const mainOutwardOffset = clamp(ringWidth * 0.02, 0.4, 2.4);
   const resultInnerOffset = clamp(ringWidth * 0.39, 9.5, ringWidth * 0.48);
-  const angleOuterOffset = clamp(ringWidth * 0.40, 9.2, ringWidth * 0.49);
+  const angleOuterOffset = clamp(ringWidth * 0.50, 12.2, ringWidth * 0.60);
 
   const mainX = x - ux * mainOutwardOffset;
   const mainY = y - uy * mainOutwardOffset;
@@ -170,7 +170,7 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const angleX = x - ux * angleOuterOffset;
   const angleY = y - uy * angleOuterOffset;
 
-  drawReadableText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, 700, 0.94);
+  drawReadableText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, 800, 0.99);
   drawReadableText(ctx, formatNumber(value), mainX, mainY, fontSize, color, 700, 1);
   drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
 }
