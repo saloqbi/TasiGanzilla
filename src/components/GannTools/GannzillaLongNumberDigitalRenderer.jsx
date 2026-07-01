@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_SUM_RESULT_ANGLE_DEGREE_SIGN_V8';
+const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_CYCLE_36_ZERO_COLOR_V9';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -40,7 +40,10 @@ function digitalRoot(value) {
 }
 
 function angleSequenceValue(value) {
-  return Math.trunc(Number(value)) - 36;
+  const n = Math.trunc(Number(value));
+  if (!Number.isFinite(n)) return 0;
+  const normalized = ((((n - 1) % 360) + 360) % 360) + 1;
+  return normalized === 36 ? 0 : normalized;
 }
 
 function formatNumber(value) {
@@ -145,8 +148,9 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const result = digitalRoot(value);
   const angleVal = angleSequenceValue(value);
 
-  // V8 layout: angle with degree mark at outer/top side, main in the middle,
-  // sum/result at inner edge. Example: 36 has 0° above and 9 toward the inner circle.
+  // V9 layout:
+  // 36 = 0°, 1 = 1°, 2 = 2°, ... 360 = 360°, then repeat.
+  // Angle label uses the same red/blue/black color family as the main cell number.
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
   const distance = Math.hypot(toCenterX, toCenterY) || 1;
@@ -166,7 +170,7 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const angleX = x - ux * angleOuterOffset;
   const angleY = y - uy * angleOuterOffset;
 
-  drawReadableText(ctx, `${angleVal}°`, angleX, angleY, angleSize, '#111111', 700, 0.94);
+  drawReadableText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, 700, 0.94);
   drawReadableText(ctx, formatNumber(value), mainX, mainY, fontSize, color, 700, 1);
   drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
 }
