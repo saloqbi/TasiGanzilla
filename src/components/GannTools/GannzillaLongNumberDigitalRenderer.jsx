@@ -92,10 +92,10 @@ function getUnrotatedRect(canvas) {
 }
 
 function ringWeight(ring, longMode) {
-  if (!longMode) return ring <= 2 ? 1.14 : ring === 3 ? 1.06 : 1;
-  if (ring === 1) return 1.62;
-  if (ring === 2) return 1.46;
-  if (ring === 3) return 1.24;
+  if (!longMode) return ring === 1 ? 1.80 : ring === 2 ? 1.28 : ring === 3 ? 1.08 : 1;
+  if (ring === 1) return 2.28;
+  if (ring === 2) return 1.56;
+  if (ring === 3) return 1.18;
   return 1;
 }
 
@@ -107,13 +107,13 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 }
 
 function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode) {
-  const arcRoom = (TWO_PI * midR / divisions) * (longMode ? 0.95 : 0.74);
-  const radialRoom = ringWidth * (longMode ? 0.74 : 0.64);
+  const arcRoom = (TWO_PI * midR / divisions) * (longMode ? 0.98 : 0.78);
+  const radialRoom = ringWidth * (longMode ? 0.78 : 0.70);
   const charFactor = textLength >= 8 ? 0.39 : textLength >= 7 ? 0.41 : textLength >= 6 ? 0.45 : textLength === 5 ? 0.54 : 0.58;
   const byArc = arcRoom / Math.max(2, textLength * charFactor);
   const byRadial = radialRoom;
-  const maxSize = textLength >= 8 ? 15.8 : textLength >= 7 ? 16.6 : textLength >= 6 ? 16.0 : 19;
-  const minSize = textLength >= 8 ? 10.5 : textLength >= 7 ? 10.9 : textLength >= 6 ? 10.2 : 9.2;
+  const maxSize = textLength >= 8 ? 16.6 : textLength >= 7 ? 17.4 : textLength >= 6 ? 16.8 : 20;
+  const minSize = textLength >= 8 ? 11.2 : textLength >= 7 ? 11.6 : textLength >= 6 ? 10.8 : 9.6;
   return clamp(Math.min(byArc, byRadial), minSize, maxSize);
 }
 
@@ -132,12 +132,10 @@ function drawReadableText(ctx, text, x, y, angleDeg, fontSize, color, longMode) 
   ctx.lineJoin = 'round';
   ctx.miterLimit = 2;
 
-  // White underlay keeps small/long digits readable without making them visually heavy.
   ctx.lineWidth = Math.max(longMode ? 0.85 : 0.7, fontSize * (longMode ? 0.085 : 0.075));
   ctx.strokeStyle = 'rgba(255,255,255,0.88)';
   ctx.strokeText(label, 0, 0);
 
-  // Tiny dark hairline for digital contrast on pale cells.
   if (longMode) {
     ctx.lineWidth = Math.max(0.22, fontSize * 0.025);
     ctx.strokeStyle = 'rgba(0,0,0,0.24)';
@@ -185,7 +183,7 @@ function renderOverlay(overlay, sourceCanvas) {
   const longMode = Math.max(formatNumber(startValue).length, formatNumber(sampleMax).length) >= 7;
   const extraRings = 96;
   const wheelRadius = minSide / 2 - extraRings;
-  const innerRadius = clamp(minSide * (longMode ? 0.192 : 0.172), 96, wheelRadius * 0.47);
+  const innerRadius = clamp(minSide * (longMode ? 0.235 : 0.205), 118, wheelRadius * 0.54);
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
   const baseRingWidth = Math.max(18, (wheelRadius - innerRadius) / Math.max(1, weightSum));
 
