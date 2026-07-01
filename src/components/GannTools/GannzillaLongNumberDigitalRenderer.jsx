@@ -92,10 +92,15 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
   return { inner, outer: inner + width, width, mid: inner + width / 2 };
 }
 
-function fontSizeForCell(textLength, longMode) {
-  if (longMode || textLength >= 6) return 10;
-  if (textLength >= 4) return 10.6;
-  return 11.4;
+function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode) {
+  const arcRoom = (TWO_PI * midR / divisions) * 0.70;
+  const radialRoom = ringWidth * 0.54;
+  const charFactor = textLength >= 8 ? 0.58 : textLength >= 7 ? 0.60 : textLength >= 6 ? 0.62 : 0.66;
+  const byArc = arcRoom / Math.max(2, textLength * charFactor);
+  const byRadial = radialRoom;
+  const maxSize = longMode || textLength >= 7 ? 24 : 27;
+  const minSize = longMode || textLength >= 7 ? 15 : 17;
+  return clamp(Math.min(byArc, byRadial), minSize, maxSize);
 }
 
 function drawReadableText(ctx, text, x, y, angleDeg, fontSize, color, longMode) {
@@ -112,9 +117,8 @@ function drawReadableText(ctx, text, x, y, angleDeg, fontSize, color, longMode) 
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
 
-  // A very light white edge only; no compression and no dark outline, to keep 7-digit values crisp like the reference.
-  ctx.lineWidth = 0.55;
-  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+  ctx.lineWidth = Math.max(0.75, fontSize * 0.055);
+  ctx.strokeStyle = 'rgba(255,255,255,0.88)';
   ctx.strokeText(label, 0, 0);
   ctx.fillStyle = color;
   ctx.fillText(label, 0, 0);
@@ -143,7 +147,8 @@ function renderOverlay(overlay, sourceCanvas) {
   ctx.clearRect(0, 0, rect.width, rect.height);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, rect.width, rect.height);
-  ctx.imageSmoothingEnabled = false;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
 
   const { levels, startValue, increment, divisions, clockwise } = settings;
   const sector = 360 / divisions;
@@ -191,7 +196,7 @@ function renderOverlay(overlay, sourceCanvas) {
       ctx.restore();
 
       const p = polar(cx, cy, metrics.mid, centerDeg);
-      const fs = fontSizeForCell(text.length, longMode);
+      const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, text.length, longMode);
       drawReadableText(ctx, text, p.x, p.y, centerDeg, fs, wheelNumberColor(value), longMode || text.length >= 6);
     }
   }
