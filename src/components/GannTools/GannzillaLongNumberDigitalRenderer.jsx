@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_EXPANDED_ANGLE_DEGREE_RAISED_V13';
+const SUM_RESULT_STYLE_VERSION = 'CELL_EXPANDED_LARGE_ANGLE_FRAME_V14';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -92,11 +92,11 @@ function getUnrotatedRect(canvas) {
 }
 
 function ringWeight(ring, longMode) {
-  if (!longMode) return ring === 1 ? 1.74 : ring === 2 ? 1.27 : ring === 3 ? 1.10 : 1.02;
-  if (ring === 1) return 2.10;
-  if (ring === 2) return 1.52;
-  if (ring === 3) return 1.20;
-  return 1.04;
+  if (!longMode) return ring === 1 ? 1.86 : ring === 2 ? 1.38 : ring === 3 ? 1.22 : 1.08;
+  if (ring === 1) return 2.26;
+  if (ring === 2) return 1.68;
+  if (ring === 3) return 1.34;
+  return 1.10;
 }
 
 function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
@@ -108,19 +108,19 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 
 function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring) {
   const arcRoom = (TWO_PI * midR / divisions) * 0.72;
-  const radialRoom = ringWidth * 0.36;
+  const radialRoom = ringWidth * 0.42;
   const charFactor = textLength >= 8 ? 0.60 : textLength >= 7 ? 0.62 : textLength >= 6 ? 0.64 : 0.68;
   const natural = Math.min(arcRoom / Math.max(2, textLength * charFactor), radialRoom);
 
   const ringCap = ring === 1
-    ? (longMode || textLength >= 7 ? 17.0 : 19.5)
+    ? (longMode || textLength >= 7 ? 18.0 : 21.0)
     : ring === 2
-      ? (longMode || textLength >= 7 ? 14.2 : 16.0)
+      ? (longMode || textLength >= 7 ? 15.6 : 18.0)
       : ring === 3
-        ? (longMode || textLength >= 7 ? 11.8 : 13.4)
-        : (longMode || textLength >= 7 ? 10.2 : 12.0);
+        ? (longMode || textLength >= 7 ? 13.2 : 15.2)
+        : (longMode || textLength >= 7 ? 11.4 : 13.2);
 
-  const ringMin = ring === 1 ? 11.8 : ring === 2 ? 10.0 : ring === 3 ? 8.8 : 8.0;
+  const ringMin = ring === 1 ? 12.6 : ring === 2 ? 10.8 : ring === 3 ? 9.4 : 8.4;
   return clamp(Math.min(natural, ringCap), ringMin, ringCap);
 }
 
@@ -135,8 +135,8 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
 
-  ctx.lineWidth = Math.max(0.42, fontSize * 0.034);
-  ctx.strokeStyle = `rgba(255,255,255,${0.9 * alpha})`;
+  ctx.lineWidth = Math.max(0.48, fontSize * 0.04);
+  ctx.strokeStyle = `rgba(255,255,255,${0.92 * alpha})`;
   ctx.strokeText(label, 0, 0);
   ctx.fillStyle = color;
   ctx.globalAlpha = alpha;
@@ -148,20 +148,20 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const result = digitalRoot(value);
   const angleVal = angleSequenceValue(value);
 
-  // V13 layout:
-  // expanded cells retained, angle numbers include degree sign and are raised slightly outward.
-  // This keeps 0°, 1°, 2°, 3° visually near the same stable level shown in the reference.
+  // V14 layout:
+  // larger ring cells and larger angle labels with degree sign.
+  // Angle labels stay near the same radial level but become clearer and more stable visually.
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
   const distance = Math.hypot(toCenterX, toCenterY) || 1;
   const ux = toCenterX / distance;
   const uy = toCenterY / distance;
 
-  const resultSize = clamp(fontSize * 0.60, 7.4, 12.6);
-  const angleSize = clamp(fontSize * 0.70, 8.4, 13.2);
-  const mainOutwardOffset = clamp(ringWidth * 0.01, 0, 1.6);
-  const resultInnerOffset = clamp(ringWidth * 0.42, 10.0, ringWidth * 0.50);
-  const angleOuterOffset = clamp(ringWidth * 0.38, 9.2, ringWidth * 0.46);
+  const resultSize = clamp(fontSize * 0.62, 7.8, 13.2);
+  const angleSize = clamp(fontSize * 0.92, 10.8, 17.2);
+  const mainOutwardOffset = clamp(ringWidth * 0.00, 0, 1.0);
+  const resultInnerOffset = clamp(ringWidth * 0.43, 10.5, ringWidth * 0.51);
+  const angleOuterOffset = clamp(ringWidth * 0.38, 10.0, ringWidth * 0.47);
 
   const mainX = x - ux * mainOutwardOffset;
   const mainY = y - uy * mainOutwardOffset;
@@ -170,7 +170,7 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const angleX = x - ux * angleOuterOffset;
   const angleY = y - uy * angleOuterOffset;
 
-  drawReadableText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, 750, 0.96);
+  drawReadableText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, 820, 0.98);
   drawReadableText(ctx, formatNumber(value), mainX, mainY, fontSize, color, 700, 1);
   drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
 }
@@ -211,9 +211,9 @@ function renderOverlay(overlay, sourceCanvas) {
   const longMode = Math.max(formatNumber(startValue).length, formatNumber(sampleMax).length) >= 7;
   const extraRings = 96;
   const wheelRadius = minSide / 2 - extraRings;
-  const innerRadius = clamp(minSide * (longMode ? 0.185 : 0.165), 92, wheelRadius * 0.48);
+  const innerRadius = clamp(minSide * (longMode ? 0.158 : 0.138), 74, wheelRadius * 0.44);
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
-  const baseRingWidth = Math.max(24, (wheelRadius - innerRadius) / Math.max(1, weightSum));
+  const baseRingWidth = Math.max(30, (wheelRadius - innerRadius) / Math.max(1, weightSum));
 
   ctx.save();
   ctx.beginPath();
