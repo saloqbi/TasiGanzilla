@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_CLEAN_NO_DEGREE_V11';
+const SUM_RESULT_STYLE_VERSION = 'CELL_EXPANDED_ANGLE_INSET_NO_DEGREE_V12';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -92,11 +92,11 @@ function getUnrotatedRect(canvas) {
 }
 
 function ringWeight(ring, longMode) {
-  if (!longMode) return ring === 1 ? 1.72 : ring === 2 ? 1.24 : ring === 3 ? 1.08 : 1;
-  if (ring === 1) return 2.06;
-  if (ring === 2) return 1.48;
-  if (ring === 3) return 1.16;
-  return 1;
+  if (!longMode) return ring === 1 ? 1.74 : ring === 2 ? 1.27 : ring === 3 ? 1.10 : 1.02;
+  if (ring === 1) return 2.10;
+  if (ring === 2) return 1.52;
+  if (ring === 3) return 1.20;
+  return 1.04;
 }
 
 function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
@@ -108,7 +108,7 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 
 function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring) {
   const arcRoom = (TWO_PI * midR / divisions) * 0.72;
-  const radialRoom = ringWidth * 0.38;
+  const radialRoom = ringWidth * 0.36;
   const charFactor = textLength >= 8 ? 0.60 : textLength >= 7 ? 0.62 : textLength >= 6 ? 0.64 : 0.68;
   const natural = Math.min(arcRoom / Math.max(2, textLength * charFactor), radialRoom);
 
@@ -148,21 +148,21 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const result = digitalRoot(value);
   const angleVal = angleSequenceValue(value);
 
-  // V11 layout:
-  // clean angle numbers without the degree sign to avoid visual noise.
-  // 36 = 0, 1 = 1, 2 = 2, ... 360 = 360, then repeat.
-  // Angle, main number, and sum use the same red/blue/black color family.
+  // V12 layout:
+  // bigger radial cells and angle numbers pulled inside the cell.
+  // This keeps angle numbers visually separated from the outer wheel frame.
+  // No degree sign, preserving the previous approved v11 visual style.
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
   const distance = Math.hypot(toCenterX, toCenterY) || 1;
   const ux = toCenterX / distance;
   const uy = toCenterY / distance;
 
-  const resultSize = clamp(fontSize * 0.62, 7.6, 12.8);
-  const angleSize = clamp(fontSize * 0.78, 9.2, 14.6);
-  const mainOutwardOffset = clamp(ringWidth * 0.02, 0.4, 2.4);
-  const resultInnerOffset = clamp(ringWidth * 0.39, 9.5, ringWidth * 0.48);
-  const angleOuterOffset = clamp(ringWidth * 0.46, 10.2, ringWidth * 0.55);
+  const resultSize = clamp(fontSize * 0.60, 7.4, 12.6);
+  const angleSize = clamp(fontSize * 0.74, 8.8, 13.8);
+  const mainOutwardOffset = clamp(ringWidth * 0.01, 0, 1.6);
+  const resultInnerOffset = clamp(ringWidth * 0.42, 10.0, ringWidth * 0.50);
+  const angleOuterOffset = clamp(ringWidth * 0.28, 8.0, ringWidth * 0.36);
 
   const mainX = x - ux * mainOutwardOffset;
   const mainY = y - uy * mainOutwardOffset;
@@ -212,9 +212,9 @@ function renderOverlay(overlay, sourceCanvas) {
   const longMode = Math.max(formatNumber(startValue).length, formatNumber(sampleMax).length) >= 7;
   const extraRings = 96;
   const wheelRadius = minSide / 2 - extraRings;
-  const innerRadius = clamp(minSide * (longMode ? 0.225 : 0.198), 112, wheelRadius * 0.52);
+  const innerRadius = clamp(minSide * (longMode ? 0.185 : 0.165), 92, wheelRadius * 0.48);
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
-  const baseRingWidth = Math.max(20, (wheelRadius - innerRadius) / Math.max(1, weightSum));
+  const baseRingWidth = Math.max(24, (wheelRadius - innerRadius) / Math.max(1, weightSum));
 
   ctx.save();
   ctx.beginPath();
