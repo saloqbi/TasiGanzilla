@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_EXPANDED_ANGLE_INSET_NO_DEGREE_V12';
+const SUM_RESULT_STYLE_VERSION = 'CELL_EXPANDED_ANGLE_DEGREE_RAISED_V13';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -148,10 +148,9 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const result = digitalRoot(value);
   const angleVal = angleSequenceValue(value);
 
-  // V12 layout:
-  // bigger radial cells and angle numbers pulled inside the cell.
-  // This keeps angle numbers visually separated from the outer wheel frame.
-  // No degree sign, preserving the previous approved v11 visual style.
+  // V13 layout:
+  // expanded cells retained, angle numbers include degree sign and are raised slightly outward.
+  // This keeps 0°, 1°, 2°, 3° visually near the same stable level shown in the reference.
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
   const distance = Math.hypot(toCenterX, toCenterY) || 1;
@@ -159,10 +158,10 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const uy = toCenterY / distance;
 
   const resultSize = clamp(fontSize * 0.60, 7.4, 12.6);
-  const angleSize = clamp(fontSize * 0.74, 8.8, 13.8);
+  const angleSize = clamp(fontSize * 0.70, 8.4, 13.2);
   const mainOutwardOffset = clamp(ringWidth * 0.01, 0, 1.6);
   const resultInnerOffset = clamp(ringWidth * 0.42, 10.0, ringWidth * 0.50);
-  const angleOuterOffset = clamp(ringWidth * 0.28, 8.0, ringWidth * 0.36);
+  const angleOuterOffset = clamp(ringWidth * 0.38, 9.2, ringWidth * 0.46);
 
   const mainX = x - ux * mainOutwardOffset;
   const mainY = y - uy * mainOutwardOffset;
@@ -171,7 +170,7 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const angleX = x - ux * angleOuterOffset;
   const angleY = y - uy * angleOuterOffset;
 
-  drawReadableText(ctx, String(angleVal), angleX, angleY, angleSize, color, 750, 0.96);
+  drawReadableText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, 750, 0.96);
   drawReadableText(ctx, formatNumber(value), mainX, mainY, fontSize, color, 700, 1);
   drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
 }
