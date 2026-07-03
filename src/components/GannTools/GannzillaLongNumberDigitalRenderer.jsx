@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_EXPANDED_LARGE_ANGLE_FRAME_CLEAN_BASE_V24';
+const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_V30';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -124,6 +124,28 @@ function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring)
   return clamp(Math.min(natural, ringCap), ringMin, ringCap);
 }
 
+function normalizeReadableRotation(rad) {
+  let r = rad;
+  while (r > Math.PI / 2) r -= Math.PI;
+  while (r < -Math.PI / 2) r += Math.PI;
+  return r;
+}
+
+function roundedRectPath(ctx, x, y, w, h, r) {
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + w - radius, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+  ctx.lineTo(x + w, y + h - radius);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+  ctx.lineTo(x + radius, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
 function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha = 1) {
   const label = String(text);
   ctx.save();
@@ -144,6 +166,39 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
   ctx.restore();
 }
 
+function drawAngleText(ctx, text, x, y, fontSize, color, wheelCx, wheelCy) {
+  const label = String(text);
+  const dx = x - wheelCx;
+  const dy = y - wheelCy;
+  const tangentRotation = normalizeReadableRotation(Math.atan2(dy, dx) + Math.PI / 2);
+
+  ctx.save();
+  ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
+  ctx.rotate(tangentRotation);
+  ctx.font = `820 ${fontSize}px ${DIGITAL_FONT_STACK}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+
+  const metrics = ctx.measureText(label);
+  const width = metrics.width + clamp(fontSize * 0.92, 9, 18);
+  const height = fontSize * 1.34;
+  roundedRectPath(ctx, -width / 2, -height / 2, width, height, clamp(fontSize * 0.28, 3, 6));
+  ctx.fillStyle = 'rgba(218,218,218,0.64)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.78)';
+  ctx.lineWidth = Math.max(0.55, fontSize * 0.045);
+  ctx.stroke();
+
+  ctx.lineWidth = Math.max(0.48, fontSize * 0.04);
+  ctx.strokeStyle = 'rgba(255,255,255,0.88)';
+  ctx.strokeText(label, 0, 0);
+  ctx.fillStyle = color;
+  ctx.globalAlpha = 0.98;
+  ctx.fillText(label, 0, 0);
+  ctx.restore();
+}
+
 function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, ringWidth, wheelCx, wheelCy) {
   const result = digitalRoot(value);
   const angleVal = angleSequenceValue(value);
@@ -156,7 +211,7 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const uy = toCenterY / distance;
 
   const resultSize = clamp(fontSize * 0.62, 7.8, 13.2);
-  const angleSize = clamp(fontSize * 0.92, 10.8, 17.2);
+  const angleSize = clamp(fontSize * 0.88, 10.2, 16.4);
   const mainOutwardOffset = clamp(ringWidth * 0.00, 0, 1.0);
   const resultInnerOffset = clamp(ringWidth * 0.43, 10.5, ringWidth * 0.51);
   const angleOuterOffset = clamp(ringWidth * 0.38, 10.0, ringWidth * 0.47);
@@ -168,7 +223,7 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const angleX = x - ux * angleOuterOffset;
   const angleY = y - uy * angleOuterOffset;
 
-  drawReadableText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, 820, 0.98);
+  drawAngleText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, wheelCx, wheelCy);
   drawReadableText(ctx, mainText, mainX, mainY, fontSize, color, 700, 1);
   drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
 }
