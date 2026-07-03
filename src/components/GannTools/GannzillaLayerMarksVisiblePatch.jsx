@@ -1,10 +1,10 @@
 import React from 'react';
 
-const PATCH_CANVAS_ID = 'gannzilla-layer-marks-line-patch-v20';
+const PATCH_CANVAS_ID = 'gannzilla-layer-marks-line-patch-v21';
 const SOURCE_CANVAS_ID = 'gannzilla-long-number-digital-renderer-v1';
 const FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
 const LAYER_COLOR = '#9c27b0';
-const MARKER = 'GANNZILLA_LAYER_MARKS_LEFT_OF_CENTER_NO_LINE_PATCH_V20';
+const MARKER = 'GANNZILLA_LAYER_MARKS_UPPER_RIGHT_NO_LINE_PATCH_V21';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -100,13 +100,15 @@ function renderLayerMarks(overlay, sourceCanvas) {
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
   const baseRingWidth = Math.max(30, (wheelRadius - innerRadius) / Math.max(1, weightSum));
 
-  const labelX = cx - clamp(baseRingWidth * 0.24, 8, 15);
-  const labelSize = clamp(baseRingWidth * 0.34, 13.5, 21.0);
+  // Place layer numbers beside the wheel axis, at the upper edge of each circular layer,
+  // matching the user's hand-marked reference position. No vertical purple line.
+  const labelX = cx + clamp(baseRingWidth * 0.34, 12, 22);
+  const labelSize = clamp(baseRingWidth * 0.38, 15.0, 23.0);
 
   for (let ring = 1; ring <= levels; ring += 1) {
     const metrics = ringMetrics(innerRadius, baseRingWidth, ring, longMode);
     const label = ((ring - 1) % 10) + 1;
-    const labelY = cy - metrics.mid;
+    const labelY = cy - metrics.outer + clamp(metrics.width * 0.10, 4, 9);
     drawLayerText(ctx, label, labelX, labelY, labelSize);
   }
 }
@@ -120,6 +122,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
     document.getElementById('gannzilla-layer-marks-visible-patch-v17')?.remove();
     document.getElementById('gannzilla-layer-marks-visible-patch-v18')?.remove();
     document.getElementById('gannzilla-layer-marks-line-patch-v19')?.remove();
+    document.getElementById('gannzilla-layer-marks-line-patch-v20')?.remove();
 
     let overlay = document.getElementById(PATCH_CANVAS_ID);
     if (!overlay) {
@@ -127,7 +130,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
       overlay.id = PATCH_CANVAS_ID;
       document.body.appendChild(overlay);
     }
-    window.__gannzillaLayerMarksLeftNoLinePatchV20 = MARKER;
+    window.__gannzillaLayerMarksUpperRightNoLinePatchV21 = MARKER;
 
     const render = () => {
       const sourceCanvas = document.getElementById(SOURCE_CANVAS_ID);
