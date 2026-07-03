@@ -1,10 +1,11 @@
 import React from 'react';
 
 const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
+const EXPORT_BUTTONS_ID = 'gannzilla-export-copy-buttons-v31';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_V30';
+const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_EXPORT_V31';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -181,20 +182,31 @@ function drawAngleText(ctx, text, x, y, fontSize, color, wheelCx, wheelCy) {
   ctx.lineJoin = 'round';
 
   const metrics = ctx.measureText(label);
-  const width = metrics.width + clamp(fontSize * 0.92, 9, 18);
-  const height = fontSize * 1.34;
-  roundedRectPath(ctx, -width / 2, -height / 2, width, height, clamp(fontSize * 0.28, 3, 6));
-  ctx.fillStyle = 'rgba(218,218,218,0.64)';
+  const width = metrics.width + clamp(fontSize * 0.98, 10, 19);
+  const height = fontSize * 1.38;
+  const bgGradient = ctx.createLinearGradient(0, -height / 2, 0, height / 2);
+  bgGradient.addColorStop(0, 'rgba(224,224,224,0.94)');
+  bgGradient.addColorStop(1, 'rgba(166,166,166,0.92)');
+
+  ctx.shadowColor = 'rgba(0,0,0,0.30)';
+  ctx.shadowBlur = clamp(fontSize * 0.30, 3.2, 6.2);
+  ctx.shadowOffsetY = clamp(fontSize * 0.12, 1.2, 2.4);
+  roundedRectPath(ctx, -width / 2, -height / 2, width, height, clamp(fontSize * 0.28, 3.4, 6.4));
+  ctx.fillStyle = bgGradient;
   ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.78)';
-  ctx.lineWidth = Math.max(0.55, fontSize * 0.045);
+
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+  ctx.strokeStyle = 'rgba(110,110,110,0.44)';
+  ctx.lineWidth = Math.max(0.65, fontSize * 0.052);
   ctx.stroke();
 
-  ctx.lineWidth = Math.max(0.48, fontSize * 0.04);
-  ctx.strokeStyle = 'rgba(255,255,255,0.88)';
+  ctx.lineWidth = Math.max(0.52, fontSize * 0.045);
+  ctx.strokeStyle = 'rgba(255,255,255,0.90)';
   ctx.strokeText(label, 0, 0);
   ctx.fillStyle = color;
-  ctx.globalAlpha = 0.98;
+  ctx.globalAlpha = 1;
   ctx.fillText(label, 0, 0);
   ctx.restore();
 }
@@ -363,6 +375,86 @@ function renderOverlay(overlay, sourceCanvas) {
   ctx.restore();
 }
 
+function makeExportButton(label, title, onClick) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = label;
+  button.title = title;
+  button.style.height = '34px';
+  button.style.padding = '0 14px';
+  button.style.border = '1px solid #bfc5cd';
+  button.style.borderRadius = '6px';
+  button.style.background = 'linear-gradient(#ffffff, #f2f2f2)';
+  button.style.boxShadow = '0 1px 2px rgba(0,0,0,0.10)';
+  button.style.color = '#222';
+  button.style.font = '700 13px Tahoma, Arial, sans-serif';
+  button.style.cursor = 'pointer';
+  button.addEventListener('click', onClick);
+  return button;
+}
+
+async function copyCanvasImage(canvas, button) {
+  if (!canvas) return;
+  const original = button.textContent;
+  try {
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1));
+    if (blob && navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      button.textContent = 'تم النسخ ✓';
+    } else {
+      const link = document.createElement('a');
+      link.download = 'gannzilla-wheel.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      button.textContent = 'تم الحفظ ✓';
+    }
+  } catch (error) {
+    const link = document.createElement('a');
+    link.download = 'gannzilla-wheel.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    button.textContent = 'تم الحفظ ✓';
+  }
+  window.setTimeout(() => {
+    button.textContent = original;
+  }, 1400);
+}
+
+function printCanvasPdf(canvas) {
+  if (!canvas) return;
+  const dataUrl = canvas.toDataURL('image/png');
+  const popup = window.open('', '_blank');
+  if (!popup) {
+    window.print();
+    return;
+  }
+  popup.document.write(`<!doctype html><html><head><title>Gannzilla PDF</title><style>html,body{margin:0;background:#fff;}img{width:100%;height:auto;display:block;}@media print{img{max-width:100%;page-break-inside:avoid;}}</style></head><body><img src="${dataUrl}" onload="setTimeout(()=>{window.print();},250)" /></body></html>`);
+  popup.document.close();
+}
+
+function ensureExportButtons(overlay) {
+  if (document.getElementById(EXPORT_BUTTONS_ID)) return;
+  const bar = document.createElement('div');
+  bar.id = EXPORT_BUTTONS_ID;
+  bar.dir = 'rtl';
+  bar.style.position = 'fixed';
+  bar.style.top = '82px';
+  bar.style.left = '12px';
+  bar.style.zIndex = '10060';
+  bar.style.display = 'flex';
+  bar.style.gap = '10px';
+  bar.style.alignItems = 'center';
+  bar.style.pointerEvents = 'auto';
+  bar.appendChild(makeExportButton('نسخ الصورة ⧉', 'نسخ صورة العجلة', (event) => copyCanvasImage(overlay, event.currentTarget)));
+  bar.appendChild(makeExportButton('طباعة PDF 🖨', 'طباعة العجلة أو حفظها PDF', () => printCanvasPdf(overlay)));
+  document.body.appendChild(bar);
+  window.__gannzillaExportButtonsV31 = true;
+}
+
+function removeExportButtons() {
+  document.getElementById(EXPORT_BUTTONS_ID)?.remove();
+}
+
 export default function GannzillaLongNumberDigitalRenderer() {
   React.useEffect(() => {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true');
@@ -374,6 +466,7 @@ export default function GannzillaLongNumberDigitalRenderer() {
       overlay.id = OVERLAY_ID;
       document.body.appendChild(overlay);
     }
+    ensureExportButtons(overlay);
     window[MARKER] = true;
     window.__gannzillaSumResultStyleVersion = SUM_RESULT_STYLE_VERSION;
 
@@ -395,6 +488,7 @@ export default function GannzillaLongNumberDigitalRenderer() {
       window.removeEventListener('scroll', render, true);
       const sourceCanvas = getWheelCanvas();
       if (sourceCanvas) sourceCanvas.style.opacity = '';
+      removeExportButtons();
       document.getElementById(OVERLAY_ID)?.remove();
     };
   }, []);
