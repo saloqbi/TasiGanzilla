@@ -1,13 +1,19 @@
 import React from 'react';
 
-const PATCH_CANVAS_ID = 'gannzilla-layer-marks-line-patch-v22';
+const PATCH_CANVAS_ID = 'gannzilla-layer-marks-clean-single-patch-v23';
 const SOURCE_CANVAS_ID = 'gannzilla-long-number-digital-renderer-v1';
+const TWO_PI = Math.PI * 2;
 const FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
 const LAYER_COLOR = '#9c27b0';
-const MARKER = 'GANNZILLA_LAYER_MARKS_BESIDE_WHEEL_EDGE_DOUBLE_PATCH_V22';
+const MARKER = 'GANNZILLA_LAYER_MARKS_CLEAN_SINGLE_PATCH_V23';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function polar(cx, cy, radius, deg) {
+  const rad = ((deg - 90) * Math.PI) / 180;
+  return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
 }
 
 function formatNumber(value) {
@@ -35,7 +41,7 @@ function getSettings() {
   const startValue = Number(inputs[1]?.value ?? 1) || 0;
   const increment = Number(inputs[3]?.value ?? 1) || 1;
   const divisions = Number(getViewSelect()?.value) || 36;
-  return { levels, startValue, increment, divisions };
+  return { levels, startValue, increment, divisions, clockwise: true };
 }
 
 function ringWeight(ring, longMode) {
@@ -53,6 +59,30 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
   return { inner, outer: inner + width, width, mid: inner + width / 2 };
 }
 
+function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring) {
+  const arcRoom = (TWO_PI * midR / divisions) * 0.72;
+  const radialRoom = ringWidth * 0.42;
+  const charFactor = textLength >= 8 ? 0.60 : textLength >= 7 ? 0.62 : textLength >= 6 ? 0.64 : 0.68;
+  const natural = Math.min(arcRoom / Math.max(2, textLength * charFactor), radialRoom);
+  const ringCap = ring === 1
+    ? (longMode || textLength >= 7 ? 18.0 : 21.0)
+    : ring === 2
+      ? (longMode || textLength >= 7 ? 15.6 : 18.0)
+      : ring === 3
+        ? (longMode || textLength >= 7 ? 13.2 : 15.2)
+        : (longMode || textLength >= 7 ? 11.4 : 13.2);
+  const ringMin = ring === 1 ? 12.6 : ring === 2 ? 10.8 : ring === 3 ? 9.4 : 8.4;
+  return clamp(Math.min(natural, ringCap), ringMin, ringCap);
+}
+
+function measureText(ctx, text, fontSize, weight = 700) {
+  ctx.save();
+  ctx.font = `${weight} ${fontSize}px ${FONT_STACK}`;
+  const width = ctx.measureText(String(text)).width;
+  ctx.restore();
+  return width;
+}
+
 function drawLayerText(ctx, text, x, y, fontSize) {
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
@@ -60,11 +90,11 @@ function drawLayerText(ctx, text, x, y, fontSize) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
-  ctx.lineWidth = Math.max(0.55, fontSize * 0.035);
-  ctx.strokeStyle = 'rgba(255,255,255,0.94)';
+  ctx.lineWidth = Math.max(0.62, fontSize * 0.045);
+  ctx.strokeStyle = 'rgba(255,255,255,0.96)';
   ctx.strokeText(String(text), 0, 0);
   ctx.fillStyle = LAYER_COLOR;
-  ctx.globalAlpha = 0.94;
+  ctx.globalAlpha = 0.96;
   ctx.fillText(String(text), 0, 0);
   ctx.restore();
 }
@@ -87,11 +117,12 @@ function renderLayerMarks(overlay, sourceCanvas) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, rect.width, rect.height);
 
-  const { levels, startValue, increment, divisions } = getSettings();
+  const { levels, startValue, increment, divisions, clockwise } = getSettings();
+  const sector = 360 / divisions;
+  const direction = clockwise ? 1 : -1;
   const cx = rect.width / 2;
   const cy = rect.height / 2;
   const minSide = Math.min(rect.width, rect.height);
-
   const sampleMax = numberAtRing(startValue, levels, Math.max(0, divisions - 1), divisions, increment);
   const longMode = Math.max(formatNumber(startValue).length, formatNumber(sampleMax).length) >= 7;
   const extraRings = 96;
@@ -100,18 +131,23 @@ function renderLayerMarks(overlay, sourceCanvas) {
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
   const baseRingWidth = Math.max(30, (wheelRadius - innerRadius) / Math.max(1, weightSum));
 
-  // V22: numbers are placed beside the wheel at the same hand-marked locations:
-  // one near the angle row and one near the main layer number row. No vertical purple line.
-  const labelX = cx + clamp(baseRingWidth * 0.36, 12, 22);
-  const labelSize = clamp(baseRingWidth * 0.34, 13.5, 21.0);
+  // V23: one clean layer number only, drawn beside the actual boundary number
+  // 36/72/108/144/180... This removes the duplicate vertical-column labels.
+  const boundaryIndex = Math.max(0, divisions - 1);
+  const centerDeg = direction * (boundaryIndex + 0.5) * sector;
 
   for (let ring = 1; ring <= levels; ring += 1) {
     const metrics = ringMetrics(innerRadius, baseRingWidth, ring, longMode);
+    const value = numberAtRing(startValue, ring, boundaryIndex, divisions, increment);
+    const mainText = formatNumber(value);
+    const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, mainText.length, longMode, ring);
+    const p = polar(cx, cy, metrics.mid, centerDeg);
+    const mainWidth = measureText(ctx, mainText, fs, 700);
     const label = ((ring - 1) % 10) + 1;
-    const topY = cy - metrics.outer + clamp(metrics.width * 0.19, 6, 13);
-    const midY = cy - metrics.mid + clamp(metrics.width * 0.03, 0, 2.5);
-    drawLayerText(ctx, label, labelX, topY, labelSize);
-    drawLayerText(ctx, label, labelX, midY, labelSize);
+    const labelSize = clamp(fs * 0.95, 12.0, 18.5);
+    const labelX = p.x + (mainWidth / 2) + clamp(labelSize * 0.46, 6.0, metrics.width * 0.25);
+    const labelY = p.y - clamp(fs * 0.02, 0, 0.8);
+    drawLayerText(ctx, label, labelX, labelY, labelSize);
   }
 }
 
@@ -126,6 +162,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
     document.getElementById('gannzilla-layer-marks-line-patch-v19')?.remove();
     document.getElementById('gannzilla-layer-marks-line-patch-v20')?.remove();
     document.getElementById('gannzilla-layer-marks-line-patch-v21')?.remove();
+    document.getElementById('gannzilla-layer-marks-line-patch-v22')?.remove();
 
     let overlay = document.getElementById(PATCH_CANVAS_ID);
     if (!overlay) {
@@ -133,7 +170,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
       overlay.id = PATCH_CANVAS_ID;
       document.body.appendChild(overlay);
     }
-    window.__gannzillaLayerMarksBesideWheelEdgeDoublePatchV22 = MARKER;
+    window.__gannzillaLayerMarksCleanSinglePatchV23 = MARKER;
 
     const render = () => {
       const sourceCanvas = document.getElementById(SOURCE_CANVAS_ID);
