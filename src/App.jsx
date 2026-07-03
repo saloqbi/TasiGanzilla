@@ -27,6 +27,7 @@ import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArab
 import GannzillaDigitalNumberClarityPatch from './components/GannTools/GannzillaDigitalNumberClarityPatch';
 import GannzillaLongNumberDigitalRenderer from './components/GannTools/GannzillaLongNumberDigitalRenderer';
 import GannzillaLayerMarksVisiblePatch from './components/GannTools/GannzillaLayerMarksVisiblePatch';
+import GannzillaTwentyRingNoOverlapPatch from './components/GannTools/GannzillaTwentyRingNoOverlapPatch';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -61,6 +62,7 @@ const App = () => {
               <GannzillaCardinalBalancePatch />
               <GannzillaLongNumberDigitalRenderer />
               <GannzillaLayerMarksVisiblePatch />
+              <GannzillaTwentyRingNoOverlapPatch />
               <GannzillaOptionsBadgeHidePatch />
               <GannzillaPanelToggleTopbarPatch />
               <GannzillaWheelLineDrawPatch />
