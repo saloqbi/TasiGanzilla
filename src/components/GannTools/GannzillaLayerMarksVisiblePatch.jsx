@@ -1,13 +1,18 @@
 import React from 'react';
 
-const PATCH_CANVAS_ID = 'gannzilla-layer-marks-axis-right-patch-v26';
+const PATCH_CANVAS_ID = 'gannzilla-layer-marks-all-columns-patch-v27';
 const SOURCE_CANVAS_ID = 'gannzilla-long-number-digital-renderer-v1';
-const FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const LAYER_COLOR = '#9c27b0';
-const MARKER = 'GANNZILLA_LAYER_MARKS_AXIS_NEAR_LINE_PATCH_V26';
+const FONT_STACK = 'Arial Narrow, Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
+const LAYER_COLOR = '#8a2a8f';
+const MARKER = 'GANNZILLA_LAYER_MARKS_ALL_COLUMNS_PATCH_V27';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function polar(cx, cy, radius, deg) {
+  const rad = ((deg - 90) * Math.PI) / 180;
+  return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
 }
 
 function formatNumber(value) {
@@ -35,7 +40,7 @@ function getSettings() {
   const startValue = Number(inputs[1]?.value ?? 1) || 0;
   const increment = Number(inputs[3]?.value ?? 1) || 1;
   const divisions = Number(getViewSelect()?.value) || 36;
-  return { levels, startValue, increment, divisions };
+  return { levels, startValue, increment, divisions, clockwise: true };
 }
 
 function ringWeight(ring, longMode) {
@@ -56,16 +61,28 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 function drawLayerText(ctx, text, x, y, fontSize) {
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
-  ctx.font = `600 ${fontSize}px ${FONT_STACK}`;
+  ctx.font = `500 ${fontSize}px ${FONT_STACK}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
-  ctx.lineWidth = Math.max(0.45, fontSize * 0.03);
-  ctx.strokeStyle = 'rgba(255,255,255,0.96)';
+  ctx.lineWidth = Math.max(0.32, fontSize * 0.024);
+  ctx.strokeStyle = 'rgba(255,255,255,0.90)';
   ctx.strokeText(String(text), 0, 0);
   ctx.fillStyle = LAYER_COLOR;
-  ctx.globalAlpha = 0.92;
+  ctx.globalAlpha = 0.76;
   ctx.fillText(String(text), 0, 0);
+  ctx.restore();
+}
+
+function drawSoftGuide(ctx, x1, y1, x2, y2, width) {
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = 'rgba(138,42,143,0.16)';
+  ctx.lineWidth = width;
+  ctx.lineCap = 'round';
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -87,7 +104,9 @@ function renderLayerMarks(overlay, sourceCanvas) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, rect.width, rect.height);
 
-  const { levels, startValue, increment, divisions } = getSettings();
+  const { levels, startValue, increment, divisions, clockwise } = getSettings();
+  const sector = 360 / divisions;
+  const direction = clockwise ? 1 : -1;
   const cx = rect.width / 2;
   const cy = rect.height / 2;
   const minSide = Math.min(rect.width, rect.height);
@@ -98,17 +117,32 @@ function renderLayerMarks(overlay, sourceCanvas) {
   const innerRadius = clamp(minSide * (longMode ? 0.158 : 0.138), 74, wheelRadius * 0.44);
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
   const baseRingWidth = Math.max(30, (wheelRadius - innerRadius) / Math.max(1, weightSum));
+  const last = ringMetrics(innerRadius, baseRingWidth, levels, longMode);
+  const guideWidth = clamp(baseRingWidth * 0.018, 0.55, 1.05);
+  const labelSize = clamp(baseRingWidth * 0.16, 6.6, 9.2);
 
-  // V26: keep exactly one layer number per ring, smaller and very close to the 0° axis line.
-  // This avoids merging with 36/72/108 on the left and 1/37/73/145 on the right.
-  const labelX = cx + clamp(baseRingWidth * 0.16, 5.0, 8.5);
-  const labelSize = clamp(baseRingWidth * 0.20, 8.0, 11.2);
+  // V27: apply the same comfortable layer-column treatment to every wheel cell.
+  // Soft purple radial guides + small layer numbers, left of each guide line.
+  for (let i = 0; i < divisions; i += 1) {
+    const boundaryDeg = direction * i * sector;
+    const tangentRad = ((boundaryDeg) * Math.PI) / 180;
+    const tx = -Math.sin(tangentRad);
+    const ty = Math.cos(tangentRad);
+    const side = direction >= 0 ? -1 : 1;
+    const offset = clamp(baseRingWidth * 0.075, 2.4, 4.0);
 
-  for (let ring = 1; ring <= levels; ring += 1) {
-    const metrics = ringMetrics(innerRadius, baseRingWidth, ring, longMode);
-    const label = ((ring - 1) % 10) + 1;
-    const labelY = cy - metrics.mid;
-    drawLayerText(ctx, label, labelX, labelY, labelSize);
+    const guideStart = polar(cx, cy, innerRadius + 1.5, boundaryDeg);
+    const guideEnd = polar(cx, cy, last.outer - 1.5, boundaryDeg);
+    drawSoftGuide(ctx, guideStart.x, guideStart.y, guideEnd.x, guideEnd.y, guideWidth);
+
+    for (let ring = 1; ring <= levels; ring += 1) {
+      const metrics = ringMetrics(innerRadius, baseRingWidth, ring, longMode);
+      const label = ((ring - 1) % 10) + 1;
+      const p = polar(cx, cy, metrics.mid, boundaryDeg);
+      const x = p.x + tx * offset * side;
+      const y = p.y + ty * offset * side;
+      drawLayerText(ctx, label, x, y, labelSize);
+    }
   }
 }
 
@@ -126,6 +160,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
     document.getElementById('gannzilla-layer-marks-line-patch-v22')?.remove();
     document.getElementById('gannzilla-layer-marks-clean-single-patch-v23')?.remove();
     document.getElementById('gannzilla-layer-marks-axis-right-patch-v25')?.remove();
+    document.getElementById('gannzilla-layer-marks-axis-right-patch-v26')?.remove();
 
     let overlay = document.getElementById(PATCH_CANVAS_ID);
     if (!overlay) {
@@ -133,7 +168,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
       overlay.id = PATCH_CANVAS_ID;
       document.body.appendChild(overlay);
     }
-    window.__gannzillaLayerMarksAxisNearLinePatchV26 = MARKER;
+    window.__gannzillaLayerMarksAllColumnsPatchV27 = MARKER;
 
     const render = () => {
       const sourceCanvas = document.getElementById(SOURCE_CANVAS_ID);
