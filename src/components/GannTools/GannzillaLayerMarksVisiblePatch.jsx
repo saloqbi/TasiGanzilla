@@ -1,11 +1,10 @@
 import React from 'react';
 
-const PATCH_CANVAS_ID = 'gannzilla-layer-marks-line-patch-v19';
+const PATCH_CANVAS_ID = 'gannzilla-layer-marks-line-patch-v20';
 const SOURCE_CANVAS_ID = 'gannzilla-long-number-digital-renderer-v1';
-const TWO_PI = Math.PI * 2;
 const FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
 const LAYER_COLOR = '#9c27b0';
-const MARKER = 'GANNZILLA_LAYER_MARKS_BESIDE_CENTER_LINE_PATCH_V19';
+const MARKER = 'GANNZILLA_LAYER_MARKS_LEFT_OF_CENTER_NO_LINE_PATCH_V20';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -101,24 +100,7 @@ function renderLayerMarks(overlay, sourceCanvas) {
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
   const baseRingWidth = Math.max(30, (wheelRadius - innerRadius) / Math.max(1, weightSum));
 
-  const first = ringMetrics(innerRadius, baseRingWidth, 1, longMode);
-  const last = ringMetrics(innerRadius, baseRingWidth, levels, longMode);
-  const lineX = cx;
-  const lineTop = cy - last.outer;
-  const lineBottom = cy - first.inner;
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(lineX, lineTop);
-  ctx.lineTo(lineX, lineBottom);
-  ctx.strokeStyle = LAYER_COLOR;
-  ctx.globalAlpha = 0.86;
-  ctx.lineWidth = clamp(baseRingWidth * 0.08, 3.2, 7.5);
-  ctx.lineCap = 'round';
-  ctx.stroke();
-  ctx.restore();
-
-  const labelX = lineX + clamp(baseRingWidth * 0.28, 10, 18);
+  const labelX = cx - clamp(baseRingWidth * 0.24, 8, 15);
   const labelSize = clamp(baseRingWidth * 0.34, 13.5, 21.0);
 
   for (let ring = 1; ring <= levels; ring += 1) {
@@ -137,6 +119,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
     document.getElementById('gannzilla-layer-marks-visible-patch-v16')?.remove();
     document.getElementById('gannzilla-layer-marks-visible-patch-v17')?.remove();
     document.getElementById('gannzilla-layer-marks-visible-patch-v18')?.remove();
+    document.getElementById('gannzilla-layer-marks-line-patch-v19')?.remove();
 
     let overlay = document.getElementById(PATCH_CANVAS_ID);
     if (!overlay) {
@@ -144,7 +127,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
       overlay.id = PATCH_CANVAS_ID;
       document.body.appendChild(overlay);
     }
-    window.__gannzillaLayerMarksBesideCenterLinePatchV19 = MARKER;
+    window.__gannzillaLayerMarksLeftNoLinePatchV20 = MARKER;
 
     const render = () => {
       const sourceCanvas = document.getElementById(SOURCE_CANVAS_ID);
