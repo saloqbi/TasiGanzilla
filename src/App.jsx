@@ -35,6 +35,11 @@ const App = () => {
   const isTestMode = search.includes('test=true');
   const isArabicAiWheelMode = search.includes('gannzillaArabicAI=true') || search.includes('aiWheel=true');
   const isGannzillaProWheelMode = search.includes('gannzillaPro=true') || search.includes('wheelPro=true');
+  const isTwentyRingStableMode =
+    search.includes('twentyRingNoOverlap') ||
+    search.includes('stable20Rings') ||
+    search.includes('noOverlap20') ||
+    search.includes('adaptive20Rings');
   const isEnhancedMode = search.includes('enhanced=true') || true; // افتراضياً الإصدار المحسن
   
   return (
@@ -60,9 +65,14 @@ const App = () => {
               <GannzillaLanguageSwitch />
               <GannzillaWheelPanButtonsPatch />
               <GannzillaCardinalBalancePatch />
-              <GannzillaLongNumberDigitalRenderer />
-              <GannzillaLayerMarksVisiblePatch />
-              <GannzillaTwentyRingNoOverlapPatch />
+              {isTwentyRingStableMode ? (
+                <GannzillaTwentyRingNoOverlapPatch />
+              ) : (
+                <>
+                  <GannzillaLongNumberDigitalRenderer />
+                  <GannzillaLayerMarksVisiblePatch />
+                </>
+              )}
               <GannzillaOptionsBadgeHidePatch />
               <GannzillaPanelToggleTopbarPatch />
               <GannzillaWheelLineDrawPatch />
