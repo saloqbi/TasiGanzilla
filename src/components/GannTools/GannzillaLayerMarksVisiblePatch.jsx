@@ -1,10 +1,10 @@
 import React from 'react';
 
-const PATCH_CANVAS_ID = 'gannzilla-layer-marks-all-columns-patch-v29';
+const PATCH_CANVAS_ID = 'gannzilla-layer-marks-all-columns-patch-v33';
 const SOURCE_CANVAS_ID = 'gannzilla-long-number-digital-renderer-v1';
 const FONT_STACK = 'Arial Narrow, Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
 const LAYER_COLOR = '#7b1fa2';
-const MARKER = 'GANNZILLA_LAYER_MARKS_ALL_COLUMNS_BIGGER_PATCH_V29';
+const MARKER = 'GANNZILLA_LAYER_MARKS_TWENTY_RING_PATCH_V33';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -36,26 +36,11 @@ function getViewSelect() {
 
 function getSettings() {
   const inputs = getNumberInputs();
-  const levels = clamp(Number(inputs[0]?.value) || 5, 1, 12);
+  const levels = clamp(Number(inputs[0]?.value) || 10, 1, 20);
   const startValue = Number(inputs[1]?.value ?? 1) || 0;
   const increment = Number(inputs[3]?.value ?? 1) || 1;
   const divisions = Number(getViewSelect()?.value) || 36;
   return { levels, startValue, increment, divisions, clockwise: true };
-}
-
-function ringWeight(ring, longMode) {
-  if (!longMode) return ring === 1 ? 1.86 : ring === 2 ? 1.38 : ring === 3 ? 1.22 : 1.08;
-  if (ring === 1) return 2.26;
-  if (ring === 2) return 1.68;
-  if (ring === 3) return 1.34;
-  return 1.10;
-}
-
-function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
-  let inner = innerRadius;
-  for (let r = 1; r < ring; r += 1) inner += baseRingWidth * ringWeight(r, longMode);
-  const width = baseRingWidth * ringWeight(ring, longMode);
-  return { inner, outer: inner + width, width, mid: inner + width / 2 };
 }
 
 function drawLayerText(ctx, text, x, y, fontSize) {
@@ -65,11 +50,11 @@ function drawLayerText(ctx, text, x, y, fontSize) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
-  ctx.lineWidth = Math.max(0.65, fontSize * 0.038);
+  ctx.lineWidth = Math.max(0.55, fontSize * 0.034);
   ctx.strokeStyle = 'rgba(255,255,255,0.96)';
   ctx.strokeText(String(text), 0, 0);
   ctx.fillStyle = LAYER_COLOR;
-  ctx.globalAlpha = 0.96;
+  ctx.globalAlpha = 0.95;
   ctx.fillText(String(text), 0, 0);
   ctx.restore();
 }
@@ -79,7 +64,7 @@ function drawSoftGuide(ctx, x1, y1, x2, y2, width) {
   ctx.beginPath();
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
-  ctx.strokeStyle = 'rgba(123,31,162,0.16)';
+  ctx.strokeStyle = 'rgba(123,31,162,0.13)';
   ctx.lineWidth = width;
   ctx.lineCap = 'round';
   ctx.stroke();
@@ -110,37 +95,29 @@ function renderLayerMarks(overlay, sourceCanvas) {
   const cx = rect.width / 2;
   const cy = rect.height / 2;
   const minSide = Math.min(rect.width, rect.height);
-  const sampleMax = numberAtRing(startValue, levels, Math.max(0, divisions - 1), divisions, increment);
-  const longMode = Math.max(formatNumber(startValue).length, formatNumber(sampleMax).length) >= 7;
-  const extraRings = 96;
-  const wheelRadius = minSide / 2 - extraRings;
-  const innerRadius = clamp(minSide * (longMode ? 0.158 : 0.138), 74, wheelRadius * 0.44);
-  const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
-  const baseRingWidth = Math.max(30, (wheelRadius - innerRadius) / Math.max(1, weightSum));
-  const last = ringMetrics(innerRadius, baseRingWidth, levels, longMode);
-  const guideWidth = clamp(baseRingWidth * 0.018, 0.55, 1.05);
-  const labelSize = clamp(baseRingWidth * 0.26, 10.4, 15.6);
+  const margin = clamp(minSide * 0.050, 82, 150);
+  const outerRadius = minSide / 2 - margin;
+  const innerRadius = clamp(minSide * 0.145, 170, outerRadius * 0.34);
+  const ringWidth = (outerRadius - innerRadius) / Math.max(1, levels);
+  const guideWidth = clamp(ringWidth * 0.012, 0.45, 0.9);
+  const labelSize = clamp(ringWidth * 0.18, 7.0, 13.5);
 
-  // V29: larger, clearer all-cell layer numbers while keeping the same comfortable positions.
   for (let i = 0; i < divisions; i += 1) {
     const boundaryDeg = direction * i * sector;
-    const tangentRad = ((boundaryDeg) * Math.PI) / 180;
+    const tangentRad = (boundaryDeg * Math.PI) / 180;
     const tx = -Math.sin(tangentRad);
     const ty = Math.cos(tangentRad);
     const side = direction >= 0 ? -1 : 1;
-    const offset = clamp(baseRingWidth * 0.082, 2.7, 4.6);
-
+    const offset = clamp(ringWidth * 0.11, 3.0, 5.5);
     const guideStart = polar(cx, cy, innerRadius + 1.5, boundaryDeg);
-    const guideEnd = polar(cx, cy, last.outer - 1.5, boundaryDeg);
+    const guideEnd = polar(cx, cy, outerRadius - 1.5, boundaryDeg);
     drawSoftGuide(ctx, guideStart.x, guideStart.y, guideEnd.x, guideEnd.y, guideWidth);
 
     for (let ring = 1; ring <= levels; ring += 1) {
-      const metrics = ringMetrics(innerRadius, baseRingWidth, ring, longMode);
+      const mid = innerRadius + (ring - 0.5) * ringWidth;
       const label = ((ring - 1) % 10) + 1;
-      const p = polar(cx, cy, metrics.mid, boundaryDeg);
-      const x = p.x + tx * offset * side;
-      const y = p.y + ty * offset * side;
-      drawLayerText(ctx, label, x, y, labelSize);
+      const p = polar(cx, cy, mid, boundaryDeg);
+      drawLayerText(ctx, label, p.x + tx * offset * side, p.y + ty * offset * side, labelSize);
     }
   }
 }
@@ -162,6 +139,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
     document.getElementById('gannzilla-layer-marks-axis-right-patch-v26')?.remove();
     document.getElementById('gannzilla-layer-marks-all-columns-patch-v27')?.remove();
     document.getElementById('gannzilla-layer-marks-all-columns-patch-v28')?.remove();
+    document.getElementById('gannzilla-layer-marks-all-columns-patch-v29')?.remove();
 
     let overlay = document.getElementById(PATCH_CANVAS_ID);
     if (!overlay) {
@@ -169,7 +147,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
       overlay.id = PATCH_CANVAS_ID;
       document.body.appendChild(overlay);
     }
-    window.__gannzillaLayerMarksAllColumnsBiggerPatchV29 = MARKER;
+    window.__gannzillaLayerMarksTwentyRingPatchV33 = MARKER;
 
     const render = () => {
       const sourceCanvas = document.getElementById(SOURCE_CANVAS_ID);
