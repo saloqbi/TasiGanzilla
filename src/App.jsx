@@ -40,7 +40,8 @@ const App = () => {
     search.includes('nativeWheelLayout') ||
     search.includes('nativeProgram') ||
     search.includes('originalLayout') ||
-    search.includes('programLayout');
+    search.includes('programLayout') ||
+    search.includes('safeOpen');
   const isTwentyRingStableMode = !useNativeWheelLayout && (
     search.includes('twentyRingNoOverlap') ||
     search.includes('stable20Rings') ||
@@ -77,7 +78,7 @@ const App = () => {
                   <GannzillaTwentyRingNoOverlapPatch />
                   <GannzillaTwentyRingViewportFixPatch />
                 </>
-              ) : (
+              ) : useNativeWheelLayout ? null : (
                 <>
                   <GannzillaLongNumberDigitalRenderer />
                   <GannzillaLayerMarksVisiblePatch />
