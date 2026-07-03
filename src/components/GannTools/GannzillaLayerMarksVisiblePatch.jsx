@@ -1,10 +1,10 @@
 import React from 'react';
 
-const PATCH_CANVAS_ID = 'gannzilla-layer-marks-axis-right-patch-v25';
+const PATCH_CANVAS_ID = 'gannzilla-layer-marks-axis-right-patch-v26';
 const SOURCE_CANVAS_ID = 'gannzilla-long-number-digital-renderer-v1';
 const FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
 const LAYER_COLOR = '#9c27b0';
-const MARKER = 'GANNZILLA_LAYER_MARKS_AXIS_RIGHT_PATCH_V25';
+const MARKER = 'GANNZILLA_LAYER_MARKS_AXIS_NEAR_LINE_PATCH_V26';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -60,11 +60,11 @@ function drawLayerText(ctx, text, x, y, fontSize) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
-  ctx.lineWidth = Math.max(0.5, fontSize * 0.035);
+  ctx.lineWidth = Math.max(0.45, fontSize * 0.03);
   ctx.strokeStyle = 'rgba(255,255,255,0.96)';
   ctx.strokeText(String(text), 0, 0);
   ctx.fillStyle = LAYER_COLOR;
-  ctx.globalAlpha = 0.94;
+  ctx.globalAlpha = 0.92;
   ctx.fillText(String(text), 0, 0);
   ctx.restore();
 }
@@ -99,15 +99,15 @@ function renderLayerMarks(overlay, sourceCanvas) {
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
   const baseRingWidth = Math.max(30, (wheelRadius - innerRadius) / Math.max(1, weightSum));
 
-  // V25: clean standalone layer numbers. One number per ring only.
-  // Position is fixed to the right of the 0°/36 boundary axis, away from 36/72/108 text.
-  const labelX = cx + clamp(baseRingWidth * 0.62, 20, 34);
-  const labelSize = clamp(baseRingWidth * 0.27, 10.5, 15.0);
+  // V26: keep exactly one layer number per ring, smaller and very close to the 0° axis line.
+  // This avoids merging with 36/72/108 on the left and 1/37/73/145 on the right.
+  const labelX = cx + clamp(baseRingWidth * 0.16, 5.0, 8.5);
+  const labelSize = clamp(baseRingWidth * 0.20, 8.0, 11.2);
 
   for (let ring = 1; ring <= levels; ring += 1) {
     const metrics = ringMetrics(innerRadius, baseRingWidth, ring, longMode);
     const label = ((ring - 1) % 10) + 1;
-    const labelY = cy - metrics.mid + clamp(metrics.width * 0.02, 0, 1.4);
+    const labelY = cy - metrics.mid;
     drawLayerText(ctx, label, labelX, labelY, labelSize);
   }
 }
@@ -125,6 +125,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
     document.getElementById('gannzilla-layer-marks-line-patch-v21')?.remove();
     document.getElementById('gannzilla-layer-marks-line-patch-v22')?.remove();
     document.getElementById('gannzilla-layer-marks-clean-single-patch-v23')?.remove();
+    document.getElementById('gannzilla-layer-marks-axis-right-patch-v25')?.remove();
 
     let overlay = document.getElementById(PATCH_CANVAS_ID);
     if (!overlay) {
@@ -132,7 +133,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
       overlay.id = PATCH_CANVAS_ID;
       document.body.appendChild(overlay);
     }
-    window.__gannzillaLayerMarksAxisRightPatchV25 = MARKER;
+    window.__gannzillaLayerMarksAxisNearLinePatchV26 = MARKER;
 
     const render = () => {
       const sourceCanvas = document.getElementById(SOURCE_CANVAS_ID);
