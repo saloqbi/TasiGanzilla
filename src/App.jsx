@@ -28,6 +28,7 @@ import GannzillaDigitalNumberClarityPatch from './components/GannTools/Gannzilla
 import GannzillaLongNumberDigitalRenderer from './components/GannTools/GannzillaLongNumberDigitalRenderer';
 import GannzillaLayerMarksVisiblePatch from './components/GannTools/GannzillaLayerMarksVisiblePatch';
 import GannzillaTwentyRingNoOverlapPatch from './components/GannTools/GannzillaTwentyRingNoOverlapPatch';
+import GannzillaTwentyRingViewportFixPatch from './components/GannTools/GannzillaTwentyRingViewportFixPatch';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -66,7 +67,10 @@ const App = () => {
               <GannzillaWheelPanButtonsPatch />
               <GannzillaCardinalBalancePatch />
               {isTwentyRingStableMode ? (
-                <GannzillaTwentyRingNoOverlapPatch />
+                <>
+                  <GannzillaTwentyRingNoOverlapPatch />
+                  <GannzillaTwentyRingViewportFixPatch />
+                </>
               ) : (
                 <>
                   <GannzillaLongNumberDigitalRenderer />
