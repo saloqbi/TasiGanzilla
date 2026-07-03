@@ -4,7 +4,8 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_EXPANDED_LARGE_ANGLE_FRAME_V14';
+const LAYER_MARK_COLOR = '#8b1fa9';
+const SUM_RESULT_STYLE_VERSION = 'CELL_EXPANDED_LARGE_ANGLE_FRAME_LAYER_MARKS_V15';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -44,6 +45,13 @@ function angleSequenceValue(value) {
   if (!Number.isFinite(n)) return 0;
   const normalized = ((((n - 1) % 360) + 360) % 360) + 1;
   return normalized === 36 ? 0 : normalized;
+}
+
+function layerBoundaryNumber(value) {
+  const n = Math.trunc(Number(value));
+  if (!Number.isFinite(n) || n <= 0 || n % 36 !== 0) return null;
+  const rawLayer = n / 36;
+  return ((rawLayer - 1) % 10) + 1;
 }
 
 function formatNumber(value) {
@@ -147,10 +155,12 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
 function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, ringWidth, wheelCx, wheelCy) {
   const result = digitalRoot(value);
   const angleVal = angleSequenceValue(value);
+  const layerVal = layerBoundaryNumber(value);
+  const mainText = formatNumber(value);
 
-  // V14 layout:
-  // larger ring cells and larger angle labels with degree sign.
-  // Angle labels stay near the same radial level but become clearer and more stable visually.
+  // V15 layout:
+  // keep V14 bigger cells and add purple layer marks only at 36-boundary cells:
+  // 36=1, 72=2, 108=3 ... 360=10, then restart again.
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
   const distance = Math.hypot(toCenterX, toCenterY) || 1;
@@ -159,6 +169,7 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
 
   const resultSize = clamp(fontSize * 0.62, 7.8, 13.2);
   const angleSize = clamp(fontSize * 0.92, 10.8, 17.2);
+  const layerSize = clamp(fontSize * 0.70, 8.6, 14.2);
   const mainOutwardOffset = clamp(ringWidth * 0.00, 0, 1.0);
   const resultInnerOffset = clamp(ringWidth * 0.43, 10.5, ringWidth * 0.51);
   const angleOuterOffset = clamp(ringWidth * 0.38, 10.0, ringWidth * 0.47);
@@ -169,9 +180,14 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const resultY = y + uy * resultInnerOffset;
   const angleX = x - ux * angleOuterOffset;
   const angleY = y - uy * angleOuterOffset;
+  const layerX = mainX + clamp(fontSize * (mainText.length * 0.34 + 0.64), 7.6, ringWidth * 0.34);
+  const layerY = mainY - clamp(fontSize * 0.04, 0, 1.1);
 
   drawReadableText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, 820, 0.98);
-  drawReadableText(ctx, formatNumber(value), mainX, mainY, fontSize, color, 700, 1);
+  drawReadableText(ctx, mainText, mainX, mainY, fontSize, color, 700, 1);
+  if (layerVal !== null) {
+    drawReadableText(ctx, String(layerVal), layerX, layerY, layerSize, LAYER_MARK_COLOR, 780, 0.98);
+  }
   drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
 }
 
