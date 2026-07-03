@@ -2,7 +2,7 @@ import React from 'react';
 
 const CANVAS_ID = 'gannzilla-twenty-ring-no-overlap-canvas-v1';
 const PANEL_ID = 'gannzilla-twenty-ring-no-overlap-panel-v1';
-const MARKER = 'GANNZILLA_TWENTY_RING_NO_OVERLAP_V1';
+const MARKER = 'GANNZILLA_TWENTY_RING_NO_OVERLAP_STABLE_V36';
 const TWO_PI = Math.PI * 2;
 const FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
 
@@ -97,6 +97,10 @@ function getSettings() {
   return { levels, startValue, increment, divisions, clockwise: true };
 }
 
+function settingsKey(settings) {
+  return [settings.levels, settings.startValue, settings.increment, settings.divisions, window.devicePixelRatio || 1].join('|');
+}
+
 function setLevelMaxTo20() {
   const firstLevelInput = getNumberInputs()[0];
   if (firstLevelInput) {
@@ -159,7 +163,7 @@ function drawAngleBadge(ctx, text, x, y, size, color, wheelCx, wheelCy) {
   ctx.restore();
 }
 
-function drawCell(ctx, value, cx, cy, midRadius, centerDeg, ringWidth, sector, ring, levels) {
+function drawCell(ctx, value, cx, cy, midRadius, centerDeg, ringWidth, levels) {
   const mainText = formatNumber(value);
   const color = colorFor(value);
   const textLen = mainText.length;
@@ -176,23 +180,20 @@ function drawCell(ctx, value, cx, cy, midRadius, centerDeg, ringWidth, sector, r
   const d = Math.hypot(toCenterX, toCenterY) || 1;
   const ux = toCenterX / d;
   const uy = toCenterY / d;
-  const angleRotation = normalizeReadableRotation(((centerDeg) * Math.PI) / 180);
+  const angleRotation = normalizeReadableRotation((centerDeg * Math.PI) / 180);
 
-  const mainX = p.x;
-  const mainY = p.y;
   const angleX = p.x - ux * ringWidth * 0.31;
   const angleY = p.y - uy * ringWidth * 0.31;
   const rootX = p.x + ux * ringWidth * 0.31;
   const rootY = p.y + uy * ringWidth * 0.31;
 
   drawAngleBadge(ctx, `${angleSequenceValue(value)}°`, angleX, angleY, angleSize, color, cx, cy);
-  drawReadableText(ctx, mainText, mainX, mainY, mainSize, color, 720, 1, angleRotation);
+  drawReadableText(ctx, mainText, p.x, p.y, mainSize, color, 720, 1, angleRotation);
   drawReadableText(ctx, String(digitalRoot(value)), rootX, rootY, smallSize, color, 650, 0.94, angleRotation);
 }
 
-function render(canvas) {
+function render(canvas, settings = getSettings()) {
   setLevelMaxTo20();
-  const settings = getSettings();
   const { levels, startValue, increment, divisions, clockwise } = settings;
   const side = levels >= 16 ? 2600 : levels >= 12 ? 2200 : 1800;
   const dpr = window.devicePixelRatio || 1;
@@ -248,7 +249,7 @@ function render(canvas) {
       ctx.stroke();
       ctx.restore();
 
-      drawCell(ctx, value, cx, cy, mid, centerDeg, ringWidth, sector, ring, levels);
+      drawCell(ctx, value, cx, cy, mid, centerDeg, ringWidth, levels);
     }
   }
 
@@ -288,18 +289,20 @@ function ensureCanvas() {
   if (!panel) {
     panel = document.createElement('div');
     panel.id = PANEL_ID;
-    panel.style.position = 'absolute';
+    panel.style.position = 'fixed';
     panel.style.left = '260px';
     panel.style.top = '78px';
     panel.style.zIndex = '80';
     panel.style.background = '#fff';
-    panel.style.overflow = 'visible';
+    panel.style.overflow = 'auto';
+    panel.style.boxSizing = 'border-box';
     document.body.appendChild(panel);
   }
   let canvas = document.getElementById(CANVAS_ID);
   if (!canvas) {
     canvas = document.createElement('canvas');
     canvas.id = CANVAS_ID;
+    canvas.style.display = 'block';
     panel.appendChild(canvas);
   }
   return canvas;
@@ -310,24 +313,32 @@ export default function GannzillaTwentyRingNoOverlapPatch() {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true');
     if (!isWheelMode) return undefined;
 
-    window.__gannzillaTwentyRingNoOverlapPatchV1 = MARKER;
-    const renderNow = () => {
+    window.__gannzillaTwentyRingNoOverlapPatchV36 = MARKER;
+    let lastKey = '';
+
+    const renderIfNeeded = (force = false) => {
       const canvas = ensureCanvas();
-      render(canvas);
-      const rect = canvas.getBoundingClientRect();
-      document.body.style.minWidth = `${Math.ceil(rect.left + rect.width + 120)}px`;
-      document.body.style.minHeight = `${Math.ceil(rect.top + rect.height + 120)}px`;
+      const settings = getSettings();
+      const key = settingsKey(settings);
+      if (force || key !== lastKey) {
+        lastKey = key;
+        render(canvas, settings);
+      }
+      document.body.style.minWidth = '100%';
+      document.body.style.minHeight = '100%';
+      document.body.style.overflowX = 'hidden';
     };
 
-    renderNow();
-    const timer = window.setInterval(renderNow, 350);
-    window.addEventListener('resize', renderNow);
-    window.addEventListener('scroll', renderNow, true);
+    renderIfNeeded(true);
+    const timer = window.setInterval(() => renderIfNeeded(false), 900);
+    window.addEventListener('resize', () => renderIfNeeded(true));
+
     return () => {
       window.clearInterval(timer);
-      window.removeEventListener('resize', renderNow);
-      window.removeEventListener('scroll', renderNow, true);
       document.getElementById(PANEL_ID)?.remove();
+      document.body.style.minWidth = '';
+      document.body.style.minHeight = '';
+      document.body.style.overflowX = '';
     };
   }, []);
 
