@@ -1,11 +1,11 @@
 import React from 'react';
 
-const PATCH_CANVAS_ID = 'gannzilla-layer-marks-visible-patch-v17';
+const PATCH_CANVAS_ID = 'gannzilla-layer-marks-visible-patch-v18';
 const SOURCE_CANVAS_ID = 'gannzilla-long-number-digital-renderer-v1';
 const TWO_PI = Math.PI * 2;
 const FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const LAYER_COLOR = '#8e24aa';
-const MARKER = 'GANNZILLA_LAYER_MARKS_VISIBLE_PATCH_V17';
+const LAYER_COLOR = '#9c27b0';
+const MARKER = 'GANNZILLA_LAYER_MARKS_PLAIN_TEXT_PATCH_V18';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -82,29 +82,19 @@ function layerBoundaryNumber(value) {
   return ((rawLayer - 1) % 10) + 1;
 }
 
-function drawLayerBadge(ctx, text, x, y, fontSize) {
+function drawLayerText(ctx, text, x, y, fontSize) {
   const label = String(text);
-  const radius = clamp(fontSize * 0.72, 9.5, 15.5);
-
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
-
-  ctx.beginPath();
-  ctx.arc(0, 0, radius, 0, TWO_PI);
-  ctx.fillStyle = 'rgba(255,255,255,0.98)';
-  ctx.fill();
-  ctx.lineWidth = Math.max(1.4, radius * 0.16);
-  ctx.strokeStyle = LAYER_COLOR;
-  ctx.stroke();
-
-  ctx.font = `900 ${fontSize}px ${FONT_STACK}`;
+  ctx.font = `500 ${fontSize}px ${FONT_STACK}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
-  ctx.lineWidth = Math.max(0.6, fontSize * 0.04);
-  ctx.strokeStyle = 'rgba(255,255,255,1)';
+  ctx.lineWidth = Math.max(0.55, fontSize * 0.035);
+  ctx.strokeStyle = 'rgba(255,255,255,0.92)';
   ctx.strokeText(label, 0, 0);
   ctx.fillStyle = LAYER_COLOR;
+  ctx.globalAlpha = 0.92;
   ctx.fillText(label, 0, 0);
   ctx.restore();
 }
@@ -160,11 +150,11 @@ function renderLayerMarks(overlay, sourceCanvas) {
       const p = polar(cx, cy, metrics.mid, centerDeg);
       const mainText = formatNumber(value);
       const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, mainText.length, longMode, ring);
-      const layerSize = clamp(fs * 1.45, 18, 28);
+      const layerSize = clamp(fs * 1.05, 12.0, 19.0);
       const mainWidth = measureText(ctx, mainText, fs);
-      const layerX = p.x + (mainWidth / 2) + clamp(layerSize * 0.95, 16, metrics.width * 0.70);
-      const layerY = p.y;
-      drawLayerBadge(ctx, layer, layerX, layerY, layerSize);
+      const layerX = p.x + (mainWidth / 2) + clamp(layerSize * 0.50, 6.5, metrics.width * 0.30);
+      const layerY = p.y - clamp(fs * 0.05, 0, 1.2);
+      drawLayerText(ctx, layer, layerX, layerY, layerSize);
     }
   }
 }
@@ -175,6 +165,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
     if (!isWheelMode) return undefined;
 
     document.getElementById('gannzilla-layer-marks-visible-patch-v16')?.remove();
+    document.getElementById('gannzilla-layer-marks-visible-patch-v17')?.remove();
 
     let overlay = document.getElementById(PATCH_CANVAS_ID);
     if (!overlay) {
@@ -182,7 +173,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
       overlay.id = PATCH_CANVAS_ID;
       document.body.appendChild(overlay);
     }
-    window.__gannzillaLayerMarksVisiblePatchV17 = MARKER;
+    window.__gannzillaLayerMarksPlainTextPatchV18 = MARKER;
 
     const render = () => {
       const sourceCanvas = document.getElementById(SOURCE_CANVAS_ID);
