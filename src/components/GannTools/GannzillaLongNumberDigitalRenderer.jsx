@@ -1,11 +1,11 @@
 import React from 'react';
 
 const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
-const EXPORT_BUTTONS_ID = 'gannzilla-export-copy-buttons-v31';
+const EXPORT_BUTTONS_ID = 'gannzilla-export-copy-buttons-v32';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_EXPORT_V31';
+const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_EXACT_EXPORT_V32';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -182,24 +182,25 @@ function drawAngleText(ctx, text, x, y, fontSize, color, wheelCx, wheelCy) {
   ctx.lineJoin = 'round';
 
   const metrics = ctx.measureText(label);
-  const width = metrics.width + clamp(fontSize * 0.98, 10, 19);
+  const width = metrics.width + clamp(fontSize * 1.0, 10, 20);
   const height = fontSize * 1.38;
   const bgGradient = ctx.createLinearGradient(0, -height / 2, 0, height / 2);
-  bgGradient.addColorStop(0, 'rgba(224,224,224,0.94)');
-  bgGradient.addColorStop(1, 'rgba(166,166,166,0.92)');
+  bgGradient.addColorStop(0, 'rgba(224,224,224,0.98)');
+  bgGradient.addColorStop(0.55, 'rgba(202,202,202,0.98)');
+  bgGradient.addColorStop(1, 'rgba(177,177,177,0.97)');
 
-  ctx.shadowColor = 'rgba(0,0,0,0.30)';
-  ctx.shadowBlur = clamp(fontSize * 0.30, 3.2, 6.2);
-  ctx.shadowOffsetY = clamp(fontSize * 0.12, 1.2, 2.4);
-  roundedRectPath(ctx, -width / 2, -height / 2, width, height, clamp(fontSize * 0.28, 3.4, 6.4));
+  ctx.shadowColor = 'rgba(0,0,0,0.34)';
+  ctx.shadowBlur = clamp(fontSize * 0.28, 3, 6);
+  ctx.shadowOffsetY = clamp(fontSize * 0.13, 1.2, 2.4);
+  roundedRectPath(ctx, -width / 2, -height / 2, width, height, clamp(fontSize * 0.25, 3, 5.6));
   ctx.fillStyle = bgGradient;
   ctx.fill();
 
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
-  ctx.strokeStyle = 'rgba(110,110,110,0.44)';
-  ctx.lineWidth = Math.max(0.65, fontSize * 0.052);
+  ctx.strokeStyle = 'rgba(120,120,120,0.62)';
+  ctx.lineWidth = Math.max(0.72, fontSize * 0.058);
   ctx.stroke();
 
   ctx.lineWidth = Math.max(0.52, fontSize * 0.045);
@@ -380,15 +381,16 @@ function makeExportButton(label, title, onClick) {
   button.type = 'button';
   button.textContent = label;
   button.title = title;
-  button.style.height = '34px';
+  button.style.height = '32px';
   button.style.padding = '0 14px';
-  button.style.border = '1px solid #bfc5cd';
-  button.style.borderRadius = '6px';
-  button.style.background = 'linear-gradient(#ffffff, #f2f2f2)';
-  button.style.boxShadow = '0 1px 2px rgba(0,0,0,0.10)';
-  button.style.color = '#222';
+  button.style.border = '1px solid #9ea4ad';
+  button.style.borderRadius = '4px';
+  button.style.background = 'linear-gradient(#ffffff, #ededed)';
+  button.style.boxShadow = '0 2px 4px rgba(0,0,0,0.18)';
+  button.style.color = '#111';
   button.style.font = '700 13px Tahoma, Arial, sans-serif';
   button.style.cursor = 'pointer';
+  button.style.whiteSpace = 'nowrap';
   button.addEventListener('click', onClick);
   return button;
 }
@@ -433,22 +435,28 @@ function printCanvasPdf(canvas) {
 }
 
 function ensureExportButtons(overlay) {
+  document.getElementById('gannzilla-export-copy-buttons-v31')?.remove();
   if (document.getElementById(EXPORT_BUTTONS_ID)) return;
   const bar = document.createElement('div');
   bar.id = EXPORT_BUTTONS_ID;
   bar.dir = 'rtl';
   bar.style.position = 'fixed';
-  bar.style.top = '82px';
-  bar.style.left = '12px';
-  bar.style.zIndex = '10060';
+  bar.style.top = '10px';
+  bar.style.left = '10px';
+  bar.style.zIndex = '2147483647';
   bar.style.display = 'flex';
-  bar.style.gap = '10px';
+  bar.style.gap = '8px';
   bar.style.alignItems = 'center';
   bar.style.pointerEvents = 'auto';
+  bar.style.background = 'rgba(255,255,255,0.94)';
+  bar.style.border = '1px solid rgba(150,150,150,0.45)';
+  bar.style.borderRadius = '6px';
+  bar.style.padding = '5px 6px';
+  bar.style.boxShadow = '0 2px 8px rgba(0,0,0,0.18)';
   bar.appendChild(makeExportButton('نسخ الصورة ⧉', 'نسخ صورة العجلة', (event) => copyCanvasImage(overlay, event.currentTarget)));
   bar.appendChild(makeExportButton('طباعة PDF 🖨', 'طباعة العجلة أو حفظها PDF', () => printCanvasPdf(overlay)));
   document.body.appendChild(bar);
-  window.__gannzillaExportButtonsV31 = true;
+  window.__gannzillaExportButtonsV32 = true;
 }
 
 function removeExportButtons() {
@@ -474,6 +482,7 @@ export default function GannzillaLongNumberDigitalRenderer() {
       const sourceCanvas = getWheelCanvas();
       if (!sourceCanvas) return;
       sourceCanvas.style.opacity = '0.001';
+      ensureExportButtons(overlay);
       renderOverlay(overlay, sourceCanvas);
     };
 
