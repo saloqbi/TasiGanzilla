@@ -1,10 +1,10 @@
 import React from 'react';
 
-const PATCH_CANVAS_ID = 'gannzilla-layer-marks-all-columns-patch-v27';
+const PATCH_CANVAS_ID = 'gannzilla-layer-marks-all-columns-patch-v28';
 const SOURCE_CANVAS_ID = 'gannzilla-long-number-digital-renderer-v1';
 const FONT_STACK = 'Arial Narrow, Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
 const LAYER_COLOR = '#8a2a8f';
-const MARKER = 'GANNZILLA_LAYER_MARKS_ALL_COLUMNS_PATCH_V27';
+const MARKER = 'GANNZILLA_LAYER_MARKS_ALL_COLUMNS_LARGER_PATCH_V28';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -61,15 +61,15 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 function drawLayerText(ctx, text, x, y, fontSize) {
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
-  ctx.font = `500 ${fontSize}px ${FONT_STACK}`;
+  ctx.font = `560 ${fontSize}px ${FONT_STACK}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
-  ctx.lineWidth = Math.max(0.32, fontSize * 0.024);
-  ctx.strokeStyle = 'rgba(255,255,255,0.90)';
+  ctx.lineWidth = Math.max(0.5, fontSize * 0.032);
+  ctx.strokeStyle = 'rgba(255,255,255,0.94)';
   ctx.strokeText(String(text), 0, 0);
   ctx.fillStyle = LAYER_COLOR;
-  ctx.globalAlpha = 0.76;
+  ctx.globalAlpha = 0.92;
   ctx.fillText(String(text), 0, 0);
   ctx.restore();
 }
@@ -79,7 +79,7 @@ function drawSoftGuide(ctx, x1, y1, x2, y2, width) {
   ctx.beginPath();
   ctx.moveTo(x1, y1);
   ctx.lineTo(x2, y2);
-  ctx.strokeStyle = 'rgba(138,42,143,0.16)';
+  ctx.strokeStyle = 'rgba(138,42,143,0.17)';
   ctx.lineWidth = width;
   ctx.lineCap = 'round';
   ctx.stroke();
@@ -119,17 +119,16 @@ function renderLayerMarks(overlay, sourceCanvas) {
   const baseRingWidth = Math.max(30, (wheelRadius - innerRadius) / Math.max(1, weightSum));
   const last = ringMetrics(innerRadius, baseRingWidth, levels, longMode);
   const guideWidth = clamp(baseRingWidth * 0.018, 0.55, 1.05);
-  const labelSize = clamp(baseRingWidth * 0.16, 6.6, 9.2);
+  const labelSize = clamp(baseRingWidth * 0.20, 8.2, 11.8);
 
-  // V27: apply the same comfortable layer-column treatment to every wheel cell.
-  // Soft purple radial guides + small layer numbers, left of each guide line.
+  // V28: same all-cell layer columns, with slightly larger and clearer layer numbers.
   for (let i = 0; i < divisions; i += 1) {
     const boundaryDeg = direction * i * sector;
     const tangentRad = ((boundaryDeg) * Math.PI) / 180;
     const tx = -Math.sin(tangentRad);
     const ty = Math.cos(tangentRad);
     const side = direction >= 0 ? -1 : 1;
-    const offset = clamp(baseRingWidth * 0.075, 2.4, 4.0);
+    const offset = clamp(baseRingWidth * 0.078, 2.5, 4.2);
 
     const guideStart = polar(cx, cy, innerRadius + 1.5, boundaryDeg);
     const guideEnd = polar(cx, cy, last.outer - 1.5, boundaryDeg);
@@ -161,6 +160,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
     document.getElementById('gannzilla-layer-marks-clean-single-patch-v23')?.remove();
     document.getElementById('gannzilla-layer-marks-axis-right-patch-v25')?.remove();
     document.getElementById('gannzilla-layer-marks-axis-right-patch-v26')?.remove();
+    document.getElementById('gannzilla-layer-marks-all-columns-patch-v27')?.remove();
 
     let overlay = document.getElementById(PATCH_CANVAS_ID);
     if (!overlay) {
@@ -168,7 +168,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
       overlay.id = PATCH_CANVAS_ID;
       document.body.appendChild(overlay);
     }
-    window.__gannzillaLayerMarksAllColumnsPatchV27 = MARKER;
+    window.__gannzillaLayerMarksAllColumnsLargerPatchV28 = MARKER;
 
     const render = () => {
       const sourceCanvas = document.getElementById(SOURCE_CANVAS_ID);
