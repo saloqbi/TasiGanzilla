@@ -1,11 +1,11 @@
 import React from 'react';
 
-const PATCH_CANVAS_ID = 'gannzilla-layer-marks-visible-patch-v16';
+const PATCH_CANVAS_ID = 'gannzilla-layer-marks-visible-patch-v17';
 const SOURCE_CANVAS_ID = 'gannzilla-long-number-digital-renderer-v1';
 const TWO_PI = Math.PI * 2;
 const FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const LAYER_COLOR = '#9c27b0';
-const MARKER = 'GANNZILLA_LAYER_MARKS_VISIBLE_PATCH_V16';
+const LAYER_COLOR = '#8e24aa';
+const MARKER = 'GANNZILLA_LAYER_MARKS_VISIBLE_PATCH_V17';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -82,18 +82,30 @@ function layerBoundaryNumber(value) {
   return ((rawLayer - 1) % 10) + 1;
 }
 
-function drawLayerText(ctx, text, x, y, fontSize) {
+function drawLayerBadge(ctx, text, x, y, fontSize) {
+  const label = String(text);
+  const radius = clamp(fontSize * 0.72, 9.5, 15.5);
+
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
+
+  ctx.beginPath();
+  ctx.arc(0, 0, radius, 0, TWO_PI);
+  ctx.fillStyle = 'rgba(255,255,255,0.98)';
+  ctx.fill();
+  ctx.lineWidth = Math.max(1.4, radius * 0.16);
+  ctx.strokeStyle = LAYER_COLOR;
+  ctx.stroke();
+
   ctx.font = `900 ${fontSize}px ${FONT_STACK}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
-  ctx.lineWidth = Math.max(1.15, fontSize * 0.12);
-  ctx.strokeStyle = 'rgba(255,255,255,0.98)';
-  ctx.strokeText(String(text), 0, 0);
+  ctx.lineWidth = Math.max(0.6, fontSize * 0.04);
+  ctx.strokeStyle = 'rgba(255,255,255,1)';
+  ctx.strokeText(label, 0, 0);
   ctx.fillStyle = LAYER_COLOR;
-  ctx.fillText(String(text), 0, 0);
+  ctx.fillText(label, 0, 0);
   ctx.restore();
 }
 
@@ -114,7 +126,7 @@ function renderLayerMarks(overlay, sourceCanvas) {
   overlay.style.top = `${rect.top}px`;
   overlay.style.width = `${rect.width}px`;
   overlay.style.height = `${rect.height}px`;
-  overlay.style.zIndex = '37';
+  overlay.style.zIndex = '9999';
   overlay.style.pointerEvents = 'none';
   overlay.width = Math.max(1, Math.round(rect.width * dpr));
   overlay.height = Math.max(1, Math.round(rect.height * dpr));
@@ -148,11 +160,11 @@ function renderLayerMarks(overlay, sourceCanvas) {
       const p = polar(cx, cy, metrics.mid, centerDeg);
       const mainText = formatNumber(value);
       const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, mainText.length, longMode, ring);
-      const layerSize = clamp(fs * 1.12, 13.5, 21.5);
+      const layerSize = clamp(fs * 1.45, 18, 28);
       const mainWidth = measureText(ctx, mainText, fs);
-      const layerX = p.x + (mainWidth / 2) + clamp(layerSize * 0.70, 9.0, metrics.width * 0.42);
+      const layerX = p.x + (mainWidth / 2) + clamp(layerSize * 0.95, 16, metrics.width * 0.70);
       const layerY = p.y;
-      drawLayerText(ctx, layer, layerX, layerY, layerSize);
+      drawLayerBadge(ctx, layer, layerX, layerY, layerSize);
     }
   }
 }
@@ -162,13 +174,15 @@ export default function GannzillaLayerMarksVisiblePatch() {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true');
     if (!isWheelMode) return undefined;
 
+    document.getElementById('gannzilla-layer-marks-visible-patch-v16')?.remove();
+
     let overlay = document.getElementById(PATCH_CANVAS_ID);
     if (!overlay) {
       overlay = document.createElement('canvas');
       overlay.id = PATCH_CANVAS_ID;
       document.body.appendChild(overlay);
     }
-    window.__gannzillaLayerMarksVisiblePatchV16 = MARKER;
+    window.__gannzillaLayerMarksVisiblePatchV17 = MARKER;
 
     const render = () => {
       const sourceCanvas = document.getElementById(SOURCE_CANVAS_ID);
@@ -177,7 +191,7 @@ export default function GannzillaLayerMarksVisiblePatch() {
     };
 
     render();
-    const timer = window.setInterval(render, 220);
+    const timer = window.setInterval(render, 180);
     window.addEventListener('resize', render);
     window.addEventListener('scroll', render, true);
 
