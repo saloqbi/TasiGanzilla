@@ -1,10 +1,10 @@
 import React from 'react';
 
-const PATCH_MARKER = 'GANNZILLA_TWENTY_RING_LAYOUT_STABILITY_FIX_V36';
+const PATCH_MARKER = 'GANNZILLA_TWENTY_RING_FIT_VIEW_LAYOUT_FIX_V38';
 const PANEL_ID = 'gannzilla-twenty-ring-no-overlap-panel-v1';
 const CANVAS_ID = 'gannzilla-twenty-ring-no-overlap-canvas-v1';
-const BADGE_ID = 'gannzilla-twenty-ring-viewport-status-v36';
-const EXPORT_BAR_ID = 'gannzilla-twenty-ring-export-bar-v36';
+const BADGE_ID = 'gannzilla-twenty-ring-viewport-status-v38';
+const EXPORT_BAR_ID = 'gannzilla-twenty-ring-export-bar-v38';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -15,29 +15,29 @@ function getSidebarRight() {
     .filter((el) => ![PANEL_ID, BADGE_ID, EXPORT_BAR_ID].includes(el.id));
   const visible = candidates
     .map((el) => el.getBoundingClientRect())
-    .filter((rect) => rect.width > 120 && rect.height > 240 && rect.left < 300)
+    .filter((rect) => rect.width > 110 && rect.height > 240 && rect.left < 280)
     .sort((a, b) => b.right - a.right)[0];
-  return visible ? visible.right : 238;
+  return visible ? visible.right : 188;
 }
 
 function getTopOffset() {
   const toolbar = Array.from(document.querySelectorAll('header, nav, [class*="toolbar"], [class*="topbar"]'))
     .map((el) => el.getBoundingClientRect())
-    .filter((rect) => rect.width > 320 && rect.height > 20 && rect.top < 120)
+    .filter((rect) => rect.width > 320 && rect.height > 18 && rect.top < 120)
     .sort((a, b) => b.bottom - a.bottom)[0];
-  return toolbar ? clamp(toolbar.bottom + 8, 72, 112) : 82;
+  return toolbar ? clamp(toolbar.bottom + 6, 82, 122) : 92;
 }
 
 function makeButton(label, onClick) {
   const button = document.createElement('button');
   button.type = 'button';
   button.textContent = label;
-  button.style.height = '32px';
-  button.style.padding = '0 12px';
-  button.style.border = '1px solid #9da3aa';
+  button.style.height = '30px';
+  button.style.padding = '0 11px';
+  button.style.border = '1px solid #8f969f';
   button.style.borderRadius = '5px';
-  button.style.background = 'linear-gradient(#fff,#eeeeee)';
-  button.style.boxShadow = '0 2px 5px rgba(0,0,0,0.16)';
+  button.style.background = 'linear-gradient(#ffffff,#ededed)';
+  button.style.boxShadow = '0 2px 5px rgba(0,0,0,0.18)';
   button.style.font = '700 12px Tahoma, Arial, sans-serif';
   button.style.color = '#111';
   button.style.cursor = 'pointer';
@@ -86,6 +86,7 @@ function printPdf(canvas) {
 }
 
 function ensureExportBar(panel, canvas) {
+  document.getElementById('gannzilla-twenty-ring-export-bar-v36')?.remove();
   let bar = document.getElementById(EXPORT_BAR_ID);
   if (!bar) {
     bar = document.createElement('div');
@@ -94,13 +95,13 @@ function ensureExportBar(panel, canvas) {
     bar.style.position = 'fixed';
     bar.style.zIndex = '2147483647';
     bar.style.display = 'flex';
-    bar.style.gap = '8px';
+    bar.style.gap = '7px';
     bar.style.alignItems = 'center';
-    bar.style.background = 'rgba(255,255,255,0.96)';
-    bar.style.border = '1px solid rgba(150,150,150,0.5)';
+    bar.style.background = 'rgba(255,255,255,0.97)';
+    bar.style.border = '1px solid rgba(130,130,130,0.52)';
     bar.style.borderRadius = '7px';
-    bar.style.padding = '5px 6px';
-    bar.style.boxShadow = '0 2px 9px rgba(0,0,0,0.16)';
+    bar.style.padding = '4px 6px';
+    bar.style.boxShadow = '0 2px 9px rgba(0,0,0,0.18)';
     document.body.appendChild(bar);
   }
   if (!bar.dataset.ready) {
@@ -110,10 +111,11 @@ function ensureExportBar(panel, canvas) {
   }
   const rect = panel.getBoundingClientRect();
   bar.style.left = `${rect.left + 10}px`;
-  bar.style.top = `${Math.max(10, rect.top - 42)}px`;
+  bar.style.top = `${Math.max(8, rect.top + 8)}px`;
 }
 
-function ensureStatusBadge(panel, canvas) {
+function ensureStatusBadge(panel, canvas, fitSide) {
+  document.getElementById('gannzilla-twenty-ring-viewport-status-v36')?.remove();
   let badge = document.getElementById(BADGE_ID);
   if (!badge) {
     badge = document.createElement('div');
@@ -123,9 +125,9 @@ function ensureStatusBadge(panel, canvas) {
     badge.style.zIndex = '12000';
     badge.style.pointerEvents = 'none';
     badge.style.background = 'rgba(255,255,255,0.94)';
-    badge.style.border = '1px solid rgba(160,160,160,0.55)';
+    badge.style.border = '1px solid rgba(160,160,160,0.50)';
     badge.style.borderRadius = '7px';
-    badge.style.boxShadow = '0 2px 8px rgba(0,0,0,0.14)';
+    badge.style.boxShadow = '0 2px 8px rgba(0,0,0,0.13)';
     badge.style.padding = '5px 9px';
     badge.style.font = '700 11px Tahoma, Arial, sans-serif';
     badge.style.color = '#222';
@@ -133,20 +135,20 @@ function ensureStatusBadge(panel, canvas) {
   }
   const rect = panel.getBoundingClientRect();
   badge.style.left = `${rect.left + 10}px`;
-  badge.style.top = `${rect.top + 8}px`;
-  const side = Math.round(canvas.getBoundingClientRect().width || 0);
-  badge.textContent = `وضع ثابت — ${side}px — اسحب داخل الإطار فقط`;
+  badge.style.top = `${rect.top + 48}px`;
+  const nativeSide = Math.round(canvas.width / (window.devicePixelRatio || 1) || 0);
+  badge.textContent = `عرض ثابت — ملاءمة ${Math.round(fitSide)}px — الأصل ${nativeSide}px`;
 }
 
-function applyLayoutFix(options = {}) {
+function applyLayoutFix() {
   const panel = document.getElementById(PANEL_ID);
   const canvas = document.getElementById(CANVAS_ID);
   if (!panel || !canvas) return false;
 
-  const left = clamp(Math.ceil(getSidebarRight() + 10), 235, 310);
+  const left = clamp(Math.ceil(getSidebarRight() + 6), 186, 246);
   const top = getTopOffset();
-  const rightPadding = 12;
-  const bottomPadding = 14;
+  const rightPadding = 10;
+  const bottomPadding = 10;
 
   panel.style.position = 'fixed';
   panel.style.left = `${left}px`;
@@ -155,34 +157,40 @@ function applyLayoutFix(options = {}) {
   panel.style.height = `calc(100vh - ${top + bottomPadding}px)`;
   panel.style.zIndex = '78';
   panel.style.background = '#fff';
-  panel.style.overflow = 'auto';
+  panel.style.overflow = 'hidden';
   panel.style.boxSizing = 'border-box';
-  panel.style.border = '1px solid rgba(190,190,190,0.55)';
+  panel.style.border = '1px solid rgba(190,190,190,0.50)';
   panel.style.boxShadow = '0 2px 12px rgba(0,0,0,0.10)';
   panel.style.direction = 'ltr';
   panel.style.contain = 'layout paint';
-  panel.style.scrollbarGutter = 'stable both-edges';
+  panel.style.display = 'flex';
+  panel.style.alignItems = 'center';
+  panel.style.justifyContent = 'center';
+
+  const panelW = Math.max(320, panel.clientWidth || 0);
+  const panelH = Math.max(320, panel.clientHeight || 0);
+  const fitSide = clamp(Math.min(panelW - 18, panelH - 18), 520, 1500);
 
   canvas.style.display = 'block';
-  canvas.style.margin = '0 auto';
+  canvas.style.width = `${fitSide}px`;
+  canvas.style.height = `${fitSide}px`;
+  canvas.style.margin = '0';
   canvas.style.maxWidth = 'none';
   canvas.style.maxHeight = 'none';
   canvas.style.transform = 'none';
+  canvas.style.flex = '0 0 auto';
+
+  panel.scrollLeft = 0;
+  panel.scrollTop = 0;
 
   document.documentElement.style.overflowX = 'hidden';
   document.body.style.overflowX = 'hidden';
   document.body.style.minWidth = '100%';
   document.body.style.minHeight = '100%';
 
-  if (options.center === true && panel.dataset.gannzillaV36Centered !== 'true') {
-    panel.scrollLeft = Math.max(0, (canvas.offsetWidth - panel.clientWidth) / 2);
-    panel.scrollTop = Math.max(0, (canvas.offsetHeight - panel.clientHeight) / 2);
-    panel.dataset.gannzillaV36Centered = 'true';
-  }
-
   ensureExportBar(panel, canvas);
-  ensureStatusBadge(panel, canvas);
-  window.__gannzillaTwentyRingLayoutStabilityFixV36 = PATCH_MARKER;
+  ensureStatusBadge(panel, canvas, fitSide);
+  window.__gannzillaTwentyRingFitViewLayoutFixV38 = PATCH_MARKER;
   return true;
 }
 
@@ -204,16 +212,14 @@ export default function GannzillaTwentyRingViewportFixPatch() {
 
     if (!isStable20Mode) return undefined;
 
-    const start = window.setInterval(() => {
-      if (applyLayoutFix({ center: true })) window.clearInterval(start);
-    }, 120);
-
-    const onResize = debounce(() => applyLayoutFix({ center: false }), 160);
+    applyLayoutFix();
+    const layoutTimer = window.setInterval(applyLayoutFix, 350);
+    const onResize = debounce(applyLayoutFix, 120);
     window.addEventListener('resize', onResize);
     window.addEventListener('orientationchange', onResize);
 
     return () => {
-      window.clearInterval(start);
+      window.clearInterval(layoutTimer);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', onResize);
       document.getElementById(BADGE_ID)?.remove();
