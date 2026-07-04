@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_V30';
+const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_LONG_NUMBER_COMPACT_V31';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -49,6 +49,16 @@ function angleSequenceValue(value) {
 function formatNumber(value) {
   if (Number.isInteger(value)) return String(value);
   return String(Number(value.toFixed(4)));
+}
+
+function formatMainDisplayNumber(value) {
+  const raw = formatNumber(value);
+  const sign = raw.startsWith('-') ? '-' : '';
+  const body = sign ? raw.slice(1) : raw;
+
+  if (body.includes('.') || body.length <= 6) return raw;
+  if (body.length >= 10) return `${sign}${body.slice(-4)}`;
+  return `${sign}${body.slice(-5)}`;
 }
 
 function numberAtRing(startValue, ringIndex, sectorIndex, divisions, increment) {
@@ -202,7 +212,7 @@ function drawAngleText(ctx, text, x, y, fontSize, color, wheelCx, wheelCy) {
 function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, ringWidth, wheelCx, wheelCy) {
   const result = digitalRoot(value);
   const angleVal = angleSequenceValue(value);
-  const mainText = formatNumber(value);
+  const mainText = formatMainDisplayNumber(value);
 
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
@@ -224,7 +234,7 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const angleY = y - uy * angleOuterOffset;
 
   drawAngleText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, wheelCx, wheelCy);
-  drawReadableText(ctx, mainText, mainX, mainY, fontSize, color, 700, 1);
+  drawReadableText(ctx, mainText, mainX, mainY, fontSize, color, 750, 1);
   drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
 }
 
@@ -287,7 +297,7 @@ function renderOverlay(overlay, sourceCanvas) {
       const endDeg = direction * (i + 1) * sector;
       const centerDeg = direction * (i + 0.5) * sector;
       const value = numberAtRing(startValue, ring, i, divisions, increment);
-      const text = formatNumber(value);
+      const text = formatMainDisplayNumber(value);
 
       ctx.save();
       drawWedge(ctx, cx, cy, metrics.inner, metrics.outer, startDeg, endDeg);
@@ -376,6 +386,7 @@ export default function GannzillaLongNumberDigitalRenderer() {
     }
     window[MARKER] = true;
     window.__gannzillaSumResultStyleVersion = SUM_RESULT_STYLE_VERSION;
+    window.__gannzillaLongNumberCompactDisplayV31 = true;
 
     const render = () => {
       const sourceCanvas = getWheelCanvas();
