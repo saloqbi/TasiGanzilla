@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Tahoma, Arial, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_LONG_NUMBER_COMPACT_V31';
+const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_FULL_LONG_NUMBER_FIT_V32';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -49,16 +49,6 @@ function angleSequenceValue(value) {
 function formatNumber(value) {
   if (Number.isInteger(value)) return String(value);
   return String(Number(value.toFixed(4)));
-}
-
-function formatMainDisplayNumber(value) {
-  const raw = formatNumber(value);
-  const sign = raw.startsWith('-') ? '-' : '';
-  const body = sign ? raw.slice(1) : raw;
-
-  if (body.includes('.') || body.length <= 6) return raw;
-  if (body.length >= 10) return `${sign}${body.slice(-4)}`;
-  return `${sign}${body.slice(-5)}`;
 }
 
 function numberAtRing(startValue, ringIndex, sectorIndex, divisions, increment) {
@@ -117,20 +107,20 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 }
 
 function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring) {
-  const arcRoom = (TWO_PI * midR / divisions) * 0.72;
-  const radialRoom = ringWidth * 0.42;
-  const charFactor = textLength >= 8 ? 0.60 : textLength >= 7 ? 0.62 : textLength >= 6 ? 0.64 : 0.68;
+  const arcRoom = (TWO_PI * midR / divisions) * 0.88;
+  const radialRoom = ringWidth * 0.34;
+  const charFactor = textLength >= 12 ? 0.52 : textLength >= 10 ? 0.54 : textLength >= 8 ? 0.58 : textLength >= 6 ? 0.64 : 0.70;
   const natural = Math.min(arcRoom / Math.max(2, textLength * charFactor), radialRoom);
 
   const ringCap = ring === 1
-    ? (longMode || textLength >= 7 ? 18.0 : 21.0)
+    ? (longMode || textLength >= 10 ? 12.8 : 21.0)
     : ring === 2
-      ? (longMode || textLength >= 7 ? 15.6 : 18.0)
+      ? (longMode || textLength >= 10 ? 11.4 : 18.0)
       : ring === 3
-        ? (longMode || textLength >= 7 ? 13.2 : 15.2)
-        : (longMode || textLength >= 7 ? 11.4 : 13.2);
+        ? (longMode || textLength >= 10 ? 10.4 : 15.2)
+        : (longMode || textLength >= 10 ? 9.4 : 13.2);
 
-  const ringMin = ring === 1 ? 12.6 : ring === 2 ? 10.8 : ring === 3 ? 9.4 : 8.4;
+  const ringMin = textLength >= 10 ? 5.8 : ring === 1 ? 12.0 : ring === 2 ? 10.4 : ring === 3 ? 9.0 : 8.2;
   return clamp(Math.min(natural, ringCap), ringMin, ringCap);
 }
 
@@ -156,10 +146,11 @@ function roundedRectPath(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha = 1) {
+function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha = 1, rotation = 0) {
   const label = String(text);
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
+  if (rotation) ctx.rotate(rotation);
   ctx.font = `${weight} ${fontSize}px ${DIGITAL_FONT_STACK}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -167,8 +158,8 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
 
-  ctx.lineWidth = Math.max(0.48, fontSize * 0.04);
-  ctx.strokeStyle = `rgba(255,255,255,${0.92 * alpha})`;
+  ctx.lineWidth = Math.max(0.36, fontSize * 0.035);
+  ctx.strokeStyle = `rgba(255,255,255,${0.90 * alpha})`;
   ctx.strokeText(label, 0, 0);
   ctx.fillStyle = color;
   ctx.globalAlpha = alpha;
@@ -212,7 +203,8 @@ function drawAngleText(ctx, text, x, y, fontSize, color, wheelCx, wheelCy) {
 function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, ringWidth, wheelCx, wheelCy) {
   const result = digitalRoot(value);
   const angleVal = angleSequenceValue(value);
-  const mainText = formatMainDisplayNumber(value);
+  const mainText = formatNumber(value);
+  const isLongText = mainText.replace('-', '').length >= 8;
 
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
@@ -220,11 +212,11 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const ux = toCenterX / distance;
   const uy = toCenterY / distance;
 
-  const resultSize = clamp(fontSize * 0.62, 7.8, 13.2);
-  const angleSize = clamp(fontSize * 0.88, 10.2, 16.4);
+  const resultSize = clamp(fontSize * (isLongText ? 0.92 : 0.62), isLongText ? 5.2 : 7.8, isLongText ? 9.4 : 13.2);
+  const angleSize = clamp(fontSize * (isLongText ? 0.88 : 0.88), isLongText ? 5.8 : 10.2, isLongText ? 9.6 : 16.4);
   const mainOutwardOffset = clamp(ringWidth * 0.00, 0, 1.0);
-  const resultInnerOffset = clamp(ringWidth * 0.43, 10.5, ringWidth * 0.51);
-  const angleOuterOffset = clamp(ringWidth * 0.38, 10.0, ringWidth * 0.47);
+  const resultInnerOffset = clamp(ringWidth * (isLongText ? 0.46 : 0.43), 8.0, ringWidth * 0.52);
+  const angleOuterOffset = clamp(ringWidth * (isLongText ? 0.43 : 0.38), 8.0, ringWidth * 0.49);
 
   const mainX = x - ux * mainOutwardOffset;
   const mainY = y - uy * mainOutwardOffset;
@@ -232,10 +224,11 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const resultY = y + uy * resultInnerOffset;
   const angleX = x - ux * angleOuterOffset;
   const angleY = y - uy * angleOuterOffset;
+  const mainRotation = isLongText ? normalizeReadableRotation(Math.atan2(mainY - wheelCy, mainX - wheelCx) + Math.PI / 2) : 0;
 
   drawAngleText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, wheelCx, wheelCy);
-  drawReadableText(ctx, mainText, mainX, mainY, fontSize, color, 750, 1);
-  drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
+  drawReadableText(ctx, mainText, mainX, mainY, fontSize, color, isLongText ? 720 : 750, 1, mainRotation);
+  drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97, isLongText ? mainRotation : 0);
 }
 
 function renderOverlay(overlay, sourceCanvas) {
@@ -297,7 +290,7 @@ function renderOverlay(overlay, sourceCanvas) {
       const endDeg = direction * (i + 1) * sector;
       const centerDeg = direction * (i + 0.5) * sector;
       const value = numberAtRing(startValue, ring, i, divisions, increment);
-      const text = formatMainDisplayNumber(value);
+      const text = formatNumber(value);
 
       ctx.save();
       drawWedge(ctx, cx, cy, metrics.inner, metrics.outer, startDeg, endDeg);
@@ -386,7 +379,7 @@ export default function GannzillaLongNumberDigitalRenderer() {
     }
     window[MARKER] = true;
     window.__gannzillaSumResultStyleVersion = SUM_RESULT_STYLE_VERSION;
-    window.__gannzillaLongNumberCompactDisplayV31 = true;
+    window.__gannzillaFullLongNumberFitV32 = true;
 
     const render = () => {
       const sourceCanvas = getWheelCanvas();
