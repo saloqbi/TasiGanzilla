@@ -4,7 +4,7 @@ const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Arial, Tahoma, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_FULL_LONG_NUMBER_CRISP_V33';
+const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_FULL_LONG_NUMBER_CRISP_BIGGER_V34';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -107,20 +107,20 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 }
 
 function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring) {
-  const arcRoom = (TWO_PI * midR / divisions) * 0.96;
-  const radialRoom = ringWidth * 0.40;
-  const charFactor = textLength >= 12 ? 0.50 : textLength >= 10 ? 0.53 : textLength >= 8 ? 0.58 : textLength >= 6 ? 0.64 : 0.70;
+  const arcRoom = (TWO_PI * midR / divisions) * 1.04;
+  const radialRoom = ringWidth * (textLength >= 10 ? 0.58 : 0.42);
+  const charFactor = textLength >= 12 ? 0.46 : textLength >= 10 ? 0.49 : textLength >= 8 ? 0.58 : textLength >= 6 ? 0.64 : 0.70;
   const natural = Math.min(arcRoom / Math.max(2, textLength * charFactor), radialRoom);
 
   const ringCap = ring === 1
-    ? (longMode || textLength >= 10 ? 13.4 : 21.0)
+    ? (longMode || textLength >= 10 ? 23.5 : 21.0)
     : ring === 2
-      ? (longMode || textLength >= 10 ? 12.0 : 18.0)
+      ? (longMode || textLength >= 10 ? 21.2 : 18.0)
       : ring === 3
-        ? (longMode || textLength >= 10 ? 10.8 : 15.2)
-        : (longMode || textLength >= 10 ? 9.8 : 13.2);
+        ? (longMode || textLength >= 10 ? 19.2 : 15.2)
+        : (longMode || textLength >= 10 ? 17.2 : 13.2);
 
-  const ringMin = textLength >= 10 ? 6.8 : ring === 1 ? 12.0 : ring === 2 ? 10.4 : ring === 3 ? 9.0 : 8.2;
+  const ringMin = textLength >= 10 ? 9.2 : ring === 1 ? 12.0 : ring === 2 ? 10.4 : ring === 3 ? 9.0 : 8.2;
   return clamp(Math.min(natural, ringCap), ringMin, ringCap);
 }
 
@@ -169,7 +169,7 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
 
 function drawCrispLongNumberText(ctx, text, x, y, fontSize, color, rotation, maxWidth) {
   const label = String(text);
-  const fontWeight = 700;
+  const fontWeight = 760;
   let fitSize = fontSize;
 
   ctx.save();
@@ -184,13 +184,13 @@ function drawCrispLongNumberText(ctx, text, x, y, fontSize, color, rotation, max
   for (let attempt = 0; attempt < 6; attempt += 1) {
     ctx.font = `${fontWeight} ${fitSize}px ${DIGITAL_FONT_STACK}`;
     const width = ctx.measureText(label).width;
-    if (width <= maxWidth || fitSize <= 6.4) break;
-    fitSize -= 0.55;
+    if (width <= maxWidth || fitSize <= 8.2) break;
+    fitSize -= 0.50;
   }
 
   ctx.font = `${fontWeight} ${fitSize}px ${DIGITAL_FONT_STACK}`;
   const measured = Math.max(1, ctx.measureText(label).width);
-  const scaleX = measured > maxWidth ? clamp(maxWidth / measured, 0.78, 1) : 1;
+  const scaleX = measured > maxWidth ? clamp(maxWidth / measured, 0.72, 1) : 1;
 
   if (scaleX !== 1) ctx.scale(scaleX, 1);
   ctx.fillStyle = color;
@@ -243,11 +243,11 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const ux = toCenterX / distance;
   const uy = toCenterY / distance;
 
-  const resultSize = clamp(fontSize * (isLongText ? 0.84 : 0.62), isLongText ? 5.0 : 7.8, isLongText ? 8.4 : 13.2);
-  const angleSize = clamp(fontSize * 0.82, isLongText ? 5.8 : 10.2, isLongText ? 8.8 : 16.4);
+  const resultSize = clamp(fontSize * (isLongText ? 0.76 : 0.62), isLongText ? 5.8 : 7.8, isLongText ? 9.8 : 13.2);
+  const angleSize = clamp(fontSize * 0.72, isLongText ? 6.2 : 10.2, isLongText ? 10.6 : 16.4);
   const mainOutwardOffset = clamp(ringWidth * 0.00, 0, 1.0);
-  const resultInnerOffset = clamp(ringWidth * (isLongText ? 0.47 : 0.43), 8.0, ringWidth * 0.53);
-  const angleOuterOffset = clamp(ringWidth * (isLongText ? 0.43 : 0.38), 8.0, ringWidth * 0.49);
+  const resultInnerOffset = clamp(ringWidth * (isLongText ? 0.50 : 0.43), 8.0, ringWidth * 0.55);
+  const angleOuterOffset = clamp(ringWidth * (isLongText ? 0.44 : 0.38), 8.0, ringWidth * 0.50);
 
   const mainX = x - ux * mainOutwardOffset;
   const mainY = y - uy * mainOutwardOffset;
@@ -339,7 +339,7 @@ function renderOverlay(overlay, sourceCanvas) {
 
       const p = polar(cx, cy, metrics.mid, centerDeg);
       const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, text.length, longMode, ring);
-      const maxMainWidth = (TWO_PI * metrics.mid / divisions) * 0.98;
+      const maxMainWidth = (TWO_PI * metrics.mid / divisions) * 1.04;
       drawCellNumberWithResultAndAngle(ctx, value, p.x, p.y, fs, wheelNumberColor(value), metrics.width, cx, cy, maxMainWidth);
     }
   }
@@ -416,7 +416,7 @@ export default function GannzillaLongNumberDigitalRenderer() {
     }
     window[MARKER] = true;
     window.__gannzillaSumResultStyleVersion = SUM_RESULT_STYLE_VERSION;
-    window.__gannzillaCrispLongNumberFitV33 = true;
+    window.__gannzillaCrispLongNumberBiggerV34 = true;
 
     const render = () => {
       const sourceCanvas = getWheelCanvas();
