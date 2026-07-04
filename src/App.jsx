@@ -27,8 +27,6 @@ import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArab
 import GannzillaDigitalNumberClarityPatch from './components/GannTools/GannzillaDigitalNumberClarityPatch';
 import GannzillaLongNumberDigitalRenderer from './components/GannTools/GannzillaLongNumberDigitalRenderer';
 import GannzillaLayerMarksVisiblePatch from './components/GannTools/GannzillaLayerMarksVisiblePatch';
-import GannzillaTwentyRingNoOverlapPatch from './components/GannTools/GannzillaTwentyRingNoOverlapPatch';
-import GannzillaTwentyRingViewportFixPatch from './components/GannTools/GannzillaTwentyRingViewportFixPatch';
 
 const App = () => {
   // للتبديل بين الصفحة الرئيسية وصفحة الاختبار
@@ -36,18 +34,6 @@ const App = () => {
   const isTestMode = search.includes('test=true');
   const isArabicAiWheelMode = search.includes('gannzillaArabicAI=true') || search.includes('aiWheel=true');
   const isGannzillaProWheelMode = search.includes('gannzillaPro=true') || search.includes('wheelPro=true');
-  const useNativeWheelLayout =
-    search.includes('nativeWheelLayout') ||
-    search.includes('nativeProgram') ||
-    search.includes('originalLayout') ||
-    search.includes('programLayout') ||
-    search.includes('safeOpen');
-  const isTwentyRingStableMode = !useNativeWheelLayout && (
-    search.includes('twentyRingNoOverlap') ||
-    search.includes('stable20Rings') ||
-    search.includes('noOverlap20') ||
-    search.includes('adaptive20Rings')
-  );
   const isEnhancedMode = search.includes('enhanced=true') || true; // افتراضياً الإصدار المحسن
   
   return (
@@ -73,17 +59,8 @@ const App = () => {
               <GannzillaLanguageSwitch />
               <GannzillaWheelPanButtonsPatch />
               <GannzillaCardinalBalancePatch />
-              {isTwentyRingStableMode ? (
-                <>
-                  <GannzillaTwentyRingNoOverlapPatch />
-                  <GannzillaTwentyRingViewportFixPatch />
-                </>
-              ) : useNativeWheelLayout ? null : (
-                <>
-                  <GannzillaLongNumberDigitalRenderer />
-                  <GannzillaLayerMarksVisiblePatch />
-                </>
-              )}
+              <GannzillaLongNumberDigitalRenderer />
+              <GannzillaLayerMarksVisiblePatch />
               <GannzillaOptionsBadgeHidePatch />
               <GannzillaPanelToggleTopbarPatch />
               <GannzillaWheelLineDrawPatch />
