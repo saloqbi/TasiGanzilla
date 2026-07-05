@@ -3,12 +3,48 @@ import React from 'react';
 const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
 const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v40';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
+const ANGLE_LAYER_SUM_MARKER = 'GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40';
 const TWO_PI = Math.PI * 2;
 const FONT_STACK = 'Arial, Tahoma, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'GANNZILLA_STANDALONE_IMAGE_MATCH_CLEAN_10_RING_V40';
+const SUM_RESULT_STYLE_VERSION = 'GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_CLEAN_10_RING_V40';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function getQueryParams() {
+  try {
+    return new URLSearchParams(window.location.search || '');
+  } catch (error) {
+    return new URLSearchParams('');
+  }
+}
+
+function queryBool(name, fallback = false) {
+  const params = getQueryParams();
+  if (!params.has(name)) return fallback;
+  const value = String(params.get(name) || '').toLowerCase();
+  return value === 'true' || value === '1' || value === 'yes' || value === 'on';
+}
+
+function queryNumber(name, fallback, min, max) {
+  const raw = Number(getQueryParams().get(name));
+  return Number.isFinite(raw) ? clamp(raw, min, max) : fallback;
+}
+
+function getMetaProfile() {
+  const enabled = queryBool('angleLayerSum', false) || queryBool('showCellAngles', false) || queryBool('showCellLayers', false) || queryBool('showDigitSum', false);
+  return {
+    enabled,
+    showCellAngles: queryBool('showCellAngles', enabled),
+    showCellLayers: queryBool('showCellLayers', enabled),
+    showDigitSum: queryBool('showDigitSum', enabled),
+    showAngleDegrees: queryBool('showAngleDegrees', false),
+    primaryScale: queryNumber('primaryNumberScale', enabled ? 1.0 : 1.0, 0.6, 1.7),
+    angleScale: queryNumber('angleNumberScale', enabled ? 0.82 : 0.72, 0.45, 1.35),
+    layerScale: queryNumber('layerNumberScale', enabled ? 0.52 : 0.45, 0.35, 1.0),
+    sumScale: queryNumber('digitSumScale', enabled ? 0.58 : 0.50, 0.35, 1.1),
+  };
 }
 
 function polar(cx, cy, radius, deg) {
@@ -47,6 +83,10 @@ function formatNumber(value) {
 
 function numberAtRing(startValue, ringIndex, sectorIndex, divisions, increment) {
   return startValue + ((ringIndex - 1) * divisions + sectorIndex) * increment;
+}
+
+function angleAtRing(ringIndex, sectorIndex, divisions) {
+  return ((ringIndex - 1) * divisions + sectorIndex + 1);
 }
 
 function getWheelCanvas() {
@@ -163,6 +203,41 @@ function drawFittedText(ctx, text, x, y, size, color, maxWidth, weight = 720) {
   ctx.fillStyle = color;
   ctx.fillText(label, 0, 0);
   ctx.restore();
+}
+
+function drawCellMeta(ctx, cell) {
+  const { cx, cy, inner, ringWidth, mid, centerDeg, value, angleValue, ring, divisions, side, primarySize, maxW, meta } = cell;
+  const label = formatNumber(value);
+  const primaryRadius = meta.enabled ? inner + ringWidth * 0.63 : mid;
+  const primaryPoint = polar(cx, cy, primaryRadius, centerDeg);
+  drawFittedText(ctx, label, primaryPoint.x, primaryPoint.y, primarySize * meta.primaryScale, colorFor(value), maxW, 730);
+
+  if (!meta.enabled) {
+    if (side >= 620 && ring <= 8) {
+      const small = digitalRoot(value);
+      const p2 = polar(cx, cy, inner + ringWidth * 0.18, centerDeg);
+      drawCenteredText(ctx, small, p2.x, p2.y, clamp(primarySize * 0.50, 3.8, 6.2), colorFor(value), 700, 0.56);
+    }
+    return;
+  }
+
+  if (meta.showCellAngles) {
+    const angleLabel = meta.showAngleDegrees ? `${angleValue}°` : String(angleValue);
+    const anglePoint = polar(cx, cy, inner + ringWidth * 0.34, centerDeg);
+    drawFittedText(ctx, angleLabel, anglePoint.x, anglePoint.y, clamp(primarySize * meta.angleScale, 4.5, 8.2), colorFor(angleValue), maxW * 0.75, 700);
+  }
+
+  if (meta.showDigitSum) {
+    const root = digitalRoot(value);
+    const sumPoint = polar(cx, cy, inner + ringWidth * 0.83, centerDeg);
+    drawCenteredText(ctx, root, sumPoint.x, sumPoint.y, clamp(primarySize * meta.sumScale, 3.8, 6.4), colorFor(root), 700, 0.78);
+  }
+
+  if (meta.showCellLayers) {
+    const layerDeg = centerDeg + (360 / divisions) * 0.24;
+    const layerPoint = polar(cx, cy, inner + ringWidth * 0.50, layerDeg);
+    drawCenteredText(ctx, ring, layerPoint.x, layerPoint.y, clamp(primarySize * meta.layerScale, 3.4, 5.8), '#222222', 700, 0.64);
+  }
 }
 
 function makeButton(label, onClick) {
@@ -286,6 +361,7 @@ function drawCenterHub(ctx, cx, cy, radius) {
 function renderOverlay(overlay) {
   const rect = getStandaloneRect();
   const settings = getSettings();
+  const meta = getMetaProfile();
   const dpr = window.devicePixelRatio || 1;
   overlay.style.position = 'fixed';
   overlay.style.left = `${rect.left}px`;
@@ -335,6 +411,7 @@ function renderOverlay(overlay) {
       const endDeg = direction * (i + 1) * sector;
       const centerDeg = direction * (i + 0.5) * sector;
       const value = numberAtRing(startValue, ring, i, divisions, increment);
+      const angleValue = angleAtRing(ring, i, divisions);
       const label = formatNumber(value);
       ctx.save();
       drawWedge(ctx, cx, cy, inner, outer, startDeg, endDeg);
@@ -345,16 +422,9 @@ function renderOverlay(overlay) {
       ctx.stroke();
       ctx.restore();
 
-      const p = polar(cx, cy, mid, centerDeg);
-      const maxW = (TWO_PI * mid / divisions) * 0.48;
+      const maxW = (TWO_PI * mid / divisions) * (meta.enabled ? 0.50 : 0.48);
       const fs = textFontSize(mid, ringWidth, divisions, label.length, ring);
-      drawFittedText(ctx, label, p.x, p.y, fs, colorFor(value), maxW, 730);
-
-      if (side >= 620 && ring <= 8) {
-        const small = digitalRoot(value);
-        const p2 = polar(cx, cy, inner + ringWidth * 0.18, centerDeg);
-        drawCenteredText(ctx, small, p2.x, p2.y, clamp(fs * 0.50, 3.8, 6.2), colorFor(value), 700, 0.56);
-      }
+      drawCellMeta(ctx, { cx, cy, inner, ringWidth, mid, centerDeg, value, angleValue, ring, divisions, side, primarySize: fs, maxW, meta });
     }
   }
 
@@ -374,7 +444,40 @@ function renderOverlay(overlay) {
     drawCenteredText(ctx, `${deg === 0 ? 360 : deg}`, p.x, p.y, clamp(side * 0.0056, 4.8, 8), '#777777', 700, 0.82);
   }
 
+  window.__gannzillaAngleLayerDigitSumV40Metrics = {
+    ok: true,
+    marker: window[ANGLE_LAYER_SUM_MARKER] === true,
+    angleLayerSum: meta.enabled,
+    showCellAngles: meta.showCellAngles,
+    showCellLayers: meta.showCellLayers,
+    showDigitSum: meta.showDigitSum,
+    levels,
+    divisions,
+    noMathMutation: true,
+    noTradingMutation: true,
+  };
+
   ensureExportBar(overlay, rect);
+}
+
+function installAuditHelper() {
+  window.__auditGannzillaAngleLayerDigitSumV40 = function auditGannzillaAngleLayerDigitSumV40() {
+    const meta = getMetaProfile();
+    const metrics = window.__gannzillaAngleLayerDigitSumV40Metrics || {};
+    return {
+      ok: window[ANGLE_LAYER_SUM_MARKER] === true,
+      marker: window[ANGLE_LAYER_SUM_MARKER] === true,
+      rendererMarker: window[MARKER] === true,
+      styleVersion: window.__gannzillaSumResultStyleVersion,
+      angleLayerSum: meta.enabled,
+      showCellAngles: meta.showCellAngles,
+      showCellLayers: meta.showCellLayers,
+      showDigitSum: meta.showDigitSum,
+      noMathMutation: true,
+      noTradingMutation: true,
+      metrics,
+    };
+  };
 }
 
 export default function GannzillaLongNumberDigitalRenderer() {
@@ -388,8 +491,10 @@ export default function GannzillaLongNumberDigitalRenderer() {
       document.body.appendChild(overlay);
     }
     window[MARKER] = true;
+    window[ANGLE_LAYER_SUM_MARKER] = true;
     window.__gannzillaSumResultStyleVersion = SUM_RESULT_STYLE_VERSION;
     window.__gannzillaStandaloneImageMatchV40 = true;
+    installAuditHelper();
 
     const render = () => {
       syncTenRingInput();
