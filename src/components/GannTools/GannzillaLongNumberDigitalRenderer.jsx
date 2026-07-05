@@ -1,18 +1,18 @@
 import React from 'react';
 
 const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
-const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v40';
+const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v41';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
-const ANGLE_LAYER_SUM_MARKER = 'GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40';
+const V41_MARKER = 'GANNZILLA_BROWSER_ZOOM_RESTORED_ANGLE_LAYER_V41';
 const TWO_PI = Math.PI * 2;
 const FONT_STACK = 'Arial, Tahoma, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_CLEAN_10_RING_V40';
+const STYLE_VERSION = 'GANNZILLA_BROWSER_ZOOM_RESTORED_ANGLE_LAYER_V41';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
-function getQueryParams() {
+function params() {
   try {
     return new URLSearchParams(window.location.search || '');
   } catch (error) {
@@ -21,15 +21,25 @@ function getQueryParams() {
 }
 
 function queryBool(name, fallback = false) {
-  const params = getQueryParams();
-  if (!params.has(name)) return fallback;
-  const value = String(params.get(name) || '').toLowerCase();
+  const p = params();
+  if (!p.has(name)) return fallback;
+  const value = String(p.get(name) || '').toLowerCase();
   return value === 'true' || value === '1' || value === 'yes' || value === 'on';
 }
 
 function queryNumber(name, fallback, min, max) {
-  const raw = Number(getQueryParams().get(name));
+  const raw = Number(params().get(name));
   return Number.isFinite(raw) ? clamp(raw, min, max) : fallback;
+}
+
+function getBrowserZoomFactor() {
+  if (!queryBool('browserZoomControl', false) && !queryBool('nativeZoomControl', false)) return 1;
+  const dpr = Number(window.devicePixelRatio || 1);
+  if (Number.isFinite(dpr) && dpr > 0) return clamp(dpr, 0.35, 3.50);
+  const outer = Number(window.outerWidth || 0);
+  const inner = Number(window.innerWidth || 0);
+  if (outer > 0 && inner > 0) return clamp(outer / inner, 0.35, 3.50);
+  return 1;
 }
 
 function getMetaProfile() {
@@ -40,10 +50,15 @@ function getMetaProfile() {
     showCellLayers: queryBool('showCellLayers', enabled),
     showDigitSum: queryBool('showDigitSum', enabled),
     showAngleDegrees: queryBool('showAngleDegrees', false),
-    primaryScale: queryNumber('primaryNumberScale', enabled ? 1.0 : 1.0, 0.6, 1.7),
-    angleScale: queryNumber('angleNumberScale', enabled ? 0.82 : 0.72, 0.45, 1.35),
-    layerScale: queryNumber('layerNumberScale', enabled ? 0.52 : 0.45, 0.35, 1.0),
-    sumScale: queryNumber('digitSumScale', enabled ? 0.58 : 0.50, 0.35, 1.1),
+    slantedAngles: queryBool('slantedAngles', true),
+    primaryScale: queryNumber('primaryNumberScale', enabled ? 1.00 : 1.00, 0.55, 2.20),
+    angleScale: queryNumber('angleNumberScale', enabled ? 0.82 : 0.72, 0.35, 1.80),
+    layerScale: queryNumber('layerNumberScale', enabled ? 0.52 : 0.45, 0.25, 1.20),
+    sumScale: queryNumber('digitSumScale', enabled ? 0.58 : 0.50, 0.25, 1.30),
+    browserZoomControl: queryBool('browserZoomControl', false) || queryBool('nativeZoomControl', false),
+    browserZoomFactor: getBrowserZoomFactor(),
+    wheelScale: queryNumber('wheelScale', 1.00, 0.35, 4.00),
+    canvasFillRatio: queryNumber('canvasFillRatio', 0.985, 0.50, 1.35),
   };
 }
 
@@ -112,19 +127,6 @@ function isStandaloneMode() {
   return q.includes('standaloneImageWheel') || q.includes('exactImageCopy') || q.includes('copyGannzillaStyle') || q.includes('clean10RingLayout');
 }
 
-function syncTenRingInput() {
-  if (!isStandaloneMode()) return;
-  const firstLevelInput = getNumberInputs()[0];
-  if (!firstLevelInput) return;
-  firstLevelInput.min = '1';
-  firstLevelInput.max = '10';
-  if (Number(firstLevelInput.value) !== 10) {
-    firstLevelInput.value = '10';
-    firstLevelInput.dispatchEvent(new Event('input', { bubbles: true }));
-    firstLevelInput.dispatchEvent(new Event('change', { bubbles: true }));
-  }
-}
-
 function getSettings() {
   const inputs = getNumberInputs();
   const levels = isStandaloneMode() ? 10 : clamp(Number(inputs[0]?.value) || 5, 1, 12);
@@ -137,7 +139,7 @@ function getSettings() {
 function getSidebarRight() {
   const candidates = Array.from(document.querySelectorAll('aside, [class*="side"], [class*="panel"], [class*="control"]'))
     .map((el) => el.getBoundingClientRect())
-    .filter((r) => r.width > 85 && r.height > 240 && r.left < 320)
+    .filter((r) => r.width > 85 && r.height > 240 && r.left < 360)
     .sort((a, b) => b.right - a.right);
   return candidates[0]?.right || 0;
 }
@@ -150,14 +152,20 @@ function getTopOffset() {
   return candidates[0]?.bottom || 74;
 }
 
-function getStandaloneRect() {
+function getStandaloneRect(meta = getMetaProfile()) {
   const left = clamp(Math.ceil(getSidebarRight() + 6), 0, Math.min(360, window.innerWidth * 0.38));
   const top = clamp(Math.ceil(getTopOffset() + 4), 64, 130);
+  const baseWidth = Math.max(280, window.innerWidth - left - 8);
+  const baseHeight = Math.max(280, window.innerHeight - top - 8);
+  const liveScale = clamp(meta.wheelScale * meta.browserZoomFactor, 0.35, 4.00);
   return {
     left,
     top,
-    width: Math.max(280, window.innerWidth - left - 8),
-    height: Math.max(280, window.innerHeight - top - 8),
+    width: Math.max(280, baseWidth * liveScale),
+    height: Math.max(280, baseHeight * liveScale),
+    baseWidth,
+    baseHeight,
+    liveScale,
   };
 }
 
@@ -171,9 +179,10 @@ function textFontSize(midR, ringWidth, divisions, textLength, ring) {
   return clamp(natural, min, max);
 }
 
-function drawCenteredText(ctx, text, x, y, size, color, weight = 700, alpha = 1) {
+function drawCenteredText(ctx, text, x, y, size, color, weight = 700, alpha = 1, rotationDeg = 0) {
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
+  if (rotationDeg) ctx.rotate((rotationDeg * Math.PI) / 180);
   ctx.font = `${weight} ${size}px ${FONT_STACK}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -183,11 +192,12 @@ function drawCenteredText(ctx, text, x, y, size, color, weight = 700, alpha = 1)
   ctx.restore();
 }
 
-function drawFittedText(ctx, text, x, y, size, color, maxWidth, weight = 720) {
+function drawFittedText(ctx, text, x, y, size, color, maxWidth, weight = 720, rotationDeg = 0) {
   const label = String(text);
   let fitted = size;
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
+  if (rotationDeg) ctx.rotate((rotationDeg * Math.PI) / 180);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.globalAlpha = 1;
@@ -221,10 +231,12 @@ function drawCellMeta(ctx, cell) {
     return;
   }
 
+  const tangentRotation = meta.slantedAngles ? centerDeg : 0;
+
   if (meta.showCellAngles) {
     const angleLabel = meta.showAngleDegrees ? `${angleValue}°` : String(angleValue);
     const anglePoint = polar(cx, cy, inner + ringWidth * 0.34, centerDeg);
-    drawFittedText(ctx, angleLabel, anglePoint.x, anglePoint.y, clamp(primarySize * meta.angleScale, 4.5, 8.2), colorFor(angleValue), maxW * 0.75, 700);
+    drawFittedText(ctx, angleLabel, anglePoint.x, anglePoint.y, clamp(primarySize * meta.angleScale, 4.5, 8.2), colorFor(angleValue), maxW * 0.75, 700, tangentRotation);
   }
 
   if (meta.showDigitSum) {
@@ -359,9 +371,9 @@ function drawCenterHub(ctx, cx, cy, radius) {
 }
 
 function renderOverlay(overlay) {
-  const rect = getStandaloneRect();
-  const settings = getSettings();
   const meta = getMetaProfile();
+  const rect = getStandaloneRect(meta);
+  const settings = getSettings();
   const dpr = window.devicePixelRatio || 1;
   overlay.style.position = 'fixed';
   overlay.style.left = `${rect.left}px`;
@@ -387,7 +399,7 @@ function renderOverlay(overlay) {
   const sector = 360 / divisions;
   const cx = rect.width / 2;
   const cy = rect.height / 2;
-  const side = Math.max(280, Math.min(rect.width, rect.height) - 18);
+  const side = Math.max(280, Math.min(rect.width, rect.height) * meta.canvasFillRatio - 18);
   const outerFrameOuter = side / 2 - 8;
   const frameWidth = clamp(side * 0.027, 16, 34);
   const wheelOuter = outerFrameOuter - frameWidth - clamp(side * 0.010, 5, 12);
@@ -444,9 +456,12 @@ function renderOverlay(overlay) {
     drawCenteredText(ctx, `${deg === 0 ? 360 : deg}`, p.x, p.y, clamp(side * 0.0056, 4.8, 8), '#777777', 700, 0.82);
   }
 
-  window.__gannzillaAngleLayerDigitSumV40Metrics = {
+  window.__gannzillaBrowserZoomRestoredAngleLayerV41Metrics = {
     ok: true,
-    marker: window[ANGLE_LAYER_SUM_MARKER] === true,
+    marker: window[V41_MARKER] === true,
+    browserZoomControl: meta.browserZoomControl,
+    browserZoomFactor: meta.browserZoomFactor,
+    liveScale: rect.liveScale,
     angleLayerSum: meta.enabled,
     showCellAngles: meta.showCellAngles,
     showCellLayers: meta.showCellLayers,
@@ -456,28 +471,34 @@ function renderOverlay(overlay) {
     noMathMutation: true,
     noTradingMutation: true,
   };
+  window.__gannzillaAngleLayerDigitSumV40Metrics = window.__gannzillaBrowserZoomRestoredAngleLayerV41Metrics;
 
   ensureExportBar(overlay, rect);
 }
 
 function installAuditHelper() {
-  window.__auditGannzillaAngleLayerDigitSumV40 = function auditGannzillaAngleLayerDigitSumV40() {
+  const audit = function auditGannzillaBrowserZoomRestoredAngleLayerV41() {
     const meta = getMetaProfile();
-    const metrics = window.__gannzillaAngleLayerDigitSumV40Metrics || {};
+    const metrics = window.__gannzillaBrowserZoomRestoredAngleLayerV41Metrics || {};
     return {
-      ok: window[ANGLE_LAYER_SUM_MARKER] === true,
-      marker: window[ANGLE_LAYER_SUM_MARKER] === true,
+      ok: window[V41_MARKER] === true,
+      markerV41: window[V41_MARKER] === true,
       rendererMarker: window[MARKER] === true,
       styleVersion: window.__gannzillaSumResultStyleVersion,
+      browserZoomControl: meta.browserZoomControl,
+      browserZoomFactor: meta.browserZoomFactor,
       angleLayerSum: meta.enabled,
       showCellAngles: meta.showCellAngles,
       showCellLayers: meta.showCellLayers,
       showDigitSum: meta.showDigitSum,
+      slantedAngles: meta.slantedAngles,
       noMathMutation: true,
       noTradingMutation: true,
       metrics,
     };
   };
+  window.__auditGannzillaBrowserZoomRestoredAngleLayerV41 = audit;
+  window.__auditGannzillaAngleLayerDigitSumV40 = audit;
 }
 
 export default function GannzillaLongNumberDigitalRenderer() {
@@ -491,26 +512,28 @@ export default function GannzillaLongNumberDigitalRenderer() {
       document.body.appendChild(overlay);
     }
     window[MARKER] = true;
-    window[ANGLE_LAYER_SUM_MARKER] = true;
-    window.__gannzillaSumResultStyleVersion = SUM_RESULT_STYLE_VERSION;
-    window.__gannzillaStandaloneImageMatchV40 = true;
+    window[V41_MARKER] = true;
+    window.GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40 = true;
+    window.__gannzillaSumResultStyleVersion = STYLE_VERSION;
+    window.__gannzillaStandaloneImageMatchV41 = true;
     installAuditHelper();
 
     const render = () => {
-      syncTenRingInput();
       const sourceCanvas = getWheelCanvas();
-      if (sourceCanvas) sourceCanvas.style.opacity = '0.001';
+      if (sourceCanvas) sourceCanvas.style.opacity = queryBool('hideSourceWheel', true) ? '0.001' : '';
       renderOverlay(overlay);
     };
 
     render();
-    const timer = window.setInterval(render, 300);
+    const timer = window.setInterval(render, 150);
     window.addEventListener('resize', render);
     window.addEventListener('scroll', render, true);
+    window.visualViewport?.addEventListener?.('resize', render);
     return () => {
       window.clearInterval(timer);
       window.removeEventListener('resize', render);
       window.removeEventListener('scroll', render, true);
+      window.visualViewport?.removeEventListener?.('resize', render);
       const sourceCanvas = getWheelCanvas();
       if (sourceCanvas) sourceCanvas.style.opacity = '';
       document.getElementById(OVERLAY_ID)?.remove();
