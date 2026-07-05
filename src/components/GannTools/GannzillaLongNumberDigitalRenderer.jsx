@@ -1,10 +1,11 @@
 import React from 'react';
 
 const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
+const EXPORT_BAR_ID = 'gannzilla-copy-export-bar-v38';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
 const TWO_PI = Math.PI * 2;
 const DIGITAL_FONT_STACK = 'Arial, Tahoma, Segoe UI, Helvetica, sans-serif';
-const SUM_RESULT_STYLE_VERSION = 'CELL_ANGLE_SHADED_TILTED_LONG_NUMBER_RING1_AND_OUTER_CLARITY_V37';
+const SUM_RESULT_STYLE_VERSION = 'TEN_RING_LARGE_CELL_COPY_EXPORT_V38';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -73,9 +74,28 @@ function getViewSelect() {
   );
 }
 
+function isTenRingMode() {
+  const q = window.location.search;
+  return q.includes('tenRingLargeCells') || q.includes('tenRings') || q.includes('largeCells10');
+}
+
+function syncTenRingInput() {
+  if (!isTenRingMode()) return;
+  const firstLevelInput = getNumberInputs()[0];
+  if (!firstLevelInput) return;
+  firstLevelInput.min = '1';
+  firstLevelInput.max = '10';
+  if (Number(firstLevelInput.value) !== 10) {
+    firstLevelInput.value = '10';
+    firstLevelInput.dispatchEvent(new Event('input', { bubbles: true }));
+    firstLevelInput.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+}
+
 function getSettings() {
   const inputs = getNumberInputs();
-  const levels = clamp(Number(inputs[0]?.value) || 5, 1, 12);
+  const rawLevels = Number(inputs[0]?.value) || 5;
+  const levels = isTenRingMode() ? 10 : clamp(rawLevels, 1, 12);
   const startValue = Number(inputs[1]?.value ?? 1) || 0;
   const increment = Number(inputs[3]?.value ?? 1) || 1;
   const divisions = Number(getViewSelect()?.value) || 36;
@@ -92,13 +112,20 @@ function getUnrotatedRect(canvas) {
 }
 
 function ringWeight(ring, longMode) {
-  if (!longMode) return ring === 1 ? 1.86 : ring === 2 ? 1.38 : ring === 3 ? 1.22 : 1.08;
-  if (ring === 1) return 3.35;
-  if (ring === 2) return 1.68;
-  if (ring === 3) return 1.44;
-  if (ring === 4) return 1.58;
-  if (ring === 5) return 1.52;
-  return 1.02;
+  if (!longMode) {
+    if (ring === 1) return 2.90;
+    if (ring === 2) return 1.50;
+    if (ring === 3) return 1.36;
+    if (ring === 4) return 1.46;
+    if (ring === 5) return 1.40;
+    return 1.18;
+  }
+  if (ring === 1) return 3.80;
+  if (ring === 2) return 1.92;
+  if (ring === 3) return 1.70;
+  if (ring === 4) return 1.86;
+  if (ring === 5) return 1.78;
+  return 1.28;
 }
 
 function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
@@ -110,33 +137,33 @@ function ringMetrics(innerRadius, baseRingWidth, ring, longMode) {
 
 function fontSizeForCell(midR, ringWidth, divisions, textLength, longMode, ring) {
   const isLong = textLength >= 10;
-  const arcRoom = (TWO_PI * midR / divisions) * (isLong ? 0.74 : 0.94);
+  const arcRoom = (TWO_PI * midR / divisions) * (isLong ? 0.72 : 0.94);
   const radialRoom = ringWidth * (isLong ? 0.34 : 0.42);
-  const charFactor = textLength >= 12 ? 0.58 : textLength >= 10 ? 0.60 : textLength >= 8 ? 0.62 : textLength >= 6 ? 0.64 : 0.70;
+  const charFactor = textLength >= 12 ? 0.60 : textLength >= 10 ? 0.62 : textLength >= 8 ? 0.62 : textLength >= 6 ? 0.66 : 0.72;
   const natural = Math.min(arcRoom / Math.max(2, textLength * charFactor), radialRoom);
 
   let ringCap;
   if (!isLong) {
-    ringCap = ring === 1 ? 21.0 : ring === 2 ? 18.0 : ring === 3 ? 15.2 : 13.2;
+    ringCap = ring === 1 ? 20 : ring === 2 ? 18 : ring === 3 ? 16 : ring === 4 || ring === 5 ? 15.8 : 13.8;
   } else if (ring === 1) {
-    ringCap = 10.8;
+    ringCap = 11.0;
   } else if (ring === 2 || ring === 3) {
     ringCap = 13.2;
   } else if (ring === 4 || ring === 5) {
-    ringCap = 14.0;
+    ringCap = 13.0;
   } else {
-    ringCap = 10.8;
+    ringCap = 11.4;
   }
 
   let ringMin;
   if (!isLong) {
-    ringMin = ring === 1 ? 12.0 : ring === 2 ? 10.4 : ring === 3 ? 9.0 : 8.2;
+    ringMin = ring === 1 ? 11.2 : ring === 4 || ring === 5 ? 10.8 : ring === 2 ? 10.4 : ring === 3 ? 9.2 : 8.4;
   } else if (ring === 1) {
     ringMin = 6.8;
   } else if (ring === 4 || ring === 5) {
-    ringMin = 9.2;
+    ringMin = 8.8;
   } else {
-    ringMin = 8.0;
+    ringMin = 7.8;
   }
 
   return clamp(Math.min(natural, ringCap), ringMin, ringCap);
@@ -175,7 +202,6 @@ function drawReadableText(ctx, text, x, y, fontSize, color, weight = 700, alpha 
   ctx.lineJoin = 'round';
   ctx.shadowColor = 'transparent';
   ctx.shadowBlur = 0;
-
   ctx.lineWidth = Math.max(0.36, fontSize * 0.035);
   ctx.strokeStyle = `rgba(255,255,255,${0.90 * alpha})`;
   ctx.strokeText(label, 0, 0);
@@ -189,7 +215,6 @@ function drawCrispLongNumberText(ctx, text, x, y, fontSize, color, rotation, max
   const label = String(text);
   const fontWeight = 780;
   let fitSize = fontSize;
-
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
   if (rotation) ctx.rotate(rotation);
@@ -199,17 +224,16 @@ function drawCrispLongNumberText(ctx, text, x, y, fontSize, color, rotation, max
   ctx.shadowBlur = 0;
   ctx.globalAlpha = 1;
 
-  for (let attempt = 0; attempt < 16; attempt += 1) {
+  for (let attempt = 0; attempt < 18; attempt += 1) {
     ctx.font = `${fontWeight} ${fitSize}px ${DIGITAL_FONT_STACK}`;
     const width = ctx.measureText(label).width;
-    if (width <= maxWidth || fitSize <= 6.6) break;
-    fitSize -= 0.34;
+    if (width <= maxWidth || fitSize <= 6.2) break;
+    fitSize -= 0.32;
   }
 
   ctx.font = `${fontWeight} ${fitSize}px ${DIGITAL_FONT_STACK}`;
   const measured = Math.max(1, ctx.measureText(label).width);
-  const scaleX = measured > maxWidth ? clamp(maxWidth / measured, 0.46, 1) : 1;
-
+  const scaleX = measured > maxWidth ? clamp(maxWidth / measured, 0.42, 1) : 1;
   if (scaleX !== 1) ctx.scale(scaleX, 1);
   ctx.fillStyle = color;
   ctx.fillText(label, 0, 0);
@@ -221,7 +245,6 @@ function drawAngleText(ctx, text, x, y, fontSize, color, wheelCx, wheelCy) {
   const dx = x - wheelCx;
   const dy = y - wheelCy;
   const tangentRotation = normalizeReadableRotation(Math.atan2(dy, dx) + Math.PI / 2);
-
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
   ctx.rotate(tangentRotation);
@@ -229,7 +252,6 @@ function drawAngleText(ctx, text, x, y, fontSize, color, wheelCx, wheelCy) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
-
   const metrics = ctx.measureText(label);
   const width = metrics.width + clamp(fontSize * 0.92, 9, 18);
   const height = fontSize * 1.34;
@@ -239,7 +261,6 @@ function drawAngleText(ctx, text, x, y, fontSize, color, wheelCx, wheelCy) {
   ctx.strokeStyle = 'rgba(255,255,255,0.78)';
   ctx.lineWidth = Math.max(0.55, fontSize * 0.045);
   ctx.stroke();
-
   ctx.lineWidth = Math.max(0.48, fontSize * 0.04);
   ctx.strokeStyle = 'rgba(255,255,255,0.88)';
   ctx.strokeText(label, 0, 0);
@@ -254,21 +275,17 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
   const angleVal = angleSequenceValue(value);
   const mainText = formatNumber(value);
   const isLongText = mainText.replace('-', '').length >= 8;
-
   const toCenterX = wheelCx - x;
   const toCenterY = wheelCy - y;
   const distance = Math.hypot(toCenterX, toCenterY) || 1;
   const ux = toCenterX / distance;
   const uy = toCenterY / distance;
-
-  const resultSize = clamp(fontSize * (isLongText ? 0.68 : 0.62), isLongText ? 5.0 : 7.8, isLongText ? 8.4 : 13.2);
-  const angleSize = clamp(fontSize * 0.66, isLongText ? 5.4 : 10.2, isLongText ? 9.2 : 16.4);
-  const mainOutwardOffset = 0;
-  const resultInnerOffset = clamp(ringWidth * (isLongText ? 0.53 : 0.43), 8.0, ringWidth * 0.58);
+  const resultSize = clamp(fontSize * (isLongText ? 0.66 : 0.62), isLongText ? 4.8 : 7.8, isLongText ? 8.2 : 13.2);
+  const angleSize = clamp(fontSize * 0.64, isLongText ? 5.0 : 10.2, isLongText ? 8.8 : 16.4);
+  const resultInnerOffset = clamp(ringWidth * (isLongText ? 0.54 : 0.43), 8.0, ringWidth * 0.59);
   const angleOuterOffset = clamp(ringWidth * (isLongText ? 0.42 : 0.38), 8.0, ringWidth * 0.49);
-
-  const mainX = x - ux * mainOutwardOffset;
-  const mainY = y - uy * mainOutwardOffset;
+  const mainX = x;
+  const mainY = y;
   const resultX = x + ux * resultInnerOffset;
   const resultY = y + uy * resultInnerOffset;
   const angleX = x - ux * angleOuterOffset;
@@ -277,20 +294,94 @@ function drawCellNumberWithResultAndAngle(ctx, value, x, y, fontSize, color, rin
 
   drawAngleText(ctx, `${angleVal}°`, angleX, angleY, angleSize, color, wheelCx, wheelCy);
   if (isLongText) {
-    const ringClarityBoost = ring === 4 || ring === 5 ? 1.18 : 1;
+    const ringClarityBoost = ring === 4 || ring === 5 ? 1.15 : 1;
     drawCrispLongNumberText(ctx, mainText, mainX, mainY, fontSize * ringClarityBoost, color, mainRotation, maxMainWidth);
     drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97, mainRotation);
   } else {
-    drawReadableText(ctx, mainText, mainX, mainY, fontSize, color, 750, 1);
+    const visualBoost = ring === 4 || ring === 5 ? 1.08 : 1;
+    drawReadableText(ctx, mainText, mainX, mainY, fontSize * visualBoost, color, 760, 1);
     drawReadableText(ctx, String(result), resultX, resultY, resultSize, color, 700, 0.97);
   }
+}
+
+function makeButton(label, onClick) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = label;
+  button.style.height = '30px';
+  button.style.padding = '0 10px';
+  button.style.border = '1px solid #888';
+  button.style.borderRadius = '5px';
+  button.style.background = 'linear-gradient(#fff,#eee)';
+  button.style.font = '700 12px Tahoma, Arial, sans-serif';
+  button.style.cursor = 'pointer';
+  button.style.boxShadow = '0 2px 6px rgba(0,0,0,.16)';
+  button.addEventListener('click', onClick);
+  return button;
+}
+
+async function copyCanvas(canvas, button) {
+  const old = button.textContent;
+  try {
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 1));
+    if (blob && navigator.clipboard && window.ClipboardItem) {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      button.textContent = 'تم النسخ ✓';
+    } else {
+      const link = document.createElement('a');
+      link.download = 'gannzilla-wheel.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      button.textContent = 'تم الحفظ ✓';
+    }
+  } catch (error) {
+    const link = document.createElement('a');
+    link.download = 'gannzilla-wheel.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    button.textContent = 'تم الحفظ ✓';
+  }
+  window.setTimeout(() => { button.textContent = old; }, 1300);
+}
+
+function printCanvas(canvas) {
+  const dataUrl = canvas.toDataURL('image/png');
+  const popup = window.open('', '_blank');
+  if (!popup) return;
+  popup.document.write(`<!doctype html><html><head><title>Gannzilla PDF</title><style>@page{size:A3 landscape;margin:6mm;}html,body{margin:0;background:white;}img{width:100%;height:auto;display:block;}</style></head><body><img src="${dataUrl}" onload="setTimeout(()=>window.print(),250)" /></body></html>`);
+  popup.document.close();
+}
+
+function ensureExportBar(overlay, rect) {
+  let bar = document.getElementById(EXPORT_BAR_ID);
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = EXPORT_BAR_ID;
+    bar.dir = 'rtl';
+    bar.style.position = 'fixed';
+    bar.style.zIndex = '12000';
+    bar.style.display = 'flex';
+    bar.style.gap = '7px';
+    bar.style.background = 'rgba(255,255,255,.96)';
+    bar.style.border = '1px solid rgba(150,150,150,.55)';
+    bar.style.borderRadius = '7px';
+    bar.style.padding = '5px';
+    bar.style.boxShadow = '0 2px 8px rgba(0,0,0,.18)';
+    document.body.appendChild(bar);
+  }
+  if (!bar.dataset.ready) {
+    bar.appendChild(makeButton('نسخ الصورة', (event) => copyCanvas(overlay, event.currentTarget)));
+    bar.appendChild(makeButton('PDF A3', () => printCanvas(overlay)));
+    bar.dataset.ready = 'true';
+  }
+  bar.style.left = `${Math.max(8, rect.left + 10)}px`;
+  bar.style.top = `${Math.max(8, rect.top + 8)}px`;
 }
 
 function renderOverlay(overlay, sourceCanvas) {
   const rect = getUnrotatedRect(sourceCanvas);
   const settings = getSettings();
   const dpr = window.devicePixelRatio || 1;
-
   overlay.style.position = 'fixed';
   overlay.style.left = `${rect.left}px`;
   overlay.style.top = `${rect.top}px`;
@@ -299,10 +390,8 @@ function renderOverlay(overlay, sourceCanvas) {
   overlay.style.zIndex = '34';
   overlay.style.pointerEvents = 'none';
   overlay.style.background = '#fff';
-  overlay.style.imageRendering = 'auto';
   overlay.width = Math.max(1, Math.round(rect.width * dpr));
   overlay.height = Math.max(1, Math.round(rect.height * dpr));
-
   const ctx = overlay.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, rect.width, rect.height);
@@ -317,14 +406,13 @@ function renderOverlay(overlay, sourceCanvas) {
   const cx = rect.width / 2;
   const cy = rect.height / 2;
   const minSide = Math.min(rect.width, rect.height);
-
   const sampleMax = numberAtRing(startValue, levels, Math.max(0, divisions - 1), divisions, increment);
   const longMode = Math.max(formatNumber(startValue).length, formatNumber(sampleMax).length) >= 7;
-  const extraRings = 96;
+  const extraRings = 62;
   const wheelRadius = minSide / 2 - extraRings;
-  const innerRadius = clamp(minSide * (longMode ? 0.118 : 0.138), 58, wheelRadius * 0.38);
+  const innerRadius = clamp(minSide * (longMode ? 0.082 : 0.10), 46, wheelRadius * 0.30);
   const weightSum = Array.from({ length: levels }, (_, i) => ringWeight(i + 1, longMode)).reduce((a, b) => a + b, 0);
-  const baseRingWidth = Math.max(33, (wheelRadius - innerRadius) / Math.max(1, weightSum));
+  const baseRingWidth = Math.max(28, (wheelRadius - innerRadius) / Math.max(1, weightSum));
 
   ctx.save();
   ctx.beginPath();
@@ -339,14 +427,12 @@ function renderOverlay(overlay, sourceCanvas) {
   for (let ring = 1; ring <= levels; ring += 1) {
     const metrics = ringMetrics(innerRadius, baseRingWidth, ring, longMode);
     const bandFill = ring % 2 === 0 ? '#f0f0f0' : '#ffffff';
-
     for (let i = 0; i < divisions; i += 1) {
       const startDeg = direction * i * sector;
       const endDeg = direction * (i + 1) * sector;
       const centerDeg = direction * (i + 0.5) * sector;
       const value = numberAtRing(startValue, ring, i, divisions, increment);
       const text = formatNumber(value);
-
       ctx.save();
       drawWedge(ctx, cx, cy, metrics.inner, metrics.outer, startDeg, endDeg);
       ctx.fillStyle = bandFill;
@@ -355,10 +441,9 @@ function renderOverlay(overlay, sourceCanvas) {
       ctx.lineWidth = 0.9;
       ctx.stroke();
       ctx.restore();
-
       const p = polar(cx, cy, metrics.mid, centerDeg);
       const fs = fontSizeForCell(metrics.mid, metrics.width, divisions, text.length, longMode, ring);
-      const maxMainWidth = (TWO_PI * metrics.mid / divisions) * (text.length >= 10 ? (ring === 1 ? 0.62 : 0.70) : 1.04);
+      const maxMainWidth = (TWO_PI * metrics.mid / divisions) * (text.length >= 10 ? (ring === 1 ? 0.54 : 0.66) : 0.92);
       drawCellNumberWithResultAndAngle(ctx, value, p.x, p.y, fs, wheelNumberColor(value), metrics.width, cx, cy, maxMainWidth, ring);
     }
   }
@@ -374,7 +459,6 @@ function renderOverlay(overlay, sourceCanvas) {
   ctx.beginPath();
   ctx.arc(cx, cy, protractorOuter, 0, TWO_PI);
   ctx.stroke();
-
   for (let deg = 0; deg < 360; deg += 5) {
     const major = deg % 30 === 0;
     const p1 = polar(cx, cy, major ? protractorInner - 2 : protractorInner, direction * deg);
@@ -391,42 +475,13 @@ function renderOverlay(overlay, sourceCanvas) {
     }
   }
   ctx.restore();
-
-  const chronoR = protractorOuter + 26;
-  ctx.save();
-  ctx.strokeStyle = '#b7cfc1';
-  ctx.lineWidth = 1.3;
-  ctx.beginPath();
-  ctx.arc(cx, cy, chronoR, 0, TWO_PI);
-  ctx.stroke();
-  const labels = ['21 MAR', '5 APR', '21 APR', '6 MAY', '21 MAY', '6 JUN', '21 JUN', '6 JUL', '22 JUL', '6 AUG', '22 AUG', '6 SEP', '22 SEP', '7 OCT', '22 OCT', '6 NOV', '21 NOV', '6 DEC', '21 DEC', '5 JAN', '20 JAN', '4 FEB', '19 FEB', '6 MAR'];
-  labels.forEach((label, idx) => {
-    const deg = direction * (idx * 360 / labels.length);
-    const p = polar(cx, cy, chronoR + 16, deg);
-    drawReadableText(ctx, label, p.x, p.y, 7.4, '#777', 700, 1);
-  });
-  ctx.restore();
-
-  const pointerDeg = 90;
-  const pp = polar(cx, cy, wheelRadius + 42, pointerDeg);
-  ctx.save();
-  ctx.translate(pp.x, pp.y);
-  ctx.rotate(((pointerDeg - 90) * Math.PI) / 180);
-  ctx.fillStyle = '#e93020';
-  ctx.beginPath();
-  ctx.moveTo(0, -7);
-  ctx.lineTo(6, 8);
-  ctx.lineTo(-6, 8);
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
+  ensureExportBar(overlay, rect);
 }
 
 export default function GannzillaLongNumberDigitalRenderer() {
   React.useEffect(() => {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true');
     if (!isWheelMode) return undefined;
-
     let overlay = document.getElementById(OVERLAY_ID);
     if (!overlay) {
       overlay = document.createElement('canvas');
@@ -435,20 +490,18 @@ export default function GannzillaLongNumberDigitalRenderer() {
     }
     window[MARKER] = true;
     window.__gannzillaSumResultStyleVersion = SUM_RESULT_STYLE_VERSION;
-    window.__gannzillaRing1OuterClarityV37 = true;
-
+    window.__gannzillaTenRingLargeCellCopyV38 = true;
     const render = () => {
+      syncTenRingInput();
       const sourceCanvas = getWheelCanvas();
       if (!sourceCanvas) return;
       sourceCanvas.style.opacity = '0.001';
       renderOverlay(overlay, sourceCanvas);
     };
-
     render();
-    const timer = window.setInterval(render, 240);
+    const timer = window.setInterval(render, 260);
     window.addEventListener('resize', render);
     window.addEventListener('scroll', render, true);
-
     return () => {
       window.clearInterval(timer);
       window.removeEventListener('resize', render);
@@ -456,8 +509,8 @@ export default function GannzillaLongNumberDigitalRenderer() {
       const sourceCanvas = getWheelCanvas();
       if (sourceCanvas) sourceCanvas.style.opacity = '';
       document.getElementById(OVERLAY_ID)?.remove();
+      document.getElementById(EXPORT_BAR_ID)?.remove();
     };
   }, []);
-
   return null;
 }
