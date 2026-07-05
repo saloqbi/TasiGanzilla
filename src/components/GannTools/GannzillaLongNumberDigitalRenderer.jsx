@@ -1,22 +1,20 @@
 import React from 'react';
 
 const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
-const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v44';
+const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v45';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
-const V44_MARKER = 'GANNZILLA_STABLE_ENLARGED_CELL_LAYOUT_V44';
+const V45_MARKER = 'GANNZILLA_NATIVE_ZOOM_RING1_CELL_SCALE_V45';
 const TWO_PI = Math.PI * 2;
 const FONT_STACK = 'Arial, Tahoma, Segoe UI, Helvetica, sans-serif';
-const STYLE_VERSION = 'GANNZILLA_STABLE_ENLARGED_CELL_LAYOUT_V44';
+const STYLE_VERSION = 'GANNZILLA_NATIVE_ZOOM_RING1_CELL_SCALE_V45';
 
 function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
 function params() { try { return new URLSearchParams(window.location.search || ''); } catch (_) { return new URLSearchParams(''); } }
 function queryBool(name, fallback = false) { const p = params(); if (!p.has(name)) return fallback; const v = String(p.get(name) || '').toLowerCase(); return v === 'true' || v === '1' || v === 'yes' || v === 'on'; }
 function queryNumber(name, fallback, min, max) { const raw = Number(params().get(name)); return Number.isFinite(raw) ? clamp(raw, min, max) : fallback; }
-function getBrowserZoomFactor() { if (!queryBool('browserZoomControl', false) && !queryBool('nativeZoomControl', false)) return 1; const dpr = Number(window.devicePixelRatio || 1); return Number.isFinite(dpr) && dpr > 0 ? clamp(dpr, 0.35, 3.5) : 1; }
 
 function getMetaProfile() {
   const enabled = queryBool('angleLayerSum', false) || queryBool('showCellAngles', false) || queryBool('showCellLayers', false) || queryBool('showDigitSum', false);
-  const cellSizeScale = queryNumber('cellSizeScale', 1.00, 0.65, 2.80);
   return {
     enabled,
     showCellAngles: queryBool('showCellAngles', enabled),
@@ -24,19 +22,16 @@ function getMetaProfile() {
     showDigitSum: queryBool('showDigitSum', enabled),
     showAngleDegrees: queryBool('showAngleDegrees', false),
     slantedAngles: queryBool('slantedAngles', false),
-    stableCellSize: queryBool('stableCellSize', true),
-    followSourceWheel: queryBool('followSourceWheel', false) || queryBool('nativeToolbarZoom', false),
-    primaryScale: queryNumber('primaryNumberScale', enabled ? 1.00 : 1.00, 0.55, 2.60),
+    followSourceWheel: queryBool('followSourceWheel', true) || queryBool('nativeToolbarZoom', true),
+    primaryScale: queryNumber('primaryNumberScale', enabled ? 1.00 : 1.00, 0.55, 3.00),
     angleScale: queryNumber('angleNumberScale', enabled ? 0.82 : 0.72, 0.35, 1.80),
     layerScale: queryNumber('layerNumberScale', enabled ? 0.52 : 0.45, 0.25, 1.20),
-    sumScale: queryNumber('digitSumScale', enabled ? 0.58 : 0.50, 0.25, 1.30),
-    browserZoomControl: queryBool('browserZoomControl', false) || queryBool('nativeZoomControl', false),
-    browserZoomFactor: getBrowserZoomFactor(),
+    sumScale: queryNumber('digitSumScale', enabled ? 0.58 : 0.50, 0.25, 1.60),
     wheelScale: queryNumber('wheelScale', 1.00, 0.35, 4.00),
     canvasFillRatio: queryNumber('canvasFillRatio', 0.985, 0.50, 1.35),
-    sourceWheelPadding: queryNumber('sourceWheelPadding', 0, -200, 600),
-    cellSizeScale,
-    cellCanvasScale: queryNumber('cellCanvasScale', Math.sqrt(cellSizeScale), 0.70, 2.20),
+    sourceWheelPadding: queryNumber('sourceWheelPadding', 0, -120, 240),
+    ring1CellScale: queryNumber('ring1CellScale', 1.00, 1.00, 6.00),
+    enlargeFirstRings: Math.round(queryNumber('enlargeFirstRings', 1, 1, 10)),
   };
 }
 
@@ -48,7 +43,13 @@ function formatNumber(value) { return Number.isInteger(value) ? String(value) : 
 function numberAtRing(startValue, ringIndex, sectorIndex, divisions, increment) { return startValue + ((ringIndex - 1) * divisions + sectorIndex) * increment; }
 function angleAtRing(ringIndex, sectorIndex, divisions) { return ((ringIndex - 1) * divisions + sectorIndex + 1); }
 
-function getWheelCanvas() { return Array.from(document.querySelectorAll('canvas')).filter((canvas) => canvas.id !== OVERLAY_ID).map((canvas) => ({ canvas, rect: canvas.getBoundingClientRect() })).filter(({ rect }) => rect.width > 60 && rect.height > 60).sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null; }
+function getWheelCanvas() {
+  return Array.from(document.querySelectorAll('canvas'))
+    .filter((canvas) => canvas.id !== OVERLAY_ID)
+    .map((canvas) => ({ canvas, rect: canvas.getBoundingClientRect() }))
+    .filter(({ rect }) => rect.width > 60 && rect.height > 60)
+    .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
+}
 function getNumberInputs() { return Array.from(document.querySelectorAll('aside input[type="number"]')); }
 function getViewSelect() { return Array.from(document.querySelectorAll('aside select')).find((select) => Array.from(select.options || []).some((option) => String(option.textContent || '').includes('Circle of 36'))); }
 function isStandaloneMode() { const q = window.location.search; return q.includes('standaloneImageWheel') || q.includes('exactImageCopy') || q.includes('copyGannzillaStyle') || q.includes('clean10RingLayout'); }
@@ -61,13 +62,13 @@ function getFallbackRect(meta) {
   const top = clamp(Math.ceil(getTopOffset() + 4), 64, 130);
   const baseWidth = Math.max(280, window.innerWidth - left - 8);
   const baseHeight = Math.max(280, window.innerHeight - top - 8);
-  const liveScale = clamp(meta.wheelScale * meta.browserZoomFactor * (meta.stableCellSize ? meta.cellCanvasScale : 1), 0.35, 4.00);
+  const liveScale = clamp(meta.wheelScale, 0.35, 4.00);
   return { left, top, width: Math.max(280, baseWidth * liveScale), height: Math.max(280, baseHeight * liveScale), baseWidth, baseHeight, liveScale, sourceFollowed: false };
 }
 
 function getStandaloneRect(meta, sourceCanvas) {
   const sourceRect = sourceCanvas?.getBoundingClientRect?.();
-  if (meta.followSourceWheel && !meta.stableCellSize && sourceRect && sourceRect.width > 60 && sourceRect.height > 60) {
+  if (meta.followSourceWheel && sourceRect && sourceRect.width > 60 && sourceRect.height > 60) {
     const pad = meta.sourceWheelPadding;
     const scale = clamp(meta.wheelScale, 0.35, 4.0);
     const width = Math.max(80, (sourceRect.width + pad) * scale);
@@ -117,6 +118,7 @@ function ensureExportBar(overlay, rect) { let bar = document.getElementById(EXPO
 function drawOuterGoldenFrame(ctx, cx, cy, innerR, outerR, divisions, direction) { const gold = 'rgba(231,215,92,0.90)'; const softGold = 'rgba(231,215,92,0.62)'; const frameLevels = 3; for (let ring = 0; ring < frameLevels; ring += 1) { const r1 = innerR + ring * ((outerR - innerR) / frameLevels); const r2 = innerR + (ring + 1) * ((outerR - innerR) / frameLevels); for (let i = 0; i < divisions; i += 1) { drawWedge(ctx, cx, cy, r1, r2, direction * i * (360 / divisions), direction * (i + 1) * (360 / divisions)); ctx.strokeStyle = softGold; ctx.lineWidth = 0.75; ctx.stroke(); } } ctx.save(); ctx.strokeStyle = gold; ctx.lineWidth = 1.0; [innerR, innerR + (outerR - innerR) / 3, innerR + 2 * (outerR - innerR) / 3, outerR].forEach((r) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, TWO_PI); ctx.stroke(); }); ctx.restore(); }
 function drawCenterHub(ctx, cx, cy, radius) { const gradient = ctx.createRadialGradient(cx, cy, 2, cx, cy, radius); gradient.addColorStop(0, 'rgba(24,60,82,0.95)'); gradient.addColorStop(0.58, 'rgba(25,37,48,0.96)'); gradient.addColorStop(1, 'rgba(12,18,25,0.96)'); ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TWO_PI); ctx.fillStyle = gradient; ctx.fill(); ctx.strokeStyle = 'rgba(95,135,155,0.45)'; ctx.lineWidth = 2; ctx.stroke(); drawCenteredText(ctx, '2026-04-11', cx, cy - radius * 0.18, clamp(radius * 0.16, 8, 13), '#40b9ff', 800, 0.95); drawCenteredText(ctx, '10:17:53', cx, cy + radius * 0.10, clamp(radius * 0.22, 11, 19), '#35c6ff', 800, 0.98); drawCenteredText(ctx, 'NOW', cx, cy + radius * 0.38, clamp(radius * 0.11, 7, 10), '#5bb8df', 800, 0.9); ctx.restore(); }
 
+function ringUnitsFor(levels, meta) { return Array.from({ length: levels }, (_, index) => (index < meta.enlargeFirstRings ? meta.ring1CellScale : 1)); }
 function renderOverlay(overlay) {
   const meta = getMetaProfile();
   const sourceCanvas = getWheelCanvas();
@@ -127,10 +129,11 @@ function renderOverlay(overlay) {
   overlay.width = Math.max(1, Math.round(rect.width * dpr)); overlay.height = Math.max(1, Math.round(rect.height * dpr));
   const ctx = overlay.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, rect.width, rect.height); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, rect.width, rect.height); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
   const { levels, startValue, increment, divisions, clockwise } = settings;
-  const direction = clockwise ? 1 : -1; const sector = 360 / divisions; const cx = rect.width / 2; const cy = rect.height / 2; const side = Math.max(80, Math.min(rect.width, rect.height) * meta.canvasFillRatio - 10); const outerFrameOuter = side / 2 - 4; const frameWidth = clamp(side * 0.027, 8, 34); const wheelOuter = outerFrameOuter - frameWidth - clamp(side * 0.010, 3, 12); const innerRadius = clamp(side * 0.120, 20, wheelOuter * 0.24); const baseRingWidth = (wheelOuter - innerRadius) / levels; const ringWidth = baseRingWidth * (meta.stableCellSize ? meta.cellSizeScale : 1); const effectiveWheelOuter = innerRadius + ringWidth * levels;
+  const direction = clockwise ? 1 : -1; const sector = 360 / divisions; const cx = rect.width / 2; const cy = rect.height / 2; const side = Math.max(80, Math.min(rect.width, rect.height) * meta.canvasFillRatio - 10); const outerFrameOuter = side / 2 - 4; const frameWidth = clamp(side * 0.027, 8, 34); const wheelOuter = outerFrameOuter - frameWidth - clamp(side * 0.010, 3, 12); const innerRadius = clamp(side * 0.120, 20, wheelOuter * 0.24); const available = wheelOuter - innerRadius; const units = ringUnitsFor(levels, meta); const unitWidth = available / Math.max(1, units.reduce((sum, value) => sum + value, 0));
   ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, innerRadius, 0, TWO_PI); ctx.fillStyle = '#ffffff'; ctx.fill(); ctx.restore();
+  let cursor = innerRadius;
   for (let ring = 1; ring <= levels; ring += 1) {
-    const inner = innerRadius + (ring - 1) * ringWidth; const outer = inner + ringWidth; const mid = inner + ringWidth * 0.50; const bandFill = ring % 2 === 0 ? '#f3f3f3' : '#ffffff';
+    const ringWidth = unitWidth * units[ring - 1]; const inner = cursor; const outer = inner + ringWidth; const mid = inner + ringWidth * 0.50; const bandFill = ring % 2 === 0 ? '#f3f3f3' : '#ffffff'; cursor = outer;
     for (let i = 0; i < divisions; i += 1) {
       const startDeg = direction * i * sector; const endDeg = direction * (i + 1) * sector; const centerDeg = direction * (i + 0.5) * sector; const value = numberAtRing(startValue, ring, i, divisions, increment); const angleValue = angleAtRing(ring, i, divisions); const label = formatNumber(value);
       ctx.save(); drawWedge(ctx, cx, cy, inner, outer, startDeg, endDeg); ctx.fillStyle = bandFill; ctx.fill(); ctx.strokeStyle = 'rgba(204,204,204,0.54)'; ctx.lineWidth = 0.62; ctx.stroke(); ctx.restore();
@@ -139,29 +142,26 @@ function renderOverlay(overlay) {
     }
   }
   ctx.save(); ctx.strokeStyle = 'rgba(210,210,210,0.82)'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(cx, cy, innerRadius, 0, TWO_PI); ctx.stroke(); ctx.restore();
-  drawCenterHub(ctx, cx, cy, clamp(innerRadius * 0.45, 12, 58)); drawOuterGoldenFrame(ctx, cx, cy, effectiveWheelOuter + clamp(side * 0.008, 2, 10), effectiveWheelOuter + frameWidth + clamp(side * 0.008, 2, 10), divisions, direction);
-  for (let deg = 0; deg < 360; deg += 30) { const p = polar(cx, cy, effectiveWheelOuter + frameWidth * 0.48, direction * deg); drawCenteredText(ctx, `${deg === 0 ? 360 : deg}`, p.x, p.y, clamp(side * 0.0056, 3.8, 8), '#777777', 700, 0.82); }
-  window.__gannzillaStableEnlargedCellLayoutV44Metrics = { ok: true, marker: window[V44_MARKER] === true, sourceFollowed: rect.sourceFollowed, rect, angleLayerSum: meta.enabled, stableCellSize: meta.stableCellSize, cellSizeScale: meta.cellSizeScale, cellCanvasScale: meta.cellCanvasScale, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, levels, divisions, noMathMutation: true, noTradingMutation: true };
-  window.__gannzillaCellMetaStackedLayoutV43Metrics = window.__gannzillaStableEnlargedCellLayoutV44Metrics;
+  drawCenterHub(ctx, cx, cy, clamp(innerRadius * 0.45, 12, 58)); drawOuterGoldenFrame(ctx, cx, cy, wheelOuter + clamp(side * 0.008, 2, 10), outerFrameOuter, divisions, direction);
+  for (let deg = 0; deg < 360; deg += 30) { const p = polar(cx, cy, outerFrameOuter - frameWidth * 0.52, direction * deg); drawCenteredText(ctx, `${deg === 0 ? 360 : deg}`, p.x, p.y, clamp(side * 0.0056, 3.8, 8), '#777777', 700, 0.82); }
+  window.__gannzillaNativeZoomRing1CellScaleV45Metrics = { ok: true, marker: window[V45_MARKER] === true, sourceFollowed: rect.sourceFollowed, rect, angleLayerSum: meta.enabled, ring1CellScale: meta.ring1CellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, levels, divisions, noMathMutation: true, noTradingMutation: true };
+  window.__gannzillaStableEnlargedCellLayoutV44Metrics = window.__gannzillaNativeZoomRing1CellScaleV45Metrics;
   ensureExportBar(overlay, rect);
 }
 
 function installAuditHelper() {
-  const audit = function auditGannzillaStableEnlargedCellLayoutV44() {
-    const metrics = window.__gannzillaStableEnlargedCellLayoutV44Metrics || {}; const meta = getMetaProfile();
-    return { ok: window[V44_MARKER] === true, markerV44: window[V44_MARKER] === true, rendererMarker: window[MARKER] === true, styleVersion: window.__gannzillaSumResultStyleVersion, stableCellSize: meta.stableCellSize, cellSizeScale: meta.cellSizeScale, cellCanvasScale: meta.cellCanvasScale, sourceFollowed: metrics.sourceFollowed === true, angleLayerSum: meta.enabled, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, noMathMutation: true, noTradingMutation: true, metrics };
-  };
-  window.__auditGannzillaStableEnlargedCellLayoutV44 = audit; window.__auditGannzillaCellMetaStackedLayoutV43 = audit; window.__auditGannzillaNativeToolbarZoomFollowSourceV42 = audit; window.__auditGannzillaAngleLayerDigitSumV40 = audit;
+  const audit = function auditGannzillaNativeZoomRing1CellScaleV45() { const metrics = window.__gannzillaNativeZoomRing1CellScaleV45Metrics || {}; const meta = getMetaProfile(); return { ok: window[V45_MARKER] === true, markerV45: window[V45_MARKER] === true, rendererMarker: window[MARKER] === true, styleVersion: window.__gannzillaSumResultStyleVersion, sourceFollowed: metrics.sourceFollowed === true, ring1CellScale: meta.ring1CellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, noMathMutation: true, noTradingMutation: true, metrics }; };
+  window.__auditGannzillaNativeZoomRing1CellScaleV45 = audit; window.__auditGannzillaStableEnlargedCellLayoutV44 = audit; window.__auditGannzillaCellMetaStackedLayoutV43 = audit; window.__auditGannzillaAngleLayerDigitSumV40 = audit;
 }
 
 export default function GannzillaLongNumberDigitalRenderer() {
   React.useEffect(() => {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true'); if (!isWheelMode) return undefined;
     let overlay = document.getElementById(OVERLAY_ID); if (!overlay) { overlay = document.createElement('canvas'); overlay.id = OVERLAY_ID; document.body.appendChild(overlay); }
-    window[MARKER] = true; window[V44_MARKER] = true; window.GANNZILLA_CELL_META_STACKED_LAYOUT_V43 = true; window.GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40 = true; window.__gannzillaSumResultStyleVersion = STYLE_VERSION; window.__gannzillaStandaloneImageMatchV44 = true;
+    window[MARKER] = true; window[V45_MARKER] = true; window.GANNZILLA_STABLE_ENLARGED_CELL_LAYOUT_V44 = true; window.GANNZILLA_CELL_META_STACKED_LAYOUT_V43 = true; window.GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40 = true; window.__gannzillaSumResultStyleVersion = STYLE_VERSION; window.__gannzillaStandaloneImageMatchV45 = true;
     installAuditHelper();
     const render = () => { const sourceCanvas = getWheelCanvas(); if (sourceCanvas) sourceCanvas.style.opacity = queryBool('hideSourceWheel', true) ? '0.001' : ''; renderOverlay(overlay); };
-    render(); const timer = window.setInterval(render, 160); window.addEventListener('resize', render); window.addEventListener('scroll', render, true); window.visualViewport?.addEventListener?.('resize', render);
+    render(); const timer = window.setInterval(render, 140); window.addEventListener('resize', render); window.addEventListener('scroll', render, true); window.visualViewport?.addEventListener?.('resize', render);
     return () => { window.clearInterval(timer); window.removeEventListener('resize', render); window.removeEventListener('scroll', render, true); window.visualViewport?.removeEventListener?.('resize', render); const sourceCanvas = getWheelCanvas(); if (sourceCanvas) sourceCanvas.style.opacity = ''; document.getElementById(OVERLAY_ID)?.remove(); document.getElementById(EXPORT_BAR_ID)?.remove(); };
   }, []);
   return null;
