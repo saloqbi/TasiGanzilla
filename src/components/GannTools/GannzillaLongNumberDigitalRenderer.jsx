@@ -1,12 +1,12 @@
 import React from 'react';
 
 const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
-const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v45';
+const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v46';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
-const V45_MARKER = 'GANNZILLA_NATIVE_ZOOM_RING1_CELL_SCALE_V45';
+const V46_MARKER = 'GANNZILLA_NATIVE_ZOOM_RING2_ONLY_CELL_SCALE_V46';
 const TWO_PI = Math.PI * 2;
 const FONT_STACK = 'Arial, Tahoma, Segoe UI, Helvetica, sans-serif';
-const STYLE_VERSION = 'GANNZILLA_NATIVE_ZOOM_RING1_CELL_SCALE_V45';
+const STYLE_VERSION = 'GANNZILLA_NATIVE_ZOOM_RING2_ONLY_CELL_SCALE_V46';
 
 function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
 function params() { try { return new URLSearchParams(window.location.search || ''); } catch (_) { return new URLSearchParams(''); } }
@@ -30,8 +30,10 @@ function getMetaProfile() {
     wheelScale: queryNumber('wheelScale', 1.00, 0.35, 4.00),
     canvasFillRatio: queryNumber('canvasFillRatio', 0.985, 0.50, 1.35),
     sourceWheelPadding: queryNumber('sourceWheelPadding', 0, -120, 240),
-    ring1CellScale: queryNumber('ring1CellScale', 1.00, 1.00, 6.00),
-    enlargeFirstRings: Math.round(queryNumber('enlargeFirstRings', 1, 1, 10)),
+    ring1CellScale: queryNumber('ring1CellScale', 1.00, 0.60, 6.00),
+    ring2CellScale: queryNumber('ring2CellScale', 1.00, 0.60, 6.00),
+    otherRingCellScale: queryNumber('otherRingCellScale', 1.00, 0.60, 6.00),
+    enlargeFirstRings: Math.round(queryNumber('enlargeFirstRings', 0, 0, 10)),
   };
 }
 
@@ -118,7 +120,16 @@ function ensureExportBar(overlay, rect) { let bar = document.getElementById(EXPO
 function drawOuterGoldenFrame(ctx, cx, cy, innerR, outerR, divisions, direction) { const gold = 'rgba(231,215,92,0.90)'; const softGold = 'rgba(231,215,92,0.62)'; const frameLevels = 3; for (let ring = 0; ring < frameLevels; ring += 1) { const r1 = innerR + ring * ((outerR - innerR) / frameLevels); const r2 = innerR + (ring + 1) * ((outerR - innerR) / frameLevels); for (let i = 0; i < divisions; i += 1) { drawWedge(ctx, cx, cy, r1, r2, direction * i * (360 / divisions), direction * (i + 1) * (360 / divisions)); ctx.strokeStyle = softGold; ctx.lineWidth = 0.75; ctx.stroke(); } } ctx.save(); ctx.strokeStyle = gold; ctx.lineWidth = 1.0; [innerR, innerR + (outerR - innerR) / 3, innerR + 2 * (outerR - innerR) / 3, outerR].forEach((r) => { ctx.beginPath(); ctx.arc(cx, cy, r, 0, TWO_PI); ctx.stroke(); }); ctx.restore(); }
 function drawCenterHub(ctx, cx, cy, radius) { const gradient = ctx.createRadialGradient(cx, cy, 2, cx, cy, radius); gradient.addColorStop(0, 'rgba(24,60,82,0.95)'); gradient.addColorStop(0.58, 'rgba(25,37,48,0.96)'); gradient.addColorStop(1, 'rgba(12,18,25,0.96)'); ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, radius, 0, TWO_PI); ctx.fillStyle = gradient; ctx.fill(); ctx.strokeStyle = 'rgba(95,135,155,0.45)'; ctx.lineWidth = 2; ctx.stroke(); drawCenteredText(ctx, '2026-04-11', cx, cy - radius * 0.18, clamp(radius * 0.16, 8, 13), '#40b9ff', 800, 0.95); drawCenteredText(ctx, '10:17:53', cx, cy + radius * 0.10, clamp(radius * 0.22, 11, 19), '#35c6ff', 800, 0.98); drawCenteredText(ctx, 'NOW', cx, cy + radius * 0.38, clamp(radius * 0.11, 7, 10), '#5bb8df', 800, 0.9); ctx.restore(); }
 
-function ringUnitsFor(levels, meta) { return Array.from({ length: levels }, (_, index) => (index < meta.enlargeFirstRings ? meta.ring1CellScale : 1)); }
+function ringUnitsFor(levels, meta) {
+  return Array.from({ length: levels }, (_, index) => {
+    const ring = index + 1;
+    if (ring === 1) return meta.ring1CellScale;
+    if (ring === 2) return meta.ring2CellScale;
+    if (meta.enlargeFirstRings > 0 && ring <= meta.enlargeFirstRings) return meta.otherRingCellScale;
+    return 1;
+  });
+}
+
 function renderOverlay(overlay) {
   const meta = getMetaProfile();
   const sourceCanvas = getWheelCanvas();
@@ -144,21 +155,20 @@ function renderOverlay(overlay) {
   ctx.save(); ctx.strokeStyle = 'rgba(210,210,210,0.82)'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(cx, cy, innerRadius, 0, TWO_PI); ctx.stroke(); ctx.restore();
   drawCenterHub(ctx, cx, cy, clamp(innerRadius * 0.45, 12, 58)); drawOuterGoldenFrame(ctx, cx, cy, wheelOuter + clamp(side * 0.008, 2, 10), outerFrameOuter, divisions, direction);
   for (let deg = 0; deg < 360; deg += 30) { const p = polar(cx, cy, outerFrameOuter - frameWidth * 0.52, direction * deg); drawCenteredText(ctx, `${deg === 0 ? 360 : deg}`, p.x, p.y, clamp(side * 0.0056, 3.8, 8), '#777777', 700, 0.82); }
-  window.__gannzillaNativeZoomRing1CellScaleV45Metrics = { ok: true, marker: window[V45_MARKER] === true, sourceFollowed: rect.sourceFollowed, rect, angleLayerSum: meta.enabled, ring1CellScale: meta.ring1CellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, levels, divisions, noMathMutation: true, noTradingMutation: true };
-  window.__gannzillaStableEnlargedCellLayoutV44Metrics = window.__gannzillaNativeZoomRing1CellScaleV45Metrics;
+  window.__gannzillaNativeZoomRing2OnlyCellScaleV46Metrics = { ok: true, marker: window[V46_MARKER] === true, sourceFollowed: rect.sourceFollowed, rect, angleLayerSum: meta.enabled, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, levels, divisions, noMathMutation: true, noTradingMutation: true };
   ensureExportBar(overlay, rect);
 }
 
 function installAuditHelper() {
-  const audit = function auditGannzillaNativeZoomRing1CellScaleV45() { const metrics = window.__gannzillaNativeZoomRing1CellScaleV45Metrics || {}; const meta = getMetaProfile(); return { ok: window[V45_MARKER] === true, markerV45: window[V45_MARKER] === true, rendererMarker: window[MARKER] === true, styleVersion: window.__gannzillaSumResultStyleVersion, sourceFollowed: metrics.sourceFollowed === true, ring1CellScale: meta.ring1CellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, noMathMutation: true, noTradingMutation: true, metrics }; };
-  window.__auditGannzillaNativeZoomRing1CellScaleV45 = audit; window.__auditGannzillaStableEnlargedCellLayoutV44 = audit; window.__auditGannzillaCellMetaStackedLayoutV43 = audit; window.__auditGannzillaAngleLayerDigitSumV40 = audit;
+  const audit = function auditGannzillaNativeZoomRing2OnlyCellScaleV46() { const metrics = window.__gannzillaNativeZoomRing2OnlyCellScaleV46Metrics || {}; const meta = getMetaProfile(); return { ok: window[V46_MARKER] === true, markerV46: window[V46_MARKER] === true, rendererMarker: window[MARKER] === true, styleVersion: window.__gannzillaSumResultStyleVersion, sourceFollowed: metrics.sourceFollowed === true, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, noMathMutation: true, noTradingMutation: true, metrics }; };
+  window.__auditGannzillaNativeZoomRing2OnlyCellScaleV46 = audit; window.__auditGannzillaNativeZoomRing1CellScaleV45 = audit; window.__auditGannzillaStableEnlargedCellLayoutV44 = audit; window.__auditGannzillaCellMetaStackedLayoutV43 = audit; window.__auditGannzillaAngleLayerDigitSumV40 = audit;
 }
 
 export default function GannzillaLongNumberDigitalRenderer() {
   React.useEffect(() => {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true'); if (!isWheelMode) return undefined;
     let overlay = document.getElementById(OVERLAY_ID); if (!overlay) { overlay = document.createElement('canvas'); overlay.id = OVERLAY_ID; document.body.appendChild(overlay); }
-    window[MARKER] = true; window[V45_MARKER] = true; window.GANNZILLA_STABLE_ENLARGED_CELL_LAYOUT_V44 = true; window.GANNZILLA_CELL_META_STACKED_LAYOUT_V43 = true; window.GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40 = true; window.__gannzillaSumResultStyleVersion = STYLE_VERSION; window.__gannzillaStandaloneImageMatchV45 = true;
+    window[MARKER] = true; window[V46_MARKER] = true; window.GANNZILLA_NATIVE_ZOOM_RING1_CELL_SCALE_V45 = true; window.GANNZILLA_STABLE_ENLARGED_CELL_LAYOUT_V44 = true; window.GANNZILLA_CELL_META_STACKED_LAYOUT_V43 = true; window.GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40 = true; window.__gannzillaSumResultStyleVersion = STYLE_VERSION; window.__gannzillaStandaloneImageMatchV46 = true;
     installAuditHelper();
     const render = () => { const sourceCanvas = getWheelCanvas(); if (sourceCanvas) sourceCanvas.style.opacity = queryBool('hideSourceWheel', true) ? '0.001' : ''; renderOverlay(overlay); };
     render(); const timer = window.setInterval(render, 140); window.addEventListener('resize', render); window.addEventListener('scroll', render, true); window.visualViewport?.addEventListener?.('resize', render);
