@@ -1,12 +1,12 @@
 import React from 'react';
 
 const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
-const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v46';
+const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v47';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
-const V46_MARKER = 'GANNZILLA_NATIVE_ZOOM_RING2_ONLY_CELL_SCALE_V46';
+const V47_MARKER = 'GANNZILLA_CLEAR_BOLD_NUMBER_FONT_V47';
 const TWO_PI = Math.PI * 2;
-const FONT_STACK = 'Arial, Tahoma, Segoe UI, Helvetica, sans-serif';
-const STYLE_VERSION = 'GANNZILLA_NATIVE_ZOOM_RING2_ONLY_CELL_SCALE_V46';
+const FONT_STACK = '"Arial Black", "Arial Bold", Arial, Tahoma, Segoe UI, Helvetica, sans-serif';
+const STYLE_VERSION = 'GANNZILLA_CLEAR_BOLD_NUMBER_FONT_V47';
 
 function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
 function params() { try { return new URLSearchParams(window.location.search || ''); } catch (_) { return new URLSearchParams(''); } }
@@ -23,10 +23,10 @@ function getMetaProfile() {
     showAngleDegrees: queryBool('showAngleDegrees', false),
     slantedAngles: queryBool('slantedAngles', false),
     followSourceWheel: queryBool('followSourceWheel', true) || queryBool('nativeToolbarZoom', true),
-    primaryScale: queryNumber('primaryNumberScale', enabled ? 1.00 : 1.00, 0.55, 3.00),
+    primaryScale: queryNumber('primaryNumberScale', enabled ? 1.00 : 1.00, 0.55, 3.20),
     angleScale: queryNumber('angleNumberScale', enabled ? 0.82 : 0.72, 0.35, 1.80),
     layerScale: queryNumber('layerNumberScale', enabled ? 0.52 : 0.45, 0.25, 1.20),
-    sumScale: queryNumber('digitSumScale', enabled ? 0.58 : 0.50, 0.25, 1.60),
+    sumScale: queryNumber('digitSumScale', enabled ? 0.58 : 0.50, 0.25, 1.80),
     wheelScale: queryNumber('wheelScale', 1.00, 0.35, 4.00),
     canvasFillRatio: queryNumber('canvasFillRatio', 0.985, 0.50, 1.35),
     sourceWheelPadding: queryNumber('sourceWheelPadding', 0, -120, 240),
@@ -34,6 +34,9 @@ function getMetaProfile() {
     ring2CellScale: queryNumber('ring2CellScale', 1.00, 0.60, 6.00),
     otherRingCellScale: queryNumber('otherRingCellScale', 1.00, 0.60, 6.00),
     enlargeFirstRings: Math.round(queryNumber('enlargeFirstRings', 0, 0, 10)),
+    clearBoldFont: queryBool('clearBoldFont', true),
+    mainWeight: Math.round(queryNumber('mainFontWeight', 900, 700, 950)),
+    smallWeight: Math.round(queryNumber('smallFontWeight', 850, 650, 950)),
   };
 }
 
@@ -81,8 +84,8 @@ function getStandaloneRect(meta, sourceCanvas) {
 }
 
 function textFontSize(midR, ringWidth, divisions, textLength, ring) { const arcRoom = (TWO_PI * midR / divisions) * 0.54; const radialRoom = ringWidth * 0.30; const charFactor = textLength >= 10 ? 0.66 : textLength >= 7 ? 0.61 : 0.56; const natural = Math.min(arcRoom / Math.max(1, textLength * charFactor), radialRoom); const min = ring <= 3 ? 7.0 : 6.2; const max = ring <= 3 ? 10.6 : ring <= 6 ? 9.8 : 9.2; return clamp(natural, min, max); }
-function drawCenteredText(ctx, text, x, y, size, color, weight = 700, alpha = 1, rotationDeg = 0) { ctx.save(); ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5); if (rotationDeg) ctx.rotate((rotationDeg * Math.PI) / 180); ctx.font = `${weight} ${size}px ${FONT_STACK}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.fillText(String(text), 0, 0); ctx.restore(); }
-function drawFittedText(ctx, text, x, y, size, color, maxWidth, weight = 720, rotationDeg = 0) { const label = String(text); let fitted = size; ctx.save(); ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5); if (rotationDeg) ctx.rotate((rotationDeg * Math.PI) / 180); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = 1; for (let i = 0; i < 12; i += 1) { ctx.font = `${weight} ${fitted}px ${FONT_STACK}`; if (ctx.measureText(label).width <= maxWidth || fitted <= 4.8) break; fitted -= 0.35; } ctx.font = `${weight} ${fitted}px ${FONT_STACK}`; const measured = Math.max(1, ctx.measureText(label).width); const scaleX = measured > maxWidth ? clamp(maxWidth / measured, 0.48, 1) : 1; if (scaleX !== 1) ctx.scale(scaleX, 1); ctx.fillStyle = color; ctx.fillText(label, 0, 0); ctx.restore(); }
+function drawCenteredText(ctx, text, x, y, size, color, weight = 850, alpha = 1, rotationDeg = 0) { ctx.save(); ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5); if (rotationDeg) ctx.rotate((rotationDeg * Math.PI) / 180); ctx.font = `${weight} ${size}px ${FONT_STACK}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = alpha; ctx.fillStyle = color; ctx.fillText(String(text), 0, 0); ctx.restore(); }
+function drawFittedText(ctx, text, x, y, size, color, maxWidth, weight = 900, rotationDeg = 0) { const label = String(text); let fitted = size; ctx.save(); ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5); if (rotationDeg) ctx.rotate((rotationDeg * Math.PI) / 180); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = 1; for (let i = 0; i < 12; i += 1) { ctx.font = `${weight} ${fitted}px ${FONT_STACK}`; if (ctx.measureText(label).width <= maxWidth || fitted <= 4.8) break; fitted -= 0.35; } ctx.font = `${weight} ${fitted}px ${FONT_STACK}`; const measured = Math.max(1, ctx.measureText(label).width); const scaleX = measured > maxWidth ? clamp(maxWidth / measured, 0.56, 1) : 1; if (scaleX !== 1) ctx.scale(scaleX, 1); ctx.fillStyle = color; ctx.fillText(label, 0, 0); ctx.restore(); }
 
 function drawCellMeta(ctx, cell) {
   const { cx, cy, ringWidth, mid, centerDeg, value, angleValue, ring, divisions, side, primarySize, maxW, meta } = cell;
@@ -101,16 +104,16 @@ function drawCellMeta(ctx, cell) {
   const topRight = { x: center.x + nx * (topGap * 0.84) + tx * rightGap, y: center.y + ny * (topGap * 0.84) + ty * rightGap };
   const mainSize = primarySize * meta.primaryScale;
   const angleSize = clamp(primarySize * meta.angleScale, 4.5, 8.2);
-  const sumSize = clamp(primarySize * meta.sumScale, 3.8, 6.4);
+  const sumSize = clamp(primarySize * meta.sumScale, 3.8, 6.8);
   const layerSize = clamp(primarySize * meta.layerScale, 3.4, 5.8);
   const label = formatNumber(value);
   const root = digitalRoot(value);
   const rotation = meta.slantedAngles ? centerDeg : 0;
-  if (!meta.enabled) { drawFittedText(ctx, label, center.x, center.y, mainSize, colorFor(value), maxW, 730); if (side >= 620 && ring <= 8) drawCenteredText(ctx, root, bottom.x, bottom.y, sumSize, colorFor(value), 700, 0.56); return; }
-  if (meta.showCellAngles) { const angleLabel = meta.showAngleDegrees ? `${angleValue}°` : String(angleValue); drawFittedText(ctx, angleLabel, top.x, top.y, angleSize, colorFor(angleValue), maxW * 0.74, 700, rotation); }
-  if (meta.showCellLayers) drawCenteredText(ctx, ring, topRight.x, topRight.y, layerSize, '#222222', 700, 0.70);
-  drawFittedText(ctx, label, center.x, center.y, mainSize, colorFor(value), maxW, 730);
-  if (meta.showDigitSum) drawCenteredText(ctx, root, bottom.x, bottom.y, sumSize, colorFor(root), 700, 0.82);
+  if (!meta.enabled) { drawFittedText(ctx, label, center.x, center.y, mainSize, colorFor(value), maxW, meta.mainWeight); if (side >= 620 && ring <= 8) drawCenteredText(ctx, root, bottom.x, bottom.y, sumSize, colorFor(value), meta.smallWeight, 0.64); return; }
+  if (meta.showCellAngles) { const angleLabel = meta.showAngleDegrees ? `${angleValue}°` : String(angleValue); drawFittedText(ctx, angleLabel, top.x, top.y, angleSize, colorFor(angleValue), maxW * 0.74, meta.smallWeight, rotation); }
+  if (meta.showCellLayers) drawCenteredText(ctx, ring, topRight.x, topRight.y, layerSize, '#222222', meta.smallWeight, 0.70);
+  drawFittedText(ctx, label, center.x, center.y, mainSize, colorFor(value), maxW, meta.mainWeight);
+  if (meta.showDigitSum) drawCenteredText(ctx, root, bottom.x, bottom.y, sumSize, colorFor(root), meta.smallWeight, 0.86);
 }
 
 function makeButton(label, onClick) { const button = document.createElement('button'); button.type = 'button'; button.textContent = label; button.style.height = '30px'; button.style.padding = '0 10px'; button.style.border = '1px solid #777'; button.style.borderRadius = '5px'; button.style.background = 'linear-gradient(#ffffff,#efefef)'; button.style.font = '700 12px Tahoma, Arial, sans-serif'; button.style.cursor = 'pointer'; button.style.boxShadow = '0 2px 6px rgba(0,0,0,.16)'; button.addEventListener('click', onClick); return button; }
@@ -154,21 +157,21 @@ function renderOverlay(overlay) {
   }
   ctx.save(); ctx.strokeStyle = 'rgba(210,210,210,0.82)'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(cx, cy, innerRadius, 0, TWO_PI); ctx.stroke(); ctx.restore();
   drawCenterHub(ctx, cx, cy, clamp(innerRadius * 0.45, 12, 58)); drawOuterGoldenFrame(ctx, cx, cy, wheelOuter + clamp(side * 0.008, 2, 10), outerFrameOuter, divisions, direction);
-  for (let deg = 0; deg < 360; deg += 30) { const p = polar(cx, cy, outerFrameOuter - frameWidth * 0.52, direction * deg); drawCenteredText(ctx, `${deg === 0 ? 360 : deg}`, p.x, p.y, clamp(side * 0.0056, 3.8, 8), '#777777', 700, 0.82); }
-  window.__gannzillaNativeZoomRing2OnlyCellScaleV46Metrics = { ok: true, marker: window[V46_MARKER] === true, sourceFollowed: rect.sourceFollowed, rect, angleLayerSum: meta.enabled, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, levels, divisions, noMathMutation: true, noTradingMutation: true };
+  for (let deg = 0; deg < 360; deg += 30) { const p = polar(cx, cy, outerFrameOuter - frameWidth * 0.52, direction * deg); drawCenteredText(ctx, `${deg === 0 ? 360 : deg}`, p.x, p.y, clamp(side * 0.0056, 3.8, 8), '#777777', 850, 0.82); }
+  window.__gannzillaClearBoldNumberFontV47Metrics = { ok: true, marker: window[V47_MARKER] === true, sourceFollowed: rect.sourceFollowed, rect, angleLayerSum: meta.enabled, clearBoldFont: meta.clearBoldFont, mainWeight: meta.mainWeight, smallWeight: meta.smallWeight, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, levels, divisions, noMathMutation: true, noTradingMutation: true };
   ensureExportBar(overlay, rect);
 }
 
 function installAuditHelper() {
-  const audit = function auditGannzillaNativeZoomRing2OnlyCellScaleV46() { const metrics = window.__gannzillaNativeZoomRing2OnlyCellScaleV46Metrics || {}; const meta = getMetaProfile(); return { ok: window[V46_MARKER] === true, markerV46: window[V46_MARKER] === true, rendererMarker: window[MARKER] === true, styleVersion: window.__gannzillaSumResultStyleVersion, sourceFollowed: metrics.sourceFollowed === true, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, noMathMutation: true, noTradingMutation: true, metrics }; };
-  window.__auditGannzillaNativeZoomRing2OnlyCellScaleV46 = audit; window.__auditGannzillaNativeZoomRing1CellScaleV45 = audit; window.__auditGannzillaStableEnlargedCellLayoutV44 = audit; window.__auditGannzillaCellMetaStackedLayoutV43 = audit; window.__auditGannzillaAngleLayerDigitSumV40 = audit;
+  const audit = function auditGannzillaClearBoldNumberFontV47() { const metrics = window.__gannzillaClearBoldNumberFontV47Metrics || {}; const meta = getMetaProfile(); return { ok: window[V47_MARKER] === true, markerV47: window[V47_MARKER] === true, rendererMarker: window[MARKER] === true, styleVersion: window.__gannzillaSumResultStyleVersion, sourceFollowed: metrics.sourceFollowed === true, clearBoldFont: meta.clearBoldFont, mainWeight: meta.mainWeight, smallWeight: meta.smallWeight, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, noMathMutation: true, noTradingMutation: true, metrics }; };
+  window.__auditGannzillaClearBoldNumberFontV47 = audit; window.__auditGannzillaNativeZoomRing2OnlyCellScaleV46 = audit; window.__auditGannzillaNativeZoomRing1CellScaleV45 = audit; window.__auditGannzillaStableEnlargedCellLayoutV44 = audit; window.__auditGannzillaCellMetaStackedLayoutV43 = audit; window.__auditGannzillaAngleLayerDigitSumV40 = audit;
 }
 
 export default function GannzillaLongNumberDigitalRenderer() {
   React.useEffect(() => {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true'); if (!isWheelMode) return undefined;
     let overlay = document.getElementById(OVERLAY_ID); if (!overlay) { overlay = document.createElement('canvas'); overlay.id = OVERLAY_ID; document.body.appendChild(overlay); }
-    window[MARKER] = true; window[V46_MARKER] = true; window.GANNZILLA_NATIVE_ZOOM_RING1_CELL_SCALE_V45 = true; window.GANNZILLA_STABLE_ENLARGED_CELL_LAYOUT_V44 = true; window.GANNZILLA_CELL_META_STACKED_LAYOUT_V43 = true; window.GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40 = true; window.__gannzillaSumResultStyleVersion = STYLE_VERSION; window.__gannzillaStandaloneImageMatchV46 = true;
+    window[MARKER] = true; window[V47_MARKER] = true; window.GANNZILLA_NATIVE_ZOOM_RING2_ONLY_CELL_SCALE_V46 = true; window.GANNZILLA_NATIVE_ZOOM_RING1_CELL_SCALE_V45 = true; window.GANNZILLA_STABLE_ENLARGED_CELL_LAYOUT_V44 = true; window.GANNZILLA_CELL_META_STACKED_LAYOUT_V43 = true; window.GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40 = true; window.__gannzillaSumResultStyleVersion = STYLE_VERSION; window.__gannzillaStandaloneImageMatchV47 = true;
     installAuditHelper();
     const render = () => { const sourceCanvas = getWheelCanvas(); if (sourceCanvas) sourceCanvas.style.opacity = queryBool('hideSourceWheel', true) ? '0.001' : ''; renderOverlay(overlay); };
     render(); const timer = window.setInterval(render, 140); window.addEventListener('resize', render); window.addEventListener('scroll', render, true); window.visualViewport?.addEventListener?.('resize', render);
