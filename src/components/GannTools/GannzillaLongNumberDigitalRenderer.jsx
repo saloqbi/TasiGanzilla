@@ -1,12 +1,12 @@
 import React from 'react';
 
 const OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
-const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v47';
+const EXPORT_BAR_ID = 'gannzilla-clean-copy-export-bar-v48';
 const MARKER = '__gannzillaLongNumberDigitalRendererV1';
-const V47_MARKER = 'GANNZILLA_CLEAR_BOLD_NUMBER_FONT_V47';
+const V48_MARKER = 'GANNZILLA_DIGIT_SUM_CIRCLE_LINE_ALIGN_V48';
 const TWO_PI = Math.PI * 2;
 const FONT_STACK = '"Arial Black", "Arial Bold", Arial, Tahoma, Segoe UI, Helvetica, sans-serif';
-const STYLE_VERSION = 'GANNZILLA_CLEAR_BOLD_NUMBER_FONT_V47';
+const STYLE_VERSION = 'GANNZILLA_DIGIT_SUM_CIRCLE_LINE_ALIGN_V48';
 
 function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
 function params() { try { return new URLSearchParams(window.location.search || ''); } catch (_) { return new URLSearchParams(''); } }
@@ -27,6 +27,7 @@ function getMetaProfile() {
     angleScale: queryNumber('angleNumberScale', enabled ? 0.82 : 0.72, 0.35, 1.80),
     layerScale: queryNumber('layerNumberScale', enabled ? 0.52 : 0.45, 0.25, 1.20),
     sumScale: queryNumber('digitSumScale', enabled ? 0.58 : 0.50, 0.25, 1.80),
+    digitSumEdgeRatio: queryNumber('digitSumEdgeRatio', 0.18, 0.06, 0.42),
     wheelScale: queryNumber('wheelScale', 1.00, 0.35, 4.00),
     canvasFillRatio: queryNumber('canvasFillRatio', 0.985, 0.50, 1.35),
     sourceWheelPadding: queryNumber('sourceWheelPadding', 0, -120, 240),
@@ -88,7 +89,7 @@ function drawCenteredText(ctx, text, x, y, size, color, weight = 850, alpha = 1,
 function drawFittedText(ctx, text, x, y, size, color, maxWidth, weight = 900, rotationDeg = 0) { const label = String(text); let fitted = size; ctx.save(); ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5); if (rotationDeg) ctx.rotate((rotationDeg * Math.PI) / 180); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = 1; for (let i = 0; i < 12; i += 1) { ctx.font = `${weight} ${fitted}px ${FONT_STACK}`; if (ctx.measureText(label).width <= maxWidth || fitted <= 4.8) break; fitted -= 0.35; } ctx.font = `${weight} ${fitted}px ${FONT_STACK}`; const measured = Math.max(1, ctx.measureText(label).width); const scaleX = measured > maxWidth ? clamp(maxWidth / measured, 0.56, 1) : 1; if (scaleX !== 1) ctx.scale(scaleX, 1); ctx.fillStyle = color; ctx.fillText(label, 0, 0); ctx.restore(); }
 
 function drawCellMeta(ctx, cell) {
-  const { cx, cy, ringWidth, mid, centerDeg, value, angleValue, ring, divisions, side, primarySize, maxW, meta } = cell;
+  const { cx, cy, inner, ringWidth, mid, centerDeg, value, angleValue, ring, divisions, side, primarySize, maxW, meta } = cell;
   const center = polar(cx, cy, mid, centerDeg);
   const invMid = Math.max(1, mid);
   const nx = (center.x - cx) / invMid;
@@ -97,15 +98,15 @@ function drawCellMeta(ctx, cell) {
   const ty = nx;
   const arcRoom = TWO_PI * mid / divisions;
   const topGap = clamp(ringWidth * 0.30, primarySize * 0.85, primarySize * 1.35);
-  const bottomGap = clamp(ringWidth * 0.30, primarySize * 0.85, primarySize * 1.35);
   const rightGap = clamp(arcRoom * 0.14, primarySize * 0.55, primarySize * 1.15);
   const top = { x: center.x + nx * topGap, y: center.y + ny * topGap };
-  const bottom = { x: center.x - nx * bottomGap, y: center.y - ny * bottomGap };
   const topRight = { x: center.x + nx * (topGap * 0.84) + tx * rightGap, y: center.y + ny * (topGap * 0.84) + ty * rightGap };
   const mainSize = primarySize * meta.primaryScale;
   const angleSize = clamp(primarySize * meta.angleScale, 4.5, 8.2);
   const sumSize = clamp(primarySize * meta.sumScale, 3.8, 6.8);
   const layerSize = clamp(primarySize * meta.layerScale, 3.4, 5.8);
+  const bottomRadius = inner + clamp(ringWidth * meta.digitSumEdgeRatio, sumSize * 0.52, ringWidth * 0.38);
+  const bottom = polar(cx, cy, bottomRadius, centerDeg);
   const label = formatNumber(value);
   const root = digitalRoot(value);
   const rotation = meta.slantedAngles ? centerDeg : 0;
@@ -158,20 +159,20 @@ function renderOverlay(overlay) {
   ctx.save(); ctx.strokeStyle = 'rgba(210,210,210,0.82)'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(cx, cy, innerRadius, 0, TWO_PI); ctx.stroke(); ctx.restore();
   drawCenterHub(ctx, cx, cy, clamp(innerRadius * 0.45, 12, 58)); drawOuterGoldenFrame(ctx, cx, cy, wheelOuter + clamp(side * 0.008, 2, 10), outerFrameOuter, divisions, direction);
   for (let deg = 0; deg < 360; deg += 30) { const p = polar(cx, cy, outerFrameOuter - frameWidth * 0.52, direction * deg); drawCenteredText(ctx, `${deg === 0 ? 360 : deg}`, p.x, p.y, clamp(side * 0.0056, 3.8, 8), '#777777', 850, 0.82); }
-  window.__gannzillaClearBoldNumberFontV47Metrics = { ok: true, marker: window[V47_MARKER] === true, sourceFollowed: rect.sourceFollowed, rect, angleLayerSum: meta.enabled, clearBoldFont: meta.clearBoldFont, mainWeight: meta.mainWeight, smallWeight: meta.smallWeight, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, levels, divisions, noMathMutation: true, noTradingMutation: true };
+  window.__gannzillaDigitSumCircleLineAlignV48Metrics = { ok: true, marker: window[V48_MARKER] === true, sourceFollowed: rect.sourceFollowed, rect, angleLayerSum: meta.enabled, digitSumEdgeRatio: meta.digitSumEdgeRatio, clearBoldFont: meta.clearBoldFont, mainWeight: meta.mainWeight, smallWeight: meta.smallWeight, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, levels, divisions, noMathMutation: true, noTradingMutation: true };
   ensureExportBar(overlay, rect);
 }
 
 function installAuditHelper() {
-  const audit = function auditGannzillaClearBoldNumberFontV47() { const metrics = window.__gannzillaClearBoldNumberFontV47Metrics || {}; const meta = getMetaProfile(); return { ok: window[V47_MARKER] === true, markerV47: window[V47_MARKER] === true, rendererMarker: window[MARKER] === true, styleVersion: window.__gannzillaSumResultStyleVersion, sourceFollowed: metrics.sourceFollowed === true, clearBoldFont: meta.clearBoldFont, mainWeight: meta.mainWeight, smallWeight: meta.smallWeight, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, noMathMutation: true, noTradingMutation: true, metrics }; };
-  window.__auditGannzillaClearBoldNumberFontV47 = audit; window.__auditGannzillaNativeZoomRing2OnlyCellScaleV46 = audit; window.__auditGannzillaNativeZoomRing1CellScaleV45 = audit; window.__auditGannzillaStableEnlargedCellLayoutV44 = audit; window.__auditGannzillaCellMetaStackedLayoutV43 = audit; window.__auditGannzillaAngleLayerDigitSumV40 = audit;
+  const audit = function auditGannzillaDigitSumCircleLineAlignV48() { const metrics = window.__gannzillaDigitSumCircleLineAlignV48Metrics || {}; const meta = getMetaProfile(); return { ok: window[V48_MARKER] === true, markerV48: window[V48_MARKER] === true, rendererMarker: window[MARKER] === true, styleVersion: window.__gannzillaSumResultStyleVersion, sourceFollowed: metrics.sourceFollowed === true, digitSumEdgeRatio: meta.digitSumEdgeRatio, clearBoldFont: meta.clearBoldFont, mainWeight: meta.mainWeight, smallWeight: meta.smallWeight, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, noMathMutation: true, noTradingMutation: true, metrics }; };
+  window.__auditGannzillaDigitSumCircleLineAlignV48 = audit; window.__auditGannzillaClearBoldNumberFontV47 = audit; window.__auditGannzillaNativeZoomRing2OnlyCellScaleV46 = audit; window.__auditGannzillaNativeZoomRing1CellScaleV45 = audit; window.__auditGannzillaStableEnlargedCellLayoutV44 = audit; window.__auditGannzillaCellMetaStackedLayoutV43 = audit; window.__auditGannzillaAngleLayerDigitSumV40 = audit;
 }
 
 export default function GannzillaLongNumberDigitalRenderer() {
   React.useEffect(() => {
     const isWheelMode = window.location.search.includes('gannzillaPro=true') || window.location.search.includes('wheelPro=true'); if (!isWheelMode) return undefined;
     let overlay = document.getElementById(OVERLAY_ID); if (!overlay) { overlay = document.createElement('canvas'); overlay.id = OVERLAY_ID; document.body.appendChild(overlay); }
-    window[MARKER] = true; window[V47_MARKER] = true; window.GANNZILLA_NATIVE_ZOOM_RING2_ONLY_CELL_SCALE_V46 = true; window.GANNZILLA_NATIVE_ZOOM_RING1_CELL_SCALE_V45 = true; window.GANNZILLA_STABLE_ENLARGED_CELL_LAYOUT_V44 = true; window.GANNZILLA_CELL_META_STACKED_LAYOUT_V43 = true; window.GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40 = true; window.__gannzillaSumResultStyleVersion = STYLE_VERSION; window.__gannzillaStandaloneImageMatchV47 = true;
+    window[MARKER] = true; window[V48_MARKER] = true; window.GANNZILLA_CLEAR_BOLD_NUMBER_FONT_V47 = true; window.GANNZILLA_NATIVE_ZOOM_RING2_ONLY_CELL_SCALE_V46 = true; window.GANNZILLA_NATIVE_ZOOM_RING1_CELL_SCALE_V45 = true; window.GANNZILLA_STABLE_ENLARGED_CELL_LAYOUT_V44 = true; window.GANNZILLA_CELL_META_STACKED_LAYOUT_V43 = true; window.GANNZILLA_CELL_ANGLE_LAYER_DIGIT_SUM_V40 = true; window.__gannzillaSumResultStyleVersion = STYLE_VERSION; window.__gannzillaStandaloneImageMatchV48 = true;
     installAuditHelper();
     const render = () => { const sourceCanvas = getWheelCanvas(); if (sourceCanvas) sourceCanvas.style.opacity = queryBool('hideSourceWheel', true) ? '0.001' : ''; renderOverlay(overlay); };
     render(); const timer = window.setInterval(render, 140); window.addEventListener('resize', render); window.addEventListener('scroll', render, true); window.visualViewport?.addEventListener?.('resize', render);
