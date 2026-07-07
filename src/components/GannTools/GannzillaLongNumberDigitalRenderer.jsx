@@ -34,6 +34,7 @@ function getMetaProfile() {
     ring1CellScale: queryNumber('ring1CellScale', 1.00, 0.60, 60.00),
     ring2CellScale: queryNumber('ring2CellScale', 1.00, 0.60, 60.00),
     ring3CellScale: queryNumber('ring3CellScale', 1.00, 0.60, 60.00),
+    ring4CellScale: queryNumber('ring4CellScale', 1.00, 0.60, 60.00),
     otherRingCellScale: queryNumber('otherRingCellScale', 1.00, 0.60, 60.00),
     enlargeFirstRings: Math.round(queryNumber('enlargeFirstRings', 0, 0, 10)),
     clearBoldFont: queryBool('clearBoldFont', true),
@@ -131,6 +132,7 @@ function ringUnitsFor(levels, meta) {
     if (ring === 1) return meta.ring1CellScale;
     if (ring === 2) return meta.ring2CellScale;
     if (ring === 3) return meta.ring3CellScale;
+    if (ring === 4) return meta.ring4CellScale;
     if (meta.enlargeFirstRings > 0 && ring <= meta.enlargeFirstRings) return meta.otherRingCellScale;
     return 1;
   });
@@ -161,12 +163,12 @@ function renderOverlay(overlay) {
   ctx.save(); ctx.strokeStyle = 'rgba(210,210,210,0.82)'; ctx.lineWidth = 0.9; ctx.beginPath(); ctx.arc(cx, cy, innerRadius, 0, TWO_PI); ctx.stroke(); ctx.restore();
   drawCenterHub(ctx, cx, cy, clamp(innerRadius * 0.45, 12, 58)); drawOuterGoldenFrame(ctx, cx, cy, wheelOuter + clamp(side * 0.008, 2, 10), outerFrameOuter, divisions, direction);
   for (let deg = 0; deg < 360; deg += 30) { const p = polar(cx, cy, outerFrameOuter - frameWidth * 0.52, direction * deg); drawCenteredText(ctx, `${deg === 0 ? 360 : deg}`, p.x, p.y, clamp(side * 0.0056, 3.8, 8), '#777777', 850, 0.82); }
-  window.__gannzillaDigitSumCircleLineAlignV48Metrics = { ok: true, marker: window[V48_MARKER] === true, sourceFollowed: rect.sourceFollowed, rect, angleLayerSum: meta.enabled, digitSumEdgeRatio: meta.digitSumEdgeRatio, clearBoldFont: meta.clearBoldFont, mainWeight: meta.mainWeight, smallWeight: meta.smallWeight, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, ring3CellScale: meta.ring3CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, levels, divisions, noMathMutation: true, noTradingMutation: true };
+  window.__gannzillaDigitSumCircleLineAlignV48Metrics = { ok: true, marker: window[V48_MARKER] === true, sourceFollowed: rect.sourceFollowed, rect, angleLayerSum: meta.enabled, digitSumEdgeRatio: meta.digitSumEdgeRatio, clearBoldFont: meta.clearBoldFont, mainWeight: meta.mainWeight, smallWeight: meta.smallWeight, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, ring3CellScale: meta.ring3CellScale, ring4CellScale: meta.ring4CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, levels, divisions, noMathMutation: true, noTradingMutation: true };
   ensureExportBar(overlay, rect);
 }
 
 function installAuditHelper() {
-  const audit = function auditGannzillaDigitSumCircleLineAlignV48() { const metrics = window.__gannzillaDigitSumCircleLineAlignV48Metrics || {}; const meta = getMetaProfile(); return { ok: window[V48_MARKER] === true, markerV48: window[V48_MARKER] === true, rendererMarker: window[MARKER] === true, styleVersion: window.__gannzillaSumResultStyleVersion, sourceFollowed: metrics.sourceFollowed === true, digitSumEdgeRatio: meta.digitSumEdgeRatio, clearBoldFont: meta.clearBoldFont, mainWeight: meta.mainWeight, smallWeight: meta.smallWeight, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, ring3CellScale: meta.ring3CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, noMathMutation: true, noTradingMutation: true, metrics }; };
+  const audit = function auditGannzillaDigitSumCircleLineAlignV48() { const metrics = window.__gannzillaDigitSumCircleLineAlignV48Metrics || {}; const meta = getMetaProfile(); return { ok: window[V48_MARKER] === true, markerV48: window[V48_MARKER] === true, rendererMarker: window[MARKER] === true, styleVersion: window.__gannzillaSumResultStyleVersion, sourceFollowed: metrics.sourceFollowed === true, digitSumEdgeRatio: meta.digitSumEdgeRatio, clearBoldFont: meta.clearBoldFont, mainWeight: meta.mainWeight, smallWeight: meta.smallWeight, ring1CellScale: meta.ring1CellScale, ring2CellScale: meta.ring2CellScale, ring3CellScale: meta.ring3CellScale, ring4CellScale: meta.ring4CellScale, otherRingCellScale: meta.otherRingCellScale, enlargeFirstRings: meta.enlargeFirstRings, showCellAngles: meta.showCellAngles, showCellLayers: meta.showCellLayers, showDigitSum: meta.showDigitSum, noMathMutation: true, noTradingMutation: true, metrics }; };
   window.__auditGannzillaDigitSumCircleLineAlignV48 = audit; window.__auditGannzillaClearBoldNumberFontV47 = audit; window.__auditGannzillaNativeZoomRing2OnlyCellScaleV46 = audit; window.__auditGannzillaNativeZoomRing1CellScaleV45 = audit; window.__auditGannzillaStableEnlargedCellLayoutV44 = audit; window.__auditGannzillaCellMetaStackedLayoutV43 = audit; window.__auditGannzillaAngleLayerDigitSumV40 = audit;
 }
 
