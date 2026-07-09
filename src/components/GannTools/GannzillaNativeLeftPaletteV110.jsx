@@ -1,9 +1,10 @@
 import React from 'react';
 
-const MARKER = 'GANNZILLA_NATIVE_LEFT_PALETTE_V113_NATIVE_SEARCH_TOGGLE';
+const MARKER = 'GANNZILLA_NATIVE_LEFT_PALETTE_V113_CAPTURE_TOGGLE';
 const TOGGLE_BUTTON_ID = 'gannzilla-left-drawing-palette-toggle-v113';
 const PALETTE_ID = 'gannzilla-native-left-drawing-palette-v113';
-const STORAGE_KEY = 'gannzillaDrawingPaletteVisibleV113NativeSearch';
+const STORAGE_KEY = 'gannzillaDrawingPaletteVisibleV113Capture';
+const PALETTE_TOP = 94;
 
 function polygonPoints(sides, radius = 13, cx = 16, cy = 16) {
   return Array.from({ length: sides }, (_, index) => {
@@ -129,6 +130,20 @@ function styleNativeToggleButton(button, visible) {
   button.style.zIndex = 'auto';
 }
 
+function isDrawingToggleButton(button) {
+  if (!button || button.tagName !== 'BUTTON') return false;
+  if (button.id === TOGGLE_BUTTON_ID) return true;
+
+  const text = String(button.textContent || '').trim();
+  if (text !== '⌕' && text !== '🔍') return false;
+
+  const previous = button.previousElementSibling;
+  const previousText = String(previous?.textContent || '').trim();
+  const previousTitle = `${previous?.title || ''} ${previous?.getAttribute?.('aria-label') || ''}`.toLowerCase();
+  return previous?.tagName === 'BUTTON'
+    && (previousText.includes('🔒') || previousText.includes('🔐') || previousTitle.includes('lock') || previousTitle.includes('قفل'));
+}
+
 export default function GannzillaNativeLeftPaletteV110() {
   const [active, setActive] = React.useState(() => String(new URLSearchParams(window.location.search).get('divisions') || '36'));
   const [left, setLeft] = React.useState(() => getPaletteLeft());
@@ -154,9 +169,13 @@ export default function GannzillaNativeLeftPaletteV110() {
       || window.location.search.includes('wheelPro=true');
     if (!enabled) return undefined;
 
-    const handleToggleClick = (event) => {
+    const handleDocumentClick = (event) => {
+      const button = event.target?.closest?.('button');
+      if (!isDrawingToggleButton(button)) return;
+
       event.preventDefault();
       event.stopPropagation();
+      event.stopImmediatePropagation();
       setVisible((current) => !current);
     };
 
@@ -165,13 +184,6 @@ export default function GannzillaNativeLeftPaletteV110() {
       const lockButton = findLockButton(toolbar);
       const button = findNativeSearchButton(lockButton);
       if (!button) return;
-
-      if (button.__gannzillaNativeDrawingToggleHandler) {
-        button.removeEventListener('click', button.__gannzillaNativeDrawingToggleHandler);
-      }
-
-      button.__gannzillaNativeDrawingToggleHandler = handleToggleClick;
-      button.addEventListener('click', handleToggleClick);
       styleNativeToggleButton(button, visibleRef.current);
     };
 
@@ -182,41 +194,38 @@ export default function GannzillaNativeLeftPaletteV110() {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
+    document.addEventListener('click', handleDocumentClick, true);
     const timer = window.setInterval(() => {
       bindNativeToggle();
       syncPosition();
-    }, 300);
+    }, 200);
 
     window.addEventListener('resize', syncPosition);
     bindNativeToggle();
     syncPosition();
 
     window[MARKER] = true;
-    window.__auditGannzillaNativeLeftPaletteV113NativeSearchToggle = () => {
+    window.__auditGannzillaNativeLeftPaletteV113CaptureToggle = () => {
       const button = document.getElementById(TOGGLE_BUTTON_ID);
       const palette = document.getElementById(PALETTE_ID);
       return {
         ok: window[MARKER] === true
           && Boolean(button)
-          && Boolean(button?.__gannzillaNativeDrawingToggleHandler)
           && (visibleRef.current === false || Boolean(palette)),
         nativeSearchIconUsed: button?.textContent === '⌕',
-        toggleHandlerBound: Boolean(button?.__gannzillaNativeDrawingToggleHandler),
+        captureClickEnabled: true,
         paletteVisible: visibleRef.current,
-        paletteTop: 70,
+        paletteTop: PALETTE_TOP,
         wheelUntouched: true,
       };
     };
 
     return () => {
       observer.disconnect();
+      document.removeEventListener('click', handleDocumentClick, true);
       window.clearInterval(timer);
       window.removeEventListener('resize', syncPosition);
       const button = document.getElementById(TOGGLE_BUTTON_ID);
-      if (button?.__gannzillaNativeDrawingToggleHandler) {
-        button.removeEventListener('click', button.__gannzillaNativeDrawingToggleHandler);
-        delete button.__gannzillaNativeDrawingToggleHandler;
-      }
       if (button) {
         button.removeAttribute('id');
         button.removeAttribute('aria-pressed');
@@ -237,7 +246,7 @@ export default function GannzillaNativeLeftPaletteV110() {
       style={{
         position: 'fixed',
         left,
-        top: 70,
+        top: PALETTE_TOP,
         zIndex: 2147483600,
         width: 44,
         padding: '6px 4px',
