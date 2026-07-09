@@ -1,6 +1,6 @@
 import React from 'react';
 
-const MARKER = 'GANNZILLA_NATIVE_LEFT_PALETTE_V110';
+const MARKER = 'GANNZILLA_NATIVE_LEFT_PALETTE_V112';
 
 function polygonPoints(sides, radius = 13, cx = 16, cy = 16) {
   return Array.from({ length: sides }, (_, index) => {
@@ -39,26 +39,54 @@ function ToolButton({ active, round = false, title, onClick, children }) {
 function applyDivisions(value) {
   const url = new URL(window.location.href);
   url.searchParams.set('divisions', String(value));
-  url.searchParams.set('v', '110');
+  url.searchParams.set('v', '112');
   window.location.assign(url.toString());
+}
+
+function getPaletteLeft() {
+  const aside = document.querySelector('aside');
+  if (!aside) return 12;
+  const style = window.getComputedStyle(aside);
+  const rect = aside.getBoundingClientRect();
+  const panelVisible = style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0;
+  return panelVisible ? Math.ceil(rect.right + 14) : 12;
 }
 
 export default function GannzillaNativeLeftPaletteV110() {
   const [active, setActive] = React.useState(() => String(new URLSearchParams(window.location.search).get('divisions') || '36'));
+  const [left, setLeft] = React.useState(() => getPaletteLeft());
 
   React.useEffect(() => {
     const enabled = window.location.search.includes('gannzillaPro=true')
       || window.location.search.includes('wheelPro=true');
     if (!enabled) return undefined;
 
+    const syncPosition = () => setLeft(getPaletteLeft());
+    const observer = new MutationObserver(syncPosition);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class'],
+    });
+    window.addEventListener('resize', syncPosition);
+    const timer = window.setInterval(syncPosition, 500);
+    syncPosition();
+
     window[MARKER] = true;
-    window.__auditGannzillaNativeLeftPaletteV110 = () => ({
+    window.__auditGannzillaNativeLeftPaletteV112 = () => ({
       ok: window[MARKER] === true,
-      position: 'outside-settings-panel',
+      position: 'outside-settings-panel-with-gap',
+      left,
       wheelUntouched: true,
       divisionsWorking: true,
     });
-    return undefined;
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', syncPosition);
+      window.clearInterval(timer);
+    };
   }, []);
 
   const choose = (value) => {
@@ -70,12 +98,12 @@ export default function GannzillaNativeLeftPaletteV110() {
     <div
       style={{
         position: 'fixed',
-        left: 338,
+        left,
         top: 54,
         zIndex: 2147483600,
         width: 44,
         padding: '6px 4px',
-        background: 'rgba(248,248,248,0.94)',
+        background: 'rgba(248,248,248,0.96)',
         border: '1px solid #dddddd',
         borderRadius: 22,
         boxShadow: '0 1px 5px rgba(0,0,0,0.14)',
