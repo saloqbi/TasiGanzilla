@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import HomeEnhanced from './pages/HomeEnhanced';
 import TestPage from './pages/TestPage';
 import GannzillaClassicFullOptionsV94 from './components/GannTools/GannzillaClassicFullOptionsV94';
+import GannzillaBilingualToggleV95 from './components/GannTools/GannzillaBilingualToggleV95';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
 const App = () => {
@@ -21,7 +22,10 @@ const App = () => {
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
-            <GannzillaClassicFullOptionsV94 />
+            <>
+              <GannzillaClassicFullOptionsV94 />
+              <GannzillaBilingualToggleV95 />
+            </>
           ) : isTestMode ? (
             <TestPage />
           ) : isEnhancedMode ? (
