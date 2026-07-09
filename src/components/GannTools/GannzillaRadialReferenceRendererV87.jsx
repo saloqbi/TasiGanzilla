@@ -1,7 +1,7 @@
 import React from 'react';
 
-const OVERLAY_ID = 'gannzilla-radial-reference-renderer-v87';
-const MARKER = 'GANNZILLA_RADIAL_REFERENCE_RENDERER_V87';
+const OVERLAY_ID = 'gannzilla-radial-reference-renderer-v88';
+const MARKER = 'GANNZILLA_ANGLE_RING1_NUMBERS_FROM_RING2_V88';
 const TWO_PI = Math.PI * 2;
 const FONT_STACK = 'Inter, "Arial Black", Tahoma, Arial, sans-serif';
 
@@ -77,11 +77,11 @@ function getViewSelect() {
 function getSettings() {
   const inputs = getNumberInputs();
   const forceTen = window.location.search.includes('clean10RingLayout=true');
-  const levels = forceTen ? 10 : clamp(Number(inputs[0]?.value) || 10, 1, 12);
+  const numberLevels = forceTen ? 10 : clamp(Number(inputs[0]?.value) || 10, 1, 12);
   const startValue = Number(inputs[1]?.value ?? 1) || 0;
   const increment = Number(inputs[3]?.value ?? 1) || 1;
   const divisions = Number(getViewSelect()?.value) || 36;
-  return { levels, startValue, increment, divisions };
+  return { numberLevels, startValue, increment, divisions };
 }
 
 function getSourceCanvas() {
@@ -177,6 +177,46 @@ function drawOuterReferenceLabels(ctx, cx, cy, wheelOuter, labelRadius, division
   }
 }
 
+function drawAngleRing(ctx, geometry) {
+  const {
+    cx, cy, innerRadius, outerRadius, divisions, sector,
+    angleScale, angleWeight,
+  } = geometry;
+  const mid = (innerRadius + outerRadius) / 2;
+  const ringWidth = outerRadius - innerRadius;
+  const arcWidth = TWO_PI * mid / divisions;
+
+  for (let index = 0; index < divisions; index += 1) {
+    const startDegrees = index * sector;
+    const endDegrees = (index + 1) * sector;
+    const centerDegrees = (index + 0.5) * sector;
+    const angleValue = (index + 1) * 10;
+
+    ctx.save();
+    wedge(ctx, cx, cy, innerRadius, outerRadius, startDegrees, endDegrees);
+    ctx.fillStyle = index % 2 === 0 ? '#f8f8f8' : '#eeeeee';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(150,150,150,0.72)';
+    ctx.lineWidth = 0.72;
+    ctx.stroke();
+    ctx.restore();
+
+    const point = polar(cx, cy, mid, centerDegrees);
+    const requested = Math.min(ringWidth * 0.44, arcWidth / 2.2) * angleScale;
+    drawFittedText(
+      ctx,
+      angleValue,
+      point.x,
+      point.y,
+      requested,
+      arcWidth * 0.82,
+      ringWidth * 0.60,
+      colorFor(angleValue / 10),
+      angleWeight,
+    );
+  }
+}
+
 function renderRadialWheel(canvas, sourceCanvas) {
   const sourceRect = sourceCanvas?.getBoundingClientRect?.();
   if (!sourceRect || sourceRect.width < 120 || sourceRect.height < 120) return;
@@ -205,33 +245,52 @@ function renderRadialWheel(canvas, sourceCanvas) {
   ctx.imageSmoothingQuality = 'high';
 
   const settings = getSettings();
-  const { levels, startValue, increment, divisions } = settings;
+  const { numberLevels, startValue, increment, divisions } = settings;
   const side = Math.min(sourceRect.width, sourceRect.height);
   const cx = sourceRect.width / 2;
   const cy = sourceRect.height / 2;
   const labelMargin = clamp(side * 0.075, 38, 72);
   const wheelOuter = side / 2 - labelMargin;
-  const innerRadius = clamp(wheelOuter * queryNumber('radialInnerRatio', 0.105, 0.06, 0.22), 20, wheelOuter * 0.22);
-  const ringWidth = (wheelOuter - innerRadius) / levels;
+  const centerRadius = clamp(wheelOuter * queryNumber('radialInnerRatio', 0.105, 0.06, 0.22), 20, wheelOuter * 0.22);
+  const angleRingRatio = queryNumber('radialAngleRingRatio', 0.82, 0.45, 1.50);
+  const numberRingWidth = (wheelOuter - centerRadius) / (numberLevels + angleRingRatio);
+  const angleRingWidth = numberRingWidth * angleRingRatio;
+  const angleInner = centerRadius;
+  const angleOuter = angleInner + angleRingWidth;
   const sector = 360 / divisions;
+
   const mainScale = queryNumber('radialNumberScale', 1.22, 0.50, 2.50);
-  const showAngles = queryBool('radialShowAngles', true);
+  const angleScale = queryNumber('radialAngleScale', 1.18, 0.60, 2.40);
   const showDigitSum = queryBool('radialShowDigitSum', true);
+  const showCellIndex = queryBool('radialShowCellIndex', false);
   const mainWeight = Math.round(queryNumber('radialMainWeight', 900, 700, 950));
   const smallWeight = Math.round(queryNumber('radialSmallWeight', 800, 600, 950));
+  const angleWeight = Math.round(queryNumber('radialAngleWeight', 900, 700, 950));
 
-  for (let ring = 1; ring <= levels; ring += 1) {
-    const inner = innerRadius + (ring - 1) * ringWidth;
-    const outer = inner + ringWidth;
+  drawAngleRing(ctx, {
+    cx,
+    cy,
+    innerRadius: angleInner,
+    outerRadius: angleOuter,
+    divisions,
+    sector,
+    angleScale,
+    angleWeight,
+  });
+
+  for (let numberRing = 1; numberRing <= numberLevels; numberRing += 1) {
+    const visualRing = numberRing + 1;
+    const inner = angleOuter + (numberRing - 1) * numberRingWidth;
+    const outer = inner + numberRingWidth;
     const mid = (inner + outer) / 2;
-    const fill = ring % 2 === 0 ? '#f3f3f3' : '#ffffff';
+    const fill = visualRing % 2 === 0 ? '#ffffff' : '#f3f3f3';
     const arcWidth = TWO_PI * mid / divisions;
 
     for (let index = 0; index < divisions; index += 1) {
       const startDegrees = index * sector;
       const endDegrees = (index + 1) * sector;
       const centerDegrees = (index + 0.5) * sector;
-      const cellIndex = (ring - 1) * divisions + index + 1;
+      const cellIndex = (numberRing - 1) * divisions + index + 1;
       const value = startValue + (cellIndex - 1) * increment;
       const label = formatNumber(value);
 
@@ -245,11 +304,11 @@ function renderRadialWheel(canvas, sourceCanvas) {
       ctx.restore();
 
       const centerPoint = polar(cx, cy, mid, centerDegrees);
-      const topPoint = polar(cx, cy, inner + ringWidth * 0.22, centerDegrees);
-      const bottomPoint = polar(cx, cy, inner + ringWidth * 0.80, centerDegrees);
-      const requested = Math.min(ringWidth * 0.42, arcWidth / Math.max(2.7, label.length * 0.61)) * mainScale;
+      const topPoint = polar(cx, cy, inner + numberRingWidth * 0.22, centerDegrees);
+      const bottomPoint = polar(cx, cy, inner + numberRingWidth * 0.80, centerDegrees);
+      const requested = Math.min(numberRingWidth * 0.42, arcWidth / Math.max(2.7, label.length * 0.61)) * mainScale;
       const maxWidth = arcWidth * 0.76;
-      const maxHeight = ringWidth * (showAngles || showDigitSum ? 0.39 : 0.70);
+      const maxHeight = numberRingWidth * (showDigitSum || showCellIndex ? 0.43 : 0.72);
 
       drawFittedText(
         ctx,
@@ -264,8 +323,8 @@ function renderRadialWheel(canvas, sourceCanvas) {
       );
 
       const smallSize = clamp(requested * 0.43, 3.0, 8.0);
-      if (showAngles) {
-        drawText(ctx, cellIndex, topPoint.x, topPoint.y, smallSize, colorFor(cellIndex), smallWeight, 0.86);
+      if (showCellIndex) {
+        drawText(ctx, cellIndex, topPoint.x, topPoint.y, smallSize, colorFor(cellIndex), smallWeight, 0.84);
       }
       if (showDigitSum) {
         const root = digitalRoot(value);
@@ -276,7 +335,7 @@ function renderRadialWheel(canvas, sourceCanvas) {
 
   for (let index = 0; index < divisions; index += 1) {
     const degrees = index * sector;
-    const start = polar(cx, cy, innerRadius * 0.18, degrees);
+    const start = polar(cx, cy, centerRadius * 0.18, degrees);
     const end = polar(cx, cy, wheelOuter, degrees);
     ctx.save();
     ctx.strokeStyle = index % 3 === 0
@@ -292,19 +351,23 @@ function renderRadialWheel(canvas, sourceCanvas) {
     ctx.restore();
   }
 
-  drawCenter(ctx, cx, cy, clamp(innerRadius * 0.48, 14, 52));
+  drawCenter(ctx, cx, cy, clamp(centerRadius * 0.48, 14, 52));
   drawOuterReferenceLabels(ctx, cx, cy, wheelOuter, wheelOuter + labelMargin * 0.62, divisions);
 
-  window.__gannzillaRadialReferenceRendererV87Metrics = {
+  window.__gannzillaRadialReferenceRendererV88Metrics = {
     ok: true,
     marker: window[MARKER] === true,
-    levels,
+    numberLevels,
+    visualRings: numberLevels + 1,
+    numbersStartVisualRing: 2,
+    angleRingCells: divisions,
+    numberCells: numberLevels * divisions,
     divisions,
-    cells: levels * divisions,
     sourceWidth: sourceRect.width,
     sourceHeight: sourceRect.height,
-    innerRadius,
-    ringWidth,
+    centerRadius,
+    angleRingWidth,
+    numberRingWidth,
     wheelOuter,
     followsNativeZoom: true,
     stableResizeObserverOnly: true,
@@ -326,18 +389,22 @@ export default function GannzillaRadialReferenceRendererV87() {
     }
 
     window[MARKER] = true;
+    window.GANNZILLA_ANGLE_RING1_NUMBERS_FROM_RING2_V88 = true;
     window.__auditGannzillaRadialReferenceRendererV87 = () => {
-      const metrics = window.__gannzillaRadialReferenceRendererV87Metrics || {};
+      const metrics = window.__gannzillaRadialReferenceRendererV88Metrics || {};
       return {
         ok: window[MARKER] === true
           && metrics.ok === true
-          && metrics.levels === 10
-          && metrics.divisions === 36
-          && metrics.cells === 360,
-        marker: window[MARKER] === true,
+          && metrics.numberLevels === 10
+          && metrics.visualRings === 11
+          && metrics.numbersStartVisualRing === 2
+          && metrics.angleRingCells === 36
+          && metrics.numberCells === 360,
+        markerV88: window[MARKER] === true,
         metrics,
       };
     };
+    window.__auditGannzillaAngleRing1NumbersFromRing2V88 = window.__auditGannzillaRadialReferenceRendererV87;
 
     let sourceCanvas = null;
     let resizeObserver = null;
