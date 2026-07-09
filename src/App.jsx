@@ -26,6 +26,7 @@ import GannzillaWheelLineDrawPatch from './components/GannTools/GannzillaWheelLi
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 import GannzillaDigitalNumberClarityPatch from './components/GannTools/GannzillaDigitalNumberClarityPatch';
 import GannzillaLongNumberDigitalRenderer from './components/GannTools/GannzillaLongNumberDigitalRenderer';
+import GannzillaRadialReferenceRendererV87 from './components/GannTools/GannzillaRadialReferenceRendererV87';
 import GannzillaLayerMarksVisiblePatch from './components/GannTools/GannzillaLayerMarksVisiblePatch';
 
 const App = () => {
@@ -34,6 +35,7 @@ const App = () => {
   const isTestMode = search.includes('test=true');
   const isArabicAiWheelMode = search.includes('gannzillaArabicAI=true') || search.includes('aiWheel=true');
   const isGannzillaProWheelMode = search.includes('gannzillaPro=true') || search.includes('wheelPro=true');
+  const isRadialReferenceLayout = search.includes('radialReferenceLayout=true');
   const isEnhancedMode = search.includes('enhanced=true') || true; // افتراضياً الإصدار المحسن
   
   return (
@@ -59,7 +61,11 @@ const App = () => {
               <GannzillaLanguageSwitch />
               <GannzillaWheelPanButtonsPatch />
               <GannzillaCardinalBalancePatch />
-              <GannzillaLongNumberDigitalRenderer />
+              {isRadialReferenceLayout ? (
+                <GannzillaRadialReferenceRendererV87 />
+              ) : (
+                <GannzillaLongNumberDigitalRenderer />
+              )}
               <GannzillaLayerMarksVisiblePatch />
               <GannzillaOptionsBadgeHidePatch />
               <GannzillaPanelToggleTopbarPatch />
