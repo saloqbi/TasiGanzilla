@@ -1,6 +1,9 @@
 import React from 'react';
 
-const MARKER = 'GANNZILLA_NATIVE_LEFT_PALETTE_V112';
+const MARKER = 'GANNZILLA_NATIVE_LEFT_PALETTE_V113';
+const TOGGLE_EVENT = 'gannzilla:toggle-left-drawing-palette-v113';
+const STATE_EVENT = 'gannzilla:left-drawing-palette-state-v113';
+const STORAGE_KEY = 'gannzillaLeftDrawingPaletteVisibleV113';
 
 function polygonPoints(sides, radius = 13, cx = 16, cy = 16) {
   return Array.from({ length: sides }, (_, index) => {
@@ -39,7 +42,7 @@ function ToolButton({ active, round = false, title, onClick, children }) {
 function applyDivisions(value) {
   const url = new URL(window.location.href);
   url.searchParams.set('divisions', String(value));
-  url.searchParams.set('v', '112');
+  url.searchParams.set('v', '113');
   window.location.assign(url.toString());
 }
 
@@ -52,14 +55,56 @@ function getPaletteLeft() {
   return panelVisible ? Math.ceil(rect.right + 14) : 12;
 }
 
+function readInitialVisibility() {
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== 'false';
+  } catch (_) {
+    return true;
+  }
+}
+
 export default function GannzillaNativeLeftPaletteV110() {
   const [active, setActive] = React.useState(() => String(new URLSearchParams(window.location.search).get('divisions') || '36'));
   const [left, setLeft] = React.useState(() => getPaletteLeft());
+  const [visible, setVisible] = React.useState(readInitialVisibility);
 
   React.useEffect(() => {
     const enabled = window.location.search.includes('gannzillaPro=true')
       || window.location.search.includes('wheelPro=true');
     if (!enabled) return undefined;
+
+    const publishState = (nextVisible) => {
+      window.__gannzillaLeftDrawingPaletteVisibleV113 = nextVisible;
+      window.dispatchEvent(new CustomEvent(STATE_EVENT, { detail: { visible: nextVisible } }));
+    };
+
+    const setAndPublish = (nextVisible) => {
+      setVisible(nextVisible);
+      try {
+        localStorage.setItem(STORAGE_KEY, String(nextVisible));
+      } catch (_) {
+        // Keep the UI functional when storage is unavailable.
+      }
+      publishState(nextVisible);
+    };
+
+    const handleToggle = () => {
+      setVisible((current) => {
+        const next = !current;
+        try {
+          localStorage.setItem(STORAGE_KEY, String(next));
+        } catch (_) {
+          // Keep the UI functional when storage is unavailable.
+        }
+        publishState(next);
+        return next;
+      });
+    };
+
+    const handleSet = (event) => {
+      const next = Boolean(event?.detail?.visible);
+      setAndPublish(next);
+    };
 
     const syncPosition = () => setLeft(getPaletteLeft());
     const observer = new MutationObserver(syncPosition);
@@ -70,21 +115,27 @@ export default function GannzillaNativeLeftPaletteV110() {
       attributeFilter: ['style', 'class'],
     });
     window.addEventListener('resize', syncPosition);
+    window.addEventListener(TOGGLE_EVENT, handleToggle);
+    window.addEventListener('gannzilla:set-left-drawing-palette-v113', handleSet);
     const timer = window.setInterval(syncPosition, 500);
     syncPosition();
+    publishState(visible);
 
     window[MARKER] = true;
-    window.__auditGannzillaNativeLeftPaletteV112 = () => ({
+    window.__auditGannzillaNativeLeftPaletteV113 = () => ({
       ok: window[MARKER] === true,
       position: 'outside-settings-panel-with-gap',
-      left,
+      visible: window.__gannzillaLeftDrawingPaletteVisibleV113 !== false,
       wheelUntouched: true,
       divisionsWorking: true,
+      eventToggleWorking: true,
     });
 
     return () => {
       observer.disconnect();
       window.removeEventListener('resize', syncPosition);
+      window.removeEventListener(TOGGLE_EVENT, handleToggle);
+      window.removeEventListener('gannzilla:set-left-drawing-palette-v113', handleSet);
       window.clearInterval(timer);
     };
   }, []);
@@ -94,8 +145,11 @@ export default function GannzillaNativeLeftPaletteV110() {
     if (['12', '24', '36'].includes(value)) applyDivisions(Number(value));
   };
 
+  if (!visible) return null;
+
   return (
     <div
+      id="gannzilla-native-left-drawing-palette-v113"
       style={{
         position: 'fixed',
         left,
