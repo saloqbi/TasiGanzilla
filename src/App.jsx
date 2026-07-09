@@ -4,7 +4,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import Home from './pages/Home';
 import HomeEnhanced from './pages/HomeEnhanced';
 import TestPage from './pages/TestPage';
-import GannzillaClassicExactV92 from './components/GannTools/GannzillaClassicExactV92';
+import GannzillaClassicFixedFontV93 from './components/GannTools/GannzillaClassicFixedFontV93';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
 const App = () => {
@@ -21,7 +21,7 @@ const App = () => {
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
-            <GannzillaClassicExactV92 />
+            <GannzillaClassicFixedFontV93 />
           ) : isTestMode ? (
             <TestPage />
           ) : isEnhancedMode ? (
