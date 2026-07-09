@@ -1,10 +1,10 @@
 import React from 'react';
 
-const MARKER = 'GANNZILLA_NATIVE_LEFT_PALETTE_V113_CAPTURE_TOGGLE';
-const TOGGLE_BUTTON_ID = 'gannzilla-left-drawing-palette-toggle-v113';
-const PALETTE_ID = 'gannzilla-native-left-drawing-palette-v113';
-const STORAGE_KEY = 'gannzillaDrawingPaletteVisibleV113Capture';
-const PALETTE_TOP = 94;
+const MARKER = 'GANNZILLA_UNIFIED_DRAWING_PALETTES_V116';
+const TOGGLE_BUTTON_ID = 'gannzilla-unified-drawing-palettes-toggle-v116';
+const LEFT_PALETTE_ID = 'gannzilla-native-left-drawing-palette-v116';
+const STORAGE_KEY = 'gannzillaUnifiedDrawingPalettesVisibleV116';
+const LEFT_PALETTE_TOP = 120;
 
 function polygonPoints(sides, radius = 13, cx = 16, cy = 16) {
   return Array.from({ length: sides }, (_, index) => {
@@ -43,7 +43,7 @@ function ToolButton({ active, round = false, title, onClick, children }) {
 function applyDivisions(value) {
   const url = new URL(window.location.href);
   url.searchParams.set('divisions', String(value));
-  url.searchParams.set('v', '113');
+  url.searchParams.set('v', '116');
   window.location.assign(url.toString());
 }
 
@@ -88,25 +88,27 @@ function findLockButton(toolbar) {
   }) || null;
 }
 
-function findNativeSearchButton(lockButton) {
-  if (!lockButton?.parentElement) return null;
+function findRightDrawingPalette() {
+  return Array.from(document.querySelectorAll('div')).find((element) => {
+    const rect = element.getBoundingClientRect();
+    const style = window.getComputedStyle(element);
+    const directButtons = Array.from(element.children).filter((child) => child.tagName === 'BUTTON');
 
-  const existing = document.getElementById(TOGGLE_BUTTON_ID);
-  if (existing && existing.parentElement === lockButton.parentElement) return existing;
-
-  const nextButton = lockButton.nextElementSibling;
-  if (nextButton?.tagName === 'BUTTON') return nextButton;
-
-  const siblings = Array.from(lockButton.parentElement.children);
-  const lockIndex = siblings.indexOf(lockButton);
-  return siblings.slice(lockIndex + 1).find((element) => element.tagName === 'BUTTON') || null;
+    return style.position === 'fixed'
+      && rect.right >= window.innerWidth - 90
+      && rect.top >= 100
+      && rect.top <= 240
+      && rect.width >= 30
+      && rect.width <= 80
+      && directButtons.length >= 8;
+  }) || null;
 }
 
-function styleNativeToggleButton(button, visible) {
+function styleUnifiedToggle(button, visible) {
   button.id = TOGGLE_BUTTON_ID;
   button.type = 'button';
   button.textContent = '⌕';
-  button.title = visible ? 'إخفاء أدوات الرسم' : 'إظهار أدوات الرسم';
+  button.title = visible ? 'إخفاء أدوات الرسم اليمنى واليسرى' : 'إظهار أدوات الرسم اليمنى واليسرى';
   button.setAttribute('aria-label', button.title);
   button.setAttribute('aria-pressed', String(visible));
   button.style.width = '22px';
@@ -126,22 +128,6 @@ function styleNativeToggleButton(button, visible) {
   button.style.boxSizing = 'border-box';
   button.style.flex = '0 0 22px';
   button.style.pointerEvents = 'auto';
-  button.style.position = 'static';
-  button.style.zIndex = 'auto';
-}
-
-function isDrawingToggleButton(button) {
-  if (!button || button.tagName !== 'BUTTON') return false;
-  if (button.id === TOGGLE_BUTTON_ID) return true;
-
-  const text = String(button.textContent || '').trim();
-  if (text !== '⌕' && text !== '🔍') return false;
-
-  const previous = button.previousElementSibling;
-  const previousText = String(previous?.textContent || '').trim();
-  const previousTitle = `${previous?.title || ''} ${previous?.getAttribute?.('aria-label') || ''}`.toLowerCase();
-  return previous?.tagName === 'BUTTON'
-    && (previousText.includes('🔒') || previousText.includes('🔐') || previousTitle.includes('lock') || previousTitle.includes('قفل'));
 }
 
 export default function GannzillaNativeLeftPaletteV110() {
@@ -149,91 +135,127 @@ export default function GannzillaNativeLeftPaletteV110() {
   const [left, setLeft] = React.useState(() => getPaletteLeft());
   const [visible, setVisible] = React.useState(readInitialVisibility);
   const visibleRef = React.useRef(visible);
+  const rightPaletteRef = React.useRef(null);
+
+  const applyBothPalettesVisibility = React.useCallback((nextVisible) => {
+    const rightPalette = rightPaletteRef.current && document.body.contains(rightPaletteRef.current)
+      ? rightPaletteRef.current
+      : findRightDrawingPalette();
+
+    if (rightPalette) {
+      rightPaletteRef.current = rightPalette;
+      rightPalette.style.setProperty('display', nextVisible ? 'flex' : 'none', 'important');
+      rightPalette.setAttribute('aria-hidden', nextVisible ? 'false' : 'true');
+    }
+  }, []);
 
   React.useEffect(() => {
     visibleRef.current = visible;
-    window.__gannzillaLeftDrawingPaletteVisibleV113 = visible;
+    window.__gannzillaUnifiedDrawingPalettesVisibleV116 = visible;
 
     try {
       localStorage.setItem(STORAGE_KEY, String(visible));
     } catch (_) {
-      // Keep the control functional if browser storage is unavailable.
+      // Continue without persistent storage.
     }
 
     const button = document.getElementById(TOGGLE_BUTTON_ID);
-    if (button) styleNativeToggleButton(button, visible);
-  }, [visible]);
+    if (button) styleUnifiedToggle(button, visible);
+    applyBothPalettesVisibility(visible);
+  }, [visible, applyBothPalettesVisibility]);
 
   React.useEffect(() => {
     const enabled = window.location.search.includes('gannzillaPro=true')
       || window.location.search.includes('wheelPro=true');
     if (!enabled) return undefined;
 
-    const handleDocumentClick = (event) => {
-      const button = event.target?.closest?.('button');
-      if (!isDrawingToggleButton(button)) return;
-
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
+    const toggleBoth = (event) => {
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
+      event?.stopImmediatePropagation?.();
       setVisible((current) => !current);
     };
 
-    const bindNativeToggle = () => {
+    const bindToggle = () => {
       const toolbar = findTopToolbar();
       const lockButton = findLockButton(toolbar);
-      const button = findNativeSearchButton(lockButton);
-      if (!button) return;
-      styleNativeToggleButton(button, visibleRef.current);
+      if (!lockButton?.parentElement) return;
+
+      let button = document.getElementById(TOGGLE_BUTTON_ID);
+      if (!button) {
+        const nativeNextButton = lockButton.nextElementSibling;
+        button = nativeNextButton?.tagName === 'BUTTON'
+          ? nativeNextButton
+          : document.createElement('button');
+      }
+
+      const parent = lockButton.parentElement;
+      if (lockButton.nextElementSibling !== button) {
+        parent.insertBefore(button, lockButton.nextElementSibling);
+      }
+
+      button.onpointerdown = toggleBoth;
+      button.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      };
+      button.onkeydown = (event) => {
+        if (event.key === 'Enter' || event.key === ' ') toggleBoth(event);
+      };
+      styleUnifiedToggle(button, visibleRef.current);
     };
 
-    const syncPosition = () => setLeft(getPaletteLeft());
-    const observer = new MutationObserver(() => {
-      bindNativeToggle();
-      syncPosition();
-    });
+    const syncRuntime = () => {
+      bindToggle();
+      setLeft(getPaletteLeft());
+      applyBothPalettesVisibility(visibleRef.current);
+    };
+
+    const observer = new MutationObserver(syncRuntime);
     observer.observe(document.body, { childList: true, subtree: true });
-
-    document.addEventListener('click', handleDocumentClick, true);
-    const timer = window.setInterval(() => {
-      bindNativeToggle();
-      syncPosition();
-    }, 200);
-
-    window.addEventListener('resize', syncPosition);
-    bindNativeToggle();
-    syncPosition();
+    const timer = window.setInterval(syncRuntime, 250);
+    window.addEventListener('resize', syncRuntime);
+    syncRuntime();
 
     window[MARKER] = true;
-    window.__auditGannzillaNativeLeftPaletteV113CaptureToggle = () => {
+    window.__auditGannzillaUnifiedDrawingPalettesV116 = () => {
       const button = document.getElementById(TOGGLE_BUTTON_ID);
-      const palette = document.getElementById(PALETTE_ID);
+      const leftPalette = document.getElementById(LEFT_PALETTE_ID);
+      const rightPalette = rightPaletteRef.current;
       return {
         ok: window[MARKER] === true
           && Boolean(button)
-          && (visibleRef.current === false || Boolean(palette)),
-        nativeSearchIconUsed: button?.textContent === '⌕',
-        captureClickEnabled: true,
-        paletteVisible: visibleRef.current,
-        paletteTop: PALETTE_TOP,
+          && (visibleRef.current === false || Boolean(leftPalette))
+          && Boolean(rightPalette),
+        oneIconControlsBoth: true,
+        toggleButtonPresent: Boolean(button),
+        leftPaletteVisible: visibleRef.current,
+        rightPaletteVisible: rightPalette ? window.getComputedStyle(rightPalette).display !== 'none' : null,
+        leftPaletteTop: LEFT_PALETTE_TOP,
         wheelUntouched: true,
       };
     };
 
     return () => {
       observer.disconnect();
-      document.removeEventListener('click', handleDocumentClick, true);
       window.clearInterval(timer);
-      window.removeEventListener('resize', syncPosition);
+      window.removeEventListener('resize', syncRuntime);
       const button = document.getElementById(TOGGLE_BUTTON_ID);
       if (button) {
+        button.onpointerdown = null;
+        button.onclick = null;
+        button.onkeydown = null;
         button.removeAttribute('id');
         button.removeAttribute('aria-pressed');
         button.title = '';
         button.textContent = '⌕';
       }
+      if (rightPaletteRef.current) {
+        rightPaletteRef.current.style.removeProperty('display');
+        rightPaletteRef.current.removeAttribute('aria-hidden');
+      }
     };
-  }, []);
+  }, [applyBothPalettesVisibility]);
 
   const choose = (value) => {
     setActive(value);
@@ -242,11 +264,11 @@ export default function GannzillaNativeLeftPaletteV110() {
 
   return visible ? (
     <div
-      id={PALETTE_ID}
+      id={LEFT_PALETTE_ID}
       style={{
         position: 'fixed',
         left,
-        top: PALETTE_TOP,
+        top: LEFT_PALETTE_TOP,
         zIndex: 2147483600,
         width: 44,
         padding: '6px 4px',
