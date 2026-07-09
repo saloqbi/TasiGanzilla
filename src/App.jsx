@@ -7,7 +7,7 @@ import TestPage from './pages/TestPage';
 import GannzillaClassicFullOptionsV94 from './components/GannTools/GannzillaClassicFullOptionsV94';
 import GannzillaBilingualToggleV95 from './components/GannTools/GannzillaBilingualToggleV95';
 import GannzillaConnectionSettingsV96 from './components/GannTools/GannzillaConnectionSettingsV96';
-import GannzillaUnifiedDrawingPalettesV118 from './components/GannTools/GannzillaUnifiedDrawingPalettesV118';
+import GannzillaUnifiedDrawingPalettesV122 from './components/GannTools/GannzillaUnifiedDrawingPalettesV122';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
 const App = () => {
@@ -20,7 +20,7 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="118">
+        <div data-gannzilla-build="122">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -28,7 +28,7 @@ const App = () => {
               <GannzillaClassicFullOptionsV94 />
               <GannzillaBilingualToggleV95 />
               <GannzillaConnectionSettingsV96 />
-              <GannzillaUnifiedDrawingPalettesV118 />
+              <GannzillaUnifiedDrawingPalettesV122 />
             </>
           ) : isTestMode ? (
             <TestPage />
