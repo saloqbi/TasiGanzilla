@@ -26,7 +26,6 @@ import GannzillaWheelLineDrawPatch from './components/GannTools/GannzillaWheelLi
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 import GannzillaDigitalNumberClarityPatch from './components/GannTools/GannzillaDigitalNumberClarityPatch';
 import GannzillaLongNumberDigitalRenderer from './components/GannTools/GannzillaLongNumberDigitalRenderer';
-import GannzillaOverlayNativeZoomBridge from './components/GannTools/GannzillaOverlayNativeZoomBridge';
 import GannzillaLayerMarksVisiblePatch from './components/GannTools/GannzillaLayerMarksVisiblePatch';
 
 const App = () => {
@@ -61,7 +60,6 @@ const App = () => {
               <GannzillaWheelPanButtonsPatch />
               <GannzillaCardinalBalancePatch />
               <GannzillaLongNumberDigitalRenderer />
-              <GannzillaOverlayNativeZoomBridge />
               <GannzillaLayerMarksVisiblePatch />
               <GannzillaOptionsBadgeHidePatch />
               <GannzillaPanelToggleTopbarPatch />
