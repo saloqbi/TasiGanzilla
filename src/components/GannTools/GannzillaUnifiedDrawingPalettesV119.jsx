@@ -1,6 +1,7 @@
 import React from 'react';
 
-const BUTTON_ID = 'gannzilla-drawing-toggle-v120';
+const BUTTON_ID = 'gannzilla-drawing-toggle-v121';
+const STORAGE_KEY = 'gannzillaDrawingPalettesVisibleV121';
 
 function findNativeButton() {
   const toolbar = Array.from(document.querySelectorAll('div')).find((element) => {
@@ -22,16 +23,24 @@ function findNativeButton() {
   }) || null;
 }
 
-function findOriginalToggle() {
-  return Array.from(document.querySelectorAll('button')).find((button) => {
-    const text = String(button.textContent || '').trim();
-    const pressed = button.getAttribute('aria-pressed');
-    return button.id !== BUTTON_ID
-      && text === '⌕'
-      && button.style.position === 'fixed'
-      && Number(button.style.zIndex) > 1000000
-      && (pressed === 'true' || pressed === 'false');
+function findRightPalette() {
+  return Array.from(document.querySelectorAll('div')).find((element) => {
+    const style = window.getComputedStyle(element);
+    const directButtons = Array.from(element.children).filter((child) => child.tagName === 'BUTTON');
+    const right = Number.parseFloat(style.right);
+    return style.position === 'fixed'
+      && directButtons.length === 9
+      && Number.isFinite(right)
+      && Math.abs(right - 18) <= 6;
   }) || null;
+}
+
+function readVisible() {
+  try {
+    return localStorage.getItem(STORAGE_KEY) !== 'false';
+  } catch (_) {
+    return true;
+  }
 }
 
 function centeredTop() {
@@ -40,7 +49,35 @@ function centeredTop() {
 
 export default function GannzillaUnifiedDrawingPalettesV119() {
   const [rect, setRect] = React.useState({ left: 0, top: 1, width: 22, height: 21 });
-  const [visible, setVisible] = React.useState(true);
+  const [visible, setVisible] = React.useState(readVisible);
+  const visibleRef = React.useRef(visible);
+
+  const applyVisibility = React.useCallback((nextVisible) => {
+    visibleRef.current = nextVisible;
+
+    const leftPalette = document.getElementById('gannzilla-left-drawing-palette-v118');
+    if (leftPalette) {
+      leftPalette.style.setProperty('display', nextVisible ? 'flex' : 'none', 'important');
+      leftPalette.setAttribute('aria-hidden', nextVisible ? 'false' : 'true');
+    }
+
+    const rightPalette = findRightPalette();
+    if (rightPalette) {
+      rightPalette.style.setProperty('display', nextVisible ? 'flex' : 'none', 'important');
+      rightPalette.setAttribute('aria-hidden', nextVisible ? 'false' : 'true');
+    }
+
+    try {
+      localStorage.setItem(STORAGE_KEY, String(nextVisible));
+    } catch (_) {
+      // Continue without persistence.
+    }
+  }, []);
+
+  React.useEffect(() => {
+    visibleRef.current = visible;
+    applyVisibility(visible);
+  }, [visible, applyVisibility]);
 
   React.useEffect(() => {
     const sync = () => {
@@ -55,25 +92,26 @@ export default function GannzillaUnifiedDrawingPalettesV119() {
         });
       }
 
-      const originalToggle = findOriginalToggle();
-      if (originalToggle) {
-        originalToggle.style.pointerEvents = 'none';
-        originalToggle.style.opacity = '0';
-        setVisible(originalToggle.getAttribute('aria-pressed') !== 'false');
-      }
+      Array.from(document.querySelectorAll('button')).forEach((button) => {
+        if (
+          button.id !== BUTTON_ID
+          && String(button.textContent || '').trim() === '⌕'
+          && button.style.position === 'fixed'
+          && Number(button.style.zIndex) > 1000000
+        ) {
+          button.style.setProperty('display', 'none', 'important');
+          button.style.pointerEvents = 'none';
+        }
+      });
 
       const top = centeredTop();
       const leftPalette = document.getElementById('gannzilla-left-drawing-palette-v118');
       if (leftPalette) leftPalette.style.setProperty('top', `${top}px`, 'important');
 
-      Array.from(document.querySelectorAll('div')).forEach((element) => {
-        const style = window.getComputedStyle(element);
-        const buttons = Array.from(element.children).filter((child) => child.tagName === 'BUTTON');
-        const right = Number.parseFloat(style.right);
-        if (style.position === 'fixed' && buttons.length === 9 && Number.isFinite(right) && Math.abs(right - 18) <= 6) {
-          element.style.setProperty('top', `${top}px`, 'important');
-        }
-      });
+      const rightPalette = findRightPalette();
+      if (rightPalette) rightPalette.style.setProperty('top', `${top}px`, 'important');
+
+      applyVisibility(visibleRef.current);
     };
 
     sync();
@@ -83,23 +121,15 @@ export default function GannzillaUnifiedDrawingPalettesV119() {
       window.clearInterval(timer);
       window.removeEventListener('resize', sync);
     };
-  }, []);
+  }, [applyVisibility]);
 
-  const toggle = () => {
-    const originalToggle = findOriginalToggle();
-    if (!originalToggle) return;
-
-    const PointerEventCtor = window.PointerEvent || window.MouseEvent;
-    originalToggle.dispatchEvent(new PointerEventCtor('pointerdown', {
-      bubbles: true,
-      cancelable: true,
-      pointerType: 'mouse',
-      isPrimary: true,
-    }));
-
-    window.setTimeout(() => {
-      setVisible(originalToggle.getAttribute('aria-pressed') !== 'false');
-    }, 60);
+  const toggle = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const nextVisible = !visibleRef.current;
+    visibleRef.current = nextVisible;
+    applyVisibility(nextVisible);
+    setVisible(nextVisible);
   };
 
   return (
@@ -129,6 +159,7 @@ export default function GannzillaUnifiedDrawingPalettesV119() {
         justifyContent: 'center',
         touchAction: 'manipulation',
         userSelect: 'none',
+        pointerEvents: 'auto',
       }}
     >
       ⌕
