@@ -10,6 +10,7 @@ import GannzillaConnectionSettingsV96 from './components/GannTools/GannzillaConn
 import GannzillaExactToolbarV97 from './components/GannTools/GannzillaExactToolbarV97';
 import GannzillaToolbarComfortScaleV98 from './components/GannTools/GannzillaToolbarComfortScaleV98';
 import GannzillaMissingConnectionIconV99 from './components/GannTools/GannzillaMissingConnectionIconV99';
+import GannzillaCrispLanguageFlagV100 from './components/GannTools/GannzillaCrispLanguageFlagV100';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
 const App = () => {
@@ -33,6 +34,7 @@ const App = () => {
               <GannzillaExactToolbarV97 />
               <GannzillaToolbarComfortScaleV98 />
               <GannzillaMissingConnectionIconV99 />
+              <GannzillaCrispLanguageFlagV100 />
             </>
           ) : isTestMode ? (
             <TestPage />
