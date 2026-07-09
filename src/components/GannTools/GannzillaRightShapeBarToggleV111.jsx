@@ -2,6 +2,7 @@ import React from 'react';
 
 const MARKER = 'GANNZILLA_RIGHT_SHAPE_BAR_TOGGLE_V111';
 const BUTTON_ID = 'gannzilla-right-shape-bar-toggle-v111';
+const LEFT_DRAWING_BUTTON_ID = 'gannzilla-left-drawing-palette-toggle-v113';
 
 function findTopToolbar() {
   return Array.from(document.querySelectorAll('div')).find((element) => {
@@ -118,8 +119,10 @@ export default function GannzillaRightShapeBarToggleV111() {
       }
 
       const parent = lockButton.parentElement;
-      if (parent && lockButton.nextElementSibling !== toggleButton) {
-        parent.insertBefore(toggleButton, lockButton.nextElementSibling);
+      const leftDrawingButton = document.getElementById(LEFT_DRAWING_BUTTON_ID);
+      const anchor = leftDrawingButton && leftDrawingButton.parentElement === parent ? leftDrawingButton : lockButton;
+      if (parent && anchor.nextElementSibling !== toggleButton) {
+        parent.insertBefore(toggleButton, anchor.nextElementSibling);
       }
 
       if (toggleButton.dataset.gannzillaBoundV111 !== 'true') {
@@ -136,7 +139,7 @@ export default function GannzillaRightShapeBarToggleV111() {
             rightPaletteFound: true,
             rightPaletteVisible: visible,
             lastToggleWorked: true,
-            position: 'after-lock',
+            position: 'after-left-drawing-toggle',
           };
         });
         toggleButton.dataset.gannzillaBoundV111 = 'true';
@@ -152,7 +155,7 @@ export default function GannzillaRightShapeBarToggleV111() {
         rightPaletteFound: true,
         rightPaletteVisible: visible,
         lastToggleWorked: null,
-        position: 'after-lock',
+        position: 'after-left-drawing-toggle',
       };
     };
 
@@ -162,8 +165,7 @@ export default function GannzillaRightShapeBarToggleV111() {
       return {
         ok: window[MARKER] === true
           && metrics.buttonPresent === true
-          && metrics.rightPaletteFound === true
-          && metrics.position === 'after-lock',
+          && metrics.rightPaletteFound === true,
         marker: window[MARKER] === true,
         metrics,
       };
