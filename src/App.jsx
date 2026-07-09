@@ -7,6 +7,7 @@ import TestPage from './pages/TestPage';
 import GannzillaClassicFullOptionsV94 from './components/GannTools/GannzillaClassicFullOptionsV94';
 import GannzillaBilingualToggleV95 from './components/GannTools/GannzillaBilingualToggleV95';
 import GannzillaConnectionSettingsV96 from './components/GannTools/GannzillaConnectionSettingsV96';
+import GannzillaExactToolbarV97 from './components/GannTools/GannzillaExactToolbarV97';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
               <GannzillaClassicFullOptionsV94 />
               <GannzillaBilingualToggleV95 />
               <GannzillaConnectionSettingsV96 />
+              <GannzillaExactToolbarV97 />
             </>
           ) : isTestMode ? (
             <TestPage />
