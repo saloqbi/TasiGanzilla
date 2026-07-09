@@ -29,6 +29,7 @@ import GannzillaLongNumberDigitalRenderer from './components/GannTools/Gannzilla
 import GannzillaRadialReferenceRendererV87 from './components/GannTools/GannzillaRadialReferenceRendererV87';
 import GannzillaNativePrecisionWheelV89 from './components/GannTools/GannzillaNativePrecisionWheelV89';
 import GannzillaNativePrecisionLayoutFixV90 from './components/GannTools/GannzillaNativePrecisionLayoutFixV90';
+import GannzillaNativePrecisionAutoFitV91 from './components/GannTools/GannzillaNativePrecisionAutoFitV91';
 import GannzillaLayerMarksVisiblePatch from './components/GannTools/GannzillaLayerMarksVisiblePatch';
 
 const App = () => {
@@ -68,6 +69,7 @@ const App = () => {
                 <>
                   <GannzillaNativePrecisionWheelV89 />
                   <GannzillaNativePrecisionLayoutFixV90 />
+                  <GannzillaNativePrecisionAutoFitV91 />
                 </>
               ) : isRadialReferenceLayout ? (
                 <GannzillaRadialReferenceRendererV87 />
