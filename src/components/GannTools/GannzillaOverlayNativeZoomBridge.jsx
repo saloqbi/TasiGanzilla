@@ -1,6 +1,7 @@
 import React from 'react';
 
 const SOURCE_OVERLAY_ID = 'gannzilla-long-number-digital-renderer-v1';
+const STABLE_HOST_ID = 'gannzilla-stable-zoom-host-v85';
 const STABLE_SURFACE_ID = 'gannzilla-stable-zoom-surface-v85';
 const MARKER = 'GANNZILLA_STABLE_NATIVE_ZOOM_SURFACE_V85';
 const BASELINE_STABLE_MS = 900;
@@ -74,30 +75,45 @@ function sameRect(a, b) {
 }
 
 function createStableSurface() {
-  let surface = document.getElementById(STABLE_SURFACE_ID);
-  if (surface) return surface;
+  let host = document.getElementById(STABLE_HOST_ID);
+  if (host) {
+    const existingSurface = host.shadowRoot?.getElementById(STABLE_SURFACE_ID);
+    if (existingSurface) return { host, surface: existingSurface };
+    host.remove();
+  }
 
-  surface = document.createElement('canvas');
+  host = document.createElement('div');
+  host.id = STABLE_HOST_ID;
+  host.setAttribute('aria-hidden', 'true');
+  host.style.position = 'fixed';
+  host.style.zIndex = '2147483601';
+  host.style.pointerEvents = 'none';
+  host.style.background = '#ffffff';
+  host.style.transformOrigin = 'center center';
+  host.style.willChange = 'transform';
+  host.style.backfaceVisibility = 'hidden';
+  host.style.transition = 'none';
+  host.style.contain = 'strict';
+  host.style.overflow = 'hidden';
+
+  const shadow = host.attachShadow({ mode: 'open' });
+  const surface = document.createElement('canvas');
   surface.id = STABLE_SURFACE_ID;
-  surface.setAttribute('aria-hidden', 'true');
-  surface.style.position = 'fixed';
-  surface.style.zIndex = '2147483601';
-  surface.style.pointerEvents = 'none';
+  surface.style.display = 'block';
+  surface.style.width = '100%';
+  surface.style.height = '100%';
   surface.style.background = '#ffffff';
-  surface.style.transformOrigin = 'center center';
-  surface.style.willChange = 'transform';
-  surface.style.backfaceVisibility = 'hidden';
-  surface.style.transition = 'none';
-  surface.style.contain = 'strict';
-  document.body.appendChild(surface);
-  return surface;
+  shadow.appendChild(surface);
+  document.body.appendChild(host);
+
+  return { host, surface };
 }
 
-function applyLockedRect(surface, rect) {
-  surface.style.left = `${rect.left}px`;
-  surface.style.top = `${rect.top}px`;
-  surface.style.width = `${rect.width}px`;
-  surface.style.height = `${rect.height}px`;
+function applyLockedRect(host, rect) {
+  host.style.left = `${rect.left}px`;
+  host.style.top = `${rect.top}px`;
+  host.style.width = `${rect.width}px`;
+  host.style.height = `${rect.height}px`;
 }
 
 function copySourceToStableSurface(source, surface, buffer) {
@@ -132,7 +148,7 @@ export default function GannzillaOverlayNativeZoomBridge() {
     const enabled = !window.location.search.includes('nativeToolbarZoom=false');
     if (!isWheelMode || !enabled) return undefined;
 
-    const surface = createStableSurface();
+    const { host, surface } = createStableSurface();
     const buffer = document.createElement('canvas');
 
     let baselineZoom = null;
@@ -153,6 +169,7 @@ export default function GannzillaOverlayNativeZoomBridge() {
       candidateRect = null;
       lockedRect = null;
       rectStableSince = performance.now();
+      host.style.visibility = 'hidden';
     };
 
     const sync = () => {
@@ -181,7 +198,7 @@ export default function GannzillaOverlayNativeZoomBridge() {
         : clamp(Number((zoom / baselineZoom).toFixed(4)), 0.25, 4);
 
       if (lastAppliedFactor === null || Math.abs(currentFactor - lastAppliedFactor) >= 0.001) {
-        surface.style.transform = `scale(${currentFactor})`;
+        host.style.transform = `scale(${currentFactor})`;
         lastAppliedFactor = currentFactor;
       }
 
@@ -193,7 +210,9 @@ export default function GannzillaOverlayNativeZoomBridge() {
         } else if (now - rectStableSince >= RECT_STABLE_MS) {
           lockedRect = { ...candidateRect };
           rectUnlockRequested = false;
-          applyLockedRect(surface, lockedRect);
+          applyLockedRect(host, lockedRect);
+          copySourceToStableSurface(source, surface, buffer);
+          lastCopyAt = now;
         }
       }
 
@@ -202,7 +221,7 @@ export default function GannzillaOverlayNativeZoomBridge() {
         lastCopyAt = now;
       }
 
-      surface.style.visibility = lockedRect ? 'visible' : 'hidden';
+      host.style.visibility = lockedRect ? 'visible' : 'hidden';
 
       window.__gannzillaOverlayNativeZoomBridgeV84Metrics = {
         ok: true,
@@ -212,6 +231,7 @@ export default function GannzillaOverlayNativeZoomBridge() {
         currentFactor,
         sourceFound: true,
         stableSurfaceFound: true,
+        stableSurfaceIsShadowIsolated: true,
         rectLocked: Boolean(lockedRect),
         lockedRect,
         sourceTransformDisabled: true,
@@ -228,6 +248,7 @@ export default function GannzillaOverlayNativeZoomBridge() {
         ok: window[MARKER] === true
           && metrics.sourceFound === true
           && metrics.stableSurfaceFound === true
+          && metrics.stableSurfaceIsShadowIsolated === true
           && metrics.rectLocked === true
           && Number.isFinite(metrics.currentZoom),
         markerV85: window[MARKER] === true,
@@ -236,6 +257,7 @@ export default function GannzillaOverlayNativeZoomBridge() {
         currentFactor: metrics.currentFactor,
         rectLocked: metrics.rectLocked === true,
         lockedRect: metrics.lockedRect,
+        shadowIsolated: metrics.stableSurfaceIsShadowIsolated === true,
         sourceTransformDisabled: metrics.sourceTransformDisabled === true,
         sourceHidden: metrics.sourceHidden === true,
       };
@@ -257,7 +279,7 @@ export default function GannzillaOverlayNativeZoomBridge() {
       window.clearTimeout(onResize.timeoutId);
       window.removeEventListener('resize', onResize);
       window.visualViewport?.removeEventListener?.('resize', onResize);
-      document.getElementById(STABLE_SURFACE_ID)?.remove();
+      document.getElementById(STABLE_HOST_ID)?.remove();
       const source = document.getElementById(SOURCE_OVERLAY_ID);
       if (source) {
         source.style.removeProperty('transform');
