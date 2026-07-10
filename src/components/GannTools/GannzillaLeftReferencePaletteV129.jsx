@@ -1,7 +1,8 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
-const BUILD = '129';
-const PALETTE_ID = 'gannzilla-left-reference-palette-v129';
+const BUILD = '134';
+const PALETTE_ID = 'gannzilla-left-reference-palette-v134';
 const LEGACY_SELECTOR = '[id^="gannzilla-left-drawing-palette-"], [id^="gannzilla-left-reference-palette-"]';
 const STORAGE_KEYS = [
   'gannzillaDrawingToolsVisibleV125',
@@ -158,7 +159,7 @@ export default function GannzillaLeftReferencePaletteV129() {
 
       document.querySelectorAll(LEGACY_SELECTOR).forEach((element) => {
         if (element.id === PALETTE_ID) return;
-        element.dataset.gannzillaLegacyLeftPaletteHiddenV129 = 'true';
+        element.dataset.gannzillaLegacyLeftPaletteHiddenV134 = 'true';
         element.style.setProperty('display', 'none', 'important');
         element.style.setProperty('visibility', 'hidden', 'important');
         element.style.setProperty('pointer-events', 'none', 'important');
@@ -172,11 +173,12 @@ export default function GannzillaLeftReferencePaletteV129() {
     window.addEventListener('resize', sync);
     window.addEventListener('scroll', sync, true);
 
-    window.GANNZILLA_LEFT_REFERENCE_PALETTE_V129 = true;
-    window.__auditGannzillaLeftReferencePaletteV129 = () => ({
+    window.GANNZILLA_LEFT_REFERENCE_PALETTE_V134 = true;
+    window.__auditGannzillaLeftReferencePaletteV134 = () => ({
       ok: Boolean(document.getElementById(PALETTE_ID)),
       build: BUILD,
-      doubledFromV128: true,
+      renderedInBodyPortal: true,
+      protectedFromParentScale: true,
       exactReferenceShapes: true,
       circleButtons: ['12', '24', '36'],
       angleButtons: ['4', '9', 'N'],
@@ -184,7 +186,6 @@ export default function GannzillaLeftReferencePaletteV129() {
       buttonSize: 84,
       iconSize: 80,
       paletteWidth: 108,
-      greyFilledPolygonsWithWhiteDots: true,
       visible: readVisible(),
     });
 
@@ -212,12 +213,12 @@ export default function GannzillaLeftReferencePaletteV129() {
     }));
   };
 
-  if (!visible) return null;
+  if (!visible || typeof document === 'undefined') return null;
 
   const estimatedHeight = (12 * 84) + (11 * 8) + 32;
   const top = Math.max(34, Math.round(((window.innerHeight || 768) - estimatedHeight) / 2));
 
-  return (
+  const palette = (
     <div
       id={PALETTE_ID}
       data-gannzilla-left-reference-palette="true"
@@ -242,6 +243,8 @@ export default function GannzillaLeftReferencePaletteV129() {
         overflowX: 'hidden',
         scrollbarWidth: 'thin',
         pointerEvents: 'auto',
+        transform: 'none',
+        zoom: 1,
       }}
     >
       {['12', '24', '36'].map((value) => (
@@ -278,4 +281,6 @@ export default function GannzillaLeftReferencePaletteV129() {
       ))}
     </div>
   );
+
+  return createPortal(palette, document.body);
 }
