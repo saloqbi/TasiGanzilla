@@ -1,7 +1,7 @@
 import React from 'react';
 
-const BUILD = '151';
-const HIDDEN_ATTR = 'data-gannzilla-toolbar-cleanup-v151';
+const BUILD = '152';
+const HIDDEN_ATTR = 'data-gannzilla-toolbar-cleanup-v152';
 const ABOUT_ID = 'gannzilla-about-v141';
 
 const HIDDEN_BUTTON_LABELS = new Set([
@@ -11,6 +11,13 @@ const HIDDEN_BUTTON_LABELS = new Set([
   'مع عقارب الساعة',
   'عكس عقارب الساعة',
   'غير عقارب الساعة',
+]);
+
+const INFO_TITLES = new Set([
+  'حول البرنامج',
+  'About',
+  'معلومات الأدوات',
+  'Toolbar information',
 ]);
 
 function findTopToolbar() {
@@ -32,6 +39,21 @@ function normalizeLabel(element) {
   return String(element?.textContent || '').replace(/\s+/g, ' ').trim();
 }
 
+function isInformationButton(element) {
+  if (!element) return false;
+  if (element.id === ABOUT_ID) return true;
+
+  const title = String(element.getAttribute('title') || '').trim();
+  const aria = String(element.getAttribute('aria-label') || '').trim();
+  const label = normalizeLabel(element).toLowerCase();
+  const rect = element.getBoundingClientRect();
+  const isTopRow = rect.width > 0 && rect.height > 0 && rect.top >= 0 && rect.bottom <= 42;
+
+  return INFO_TITLES.has(title)
+    || INFO_TITLES.has(aria)
+    || (isTopRow && ['i', 'ⓘ', 'ℹ', 'ℹ️'].includes(label));
+}
+
 export default function GannzillaToolbarCleanupV151() {
   React.useEffect(() => {
     let scheduled = false;
@@ -39,27 +61,35 @@ export default function GannzillaToolbarCleanupV151() {
     const apply = () => {
       scheduled = false;
 
-      const aboutButton = document.getElementById(ABOUT_ID);
-      if (aboutButton) aboutButton.setAttribute(HIDDEN_ATTR, 'true');
+      document.querySelectorAll('button, [role="button"]').forEach((element) => {
+        if (isInformationButton(element)) element.setAttribute(HIDDEN_ATTR, 'true');
+      });
 
       const toolbar = findTopToolbar();
       const strip = toolbar?.children?.[1];
       if (!strip) return;
 
       Array.from(strip.children).forEach((element) => {
-        if (element.id === ABOUT_ID || HIDDEN_BUTTON_LABELS.has(normalizeLabel(element))) {
+        if (isInformationButton(element) || HIDDEN_BUTTON_LABELS.has(normalizeLabel(element))) {
           element.setAttribute(HIDDEN_ATTR, 'true');
         }
       });
 
-      window.GANNZILLA_TOOLBAR_CLEANUP_V151 = true;
-      window.__auditGannzillaToolbarCleanupV151 = () => ({
-        ok: document.getElementById(ABOUT_ID)?.getAttribute(HIDDEN_ATTR) === 'true'
+      const hiddenInfoButtons = Array.from(document.querySelectorAll(`[${HIDDEN_ATTR}="true"]`))
+        .filter(isInformationButton);
+
+      window.GANNZILLA_TOOLBAR_CLEANUP_V152 = true;
+      window.__auditGannzillaToolbarCleanupV152 = () => ({
+        ok: hiddenInfoButtons.length > 0
+          && hiddenInfoButtons.every((element) => {
+            const style = window.getComputedStyle(element);
+            return style.display === 'none' || style.visibility === 'hidden';
+          })
           && Array.from(strip.children)
             .filter((element) => HIDDEN_BUTTON_LABELS.has(normalizeLabel(element)))
             .every((element) => element.getAttribute(HIDDEN_ATTR) === 'true'),
         build: BUILD,
-        aboutHidden: document.getElementById(ABOUT_ID)?.getAttribute(HIDDEN_ATTR) === 'true',
+        hiddenInformationButtons: hiddenInfoButtons.length,
         hiddenToolbarLabels: Array.from(strip.children)
           .filter((element) => element.getAttribute(HIDDEN_ATTR) === 'true')
           .map(normalizeLabel),
@@ -73,9 +103,15 @@ export default function GannzillaToolbarCleanupV151() {
     };
 
     const observer = new MutationObserver(schedule);
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      attributes: true,
+      attributeFilter: ['id', 'title', 'aria-label', 'style', 'class'],
+    });
     window.addEventListener('resize', schedule);
-    const timer = window.setInterval(apply, 250);
+    const timer = window.setInterval(apply, 200);
     apply();
 
     return () => {
@@ -88,6 +124,14 @@ export default function GannzillaToolbarCleanupV151() {
   return (
     <style>{`
       #${ABOUT_ID},
+      button[title="حول البرنامج"],
+      button[title="About"],
+      button[title="معلومات الأدوات"],
+      button[title="Toolbar information"],
+      button[aria-label="حول البرنامج"],
+      button[aria-label="About"],
+      button[aria-label="معلومات الأدوات"],
+      button[aria-label="Toolbar information"],
       [${HIDDEN_ATTR}="true"] {
         display: none !important;
         visibility: hidden !important;
