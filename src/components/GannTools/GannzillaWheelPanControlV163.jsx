@@ -5,6 +5,7 @@ const BUILD = '163';
 const CONTROL_ID = 'gannzilla-wheel-pan-control-v163';
 const PANEL_ID = 'gannzilla-wheel-pan-panel-v163';
 const PAN_STEP = 120;
+const RESERVED_SPACE = 24;
 
 function textOf(element) {
   return String(element?.textContent || '').replace(/\s+/g, ' ').trim();
@@ -39,9 +40,11 @@ function findZoomMinusButton() {
 function getControlRect() {
   const minus = findZoomMinusButton();
   if (!minus) return null;
+
+  minus.style.setProperty('margin-left', `${RESERVED_SPACE}px`, 'important');
   const rect = minus.getBoundingClientRect();
   return {
-    left: Math.round(rect.left - 24),
+    left: Math.round(rect.left - RESERVED_SPACE),
     top: Math.round(rect.top),
     width: 22,
     height: Math.max(21, Math.round(rect.height)),
@@ -157,15 +160,18 @@ export default function GannzillaWheelPanControlV163() {
     window.__auditGannzillaWheelPanControlV163 = () => {
       const control = document.getElementById(CONTROL_ID);
       const style = control ? window.getComputedStyle(control) : null;
+      const minus = findZoomMinusButton();
       return {
         ok: Boolean(control)
           && style?.display !== 'none'
           && style?.visibility !== 'hidden'
           && style?.pointerEvents !== 'none'
-          && Boolean(findZoomMinusButton()),
+          && Boolean(minus)
+          && Number.parseFloat(window.getComputedStyle(minus).marginLeft) >= RESERVED_SPACE,
         build: BUILD,
         visible: Boolean(control),
-        anchoredToZoomMinus: Boolean(findZoomMinusButton()),
+        anchoredToZoomMinus: Boolean(minus),
+        reservedToolbarSpace: minus ? window.getComputedStyle(minus).marginLeft : null,
         panelOpen: Boolean(document.getElementById(PANEL_ID)),
         wheelViewportFound: Boolean(findWheelViewport()),
       };
@@ -178,6 +184,7 @@ export default function GannzillaWheelPanControlV163() {
       window.clearInterval(timer);
       window.removeEventListener('resize', refresh);
       window.removeEventListener('scroll', refresh, true);
+      findZoomMinusButton()?.style.removeProperty('margin-left');
     };
   }, []);
 
