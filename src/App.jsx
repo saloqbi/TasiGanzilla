@@ -45,6 +45,40 @@ function findDrawingToggleAnchor() {
   }) || null;
 }
 
+function GannzillaHideLockButtonV186() {
+  React.useEffect(() => {
+    let disposed = false;
+    const hideLock = () => {
+      if (disposed) return;
+      document.querySelectorAll('button').forEach((button) => {
+        const rect = button.getBoundingClientRect();
+        const label = cleanLabel(button);
+        if (rect.width > 0 && rect.height > 0 && rect.top >= 0 && rect.bottom <= 48 && ['🔒', '🔐'].includes(label)) {
+          button.style.setProperty('display', 'none', 'important');
+          button.style.setProperty('visibility', 'hidden', 'important');
+          button.style.setProperty('pointer-events', 'none', 'important');
+          button.setAttribute('aria-hidden', 'true');
+          button.disabled = true;
+        }
+      });
+    };
+
+    hideLock();
+    const observer = new MutationObserver(hideLock);
+    observer.observe(document.body, { childList: true, subtree: true });
+    const timer = window.setInterval(hideLock, 300);
+    window.addEventListener('resize', hideLock);
+    return () => {
+      disposed = true;
+      observer.disconnect();
+      window.clearInterval(timer);
+      window.removeEventListener('resize', hideLock);
+    };
+  }, []);
+
+  return null;
+}
+
 function GannzillaDrawingToolsUrlToggleV182() {
   const [rect, setRect] = React.useState(null);
   const query = new URLSearchParams(window.location.search);
@@ -99,7 +133,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '183');
+    url.searchParams.set('v', '186');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -151,7 +185,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 183: Gannzilla-style line dropdown with plain, one-arrow and double-arrow modes.
+// Build 186: hide the lock icon while preserving the drawing tools and dual menus.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -168,7 +202,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="183">
+        <div data-gannzilla-build="186">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -187,6 +221,7 @@ const App = () => {
               <GannzillaNativeToolbarBindingV178 />
               <GannzillaLineStyleMenuV183 />
               <GannzillaDrawingToolsUrlToggleV182 />
+              <GannzillaHideLockButtonV186 />
             </>
           ) : isTestMode ? (
             <TestPage />
