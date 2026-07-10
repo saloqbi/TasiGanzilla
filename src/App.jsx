@@ -9,6 +9,7 @@ import GannzillaBilingualToggleV95 from './components/GannTools/GannzillaBilingu
 import GannzillaConnectionSettingsV96 from './components/GannTools/GannzillaConnectionSettingsV96';
 import GannzillaUnifiedDrawingPalettesV122 from './components/GannTools/GannzillaUnifiedDrawingPalettesV122';
 import GannzillaRightDrawingPaletteV126 from './components/GannTools/GannzillaRightDrawingPaletteV126';
+import GannzillaLeftReferencePaletteV128 from './components/GannTools/GannzillaLeftReferencePaletteV128';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
 const App = () => {
@@ -21,7 +22,7 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="127">
+        <div data-gannzilla-build="128">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -31,6 +32,7 @@ const App = () => {
               <GannzillaConnectionSettingsV96 />
               <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
+              <GannzillaLeftReferencePaletteV128 />
             </>
           ) : isTestMode ? (
             <TestPage />
