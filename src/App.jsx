@@ -13,7 +13,7 @@ import GannzillaLeftReferencePaletteV129 from './components/GannTools/GannzillaL
 import GannzillaToolbarCleanupV151 from './components/GannTools/GannzillaToolbarCleanupV151';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 154: remove every information icon variant while preserving connection controls.
+// Build 155: hide the 100% reset and rotation-direction controls without changing their state logic.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -30,7 +30,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="154">
+        <div data-gannzilla-build="155">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
