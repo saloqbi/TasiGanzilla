@@ -14,11 +14,11 @@ import GannzillaToolbarCleanupV151 from './components/GannTools/GannzillaToolbar
 import GannzillaAboutDialogScaleV157 from './components/GannTools/GannzillaAboutDialogScaleV157';
 import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV159';
 import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
-import GannzillaWheelPanControlV163 from './components/GannTools/GannzillaWheelPanControlV163';
+import GannzillaWheelPanControlV180 from './components/GannTools/GannzillaWheelPanControlV180';
 import GannzillaNativeToolbarBindingV178 from './components/GannTools/GannzillaNativeToolbarBindingV178';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 179: redeploy the single-owner palette toggle fix.
+// Build 180: restore the wheel movement icon with a stable top-toolbar anchor.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -35,7 +35,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="179">
+        <div data-gannzilla-build="180">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -47,7 +47,7 @@ const App = () => {
               <GannzillaAboutDialogScaleV157 />
               <GannzillaAboutBrandV159 />
               <GannzillaAboutClickFixV160 />
-              <GannzillaWheelPanControlV163 />
+              <GannzillaWheelPanControlV180 />
               <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
