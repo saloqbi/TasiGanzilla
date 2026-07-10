@@ -57,6 +57,7 @@
       (() => {
         const HIDDEN_BY_V145 = 'data-gannzilla-v145-hidden';
         const PREVIOUS_DISPLAY = 'data-gannzilla-v145-previous-display';
+        const CONNECTION_HITBOX_ID = 'gannzilla-connection-hitbox-v149';
         const DRAWING_TOGGLE_IDS = [
           'gannzilla-drawing-tools-hitbox-v125',
           'gannzilla-top-hide-toolbar-v138',
@@ -83,6 +84,19 @@
           element.removeAttribute(HIDDEN_BY_V145);
           element.removeAttribute(PREVIOUS_DISPLAY);
           element.removeAttribute('aria-hidden');
+        };
+
+        const protectConnectionHitbox = () => {
+          const element = document.getElementById(CONNECTION_HITBOX_ID);
+          if (!element) return;
+          element.removeAttribute(HIDDEN_BY_V145);
+          element.removeAttribute(PREVIOUS_DISPLAY);
+          element.removeAttribute('aria-hidden');
+          element.disabled = false;
+          element.style.setProperty('display', 'flex', 'important');
+          element.style.setProperty('visibility', 'visible', 'important');
+          element.style.setProperty('pointer-events', 'auto', 'important');
+          element.style.setProperty('opacity', '1', 'important');
         };
 
         const isDuplicateDrawingToggle = (element) => Boolean(element) && (
@@ -129,6 +143,7 @@
           if (!window.location.search.includes('gannzillaPro=true')
             && !window.location.search.includes('wheelPro=true')) return;
 
+          protectConnectionHitbox();
           DRAWING_TOGGLE_IDS.forEach((id) => hide(document.getElementById(id)));
           document.querySelectorAll('button[title="إخفاء أدوات الرسم"], button[aria-label="إخفاء أدوات الرسم"]')
             .forEach(hide);
@@ -137,8 +152,8 @@
           const strip = toolbar?.children?.[1];
           if (!toolbar || !strip) return;
 
-          toolbar.setAttribute('data-gannzilla-canonical-toolbar', 'v147');
-          strip.setAttribute('data-gannzilla-canonical-toolbar-strip', 'v147');
+          toolbar.setAttribute('data-gannzilla-canonical-toolbar', 'v149');
+          strip.setAttribute('data-gannzilla-canonical-toolbar-strip', 'v149');
 
           const children = Array.from(strip.children);
           const first = findCanonicalFirstButton(strip);
@@ -158,6 +173,10 @@
 
           const stripRect = strip.getBoundingClientRect();
           document.querySelectorAll('button, [role="button"]').forEach((element) => {
+            if (element.id === CONNECTION_HITBOX_ID) {
+              protectConnectionHitbox();
+              return;
+            }
             if (isDuplicateDrawingToggle(element)) {
               hide(element);
               return;
@@ -176,11 +195,18 @@
             if (topRow && toolbarZone) hide(element);
           });
 
-          window.GANNZILLA_TOOLBAR_BOUNDS_V147 = true;
-          window.__auditGannzillaToolbarBoundsV147 = () => {
+          protectConnectionHitbox();
+          window.GANNZILLA_TOOLBAR_BOUNDS_V149 = true;
+          window.__auditGannzillaToolbarBoundsV149 = () => {
             const currentToolbar = findTopToolbar();
             const currentStrip = currentToolbar?.children?.[1];
             const visible = directVisibleChildren(currentStrip);
+            const connectionHitbox = document.getElementById(CONNECTION_HITBOX_ID);
+            const connectionStyle = connectionHitbox ? window.getComputedStyle(connectionHitbox) : null;
+            const connectionClickable = Boolean(connectionHitbox)
+              && connectionStyle?.display !== 'none'
+              && connectionStyle?.visibility !== 'hidden'
+              && connectionStyle?.pointerEvents !== 'none';
             const duplicateToggles = DRAWING_TOGGLE_IDS
               .map((id) => document.getElementById(id))
               .filter(Boolean);
@@ -192,10 +218,12 @@
               ok: Boolean(currentStrip)
                 && visible[0] === findCanonicalFirstButton(currentStrip)
                 && visible.at(-1)?.id === 'gannzilla-about-v141'
-                && togglesHidden,
+                && togglesHidden
+                && connectionClickable,
               firstVisibleText: String(visible[0]?.textContent || '').trim(),
               lastVisibleId: visible.at(-1)?.id || null,
               duplicateDrawingTogglesHidden: togglesHidden,
+              connectionClickable,
               hiddenOutsideCount: document.querySelectorAll(`[${HIDDEN_BY_V145}="true"]`).length,
             };
           };
