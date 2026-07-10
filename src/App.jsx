@@ -18,6 +18,7 @@ import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutCli
 import GannzillaWheelPanControlV180 from './components/GannTools/GannzillaWheelPanControlV180';
 import GannzillaNativeToolbarBindingV178 from './components/GannTools/GannzillaNativeToolbarBindingV178';
 import GannzillaLineStyleMenuV183 from './components/GannTools/GannzillaLineStyleMenuV183';
+import GannzillaDeleteSelectedButtonV194 from './components/GannTools/GannzillaDeleteSelectedButtonV194';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
 const DRAWING_TOGGLE_ID = 'gannzilla-drawing-tools-url-toggle-v182';
@@ -99,7 +100,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '193');
+    url.searchParams.set('v', '194');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -151,7 +152,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 193: remove clear-all and delete only the drawing that is clicked.
+// Build 194: replace the native lock with an eraser while retaining single-drawing deletion.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -216,7 +217,7 @@ const App = () => {
             transform-box: fill-box;
           }
         `}</style>
-        <div data-gannzilla-build="193">
+        <div data-gannzilla-build="194">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -235,6 +236,7 @@ const App = () => {
               <GannzillaNativeToolbarBindingV178 />
               <GannzillaLineStyleMenuV183 />
               <GannzillaDrawingToolsUrlToggleV182 />
+              <GannzillaDeleteSelectedButtonV194 />
             </>
           ) : isTestMode ? (
             <TestPage />
