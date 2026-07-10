@@ -13,9 +13,10 @@ import GannzillaLeftReferencePaletteV129 from './components/GannTools/GannzillaL
 import GannzillaToolbarCleanupV151 from './components/GannTools/GannzillaToolbarCleanupV151';
 import GannzillaAboutDialogScaleV157 from './components/GannTools/GannzillaAboutDialogScaleV157';
 import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV159';
+import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 159: approved Kawkabat TASI artwork with black-gold bilingual About branding.
+// Build 160: reliable About activation plus non-blocking black-gold branding.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -32,7 +33,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="159">
+        <div data-gannzilla-build="160">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -43,6 +44,7 @@ const App = () => {
               <GannzillaToolbarCleanupV151 />
               <GannzillaAboutDialogScaleV157 />
               <GannzillaAboutBrandV159 />
+              <GannzillaAboutClickFixV160 />
               <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
