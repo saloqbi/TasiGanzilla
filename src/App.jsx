@@ -18,7 +18,7 @@ import GannzillaWheelPanControlV163 from './components/GannTools/GannzillaWheelP
 import GannzillaFullscreenFitV166 from './components/GannTools/GannzillaFullscreenFitV166';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 166: true browser fullscreen plus automatic wheel fit and top reset.
+// Build 167: true browser fullscreen plus automatic wheel fit and top reset.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -35,7 +35,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="166">
+        <div data-gannzilla-build="167">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
