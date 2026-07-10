@@ -100,7 +100,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '198');
+    url.searchParams.set('v', '203');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -152,7 +152,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 198: separate the line and shape controls with a real visual gap and comfortable sizing.
+// Build 203: restore the native Gannzilla-style line and shape controls without external repositioning.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -168,67 +168,8 @@ const App = () => {
             top: 112px !important;
             max-height: calc(100vh - 128px) !important;
           }
-
-          #gannzilla-line-control-v185,
-          #gannzilla-shape-control-v185 {
-            width: 34px !important;
-            min-width: 34px !important;
-            height: 23px !important;
-            min-height: 23px !important;
-            overflow: visible !important;
-            box-sizing: border-box !important;
-          }
-
-          #gannzilla-line-control-v185 {
-            transform: translateX(-22px) !important;
-          }
-
-          #gannzilla-shape-control-v185 {
-            transform: translateX(-2px) !important;
-          }
-
-          #gannzilla-line-control-v185 > button:first-child,
-          #gannzilla-shape-control-v185 > button:first-child {
-            min-width: 27px !important;
-            overflow: visible !important;
-            position: relative;
-            z-index: 2;
-          }
-
-          #gannzilla-line-control-v185 > button:last-child,
-          #gannzilla-shape-control-v185 > button:last-child {
-            width: 7px !important;
-            min-width: 7px !important;
-            font-size: 7px !important;
-            position: relative;
-            z-index: 3;
-          }
-
-          #gannzilla-line-control-v185 > button:first-child svg,
-          #gannzilla-shape-control-v185 > button:first-child svg {
-            width: 29px !important;
-            height: 21px !important;
-            max-width: none !important;
-            overflow: visible !important;
-          }
-
-          #gannzilla-line-control-v185 > button:first-child svg line {
-            stroke-width: 2.9 !important;
-            transform: scaleX(1.16);
-            transform-origin: center;
-            transform-box: fill-box;
-          }
-
-          #gannzilla-shape-control-v185 > button:first-child svg rect,
-          #gannzilla-shape-control-v185 > button:first-child svg ellipse,
-          #gannzilla-shape-control-v185 > button:first-child svg path {
-            stroke-width: 2.9 !important;
-            transform: scale(1.15);
-            transform-origin: center;
-            transform-box: fill-box;
-          }
         `}</style>
-        <div data-gannzilla-build="198">
+        <div data-gannzilla-build="203">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
