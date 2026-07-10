@@ -45,34 +45,69 @@ function findDrawingToggleAnchor() {
   }) || null;
 }
 
-function GannzillaHideLockButtonV186() {
+function GannzillaToolbarVisualFixV187() {
   React.useEffect(() => {
     let disposed = false;
-    const hideLock = () => {
+
+    const apply = () => {
       if (disposed) return;
+
       document.querySelectorAll('button').forEach((button) => {
         const rect = button.getBoundingClientRect();
         const label = cleanLabel(button);
-        if (rect.width > 0 && rect.height > 0 && rect.top >= 0 && rect.bottom <= 48 && ['🔒', '🔐'].includes(label)) {
+        if (rect.top >= 0 && rect.bottom <= 48 && ['🔒', '🔐'].includes(label)) {
           button.style.setProperty('display', 'none', 'important');
           button.style.setProperty('visibility', 'hidden', 'important');
+          button.style.setProperty('width', '0', 'important');
+          button.style.setProperty('min-width', '0', 'important');
+          button.style.setProperty('padding', '0', 'important');
+          button.style.setProperty('margin', '0', 'important');
+          button.style.setProperty('border', '0', 'important');
           button.style.setProperty('pointer-events', 'none', 'important');
           button.setAttribute('aria-hidden', 'true');
           button.disabled = true;
         }
       });
+
+      ['gannzilla-line-control-v185', 'gannzilla-shape-control-v185'].forEach((id) => {
+        const control = document.getElementById(id);
+        if (!control) return;
+        control.style.setProperty('height', '23px', 'important');
+        control.style.setProperty('min-height', '23px', 'important');
+        control.style.setProperty('overflow', 'visible', 'important');
+
+        const primary = control.querySelector('button:first-child');
+        const arrow = control.querySelector('button:last-child');
+        const svg = primary?.querySelector('svg');
+
+        primary?.style.setProperty('padding', '0', 'important');
+        primary?.style.setProperty('overflow', 'visible', 'important');
+        arrow?.style.setProperty('width', '9px', 'important');
+        arrow?.style.setProperty('min-width', '9px', 'important');
+        arrow?.style.setProperty('font-size', '9px', 'important');
+
+        svg?.style.setProperty('width', '24px', 'important');
+        svg?.style.setProperty('height', '20px', 'important');
+        svg?.style.setProperty('transform', 'scale(1.18)', 'important');
+        svg?.style.setProperty('transform-origin', 'center', 'important');
+
+        control.querySelectorAll('svg line, svg rect, svg ellipse, svg path').forEach((shape) => {
+          shape.style.setProperty('stroke-width', '2.8', 'important');
+        });
+      });
     };
 
-    hideLock();
-    const observer = new MutationObserver(hideLock);
+    apply();
+    const observer = new MutationObserver(apply);
     observer.observe(document.body, { childList: true, subtree: true });
-    const timer = window.setInterval(hideLock, 300);
-    window.addEventListener('resize', hideLock);
+    const timer = window.setInterval(apply, 180);
+    window.addEventListener('resize', apply);
+
     return () => {
       disposed = true;
       observer.disconnect();
       window.clearInterval(timer);
-      window.removeEventListener('resize', hideLock);
+      window.removeEventListener('resize', apply);
     };
   }, []);
 
@@ -133,7 +168,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '186');
+    url.searchParams.set('v', '187');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -185,7 +220,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 186: hide the lock icon while preserving the drawing tools and dual menus.
+// Build 187: enlarge the two drawing icons and remove the lock icon from the toolbar.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -202,7 +237,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="186">
+        <div data-gannzilla-build="187">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -221,7 +256,7 @@ const App = () => {
               <GannzillaNativeToolbarBindingV178 />
               <GannzillaLineStyleMenuV183 />
               <GannzillaDrawingToolsUrlToggleV182 />
-              <GannzillaHideLockButtonV186 />
+              <GannzillaToolbarVisualFixV187 />
             </>
           ) : isTestMode ? (
             <TestPage />
