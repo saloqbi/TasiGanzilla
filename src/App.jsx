@@ -99,7 +99,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '190');
+    url.searchParams.set('v', '191');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -151,7 +151,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 190: match the two drawing icons to the Gannzilla reference using static CSS only.
+// Build 191: enlarge only the line and shape glyphs to match neighboring toolbar icons.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -172,30 +172,37 @@ const App = () => {
           #gannzilla-shape-control-v185 {
             height: 23px !important;
             min-height: 23px !important;
+            overflow: visible !important;
           }
 
           #gannzilla-line-control-v185 > button:first-child,
           #gannzilla-shape-control-v185 > button:first-child {
-            min-width: 24px !important;
+            min-width: 25px !important;
             overflow: visible !important;
+            position: relative;
+            z-index: 2;
           }
 
           #gannzilla-line-control-v185 > button:last-child,
           #gannzilla-shape-control-v185 > button:last-child {
-            width: 8px !important;
-            min-width: 8px !important;
-            font-size: 8px !important;
+            width: 7px !important;
+            min-width: 7px !important;
+            font-size: 7px !important;
+            position: relative;
+            z-index: 3;
           }
 
           #gannzilla-line-control-v185 > button:first-child svg,
           #gannzilla-shape-control-v185 > button:first-child svg {
-            width: 28px !important;
+            width: 31px !important;
             height: 22px !important;
+            max-width: none !important;
+            overflow: visible !important;
           }
 
           #gannzilla-line-control-v185 > button:first-child svg line {
-            stroke-width: 2.8 !important;
-            transform: scaleX(1.16);
+            stroke-width: 2.9 !important;
+            transform: scaleX(1.24);
             transform-origin: center;
             transform-box: fill-box;
           }
@@ -203,13 +210,13 @@ const App = () => {
           #gannzilla-shape-control-v185 > button:first-child svg rect,
           #gannzilla-shape-control-v185 > button:first-child svg ellipse,
           #gannzilla-shape-control-v185 > button:first-child svg path {
-            stroke-width: 2.8 !important;
-            transform: scale(1.15);
+            stroke-width: 2.9 !important;
+            transform: scale(1.22);
             transform-origin: center;
             transform-box: fill-box;
           }
         `}</style>
-        <div data-gannzilla-build="190">
+        <div data-gannzilla-build="191">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
