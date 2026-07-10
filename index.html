@@ -36,6 +36,13 @@
       button[aria-label="Toolbar information"] {
         display: none !important;
       }
+
+      /* v146: حذف زر إخفاء أدوات الرسم المكرر من يمين الشريط */
+      #gannzilla-drawing-tools-hitbox-v125 {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
     </style>
   </head>
   <body style="margin: 0; background-color: #0a0a0a; color: #FFD700; font-family: 'Noto Sans Arabic', 'Segoe UI', 'Tahoma', 'Arial', sans-serif;">
@@ -55,6 +62,8 @@
           element.setAttribute(PREVIOUS_DISPLAY, element.style.display || '');
           element.setAttribute(HIDDEN_BY_V145, 'true');
           element.style.setProperty('display', 'none', 'important');
+          element.style.setProperty('visibility', 'hidden', 'important');
+          element.style.setProperty('pointer-events', 'none', 'important');
           element.setAttribute('aria-hidden', 'true');
         };
 
@@ -62,6 +71,8 @@
           if (!element || !element.hasAttribute(HIDDEN_BY_V145)) return;
           const previous = element.getAttribute(PREVIOUS_DISPLAY) || '';
           element.style.removeProperty('display');
+          element.style.removeProperty('visibility');
+          element.style.removeProperty('pointer-events');
           if (previous) element.style.display = previous;
           element.removeAttribute(HIDDEN_BY_V145);
           element.removeAttribute(PREVIOUS_DISPLAY);
@@ -106,12 +117,14 @@
           if (!window.location.search.includes('gannzillaPro=true')
             && !window.location.search.includes('wheelPro=true')) return;
 
+          hide(document.getElementById(DRAWING_TOGGLE_ID));
+
           const toolbar = findTopToolbar();
           const strip = toolbar?.children?.[1];
           if (!toolbar || !strip) return;
 
-          toolbar.setAttribute('data-gannzilla-canonical-toolbar', 'v145');
-          strip.setAttribute('data-gannzilla-canonical-toolbar-strip', 'v145');
+          toolbar.setAttribute('data-gannzilla-canonical-toolbar', 'v146');
+          strip.setAttribute('data-gannzilla-canonical-toolbar-strip', 'v146');
 
           const children = Array.from(strip.children);
           const first = findCanonicalFirstButton(strip);
@@ -131,8 +144,11 @@
 
           const stripRect = strip.getBoundingClientRect();
           document.querySelectorAll('button, [role="button"]').forEach((element) => {
+            if (element.id === DRAWING_TOGGLE_ID) {
+              hide(element);
+              return;
+            }
             if (toolbar.contains(element)) return;
-            if (element.id === DRAWING_TOGGLE_ID) return;
             if (element.closest('[id^="gannzilla-left-drawing-palette-"], [id^="gannzilla-right-drawing-palette-"]')) return;
 
             const rect = element.getBoundingClientRect();
@@ -146,17 +162,23 @@
             if (topRow && toolbarZone) hide(element);
           });
 
-          window.GANNZILLA_TOOLBAR_BOUNDS_V145 = true;
-          window.__auditGannzillaToolbarBoundsV145 = () => {
+          window.GANNZILLA_TOOLBAR_BOUNDS_V146 = true;
+          window.__auditGannzillaToolbarBoundsV146 = () => {
             const currentToolbar = findTopToolbar();
             const currentStrip = currentToolbar?.children?.[1];
             const visible = directVisibleChildren(currentStrip);
+            const duplicateToggle = document.getElementById(DRAWING_TOGGLE_ID);
+            const toggleHidden = !duplicateToggle
+              || window.getComputedStyle(duplicateToggle).display === 'none'
+              || window.getComputedStyle(duplicateToggle).visibility === 'hidden';
             return {
               ok: Boolean(currentStrip)
                 && visible[0] === findCanonicalFirstButton(currentStrip)
-                && visible.at(-1)?.id === 'gannzilla-about-v141',
+                && visible.at(-1)?.id === 'gannzilla-about-v141'
+                && toggleHidden,
               firstVisibleText: String(visible[0]?.textContent || '').trim(),
               lastVisibleId: visible.at(-1)?.id || null,
+              duplicateDrawingToggleHidden: toggleHidden,
               hiddenOutsideCount: document.querySelectorAll(`[${HIDDEN_BY_V145}="true"]`).length,
             };
           };
