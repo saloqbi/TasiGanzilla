@@ -40,7 +40,7 @@ function applyBranding() {
   const lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
   const copy = COPY[lang];
 
-  dialog.dataset.brandV159 = 'true';
+  dialog.dataset.brandV160 = 'true';
   panel.dir = lang === 'ar' ? 'rtl' : 'ltr';
 
   setText(header.querySelector('span'), copy.title);
@@ -50,12 +50,14 @@ function applyBranding() {
 
   const email = content.children?.[4];
   if (email) {
-    email.textContent = 'm.a.m.1392@gmail.com';
-    email.setAttribute('href', 'mailto:m.a.m.1392@gmail.com');
+    setText(email, 'm.a.m.1392@gmail.com');
+    if (email.getAttribute('href') !== 'mailto:m.a.m.1392@gmail.com') {
+      email.setAttribute('href', 'mailto:m.a.m.1392@gmail.com');
+    }
   }
 
   const website = content.children?.[5];
-  if (website) website.style.display = 'none';
+  if (website && website.style.display !== 'none') website.style.display = 'none';
 
   setText(content.children?.[6], copy.rightsOwner);
   setText(content.children?.[7], copy.rights);
@@ -66,7 +68,10 @@ function applyBranding() {
 
   const logo = content.children?.[0];
   if (logo) {
-    logo.innerHTML = '';
+    if (logo.dataset.brandImageV160 !== 'true') {
+      logo.replaceChildren();
+      logo.dataset.brandImageV160 = 'true';
+    }
     Object.assign(logo.style, {
       width: 'min(430px, calc(100vw - 70px))',
       height: 'min(430px, calc(100vw - 70px))',
@@ -87,21 +92,39 @@ function applyBranding() {
 
 export default function GannzillaAboutBrandV159() {
   React.useEffect(() => {
-    const apply = () => applyBranding();
-    const observer = new MutationObserver(apply);
+    let scheduled = false;
+
+    const apply = () => {
+      scheduled = false;
+      applyBranding();
+    };
+
+    const schedule = () => {
+      if (scheduled) return;
+      scheduled = true;
+      window.requestAnimationFrame(apply);
+    };
+
+    const observer = new MutationObserver(schedule);
     observer.observe(document.body, { childList: true, subtree: true });
-    const langObserver = new MutationObserver(apply);
-    langObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-    const timer = window.setInterval(apply, 250);
+
+    const langObserver = new MutationObserver(schedule);
+    langObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['lang'],
+    });
+
+    const timer = window.setInterval(apply, 300);
     apply();
 
-    window.GANNZILLA_ABOUT_BRAND_V159 = true;
-    window.__auditGannzillaAboutBrandV159 = () => {
+    window.GANNZILLA_ABOUT_BRAND_V160 = true;
+    window.__auditGannzillaAboutBrandV160 = () => {
       const dialog = document.getElementById(DIALOG_ID);
       return {
-        ok: !dialog || dialog.dataset.brandV159 === 'true',
-        build: '159',
+        ok: !dialog || dialog.dataset.brandV160 === 'true',
+        build: '160',
         dialogOpen: Boolean(dialog),
+        branded: dialog?.dataset.brandV160 === 'true',
       };
     };
 
@@ -109,6 +132,7 @@ export default function GannzillaAboutBrandV159() {
       observer.disconnect();
       langObserver.disconnect();
       window.clearInterval(timer);
+      if (scheduled) window.cancelAnimationFrame?.(scheduled);
     };
   }, []);
 
