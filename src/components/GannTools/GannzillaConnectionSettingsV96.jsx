@@ -1,8 +1,8 @@
 import React from 'react';
 
-const STORAGE_KEY = 'gannzillaConnectionSettingsV139';
-const PASSWORD_KEY = 'gannzillaConnectionPasswordV139';
-const BUTTON_ID = 'gannzilla-connection-settings-v139';
+const STORAGE_KEY = 'gannzillaConnectionSettingsV140';
+const PASSWORD_KEY = 'gannzillaConnectionPasswordV140';
+const BUTTON_ID = 'gannzilla-connection-settings-v140';
 
 function loadSettings() {
   try {
@@ -47,19 +47,25 @@ export default function GannzillaConnectionSettingsV96() {
         button = document.createElement('button');
         button.id = BUTTON_ID;
         button.type = 'button';
-        button.innerHTML = '⚙';
+        button.innerHTML = '▣';
         button.style.height = '22px';
-        button.style.width = '28px';
+        button.style.width = '27px';
+        button.style.minWidth = '27px';
         button.style.padding = '0';
-        button.style.marginInlineStart = '4px';
-        button.style.border = '1px solid #a7a7a7';
-        button.style.borderRadius = '2px';
-        button.style.background = '#f7f7f7';
-        button.style.color = '#333';
-        button.style.font = '700 15px Segoe UI, Arial, sans-serif';
+        button.style.marginInlineEnd = '3px';
+        button.style.border = '1px solid #8e98a3';
+        button.style.borderRadius = '1px';
+        button.style.background = 'linear-gradient(#ffffff,#dfe5eb)';
+        button.style.color = '#59636d';
+        button.style.font = '700 14px Segoe UI, Arial, sans-serif';
+        button.style.lineHeight = '20px';
         button.style.cursor = 'pointer';
         button.style.verticalAlign = 'middle';
-        languageButton.parentElement.insertBefore(button, languageButton.nextSibling);
+        button.style.boxSizing = 'border-box';
+        button.style.boxShadow = 'inset 0 0 0 1px rgba(255,255,255,.6)';
+        languageButton.parentElement.insertBefore(button, languageButton);
+      } else if (button.nextSibling !== languageButton) {
+        languageButton.parentElement.insertBefore(button, languageButton);
       }
 
       button.title = language === 'ar' ? 'إعدادات الاتصال' : 'Connection settings';
@@ -77,14 +83,15 @@ export default function GannzillaConnectionSettingsV96() {
     };
 
     install();
-    const timer = window.setInterval(install, 200);
+    const timer = window.setInterval(install, 150);
     const observer = new MutationObserver(syncLanguage);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
-    window.GANNZILLA_CONNECTION_SETTINGS_V139 = true;
-    window.__auditGannzillaConnectionSettingsV139 = () => ({
+    window.GANNZILLA_CONNECTION_SETTINGS_V140 = true;
+    window.__auditGannzillaConnectionSettingsV140 = () => ({
       ok: Boolean(document.getElementById(BUTTON_ID)),
-      buttonBesideLanguage: true,
+      buttonBeforeLanguage: true,
+      matchedToolbarStyle: true,
       storageEnabled: true,
     });
 
