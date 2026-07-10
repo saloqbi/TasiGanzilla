@@ -17,7 +17,7 @@ import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutCli
 import GannzillaWheelPanControlV163 from './components/GannTools/GannzillaWheelPanControlV163';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 163: fixed-position wheel movement control anchored immediately left of zoom minus.
+// Build 164: reserve real toolbar space and pin the wheel movement control beside zoom minus.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -34,7 +34,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="163">
+        <div data-gannzilla-build="164">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
