@@ -1,0 +1,2 @@
+Build 211
+Drawing toolbar icons separated with 6px gaps and centered within the original toolbar footprint.
