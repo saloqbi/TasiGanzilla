@@ -5,7 +5,8 @@ const SHAPE_CONTROL_ID = 'gannzilla-shape-control-v185';
 const LINE_MENU_ID = 'gannzilla-line-menu-v185';
 const SHAPE_MENU_ID = 'gannzilla-shape-menu-v185';
 const CONTROL_WIDTH = 38;
-const GAP = 7;
+const CONTROL_GAP = 8;
+const TEXT_GAP = 11;
 const MAX_ATTEMPTS = 80;
 const RETRY_MS = 100;
 
@@ -28,78 +29,101 @@ function setImportant(element, property, value) {
   element?.style?.setProperty(property, value, 'important');
 }
 
+function requestApply(callback) {
+  window.requestAnimationFrame(() => window.requestAnimationFrame(callback));
+}
+
 export default function GannzillaDrawingControlsLayoutV199() {
   React.useLayoutEffect(() => {
     let disposed = false;
-    let timer = null;
+    let retryTimer = null;
     let attempts = 0;
 
     const apply = () => {
-      if (disposed) return;
-      attempts += 1;
+      if (disposed) return false;
 
       const line = document.getElementById(LINE_CONTROL_ID);
       const shape = document.getElementById(SHAPE_CONTROL_ID);
       const textButton = findTopTextButton('T');
 
-      if (!line || !shape || !textButton) {
-        if (attempts < MAX_ATTEMPTS) timer = window.setTimeout(apply, RETRY_MS);
-        return;
-      }
+      if (!line || !shape || !textButton) return false;
 
       const textRect = textButton.getBoundingClientRect();
-      const shapeLeft = Math.round(textRect.left - GAP - CONTROL_WIDTH);
-      const lineLeft = Math.round(shapeLeft - GAP - CONTROL_WIDTH);
       const top = Math.round(textRect.top);
       const height = Math.max(22, Math.round(textRect.height));
+      const shapeLeft = Math.round(textRect.left - TEXT_GAP - CONTROL_WIDTH);
+      const lineLeft = Math.round(shapeLeft - CONTROL_GAP - CONTROL_WIDTH);
 
       [line, shape].forEach((control) => {
+        setImportant(control, 'transform', 'none');
         setImportant(control, 'width', `${CONTROL_WIDTH}px`);
         setImportant(control, 'min-width', `${CONTROL_WIDTH}px`);
         setImportant(control, 'height', `${height}px`);
         setImportant(control, 'min-height', `${height}px`);
         setImportant(control, 'top', `${top}px`);
-        setImportant(control, 'transform', 'none');
         setImportant(control, 'margin', '0');
         setImportant(control, 'overflow', 'hidden');
+        setImportant(control, 'pointer-events', 'auto');
+        setImportant(control, 'z-index', '2147483647');
       });
 
-      setImportant(shape, 'left', `${shapeLeft}px`);
-      setImportant(line, 'left', `${lineLeft}px`);
+      const lineBase = line.getBoundingClientRect();
+      const shapeBase = shape.getBoundingClientRect();
+      const lineShift = Math.round(lineLeft - lineBase.left);
+      const shapeShift = Math.round(shapeLeft - shapeBase.left);
 
-      const lineMenu = document.getElementById(LINE_MENU_ID);
-      const shapeMenu = document.getElementById(SHAPE_MENU_ID);
-      if (lineMenu) setImportant(lineMenu, 'left', `${lineLeft}px`);
-      if (shapeMenu) setImportant(shapeMenu, 'left', `${shapeLeft}px`);
+      setImportant(line, 'transform', `translate3d(${lineShift}px, 0, 0)`);
+      setImportant(shape, 'transform', `translate3d(${shapeShift}px, 0, 0)`);
 
-      window.GANNZILLA_DRAWING_CONTROLS_LAYOUT_V199 = {
+      const positionMenu = (menuId, desiredLeft) => {
+        const menu = document.getElementById(menuId);
+        if (!menu) return;
+        setImportant(menu, 'transform', 'none');
+        setImportant(menu, 'pointer-events', 'auto');
+        setImportant(menu, 'z-index', '2147483647');
+        const base = menu.getBoundingClientRect();
+        const shift = Math.round(desiredLeft - base.left);
+        setImportant(menu, 'transform', `translate3d(${shift}px, 0, 0)`);
+      };
+
+      positionMenu(LINE_MENU_ID, lineLeft);
+      positionMenu(SHAPE_MENU_ID, shapeLeft);
+
+      window.GANNZILLA_DRAWING_CONTROLS_LAYOUT_V200 = {
         ok: true,
         lineLeft,
         shapeLeft,
-        gap: GAP,
+        controlGap: CONTROL_GAP,
+        textGap: TEXT_GAP,
         width: CONTROL_WIDTH,
+        lineShift,
+        shapeShift,
       };
 
-      if (attempts < 25) timer = window.setTimeout(apply, RETRY_MS);
+      return true;
     };
 
-    const refreshSoon = () => {
-      attempts = 0;
-      if (timer) window.clearTimeout(timer);
-      timer = window.setTimeout(apply, 0);
+    const retry = () => {
+      if (disposed) return;
+      attempts += 1;
+      if (apply() || attempts >= MAX_ATTEMPTS) return;
+      retryTimer = window.setTimeout(retry, RETRY_MS);
     };
 
-    apply();
-    window.addEventListener('resize', refreshSoon);
-    window.addEventListener('scroll', refreshSoon, true);
-    document.addEventListener('pointerdown', refreshSoon, true);
+    const refresh = () => requestApply(apply);
+    retry();
+
+    const observer = new MutationObserver(refresh);
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener('resize', refresh);
+    window.addEventListener('scroll', refresh, true);
 
     return () => {
       disposed = true;
-      if (timer) window.clearTimeout(timer);
-      window.removeEventListener('resize', refreshSoon);
-      window.removeEventListener('scroll', refreshSoon, true);
-      document.removeEventListener('pointerdown', refreshSoon, true);
+      if (retryTimer) window.clearTimeout(retryTimer);
+      observer.disconnect();
+      window.removeEventListener('resize', refresh);
+      window.removeEventListener('scroll', refresh, true);
     };
   }, []);
 
