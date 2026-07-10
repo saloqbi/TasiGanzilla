@@ -1,8 +1,9 @@
 import React from 'react';
 
-const BUILD = '155';
-const HIDDEN_ATTR = 'data-gannzilla-toolbar-cleanup-v155';
-const ABOUT_ID = 'gannzilla-about-v141';
+const BUILD = '156';
+const HIDDEN_ATTR = 'data-gannzilla-toolbar-cleanup-v156';
+const CANONICAL_ABOUT_ID = 'gannzilla-about-v156';
+const LEGACY_ABOUT_ID = 'gannzilla-about-v141';
 
 const AUXILIARY_LABELS = new Set([
   '100%',
@@ -63,9 +64,15 @@ function isTopRow(element) {
     && rect.bottom <= 42;
 }
 
-function isInformationElement(element) {
+function isCanonicalAbout(element) {
   if (!element) return false;
-  if (element.id === ABOUT_ID) return true;
+  return element.id === CANONICAL_ABOUT_ID
+    || Boolean(element.closest?.(`#${CANONICAL_ABOUT_ID}`));
+}
+
+function isInformationElement(element) {
+  if (!element || isCanonicalAbout(element)) return false;
+  if (element.id === LEGACY_ABOUT_ID) return true;
 
   const title = String(element.getAttribute?.('title') || '').trim();
   const aria = String(element.getAttribute?.('aria-label') || '').trim();
@@ -77,10 +84,11 @@ function isInformationElement(element) {
 }
 
 function removeInformationElement(element) {
-  if (!element) return false;
+  if (!element || isCanonicalAbout(element)) return false;
   const owner = element.closest?.('button, [role="button"]');
   const target = owner && isTopRow(owner) ? owner : element;
-  if (!isTopRow(target) && target.id !== ABOUT_ID) return false;
+  if (isCanonicalAbout(target)) return false;
+  if (!isTopRow(target) && target.id !== LEGACY_ABOUT_ID) return false;
   target.remove();
   return true;
 }
@@ -139,11 +147,21 @@ export default function GannzillaToolbarCleanupV151() {
         });
       }
 
-      window.GANNZILLA_TOOLBAR_CLEANUP_V155 = true;
-      window.__auditGannzillaToolbarCleanupV155 = () => {
-        const remainingInformationIcons = Array.from(
+      const canonicalAbout = document.getElementById(CANONICAL_ABOUT_ID);
+      if (canonicalAbout) {
+        canonicalAbout.removeAttribute(HIDDEN_ATTR);
+        canonicalAbout.style.removeProperty('display');
+        canonicalAbout.style.removeProperty('visibility');
+        canonicalAbout.style.removeProperty('pointer-events');
+      }
+
+      window.GANNZILLA_TOOLBAR_CLEANUP_V156 = true;
+      window.__auditGannzillaToolbarCleanupV156 = () => {
+        const remainingDuplicateInformationIcons = Array.from(
           document.querySelectorAll('button, [role="button"], span'),
         ).filter(isInformationElement);
+        const visibleCanonicalAbout = document.getElementById(CANONICAL_ABOUT_ID);
+        const canonicalStyle = visibleCanonicalAbout ? window.getComputedStyle(visibleCanonicalAbout) : null;
         const remainingAuxiliaryControls = Array.from(
           document.querySelectorAll('button, [role="button"], span'),
         ).filter(isAuxiliaryControl)
@@ -155,10 +173,17 @@ export default function GannzillaToolbarCleanupV151() {
           });
 
         return {
-          ok: remainingInformationIcons.length === 0 && remainingAuxiliaryControls.length === 0,
+          ok: Boolean(visibleCanonicalAbout)
+            && canonicalStyle?.display !== 'none'
+            && canonicalStyle?.visibility !== 'hidden'
+            && remainingDuplicateInformationIcons.length === 0
+            && remainingAuxiliaryControls.length === 0,
           build: BUILD,
-          removedInformationIcons,
-          remainingInformationIcons: remainingInformationIcons.length,
+          canonicalAboutVisible: Boolean(visibleCanonicalAbout)
+            && canonicalStyle?.display !== 'none'
+            && canonicalStyle?.visibility !== 'hidden',
+          removedDuplicateInformationIcons: removedInformationIcons,
+          remainingDuplicateInformationIcons: remainingDuplicateInformationIcons.length,
           visibleAuxiliaryControls: remainingAuxiliaryControls.map(normalizeLabel),
         };
       };
@@ -191,19 +216,18 @@ export default function GannzillaToolbarCleanupV151() {
 
   return (
     <style>{`
-      #${ABOUT_ID},
-      button[title="حول البرنامج"],
-      button[title="About"],
-      button[title="معلومات الأدوات"],
-      button[title="Toolbar information"],
-      button[aria-label="حول البرنامج"],
-      button[aria-label="About"],
-      button[aria-label="معلومات الأدوات"],
-      button[aria-label="Toolbar information"],
+      #${LEGACY_ABOUT_ID},
       [${HIDDEN_ATTR}="true"] {
         display: none !important;
         visibility: hidden !important;
         pointer-events: none !important;
+      }
+
+      #${CANONICAL_ABOUT_ID} {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
       }
     `}</style>
   );
