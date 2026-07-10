@@ -28,6 +28,14 @@
         direction: rtl;
         unicode-bidi: embed;
       }
+
+      /* v144: إخفاء أيقونة المعلومات المكررة الموجودة في أقصى اليمين */
+      button[title="معلومات الأدوات"],
+      button[title="Toolbar information"],
+      button[aria-label="معلومات الأدوات"],
+      button[aria-label="Toolbar information"] {
+        display: none !important;
+      }
     </style>
   </head>
   <body style="margin: 0; background-color: #0a0a0a; color: #FFD700; font-family: 'Noto Sans Arabic', 'Segoe UI', 'Tahoma', 'Arial', sans-serif;">
