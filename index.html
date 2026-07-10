@@ -43,5 +43,138 @@
     <div id="root"></div>
     <!-- ✅ فقط هذا السكربت هنا -->
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      (() => {
+        const HIDDEN_BY_V145 = 'data-gannzilla-v145-hidden';
+        const PREVIOUS_DISPLAY = 'data-gannzilla-v145-previous-display';
+        const DRAWING_TOGGLE_ID = 'gannzilla-drawing-tools-hitbox-v125';
+        let scheduled = false;
+
+        const hide = (element) => {
+          if (!element || element.hasAttribute(HIDDEN_BY_V145)) return;
+          element.setAttribute(PREVIOUS_DISPLAY, element.style.display || '');
+          element.setAttribute(HIDDEN_BY_V145, 'true');
+          element.style.setProperty('display', 'none', 'important');
+          element.setAttribute('aria-hidden', 'true');
+        };
+
+        const restore = (element) => {
+          if (!element || !element.hasAttribute(HIDDEN_BY_V145)) return;
+          const previous = element.getAttribute(PREVIOUS_DISPLAY) || '';
+          element.style.removeProperty('display');
+          if (previous) element.style.display = previous;
+          element.removeAttribute(HIDDEN_BY_V145);
+          element.removeAttribute(PREVIOUS_DISPLAY);
+          element.removeAttribute('aria-hidden');
+        };
+
+        const findTopToolbar = () => Array.from(document.querySelectorAll('div'))
+          .filter((element) => {
+            const style = window.getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+            const text = String(element.textContent || '');
+            return style.position === 'fixed'
+              && rect.top <= 1
+              && rect.height >= 20
+              && rect.height <= 30
+              && (text.includes('Gannzilla Pro') || text.includes('جانزيلا برو'));
+          })
+          .sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width)[0] || null;
+
+        const directVisibleChildren = (parent) => Array.from(parent?.children || []).filter((element) => {
+          const style = window.getComputedStyle(element);
+          return style.display !== 'none' && style.visibility !== 'hidden';
+        });
+
+        const findCanonicalFirstButton = (strip) => {
+          const children = Array.from(strip.children);
+          const expected = children.find((element, index) => {
+            if (element.tagName !== 'BUTTON') return false;
+            const label = String(element.textContent || '').trim();
+            if (!['↖', '↗', '↙', '↘'].includes(label)) return false;
+            const next = children.slice(index + 1).find((candidate) => {
+              const style = window.getComputedStyle(candidate);
+              return style.display !== 'none' && style.visibility !== 'hidden';
+            });
+            return next && ['—', '-', '−'].includes(String(next.textContent || '').trim());
+          });
+          return expected || directVisibleChildren(strip).find((element) => element.tagName === 'BUTTON') || null;
+        };
+
+        const enforceToolbarBounds = () => {
+          scheduled = false;
+          if (!window.location.search.includes('gannzillaPro=true')
+            && !window.location.search.includes('wheelPro=true')) return;
+
+          const toolbar = findTopToolbar();
+          const strip = toolbar?.children?.[1];
+          if (!toolbar || !strip) return;
+
+          toolbar.setAttribute('data-gannzilla-canonical-toolbar', 'v145');
+          strip.setAttribute('data-gannzilla-canonical-toolbar-strip', 'v145');
+
+          const children = Array.from(strip.children);
+          const first = findCanonicalFirstButton(strip);
+          const last = document.getElementById('gannzilla-about-v141')
+            || document.getElementById('gannzilla-bilingual-toggle-v95')
+            || directVisibleChildren(strip).at(-1)
+            || null;
+
+          if (first && last && strip.contains(first) && strip.contains(last)) {
+            const firstIndex = children.indexOf(first);
+            const lastIndex = children.indexOf(last);
+            children.forEach((element, index) => {
+              if (index < firstIndex || index > lastIndex) hide(element);
+              else restore(element);
+            });
+          }
+
+          const stripRect = strip.getBoundingClientRect();
+          document.querySelectorAll('button, [role="button"]').forEach((element) => {
+            if (toolbar.contains(element)) return;
+            if (element.id === DRAWING_TOGGLE_ID) return;
+            if (element.closest('[id^="gannzilla-left-drawing-palette-"], [id^="gannzilla-right-drawing-palette-"]')) return;
+
+            const rect = element.getBoundingClientRect();
+            const topRow = rect.width > 0
+              && rect.height >= 16
+              && rect.height <= 36
+              && rect.top <= 5
+              && rect.bottom <= 40;
+            const toolbarZone = rect.right >= stripRect.left - 8;
+
+            if (topRow && toolbarZone) hide(element);
+          });
+
+          window.GANNZILLA_TOOLBAR_BOUNDS_V145 = true;
+          window.__auditGannzillaToolbarBoundsV145 = () => {
+            const currentToolbar = findTopToolbar();
+            const currentStrip = currentToolbar?.children?.[1];
+            const visible = directVisibleChildren(currentStrip);
+            return {
+              ok: Boolean(currentStrip)
+                && visible[0] === findCanonicalFirstButton(currentStrip)
+                && visible.at(-1)?.id === 'gannzilla-about-v141',
+              firstVisibleText: String(visible[0]?.textContent || '').trim(),
+              lastVisibleId: visible.at(-1)?.id || null,
+              hiddenOutsideCount: document.querySelectorAll(`[${HIDDEN_BY_V145}="true"]`).length,
+            };
+          };
+        };
+
+        const schedule = () => {
+          if (scheduled) return;
+          scheduled = true;
+          window.requestAnimationFrame(enforceToolbarBounds);
+        };
+
+        const observer = new MutationObserver(schedule);
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        window.addEventListener('load', schedule, { once: true });
+        window.addEventListener('resize', schedule);
+        window.setInterval(enforceToolbarBounds, 500);
+        schedule();
+      })();
+    </script>
   </body>
 </html>
