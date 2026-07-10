@@ -15,10 +15,10 @@ import GannzillaAboutDialogScaleV157 from './components/GannTools/GannzillaAbout
 import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV159';
 import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
 import GannzillaWheelPanControlV163 from './components/GannTools/GannzillaWheelPanControlV163';
-import GannzillaNativeToolbarV175 from './components/GannTools/GannzillaNativeToolbarV175';
+import GannzillaToolbarDirectV176 from './components/GannTools/GannzillaToolbarDirectV176';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 175: native inline toolbar controls with direct interaction handlers.
+// Build 176: direct functional toolbar with drawing, palette, lock and fullscreen actions.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -35,7 +35,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="175">
+        <div data-gannzilla-build="176">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -51,7 +51,7 @@ const App = () => {
               <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
-              <GannzillaNativeToolbarV175 />
+              <GannzillaToolbarDirectV176 />
             </>
           ) : isTestMode ? (
             <TestPage />
