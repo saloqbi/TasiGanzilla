@@ -12,7 +12,7 @@ import GannzillaRightDrawingPaletteV126 from './components/GannTools/GannzillaRi
 import GannzillaLeftReferencePaletteV129 from './components/GannTools/GannzillaLeftReferencePaletteV129';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 129 production trigger: left reference palette is exactly doubled from v128.
+// Build 135: keep the enlarged left drawing palette below the hide/show control.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -23,7 +23,13 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="129">
+        <style>{`
+          [id^="gannzilla-left-reference-palette-"] {
+            top: 112px !important;
+            max-height: calc(100vh - 128px) !important;
+          }
+        `}</style>
+        <div data-gannzilla-build="135">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
