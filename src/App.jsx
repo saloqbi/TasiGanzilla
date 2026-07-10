@@ -16,7 +16,6 @@ import GannzillaAboutDialogScaleV157 from './components/GannTools/GannzillaAbout
 import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV159';
 import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
 import GannzillaWheelPanControlV180 from './components/GannTools/GannzillaWheelPanControlV180';
-import GannzillaNativeToolbarBindingV178 from './components/GannTools/GannzillaNativeToolbarBindingV178';
 import GannzillaNativeDrawingToolsV206 from './components/GannTools/GannzillaNativeDrawingToolsV206';
 import GannzillaHideArrowLockV195 from './components/GannTools/GannzillaHideArrowLockV195';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
@@ -100,7 +99,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '206');
+    url.searchParams.set('v', '207');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -152,7 +151,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 206: delete both previous drawing implementations and recreate the Gannzilla line/shape tools from scratch.
+// Build 207: V206 is the sole drawing owner; remove the legacy V178 capture interceptor.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -169,7 +168,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="206">
+        <div data-gannzilla-build="207">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -185,7 +184,6 @@ const App = () => {
               <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
-              <GannzillaNativeToolbarBindingV178 />
               <GannzillaNativeDrawingToolsV206 />
               <GannzillaDrawingToolsUrlToggleV182 />
               <GannzillaHideArrowLockV195 />
