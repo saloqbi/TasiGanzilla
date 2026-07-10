@@ -1,9 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = '169';
-const FULLSCREEN_ID = 'gannzilla-fullscreen-action-v169';
-const DRAWING_ID = 'gannzilla-drawing-toggle-v169';
+const BUILD = '171';
+const FULLSCREEN_ID = 'gannzilla-fullscreen-action-v171';
+const DRAWING_ID = 'gannzilla-drawing-toggle-v171';
 const OLD_DRAWING_HITBOX_ID = 'gannzilla-drawing-tools-hitbox-v125';
 const STORAGE_KEYS = [
   'gannzillaDrawingToolsVisibleV125',
@@ -25,13 +25,22 @@ function isTopToolbarButton(button) {
     && rect.bottom <= 44;
 }
 
+function isOverlayButton(button) {
+  const id = String(button?.id || '');
+  return id === FULLSCREEN_ID
+    || id === DRAWING_ID
+    || id === OLD_DRAWING_HITBOX_ID
+    || id.startsWith('gannzilla-fullscreen-')
+    || id.startsWith('gannzilla-drawing-toggle-');
+}
+
 function findNativeButton(kind) {
   return Array.from(document.querySelectorAll('button'))
-    .filter((button) => button.id !== FULLSCREEN_ID && button.id !== DRAWING_ID)
+    .filter((button) => !isOverlayButton(button))
     .filter(isTopToolbarButton)
     .find((button) => {
       const label = textOf(button);
-      if (kind === 'fullscreen') return ['⛶', '⤢', '↗'].includes(label);
+      if (kind === 'fullscreen') return ['⛶', '⤢', '↗', '⛶︎'].includes(label);
       return ['⌕', '🔍', '🔎', '🔍︎'].includes(label);
     }) || null;
 }
@@ -93,23 +102,30 @@ function enforceDrawingVisibility(visible) {
   });
 }
 
-async function requestTrueFullscreen() {
+function isFullscreen() {
+  return Boolean(
+    document.fullscreenElement
+    || document.webkitFullscreenElement
+    || document.msFullscreenElement,
+  );
+}
+
+function enterOrExitFullscreen() {
   const root = document.documentElement;
-  if (document.fullscreenElement || document.webkitFullscreenElement) {
-    if (document.exitFullscreen) await document.exitFullscreen();
-    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-    return;
+
+  if (isFullscreen()) {
+    if (document.exitFullscreen) return document.exitFullscreen();
+    if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+    if (document.msExitFullscreen) return document.msExitFullscreen();
+    return undefined;
   }
 
-  if (root.requestFullscreen) {
-    try {
-      await root.requestFullscreen({ navigationUI: 'hide' });
-    } catch (_) {
-      await root.requestFullscreen();
-    }
-  } else if (root.webkitRequestFullscreen) {
-    root.webkitRequestFullscreen();
-  }
+  // Call the browser API directly from the trusted pointer event.
+  // Do not await anything before this call, otherwise Chrome may consume user activation.
+  if (root.requestFullscreen) return root.requestFullscreen();
+  if (root.webkitRequestFullscreen) return root.webkitRequestFullscreen();
+  if (root.msRequestFullscreen) return root.msRequestFullscreen();
+  return undefined;
 }
 
 function clickNativeFit(button) {
@@ -147,7 +163,7 @@ export default function GannzillaToolbarActionsFixV169() {
   const [drawingRect, setDrawingRect] = React.useState(null);
   const [drawingVisible, setDrawingVisible] = React.useState(readDrawingVisible);
   const fullscreenSourceRef = React.useRef(null);
-  const skipFullscreenRef = React.useRef(false);
+  const fullscreenBusyRef = React.useRef(false);
 
   const refresh = React.useCallback(() => {
     document.getElementById(OLD_DRAWING_HITBOX_ID)?.remove();
@@ -196,49 +212,84 @@ export default function GannzillaToolbarActionsFixV169() {
 
   React.useEffect(() => {
     const onFullscreenChange = () => {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      window.setTimeout(() => {
-        skipFullscreenRef.current = true;
+      fullscreenBusyRef.current = false;
+      window.scrollTo(0, 0);
+
+      // Match Gannzilla: after the browser enters fullscreen, fit and center the wheel.
+      const fit = () => {
         clickNativeFit(fullscreenSourceRef.current || findNativeButton('fullscreen'));
+        window.scrollTo(0, 0);
         window.dispatchEvent(new Event('resize'));
-      }, 120);
+      };
+      window.setTimeout(fit, 80);
+      window.setTimeout(fit, 260);
+      window.setTimeout(fit, 520);
     };
+
     document.addEventListener('fullscreenchange', onFullscreenChange);
     document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+    document.addEventListener('MSFullscreenChange', onFullscreenChange);
     return () => {
       document.removeEventListener('fullscreenchange', onFullscreenChange);
       document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', onFullscreenChange);
     };
   }, []);
 
   React.useEffect(() => {
-    window.GANNZILLA_TOOLBAR_ACTIONS_FIX_V169 = true;
-    window.__auditGannzillaToolbarActionsFixV169 = () => ({
+    window.GANNZILLA_TOOLBAR_ACTIONS_FIX_V171 = true;
+    window.__auditGannzillaToolbarActionsFixV171 = () => ({
       ok: Boolean(document.getElementById(FULLSCREEN_ID))
         && Boolean(document.getElementById(DRAWING_ID)),
       build: BUILD,
       fullscreenControlVisible: Boolean(document.getElementById(FULLSCREEN_ID)),
       drawingControlVisible: Boolean(document.getElementById(DRAWING_ID)),
       drawingVisible,
-      fullscreen: Boolean(document.fullscreenElement || document.webkitFullscreenElement),
+      fullscreen: isFullscreen(),
+      nativeFullscreenSourceFound: Boolean(fullscreenSourceRef.current),
     });
   }, [drawingVisible]);
+
+  const activateFullscreen = React.useCallback((event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent?.stopImmediatePropagation?.();
+    if (fullscreenBusyRef.current) return;
+
+    fullscreenBusyRef.current = true;
+    window.scrollTo(0, 0);
+
+    try {
+      const result = enterOrExitFullscreen();
+      if (result && typeof result.catch === 'function') {
+        result.catch(() => {
+          fullscreenBusyRef.current = false;
+          // Safe fallback: at least fit and center the wheel when fullscreen is denied.
+          clickNativeFit(fullscreenSourceRef.current || findNativeButton('fullscreen'));
+          window.scrollTo(0, 0);
+        });
+      }
+    } catch (_) {
+      fullscreenBusyRef.current = false;
+      clickNativeFit(fullscreenSourceRef.current || findNativeButton('fullscreen'));
+      window.scrollTo(0, 0);
+    }
+  }, []);
 
   const fullscreenButton = fullscreenRect && createPortal(
     <button
       id={FULLSCREEN_ID}
       type="button"
-      title="ملء الشاشة وتعبئة العجلة"
-      aria-label="ملء الشاشة وتعبئة العجلة"
-      onClick={async (event) => {
+      title="فتح ملء الشاشة مثل Gannzilla"
+      aria-label="فتح ملء الشاشة مثل Gannzilla"
+      aria-pressed={isFullscreen()}
+      onPointerDown={activateFullscreen}
+      onClick={(event) => {
         event.preventDefault();
         event.stopPropagation();
-        if (skipFullscreenRef.current) {
-          skipFullscreenRef.current = false;
-          return;
-        }
-        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        await requestTrueFullscreen();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') activateFullscreen(event);
       }}
       style={{ ...overlayStyle, ...fullscreenRect }}
     >
@@ -257,6 +308,7 @@ export default function GannzillaToolbarActionsFixV169() {
       onPointerDown={(event) => {
         event.preventDefault();
         event.stopPropagation();
+        event.nativeEvent?.stopImmediatePropagation?.();
         setDrawingVisible((current) => !current);
       }}
       onClick={(event) => {
