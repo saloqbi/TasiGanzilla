@@ -11,9 +11,10 @@ import GannzillaUnifiedDrawingPalettesV122 from './components/GannTools/Gannzill
 import GannzillaRightDrawingPaletteV126 from './components/GannTools/GannzillaRightDrawingPaletteV126';
 import GannzillaLeftReferencePaletteV129 from './components/GannTools/GannzillaLeftReferencePaletteV129';
 import GannzillaToolbarCleanupV151 from './components/GannTools/GannzillaToolbarCleanupV151';
+import GannzillaAboutDialogScaleV157 from './components/GannTools/GannzillaAboutDialogScaleV157';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 156: add the canonical Gannzilla About icon and matching About dialog.
+// Build 157: enlarge the canonical Gannzilla About dialog to twice its previous size.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -30,7 +31,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="156">
+        <div data-gannzilla-build="157">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -39,6 +40,7 @@ const App = () => {
               <GannzillaBilingualToggleV95 />
               <GannzillaConnectionSettingsV96 />
               <GannzillaToolbarCleanupV151 />
+              <GannzillaAboutDialogScaleV157 />
               <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
