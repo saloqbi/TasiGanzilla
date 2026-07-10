@@ -45,81 +45,6 @@ function findDrawingToggleAnchor() {
   }) || null;
 }
 
-function GannzillaToolbarFinalVisualFixV188() {
-  React.useEffect(() => {
-    let disposed = false;
-
-    const apply = () => {
-      if (disposed) return;
-
-      document.querySelectorAll('button').forEach((button) => {
-        const rect = button.getBoundingClientRect();
-        const label = cleanLabel(button);
-        if (rect.top >= 0 && rect.bottom <= 48 && ['🔒', '🔐'].includes(label)) {
-          button.style.setProperty('display', 'none', 'important');
-          button.style.setProperty('visibility', 'hidden', 'important');
-          button.style.setProperty('opacity', '0', 'important');
-          button.style.setProperty('width', '0', 'important');
-          button.style.setProperty('min-width', '0', 'important');
-          button.style.setProperty('max-width', '0', 'important');
-          button.style.setProperty('height', '0', 'important');
-          button.style.setProperty('padding', '0', 'important');
-          button.style.setProperty('margin', '0', 'important');
-          button.style.setProperty('border', '0', 'important');
-          button.style.setProperty('pointer-events', 'none', 'important');
-          button.setAttribute('aria-hidden', 'true');
-          button.disabled = true;
-        }
-      });
-
-      ['gannzilla-line-control-v185', 'gannzilla-shape-control-v185'].forEach((id) => {
-        const control = document.getElementById(id);
-        if (!control) return;
-
-        control.style.setProperty('height', '23px', 'important');
-        control.style.setProperty('min-height', '23px', 'important');
-        control.style.setProperty('overflow', 'visible', 'important');
-
-        const primary = control.querySelector('button:first-child');
-        const arrow = control.querySelector('button:last-child');
-        const svg = primary?.querySelector('svg');
-
-        primary?.style.setProperty('padding', '0', 'important');
-        primary?.style.setProperty('overflow', 'visible', 'important');
-        arrow?.style.setProperty('width', '9px', 'important');
-        arrow?.style.setProperty('min-width', '9px', 'important');
-        arrow?.style.setProperty('font-size', '9px', 'important');
-
-        svg?.setAttribute('width', '25');
-        svg?.setAttribute('height', '21');
-        svg?.style.setProperty('width', '25px', 'important');
-        svg?.style.setProperty('height', '21px', 'important');
-        svg?.style.setProperty('transform', 'scale(1.2)', 'important');
-        svg?.style.setProperty('transform-origin', 'center', 'important');
-
-        control.querySelectorAll('svg line, svg rect, svg ellipse, svg path').forEach((shape) => {
-          shape.style.setProperty('stroke-width', '2.8', 'important');
-        });
-      });
-    };
-
-    apply();
-    const observer = new MutationObserver(apply);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-    const timer = window.setInterval(apply, 120);
-    window.addEventListener('resize', apply);
-
-    return () => {
-      disposed = true;
-      observer.disconnect();
-      window.clearInterval(timer);
-      window.removeEventListener('resize', apply);
-    };
-  }, []);
-
-  return null;
-}
-
 function GannzillaDrawingToolsUrlToggleV182() {
   const [rect, setRect] = React.useState(null);
   const query = new URLSearchParams(window.location.search);
@@ -174,7 +99,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '188');
+    url.searchParams.set('v', '183');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -226,7 +151,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 188: permanently hide the lock icon and match the two drawing icons to the toolbar size.
+// Build 183: Gannzilla-style line dropdown with plain, one-arrow and double-arrow modes.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -243,7 +168,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="188">
+        <div data-gannzilla-build="183">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -262,7 +187,6 @@ const App = () => {
               <GannzillaNativeToolbarBindingV178 />
               <GannzillaLineStyleMenuV183 />
               <GannzillaDrawingToolsUrlToggleV182 />
-              <GannzillaToolbarFinalVisualFixV188 />
             </>
           ) : isTestMode ? (
             <TestPage />
