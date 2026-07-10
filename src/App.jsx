@@ -45,7 +45,7 @@ function findDrawingToggleAnchor() {
   }) || null;
 }
 
-function GannzillaToolbarVisualFixV187() {
+function GannzillaToolbarFinalVisualFixV188() {
   React.useEffect(() => {
     let disposed = false;
 
@@ -58,8 +58,11 @@ function GannzillaToolbarVisualFixV187() {
         if (rect.top >= 0 && rect.bottom <= 48 && ['🔒', '🔐'].includes(label)) {
           button.style.setProperty('display', 'none', 'important');
           button.style.setProperty('visibility', 'hidden', 'important');
+          button.style.setProperty('opacity', '0', 'important');
           button.style.setProperty('width', '0', 'important');
           button.style.setProperty('min-width', '0', 'important');
+          button.style.setProperty('max-width', '0', 'important');
+          button.style.setProperty('height', '0', 'important');
           button.style.setProperty('padding', '0', 'important');
           button.style.setProperty('margin', '0', 'important');
           button.style.setProperty('border', '0', 'important');
@@ -72,6 +75,7 @@ function GannzillaToolbarVisualFixV187() {
       ['gannzilla-line-control-v185', 'gannzilla-shape-control-v185'].forEach((id) => {
         const control = document.getElementById(id);
         if (!control) return;
+
         control.style.setProperty('height', '23px', 'important');
         control.style.setProperty('min-height', '23px', 'important');
         control.style.setProperty('overflow', 'visible', 'important');
@@ -86,9 +90,11 @@ function GannzillaToolbarVisualFixV187() {
         arrow?.style.setProperty('min-width', '9px', 'important');
         arrow?.style.setProperty('font-size', '9px', 'important');
 
-        svg?.style.setProperty('width', '24px', 'important');
-        svg?.style.setProperty('height', '20px', 'important');
-        svg?.style.setProperty('transform', 'scale(1.18)', 'important');
+        svg?.setAttribute('width', '25');
+        svg?.setAttribute('height', '21');
+        svg?.style.setProperty('width', '25px', 'important');
+        svg?.style.setProperty('height', '21px', 'important');
+        svg?.style.setProperty('transform', 'scale(1.2)', 'important');
         svg?.style.setProperty('transform-origin', 'center', 'important');
 
         control.querySelectorAll('svg line, svg rect, svg ellipse, svg path').forEach((shape) => {
@@ -99,8 +105,8 @@ function GannzillaToolbarVisualFixV187() {
 
     apply();
     const observer = new MutationObserver(apply);
-    observer.observe(document.body, { childList: true, subtree: true });
-    const timer = window.setInterval(apply, 180);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    const timer = window.setInterval(apply, 120);
     window.addEventListener('resize', apply);
 
     return () => {
@@ -168,7 +174,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '187');
+    url.searchParams.set('v', '188');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -220,7 +226,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 187: enlarge the two drawing icons and remove the lock icon from the toolbar.
+// Build 188: permanently hide the lock icon and match the two drawing icons to the toolbar size.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -237,7 +243,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="187">
+        <div data-gannzilla-build="188">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -256,7 +262,7 @@ const App = () => {
               <GannzillaNativeToolbarBindingV178 />
               <GannzillaLineStyleMenuV183 />
               <GannzillaDrawingToolsUrlToggleV182 />
-              <GannzillaToolbarVisualFixV187 />
+              <GannzillaToolbarFinalVisualFixV188 />
             </>
           ) : isTestMode ? (
             <TestPage />
