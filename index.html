@@ -37,8 +37,11 @@
         display: none !important;
       }
 
-      /* v146: حذف زر إخفاء أدوات الرسم المكرر من يمين الشريط */
-      #gannzilla-drawing-tools-hitbox-v125 {
+      /* v147: حذف زري إخفاء أدوات الرسم المكررين من الشريط العلوي */
+      #gannzilla-drawing-tools-hitbox-v125,
+      #gannzilla-top-hide-toolbar-v138,
+      button[title="إخفاء أدوات الرسم"],
+      button[aria-label="إخفاء أدوات الرسم"] {
         display: none !important;
         visibility: hidden !important;
         pointer-events: none !important;
@@ -54,7 +57,10 @@
       (() => {
         const HIDDEN_BY_V145 = 'data-gannzilla-v145-hidden';
         const PREVIOUS_DISPLAY = 'data-gannzilla-v145-previous-display';
-        const DRAWING_TOGGLE_ID = 'gannzilla-drawing-tools-hitbox-v125';
+        const DRAWING_TOGGLE_IDS = [
+          'gannzilla-drawing-tools-hitbox-v125',
+          'gannzilla-top-hide-toolbar-v138',
+        ];
         let scheduled = false;
 
         const hide = (element) => {
@@ -78,6 +84,12 @@
           element.removeAttribute(PREVIOUS_DISPLAY);
           element.removeAttribute('aria-hidden');
         };
+
+        const isDuplicateDrawingToggle = (element) => Boolean(element) && (
+          DRAWING_TOGGLE_IDS.includes(element.id)
+          || element.getAttribute('title') === 'إخفاء أدوات الرسم'
+          || element.getAttribute('aria-label') === 'إخفاء أدوات الرسم'
+        );
 
         const findTopToolbar = () => Array.from(document.querySelectorAll('div'))
           .filter((element) => {
@@ -117,14 +129,16 @@
           if (!window.location.search.includes('gannzillaPro=true')
             && !window.location.search.includes('wheelPro=true')) return;
 
-          hide(document.getElementById(DRAWING_TOGGLE_ID));
+          DRAWING_TOGGLE_IDS.forEach((id) => hide(document.getElementById(id)));
+          document.querySelectorAll('button[title="إخفاء أدوات الرسم"], button[aria-label="إخفاء أدوات الرسم"]')
+            .forEach(hide);
 
           const toolbar = findTopToolbar();
           const strip = toolbar?.children?.[1];
           if (!toolbar || !strip) return;
 
-          toolbar.setAttribute('data-gannzilla-canonical-toolbar', 'v146');
-          strip.setAttribute('data-gannzilla-canonical-toolbar-strip', 'v146');
+          toolbar.setAttribute('data-gannzilla-canonical-toolbar', 'v147');
+          strip.setAttribute('data-gannzilla-canonical-toolbar-strip', 'v147');
 
           const children = Array.from(strip.children);
           const first = findCanonicalFirstButton(strip);
@@ -137,14 +151,14 @@
             const firstIndex = children.indexOf(first);
             const lastIndex = children.indexOf(last);
             children.forEach((element, index) => {
-              if (index < firstIndex || index > lastIndex) hide(element);
+              if (isDuplicateDrawingToggle(element) || index < firstIndex || index > lastIndex) hide(element);
               else restore(element);
             });
           }
 
           const stripRect = strip.getBoundingClientRect();
           document.querySelectorAll('button, [role="button"]').forEach((element) => {
-            if (element.id === DRAWING_TOGGLE_ID) {
+            if (isDuplicateDrawingToggle(element)) {
               hide(element);
               return;
             }
@@ -162,23 +176,26 @@
             if (topRow && toolbarZone) hide(element);
           });
 
-          window.GANNZILLA_TOOLBAR_BOUNDS_V146 = true;
-          window.__auditGannzillaToolbarBoundsV146 = () => {
+          window.GANNZILLA_TOOLBAR_BOUNDS_V147 = true;
+          window.__auditGannzillaToolbarBoundsV147 = () => {
             const currentToolbar = findTopToolbar();
             const currentStrip = currentToolbar?.children?.[1];
             const visible = directVisibleChildren(currentStrip);
-            const duplicateToggle = document.getElementById(DRAWING_TOGGLE_ID);
-            const toggleHidden = !duplicateToggle
-              || window.getComputedStyle(duplicateToggle).display === 'none'
-              || window.getComputedStyle(duplicateToggle).visibility === 'hidden';
+            const duplicateToggles = DRAWING_TOGGLE_IDS
+              .map((id) => document.getElementById(id))
+              .filter(Boolean);
+            const togglesHidden = duplicateToggles.every((element) => {
+              const style = window.getComputedStyle(element);
+              return style.display === 'none' || style.visibility === 'hidden';
+            });
             return {
               ok: Boolean(currentStrip)
                 && visible[0] === findCanonicalFirstButton(currentStrip)
                 && visible.at(-1)?.id === 'gannzilla-about-v141'
-                && toggleHidden,
+                && togglesHidden,
               firstVisibleText: String(visible[0]?.textContent || '').trim(),
               lastVisibleId: visible.at(-1)?.id || null,
-              duplicateDrawingToggleHidden: toggleHidden,
+              duplicateDrawingTogglesHidden: togglesHidden,
               hiddenOutsideCount: document.querySelectorAll(`[${HIDDEN_BY_V145}="true"]`).length,
             };
           };
@@ -194,7 +211,7 @@
         observer.observe(document.documentElement, { childList: true, subtree: true });
         window.addEventListener('load', schedule, { once: true });
         window.addEventListener('resize', schedule);
-        window.setInterval(enforceToolbarBounds, 500);
+        window.setInterval(enforceToolbarBounds, 250);
         schedule();
       })();
     </script>
