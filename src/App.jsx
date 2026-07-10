@@ -18,7 +18,7 @@ import GannzillaWheelPanControlV163 from './components/GannTools/GannzillaWheelP
 import GannzillaNativeToolbarBindingV178 from './components/GannTools/GannzillaNativeToolbarBindingV178';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 178: let the original drawing-palette owner handle its own toggle without double interception.
+// Build 178: original palette toggle owns the event; native toolbar binding no longer double-intercepts it.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
