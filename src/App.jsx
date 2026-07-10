@@ -22,7 +22,6 @@ import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArab
 
 const DRAWING_TOGGLE_ID = 'gannzilla-drawing-tools-url-toggle-v182';
 const LEGACY_HITBOX_ID = 'gannzilla-drawing-tools-hitbox-v125';
-const CLEAR_DRAWINGS_ID = 'gannzilla-clear-drawings-v192';
 const DRAWING_STORAGE_KEYS = [
   'gannzillaDrawingToolsVisibleV125',
   'gannzillaDrawingToolsVisibleV124',
@@ -43,20 +42,6 @@ function findDrawingToggleAnchor() {
       && rect.top >= 0
       && rect.bottom <= 48
       && ['⌕', '🔍', '🔎'].includes(cleanLabel(button));
-  }) || null;
-}
-
-function findClearDrawingsAnchor() {
-  return Array.from(document.querySelectorAll('button')).find((button) => {
-    if (button.id === CLEAR_DRAWINGS_ID) return false;
-    const rect = button.getBoundingClientRect();
-    const label = cleanLabel(button);
-    const name = `${button.getAttribute('title') || ''} ${button.getAttribute('aria-label') || ''}`;
-    return rect.width > 0
-      && rect.height > 0
-      && rect.top >= 0
-      && rect.bottom <= 48
-      && (['🔒', '🔐'].includes(label) || /lock|قفل/i.test(name));
   }) || null;
 }
 
@@ -114,7 +99,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '192');
+    url.searchParams.set('v', '193');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -166,100 +151,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-function GannzillaClearDrawingsButtonV192() {
-  const [rect, setRect] = React.useState(null);
-
-  React.useEffect(() => {
-    let disposed = false;
-    const refresh = () => {
-      if (disposed) return;
-      const anchor = findClearDrawingsAnchor();
-      if (!anchor) {
-        setRect(null);
-        return;
-      }
-      const nextRect = anchor.getBoundingClientRect();
-      const next = {
-        left: Math.round(nextRect.left),
-        top: Math.round(nextRect.top),
-        width: Math.max(22, Math.round(nextRect.width)),
-        height: Math.max(21, Math.round(nextRect.height)),
-      };
-      setRect((current) => current
-        && current.left === next.left
-        && current.top === next.top
-        && current.width === next.width
-        && current.height === next.height
-        ? current
-        : next);
-    };
-
-    refresh();
-    const timer = window.setInterval(refresh, 400);
-    window.addEventListener('resize', refresh);
-    window.addEventListener('scroll', refresh, true);
-    return () => {
-      disposed = true;
-      window.clearInterval(timer);
-      window.removeEventListener('resize', refresh);
-      window.removeEventListener('scroll', refresh, true);
-    };
-  }, []);
-
-  const clearDrawings = React.useCallback((event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.nativeEvent?.stopImmediatePropagation?.();
-    const confirmed = window.confirm('هل تريد مسح جميع الرسومات الحالية؟');
-    if (confirmed) window.location.reload();
-  }, []);
-
-  if (!rect) return null;
-
-  return createPortal(
-    <button
-      id={CLEAR_DRAWINGS_ID}
-      type="button"
-      title="مسح جميع الرسومات"
-      aria-label="مسح جميع الرسومات"
-      onPointerDown={clearDrawings}
-      onClick={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-      }}
-      style={{
-        position: 'fixed',
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        minWidth: rect.width,
-        height: rect.height,
-        padding: 0,
-        margin: 0,
-        zIndex: 2147483647,
-        border: '1px solid #8fa5b4',
-        borderRadius: 2,
-        background: '#f7f7f7',
-        color: '#b42318',
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: 'pointer',
-        pointerEvents: 'auto',
-        touchAction: 'manipulation',
-        userSelect: 'none',
-        boxSizing: 'border-box',
-      }}
-    >
-      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" style={{ display: 'block', pointerEvents: 'none' }}>
-        <path d="M8 8v9m4-9v9m4-9v9M5 5h14M9 5V3h6v2m-8 0 1 16h8l1-16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </button>,
-    document.body,
-  );
-}
-
-// Build 192: add a dedicated clear-all drawings button without changing drawing behavior.
+// Build 193: remove clear-all and delete only the drawing that is clicked.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -324,7 +216,7 @@ const App = () => {
             transform-box: fill-box;
           }
         `}</style>
-        <div data-gannzilla-build="192">
+        <div data-gannzilla-build="193">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -343,7 +235,6 @@ const App = () => {
               <GannzillaNativeToolbarBindingV178 />
               <GannzillaLineStyleMenuV183 />
               <GannzillaDrawingToolsUrlToggleV182 />
-              <GannzillaClearDrawingsButtonV192 />
             </>
           ) : isTestMode ? (
             <TestPage />
