@@ -15,10 +15,10 @@ import GannzillaAboutDialogScaleV157 from './components/GannTools/GannzillaAbout
 import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV159';
 import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
 import GannzillaWheelPanControlV163 from './components/GannTools/GannzillaWheelPanControlV163';
-import GannzillaFullscreenFitV166 from './components/GannTools/GannzillaFullscreenFitV166';
+import GannzillaToolbarActionsFixV169 from './components/GannTools/GannzillaToolbarActionsFixV169';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 168: deploy true browser fullscreen plus automatic wheel fit and top reset.
+// Build 169: reliable fullscreen and drawing-palette toolbar actions.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -35,7 +35,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="168">
+        <div data-gannzilla-build="169">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -48,10 +48,10 @@ const App = () => {
               <GannzillaAboutBrandV159 />
               <GannzillaAboutClickFixV160 />
               <GannzillaWheelPanControlV163 />
-              <GannzillaFullscreenFitV166 />
               <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
+              <GannzillaToolbarActionsFixV169 />
             </>
           ) : isTestMode ? (
             <TestPage />
