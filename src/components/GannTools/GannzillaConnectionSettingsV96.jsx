@@ -6,7 +6,6 @@ const PASSWORD_KEY = 'gannzillaConnectionPasswordV141';
 const BUTTON_ID = 'gannzilla-connection-settings-v141';
 const ABOUT_ID = 'gannzilla-about-v141';
 const LANGUAGE_BUTTON_ID = 'gannzilla-bilingual-toggle-v95';
-const OPEN_EVENT = 'gannzilla:open-connection-settings-v148';
 
 function loadSettings() {
   try {
@@ -35,41 +34,40 @@ function saveSettings(settings) {
   sessionStorage.setItem(PASSWORD_KEY, settings.password || '');
 }
 
-function applyButtonStyle(button, type) {
+function stopEvent(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+  event?.stopImmediatePropagation?.();
+}
+
+function styleToolbarButton(button, kind) {
   Object.assign(button.style, {
-    height: type === 'about' ? '24px' : '22px',
-    width: type === 'about' ? '30px' : '27px',
-    minWidth: type === 'about' ? '30px' : '27px',
+    width: kind === 'about' ? '30px' : '27px',
+    minWidth: kind === 'about' ? '30px' : '27px',
+    height: kind === 'about' ? '24px' : '22px',
     padding: '0',
-    marginInlineStart: type === 'about' ? '3px' : '0',
-    marginInlineEnd: type === 'connection' ? '3px' : '0',
+    marginInlineStart: kind === 'about' ? '3px' : '0',
+    marginInlineEnd: kind === 'connection' ? '3px' : '0',
     border: '1px solid #8794a6',
     borderRadius: '2px',
     background: 'linear-gradient(#ffffff,#dfe5eb)',
     cursor: 'pointer',
-    verticalAlign: 'middle',
     boxSizing: 'border-box',
-    pointerEvents: 'auto',
-    userSelect: 'none',
-    touchAction: 'manipulation',
-    position: 'relative',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
     visibility: 'visible',
     opacity: '1',
+    pointerEvents: 'auto',
+    touchAction: 'manipulation',
+    userSelect: 'none',
     zIndex: '2147483647',
   });
   button.disabled = false;
   button.removeAttribute('aria-hidden');
   button.removeAttribute('data-gannzilla-v145-hidden');
   button.removeAttribute('data-gannzilla-v145-previous-display');
-}
-
-function stopEvent(event) {
-  event?.preventDefault?.();
-  event?.stopPropagation?.();
-  event?.stopImmediatePropagation?.();
 }
 
 export default function GannzillaConnectionSettingsV96() {
@@ -80,7 +78,7 @@ export default function GannzillaConnectionSettingsV96() {
   const [language, setLanguage] = React.useState(document.documentElement.lang === 'ar' ? 'ar' : 'en');
   const languageRef = React.useRef(language);
 
-  const openConnectionDialog = React.useCallback((event) => {
+  const openConnection = React.useCallback((event) => {
     stopEvent(event);
     setSettings(loadSettings());
     setStatus('');
@@ -88,7 +86,7 @@ export default function GannzillaConnectionSettingsV96() {
     setOpen(true);
   }, []);
 
-  const openAboutDialog = React.useCallback((event) => {
+  const openAbout = React.useCallback((event) => {
     stopEvent(event);
     setOpen(false);
     setAboutOpen(true);
@@ -96,50 +94,16 @@ export default function GannzillaConnectionSettingsV96() {
 
   React.useEffect(() => {
     languageRef.current = language;
-    const connectionButton = document.getElementById(BUTTON_ID);
-    const aboutButton = document.getElementById(ABOUT_ID);
-    if (connectionButton) {
-      connectionButton.title = language === 'ar' ? 'إعدادات الاتصال' : 'Connection settings';
-      connectionButton.setAttribute('aria-label', connectionButton.title);
-    }
-    if (aboutButton) {
-      aboutButton.title = language === 'ar' ? 'حول البرنامج' : 'About';
-      aboutButton.setAttribute('aria-label', aboutButton.title);
-    }
   }, [language]);
 
   React.useEffect(() => {
     let disposed = false;
-    let bodyObserver;
-
-    const activateConnectionButton = (button) => {
-      applyButtonStyle(button, 'connection');
-      button.dataset.gannzillaConnectionButton = BUILD;
-      button.title = languageRef.current === 'ar' ? 'إعدادات الاتصال' : 'Connection settings';
-      button.setAttribute('aria-label', button.title);
-      button.tabIndex = 0;
-      button.onpointerdown = openConnectionDialog;
-      button.onmousedown = openConnectionDialog;
-      button.onclick = openConnectionDialog;
-      button.onkeydown = (event) => {
-        if (event.key === 'Enter' || event.key === ' ') openConnectionDialog(event);
-      };
-    };
-
-    const activateAboutButton = (button) => {
-      applyButtonStyle(button, 'about');
-      button.title = languageRef.current === 'ar' ? 'حول البرنامج' : 'About';
-      button.setAttribute('aria-label', button.title);
-      button.tabIndex = 0;
-      button.onpointerdown = openAboutDialog;
-      button.onclick = openAboutDialog;
-    };
 
     const install = () => {
-      if (disposed) return false;
+      if (disposed) return;
       const languageButton = document.getElementById(LANGUAGE_BUTTON_ID);
-      if (!languageButton?.parentElement) return false;
-      const parent = languageButton.parentElement;
+      const parent = languageButton?.parentElement;
+      if (!parent) return;
 
       let connectionButton = document.getElementById(BUTTON_ID);
       if (!connectionButton) {
@@ -151,7 +115,16 @@ export default function GannzillaConnectionSettingsV96() {
         connectionButton.style.font = '700 14px Segoe UI, Arial, sans-serif';
         connectionButton.style.lineHeight = '20px';
       }
-      activateConnectionButton(connectionButton);
+      styleToolbarButton(connectionButton, 'connection');
+      connectionButton.dataset.gannzillaConnectionButton = BUILD;
+      connectionButton.title = languageRef.current === 'ar' ? 'إعدادات الاتصال' : 'Connection settings';
+      connectionButton.setAttribute('aria-label', connectionButton.title);
+      connectionButton.tabIndex = 0;
+      connectionButton.onpointerdown = openConnection;
+      connectionButton.onclick = openConnection;
+      connectionButton.onkeydown = (event) => {
+        if (event.key === 'Enter' || event.key === ' ') openConnection(event);
+      };
       if (connectionButton.parentElement !== parent || connectionButton.nextSibling !== languageButton) {
         parent.insertBefore(connectionButton, languageButton);
       }
@@ -170,32 +143,29 @@ export default function GannzillaConnectionSettingsV96() {
         });
         aboutButton.appendChild(circle);
       }
-      activateAboutButton(aboutButton);
+      styleToolbarButton(aboutButton, 'about');
+      aboutButton.title = languageRef.current === 'ar' ? 'حول البرنامج' : 'About';
+      aboutButton.setAttribute('aria-label', aboutButton.title);
+      aboutButton.onpointerdown = openAbout;
+      aboutButton.onclick = openAbout;
       if (aboutButton.parentElement !== parent || languageButton.nextSibling !== aboutButton) {
         parent.insertBefore(aboutButton, languageButton.nextSibling);
       }
-
-      return true;
     };
 
-    const captureConnectionActivation = (event) => {
+    const captureActivation = (event) => {
       const target = event.target instanceof Element ? event.target.closest(`#${BUTTON_ID}`) : null;
-      if (target) openConnectionDialog(event);
+      if (target) openConnection(event);
     };
-
-    const openFromWindowEvent = (event) => openConnectionDialog(event);
 
     install();
-    bodyObserver = new MutationObserver(() => install());
-    bodyObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class', 'aria-hidden', 'disabled'] });
-
-    document.addEventListener('pointerdown', captureConnectionActivation, true);
-    document.addEventListener('click', captureConnectionActivation, true);
-    window.addEventListener(OPEN_EVENT, openFromWindowEvent);
-    const timer = window.setInterval(install, 250);
+    const observer = new MutationObserver(install);
+    observer.observe(document.body, { childList: true, subtree: true });
+    const timer = window.setInterval(install, 500);
+    document.addEventListener('pointerdown', captureActivation, true);
 
     window.GANNZILLA_CONNECTION_SETTINGS_V148 = true;
-    window.__openGannzillaConnectionSettingsV148 = () => openConnectionDialog();
+    window.__openGannzillaConnectionSettingsV148 = () => openConnection();
     window.__auditGannzillaConnectionSettingsV148 = () => {
       const button = document.getElementById(BUTTON_ID);
       const style = button ? window.getComputedStyle(button) : null;
@@ -209,27 +179,23 @@ export default function GannzillaConnectionSettingsV96() {
         connectionButtonPresent: Boolean(button),
         connectionButtonVisible: Boolean(style) && style.display !== 'none' && style.visibility !== 'hidden',
         connectionButtonClickable: Boolean(style) && style.pointerEvents !== 'none' && typeof button?.onclick === 'function',
-        directOpenFunctionPresent: typeof window.__openGannzillaConnectionSettingsV148 === 'function',
       };
     };
 
     return () => {
       disposed = true;
+      observer.disconnect();
       window.clearInterval(timer);
-      bodyObserver?.disconnect();
-      document.removeEventListener('pointerdown', captureConnectionActivation, true);
-      document.removeEventListener('click', captureConnectionActivation, true);
-      window.removeEventListener(OPEN_EVENT, openFromWindowEvent);
-      delete window.__openGannzillaConnectionSettingsV148;
+      document.removeEventListener('pointerdown', captureActivation, true);
     };
-  }, [openAboutDialog, openConnectionDialog]);
+  }, [openAbout, openConnection]);
 
   React.useEffect(() => {
-    const languageObserver = new MutationObserver(() => {
+    const observer = new MutationObserver(() => {
       setLanguage(document.documentElement.lang === 'ar' ? 'ar' : 'en');
     });
-    languageObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-    return () => languageObserver.disconnect();
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    return () => observer.disconnect();
   }, []);
 
   const ar = language === 'ar';
@@ -240,20 +206,27 @@ export default function GannzillaConnectionSettingsV96() {
     about: 'حول البرنامج', version: 'الإصدار: 8.3', author: 'المؤلف: Artem Kalashnikov', rights: 'جميع الحقوق محفوظة', close: 'إغلاق',
   } : {
     title: 'Connection settings', useProxy: 'Use proxy', type: 'Type:', server: 'Server:', port: 'Port:',
-    login: 'Login:', password: 'Password:', test: 'Test', ok: 'OK', cancel: 'Cancel',
+    login: 'Login:', password: 'Password', test: 'Test', ok: 'OK', cancel: 'Cancel',
     direct: 'Direct connection will be used.', valid: 'Configuration format is valid.', invalid: 'Enter a valid server and port.',
     about: 'About', version: 'Version: 8.3', author: 'Author: Artem Kalashnikov', rights: 'All rights reserved', close: 'Cancel',
   };
 
-  const update = (key) => (event) => setSettings((current) => ({ ...current, [key]: event.target.type === 'checkbox' ? event.target.checked : event.target.value }));
+  const update = (key) => (event) => setSettings((current) => ({
+    ...current,
+    [key]: event.target.type === 'checkbox' ? event.target.checked : event.target.value,
+  }));
+
   const test = () => {
     if (!settings.useProxy) return setStatus(t.direct);
     const port = Number(settings.port);
     setStatus(settings.server.trim() && Number.isInteger(port) && port > 0 && port <= 65535 ? t.valid : t.invalid);
   };
+
   const confirm = () => {
     saveSettings(settings);
-    window.dispatchEvent(new CustomEvent('gannzilla:connection-settings-changed', { detail: { ...settings, password: undefined } }));
+    window.dispatchEvent(new CustomEvent('gannzilla:connection-settings-changed', {
+      detail: { ...settings, password: undefined },
+    }));
     setOpen(false);
   };
 
