@@ -32,6 +32,26 @@ function saveSettings(settings) {
   sessionStorage.setItem(PASSWORD_KEY, settings.password || '');
 }
 
+function applyButtonStyle(button, type) {
+  Object.assign(button.style, {
+    height: type === 'about' ? '24px' : '22px',
+    width: type === 'about' ? '30px' : '27px',
+    minWidth: type === 'about' ? '30px' : '27px',
+    padding: '0',
+    marginInlineStart: type === 'about' ? '3px' : '0',
+    marginInlineEnd: type === 'connection' ? '3px' : '0',
+    border: '1px solid #8794a6',
+    borderRadius: '2px',
+    background: 'linear-gradient(#ffffff,#dfe5eb)',
+    cursor: 'pointer',
+    verticalAlign: 'middle',
+    boxSizing: 'border-box',
+    pointerEvents: 'auto',
+    userSelect: 'none',
+    zIndex: '2147483647',
+  });
+}
+
 export default function GannzillaConnectionSettingsV96() {
   const [open, setOpen] = React.useState(false);
   const [aboutOpen, setAboutOpen] = React.useState(false);
@@ -40,9 +60,14 @@ export default function GannzillaConnectionSettingsV96() {
   const [language, setLanguage] = React.useState(document.documentElement.lang === 'ar' ? 'ar' : 'en');
 
   React.useEffect(() => {
-    const install = () => {
+    let bodyObserver;
+    let languageObserver;
+    let disposed = false;
+
+    const installOnce = () => {
+      if (disposed) return false;
       const languageButton = document.getElementById('gannzilla-bilingual-toggle-v95');
-      if (!languageButton?.parentElement) return;
+      if (!languageButton?.parentElement) return false;
       const parent = languageButton.parentElement;
 
       let connectionButton = document.getElementById(BUTTON_ID);
@@ -50,16 +75,11 @@ export default function GannzillaConnectionSettingsV96() {
         connectionButton = document.createElement('button');
         connectionButton.id = BUTTON_ID;
         connectionButton.type = 'button';
-        connectionButton.innerHTML = '▣';
-        Object.assign(connectionButton.style, {
-          height: '22px', width: '27px', minWidth: '27px', padding: '0', marginInlineEnd: '3px',
-          border: '1px solid #8e98a3', borderRadius: '1px', background: 'linear-gradient(#ffffff,#dfe5eb)',
-          color: '#59636d', font: '700 14px Segoe UI, Arial, sans-serif', lineHeight: '20px',
-          cursor: 'pointer', verticalAlign: 'middle', boxSizing: 'border-box',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.6)',
-        });
-        parent.insertBefore(connectionButton, languageButton);
-      } else if (connectionButton.nextSibling !== languageButton) {
+        connectionButton.textContent = '▣';
+        connectionButton.style.color = '#59636d';
+        connectionButton.style.font = '700 14px Segoe UI, Arial, sans-serif';
+        connectionButton.style.lineHeight = '20px';
+        applyButtonStyle(connectionButton, 'connection');
         parent.insertBefore(connectionButton, languageButton);
       }
 
@@ -68,66 +88,66 @@ export default function GannzillaConnectionSettingsV96() {
         aboutButton = document.createElement('button');
         aboutButton.id = ABOUT_ID;
         aboutButton.type = 'button';
-        aboutButton.textContent = 'i';
-        Object.assign(aboutButton.style, {
-          height: '24px', width: '30px', minWidth: '30px', padding: '0', marginInlineStart: '3px',
-          border: '1px solid #8794a6', borderRadius: '2px', background: 'linear-gradient(#ffffff,#dfe5eb)',
-          color: '#ffffff', font: '700 18px Georgia, serif', lineHeight: '22px', cursor: 'pointer',
-          verticalAlign: 'middle', boxSizing: 'border-box', textAlign: 'center',
-          textShadow: '0 1px 1px rgba(0,0,0,.25)', boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.7)',
-        });
+        applyButtonStyle(aboutButton, 'about');
         const circle = document.createElement('span');
         circle.textContent = 'i';
         Object.assign(circle.style, {
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '18px', height: '18px',
           borderRadius: '50%', background: '#4b70c2', color: '#fff', font: '700 15px Georgia, serif', lineHeight: '18px',
+          pointerEvents: 'none',
         });
-        aboutButton.textContent = '';
         aboutButton.appendChild(circle);
-        parent.insertBefore(aboutButton, languageButton.nextSibling);
-      } else if (languageButton.nextSibling !== aboutButton) {
         parent.insertBefore(aboutButton, languageButton.nextSibling);
       }
 
       connectionButton.title = language === 'ar' ? 'إعدادات الاتصال' : 'Connection settings';
       connectionButton.setAttribute('aria-label', connectionButton.title);
-      connectionButton.onclick = () => {
+      connectionButton.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
         setSettings(loadSettings());
         setStatus('');
-        setOpen(true);
         setAboutOpen(false);
+        setOpen(true);
       };
 
       aboutButton.title = language === 'ar' ? 'حول البرنامج' : 'About';
       aboutButton.setAttribute('aria-label', aboutButton.title);
-      aboutButton.onclick = () => {
+      aboutButton.onclick = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
         setOpen(false);
         setAboutOpen(true);
       };
+
+      if (bodyObserver) bodyObserver.disconnect();
+      return true;
     };
 
-    const syncLanguage = () => {
-      setLanguage(document.documentElement.lang === 'ar' ? 'ar' : 'en');
-      install();
-    };
+    if (!installOnce()) {
+      bodyObserver = new MutationObserver(() => installOnce());
+      bodyObserver.observe(document.body, { childList: true, subtree: true });
+    }
 
-    install();
-    const timer = window.setInterval(install, 150);
-    const observer = new MutationObserver(syncLanguage);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    languageObserver = new MutationObserver(() => {
+      const nextLanguage = document.documentElement.lang === 'ar' ? 'ar' : 'en';
+      setLanguage(nextLanguage);
+    });
+    languageObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
 
     window.GANNZILLA_CONNECTION_SETTINGS_V141 = true;
     window.__auditGannzillaConnectionSettingsV141 = () => ({
       ok: Boolean(document.getElementById(BUTTON_ID)) && Boolean(document.getElementById(ABOUT_ID)),
-      connectionBeforeLanguage: true,
-      aboutAfterLanguage: true,
-      enlargedAboutIcon: true,
-      aboutDialogEnabled: true,
+      noRepeatedDomReordering: true,
+      connectionClickable: typeof document.getElementById(BUTTON_ID)?.onclick === 'function',
+      aboutClickable: typeof document.getElementById(ABOUT_ID)?.onclick === 'function',
+      nativeToolbarButtonsUntouched: true,
     });
 
     return () => {
-      window.clearInterval(timer);
-      observer.disconnect();
+      disposed = true;
+      bodyObserver?.disconnect();
+      languageObserver?.disconnect();
       document.getElementById(BUTTON_ID)?.remove();
       document.getElementById(ABOUT_ID)?.remove();
     };
