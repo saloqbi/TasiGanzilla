@@ -165,12 +165,21 @@ export default function GannzillaUnifiedDrawingPalettesV122() {
       if (nativeButton) {
         nativeButtonRef.current = nativeButton;
         const rect = nativeButton.getBoundingClientRect();
-        setButtonRect({
+        const nextRect = {
           left: Math.round(rect.left - 5),
           top: Math.round(rect.top - 3),
           width: Math.max(32, Math.round(rect.width + 10)),
           height: Math.max(27, Math.round(rect.height + 6)),
-        });
+        };
+        setButtonRect((current) => (
+          current
+          && current.left === nextRect.left
+          && current.top === nextRect.top
+          && current.width === nextRect.width
+          && current.height === nextRect.height
+            ? current
+            : nextRect
+        ));
         nativeButton.style.setProperty('pointer-events', 'none', 'important');
         nativeButton.setAttribute('aria-hidden', 'true');
       }
@@ -201,13 +210,14 @@ export default function GannzillaUnifiedDrawingPalettesV122() {
           && window.getComputedStyle(rightPalette).visibility !== 'hidden'
         : null;
       const leftVisible = Boolean(document.getElementById(LEFT_ID));
+      const hitboxPresent = Boolean(document.getElementById(HITBOX_ID));
       return {
-        ok: Boolean(buttonRect)
+        ok: hitboxPresent
           && (visibleRef.current
             ? leftVisible && rightVisible === true
             : !leftVisible && rightVisible === false),
         build: BUILD,
-        hitboxPresent: Boolean(document.getElementById(HITBOX_ID)),
+        hitboxPresent,
         nativeButtonFound: Boolean(nativeButtonRef.current),
         visible: visibleRef.current,
         leftVisible,
@@ -225,7 +235,7 @@ export default function GannzillaUnifiedDrawingPalettesV122() {
         nativeButtonRef.current.removeAttribute('aria-hidden');
       }
     };
-  }, [buttonRect, applyVisibility]);
+  }, [applyVisibility]);
 
   React.useEffect(() => {
     applyVisibility(visible);
