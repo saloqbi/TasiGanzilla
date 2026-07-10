@@ -17,6 +17,7 @@ import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV
 import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
 import GannzillaWheelPanControlV180 from './components/GannTools/GannzillaWheelPanControlV180';
 import GannzillaNativeToolbarBindingV178 from './components/GannTools/GannzillaNativeToolbarBindingV178';
+import GannzillaLineStyleMenuV183 from './components/GannTools/GannzillaLineStyleMenuV183';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
 const DRAWING_TOGGLE_ID = 'gannzilla-drawing-tools-url-toggle-v182';
@@ -98,7 +99,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '182');
+    url.searchParams.set('v', '183');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -150,7 +151,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 182: direct single-owner drawing palette toggle using URL state.
+// Build 183: Gannzilla-style line dropdown with plain, one-arrow and double-arrow modes.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -167,7 +168,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="182">
+        <div data-gannzilla-build="183">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -184,6 +185,7 @@ const App = () => {
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
               <GannzillaNativeToolbarBindingV178 />
+              <GannzillaLineStyleMenuV183 />
               <GannzillaDrawingToolsUrlToggleV182 />
             </>
           ) : isTestMode ? (
