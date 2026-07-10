@@ -1,10 +1,11 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = '172';
-const OVERLAY_PREFIX = 'gannzilla-toolbar-action-v172-';
-const DRAW_LAYER_ID = 'gannzilla-toolbar-drawing-layer-v172';
-const SHAPES_KEY = 'gannzillaToolbarDrawingsV172';
+const BUILD = '173';
+const OVERLAY_PREFIX = 'gannzilla-toolbar-action-v173-';
+const DRAW_LAYER_ID = 'gannzilla-toolbar-drawing-layer-v173';
+const SHAPES_KEY = 'gannzillaToolbarDrawingsV173';
+const LEGACY_HITBOX_ID = 'gannzilla-drawing-tools-hitbox-v125';
 const STORAGE_KEYS = [
   'gannzillaDrawingToolsVisibleV125',
   'gannzillaDrawingToolsVisibleV124',
@@ -26,19 +27,31 @@ function textOf(element) {
   return String(element?.textContent || '').replace(/\s+/g, ' ').trim();
 }
 
-function isTopToolbarButton(button) {
-  const rect = button?.getBoundingClientRect?.();
+function isVisibleTopButton(button) {
+  if (!button) return false;
+  const rect = button.getBoundingClientRect?.();
+  const style = window.getComputedStyle(button);
   return Boolean(rect)
     && rect.width > 0
     && rect.height > 0
     && rect.top >= 0
-    && rect.bottom <= 44;
+    && rect.bottom <= 44
+    && style.display !== 'none'
+    && style.visibility !== 'hidden'
+    && style.opacity !== '0';
+}
+
+function toolKeyForButton(button) {
+  if (!button || String(button.id || '').startsWith(OVERLAY_PREFIX)) return null;
+  if (!isVisibleTopButton(button)) return null;
+  const label = textOf(button);
+  return TOOL_DEFS.find((tool) => tool.labels.includes(label))?.key || null;
 }
 
 function findNativeButtons() {
   const buttons = Array.from(document.querySelectorAll('button'))
     .filter((button) => !String(button.id || '').startsWith(OVERLAY_PREFIX))
-    .filter(isTopToolbarButton);
+    .filter(isVisibleTopButton);
 
   const found = {};
   TOOL_DEFS.forEach((tool) => {
@@ -47,9 +60,9 @@ function findNativeButtons() {
   return found;
 }
 
-function rectOf(button, padding = 0) {
-  if (!button) return null;
-  const rect = button.getBoundingClientRect();
+function rectOf(element, padding = 0) {
+  if (!element) return null;
+  const rect = element.getBoundingClientRect();
   if (rect.width <= 0 || rect.height <= 0) return null;
   return {
     left: Math.round(rect.left - padding),
@@ -57,6 +70,14 @@ function rectOf(button, padding = 0) {
     width: Math.max(22, Math.round(rect.width + padding * 2)),
     height: Math.max(21, Math.round(rect.height + padding * 2)),
   };
+}
+
+function sameRect(a, b) {
+  return Boolean(a && b)
+    && a.left === b.left
+    && a.top === b.top
+    && a.width === b.width
+    && a.height === b.height;
 }
 
 function findWheelCanvas() {
@@ -108,6 +129,15 @@ function persistDrawingVisible(visible) {
   window.dispatchEvent(new CustomEvent('gannzilla:drawing-tools-visibility', { detail }));
 }
 
+function setImportant(element, property, value) {
+  if (!element) return;
+  const current = element.style.getPropertyValue(property);
+  const priority = element.style.getPropertyPriority(property);
+  if (current !== value || priority !== 'important') {
+    element.style.setProperty(property, value, 'important');
+  }
+}
+
 function enforceDrawingVisibility(visible) {
   const selectors = [
     '[data-gannzilla-left-reference-palette="true"]',
@@ -118,22 +148,24 @@ function enforceDrawingVisibility(visible) {
   ].join(',');
 
   document.querySelectorAll(selectors).forEach((element) => {
-    element.style.setProperty('display', visible ? 'flex' : 'none', 'important');
-    element.style.setProperty('visibility', visible ? 'visible' : 'hidden', 'important');
-    element.style.setProperty('pointer-events', visible ? 'auto' : 'none', 'important');
+    setImportant(element, 'display', visible ? 'flex' : 'none');
+    setImportant(element, 'visibility', visible ? 'visible' : 'hidden');
+    setImportant(element, 'pointer-events', visible ? 'auto' : 'none');
     element.setAttribute('aria-hidden', visible ? 'false' : 'true');
   });
 }
 
-async function toggleTrueFullscreen() {
+function requestFullscreenNow() {
   const root = document.documentElement;
-  if (document.fullscreenElement || document.webkitFullscreenElement) {
-    if (document.exitFullscreen) await document.exitFullscreen();
-    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-    return;
+  const active = document.fullscreenElement || document.webkitFullscreenElement;
+  if (active) {
+    if (document.exitFullscreen) return document.exitFullscreen();
+    if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+    return undefined;
   }
-  if (root.requestFullscreen) await root.requestFullscreen();
-  else if (root.webkitRequestFullscreen) root.webkitRequestFullscreen();
+  if (root.requestFullscreen) return root.requestFullscreen();
+  if (root.webkitRequestFullscreen) return root.webkitRequestFullscreen();
+  return undefined;
 }
 
 function clickNative(button) {
@@ -150,14 +182,6 @@ function normalizedPoint(event, rect) {
     x: Math.max(0, Math.min(1, (event.clientX - rect.left) / Math.max(1, rect.width))),
     y: Math.max(0, Math.min(1, (event.clientY - rect.top) / Math.max(1, rect.height))),
   };
-}
-
-function sameRect(a, b) {
-  return Boolean(a && b)
-    && a.left === b.left
-    && a.top === b.top
-    && a.width === b.width
-    && a.height === b.height;
 }
 
 const baseButtonStyle = {
@@ -192,15 +216,20 @@ export default function GannzillaToolbarActionsFixV169() {
   const [selectedId, setSelectedId] = React.useState(null);
   const [language, setLanguage] = React.useState(document.documentElement.lang === 'ar' ? 'ar' : 'en');
   const sourcesRef = React.useRef({});
+  const lastPointerRef = React.useRef({ key: '', time: 0 });
 
   const refresh = React.useCallback(() => {
+    const legacyHitbox = document.getElementById(LEGACY_HITBOX_ID);
+    if (legacyHitbox) {
+      setImportant(legacyHitbox, 'display', 'none');
+      setImportant(legacyHitbox, 'pointer-events', 'none');
+    }
+
     const sources = findNativeButtons();
     sourcesRef.current = sources;
     const nextRects = {};
     Object.entries(sources).forEach(([key, button]) => {
       if (!button) return;
-      button.style.setProperty('pointer-events', 'none', 'important');
-      button.setAttribute('aria-hidden', 'true');
       nextRects[key] = rectOf(button, key === 'palettes' ? 2 : 1);
     });
     setRects((current) => JSON.stringify(current) === JSON.stringify(nextRects) ? current : nextRects);
@@ -213,15 +242,15 @@ export default function GannzillaToolbarActionsFixV169() {
 
     if (canvas) {
       const cursor = locked ? 'not-allowed' : activeTool === 'select' ? 'default' : activeTool === 'text' ? 'text' : 'crosshair';
-      canvas.style.setProperty('cursor', cursor, 'important');
+      setImportant(canvas, 'cursor', cursor);
     }
   }, [activeTool, drawingVisible, locked]);
 
   React.useEffect(() => {
     refresh();
-    const timer = window.setInterval(refresh, 120);
+    const timer = window.setInterval(refresh, 500);
     const observer = new MutationObserver(refresh);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
+    observer.observe(document.body, { childList: true, subtree: true });
     window.addEventListener('resize', refresh);
     window.addEventListener('scroll', refresh, true);
     return () => {
@@ -243,13 +272,13 @@ export default function GannzillaToolbarActionsFixV169() {
 
   React.useEffect(() => {
     const onFullscreenChange = () => {
-      const isFullscreen = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
-      setFullscreen(isFullscreen);
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      const value = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      setFullscreen(value);
+      window.scrollTo(0, 0);
       window.setTimeout(() => {
         clickNative(sourcesRef.current.fullscreen || findNativeButtons().fullscreen);
         window.dispatchEvent(new Event('resize'));
-      }, 150);
+      }, 120);
     };
     document.addEventListener('fullscreenchange', onFullscreenChange);
     document.addEventListener('webkitfullscreenchange', onFullscreenChange);
@@ -274,6 +303,50 @@ export default function GannzillaToolbarActionsFixV169() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [locked, selectedId]);
 
+  const activate = React.useCallback((tool) => {
+    if (tool === 'lock') {
+      setLocked((current) => {
+        const next = !current;
+        if (next) setActiveTool('select');
+        return next;
+      });
+      return;
+    }
+    if (tool === 'palettes') {
+      setDrawingVisible((current) => !current);
+      return;
+    }
+    if (tool === 'fullscreen') {
+      window.scrollTo(0, 0);
+      try {
+        const result = requestFullscreenNow();
+        result?.catch?.(() => clickNative(sourcesRef.current.fullscreen));
+      } catch (_) {
+        clickNative(sourcesRef.current.fullscreen);
+      }
+      return;
+    }
+    if (locked) return;
+    setActiveTool(tool);
+    setSelectedId(null);
+    window.dispatchEvent(new CustomEvent('gannzilla:top-toolbar-tool-v173', { detail: { tool } }));
+  }, [locked]);
+
+  React.useEffect(() => {
+    const nativeFallback = (event) => {
+      const target = event.target instanceof Element ? event.target.closest('button') : null;
+      if (!target || String(target.id || '').startsWith(OVERLAY_PREFIX)) return;
+      const key = toolKeyForButton(target);
+      if (!key) return;
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation?.();
+      activate(key);
+    };
+    document.addEventListener('pointerdown', nativeFallback, true);
+    return () => document.removeEventListener('pointerdown', nativeFallback, true);
+  }, [activate]);
+
   const ar = language === 'ar';
   const titles = {
     select: ar ? 'تحديد العناصر' : 'Select',
@@ -295,32 +368,6 @@ export default function GannzillaToolbarActionsFixV169() {
     fullscreen: '⛶',
   };
 
-  const activate = (tool) => {
-    if (tool === 'lock') {
-      setLocked((current) => {
-        const next = !current;
-        if (next) setActiveTool('select');
-        return next;
-      });
-      return;
-    }
-    if (tool === 'palettes') {
-      setDrawingVisible((current) => !current);
-      return;
-    }
-    if (tool === 'fullscreen') {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      toggleTrueFullscreen().catch(() => {
-        clickNative(sourcesRef.current.fullscreen);
-      });
-      return;
-    }
-    if (locked) return;
-    setActiveTool(tool);
-    setSelectedId(null);
-    window.dispatchEvent(new CustomEvent('gannzilla:top-toolbar-tool-v172', { detail: { tool } }));
-  };
-
   const toolbarButtons = TOOL_DEFS.map(({ key }) => {
     const rect = rects[key];
     if (!rect) return null;
@@ -328,6 +375,7 @@ export default function GannzillaToolbarActionsFixV169() {
       || (key === 'lock' && locked)
       || (key === 'palettes' && drawingVisible)
       || (key === 'fullscreen' && fullscreen);
+
     return createPortal(
       <button
         key={key}
@@ -336,10 +384,18 @@ export default function GannzillaToolbarActionsFixV169() {
         title={titles[key]}
         aria-label={titles[key]}
         aria-pressed={active}
+        onPointerDown={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          event.nativeEvent?.stopImmediatePropagation?.();
+          const now = Date.now();
+          if (lastPointerRef.current.key === key && now - lastPointerRef.current.time < 180) return;
+          lastPointerRef.current = { key, time: now };
+          activate(key);
+        }}
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();
-          activate(key);
         }}
         style={{
           ...baseButtonStyle,
@@ -480,8 +536,8 @@ export default function GannzillaToolbarActionsFixV169() {
   );
 
   React.useEffect(() => {
-    window.GANNZILLA_TOOLBAR_ACTIONS_FIX_V172 = true;
-    window.__auditGannzillaToolbarActionsFixV172 = () => ({
+    window.GANNZILLA_TOOLBAR_ACTIONS_FIX_V173 = true;
+    window.__auditGannzillaToolbarActionsFixV173 = () => ({
       ok: TOOL_DEFS.every(({ key }) => Boolean(document.getElementById(`${OVERLAY_PREFIX}${key}`))),
       build: BUILD,
       activeTool,
@@ -493,5 +549,5 @@ export default function GannzillaToolbarActionsFixV169() {
     });
   }, [activeTool, drawingVisible, fullscreen, locked, shapes.length]);
 
-  return <>{toolbarButtons}{drawingLayer}</>;
+  return <>{toolbarButtons}{drawingLayer}<style>{`#${LEGACY_HITBOX_ID}{display:none!important;pointer-events:none!important;}`}</style></>;
 }
