@@ -1,9 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = '137';
-const PALETTE_ID = 'gannzilla-left-reference-palette-v137';
-const HIDE_ID = 'gannzilla-left-hide-toolbar-v137';
+const BUILD = '138';
+const PALETTE_ID = 'gannzilla-left-reference-palette-v138';
+const HIDE_ID = 'gannzilla-top-hide-toolbar-v138';
 const LEGACY_SELECTOR = '[id^="gannzilla-left-drawing-palette-"], [id^="gannzilla-left-reference-palette-"]';
 const STORAGE_KEYS = [
   'gannzillaDrawingToolsVisibleV125',
@@ -20,6 +20,37 @@ function getPaletteLeft() {
   return style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0
     ? Math.ceil(rect.right + 14)
     : 12;
+}
+
+function getTopHidePosition() {
+  const buttons = [...document.querySelectorAll('button')].filter((button) => {
+    if (button.id === HIDE_ID || button.closest(`#${PALETTE_ID}`)) return false;
+    const rect = button.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0 && rect.top >= 0 && rect.top < 70;
+  });
+
+  const addButton = buttons.find((button) => /^(Add|إضافة)$/i.test((button.textContent || '').trim()));
+  if (addButton) {
+    const parent = addButton.parentElement;
+    const rowButtons = parent
+      ? [...parent.querySelectorAll('button')].filter((button) => {
+          const rect = button.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0 && rect.top < 70;
+        })
+      : buttons;
+    const rightMost = rowButtons.sort((a, b) => b.getBoundingClientRect().right - a.getBoundingClientRect().right)[0];
+    const anchor = rightMost || addButton;
+    const rect = anchor.getBoundingClientRect();
+    return { left: Math.round(rect.right + 5), top: Math.round(rect.top) };
+  }
+
+  const rightMost = buttons.sort((a, b) => b.getBoundingClientRect().right - a.getBoundingClientRect().right)[0];
+  if (rightMost) {
+    const rect = rightMost.getBoundingClientRect();
+    return { left: Math.round(rect.right + 5), top: Math.round(rect.top) };
+  }
+
+  return { left: 112, top: 5 };
 }
 
 function readVisible() {
@@ -113,12 +144,14 @@ function ReferenceButton({ active, round = false, title, onClick, children }) {
 export default function GannzillaLeftReferencePaletteV129() {
   const [visible, setVisible] = React.useState(readVisible);
   const [left, setLeft] = React.useState(getPaletteLeft);
+  const [hidePos, setHidePos] = React.useState(() => ({ left: 112, top: 5 }));
   const [active, setActive] = React.useState(() => String(new URLSearchParams(window.location.search).get('divisions') || '36'));
 
   React.useEffect(() => {
     const sync = () => {
       setVisible(readVisible());
       setLeft(getPaletteLeft());
+      setHidePos(getTopHidePosition());
       document.querySelectorAll(LEGACY_SELECTOR).forEach((element) => {
         if (element.id === PALETTE_ID) return;
         element.style.setProperty('display', 'none', 'important');
@@ -126,19 +159,17 @@ export default function GannzillaLeftReferencePaletteV129() {
         element.style.setProperty('pointer-events', 'none', 'important');
       });
       document.querySelectorAll('button').forEach((button) => {
-        if (button.closest(`#${PALETTE_ID}`) || button.id === HIDE_ID) return;
-        if ((button.textContent || '').trim() === 'إخفاء') {
-          button.style.setProperty('display', 'none', 'important');
-        }
+        if (button.id === HIDE_ID || button.closest(`#${PALETTE_ID}`)) return;
+        if ((button.textContent || '').trim() === 'إخفاء') button.style.setProperty('display', 'none', 'important');
       });
     };
     sync();
-    const timer = window.setInterval(sync, 150);
+    const timer = window.setInterval(sync, 250);
     const observer = new MutationObserver(sync);
     observer.observe(document.body, { childList: true, subtree: true });
     window.addEventListener('resize', sync);
     window.addEventListener('scroll', sync, true);
-    window.GANNZILLA_LEFT_REFERENCE_PALETTE_V137 = true;
+    window.GANNZILLA_LEFT_REFERENCE_PALETTE_V138 = true;
     return () => {
       window.clearInterval(timer);
       observer.disconnect();
@@ -169,12 +200,12 @@ export default function GannzillaLeftReferencePaletteV129() {
   const palette = (
     <>
       <button id={HIDE_ID} type="button" onClick={hideTools} title="إخفاء أدوات الرسم" aria-label="إخفاء أدوات الرسم" style={{
-        position: 'fixed', left, top: 67, zIndex: 2147483606,
-        width: 84, height: 30, padding: 0, margin: 0,
+        position: 'fixed', left: hidePos.left, top: hidePos.top, zIndex: 2147483606,
+        width: 48, height: 24, padding: '0 6px', margin: 0,
         border: '1px solid #aeb4ba', borderRadius: 3,
         background: '#f7f7f7', color: '#444',
-        font: '700 14px Tahoma, Arial, sans-serif', lineHeight: '28px', cursor: 'pointer',
-        boxSizing: 'border-box', boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
+        font: '700 12px Tahoma, Arial, sans-serif', lineHeight: '22px', cursor: 'pointer',
+        boxSizing: 'border-box', boxShadow: '0 1px 2px rgba(0,0,0,0.10)',
       }}>إخفاء</button>
 
       <div id={PALETTE_ID} data-gannzilla-left-reference-palette="true" style={{
