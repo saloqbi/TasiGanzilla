@@ -1,11 +1,12 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = '163';
+const BUILD = '165';
 const CONTROL_ID = 'gannzilla-wheel-pan-control-v163';
 const PANEL_ID = 'gannzilla-wheel-pan-panel-v163';
-const PAN_STEP = 120;
-const RESERVED_SPACE = 24;
+const PAN_STEP = 100;
+const RESERVED_SPACE = 30;
+const STORAGE_KEY = 'gannzillaWheelPanV165';
 
 function textOf(element) {
   return String(element?.textContent || '').replace(/\s+/g, ' ').trim();
@@ -46,7 +47,7 @@ function getControlRect() {
   return {
     left: Math.round(rect.left - RESERVED_SPACE),
     top: Math.round(rect.top),
-    width: 22,
+    width: 24,
     height: Math.max(21, Math.round(rect.height)),
   };
 }
@@ -54,49 +55,28 @@ function getControlRect() {
 function findWheelCanvas() {
   return Array.from(document.querySelectorAll('canvas'))
     .map((canvas) => ({ canvas, rect: canvas.getBoundingClientRect() }))
-    .filter(({ rect }) => rect.width > 300 && rect.height > 300)
+    .filter(({ rect }) => rect.width > 250 && rect.height > 250)
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
 }
 
-function findWheelViewport() {
-  const canvas = findWheelCanvas();
-  if (!canvas) return null;
-
-  let current = canvas.parentElement;
-  while (current && current !== document.body) {
-    const style = window.getComputedStyle(current);
-    if (['auto', 'scroll', 'overlay'].includes(style.overflowX)
-      || ['auto', 'scroll', 'overlay'].includes(style.overflowY)) return current;
-    current = current.parentElement;
+function loadPan() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '{}');
+    return {
+      x: Number.isFinite(saved.x) ? saved.x : 0,
+      y: Number.isFinite(saved.y) ? saved.y : 0,
+    };
+  } catch (_) {
+    return { x: 0, y: 0 };
   }
-  return null;
 }
 
-function moveWheel(direction) {
-  const viewport = findWheelViewport();
-  if (!viewport) return false;
-
-  const delta = {
-    left: { left: PAN_STEP, top: 0 },
-    right: { left: -PAN_STEP, top: 0 },
-    up: { left: 0, top: PAN_STEP },
-    down: { left: 0, top: -PAN_STEP },
-  }[direction];
-
-  if (!delta) return false;
-  viewport.scrollBy({ ...delta, behavior: 'smooth' });
-  return true;
-}
-
-function centerWheel() {
-  const viewport = findWheelViewport();
-  if (!viewport) return false;
-  viewport.scrollTo({
-    left: Math.max(0, (viewport.scrollWidth - viewport.clientWidth) / 2),
-    top: Math.max(0, (viewport.scrollHeight - viewport.clientHeight) / 2),
-    behavior: 'smooth',
-  });
-  return true;
+function savePan(pan) {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(pan));
+  } catch (_) {
+    // Ignore storage restrictions.
+  }
 }
 
 function DirectionIcon() {
@@ -129,6 +109,17 @@ export default function GannzillaWheelPanControlV163() {
   const [rect, setRect] = React.useState(null);
   const [open, setOpen] = React.useState(false);
   const [language, setLanguage] = React.useState(document.documentElement.lang === 'ar' ? 'ar' : 'en');
+  const [pan, setPan] = React.useState(loadPan);
+
+  const applyPan = React.useCallback((nextPan = pan) => {
+    const canvas = findWheelCanvas();
+    if (!canvas) return false;
+    canvas.style.setProperty('transform', `translate3d(${nextPan.x}px, ${nextPan.y}px, 0)`, 'important');
+    canvas.style.setProperty('transform-origin', 'center center', 'important');
+    canvas.style.setProperty('transition', 'transform 160ms ease-out', 'important');
+    canvas.dataset.gannzillaPanV165 = `${nextPan.x},${nextPan.y}`;
+    return true;
+  }, [pan]);
 
   React.useEffect(() => {
     let disposed = false;
@@ -145,35 +136,35 @@ export default function GannzillaWheelPanControlV163() {
           ? current
           : next
       ));
+      applyPan();
     };
 
     refresh();
     const observer = new MutationObserver(refresh);
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['style', 'class'] });
+    observer.observe(document.body, { childList: true, subtree: true });
     const languageObserver = new MutationObserver(refresh);
     languageObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
-    const timer = window.setInterval(refresh, 150);
+    const timer = window.setInterval(refresh, 250);
     window.addEventListener('resize', refresh);
     window.addEventListener('scroll', refresh, true);
 
-    window.GANNZILLA_WHEEL_PAN_CONTROL_V163 = true;
-    window.__auditGannzillaWheelPanControlV163 = () => {
+    window.GANNZILLA_WHEEL_PAN_CONTROL_V165 = true;
+    window.__auditGannzillaWheelPanControlV165 = () => {
       const control = document.getElementById(CONTROL_ID);
+      const canvas = findWheelCanvas();
       const style = control ? window.getComputedStyle(control) : null;
-      const minus = findZoomMinusButton();
       return {
         ok: Boolean(control)
           && style?.display !== 'none'
           && style?.visibility !== 'hidden'
           && style?.pointerEvents !== 'none'
-          && Boolean(minus)
-          && Number.parseFloat(window.getComputedStyle(minus).marginLeft) >= RESERVED_SPACE,
+          && Boolean(canvas)
+          && canvas?.dataset?.gannzillaPanV165 === `${pan.x},${pan.y}`,
         build: BUILD,
         visible: Boolean(control),
-        anchoredToZoomMinus: Boolean(minus),
-        reservedToolbarSpace: minus ? window.getComputedStyle(minus).marginLeft : null,
         panelOpen: Boolean(document.getElementById(PANEL_ID)),
-        wheelViewportFound: Boolean(findWheelViewport()),
+        canvasFound: Boolean(canvas),
+        pan,
       };
     };
 
@@ -184,9 +175,13 @@ export default function GannzillaWheelPanControlV163() {
       window.clearInterval(timer);
       window.removeEventListener('resize', refresh);
       window.removeEventListener('scroll', refresh, true);
-      findZoomMinusButton()?.style.removeProperty('margin-left');
     };
-  }, []);
+  }, [applyPan, pan]);
+
+  React.useEffect(() => {
+    applyPan(pan);
+    savePan(pan);
+  }, [applyPan, pan]);
 
   React.useEffect(() => {
     if (!open) return undefined;
@@ -198,6 +193,22 @@ export default function GannzillaWheelPanControlV163() {
     document.addEventListener('pointerdown', close, true);
     return () => document.removeEventListener('pointerdown', close, true);
   }, [open]);
+
+  const move = React.useCallback((direction) => {
+    setPan((current) => {
+      const delta = {
+        left: { x: -PAN_STEP, y: 0 },
+        right: { x: PAN_STEP, y: 0 },
+        up: { x: 0, y: -PAN_STEP },
+        down: { x: 0, y: PAN_STEP },
+      }[direction];
+      if (!delta) return current;
+      return {
+        x: Math.max(-2000, Math.min(2000, current.x + delta.x)),
+        y: Math.max(-2000, Math.min(2000, current.y + delta.y)),
+      };
+    });
+  }, []);
 
   if (!rect) return null;
 
@@ -220,27 +231,11 @@ export default function GannzillaWheelPanControlV163() {
         setOpen((value) => !value);
       }}
       style={{
-        position: 'fixed',
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        minWidth: rect.width,
-        height: rect.height,
-        padding: 0,
-        margin: 0,
-        zIndex: 2147483647,
-        border: '1px solid #a7a7a7',
-        borderRadius: 2,
-        background: '#f7f7f7',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        visibility: 'visible',
-        opacity: 1,
-        pointerEvents: 'auto',
-        cursor: 'pointer',
-        boxSizing: 'border-box',
-        touchAction: 'manipulation',
+        position: 'fixed', left: rect.left - 4, top: rect.top, width: rect.width, minWidth: rect.width,
+        height: rect.height, padding: 0, margin: 0, zIndex: 2147483647,
+        border: '1px solid #a7a7a7', borderRadius: 2, background: '#f7f7f7',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', visibility: 'visible',
+        opacity: 1, pointerEvents: 'auto', cursor: 'pointer', boxSizing: 'border-box', touchAction: 'manipulation',
       }}
     >
       <DirectionIcon />
@@ -254,43 +249,25 @@ export default function GannzillaWheelPanControlV163() {
       role="group"
       aria-label={title}
       style={{
-        position: 'fixed',
-        left: Math.max(4, rect.left - 43),
-        top: rect.top + rect.height + 4,
-        width: 110,
-        height: 110,
-        zIndex: 2147483647,
-        display: 'grid',
-        gridTemplateColumns: '34px 34px 34px',
-        gridTemplateRows: '34px 34px 34px',
-        gap: 2,
-        padding: 4,
-        border: '1px solid #8e9aa5',
-        borderRadius: 3,
-        background: '#eef1f3',
-        boxShadow: '0 4px 12px rgba(0,0,0,.22)',
-        boxSizing: 'border-box',
+        position: 'fixed', left: Math.max(4, rect.left - 47), top: rect.top + rect.height + 4,
+        width: 110, height: 110, zIndex: 2147483647, display: 'grid',
+        gridTemplateColumns: '34px 34px 34px', gridTemplateRows: '34px 34px 34px',
+        gap: 2, padding: 4, border: '1px solid #8e9aa5', borderRadius: 3,
+        background: '#eef1f3', boxShadow: '0 4px 12px rgba(0,0,0,.22)', boxSizing: 'border-box',
       }}
     >
-      <button type="button" title={labels.up} aria-label={labels.up} onClick={() => moveWheel('up')} style={{ gridColumn: 2, gridRow: 1 }}><Arrow direction="up" /></button>
-      <button type="button" title={labels.left} aria-label={labels.left} onClick={() => moveWheel('left')} style={{ gridColumn: 1, gridRow: 2 }}><Arrow direction="left" /></button>
-      <button type="button" title={labels.center} aria-label={labels.center} onClick={centerWheel} style={{ gridColumn: 2, gridRow: 2 }}><span style={{ width: 12, height: 12, border: '2px solid #1c75bc', borderRadius: '50%', display: 'block', boxSizing: 'border-box' }} /></button>
-      <button type="button" title={labels.right} aria-label={labels.right} onClick={() => moveWheel('right')} style={{ gridColumn: 3, gridRow: 2 }}><Arrow direction="right" /></button>
-      <button type="button" title={labels.down} aria-label={labels.down} onClick={() => moveWheel('down')} style={{ gridColumn: 2, gridRow: 3 }}><Arrow direction="down" /></button>
+      <button type="button" title={labels.up} aria-label={labels.up} onClick={() => move('up')} style={{ gridColumn: 2, gridRow: 1 }}><Arrow direction="up" /></button>
+      <button type="button" title={labels.left} aria-label={labels.left} onClick={() => move('left')} style={{ gridColumn: 1, gridRow: 2 }}><Arrow direction="left" /></button>
+      <button type="button" title={labels.center} aria-label={labels.center} onClick={() => setPan({ x: 0, y: 0 })} style={{ gridColumn: 2, gridRow: 2 }}><span style={{ width: 12, height: 12, border: '2px solid #1c75bc', borderRadius: '50%', display: 'block', boxSizing: 'border-box' }} /></button>
+      <button type="button" title={labels.right} aria-label={labels.right} onClick={() => move('right')} style={{ gridColumn: 3, gridRow: 2 }}><Arrow direction="right" /></button>
+      <button type="button" title={labels.down} aria-label={labels.down} onClick={() => move('down')} style={{ gridColumn: 2, gridRow: 3 }}><Arrow direction="down" /></button>
       <style>{`
         #${PANEL_ID} button {
-          width: 34px;
-          height: 34px;
-          padding: 0;
-          border: 1px solid #a5afb8;
-          border-radius: 2px;
-          background: linear-gradient(#ffffff,#e3e7ea);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          box-sizing: border-box;
+          width: 34px; height: 34px; padding: 0; border: 1px solid #a5afb8; border-radius: 2px;
+          background: linear-gradient(#ffffff,#e3e7ea); display: flex; align-items: center;
+          justify-content: center; cursor: pointer; box-sizing: border-box;
         }
+        #${PANEL_ID} button:active { background: #cfe7f7; transform: translateY(1px); }
       `}</style>
     </div>,
     document.body,
