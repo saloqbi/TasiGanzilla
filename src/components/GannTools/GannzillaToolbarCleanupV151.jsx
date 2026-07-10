@@ -1,13 +1,26 @@
 import React from 'react';
 
-const BUILD = '154';
-const HIDDEN_ATTR = 'data-gannzilla-toolbar-cleanup-v154';
+const BUILD = '155';
+const HIDDEN_ATTR = 'data-gannzilla-toolbar-cleanup-v155';
 const ABOUT_ID = 'gannzilla-about-v141';
 
-const HIDDEN_BUTTON_LABELS = new Set([
+const AUXILIARY_LABELS = new Set([
   '100%',
   'Clockwise',
   'Counter',
+  'Counterclockwise',
+  'مع عقارب الساعة',
+  'عكس عقارب الساعة',
+  'غير عقارب الساعة',
+]);
+
+const AUXILIARY_TITLES = new Set([
+  'إعادة إلى 100%',
+  'إعادة الضبط إلى 100%',
+  'Reset to 100%',
+  'Clockwise',
+  'Counter',
+  'Counterclockwise',
   'مع عقارب الساعة',
   'عكس عقارب الساعة',
   'غير عقارب الساعة',
@@ -72,6 +85,31 @@ function removeInformationElement(element) {
   return true;
 }
 
+function isAuxiliaryControl(element) {
+  if (!element || !isTopRow(element)) return false;
+
+  const label = normalizeLabel(element);
+  const title = String(element.getAttribute?.('title') || '').trim();
+  const aria = String(element.getAttribute?.('aria-label') || '').trim();
+
+  return AUXILIARY_LABELS.has(label)
+    || AUXILIARY_TITLES.has(title)
+    || AUXILIARY_TITLES.has(aria)
+    || label.includes('عقارب الساعة')
+    || /^(clockwise|counter|counterclockwise)$/i.test(label);
+}
+
+function hideAuxiliaryControl(element) {
+  if (!element) return false;
+  const owner = element.closest?.('button, [role="button"]');
+  const target = owner && isTopRow(owner) ? owner : element;
+  if (!isAuxiliaryControl(target)) return false;
+  if (target.getAttribute(HIDDEN_ATTR) !== 'true') {
+    target.setAttribute(HIDDEN_ATTR, 'true');
+  }
+  return true;
+}
+
 export default function GannzillaToolbarCleanupV151() {
   React.useEffect(() => {
     let scheduled = false;
@@ -84,7 +122,9 @@ export default function GannzillaToolbarCleanupV151() {
       candidates.forEach((element) => {
         if (isInformationElement(element) && removeInformationElement(element)) {
           removedInformationIcons += 1;
+          return;
         }
+        hideAuxiliaryControl(element);
       });
 
       const toolbar = findTopToolbar();
@@ -95,27 +135,31 @@ export default function GannzillaToolbarCleanupV151() {
             if (removeInformationElement(element)) removedInformationIcons += 1;
             return;
           }
-          if (HIDDEN_BUTTON_LABELS.has(normalizeLabel(element))) {
-            element.setAttribute(HIDDEN_ATTR, 'true');
-          }
+          hideAuxiliaryControl(element);
         });
       }
 
-      window.GANNZILLA_TOOLBAR_CLEANUP_V154 = true;
-      window.__auditGannzillaToolbarCleanupV154 = () => {
+      window.GANNZILLA_TOOLBAR_CLEANUP_V155 = true;
+      window.__auditGannzillaToolbarCleanupV155 = () => {
         const remainingInformationIcons = Array.from(
           document.querySelectorAll('button, [role="button"], span'),
         ).filter(isInformationElement);
+        const remainingAuxiliaryControls = Array.from(
+          document.querySelectorAll('button, [role="button"], span'),
+        ).filter(isAuxiliaryControl)
+          .filter((element) => {
+            const owner = element.closest?.('button, [role="button"]');
+            const target = owner && isTopRow(owner) ? owner : element;
+            const style = window.getComputedStyle(target);
+            return style.display !== 'none' && style.visibility !== 'hidden';
+          });
+
         return {
-          ok: remainingInformationIcons.length === 0,
+          ok: remainingInformationIcons.length === 0 && remainingAuxiliaryControls.length === 0,
           build: BUILD,
           removedInformationIcons,
           remainingInformationIcons: remainingInformationIcons.length,
-          hiddenToolbarLabels: strip
-            ? Array.from(strip.children)
-              .filter((element) => element.getAttribute(HIDDEN_ATTR) === 'true')
-              .map(normalizeLabel)
-            : [],
+          visibleAuxiliaryControls: remainingAuxiliaryControls.map(normalizeLabel),
         };
       };
     };
