@@ -17,7 +17,7 @@ import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV
 import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
 import GannzillaWheelPanControlV180 from './components/GannTools/GannzillaWheelPanControlV180';
 import GannzillaNativeToolbarBindingV178 from './components/GannTools/GannzillaNativeToolbarBindingV178';
-import GannzillaLineStyleMenuV183 from './components/GannTools/GannzillaLineStyleMenuV183';
+import GannzillaNativeSplitDrawingToolsV204 from './components/GannTools/GannzillaNativeSplitDrawingToolsV204';
 import GannzillaHideArrowLockV195 from './components/GannTools/GannzillaHideArrowLockV195';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
@@ -100,7 +100,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '203');
+    url.searchParams.set('v', '204');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -152,7 +152,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 203: restore the native Gannzilla-style line and shape controls without external repositioning.
+// Build 204: replace the line and shape controls with balanced Gannzilla-style split buttons and responsive menus.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -169,7 +169,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="203">
+        <div data-gannzilla-build="204">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -186,7 +186,7 @@ const App = () => {
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
               <GannzillaNativeToolbarBindingV178 />
-              <GannzillaLineStyleMenuV183 />
+              <GannzillaNativeSplitDrawingToolsV204 />
               <GannzillaDrawingToolsUrlToggleV182 />
               <GannzillaHideArrowLockV195 />
             </>
