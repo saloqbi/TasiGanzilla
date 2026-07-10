@@ -1,1 +1,1 @@
-Build 183: Gannzilla-style line menu with plain, arrow, and double-arrow drawing modes.
+Build 184: redeploy Gannzilla line dropdown options (plain, one-arrow, double-arrow).
