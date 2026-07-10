@@ -1,9 +1,12 @@
 import React from 'react';
 
+const BUILD = '148';
 const STORAGE_KEY = 'gannzillaConnectionSettingsV141';
 const PASSWORD_KEY = 'gannzillaConnectionPasswordV141';
 const BUTTON_ID = 'gannzilla-connection-settings-v141';
 const ABOUT_ID = 'gannzilla-about-v141';
+const LANGUAGE_BUTTON_ID = 'gannzilla-bilingual-toggle-v95';
+const OPEN_EVENT = 'gannzilla:open-connection-settings-v148';
 
 function loadSettings() {
   try {
@@ -48,8 +51,25 @@ function applyButtonStyle(button, type) {
     boxSizing: 'border-box',
     pointerEvents: 'auto',
     userSelect: 'none',
+    touchAction: 'manipulation',
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    visibility: 'visible',
+    opacity: '1',
     zIndex: '2147483647',
   });
+  button.disabled = false;
+  button.removeAttribute('aria-hidden');
+  button.removeAttribute('data-gannzilla-v145-hidden');
+  button.removeAttribute('data-gannzilla-v145-previous-display');
+}
+
+function stopEvent(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+  event?.stopImmediatePropagation?.();
 }
 
 export default function GannzillaConnectionSettingsV96() {
@@ -58,15 +78,66 @@ export default function GannzillaConnectionSettingsV96() {
   const [settings, setSettings] = React.useState(loadSettings);
   const [status, setStatus] = React.useState('');
   const [language, setLanguage] = React.useState(document.documentElement.lang === 'ar' ? 'ar' : 'en');
+  const languageRef = React.useRef(language);
+
+  const openConnectionDialog = React.useCallback((event) => {
+    stopEvent(event);
+    setSettings(loadSettings());
+    setStatus('');
+    setAboutOpen(false);
+    setOpen(true);
+  }, []);
+
+  const openAboutDialog = React.useCallback((event) => {
+    stopEvent(event);
+    setOpen(false);
+    setAboutOpen(true);
+  }, []);
 
   React.useEffect(() => {
-    let bodyObserver;
-    let languageObserver;
-    let disposed = false;
+    languageRef.current = language;
+    const connectionButton = document.getElementById(BUTTON_ID);
+    const aboutButton = document.getElementById(ABOUT_ID);
+    if (connectionButton) {
+      connectionButton.title = language === 'ar' ? 'إعدادات الاتصال' : 'Connection settings';
+      connectionButton.setAttribute('aria-label', connectionButton.title);
+    }
+    if (aboutButton) {
+      aboutButton.title = language === 'ar' ? 'حول البرنامج' : 'About';
+      aboutButton.setAttribute('aria-label', aboutButton.title);
+    }
+  }, [language]);
 
-    const installOnce = () => {
+  React.useEffect(() => {
+    let disposed = false;
+    let bodyObserver;
+
+    const activateConnectionButton = (button) => {
+      applyButtonStyle(button, 'connection');
+      button.dataset.gannzillaConnectionButton = BUILD;
+      button.title = languageRef.current === 'ar' ? 'إعدادات الاتصال' : 'Connection settings';
+      button.setAttribute('aria-label', button.title);
+      button.tabIndex = 0;
+      button.onpointerdown = openConnectionDialog;
+      button.onmousedown = openConnectionDialog;
+      button.onclick = openConnectionDialog;
+      button.onkeydown = (event) => {
+        if (event.key === 'Enter' || event.key === ' ') openConnectionDialog(event);
+      };
+    };
+
+    const activateAboutButton = (button) => {
+      applyButtonStyle(button, 'about');
+      button.title = languageRef.current === 'ar' ? 'حول البرنامج' : 'About';
+      button.setAttribute('aria-label', button.title);
+      button.tabIndex = 0;
+      button.onpointerdown = openAboutDialog;
+      button.onclick = openAboutDialog;
+    };
+
+    const install = () => {
       if (disposed) return false;
-      const languageButton = document.getElementById('gannzilla-bilingual-toggle-v95');
+      const languageButton = document.getElementById(LANGUAGE_BUTTON_ID);
       if (!languageButton?.parentElement) return false;
       const parent = languageButton.parentElement;
 
@@ -79,7 +150,9 @@ export default function GannzillaConnectionSettingsV96() {
         connectionButton.style.color = '#59636d';
         connectionButton.style.font = '700 14px Segoe UI, Arial, sans-serif';
         connectionButton.style.lineHeight = '20px';
-        applyButtonStyle(connectionButton, 'connection');
+      }
+      activateConnectionButton(connectionButton);
+      if (connectionButton.parentElement !== parent || connectionButton.nextSibling !== languageButton) {
         parent.insertBefore(connectionButton, languageButton);
       }
 
@@ -88,7 +161,6 @@ export default function GannzillaConnectionSettingsV96() {
         aboutButton = document.createElement('button');
         aboutButton.id = ABOUT_ID;
         aboutButton.type = 'button';
-        applyButtonStyle(aboutButton, 'about');
         const circle = document.createElement('span');
         circle.textContent = 'i';
         Object.assign(circle.style, {
@@ -97,61 +169,68 @@ export default function GannzillaConnectionSettingsV96() {
           pointerEvents: 'none',
         });
         aboutButton.appendChild(circle);
+      }
+      activateAboutButton(aboutButton);
+      if (aboutButton.parentElement !== parent || languageButton.nextSibling !== aboutButton) {
         parent.insertBefore(aboutButton, languageButton.nextSibling);
       }
 
-      connectionButton.title = language === 'ar' ? 'إعدادات الاتصال' : 'Connection settings';
-      connectionButton.setAttribute('aria-label', connectionButton.title);
-      connectionButton.onclick = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setSettings(loadSettings());
-        setStatus('');
-        setAboutOpen(false);
-        setOpen(true);
-      };
-
-      aboutButton.title = language === 'ar' ? 'حول البرنامج' : 'About';
-      aboutButton.setAttribute('aria-label', aboutButton.title);
-      aboutButton.onclick = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setOpen(false);
-        setAboutOpen(true);
-      };
-
-      if (bodyObserver) bodyObserver.disconnect();
       return true;
     };
 
-    if (!installOnce()) {
-      bodyObserver = new MutationObserver(() => installOnce());
-      bodyObserver.observe(document.body, { childList: true, subtree: true });
-    }
+    const captureConnectionActivation = (event) => {
+      const target = event.target instanceof Element ? event.target.closest(`#${BUTTON_ID}`) : null;
+      if (target) openConnectionDialog(event);
+    };
 
-    languageObserver = new MutationObserver(() => {
-      const nextLanguage = document.documentElement.lang === 'ar' ? 'ar' : 'en';
-      setLanguage(nextLanguage);
-    });
-    languageObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    const openFromWindowEvent = (event) => openConnectionDialog(event);
 
-    window.GANNZILLA_CONNECTION_SETTINGS_V141 = true;
-    window.__auditGannzillaConnectionSettingsV141 = () => ({
-      ok: Boolean(document.getElementById(BUTTON_ID)) && Boolean(document.getElementById(ABOUT_ID)),
-      noRepeatedDomReordering: true,
-      connectionClickable: typeof document.getElementById(BUTTON_ID)?.onclick === 'function',
-      aboutClickable: typeof document.getElementById(ABOUT_ID)?.onclick === 'function',
-      nativeToolbarButtonsUntouched: true,
-    });
+    install();
+    bodyObserver = new MutationObserver(() => install());
+    bodyObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class', 'aria-hidden', 'disabled'] });
+
+    document.addEventListener('pointerdown', captureConnectionActivation, true);
+    document.addEventListener('click', captureConnectionActivation, true);
+    window.addEventListener(OPEN_EVENT, openFromWindowEvent);
+    const timer = window.setInterval(install, 250);
+
+    window.GANNZILLA_CONNECTION_SETTINGS_V148 = true;
+    window.__openGannzillaConnectionSettingsV148 = () => openConnectionDialog();
+    window.__auditGannzillaConnectionSettingsV148 = () => {
+      const button = document.getElementById(BUTTON_ID);
+      const style = button ? window.getComputedStyle(button) : null;
+      return {
+        ok: Boolean(button)
+          && style?.display !== 'none'
+          && style?.visibility !== 'hidden'
+          && style?.pointerEvents !== 'none'
+          && typeof button.onclick === 'function',
+        build: BUILD,
+        connectionButtonPresent: Boolean(button),
+        connectionButtonVisible: Boolean(style) && style.display !== 'none' && style.visibility !== 'hidden',
+        connectionButtonClickable: Boolean(style) && style.pointerEvents !== 'none' && typeof button?.onclick === 'function',
+        directOpenFunctionPresent: typeof window.__openGannzillaConnectionSettingsV148 === 'function',
+      };
+    };
 
     return () => {
       disposed = true;
+      window.clearInterval(timer);
       bodyObserver?.disconnect();
-      languageObserver?.disconnect();
-      document.getElementById(BUTTON_ID)?.remove();
-      document.getElementById(ABOUT_ID)?.remove();
+      document.removeEventListener('pointerdown', captureConnectionActivation, true);
+      document.removeEventListener('click', captureConnectionActivation, true);
+      window.removeEventListener(OPEN_EVENT, openFromWindowEvent);
+      delete window.__openGannzillaConnectionSettingsV148;
     };
-  }, [language]);
+  }, [openAboutDialog, openConnectionDialog]);
+
+  React.useEffect(() => {
+    const languageObserver = new MutationObserver(() => {
+      setLanguage(document.documentElement.lang === 'ar' ? 'ar' : 'en');
+    });
+    languageObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+    return () => languageObserver.disconnect();
+  }, []);
 
   const ar = language === 'ar';
   const t = ar ? {
@@ -184,10 +263,10 @@ export default function GannzillaConnectionSettingsV96() {
   return (
     <>
       {open && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 2147483646, background: 'rgba(0,0,0,.16)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div dir={ar ? 'rtl' : 'ltr'} style={{ width: 330, background: '#f1f1f1', border: '1px solid #888', boxShadow: '0 8px 24px rgba(0,0,0,.3)', fontFamily: 'Segoe UI,Tahoma,Arial' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2147483647, background: 'rgba(0,0,0,.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'auto' }}>
+          <div dir={ar ? 'rtl' : 'ltr'} style={{ width: 330, background: '#f1f1f1', border: '1px solid #888', boxShadow: '0 8px 24px rgba(0,0,0,.3)', fontFamily: 'Segoe UI,Tahoma,Arial', color: '#111' }}>
             <div style={{ height: 31, display: 'flex', alignItems: 'center', padding: '0 9px', background: '#fff', borderBottom: '1px solid #ccc' }}>
-              <span style={{ flex: 1 }}>{t.title}</span><button onClick={() => setOpen(false)} style={{ border: 0, background: 'transparent', fontSize: 18 }}>×</button>
+              <span style={{ flex: 1 }}>{t.title}</span><button onClick={() => setOpen(false)} style={{ border: 0, background: 'transparent', fontSize: 18, cursor: 'pointer' }}>×</button>
             </div>
             <div style={{ padding: 10 }}>
               <label style={{ display: 'flex', gap: 7, alignItems: 'center', marginBottom: 9 }}><input type="checkbox" checked={settings.useProxy} onChange={update('useProxy')} />{t.useProxy}</label>
@@ -208,7 +287,7 @@ export default function GannzillaConnectionSettingsV96() {
       )}
 
       {aboutOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 2147483646, background: 'rgba(0,0,0,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2147483647, background: 'rgba(0,0,0,.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'auto' }}>
           <div dir={ar ? 'rtl' : 'ltr'} style={{ width: 300, background: '#efefef', border: '1px solid #8f8f8f', boxShadow: '0 8px 24px rgba(0,0,0,.3)', fontFamily: 'Segoe UI,Tahoma,Arial', color: '#111' }}>
             <div style={{ height: 30, display: 'flex', alignItems: 'center', padding: '0 8px', background: '#fff', borderBottom: '1px solid #c9c9c9', fontSize: 13 }}>
               <span style={{ flex: 1 }}>{t.about}</span><button onClick={() => setAboutOpen(false)} style={{ border: 0, background: 'transparent', fontSize: 20, cursor: 'pointer' }}>×</button>
