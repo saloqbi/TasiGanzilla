@@ -100,7 +100,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '195');
+    url.searchParams.set('v', '196');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -152,7 +152,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 195: hide only the native arrow and lock icons; preserve all other behavior.
+// Build 196: hide only the native arrow and lock icons after the toolbar mounts.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -217,7 +217,7 @@ const App = () => {
             transform-box: fill-box;
           }
         `}</style>
-        <div data-gannzilla-build="195">
+        <div data-gannzilla-build="196">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
