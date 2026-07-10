@@ -17,7 +17,7 @@ import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV
 import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
 import GannzillaWheelPanControlV180 from './components/GannTools/GannzillaWheelPanControlV180';
 import GannzillaExactDrawingToolbarV208 from './components/GannTools/GannzillaExactDrawingToolbarV208';
-import GannzillaHideLineIconV209 from './components/GannTools/GannzillaHideLineIconV209';
+import GannzillaCenteredToolbarV211 from './components/GannTools/GannzillaCenteredToolbarV211';
 import GannzillaHideArrowLockV195 from './components/GannTools/GannzillaHideArrowLockV195';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
@@ -100,7 +100,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '210');
+    url.searchParams.set('v', '211');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -152,7 +152,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 210: force redeploy of the hidden standalone line control.
+// Build 211: hide the line control, separate the remaining icons, and center them.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -169,7 +169,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="210">
+        <div data-gannzilla-build="211">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -186,7 +186,7 @@ const App = () => {
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
               <GannzillaExactDrawingToolbarV208 />
-              <GannzillaHideLineIconV209 />
+              <GannzillaCenteredToolbarV211 />
               <GannzillaDrawingToolsUrlToggleV182 />
               <GannzillaHideArrowLockV195 />
             </>
