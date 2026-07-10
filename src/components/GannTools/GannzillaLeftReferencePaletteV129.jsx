@@ -1,8 +1,9 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = '136';
-const PALETTE_ID = 'gannzilla-left-reference-palette-v136';
+const BUILD = '137';
+const PALETTE_ID = 'gannzilla-left-reference-palette-v137';
+const HIDE_ID = 'gannzilla-left-hide-toolbar-v137';
 const LEGACY_SELECTOR = '[id^="gannzilla-left-drawing-palette-"], [id^="gannzilla-left-reference-palette-"]';
 const STORAGE_KEYS = [
   'gannzillaDrawingToolsVisibleV125',
@@ -125,9 +126,8 @@ export default function GannzillaLeftReferencePaletteV129() {
         element.style.setProperty('pointer-events', 'none', 'important');
       });
       document.querySelectorAll('button').forEach((button) => {
-        if (button.closest(`#${PALETTE_ID}`)) return;
+        if (button.closest(`#${PALETTE_ID}`) || button.id === HIDE_ID) return;
         if ((button.textContent || '').trim() === 'إخفاء') {
-          button.dataset.gannzillaExternalHideMovedV136 = 'true';
           button.style.setProperty('display', 'none', 'important');
         }
       });
@@ -138,7 +138,7 @@ export default function GannzillaLeftReferencePaletteV129() {
     observer.observe(document.body, { childList: true, subtree: true });
     window.addEventListener('resize', sync);
     window.addEventListener('scroll', sync, true);
-    window.GANNZILLA_LEFT_REFERENCE_PALETTE_V136 = true;
+    window.GANNZILLA_LEFT_REFERENCE_PALETTE_V137 = true;
     return () => {
       window.clearInterval(timer);
       observer.disconnect();
@@ -167,27 +167,34 @@ export default function GannzillaLeftReferencePaletteV129() {
   if (!visible || typeof document === 'undefined') return null;
 
   const palette = (
-    <div id={PALETTE_ID} data-gannzilla-left-reference-palette="true" style={{
-      position: 'fixed', left, top: 110, zIndex: 2147483605, width: 108,
-      maxHeight: 'calc(100vh - 128px)', padding: '12px 10px 16px', background: 'rgba(250,250,250,0.96)',
-      border: '1px solid #d9d9d9', borderRadius: 54, boxShadow: '0 2px 10px rgba(0,0,0,0.14)',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, boxSizing: 'border-box',
-      overflowY: 'auto', overflowX: 'hidden', scrollbarWidth: 'thin', pointerEvents: 'auto', transform: 'none', zoom: 1,
-    }}>
-      <button type="button" onClick={hideTools} title="إخفاء أدوات الرسم" aria-label="إخفاء أدوات الرسم" style={{
-        width: 84, minHeight: 40, flex: '0 0 40px', border: '1px solid #bfc4c8', borderRadius: 10,
-        background: '#ffffff', color: '#555', font: '700 17px Tahoma, Arial, sans-serif', cursor: 'pointer',
+    <>
+      <button id={HIDE_ID} type="button" onClick={hideTools} title="إخفاء أدوات الرسم" aria-label="إخفاء أدوات الرسم" style={{
+        position: 'fixed', left, top: 67, zIndex: 2147483606,
+        width: 84, height: 30, padding: 0, margin: 0,
+        border: '1px solid #aeb4ba', borderRadius: 3,
+        background: '#f7f7f7', color: '#444',
+        font: '700 14px Tahoma, Arial, sans-serif', lineHeight: '28px', cursor: 'pointer',
+        boxSizing: 'border-box', boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
       }}>إخفاء</button>
-      {['12', '24', '36'].map((value) => (
-        <ReferenceButton key={value} round active={active === value} title={`Circle of ${value}`} onClick={() => choose(value)}>{value}</ReferenceButton>
-      ))}
-      <ReferenceButton active={active === '4'} title="Angle 4" onClick={() => choose('4')}><AngleReferenceIcon value="4" /></ReferenceButton>
-      <ReferenceButton active={active === '9'} title="Angle 9" onClick={() => choose('9')}><AngleReferenceIcon value="9" /></ReferenceButton>
-      <ReferenceButton active={active === 'N'} title="North" onClick={() => choose('N')}><NorthReferenceIcon /></ReferenceButton>
-      {[4, 5, 6, 7, 8, 9].map((sides) => (
-        <ReferenceButton key={sides} active={active === `p${sides}`} title={`${sides}-sided shape`} onClick={() => choose(`p${sides}`)}><PolygonReferenceIcon sides={sides} /></ReferenceButton>
-      ))}
-    </div>
+
+      <div id={PALETTE_ID} data-gannzilla-left-reference-palette="true" style={{
+        position: 'fixed', left, top: 110, zIndex: 2147483605, width: 108,
+        maxHeight: 'calc(100vh - 128px)', padding: '12px 10px 16px', background: 'rgba(250,250,250,0.96)',
+        border: '1px solid #d9d9d9', borderRadius: 54, boxShadow: '0 2px 10px rgba(0,0,0,0.14)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, boxSizing: 'border-box',
+        overflowY: 'auto', overflowX: 'hidden', scrollbarWidth: 'thin', pointerEvents: 'auto', transform: 'none', zoom: 1,
+      }}>
+        {['12', '24', '36'].map((value) => (
+          <ReferenceButton key={value} round active={active === value} title={`Circle of ${value}`} onClick={() => choose(value)}>{value}</ReferenceButton>
+        ))}
+        <ReferenceButton active={active === '4'} title="Angle 4" onClick={() => choose('4')}><AngleReferenceIcon value="4" /></ReferenceButton>
+        <ReferenceButton active={active === '9'} title="Angle 9" onClick={() => choose('9')}><AngleReferenceIcon value="9" /></ReferenceButton>
+        <ReferenceButton active={active === 'N'} title="North" onClick={() => choose('N')}><NorthReferenceIcon /></ReferenceButton>
+        {[4, 5, 6, 7, 8, 9].map((sides) => (
+          <ReferenceButton key={sides} active={active === `p${sides}`} title={`${sides}-sided shape`} onClick={() => choose(`p${sides}`)}><PolygonReferenceIcon sides={sides} /></ReferenceButton>
+        ))}
+      </div>
+    </>
   );
 
   return createPortal(palette, document.body);
