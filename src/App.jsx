@@ -18,7 +18,7 @@ import GannzillaWheelPanControlV163 from './components/GannTools/GannzillaWheelP
 import GannzillaToolbarActionsFixV169 from './components/GannTools/GannzillaToolbarActionsFixV169';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 170: reliable fullscreen and drawing-palette toolbar actions.
+// Build 174: deploy responsive toolbar controls from the v173 implementation.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -35,7 +35,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="170">
+        <div data-gannzilla-build="174">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
