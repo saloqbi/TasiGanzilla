@@ -99,7 +99,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '183');
+    url.searchParams.set('v', '189');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -151,7 +151,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 183: Gannzilla-style line dropdown with plain, one-arrow and double-arrow modes.
+// Build 189: preserve all v187 behavior and only enlarge the two drawing icons with static CSS.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -167,8 +167,27 @@ const App = () => {
             top: 112px !important;
             max-height: calc(100vh - 128px) !important;
           }
+
+          #gannzilla-line-control-v185,
+          #gannzilla-shape-control-v185 {
+            height: 23px !important;
+            min-height: 23px !important;
+          }
+
+          #gannzilla-line-control-v185 > button:first-child svg,
+          #gannzilla-shape-control-v185 > button:first-child svg {
+            width: 25px !important;
+            height: 21px !important;
+          }
+
+          #gannzilla-line-control-v185 > button:first-child svg line,
+          #gannzilla-shape-control-v185 > button:first-child svg rect,
+          #gannzilla-shape-control-v185 > button:first-child svg ellipse,
+          #gannzilla-shape-control-v185 > button:first-child svg path {
+            stroke-width: 2.7 !important;
+          }
         `}</style>
-        <div data-gannzilla-build="183">
+        <div data-gannzilla-build="189">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
