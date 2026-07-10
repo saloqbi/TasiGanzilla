@@ -1,12 +1,13 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = 185;
+const BUILD = 193;
 const LINE_CONTROL_ID = 'gannzilla-line-control-v185';
 const SHAPE_CONTROL_ID = 'gannzilla-shape-control-v185';
 const LINE_MENU_ID = 'gannzilla-line-menu-v185';
 const SHAPE_MENU_ID = 'gannzilla-shape-menu-v185';
 const DRAW_LAYER_ID = 'gannzilla-dual-drawing-layer-v185';
+const DRAWING_ID_ATTRIBUTE = 'data-gannzilla-drawing-id';
 
 function cleanLabel(element) {
   return String(element?.textContent || '').replace(/\s+/g, '').trim();
@@ -315,6 +316,20 @@ export default function GannzillaLineStyleMenuV183() {
       const target = event.target instanceof Element ? event.target : null;
       if (target?.closest?.(`#${LINE_CONTROL_ID}, #${SHAPE_CONTROL_ID}, #${LINE_MENU_ID}, #${SHAPE_MENU_ID}`)) return;
 
+      const drawingTarget = target?.closest?.(`[${DRAWING_ID_ATTRIBUTE}]`);
+      if (drawingTarget) {
+        const drawingId = drawingTarget.getAttribute(DRAWING_ID_ATTRIBUTE);
+        if (drawingId) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.stopImmediatePropagation?.();
+          setItems((existing) => existing.filter((item) => item.id !== drawingId));
+          draftRef.current = null;
+          setDraft(null);
+          return;
+        }
+      }
+
       const toolbarButton = target?.closest?.('button');
       if (toolbarButton && isTopToolbarButton(toolbarButton)) {
         setOpenMenu(null);
@@ -406,6 +421,7 @@ export default function GannzillaLineStyleMenuV183() {
       shapeMode,
       openMenu,
       itemCount: items.length,
+      clickToDelete: true,
     });
   }, [activeTool, lineMode, shapeMode, openMenu, items.length]);
 
@@ -482,6 +498,13 @@ export default function GannzillaLineStyleMenuV183() {
     const x2 = item.x2 * canvasRect.width;
     const y2 = item.y2 * canvasRect.height;
     const stroke = '#0877c9';
+    const hitProps = dashed ? {} : {
+      [DRAWING_ID_ATTRIBUTE]: item.id,
+      stroke: 'rgba(0, 0, 0, 0.001)',
+      strokeWidth: 14,
+      fill: 'none',
+      style: { cursor: 'pointer', pointerEvents: 'stroke' },
+    };
 
     if (item.type === 'line') {
       const markerId = `gann-line-marker-${String(key).replace(/[^a-zA-Z0-9_-]/g, '')}`;
@@ -492,6 +515,7 @@ export default function GannzillaLineStyleMenuV183() {
               <path d="M0,0 L8,4 L0,8 Z" fill={stroke} />
             </marker>
           </defs>
+          {!dashed && <line x1={x1} y1={y1} x2={x2} y2={y2} {...hitProps} />}
           <line
             x1={x1}
             y1={y1}
@@ -502,6 +526,7 @@ export default function GannzillaLineStyleMenuV183() {
             strokeDasharray={dashed ? '6 4' : undefined}
             markerStart={item.mode === 'double' ? `url(#${markerId})` : undefined}
             markerEnd={item.mode === 'arrow' || item.mode === 'double' ? `url(#${markerId})` : undefined}
+            style={{ pointerEvents: 'none' }}
           />
         </g>
       );
@@ -516,15 +541,32 @@ export default function GannzillaLineStyleMenuV183() {
       stroke,
       strokeWidth: 2.4,
       strokeDasharray: dashed ? '6 4' : undefined,
+      style: { pointerEvents: 'none' },
     };
 
     if (item.mode === 'triangle') {
-      return <path key={key} d={`M ${left + width / 2} ${top} L ${left + width} ${top + height} L ${left} ${top + height} Z`} {...common} />;
+      const path = `M ${left + width / 2} ${top} L ${left + width} ${top + height} L ${left} ${top + height} Z`;
+      return (
+        <g key={key}>
+          {!dashed && <path d={path} {...hitProps} />}
+          <path d={path} {...common} />
+        </g>
+      );
     }
     if (item.mode === 'circle') {
-      return <ellipse key={key} cx={left + width / 2} cy={top + height / 2} rx={width / 2} ry={height / 2} {...common} />;
+      return (
+        <g key={key}>
+          {!dashed && <ellipse cx={left + width / 2} cy={top + height / 2} rx={width / 2} ry={height / 2} {...hitProps} />}
+          <ellipse cx={left + width / 2} cy={top + height / 2} rx={width / 2} ry={height / 2} {...common} />
+        </g>
+      );
     }
-    return <rect key={key} x={left} y={top} width={width} height={height} {...common} />;
+    return (
+      <g key={key}>
+        {!dashed && <rect x={left} y={top} width={width} height={height} {...hitProps} />}
+        <rect x={left} y={top} width={width} height={height} {...common} />
+      </g>
+    );
   };
 
   const drawingLayer = canvasRect ? createPortal(
