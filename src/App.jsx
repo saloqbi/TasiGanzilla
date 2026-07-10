@@ -14,10 +14,10 @@ import GannzillaToolbarCleanupV151 from './components/GannTools/GannzillaToolbar
 import GannzillaAboutDialogScaleV157 from './components/GannTools/GannzillaAboutDialogScaleV157';
 import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV159';
 import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
-import GannzillaWheelPanControlV161 from './components/GannTools/GannzillaWheelPanControlV161';
+import GannzillaWheelPanControlV162 from './components/GannTools/GannzillaWheelPanControlV162';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 161: add a four-direction wheel movement control beside the zoom controls.
+// Build 162: insert the wheel movement control directly before the zoom-minus button.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -34,7 +34,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="161">
+        <div data-gannzilla-build="162">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -46,7 +46,7 @@ const App = () => {
               <GannzillaAboutDialogScaleV157 />
               <GannzillaAboutBrandV159 />
               <GannzillaAboutClickFixV160 />
-              <GannzillaWheelPanControlV161 />
+              <GannzillaWheelPanControlV162 />
               <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
