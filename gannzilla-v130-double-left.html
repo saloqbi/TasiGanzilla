@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TASI Gannzilla v130 - Double Left Palette</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:Segoe UI,Arial,sans-serif}
+    #appFrame{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
+    #cover{position:fixed;left:334px;top:25px;width:128px;height:calc(100vh - 25px);z-index:2147483603;background:rgba(255,255,255,.96);pointer-events:none}
+    #palette{position:fixed;left:344px;top:34px;z-index:2147483605;width:108px;max-height:calc(100vh - 68px);padding:16px 10px;background:rgba(250,250,250,.97);border:1px solid #d9d9d9;border-radius:54px;box-shadow:0 2px 10px rgba(0,0,0,.14);display:flex;flex-direction:column;align-items:center;gap:8px;box-sizing:border-box;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;direction:ltr}
+    .tool{width:84px;min-width:84px;height:84px;min-height:84px;padding:0;margin:0;border:1px solid transparent;border-radius:6px;background:transparent;color:#74787b;display:flex;align-items:center;justify-content:center;box-sizing:border-box;cursor:pointer;font:700 32px Segoe UI,Arial,sans-serif;line-height:1;flex:0 0 84px}
+    .tool.round{border:2px solid #bfc4c8;border-radius:50%;background:#fbfbfb}
+    .tool.active.round{border:3px solid #6f82b7;color:#596b9b}
+    .tool.active:not(.round){border:2px solid #8799bc;background:rgba(235,239,247,.7)}
+    .tool svg{display:block}
+    @media(max-width:700px){#cover{left:0}#palette{left:10px}}
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" title="TASI Gannzilla"></iframe>
+  <div id="cover"></div>
+  <div id="palette" aria-label="لوحة أدوات جانزيلا المكبرة"></div>
+<script>
+(function(){
+  const base='https://tasi-ganzilla.vercel.app/';
+  const p=new URLSearchParams({gannzillaPro:'true',levels:'10',divisions:'36',startValue:'79680',increment:'1',gannzillaZoom:'1.15',gannzillaFontSize:'13',gannzillaFontWeight:'700',gannzillaInnerRadius:'170',gannzillaRingWidth:'60',showProtractor:'true',showChronometer:'false',lang:'ar',drawingTools:'true',v:'128'});
+  const frame=document.getElementById('appFrame');
+  frame.src=base+'?'+p.toString();
+  const palette=document.getElementById('palette');
+  let active='36';
+
+  function polygonPoints(sides,r=30.4,c=40){
+    const rot=sides===4?-Math.PI/4:-Math.PI/2;
+    return Array.from({length:sides},(_,i)=>{const a=rot+i*Math.PI*2/sides;return `${c+Math.cos(a)*r},${c+Math.sin(a)*r}`}).join(' ');
+  }
+  function dots(sides,r=19.2,c=40){
+    const rot=sides===4?-Math.PI/4:-Math.PI/2;
+    return Array.from({length:sides},(_,i)=>{const a=rot+i*Math.PI*2/sides;return {x:c+Math.cos(a)*r,y:c+Math.sin(a)*r}});
+  }
+  function polySvg(sides){
+    return `<svg width="80" height="80" viewBox="0 0 80 80" aria-hidden="true"><polygon points="${polygonPoints(sides)}" fill="#969696" stroke="#858585" stroke-width="2.4" stroke-linejoin="round"/>${dots(sides).map(d=>`<circle cx="${d.x}" cy="${d.y}" r="3.3" fill="#f5f5f5" stroke="#e7e7e7" stroke-width=".5"/>`).join('')}</svg>`;
+  }
+  function angleSvg(v){return `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="5" y="5" width="70" height="70" rx="3" fill="#fafafa" stroke="#bfc2c5" stroke-width="2.4"/><path d="M14 22V14h8M58 14h8v8M14 58v8h8M66 58v8h-8" fill="none" stroke="#8f9498" stroke-width="2.5" stroke-linecap="round"/><text x="40" y="48" text-anchor="middle" font-family="Segoe UI,Arial" font-size="30" font-weight="700" fill="#74787b">${v}°</text></svg>`}
+  function northSvg(){return `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="5" y="5" width="70" height="70" rx="3" fill="#fafafa" stroke="#bfc2c5" stroke-width="2.4"/><text x="40" y="52" text-anchor="middle" font-family="Georgia,Times New Roman,serif" font-style="italic" font-size="44" font-weight="700" fill="#6f7478">N</text></svg>`}
+  const tools=[
+    ...['12','24','36'].map(v=>({id:v,round:true,html:v,title:`Circle of ${v}`})),
+    {id:'4',html:angleSvg('4'),title:'Angle 4'},
+    {id:'9',html:angleSvg('9'),title:'Angle 9'},
+    {id:'N',html:northSvg(),title:'North'},
+    ...[4,5,6,7,8,9].map(v=>({id:'p'+v,html:polySvg(v),title:`${v}-sided shape`}))
+  ];
+  function render(){
+    palette.innerHTML='';
+    tools.forEach(t=>{
+      const b=document.createElement('button');
+      b.type='button';b.className='tool'+(t.round?' round':'')+(active===t.id?' active':'');b.title=t.title;b.innerHTML=t.html;
+      b.onclick=()=>{active=t.id;render();if(['12','24','36'].includes(t.id)){p.set('divisions',t.id);p.set('v','130');frame.src=base+'?'+p.toString();}};
+      palette.appendChild(b);
+    });
+  }
+  render();
+})();
+</script>
+</body>
+</html>
