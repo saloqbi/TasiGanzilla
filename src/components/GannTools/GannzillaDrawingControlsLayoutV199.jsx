@@ -5,8 +5,8 @@ const SHAPE_CONTROL_ID = 'gannzilla-shape-control-v185';
 const LINE_MENU_ID = 'gannzilla-line-menu-v185';
 const SHAPE_MENU_ID = 'gannzilla-shape-menu-v185';
 const CONTROL_WIDTH = 38;
-const CONTROL_GAP = 8;
-const TEXT_GAP = 11;
+const CONTROL_GAP = 14;
+const TEXT_GAP = 18;
 const MAX_ATTEMPTS = 80;
 const RETRY_MS = 100;
 
@@ -89,7 +89,7 @@ export default function GannzillaDrawingControlsLayoutV199() {
       positionMenu(LINE_MENU_ID, lineLeft);
       positionMenu(SHAPE_MENU_ID, shapeLeft);
 
-      window.GANNZILLA_DRAWING_CONTROLS_LAYOUT_V200 = {
+      window.GANNZILLA_DRAWING_CONTROLS_LAYOUT_V201 = {
         ok: true,
         lineLeft,
         shapeLeft,
