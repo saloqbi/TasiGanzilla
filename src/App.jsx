@@ -21,7 +21,7 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="126">
+        <div data-gannzilla-build="127">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
