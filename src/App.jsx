@@ -10,9 +10,10 @@ import GannzillaConnectionSettingsV96 from './components/GannTools/GannzillaConn
 import GannzillaUnifiedDrawingPalettesV122 from './components/GannTools/GannzillaUnifiedDrawingPalettesV122';
 import GannzillaRightDrawingPaletteV126 from './components/GannTools/GannzillaRightDrawingPaletteV126';
 import GannzillaLeftReferencePaletteV129 from './components/GannTools/GannzillaLeftReferencePaletteV129';
+import GannzillaToolbarCleanupV151 from './components/GannTools/GannzillaToolbarCleanupV151';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 135: keep the enlarged left drawing palette below the hide/show control.
+// Build 151: keep the canonical toolbar compact without removing its underlying functions.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -29,7 +30,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="135">
+        <div data-gannzilla-build="151">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -37,6 +38,7 @@ const App = () => {
               <GannzillaClassicFullOptionsV94 />
               <GannzillaBilingualToggleV95 />
               <GannzillaConnectionSettingsV96 />
+              <GannzillaToolbarCleanupV151 />
               <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
