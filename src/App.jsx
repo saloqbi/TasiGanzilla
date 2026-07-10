@@ -18,7 +18,7 @@ import GannzillaWheelPanControlV163 from './components/GannTools/GannzillaWheelP
 import GannzillaNativeToolbarBindingV178 from './components/GannTools/GannzillaNativeToolbarBindingV178';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 178: original palette toggle owns the event; native toolbar binding no longer double-intercepts it.
+// Build 179: redeploy the single-owner palette toggle fix.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -35,7 +35,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="178">
+        <div data-gannzilla-build="179">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
