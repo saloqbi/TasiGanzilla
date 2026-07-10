@@ -12,7 +12,7 @@ import GannzillaRightDrawingPaletteV126 from './components/GannTools/GannzillaRi
 import GannzillaLeftReferencePaletteV129 from './components/GannTools/GannzillaLeftReferencePaletteV129';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 
-// Build 129: doubled left reference palette, preserving the v128 shapes and colors.
+// Build 129 production trigger: left reference palette is exactly doubled from v128.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
