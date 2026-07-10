@@ -100,7 +100,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '204');
+    url.searchParams.set('v', '205');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -152,7 +152,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 204: replace the line and shape controls with balanced Gannzilla-style split buttons and responsive menus.
+// Build 205: redeploy balanced Gannzilla-style split drawing buttons after the previous Vercel rate-limit.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -169,7 +169,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="204">
+        <div data-gannzilla-build="205">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
