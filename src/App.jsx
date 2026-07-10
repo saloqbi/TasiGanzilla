@@ -100,7 +100,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '209');
+    url.searchParams.set('v', '210');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -152,7 +152,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 209: remove the standalone line icon from the visible drawing toolbar.
+// Build 210: force redeploy of the hidden standalone line control.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -169,7 +169,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="209">
+        <div data-gannzilla-build="210">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
