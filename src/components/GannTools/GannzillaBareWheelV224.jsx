@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV275 from './GannzillaDrawingPalettesV275';
+import GannzillaDrawingPalettesV276 from './GannzillaDrawingPalettesV276';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 275: both left and right drawing palettes enlarged to 200%. */
+/** Build 276: double-size drawing palettes with hidden internal scrollbars and right-side clearance. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V275 = true;
-    window.__auditGannzillaBareWheelV275 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V276 = true;
+    window.__auditGannzillaBareWheelV276 = () => ({
       ok: true,
-      build: 275,
+      build: 276,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -21,9 +21,6 @@ export default function GannzillaBareWheelV224() {
       toolbarRightInsetPx: 4,
       drawingPalettesMounted: true,
       drawingPaletteSingleOwner: true,
-      drawingPalettePostRenderGeometryAuthority: true,
-      drawingPaletteRightStyleMutationGuard: true,
-      drawingPaletteLeftStyleMutationGuard: true,
       drawingPaletteScale: 2,
       bothDrawingPalettesEnlarged: true,
       leftDrawingPaletteEnlarged: true,
@@ -32,16 +29,13 @@ export default function GannzillaBareWheelV224() {
       drawingPaletteButtonGapPx: 8,
       drawingPaletteWidthPx: 92,
       drawingPaletteIconSizePx: 56,
-      drawingPaletteSharedSideGapPx: 24,
-      drawingPaletteSharedSideGapUrlParam: 'drawingToolsSideGap',
-      rightBoundaryUsesVisibleOuterControlLine: true,
-      rightScrollbarSubtractionRemoved: true,
+      drawingPaletteInternalScrollbarHidden: true,
+      rightDrawingPaletteMinimumControlLineClearancePx: 20,
+      rightDrawingPaletteDoesNotTouchControlLine: true,
       drawingPaletteSameTop: true,
       drawingPaletteSameWidth: true,
       drawingPaletteSameHeight: true,
       drawingPaletteSameBorderAndBackground: true,
-      leftPaletteSeparatedFromSettingsControlLine: true,
-      rightPaletteSeparatedFromViewportControlLine: true,
       drawingPalettesMatchGannzillaColorsAndShapes: true,
       drawingPalettesToggleLeftOfMovement: true,
       aboutControlMounted: true,
@@ -75,8 +69,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V275;
-      delete window.__auditGannzillaBareWheelV275;
+      delete window.GANNZILLA_BARE_WHEEL_V276;
+      delete window.__auditGannzillaBareWheelV276;
     };
   }, []);
 
@@ -124,7 +118,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV275 />
+      <GannzillaDrawingPalettesV276 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
