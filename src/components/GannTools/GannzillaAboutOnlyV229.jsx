@@ -4,30 +4,34 @@ import BRAND_IMAGE from './gannzillaBrandImageV159';
 const GOLD = '#d79a18';
 const GOLD_LIGHT = '#ffd86a';
 
-export default function GannzillaAboutOnlyV229() {
+export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
   const [open, setOpen] = React.useState(false);
+  const iconSize = Math.max(22, toolbarHeight - 8);
+  const iconFontSize = Math.max(16, Math.round(iconSize * 0.72));
 
   React.useEffect(() => {
     const onKeyDown = (event) => {
       if (event.key === 'Escape') setOpen(false);
     };
     window.addEventListener('keydown', onKeyDown);
-    window.GANNZILLA_ABOUT_ONLY_V230 = true;
-    window.__auditGannzillaAboutOnlyV230 = () => ({
+    window.GANNZILLA_ABOUT_ONLY_V231 = true;
+    window.__auditGannzillaAboutOnlyV231 = () => ({
       ok: true,
-      build: 230,
+      build: 231,
       singleReactOwner: true,
       intervalCount: 0,
       mutationObserverCount: 0,
-      iconSizePx: 32,
+      toolbarHeightPx: toolbarHeight,
+      iconSizePx: iconSize,
+      iconGovernedByToolbar: true,
       dialogOpen: open,
     });
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      delete window.GANNZILLA_ABOUT_ONLY_V230;
-      delete window.__auditGannzillaAboutOnlyV230;
+      delete window.GANNZILLA_ABOUT_ONLY_V231;
+      delete window.__auditGannzillaAboutOnlyV231;
     };
-  }, [open]);
+  }, [iconSize, open, toolbarHeight]);
 
   return (
     <>
@@ -37,24 +41,23 @@ export default function GannzillaAboutOnlyV229() {
         title="حول البرنامج"
         onClick={() => setOpen(true)}
         style={{
-          position: 'fixed',
-          top: 6,
-          right: 6,
-          zIndex: 120,
-          width: 32,
-          height: 32,
-          minWidth: 32,
-          minHeight: 32,
+          position: 'static',
+          flex: '0 0 auto',
+          width: iconSize,
+          height: iconSize,
+          minWidth: iconSize,
+          minHeight: iconSize,
           padding: 0,
           display: 'grid',
           placeItems: 'center',
+          boxSizing: 'border-box',
           border: '1px solid #527da8',
-          borderRadius: 4,
+          borderRadius: 3,
           background: 'linear-gradient(180deg, #63a6e8 0%, #1765b3 100%)',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.42), 0 1px 3px rgba(0,0,0,.28)',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.42), 0 1px 2px rgba(0,0,0,.24)',
           color: '#fff',
           fontFamily: 'Arial, Helvetica, sans-serif',
-          fontSize: 23,
+          fontSize: iconFontSize,
           lineHeight: 1,
           fontWeight: 900,
           cursor: 'pointer',
@@ -83,7 +86,7 @@ export default function GannzillaAboutOnlyV229() {
           <section
             role="dialog"
             aria-modal="true"
-            aria-labelledby="gannzilla-about-title-v230"
+            aria-labelledby="gannzilla-about-title-v231"
             dir="rtl"
             style={{
               width: 'min(280px, calc(100vw - 20px))',
@@ -109,7 +112,7 @@ export default function GannzillaAboutOnlyV229() {
                 fontWeight: 800,
               }}
             >
-              <span id="gannzilla-about-title-v230">حول البرنامج</span>
+              <span id="gannzilla-about-title-v231">حول البرنامج</span>
               <button
                 type="button"
                 aria-label="إغلاق"
