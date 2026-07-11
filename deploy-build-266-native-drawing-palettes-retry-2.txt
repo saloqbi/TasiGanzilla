@@ -1,0 +1,4 @@
+Build 266 deployment retry 2.
+Native-size left and right drawing palettes are mounted.
+Toolbar drawing-tools icon is immediately left of wheel movement.
+Open with drawingTools=true.
