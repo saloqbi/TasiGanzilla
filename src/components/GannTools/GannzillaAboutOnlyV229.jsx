@@ -1,5 +1,5 @@
 import React from 'react';
-import BRAND_IMAGE from './gannzillaBrandImageV233';
+import BRAND_IMAGE from './gannzillaBrandImageV159';
 
 const GOLD = '#d79a18';
 const GOLD_LIGHT = '#ffd86a';
@@ -15,29 +15,28 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
     };
 
     window.addEventListener('keydown', onKeyDown);
-    window.GANNZILLA_ABOUT_ONLY_V235 = true;
-    window.__auditGannzillaAboutOnlyV235 = () => ({
+    window.GANNZILLA_ABOUT_ONLY_V245 = true;
+    window.__auditGannzillaAboutOnlyV245 = () => ({
       ok: true,
-      build: 235,
+      build: 245,
       singleReactOwner: true,
       intervalCount: 0,
       mutationObserverCount: 0,
       toolbarHeightPx: toolbarHeight,
       iconSizePx: iconSize,
       iconGovernedByToolbar: true,
-      logoNativeSize: '800x800',
-      logoDisplayMaxWidthPx: 1520,
-      logoDisplayScale: 2,
-      informationTextScale: 2,
-      emailTextScale: 2,
+      logoSource: 'GANNZILLA_BRAND_IMAGE_V159_SINGLE_DATA_URI',
+      logoRenderingMode: 'CSS_BACKGROUND_IMAGE',
+      brokenImageElementRemoved: true,
+      logoDisplayMaxWidthPx: 1254,
       fullLogoVisible: true,
       dialogOpen: open,
     });
 
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      delete window.GANNZILLA_ABOUT_ONLY_V235;
-      delete window.__auditGannzillaAboutOnlyV235;
+      delete window.GANNZILLA_ABOUT_ONLY_V245;
+      delete window.__auditGannzillaAboutOnlyV245;
     };
   }, [iconSize, open, toolbarHeight]);
 
@@ -94,10 +93,10 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
           <section
             role="dialog"
             aria-modal="true"
-            aria-labelledby="gannzilla-about-title-v235"
+            aria-labelledby="gannzilla-about-title-v245"
             dir="rtl"
             style={{
-              width: 'min(1580px, calc(100vw - 24px))',
+              width: 'min(1320px, calc(100vw - 24px))',
               maxHeight: 'calc(100vh - 24px)',
               overflow: 'auto',
               background: 'linear-gradient(180deg,#090909 0%,#020202 100%)',
@@ -125,7 +124,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
                 background: '#050505',
               }}
             >
-              <span id="gannzilla-about-title-v235">حول البرنامج</span>
+              <span id="gannzilla-about-title-v245">حول البرنامج</span>
               <button
                 type="button"
                 aria-label="إغلاق"
@@ -146,17 +145,19 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
             </header>
 
             <div style={{ padding: '16px 20px 16px', textAlign: 'center' }}>
-              <img
-                src={BRAND_IMAGE}
-                alt="شعار كوكبة تاسي GOLD عالي الدقة"
-                draggable="false"
+              <div
+                role="img"
+                aria-label="شعار كوكبة تاسي GOLD عالي الدقة"
                 style={{
                   display: 'block',
-                  width: 'min(1520px, 100%)',
-                  height: 'auto',
+                  width: 'min(1254px, 100%)',
                   aspectRatio: '1 / 1',
-                  objectFit: 'contain',
                   margin: '0 auto 28px',
+                  backgroundImage: `url("${BRAND_IMAGE}")`,
+                  backgroundSize: 'contain',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'center',
+                  backgroundColor: '#020202',
                   borderRadius: 14,
                   boxShadow: '0 0 28px rgba(244,184,32,.38)',
                 }}
