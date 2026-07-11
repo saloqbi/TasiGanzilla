@@ -78,6 +78,7 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 38 }) {
       englishFlag: 'UNITED_KINGDOM_SVG',
       controlHeightPx: controlHeight,
       controlWidthPx: CONTROL_WIDTH,
+      textColor: '#111111',
       dropdownOpen: open,
       intervalCount: 0,
       mutationObserverCount: 0,
@@ -104,13 +105,14 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 38 }) {
     border: 0,
     borderBottom: '1px solid #d0d0d0',
     background: active ? '#1478c9' : '#f4f4f4',
-    color: active ? '#fff' : '#111',
+    color: '#111111',
     fontFamily: 'Tahoma, Arial, sans-serif',
     fontSize: 13,
-    fontWeight: active ? 800 : 700,
+    fontWeight: 800,
     cursor: 'pointer',
     textAlign: 'left',
     whiteSpace: 'nowrap',
+    textShadow: active ? '0 1px 0 rgba(255,255,255,.30)' : 'none',
   });
 
   return (
@@ -147,11 +149,11 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 38 }) {
           borderRadius: 1,
           background: '#ececec',
           boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.62)',
-          color: '#fff',
+          color: '#111111',
           fontFamily: 'Tahoma, Arial, sans-serif',
           fontSize: 13,
           lineHeight: 1,
-          fontWeight: 700,
+          fontWeight: 800,
           cursor: 'pointer',
           userSelect: 'none',
           overflow: 'hidden',
@@ -168,9 +170,11 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 38 }) {
             gap: 5,
             padding: '0 5px',
             background: 'linear-gradient(180deg,#2696e6 0%,#0874c6 100%)',
-            color: '#fff',
+            color: '#111111',
+            fontWeight: 800,
             textAlign: 'left',
             whiteSpace: 'nowrap',
+            textShadow: '0 1px 0 rgba(255,255,255,.28)',
           }}
         >
           <span
@@ -200,7 +204,7 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 38 }) {
             placeItems: 'center',
             borderLeft: '1px solid #8c8c8c',
             background: 'linear-gradient(180deg,#fafafa 0%,#dcdcdc 100%)',
-            color: '#222',
+            color: '#111111',
             fontSize: 10,
             lineHeight: 1,
           }}
