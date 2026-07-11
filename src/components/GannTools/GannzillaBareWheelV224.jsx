@@ -3,26 +3,27 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
+import GannzillaDrawingPalettesV266 from './GannzillaDrawingPalettesV266';
 
 const TOOLBAR_HEIGHT = 24;
 
-/**
- * Build 248: stable wheel with comprehensive Arabic interface localization,
- * right-to-left layout, Arabic wheel digits, and the restored About logo.
- */
+/** Build 266: stable Arabic wheel with native-size Gannzilla drawing palettes. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V248 = true;
-    window.__auditGannzillaBareWheelV248 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V266 = true;
+    window.__auditGannzillaBareWheelV266 = () => ({
       ok: true,
-      build: 248,
+      build: 266,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
       toolbarSingleOwner: true,
       toolbarRightInsetPx: 4,
-      toolbarControlGapPx: 2,
-      sideToolbarsMounted: false,
+      drawingPalettesMounted: true,
+      drawingPaletteButtonSizePx: 34,
+      drawingPaletteWidthPx: 46,
+      drawingPalettesMatchGannzillaColorsAndShapes: true,
+      drawingPalettesToggleLeftOfMovement: true,
       aboutControlMounted: true,
       languageControlMounted: true,
       defaultLanguage: 'ar',
@@ -32,9 +33,6 @@ export default function GannzillaBareWheelV224() {
       arabicWheelDigits: true,
       customLanguageSelector: true,
       nativeSelectRemoved: true,
-      cssFlags: true,
-      externalImageCount: 0,
-      svgFlagCount: 0,
       flagAlwaysVisible: true,
       languageControlWidthPx: 100,
       languageControlHeightPx: TOOLBAR_HEIGHT,
@@ -43,13 +41,6 @@ export default function GannzillaBareWheelV224() {
       controlsMatchToolbarHeight: true,
       controlsOverflowToolbar: false,
       supportedLanguages: ['ar', 'en'],
-      languageFlags: ['SAUDI_ARABIA_CSS', 'UNITED_STATES_CSS'],
-      aboutIconGlyph: 'ⓘ',
-      aboutIconAlignment: 'RIGHT',
-      aboutLogoSource: 'GANNZILLA_BRAND_IMAGE_V247_EMBEDDED_WEBP',
-      aboutLogoRenderingMode: 'DIRECT_IMG',
-      aboutLogoDisplayMaxWidthPx: 420,
-      aboutLogoFullVisible: true,
       ringOneMode: 'INDEX_1_TO_36',
       digitSystem: 'ARABIC_INDIC_٠١٢٣٤٥٦٧٨٩',
       allNumericRingsGateColored: true,
@@ -64,8 +55,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V248;
-      delete window.__auditGannzillaBareWheelV248;
+      delete window.GANNZILLA_BARE_WHEEL_V266;
+      delete window.__auditGannzillaBareWheelV266;
     };
   }, []);
 
@@ -113,6 +104,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
+      <GannzillaDrawingPalettesV266 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
