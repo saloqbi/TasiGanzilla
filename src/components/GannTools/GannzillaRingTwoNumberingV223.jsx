@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 225;
+const BUILD = 226;
 const TWO_PI = Math.PI * 2;
 
 function clamp(value, min, max) {
@@ -88,7 +88,7 @@ function findWheelCanvas() {
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
 }
 
-function redrawWheelNumberingV225() {
+function redrawWheelNumberingV226() {
   const canvas = findWheelCanvas();
   if (!canvas) return false;
 
@@ -173,7 +173,7 @@ function redrawWheelNumberingV225() {
           fontSize,
           maxWidth,
           fontWeight,
-          '#111111',
+          gateColor(value),
         );
       }
     }
@@ -192,7 +192,7 @@ export default function GannzillaRingTwoNumberingV223() {
 
     const draw = () => {
       frame = 0;
-      if (!disposed) redrawWheelNumberingV225();
+      if (!disposed) redrawWheelNumberingV226();
     };
 
     const schedule = (delay = 0) => {
@@ -223,12 +223,13 @@ export default function GannzillaRingTwoNumberingV223() {
     window.addEventListener('resize', scheduleAfterUiChange);
     window.addEventListener('gannzilla:ring-two-numbering-refresh', scheduleAfterUiChange);
 
-    window.GANNZILLA_RING_INDEX_V225 = true;
-    window.__auditGannzillaRingIndexV225 = () => ({
+    window.GANNZILLA_RING_INDEX_V226 = true;
+    window.__auditGannzillaRingIndexV226 = () => ({
       ok: Boolean(findWheelCanvas()),
       build: BUILD,
       ring1Mode: 'INDEX_1_TO_36',
       gateColors: { red: '1/4/7', blue: '2/5/8', black: '3/6/9' },
+      allNumericRingsGateColored: true,
       numericRingCount: Math.round(numberParam('levels', 10, 1, 12)),
       firstNumericRing: 2,
       protractorIndependent: true,
@@ -245,8 +246,8 @@ export default function GannzillaRingTwoNumberingV223() {
       document.removeEventListener('change', scheduleAfterUiChange, true);
       window.removeEventListener('resize', scheduleAfterUiChange);
       window.removeEventListener('gannzilla:ring-two-numbering-refresh', scheduleAfterUiChange);
-      delete window.GANNZILLA_RING_INDEX_V225;
-      delete window.__auditGannzillaRingIndexV225;
+      delete window.GANNZILLA_RING_INDEX_V226;
+      delete window.__auditGannzillaRingIndexV226;
     };
   }, []);
 
