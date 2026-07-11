@@ -5,16 +5,16 @@ import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 import GannzillaWheelZoomV289 from './GannzillaWheelZoomV289';
 
-const BUILD = 289;
+const BUILD = 290;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 289: integrated chart visibility eye, movement, zoom, fullscreen, connection, language, and About. */
+/** Build 290: force a fresh deployment of the integrated chart visibility eye. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V289 = true;
-    window.__auditGannzillaTopToolbarV289 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V290 = true;
+    window.__auditGannzillaTopToolbarV290 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
@@ -38,8 +38,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V289;
-      delete window.__auditGannzillaTopToolbarV289;
+      delete window.GANNZILLA_TOP_TOOLBAR_V290;
+      delete window.__auditGannzillaTopToolbarV290;
     };
   }, []);
 
