@@ -1,6 +1,9 @@
 import React from 'react';
-import BRAND_IMAGE from './gannzillaBrandImageV159';
+import BRAND_IMAGE_PART_0 from './gannzillaBrandImageV247Part0';
+import BRAND_IMAGE_PART_1 from './gannzillaBrandImageV247Part1';
+import BRAND_IMAGE_PART_2 from './gannzillaBrandImageV247Part2';
 
+const BRAND_IMAGE = `data:image/webp;base64,${BRAND_IMAGE_PART_0}${BRAND_IMAGE_PART_1}${BRAND_IMAGE_PART_2}`;
 const GOLD = '#d79a18';
 const GOLD_LIGHT = '#ffd86a';
 
@@ -16,17 +19,17 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
     };
 
     window.addEventListener('keydown', onKeyDown);
-    window.GANNZILLA_ABOUT_ONLY_V246 = true;
-    window.__auditGannzillaAboutOnlyV246 = () => ({
+    window.GANNZILLA_ABOUT_ONLY_V247 = true;
+    window.__auditGannzillaAboutOnlyV247 = () => ({
       ok: true,
-      build: 246,
+      build: 247,
       singleReactOwner: true,
       intervalCount: 0,
       mutationObserverCount: 0,
       toolbarHeightPx: toolbarHeight,
       iconSizePx: iconSize,
       iconGovernedByToolbar: true,
-      logoSource: 'GANNZILLA_BRAND_IMAGE_V159_SINGLE_DATA_URI',
+      logoSource: 'GANNZILLA_BRAND_IMAGE_V247_EMBEDDED_WEBP',
       logoRenderingMode: 'DIRECT_IMG',
       logoDisplayMaxWidthPx: 420,
       logoFailed,
@@ -36,8 +39,8 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
 
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      delete window.GANNZILLA_ABOUT_ONLY_V246;
-      delete window.__auditGannzillaAboutOnlyV246;
+      delete window.GANNZILLA_ABOUT_ONLY_V247;
+      delete window.__auditGannzillaAboutOnlyV247;
     };
   }, [iconSize, logoFailed, open, toolbarHeight]);
 
@@ -94,7 +97,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
           <section
             role="dialog"
             aria-modal="true"
-            aria-labelledby="gannzilla-about-title-v246"
+            aria-labelledby="gannzilla-about-title-v247"
             dir="rtl"
             style={{
               width: 'min(620px, calc(100vw - 24px))',
@@ -125,7 +128,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
                 background: '#050505',
               }}
             >
-              <span id="gannzilla-about-title-v246">حول البرنامج</span>
+              <span id="gannzilla-about-title-v247">حول البرنامج</span>
               <button
                 type="button"
                 aria-label="إغلاق"
@@ -158,6 +161,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
                     display: 'block',
                     width: 'min(420px, 100%)',
                     height: 'auto',
+                    aspectRatio: '1 / 1',
                     objectFit: 'contain',
                     margin: '0 auto 24px',
                     borderRadius: 14,
