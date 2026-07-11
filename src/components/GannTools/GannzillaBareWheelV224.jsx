@@ -7,13 +7,13 @@ import GannzillaDrawingPalettesV268 from './GannzillaDrawingPalettesV268';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 269: stable Arabic wheel with mirrored drawing palettes outside both control lines. */
+/** Build 270: stable Arabic wheel with extra right drawing-palette clearance. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V269 = true;
-    window.__auditGannzillaBareWheelV269 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V270 = true;
+    window.__auditGannzillaBareWheelV270 = () => ({
       ok: true,
-      build: 269,
+      build: 270,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -22,10 +22,11 @@ export default function GannzillaBareWheelV224() {
       drawingPalettesMounted: true,
       drawingPaletteButtonSizePx: 34,
       drawingPaletteWidthPx: 46,
-      drawingPaletteBoundaryGapPx: 12,
+      leftDrawingPaletteGapPx: 12,
+      rightDrawingPaletteGapPx: 22,
+      rightPaletteAdditionalLeftShiftPx: 10,
       leftPaletteSeparatedFromSettingsPanel: true,
       rightPaletteSeparatedFromViewportControlLine: true,
-      mirroredControlLineSpacing: true,
       rightPaletteOutsideWheelControlLine: true,
       drawingPalettesMatchGannzillaColorsAndShapes: true,
       drawingPalettesToggleLeftOfMovement: true,
@@ -60,8 +61,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V269;
-      delete window.__auditGannzillaBareWheelV269;
+      delete window.GANNZILLA_BARE_WHEEL_V270;
+      delete window.__auditGannzillaBareWheelV270;
     };
   }, []);
 
