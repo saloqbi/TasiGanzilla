@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TASI Gannzilla V247 - Logo Restored</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:Tahoma,Arial,sans-serif}
+#app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
+#infoCover{position:fixed;top:0;right:0;width:30px;height:24px;z-index:2147483646;background:linear-gradient(180deg,#fafafa 0%,#f1f1f1 55%,#e7e7e7 100%);display:flex;align-items:center;justify-content:center;border-left:1px solid #c7c7c7;box-shadow:inset 0 1px 0 #fff,inset 0 -1px 0 #b7b7b7}
+#infoBtn{width:24px;height:24px;padding:0;border:0;background:transparent;color:#2469b2;font:900 20px/1 'Segoe UI Symbol','Arial Unicode MS',Arial,sans-serif;cursor:pointer;display:grid;place-items:center}
+#overlay{position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.72);display:none;place-items:center;padding:12px;box-sizing:border-box}
+#overlay.open{display:grid}
+#dialog{width:min(620px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;background:linear-gradient(180deg,#090909 0%,#020202 100%);border:2px solid #d79a18;box-shadow:0 0 34px rgba(235,164,18,.42);color:#f2c454;box-sizing:border-box}
+#head{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #9d690e;color:#ffd86a;font-size:17px;font-weight:800;position:sticky;top:0;z-index:2;background:#050505}
+#x{width:30px;height:30px;border:0;background:transparent;color:#ffd86a;font-size:24px;line-height:1;cursor:pointer}
+#body{padding:16px 20px;text-align:center}
+#logo{display:block;width:min(420px,100%);height:auto;aspect-ratio:1/1;object-fit:contain;margin:0 auto 24px;border-radius:14px;box-shadow:0 0 28px rgba(244,184,32,.38);background:#020202}
+#title{color:#ffd86a;font-size:32px;line-height:1.35;font-weight:900;margin-bottom:18px;text-shadow:0 1px 8px rgba(255,196,64,.28)}
+.meta{font-size:20px;line-height:1.75;font-weight:800}
+#mail{color:#ffd86a;font-size:20px;line-height:1.75;font-weight:900;text-decoration:none;text-shadow:0 1px 8px rgba(255,196,64,.24)}
+.rights{font-size:18px;line-height:1.7;font-weight:800}
+#closeBottom{margin-top:20px;min-width:70px;height:32px;border:1px solid #d79a18;background:linear-gradient(#251a05,#080808);color:#ffd86a;font:800 13px Tahoma,Arial,sans-serif;cursor:pointer}
+#loading{color:#ffd86a;font-size:18px;padding:40px}
+@media(max-width:700px){#title{font-size:27px}.meta,#mail{font-size:17px}.rights{font-size:16px}}
+</style>
+</head>
+<body>
+<iframe id="app" src="https://tasi-ganzilla.vercel.app/?gannzillaPro=true&levels=10&divisions=36&startValue=79680&increment=1&gannzillaZoom=1.15&gannzillaFontSize=13&gannzillaFontWeight=700&gannzillaInnerRadius=170&gannzillaRingWidth=60&showProtractor=true&showChronometer=false&lang=ar&drawingTools=false&v=246" title="TASI Gannzilla"></iframe>
+<div id="infoCover"><button id="infoBtn" title="حول البرنامج" aria-label="حول البرنامج">ⓘ</button></div>
+<div id="overlay" role="presentation">
+  <section id="dialog" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <div id="head"><span id="aboutTitle">حول البرنامج</span><button id="x" aria-label="إغلاق">×</button></div>
+    <div id="body">
+      <div id="loading">جاري تحميل الشعار...</div>
+      <img id="logo" alt="شعار كوكبة تاسي GOLD" hidden />
+      <div id="title">كوكبة الأرقام السحرية</div>
+      <div class="meta">الإصدار: 1</div>
+      <div class="meta">المؤلف: محمود سمان</div>
+      <a id="mail" href="mailto:m.a.m.1392@gmail.com">m.a.m.1392@gmail.com</a>
+      <div class="rights" style="margin-top:22px">© 2026 كوكبة تاسي</div>
+      <div class="rights">جميع الحقوق محفوظة</div>
+      <button id="closeBottom">إغلاق</button>
+    </div>
+  </section>
+</div>
+<script type="module">
+import p0 from './src/components/GannTools/gannzillaBrandImageV247Part0.js';
+import p1 from './src/components/GannTools/gannzillaBrandImageV247Part1.js';
+import p2 from './src/components/GannTools/gannzillaBrandImageV247Part2.js';
+const overlay=document.getElementById('overlay');
+const logo=document.getElementById('logo');
+const loading=document.getElementById('loading');
+const open=()=>overlay.classList.add('open');
+const close=()=>overlay.classList.remove('open');
+document.getElementById('infoBtn').addEventListener('click',open);
+document.getElementById('x').addEventListener('click',close);
+document.getElementById('closeBottom').addEventListener('click',close);
+overlay.addEventListener('mousedown',e=>{if(e.target===overlay)close();});
+window.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+logo.src=`data:image/webp;base64,${p0}${p1}${p2}`;
+logo.onload=()=>{loading.hidden=true;logo.hidden=false;};
+logo.onerror=()=>{loading.textContent='تعذر تحميل الشعار';};
+</script>
+</body>
+</html>
