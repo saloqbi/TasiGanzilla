@@ -5,21 +5,23 @@ import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 import GannzillaWheelZoomV256 from './GannzillaWheelZoomV256';
 
-const BUILD = 263;
+const BUILD = 264;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 263: exact restore of the previously working integrated movement + zoom toolbar. */
+/** Build 264: functional click and press-and-hold wheel direction pad. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V263 = true;
-    window.__auditGannzillaTopToolbarV263 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V264 = true;
+    window.__auditGannzillaTopToolbarV264 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
-      exactWorkingDirectionControlsRestored: true,
-      suppressionPatchRemoved: true,
+      directionPadFunctional: true,
+      directionPadClickEnabled: true,
+      directionPadPressAndHoldEnabled: true,
+      directionButtonsProtectedFromLegacySuppression: true,
       wheelMovementIntegratedWithZoom: true,
       wheelMovementIconPlacement: 'IMMEDIATELY_LEFT_OF_ZOOM_MINUS',
       wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
@@ -34,7 +36,7 @@ export default function GannzillaTopToolbarV231() {
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
       mountedControls: [
-        'INTEGRATED_WHEEL_MOVEMENT_AND_ZOOM',
+        'FUNCTIONAL_WHEEL_DIRECTION_PAD_AND_ZOOM',
         'PAGE_MAXIMIZE_GANNZILLA_STYLE',
         'CONNECTION_SETTINGS_EXACT',
         'LANGUAGE_CUSTOM_FLAG',
@@ -49,8 +51,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V263;
-      delete window.__auditGannzillaTopToolbarV263;
+      delete window.GANNZILLA_TOP_TOOLBAR_V264;
+      delete window.__auditGannzillaTopToolbarV264;
     };
   }, []);
 
