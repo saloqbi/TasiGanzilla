@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 
-const BUILD = 248;
+const BUILD = 249;
 const ARABIC_DIGITS = Object.freeze({
   0: '٠', 1: '١', 2: '٢', 3: '٣', 4: '٤',
   5: '٥', 6: '٦', 7: '٧', 8: '٨', 9: '٩',
@@ -13,7 +13,7 @@ const EXACT_TRANSLATIONS = Object.freeze({
   '＋ Add': '＋ إضافة',
   Add: 'إضافة',
   Clockwise: 'مع عقارب الساعة',
-  Counter: 'عكس عقارب الساعة',
+  Counter: 'العداد',
   Layout: 'التخطيط',
   Visible: 'ظاهر',
   Size: 'الحجم',
@@ -32,7 +32,6 @@ const EXACT_TRANSLATIONS = Object.freeze({
   'Show marks': 'إظهار العلامات',
   'Show numbers': 'إظهار الأرقام',
   Protractor: 'المنقلة',
-  Counter: 'العداد',
   Start: 'البداية',
   Step: 'الخطوة',
   Radius: 'نصف القطر',
@@ -66,9 +65,6 @@ const EXACT_TRANSLATIONS = Object.freeze({
   Offset: 'الإزاحة',
   Hide: 'إخفاء',
   Show: 'إظهار',
-  English: 'العربية',
-  Languages: 'اللغات',
-  'Choose language': 'اختيار اللغة',
   'New York': 'نيويورك',
   North: 'شمال',
   South: 'جنوب',
@@ -87,13 +83,20 @@ export function toArabicDigits(value) {
   return String(value ?? '').replace(/[0-9]/g, (digit) => ARABIC_DIGITS[digit]);
 }
 
-function isArabicRequested() {
+function requestedLanguage() {
   try {
     const queryLanguage = new URLSearchParams(window.location.search).get('lang');
-    if (queryLanguage) return queryLanguage !== 'en';
+    if (queryLanguage === 'en') return 'en';
+    if (queryLanguage === 'ar') return 'ar';
   } catch {
     // Ignore malformed URLs.
   }
+  return null;
+}
+
+function isArabicRequested() {
+  const queryLanguage = requestedLanguage();
+  if (queryLanguage) return queryLanguage === 'ar';
   return document.documentElement.lang !== 'en';
 }
 
@@ -108,9 +111,9 @@ function translateCanvasText(value) {
 
 if (typeof window !== 'undefined' && typeof window.CanvasRenderingContext2D !== 'undefined') {
   const prototype = window.CanvasRenderingContext2D.prototype;
-  if (!prototype.__gannzillaArabicFillTextV248) {
-    const originalFillText = prototype.fillText;
-    Object.defineProperty(prototype, '__gannzillaArabicFillTextV248', {
+  if (!prototype.__gannzillaArabicFillTextV249) {
+    const originalFillText = prototype.__gannzillaArabicFillTextV248 || prototype.fillText;
+    Object.defineProperty(prototype, '__gannzillaArabicFillTextV249', {
       value: originalFillText,
       configurable: true,
     });
@@ -138,13 +141,20 @@ function translateText(text) {
   return `${leading}${translated}${trailing}`;
 }
 
+function shouldSkipElement(element) {
+  if (!element) return true;
+  if (['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(element.tagName)) return true;
+  return Boolean(element.closest?.('[data-gannzilla-language-control="true"]'));
+}
+
 function localizeNode(root) {
   if (!root || root.nodeType !== Node.ELEMENT_NODE) return;
+  if (root.closest?.('[data-gannzilla-language-control="true"]')) return;
 
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       const parent = node.parentElement;
-      if (!parent || ['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(parent.tagName)) return NodeFilter.FILTER_REJECT;
+      if (shouldSkipElement(parent)) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     },
   });
@@ -157,6 +167,7 @@ function localizeNode(root) {
   });
 
   root.querySelectorAll('input[type="text"]').forEach((input) => {
+    if (input.closest('[data-gannzilla-language-control="true"]')) return;
     if (input.value === 'New York') input.value = 'نيويورك';
     else if (/North|South|East|West/.test(input.value)) input.value = translateText(input.value);
     input.dir = 'rtl';
@@ -171,26 +182,23 @@ function localizeNode(root) {
   });
 
   root.querySelectorAll('select, button, aside, [role="menu"], [role="toolbar"]').forEach((element) => {
+    if (element.closest('[data-gannzilla-language-control="true"]')) return;
     element.dir = 'rtl';
   });
 }
 
 export default function GannzillaArabicLocalizationV248() {
   const { lang, setLang } = useLanguage();
+  const arabicMode = requestedLanguage() === 'ar' || (requestedLanguage() === null && lang === 'ar');
 
   React.useEffect(() => {
-    let requestedLanguage = lang;
-    try {
-      requestedLanguage = new URLSearchParams(window.location.search).get('lang') || lang || 'ar';
-    } catch {
-      requestedLanguage = lang || 'ar';
-    }
-
-    if (requestedLanguage !== 'en' && lang !== 'ar') setLang('ar');
+    const urlLanguage = requestedLanguage();
+    if (urlLanguage === 'ar' && lang !== 'ar') setLang('ar');
+    if (urlLanguage === 'en' && lang !== 'en') setLang('en');
   }, [lang, setLang]);
 
   React.useEffect(() => {
-    if (lang !== 'ar') return undefined;
+    if (!arabicMode) return undefined;
 
     document.documentElement.lang = 'ar';
     document.documentElement.dir = 'rtl';
@@ -199,38 +207,50 @@ export default function GannzillaArabicLocalizationV248() {
 
     const observer = new MutationObserver((records) => {
       records.forEach((record) => {
+        if (record.type === 'characterData' && record.target.parentElement) {
+          localizeNode(record.target.parentElement);
+          return;
+        }
         record.addedNodes.forEach((node) => {
           if (node.nodeType === Node.ELEMENT_NODE) localizeNode(node);
           else if (node.nodeType === Node.TEXT_NODE && node.parentElement) localizeNode(node.parentElement);
         });
       });
     });
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+
+    const secondPass = window.setTimeout(() => localizeNode(document.body), 120);
+    const thirdPass = window.setTimeout(() => localizeNode(document.body), 500);
 
     window.dispatchEvent(new CustomEvent('gannzilla:ring-two-numbering-refresh'));
     window.dispatchEvent(new Event('resize'));
 
-    window.GANNZILLA_ARABIC_LOCALIZATION_V248 = true;
-    window.__auditGannzillaArabicLocalizationV248 = () => ({
+    window.GANNZILLA_ARABIC_LOCALIZATION_V249 = true;
+    window.__auditGannzillaArabicLocalizationV249 = () => ({
       ok: true,
       build: BUILD,
       language: 'ar',
       direction: 'rtl',
+      urlLanguageAuthority: true,
       wheelDigits: 'ARABIC_INDIC_٠١٢٣٤٥٦٧٨٩',
       interfaceTranslated: true,
       canvasTextLocalized: true,
+      languageControlExcludedFromTranslation: true,
+      characterDataObserved: true,
       symbolNamesPreserved: true,
       mutationObserverCount: 1,
     });
 
     return () => {
       observer.disconnect();
-      delete window.GANNZILLA_ARABIC_LOCALIZATION_V248;
-      delete window.__auditGannzillaArabicLocalizationV248;
+      window.clearTimeout(secondPass);
+      window.clearTimeout(thirdPass);
+      delete window.GANNZILLA_ARABIC_LOCALIZATION_V249;
+      delete window.__auditGannzillaArabicLocalizationV249;
     };
-  }, [lang]);
+  }, [arabicMode]);
 
-  if (lang !== 'ar') return null;
+  if (!arabicMode) return null;
 
   return (
     <style>{`
@@ -270,7 +290,13 @@ export default function GannzillaArabicLocalizationV248() {
       }
 
       [data-gannzilla-language-control="true"] {
-        direction: rtl !important;
+        direction: ltr !important;
+        pointer-events: auto !important;
+        z-index: 2147483647 !important;
+      }
+
+      [data-gannzilla-language-control="true"] * {
+        pointer-events: auto !important;
       }
     `}</style>
   );
