@@ -24,6 +24,8 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
       toolbarHeightPx: toolbarHeight,
       iconSizePx: iconSize,
       iconGovernedByToolbar: true,
+      logoWidthPx: 440,
+      logoScale: 2,
       dialogOpen: open,
     });
     return () => {
@@ -89,7 +91,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
             aria-labelledby="gannzilla-about-title-v231"
             dir="rtl"
             style={{
-              width: 'min(280px, calc(100vw - 20px))',
+              width: 'min(500px, calc(100vw - 20px))',
               maxHeight: 'calc(100vh - 20px)',
               overflow: 'auto',
               background: 'linear-gradient(180deg,#090909 0%,#020202 100%)',
@@ -132,49 +134,50 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
               </button>
             </header>
 
-            <div style={{ padding: '16px 14px 12px', textAlign: 'center' }}>
+            <div style={{ padding: '16px 18px 14px', textAlign: 'center' }}>
               <img
                 src={BRAND_IMAGE}
                 alt="شعار كوكبة تاسي GOLD"
                 draggable="false"
                 style={{
                   display: 'block',
-                  width: '220px',
+                  width: '440px',
                   maxWidth: '100%',
-                  height: '220px',
+                  height: 'auto',
+                  aspectRatio: '1 / 1',
                   objectFit: 'contain',
-                  margin: '0 auto 15px',
-                  borderRadius: 10,
-                  boxShadow: '0 0 18px rgba(244,184,32,.30)',
+                  margin: '0 auto 18px',
+                  borderRadius: 14,
+                  boxShadow: '0 0 24px rgba(244,184,32,.34)',
                 }}
               />
 
-              <div style={{ color: GOLD_LIGHT, fontSize: 19, fontWeight: 900, marginBottom: 16 }}>
+              <div style={{ color: GOLD_LIGHT, fontSize: 22, fontWeight: 900, marginBottom: 16 }}>
                 كوكبة الأرقام السحرية
               </div>
-              <div style={{ fontSize: 12, lineHeight: 1.75 }}>الإصدار: 1</div>
-              <div style={{ fontSize: 12, lineHeight: 1.75 }}>المؤلف: محمود سمان</div>
+              <div style={{ fontSize: 13, lineHeight: 1.75 }}>الإصدار: 1</div>
+              <div style={{ fontSize: 13, lineHeight: 1.75 }}>المؤلف: محمود سمان</div>
               <a
                 href="mailto:m.a.m.1392@gmail.com"
-                style={{ color: GOLD_LIGHT, fontSize: 12, lineHeight: 1.75, textDecoration: 'none' }}
+                style={{ color: GOLD_LIGHT, fontSize: 13, lineHeight: 1.75, textDecoration: 'none' }}
               >
                 m.a.m.1392@gmail.com
               </a>
-              <div style={{ marginTop: 18, fontSize: 11, lineHeight: 1.7 }}>© 2026 كوكبة تاسي</div>
-              <div style={{ fontSize: 11, lineHeight: 1.7 }}>جميع الحقوق محفوظة</div>
+              <div style={{ marginTop: 18, fontSize: 12, lineHeight: 1.7 }}>© 2026 كوكبة تاسي</div>
+              <div style={{ fontSize: 12, lineHeight: 1.7 }}>جميع الحقوق محفوظة</div>
 
               <div style={{ marginTop: 16, textAlign: 'left' }}>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
                   style={{
-                    minWidth: 54,
-                    height: 26,
+                    minWidth: 64,
+                    height: 30,
                     border: `1px solid ${GOLD}`,
                     background: 'linear-gradient(#251a05,#080808)',
                     color: GOLD_LIGHT,
                     fontFamily: 'Tahoma, Arial, sans-serif',
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: 800,
                     cursor: 'pointer',
                   }}
