@@ -4,20 +4,25 @@ import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 import GannzillaWheelZoomV256 from './GannzillaWheelZoomV256';
+import GannzillaWheelPanV257 from './GannzillaWheelPanV257';
 
-const BUILD = 256;
+const BUILD = 257;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 256: direct native Gannzilla wheel zoom, maximize, connection, language, and About controls. Deployment retry 1. */
+/** Build 257: four-direction wheel movement, native zoom, maximize, connection, language, and About controls. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V256 = true;
-    window.__auditGannzillaTopToolbarV256 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V257 = true;
+    window.__auditGannzillaTopToolbarV257 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
+      wheelPanControlMounted: true,
+      wheelPanDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
+      wheelPanPressAndHold: true,
+      wheelPanPersistent: true,
       wheelZoomControlMounted: true,
       wheelZoomControlMode: 'DIRECT_NATIVE_GANNZILLA_MIRROR',
       wheelZoomUsesCssTransform: false,
@@ -30,13 +35,15 @@ export default function GannzillaTopToolbarV231() {
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
       mountedControls: [
+        'WHEEL_PAN_LEFT_UP_CENTER_DOWN_RIGHT',
         'WHEEL_ZOOM_MINUS_PERCENT_PLUS',
         'PAGE_MAXIMIZE_GANNZILLA_STYLE',
         'CONNECTION_SETTINGS_EXACT',
         'LANGUAGE_CUSTOM_FLAG',
         'ORIGINAL_GANNZILLA_ABOUT',
       ],
-      controlVisualOrderLeftToRight: 'WHEEL_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
+      controlVisualOrderLeftToRight: 'WHEEL_PAN_WHEEL_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
+      wheelPanFunctional: true,
       wheelZoomFunctional: true,
       pageMaximizeFunctional: true,
       connectionDialogFunctional: true,
@@ -47,8 +54,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V256;
-      delete window.__auditGannzillaTopToolbarV256;
+      delete window.GANNZILLA_TOP_TOOLBAR_V257;
+      delete window.__auditGannzillaTopToolbarV257;
     };
   }, []);
 
@@ -83,24 +90,28 @@ export default function GannzillaTopToolbarV231() {
           direction: ltr !important;
         }
 
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-pan-control="true"] {
           order: 0 !important;
         }
 
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-control="true"] {
           order: 1 !important;
         }
 
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] {
           order: 2 !important;
         }
 
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] {
           order: 3 !important;
         }
 
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] {
           order: 4 !important;
+        }
+
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] {
+          order: 5 !important;
         }
 
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"],
@@ -154,6 +165,7 @@ export default function GannzillaTopToolbarV231() {
           overflow: 'visible',
         }}
       >
+        <GannzillaWheelPanV257 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaWheelZoomV256 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaPageFullscreenV253 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
