@@ -1,0 +1,3 @@
+Build 258 deployment marker.
+Compact four-direction movement icon is immediately left of wheel zoom.
+Popup directions: left, up, center, down, right.
