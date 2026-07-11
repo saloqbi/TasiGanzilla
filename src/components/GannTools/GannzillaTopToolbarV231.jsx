@@ -2,22 +2,22 @@ import React from 'react';
 import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 
-const TOOLBAR_HEIGHT = 38;
+const TOOLBAR_HEIGHT = 50;
 const RIGHT_INSET_PX = 38;
-const CONTROL_GAP_PX = 3;
+const CONTROL_GAP_PX = 5;
 
 /**
- * Build 237: classic Arabic/English flag language selector beside About.
- * All toolbar controls derive their height from TOOLBAR_HEIGHT.
+ * Build 238: enlarged classic Arabic/English selector matched to the supplied
+ * desktop reference, with the About icon governed by the same toolbar height.
  */
 export default function GannzillaTopToolbarV231() {
   const iconSize = TOOLBAR_HEIGHT - 8;
 
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V237 = true;
-    window.__auditGannzillaTopToolbarV237 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V238 = true;
+    window.__auditGannzillaTopToolbarV238 = () => ({
       ok: true,
-      build: 237,
+      build: 238,
       singleReactOwner: true,
       heightPx: TOOLBAR_HEIGHT,
       iconSizePx: iconSize,
@@ -25,17 +25,19 @@ export default function GannzillaTopToolbarV231() {
       iconAlignment: 'RIGHT',
       rightInsetPx: RIGHT_INSET_PX,
       controlGapPx: CONTROL_GAP_PX,
-      mountedControls: ['LANGUAGE_CLASSIC', 'ABOUT'],
+      mountedControls: ['LANGUAGE_CLASSIC_ENLARGED', 'ABOUT_ENLARGED'],
       languageControlPosition: 'LEFT_OF_ABOUT',
       languageControlVisible: true,
       languageFlags: ['UNITED_KINGDOM_SVG', 'SAUDI_ARABIA_SVG'],
+      languageTextColor: '#111111',
+      referenceSizeMatch: true,
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V237;
-      delete window.__auditGannzillaTopToolbarV237;
+      delete window.GANNZILLA_TOP_TOOLBAR_V238;
+      delete window.__auditGannzillaTopToolbarV238;
     };
   }, [iconSize]);
 
