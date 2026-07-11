@@ -10,7 +10,7 @@ const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 256: direct native Gannzilla wheel zoom, maximize, connection, language, and About controls. */
+/** Build 256: direct native Gannzilla wheel zoom, maximize, connection, language, and About controls. Deployment retry 1. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
     window.GANNZILLA_TOP_TOOLBAR_V256 = true;
