@@ -3,43 +3,27 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV286 from './GannzillaDrawingPalettesV286';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 286: remove all visible tools from the right side and release wheel interaction. */
+/** Build 287: remove all left/right drawing-tool code from the active runtime. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V286 = true;
-    window.__auditGannzillaBareWheelV286 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V287 = true;
+    window.__auditGannzillaBareWheelV287 = () => ({
       ok: true,
-      build: 286,
-      completeRightDrawingPaletteRemovedFromDisplay: true,
-      allRightGeometryIconsRemovedFromDisplay: true,
-      spiralIconRemovedFromDisplay: true,
-      drawingOverlayDisabled: true,
+      build: 287,
+      leftDrawingPaletteMounted: false,
+      rightDrawingPaletteMounted: false,
+      drawingOverlayMounted: false,
+      drawingToolsRuntimeRemoved: true,
+      drawingToolsToggleRemoved: true,
       wheelInteractionReleased: true,
-      leftDrawingPalettePreserved: true,
-      lastDrawingLibraryAdditionRemoved: true,
-      previousAcceptedWorkPreserved: true,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
       toolbarSingleOwner: true,
       toolbarRightInsetPx: 4,
-      drawingPalettesMounted: true,
-      drawingPaletteSingleOwner: true,
-      drawingPaletteScale: 2,
-      leftDrawingPaletteEnlarged: true,
-      drawingPaletteButtonSizePx: 68,
-      drawingPaletteButtonGapPx: 8,
-      drawingPaletteWidthPx: 92,
-      drawingPaletteIconSizePx: 56,
-      drawingPaletteInternalScrollbarHidden: true,
-      drawingPaletteOpaqueBackgrounds: true,
-      drawingPaletteOpaqueButtonBackgrounds: true,
-      drawingPaletteOpaqueShapeColors: true,
-      drawingPaletteTransparencyRemoved: true,
       aboutControlMounted: true,
       languageControlMounted: true,
       defaultLanguage: 'ar',
@@ -71,8 +55,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V286;
-      delete window.__auditGannzillaBareWheelV286;
+      delete window.GANNZILLA_BARE_WHEEL_V287;
+      delete window.__auditGannzillaBareWheelV287;
     };
   }, []);
 
@@ -120,7 +104,6 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV286 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
