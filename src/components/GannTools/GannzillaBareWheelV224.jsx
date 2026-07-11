@@ -1,25 +1,26 @@
 import React from 'react';
 import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
+import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 
 /**
- * Build 228 baseline: canonical wheel + settings panel only.
+ * Build 229: stable V228 wheel plus the first restored control: About.
  *
  * Ring 1 is a standalone 1..36 index ring using 147/258/369 colors.
  * Ten numeric rings start from ring 2 and use the same gate colors.
  * The wheel uses the warm Gannzilla-style alternating ring palette.
- * The protractor stays independent.
+ * The About icon/dialog is React-owned with no interval or MutationObserver.
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V228 = true;
-    window.__auditGannzillaBareWheelV228 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V229 = true;
+    window.__auditGannzillaBareWheelV229 = () => ({
       ok: true,
-      build: 228,
+      build: 229,
       canonicalRendererMounted: true,
       topToolbarMounted: false,
       sideToolbarsMounted: false,
-      overlayControlsMounted: false,
+      aboutControlMounted: true,
       ringOneMode: 'INDEX_1_TO_36',
       allNumericRingsGateColored: true,
       ringPalette: {
@@ -33,8 +34,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V228;
-      delete window.__auditGannzillaBareWheelV228;
+      delete window.GANNZILLA_BARE_WHEEL_V229;
+      delete window.__auditGannzillaBareWheelV229;
     };
   }, []);
 
@@ -47,35 +48,36 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="228"] > div > div:first-of-type {
+        [data-gannzilla-build="229"] > div > div:first-of-type {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="228"] > div > div:nth-of-type(2) {
+        [data-gannzilla-build="229"] > div > div:nth-of-type(2) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="228"] > div > button {
+        [data-gannzilla-build="229"] > div > button {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="228"] > div > aside {
+        [data-gannzilla-build="229"] > div > aside {
           top: 0 !important;
           height: 100vh !important;
         }
 
-        [data-gannzilla-build="228"] > div > div:last-of-type {
+        [data-gannzilla-build="229"] > div > div:last-of-type {
           top: 0 !important;
         }
       `}</style>
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
+      <GannzillaAboutOnlyV229 />
     </>
   );
 }
