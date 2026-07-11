@@ -2,21 +2,23 @@ import React from 'react';
 import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
+import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 
-const BUILD = 252;
+const BUILD = 253;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const CONTROL_GAP_PX = 2;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 252: exact connection settings, language, and original About controls. */
+/** Build 253: page maximize, exact connection settings, language, and original About controls. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V252 = true;
-    window.__auditGannzillaTopToolbarV252 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V253 = true;
+    window.__auditGannzillaTopToolbarV253 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
+      pageMaximizeControlSizePx: TOOLBAR_HEIGHT,
       languageControlHeightPx: TOOLBAR_HEIGHT,
       languageControlWidthPx: 100,
       connectionControlSizePx: TOOLBAR_HEIGHT,
@@ -25,20 +27,27 @@ export default function GannzillaTopToolbarV231() {
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
       controlGapPx: CONTROL_GAP_PX,
-      mountedControls: ['CONNECTION_SETTINGS_EXACT', 'LANGUAGE_CUSTOM_FLAG', 'ORIGINAL_GANNZILLA_ABOUT'],
+      mountedControls: [
+        'PAGE_MAXIMIZE_GANNZILLA_STYLE',
+        'CONNECTION_SETTINGS_EXACT',
+        'LANGUAGE_CUSTOM_FLAG',
+        'ORIGINAL_GANNZILLA_ABOUT',
+      ],
+      pageMaximizeFunctional: true,
+      pageMaximizeVisualReference: 'GANNZILLA_FOUR_CORNER_EXPAND_ICON',
       connectionDialogFunctional: true,
       connectionVisualReference: 'GANNZILLA_CONNECTION_SETTINGS_222x211',
       aboutDialogFunctional: true,
       aboutVisualReference: 'GANNZILLA_PRO_8_3',
-      controlVisualOrder: 'CONNECTION_LANGUAGE_INFORMATION',
+      controlVisualOrder: 'PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
       flagAlwaysVisible: true,
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V252;
-      delete window.__auditGannzillaTopToolbarV252;
+      delete window.GANNZILLA_TOP_TOOLBAR_V253;
+      delete window.__auditGannzillaTopToolbarV253;
     };
   }, []);
 
@@ -107,6 +116,7 @@ export default function GannzillaTopToolbarV231() {
           overflow: 'visible',
         }}
       >
+        <GannzillaPageFullscreenV253 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaLanguageToggleV237 />
         <GannzillaAboutOnlyV229 toolbarHeight={TOOLBAR_HEIGHT} />
