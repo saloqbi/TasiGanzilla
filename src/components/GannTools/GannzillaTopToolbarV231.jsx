@@ -1,35 +1,39 @@
 import React from 'react';
 import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
+import GannzillaLanguageToggleV236 from './GannzillaLanguageToggleV236';
 
 const TOOLBAR_HEIGHT = 38;
 const RIGHT_INSET_PX = 38;
+const CONTROL_GAP_PX = 3;
 
 /**
- * Build 233: single-owner top toolbar with a fixed right safety inset.
- * All toolbar icons derive their dimensions from TOOLBAR_HEIGHT.
+ * Build 236: single-owner top toolbar with Arabic/English language selector.
+ * All toolbar controls derive their height from TOOLBAR_HEIGHT.
  */
 export default function GannzillaTopToolbarV231() {
   const iconSize = TOOLBAR_HEIGHT - 8;
 
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V233 = true;
-    window.__auditGannzillaTopToolbarV233 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V236 = true;
+    window.__auditGannzillaTopToolbarV236 = () => ({
       ok: true,
-      build: 233,
+      build: 236,
       singleReactOwner: true,
       heightPx: TOOLBAR_HEIGHT,
       iconSizePx: iconSize,
       iconSizingAuthority: 'TOOLBAR_HEIGHT_MINUS_8',
       iconAlignment: 'RIGHT',
       rightInsetPx: RIGHT_INSET_PX,
-      mountedControls: ['ABOUT'],
+      controlGapPx: CONTROL_GAP_PX,
+      mountedControls: ['LANGUAGE', 'ABOUT'],
+      languageControlPosition: 'LEFT_OF_ABOUT',
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V233;
-      delete window.__auditGannzillaTopToolbarV233;
+      delete window.GANNZILLA_TOP_TOOLBAR_V236;
+      delete window.__auditGannzillaTopToolbarV236;
     };
   }, [iconSize]);
 
@@ -52,7 +56,7 @@ export default function GannzillaTopToolbarV231() {
         direction: 'ltr',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        gap: 3,
+        gap: CONTROL_GAP_PX,
         paddingTop: 4,
         paddingBottom: 4,
         paddingLeft: 5,
@@ -63,6 +67,7 @@ export default function GannzillaTopToolbarV231() {
         boxShadow: 'inset 0 -1px 0 rgba(255,255,255,.75), 0 1px 2px rgba(0,0,0,.18)',
       }}
     >
+      <GannzillaLanguageToggleV236 toolbarHeight={TOOLBAR_HEIGHT} />
       <GannzillaAboutOnlyV229 toolbarHeight={TOOLBAR_HEIGHT} />
     </div>
   );
