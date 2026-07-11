@@ -4,16 +4,17 @@ import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaDrawingPalettesV283 from './GannzillaDrawingPalettesV283';
+import GannzillaDrawingLibraryV284 from './GannzillaDrawingLibraryV284';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 283: ordered geometry toolbar without angle or leaf/compass icons. */
+/** Build 284: current tools control opens a categorized Arabic drawing library. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V283 = true;
-    window.__auditGannzillaBareWheelV283 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V284 = true;
+    window.__auditGannzillaBareWheelV284 = () => ({
       ok: true,
-      build: 283,
+      build: 284,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -21,6 +22,12 @@ export default function GannzillaBareWheelV224() {
       toolbarRightInsetPx: 4,
       drawingPalettesMounted: true,
       drawingPaletteSingleOwner: true,
+      drawingLibraryMounted: true,
+      drawingLibraryOpenedFromExistingToolsControl: true,
+      noNewToolbarButtonAdded: true,
+      drawingLibraryCategories: ['geometry', 'stars', 'special'],
+      geometrySelectionDelegatesToExistingPalette: true,
+      advancedShapesDrawOnWheel: true,
       drawingPaletteScale: 2,
       bothDrawingPalettesEnlarged: true,
       leftDrawingPaletteEnlarged: true,
@@ -81,8 +88,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V283;
-      delete window.__auditGannzillaBareWheelV283;
+      delete window.GANNZILLA_BARE_WHEEL_V284;
+      delete window.__auditGannzillaBareWheelV284;
     };
   }, []);
 
@@ -131,6 +138,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
       <GannzillaDrawingPalettesV283 />
+      <GannzillaDrawingLibraryV284 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
