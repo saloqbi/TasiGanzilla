@@ -7,47 +7,77 @@ const FLAG_WIDTH = 17;
 const FLAG_HEIGHT = 11;
 const ARROW_WIDTH = 18;
 
-function UnitedKingdomFlag() {
+function AmericanFlag() {
   return (
-    <svg
-      viewBox="0 0 60 36"
-      width={FLAG_WIDTH}
-      height={FLAG_HEIGHT}
+    <span
       aria-hidden="true"
-      focusable="false"
-      shapeRendering="geometricPrecision"
-      style={{ display: 'block' }}
+      style={{
+        position: 'relative',
+        display: 'block',
+        width: FLAG_WIDTH,
+        height: FLAG_HEIGHT,
+        overflow: 'hidden',
+        background: 'repeating-linear-gradient(to bottom,#b22234 0,#b22234 0.846px,#ffffff 0.846px,#ffffff 1.692px)',
+        boxShadow: '0 0 0 1px rgba(0,0,0,.22)',
+      }}
     >
-      <rect width="60" height="36" fill="#012169" />
-      <path d="M0 0 60 36M60 0 0 36" stroke="#ffffff" strokeWidth="8" />
-      <path d="M0 0 60 36M60 0 0 36" stroke="#c8102e" strokeWidth="4" />
-      <path d="M30 0v36M0 18h60" stroke="#ffffff" strokeWidth="12" />
-      <path d="M30 0v36M0 18h60" stroke="#c8102e" strokeWidth="7" />
-    </svg>
+      <span
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: 7.5,
+          height: 6,
+          backgroundColor: '#3c3b6e',
+          backgroundImage: 'radial-gradient(circle,#ffffff 0 0.45px,transparent 0.55px)',
+          backgroundSize: '2px 2px',
+        }}
+      />
+    </span>
   );
 }
 
 function SaudiArabiaFlag() {
   return (
-    <svg
-      viewBox="0 0 60 36"
-      width={FLAG_WIDTH}
-      height={FLAG_HEIGHT}
+    <span
       aria-hidden="true"
-      focusable="false"
-      shapeRendering="geometricPrecision"
-      style={{ display: 'block' }}
+      style={{
+        position: 'relative',
+        display: 'block',
+        width: FLAG_WIDTH,
+        height: FLAG_HEIGHT,
+        overflow: 'hidden',
+        background: '#006c35',
+        boxShadow: '0 0 0 1px rgba(0,0,0,.22)',
+      }}
     >
-      <rect width="60" height="36" fill="#006c35" />
-      <path d="M14 12h32M17 16h26M20 20h20" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M15 26h30" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" />
-      <path d="m43 24 5 2-5 2" fill="#ffffff" />
-    </svg>
+      <span
+        style={{
+          position: 'absolute',
+          left: 2,
+          right: 2,
+          top: 2,
+          height: 4,
+          background: 'repeating-linear-gradient(to bottom,#ffffff 0,#ffffff .7px,transparent .7px,transparent 1.45px)',
+        }}
+      />
+      <span
+        style={{
+          position: 'absolute',
+          left: 3,
+          right: 3,
+          bottom: 2,
+          height: 1,
+          background: '#ffffff',
+          borderRadius: 1,
+        }}
+      />
+    </span>
   );
 }
 
 function LanguageFlag({ language }) {
-  return language === 'ar' ? <SaudiArabiaFlag /> : <UnitedKingdomFlag />;
+  return language === 'ar' ? <SaudiArabiaFlag /> : <AmericanFlag />;
 }
 
 export default function GannzillaLanguageToggleV237() {
@@ -75,12 +105,14 @@ export default function GannzillaLanguageToggleV237() {
   }, [open]);
 
   React.useEffect(() => {
-    window.GANNZILLA_LANGUAGE_TOGGLE_V242 = true;
-    window.__auditGannzillaLanguageToggleV242 = () => ({
+    window.GANNZILLA_LANGUAGE_TOGGLE_V243 = true;
+    window.__auditGannzillaLanguageToggleV243 = () => ({
       ok: true,
-      build: 242,
+      build: 243,
       customSelector: true,
-      nativeSelectRemoved: true,
+      cssFlags: true,
+      externalImageCount: 0,
+      svgFlagCount: 0,
       flagAlwaysVisible: true,
       language: lang,
       supportedLanguages: ['ar', 'en'],
@@ -89,17 +121,18 @@ export default function GannzillaLanguageToggleV237() {
       flagWidthPx: FLAG_WIDTH,
       flagHeightPx: FLAG_HEIGHT,
       arrowWidthPx: ARROW_WIDTH,
-      ukFlagColors: ['#012169', '#ffffff', '#c8102e'],
+      englishFlag: 'UNITED_STATES_CSS',
+      arabicFlag: 'SAUDI_ARABIA_CSS',
+      usFlagColors: ['#b22234', '#ffffff', '#3c3b6e'],
       saFlagColors: ['#006c35', '#ffffff'],
-      textColor: '#111111',
       dropdownOpen: open,
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_LANGUAGE_TOGGLE_V242;
-      delete window.__auditGannzillaLanguageToggleV242;
+      delete window.GANNZILLA_LANGUAGE_TOGGLE_V243;
+      delete window.__auditGannzillaLanguageToggleV243;
     };
   }, [lang, open]);
 
@@ -152,10 +185,10 @@ export default function GannzillaLanguageToggleV237() {
           height: CONTROL_HEIGHT,
           margin: 0,
           padding: 0,
-          border: '1px solid #7f7f7f',
+          border: '1px solid #547b9c',
           borderRadius: 0,
-          background: 'linear-gradient(180deg,#ffffff 0%,#f2f2f2 55%,#e3e3e3 100%)',
-          color: '#111111',
+          background: 'linear-gradient(180deg,#42a8e8 0%,#1687cf 52%,#0a69b0 100%)',
+          color: '#ffffff',
           display: 'flex',
           alignItems: 'stretch',
           boxSizing: 'border-box',
@@ -163,8 +196,9 @@ export default function GannzillaLanguageToggleV237() {
           overflow: 'hidden',
           fontFamily: 'Segoe UI, Tahoma, Arial, sans-serif',
           fontSize: 12,
-          fontWeight: 600,
+          fontWeight: 700,
           lineHeight: 1,
+          textShadow: '0 1px 0 rgba(0,0,0,.25)',
         }}
       >
         <span
@@ -175,24 +209,11 @@ export default function GannzillaLanguageToggleV237() {
             alignItems: 'center',
             gap: 5,
             padding: '0 4px',
-            color: '#111111',
+            color: '#ffffff',
             whiteSpace: 'nowrap',
           }}
         >
-          <span
-            aria-hidden="true"
-            style={{
-              width: FLAG_WIDTH,
-              height: FLAG_HEIGHT,
-              flex: `0 0 ${FLAG_WIDTH}px`,
-              display: 'grid',
-              placeItems: 'center',
-              overflow: 'hidden',
-              boxShadow: '0 0 0 1px rgba(0,0,0,.18)',
-            }}
-          >
-            <LanguageFlag language={lang} />
-          </span>
+          <LanguageFlag language={lang} />
           <span>{isArabic ? 'العربية' : 'English'}</span>
         </span>
 
@@ -203,12 +224,13 @@ export default function GannzillaLanguageToggleV237() {
             flex: `0 0 ${ARROW_WIDTH}px`,
             display: 'grid',
             placeItems: 'center',
-            borderLeft: '1px solid #b0b0b0',
+            borderLeft: '1px solid #7f8f99',
             background: 'linear-gradient(180deg,#ffffff 0%,#eeeeee 55%,#d9d9d9 100%)',
             color: '#222222',
             fontSize: 9,
             fontWeight: 900,
             lineHeight: 1,
+            textShadow: 'none',
           }}
         >
           ▼
@@ -232,7 +254,7 @@ export default function GannzillaLanguageToggleV237() {
           }}
         >
           <button type="button" role="menuitem" onClick={() => chooseLanguage('en')} style={optionStyle(lang === 'en')}>
-            <UnitedKingdomFlag />
+            <AmericanFlag />
             <span>English</span>
           </button>
           <button type="button" role="menuitem" onClick={() => chooseLanguage('ar')} style={optionStyle(lang === 'ar')}>

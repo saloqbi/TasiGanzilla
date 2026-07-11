@@ -7,7 +7,7 @@ import TestPage from './pages/TestPage';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 import GannzillaBareWheelV224 from './components/GannTools/GannzillaBareWheelV224';
 
-// Build 242: custom Gannzilla-style language control with always-visible flag colors.
+// Build 243: always-visible United States and Saudi Arabia CSS flags.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -18,7 +18,7 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="242">
+        <div data-gannzilla-build="243">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
