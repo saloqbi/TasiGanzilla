@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = 271;
+const BUILD = 272;
 const EVENT_NAME = 'gannzilla:drawing-tools-v266';
 const STORAGE_KEY = 'gannzilla-drawing-tools-visible-v266';
 const LEFT_ID = 'gannzilla-left-drawing-palette';
@@ -9,10 +9,13 @@ const RIGHT_ID = 'gannzilla-right-drawing-palette';
 const OVERLAY_ID = 'gannzilla-drawing-overlay';
 const ICON = '#8f999f';
 const ACTIVE = '#5f83b9';
+const BUTTON_SIZE = 34;
+const BUTTON_GAP = 4;
 const PALETTE_WIDTH = 46;
-const LEFT_GAP_PX = 12;
-const DEFAULT_RIGHT_GAP_PX = 36;
-const TOP_GAP_PX = 6;
+const DEFAULT_SIDE_GAP = 24;
+const TOP_GAP = 6;
+const MAX_BUTTON_COUNT = 13;
+const PALETTE_NATURAL_HEIGHT = (MAX_BUTTON_COUNT * BUTTON_SIZE) + ((MAX_BUTTON_COUNT - 1) * BUTTON_GAP) + 14;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -43,9 +46,9 @@ function getWheelCanvas() {
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0] || null;
 }
 
-function getVisibleSettingsPanelRect() {
-  const candidates = Array.from(document.querySelectorAll('aside, [data-gannzilla-settings-panel="true"]'))
-    .map((node) => ({ node, rect: node.getBoundingClientRect(), style: window.getComputedStyle(node) }))
+function getSettingsPanelRect() {
+  return Array.from(document.querySelectorAll('aside, [data-gannzilla-settings-panel="true"]'))
+    .map((node) => ({ rect: node.getBoundingClientRect(), style: window.getComputedStyle(node) }))
     .filter(({ rect, style }) => (
       rect.width >= 180
       && rect.height >= 250
@@ -54,18 +57,11 @@ function getVisibleSettingsPanelRect() {
       && style.visibility !== 'hidden'
       && style.opacity !== '0'
     ))
-    .sort((a, b) => b.rect.height - a.rect.height);
-  return candidates[0]?.rect || null;
+    .sort((a, b) => b.rect.height - a.rect.height)[0]?.rect || null;
 }
 
-function getWheelViewportMetrics(wheelCanvas) {
-  if (!wheelCanvas?.node) {
-    return {
-      viewport: null,
-      controlLineX: window.innerWidth,
-      scrollbarWidth: 0,
-    };
-  }
+function getViewportMetrics(wheelCanvas) {
+  if (!wheelCanvas?.node) return { controlLineX: window.innerWidth, scrollbarWidth: 0 };
 
   let node = wheelCanvas.node.parentElement;
   while (node && node !== document.body) {
@@ -78,44 +74,38 @@ function getWheelViewportMetrics(wheelCanvas) {
       const controlLineX = Math.round(rect.right - scrollbarWidth);
       node.setAttribute('data-gannzilla-wheel-scroll-viewport', 'true');
       node.dataset.gannzillaVerticalControlLineX = String(controlLineX);
-      return { viewport: node, controlLineX, scrollbarWidth };
+      return { controlLineX, scrollbarWidth };
     }
     node = node.parentElement;
   }
 
-  return {
-    viewport: null,
-    controlLineX: window.innerWidth,
-    scrollbarWidth: 0,
-  };
+  return { controlLineX: window.innerWidth, scrollbarWidth: 0 };
 }
 
 function readLayout() {
   const wheelCanvas = getWheelCanvas();
   const wheel = wheelCanvas?.rect || null;
-  const panel = getVisibleSettingsPanelRect();
-  const viewport = getWheelViewportMetrics(wheelCanvas);
+  const panel = getSettingsPanelRect();
+  const viewport = getViewportMetrics(wheelCanvas);
   const toolbarHeight = Number.parseFloat(
     window.getComputedStyle(document.documentElement).getPropertyValue('--gannzilla-toolbar-height'),
   ) || 24;
-  const rightGap = numberParam('drawingToolsRightGap', DEFAULT_RIGHT_GAP_PX, 20, 90);
-  const top = Math.max(toolbarHeight + TOP_GAP_PX, Math.round((wheel?.top || toolbarHeight) + TOP_GAP_PX));
-  const left = panel
-    ? Math.round(panel.right + LEFT_GAP_PX)
-    : Math.max(LEFT_GAP_PX, Math.round((wheel?.left || 0) + LEFT_GAP_PX));
-  const right = Math.max(
-    rightGap,
-    Math.round(window.innerWidth - viewport.controlLineX + rightGap),
-  );
+  const sideGap = numberParam('drawingToolsSideGap', DEFAULT_SIDE_GAP, 12, 70);
+  const top = Math.max(toolbarHeight + TOP_GAP, Math.round((wheel?.top || toolbarHeight) + TOP_GAP));
+  const leftControlLineX = panel ? Math.round(panel.right) : Math.round(wheel?.left || 0);
+  const rightControlLineX = Number.isFinite(viewport.controlLineX) ? viewport.controlLineX : window.innerWidth;
+  const maxHeight = Math.max(180, Math.round(window.innerHeight - top - 8));
+  const paletteHeight = Math.min(PALETTE_NATURAL_HEIGHT, maxHeight);
 
   return {
-    left,
-    right,
-    rightGap,
+    left: leftControlLineX + sideGap,
+    right: Math.max(sideGap, Math.round(window.innerWidth - rightControlLineX + sideGap)),
+    sideGap,
     top,
-    maxHeight: Math.max(180, Math.round(window.innerHeight - top - 8)),
-    panelRight: panel ? Math.round(panel.right) : null,
-    rightControlLineX: viewport.controlLineX,
+    maxHeight,
+    paletteHeight,
+    leftControlLineX,
+    rightControlLineX,
     scrollbarWidth: viewport.scrollbarWidth,
     wheelRect: wheel ? {
       left: wheel.left,
@@ -131,10 +121,11 @@ function sameLayout(a, b) {
     a && b
     && a.left === b.left
     && a.right === b.right
-    && a.rightGap === b.rightGap
+    && a.sideGap === b.sideGap
     && a.top === b.top
     && a.maxHeight === b.maxHeight
-    && a.panelRight === b.panelRight
+    && a.paletteHeight === b.paletteHeight
+    && a.leftControlLineX === b.leftControlLineX
     && a.rightControlLineX === b.rightControlLineX
     && a.scrollbarWidth === b.scrollbarWidth
     && JSON.stringify(a.wheelRect) === JSON.stringify(b.wheelRect)
@@ -143,8 +134,8 @@ function sameLayout(a, b) {
 
 function point(event, rect) {
   return {
-    x: Math.max(0, Math.min(1, (event.clientX - rect.left) / Math.max(1, rect.width))),
-    y: Math.max(0, Math.min(1, (event.clientY - rect.top) / Math.max(1, rect.height))),
+    x: clamp((event.clientX - rect.left) / Math.max(1, rect.width), 0, 1),
+    y: clamp((event.clientY - rect.top) / Math.max(1, rect.height), 0, 1),
   };
 }
 
@@ -164,10 +155,10 @@ function PaletteButton({ title, active, onClick, children, round = false }) {
       aria-pressed={active}
       onClick={onClick}
       style={{
-        width: 34,
-        minWidth: 34,
-        height: 34,
-        minHeight: 34,
+        width: BUTTON_SIZE,
+        minWidth: BUTTON_SIZE,
+        height: BUTTON_SIZE,
+        minHeight: BUTTON_SIZE,
         padding: 0,
         margin: 0,
         border: active ? `2px solid ${ACTIVE}` : '1px solid #c7c7c7',
@@ -256,7 +247,9 @@ function paletteStyle(side, layout) {
     top: layout.top,
     zIndex: 2147483605,
     width: PALETTE_WIDTH,
-    maxHeight: layout.maxHeight,
+    height: layout.paletteHeight,
+    minHeight: layout.paletteHeight,
+    maxHeight: layout.paletteHeight,
     padding: '6px 5px',
     background: 'rgba(248,248,248,.97)',
     border: '1px solid #d5d5d5',
@@ -265,7 +258,8 @@ function paletteStyle(side, layout) {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 4,
+    justifyContent: 'flex-start',
+    gap: BUTTON_GAP,
     overflowY: 'auto',
     overflowX: 'hidden',
     scrollbarWidth: 'thin',
@@ -335,7 +329,7 @@ export default function GannzillaDrawingPalettesV266() {
       try {
         localStorage.setItem(STORAGE_KEY, String(event.detail.visible));
       } catch {
-        // Visibility still works when storage is unavailable.
+        // Keep runtime behavior when storage is unavailable.
       }
     };
     window.addEventListener(EVENT_NAME, onVisibility);
@@ -351,10 +345,7 @@ export default function GannzillaDrawingPalettesV266() {
 
     syncLayout();
     const timers = [80, 240, 600].map((delay) => window.setTimeout(scheduleSync, delay));
-    const resizeObserver = typeof ResizeObserver === 'function'
-      ? new ResizeObserver(scheduleSync)
-      : null;
-
+    const resizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(scheduleSync) : null;
     const wheelCanvas = getWheelCanvas();
     const panel = document.querySelector('aside, [data-gannzilla-settings-panel="true"]');
     if (wheelCanvas?.node) resizeObserver?.observe(wheelCanvas.node);
@@ -378,40 +369,41 @@ export default function GannzillaDrawingPalettesV266() {
   }, [syncLayout]);
 
   React.useEffect(() => {
-    window.GANNZILLA_DRAWING_PALETTES_V271 = true;
-    window.__auditGannzillaDrawingPalettesV271 = () => {
+    window.GANNZILLA_DRAWING_PALETTES_V272 = true;
+    window.__auditGannzillaDrawingPalettesV272 = () => {
       const leftRect = document.getElementById(LEFT_ID)?.getBoundingClientRect?.() || null;
       const rightRect = document.getElementById(RIGHT_ID)?.getBoundingClientRect?.() || null;
-      const actualRightGap = rightRect
-        ? Math.round(layout.rightControlLineX - rightRect.right)
-        : null;
+      const leftGap = leftRect ? Math.round(leftRect.left - layout.leftControlLineX) : null;
+      const rightGap = rightRect ? Math.round(layout.rightControlLineX - rightRect.right) : null;
       return {
-        ok: Boolean(leftRect && rightRect),
+        ok: Boolean(leftRect && rightRect && leftGap === rightGap),
         build: BUILD,
         visible,
         activeTool,
         activeReference,
         drawingCount: items.length,
+        exactMirrorMode: true,
         singleDrawingPaletteComponent: true,
-        continuousPollingRemoved: true,
-        fullPageMutationObserverRemoved: true,
         leftPaletteMounted: Boolean(leftRect),
         rightPaletteMounted: Boolean(rightRect),
-        nativeButtonSizePx: 34,
-        nativePaletteWidthPx: PALETTE_WIDTH,
-        leftGapPx: LEFT_GAP_PX,
-        configuredRightGapPx: layout.rightGap,
-        actualRightGapBeforeControlLinePx: actualRightGap,
-        rightControlLineX: layout.rightControlLineX,
-        verticalScrollbarWidthPx: layout.scrollbarWidth,
-        placementMode: 'LEFT_AFTER_SETTINGS_PANEL_AND_RIGHT_CLEAR_OF_SCROLL_CONTROL_LINE',
-        colors: { icon: ICON, active: ACTIVE, background: '#ffffff' },
+        paletteWidthPx: PALETTE_WIDTH,
+        paletteHeightPx: layout.paletteHeight,
+        buttonSizePx: BUTTON_SIZE,
+        buttonGapPx: BUTTON_GAP,
+        configuredSharedSideGapPx: layout.sideGap,
+        actualLeftGapPx: leftGap,
+        actualRightGapPx: rightGap,
+        sameTop: Boolean(leftRect && rightRect && Math.round(leftRect.top) === Math.round(rightRect.top)),
+        sameWidth: Boolean(leftRect && rightRect && Math.round(leftRect.width) === Math.round(rightRect.width)),
+        sameHeight: Boolean(leftRect && rightRect && Math.round(leftRect.height) === Math.round(rightRect.height)),
+        sameFrameStyle: true,
+        placementMode: 'EXACT_MIRROR_AROUND_LEFT_AND_RIGHT_CONTROL_LINES',
       };
     };
 
     return () => {
-      delete window.GANNZILLA_DRAWING_PALETTES_V271;
-      delete window.__auditGannzillaDrawingPalettesV271;
+      delete window.GANNZILLA_DRAWING_PALETTES_V272;
+      delete window.__auditGannzillaDrawingPalettesV272;
     };
   }, [activeReference, activeTool, items.length, layout, visible]);
 
@@ -421,7 +413,7 @@ export default function GannzillaDrawingPalettesV266() {
       const url = new URL(window.location.href);
       url.searchParams.set('divisions', value);
       url.searchParams.set('drawingTools', 'true');
-      url.searchParams.set('drawingToolsRightGap', String(layout.rightGap));
+      url.searchParams.set('drawingToolsSideGap', String(layout.sideGap));
       url.searchParams.set('v', String(BUILD));
       window.location.assign(url.toString());
     }
@@ -461,6 +453,7 @@ export default function GannzillaDrawingPalettesV266() {
       <div
         id={LEFT_ID}
         data-gannzilla-left-drawing-palette="true"
+        data-gannzilla-exact-mirror="true"
         style={paletteStyle('left', layout)}
       >
         {leftValues.map((value) => (
@@ -479,7 +472,7 @@ export default function GannzillaDrawingPalettesV266() {
       <div
         id={RIGHT_ID}
         data-gannzilla-right-drawing-palette="true"
-        data-gannzilla-right-control-gap={layout.rightGap}
+        data-gannzilla-exact-mirror="true"
         style={paletteStyle('right', layout)}
       >
         {rightTools.map((tool) => (
