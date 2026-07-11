@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV280 from './GannzillaDrawingPalettesV280';
+import GannzillaDrawingPalettesV281 from './GannzillaDrawingPalettesV281';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 280: remove arrow, replace gold rings with grey spiral, and add compass/leaf tool. */
+/** Build 281: remove the concentric gold/spiral tool while preserving the leaf/compass icon. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V280 = true;
-    window.__auditGannzillaBareWheelV280 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V281 = true;
+    window.__auditGannzillaBareWheelV281 = () => ({
       ok: true,
-      build: 280,
+      build: 281,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -39,9 +39,9 @@ export default function GannzillaBareWheelV224() {
       bothDrawingPalettesColored: true,
       cursorArrowRemovedFromDisplay: true,
       triangleIsFirstVisibleRightTool: true,
-      goldenRingsIconRemoved: true,
-      greySpiralIconAdded: true,
-      compassLeafIconAdded: true,
+      concentricGoldRingIconRemovedFromDisplay: true,
+      greySpiralToolRemovedFromDisplay: true,
+      compassLeafIconPreserved: true,
       coordinatedSolidShapeColors: true,
       drawingPaletteSameTop: true,
       drawingPaletteSameWidth: true,
@@ -80,8 +80,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V280;
-      delete window.__auditGannzillaBareWheelV280;
+      delete window.GANNZILLA_BARE_WHEEL_V281;
+      delete window.__auditGannzillaBareWheelV281;
     };
   }, []);
 
@@ -129,7 +129,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV280 />
+      <GannzillaDrawingPalettesV281 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
