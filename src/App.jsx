@@ -8,22 +8,17 @@ import TestPage from './pages/TestPage';
 import GannzillaClassicFullOptionsV94 from './components/GannTools/GannzillaClassicFullOptionsV94';
 import GannzillaBilingualToggleV95 from './components/GannTools/GannzillaBilingualToggleV95';
 import GannzillaConnectionSettingsV96 from './components/GannTools/GannzillaConnectionSettingsV96';
-import GannzillaUnifiedDrawingPalettesV122 from './components/GannTools/GannzillaUnifiedDrawingPalettesV122';
 import GannzillaRightDrawingPaletteV126 from './components/GannTools/GannzillaRightDrawingPaletteV126';
 import GannzillaLeftReferencePaletteV129 from './components/GannTools/GannzillaLeftReferencePaletteV129';
 import GannzillaToolbarCleanupV151 from './components/GannTools/GannzillaToolbarCleanupV151';
-import GannzillaAboutDialogScaleV157 from './components/GannTools/GannzillaAboutDialogScaleV157';
 import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV159';
-import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
 import GannzillaWheelNavigationV220 from './components/GannTools/GannzillaWheelNavigationV220';
 import GannzillaExactDrawingToolbarV208 from './components/GannTools/GannzillaExactDrawingToolbarV208';
-import GannzillaFinalDrawingToolbarV214 from './components/GannTools/GannzillaFinalDrawingToolbarV214';
-import GannzillaRestoreWheelZoomMinusV215 from './components/GannTools/GannzillaRestoreWheelZoomMinusV215';
 import GannzillaHideArrowLockV195 from './components/GannTools/GannzillaHideArrowLockV195';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
+import GannzillaRingTwoNumberingV223 from './components/GannTools/GannzillaRingTwoNumberingV223';
 
-const DRAWING_TOGGLE_ID = 'gannzilla-drawing-tools-url-toggle-v182';
-const LEGACY_HITBOX_ID = 'gannzilla-drawing-tools-hitbox-v125';
+const DRAWING_TOGGLE_ID = 'gannzilla-drawing-tools-url-toggle-v223';
 const DRAWING_STORAGE_KEYS = [
   'gannzillaDrawingToolsVisibleV125',
   'gannzillaDrawingToolsVisibleV124',
@@ -37,7 +32,7 @@ function cleanLabel(element) {
 
 function findDrawingToggleAnchor() {
   return Array.from(document.querySelectorAll('button')).find((button) => {
-    if (button.id === DRAWING_TOGGLE_ID || button.id === LEGACY_HITBOX_ID) return false;
+    if (button.id === DRAWING_TOGGLE_ID) return false;
     const rect = button.getBoundingClientRect();
     return rect.width > 0
       && rect.height > 0
@@ -47,13 +42,15 @@ function findDrawingToggleAnchor() {
   }) || null;
 }
 
-function GannzillaDrawingToolsUrlToggleV182() {
+function GannzillaDrawingToolsUrlToggleV223() {
   const [rect, setRect] = React.useState(null);
   const query = new URLSearchParams(window.location.search);
   const visible = query.get('drawingTools') !== 'false';
 
   React.useEffect(() => {
     let disposed = false;
+    let frame = 0;
+
     const refresh = () => {
       if (disposed) return;
       const anchor = findDrawingToggleAnchor();
@@ -77,15 +74,22 @@ function GannzillaDrawingToolsUrlToggleV182() {
         : next);
     };
 
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        refresh();
+      });
+    };
+
     refresh();
-    const timer = window.setInterval(refresh, 300);
-    window.addEventListener('resize', refresh);
-    window.addEventListener('scroll', refresh, true);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('scroll', schedule, true);
     return () => {
       disposed = true;
-      window.clearInterval(timer);
-      window.removeEventListener('resize', refresh);
-      window.removeEventListener('scroll', refresh, true);
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('scroll', schedule, true);
     };
   }, []);
 
@@ -101,7 +105,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '222');
+    url.searchParams.set('v', '223');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -153,13 +157,15 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 222: direct page fullscreen control plus wheel drag.
+// Build 223: single-owner UI cleanup, event-driven ring numbering, no duplicate drawing toolbar.
 const App = () => {
   const search = window.location.search;
+  const query = new URLSearchParams(search);
   const isTestMode = search.includes('test=true');
   const isArabicAiWheelMode = search.includes('gannzillaArabicAI=true') || search.includes('aiWheel=true');
   const isGannzillaProWheelMode = search.includes('gannzillaPro=true') || search.includes('wheelPro=true');
   const isEnhancedMode = search.includes('enhanced=true') || true;
+  const drawingToolsVisible = query.get('drawingTools') !== 'false';
 
   return (
     <ToolProvider>
@@ -169,8 +175,14 @@ const App = () => {
             top: 112px !important;
             max-height: calc(100vh - 128px) !important;
           }
+          #gannzilla-right-drawing-palette-v127,
+          [data-gannzilla-right-drawing-palette="true"] {
+            display: ${drawingToolsVisible ? 'flex' : 'none'} !important;
+            visibility: ${drawingToolsVisible ? 'visible' : 'hidden'} !important;
+            pointer-events: ${drawingToolsVisible ? 'auto' : 'none'} !important;
+          }
         `}</style>
-        <div data-gannzilla-build="222">
+        <div data-gannzilla-build="223">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -179,17 +191,13 @@ const App = () => {
               <GannzillaBilingualToggleV95 />
               <GannzillaConnectionSettingsV96 />
               <GannzillaToolbarCleanupV151 />
-              <GannzillaAboutDialogScaleV157 />
               <GannzillaAboutBrandV159 />
-              <GannzillaAboutClickFixV160 />
               <GannzillaWheelNavigationV220 />
-              <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
               <GannzillaExactDrawingToolbarV208 />
-              <GannzillaFinalDrawingToolbarV214 />
-              <GannzillaRestoreWheelZoomMinusV215 />
-              <GannzillaDrawingToolsUrlToggleV182 />
+              <GannzillaRingTwoNumberingV223 />
+              <GannzillaDrawingToolsUrlToggleV223 />
               <GannzillaHideArrowLockV195 />
             </>
           ) : isTestMode ? (
