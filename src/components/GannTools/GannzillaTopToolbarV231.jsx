@@ -4,50 +4,47 @@ import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 
-const BUILD = 253;
+const BUILD = 254;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
-const CONTROL_GAP_PX = 2;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 253: page maximize, exact connection settings, language, and original About controls. */
+/** Build 254: maximize is fixed immediately left of connection with native Gannzilla toolbar styling. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V253 = true;
-    window.__auditGannzillaTopToolbarV253 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V254 = true;
+    window.__auditGannzillaTopToolbarV254 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
       pageMaximizeControlSizePx: TOOLBAR_HEIGHT,
+      connectionControlSizePx: TOOLBAR_HEIGHT,
       languageControlHeightPx: TOOLBAR_HEIGHT,
       languageControlWidthPx: 100,
-      connectionControlSizePx: TOOLBAR_HEIGHT,
       infoButtonSizePx: INFO_BUTTON_SIZE,
       controlsMatchToolbarHeight: true,
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
-      controlGapPx: CONTROL_GAP_PX,
       mountedControls: [
         'PAGE_MAXIMIZE_GANNZILLA_STYLE',
         'CONNECTION_SETTINGS_EXACT',
         'LANGUAGE_CUSTOM_FLAG',
         'ORIGINAL_GANNZILLA_ABOUT',
       ],
+      maximizeImmediatelyLeftOfConnection: true,
+      controlVisualOrderLeftToRight: 'PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
+      sharedNativeToolbarStyling: true,
       pageMaximizeFunctional: true,
-      pageMaximizeVisualReference: 'GANNZILLA_FOUR_CORNER_EXPAND_ICON',
       connectionDialogFunctional: true,
-      connectionVisualReference: 'GANNZILLA_CONNECTION_SETTINGS_222x211',
       aboutDialogFunctional: true,
-      aboutVisualReference: 'GANNZILLA_PRO_8_3',
-      controlVisualOrder: 'PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
       flagAlwaysVisible: true,
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V253;
-      delete window.__auditGannzillaTopToolbarV253;
+      delete window.GANNZILLA_TOP_TOOLBAR_V254;
+      delete window.__auditGannzillaTopToolbarV254;
     };
   }, []);
 
@@ -77,30 +74,62 @@ export default function GannzillaTopToolbarV231() {
       }}
     >
       <style>{`
+        [data-gannzilla-toolbar="true"] [data-gannzilla-control-strip="true"] {
+          direction: ltr !important;
+        }
+
+        [data-gannzilla-toolbar="true"] [data-gannzilla-page-fullscreen-control="true"] {
+          order: 0 !important;
+        }
+
+        [data-gannzilla-toolbar="true"] [data-gannzilla-connection-control="true"] {
+          order: 1 !important;
+        }
+
+        [data-gannzilla-toolbar="true"] [data-gannzilla-language-control="true"] {
+          order: 2 !important;
+        }
+
         [data-gannzilla-toolbar="true"] [data-gannzilla-about-control="true"] {
-          width: ${INFO_BUTTON_SIZE}px !important;
-          height: ${INFO_BUTTON_SIZE}px !important;
-          min-width: ${INFO_BUTTON_SIZE}px !important;
-          min-height: ${INFO_BUTTON_SIZE}px !important;
-          max-width: ${INFO_BUTTON_SIZE}px !important;
-          max-height: ${INFO_BUTTON_SIZE}px !important;
+          order: 3 !important;
+        }
+
+        [data-gannzilla-toolbar="true"] [data-gannzilla-page-fullscreen-control="true"],
+        [data-gannzilla-toolbar="true"] [data-gannzilla-connection-control="true"],
+        [data-gannzilla-toolbar="true"] [data-gannzilla-about-control="true"] {
+          width: ${TOOLBAR_HEIGHT}px !important;
+          height: ${TOOLBAR_HEIGHT}px !important;
+          min-width: ${TOOLBAR_HEIGHT}px !important;
+          min-height: ${TOOLBAR_HEIGHT}px !important;
+          max-width: ${TOOLBAR_HEIGHT}px !important;
+          max-height: ${TOOLBAR_HEIGHT}px !important;
+          flex: 0 0 ${TOOLBAR_HEIGHT}px !important;
           align-self: stretch !important;
           margin: 0 !important;
           padding: 0 !important;
           border: 0 !important;
-          border-left: 1px solid #c9c9c9 !important;
+          border-right: 1px solid #c7c7c7 !important;
           border-radius: 0 !important;
           background: transparent !important;
           box-shadow: none !important;
+          display: grid !important;
+          place-items: center !important;
+          box-sizing: border-box !important;
+          pointer-events: auto !important;
+        }
+
+        [data-gannzilla-toolbar="true"] [data-gannzilla-page-fullscreen-control="true"]:hover,
+        [data-gannzilla-toolbar="true"] [data-gannzilla-connection-control="true"]:hover,
+        [data-gannzilla-toolbar="true"] [data-gannzilla-about-control="true"]:hover {
+          background: #dceaf5 !important;
+        }
+
+        [data-gannzilla-toolbar="true"] [data-gannzilla-about-control="true"] {
           color: #2469b2 !important;
           font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial, sans-serif !important;
           font-size: 17px !important;
           font-weight: 900 !important;
           line-height: 1 !important;
-          display: grid !important;
-          place-items: center !important;
-          box-sizing: border-box !important;
-          pointer-events: auto !important;
         }
       `}</style>
 
@@ -110,7 +139,7 @@ export default function GannzillaTopToolbarV231() {
           height: TOOLBAR_HEIGHT,
           display: 'flex',
           alignItems: 'stretch',
-          gap: CONTROL_GAP_PX,
+          gap: 0,
           direction: 'ltr',
           flex: '0 0 auto',
           overflow: 'visible',
