@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = 214;
+const BUILD = 217;
 const SOURCE_TOOLBAR_ID = 'gannzilla-exact-drawing-toolbar-v208';
 const FINAL_TOOLBAR_ID = 'gannzilla-final-drawing-toolbar-v214';
 const TOOLBAR_HEIGHT = 23;
@@ -40,31 +40,31 @@ function hideNativeDrawingButtons() {
 
 function PointerIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" style={{ display: 'block', pointerEvents: 'none' }}>
-      <path d="M3.2 2.1 15.7 12.2l-5.1.5 2.8 5-2.5 1.3-2.7-5-3.6 3.4Z" fill="#f8fbfd" stroke="#52788f" strokeWidth="1.15" strokeLinejoin="round" />
-      <path d="m10.1 12.8 3.2 5" fill="none" stroke="#8b8b8b" strokeWidth=".75" />
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" style={{ display: 'block', pointerEvents: 'none' }}>
+      <path d="M3.2 2.1 15.7 12.2l-5.1.5 2.8 5-2.5 1.3-2.7-5-3.6 3.4Z" fill="#f8fbfd" stroke="#52788f" strokeWidth="1.25" strokeLinejoin="round" />
+      <path d="m10.1 12.8 3.2 5" fill="none" stroke="#8b8b8b" strokeWidth=".85" />
     </svg>
   );
 }
 
 function LineIcon() {
   return (
-    <svg width="17" height="14" viewBox="0 0 28 18" aria-hidden="true" style={{ display: 'block', pointerEvents: 'none' }}>
-      <line x1="3" y1="9" x2="25" y2="9" stroke="#0878c8" strokeWidth="2.25" strokeLinecap="square" />
+    <svg width="20" height="16" viewBox="0 0 28 18" aria-hidden="true" style={{ display: 'block', pointerEvents: 'none' }}>
+      <line x1="3" y1="9" x2="25" y2="9" stroke="#0878c8" strokeWidth="2.5" strokeLinecap="square" />
     </svg>
   );
 }
 
 function ShapeIcon() {
   return (
-    <svg width="17" height="15" viewBox="0 0 28 22" aria-hidden="true" style={{ display: 'block', pointerEvents: 'none' }}>
-      <rect x="4" y="4" width="20" height="14" rx=".5" fill="none" stroke="#0878c8" strokeWidth="2.2" />
+    <svg width="20" height="17" viewBox="0 0 28 22" aria-hidden="true" style={{ display: 'block', pointerEvents: 'none' }}>
+      <rect x="4" y="4" width="20" height="14" rx=".5" fill="none" stroke="#0878c8" strokeWidth="2.4" />
     </svg>
   );
 }
 
 function DropArrow() {
-  return <span aria-hidden="true" style={{ width: 0, height: 0, borderLeft: '3px solid transparent', borderRight: '3px solid transparent', borderTop: '4px solid #161616', transform: 'translateY(1px)', pointerEvents: 'none' }} />;
+  return <span aria-hidden="true" style={{ width: 0, height: 0, borderLeft: '3.5px solid transparent', borderRight: '3.5px solid transparent', borderTop: '5px solid #161616', transform: 'translateY(1px)', pointerEvents: 'none' }} />;
 }
 
 const baseControl = {
@@ -181,6 +181,7 @@ export default function GannzillaFinalDrawingToolbarV214() {
         build: BUILD,
         width: TOOLBAR_WIDTH,
         height: TOOLBAR_HEIGHT,
+        iconSizes: { pointer: 20, line: 20, shape: 20, text: 20 },
         hiddenNativeCount: document.querySelectorAll(`[${HIDDEN_ATTR}="true"]`).length,
       });
     };
@@ -244,7 +245,7 @@ export default function GannzillaFinalDrawingToolbarV214() {
       <SplitControl width={LINE_WIDTH} active={active === 'line'} title="أداة الخط والسهم" icon={<LineIcon />} onMain={() => press(1, 0, 'line')} onArrow={() => press(1, 1)} />
       <SplitControl width={SHAPE_WIDTH} active={active === 'shape'} title="أداة الأشكال" icon={<ShapeIcon />} onMain={() => press(2, 0, 'shape')} onArrow={() => press(2, 1)} />
       <SingleControl width={TEXT_WIDTH} active={active === 'text'} title="أداة النص" joinLeft onClick={() => press(3, null, 'text')}>
-        <span aria-hidden="true" style={{ color: '#0878c8', fontFamily: 'Times New Roman, Georgia, serif', fontSize: 18, fontWeight: 800, lineHeight: 1, transform: 'translateY(-1px)', pointerEvents: 'none' }}>T</span>
+        <span aria-hidden="true" style={{ color: '#0878c8', fontFamily: 'Times New Roman, Georgia, serif', fontSize: 20, fontWeight: 800, lineHeight: 1, transform: 'translateY(-1px)', pointerEvents: 'none' }}>T</span>
       </SingleControl>
     </div>,
     document.body,
