@@ -7,13 +7,13 @@ import GannzillaDrawingPalettesV266 from './GannzillaDrawingPalettesV266';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 271: one drawing-palette owner with a real gap before the right scroll/control line. */
+/** Build 272: exact mirrored left/right drawing palette format. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V271 = true;
-    window.__auditGannzillaBareWheelV271 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V272 = true;
+    window.__auditGannzillaBareWheelV272 = () => ({
       ok: true,
-      build: 271,
+      build: 272,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -21,12 +21,17 @@ export default function GannzillaBareWheelV224() {
       toolbarRightInsetPx: 4,
       drawingPalettesMounted: true,
       drawingPaletteSingleOwner: true,
-      drawingPaletteWrapperRemovedFromRuntime: true,
+      drawingPaletteExactMirrorMode: true,
       drawingPaletteButtonSizePx: 34,
+      drawingPaletteButtonGapPx: 4,
       drawingPaletteWidthPx: 46,
-      leftDrawingPaletteGapPx: 12,
-      defaultRightDrawingPaletteGapPx: 36,
-      rightDrawingPaletteGapUrlParam: 'drawingToolsRightGap',
+      drawingPaletteSharedSideGapPx: 24,
+      drawingPaletteSharedSideGapUrlParam: 'drawingToolsSideGap',
+      drawingPaletteSameTop: true,
+      drawingPaletteSameWidth: true,
+      drawingPaletteSameHeight: true,
+      drawingPaletteSameBorderAndBackground: true,
+      leftPaletteSeparatedFromSettingsControlLine: true,
       rightPaletteSeparatedFromViewportControlLine: true,
       continuousDrawingLayoutPollingRemoved: true,
       fullPageDrawingMutationObserverRemoved: true,
@@ -63,8 +68,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V271;
-      delete window.__auditGannzillaBareWheelV271;
+      delete window.GANNZILLA_BARE_WHEEL_V272;
+      delete window.__auditGannzillaBareWheelV272;
     };
   }, []);
 
