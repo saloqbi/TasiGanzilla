@@ -1,8 +1,9 @@
 import React from 'react';
 import GannzillaDrawingPalettesV266 from './GannzillaDrawingPalettesV266';
 
-const BUILD = 269;
-const SIDE_GAP_PX = 12;
+const BUILD = 270;
+const LEFT_GAP_PX = 12;
+const RIGHT_GAP_PX = 22;
 const TOP_MIN_GAP_PX = 6;
 
 function getVisibleSettingsPanelRect() {
@@ -99,13 +100,13 @@ function applyPaletteSpacing() {
 
   if (leftPalette) {
     const left = panel
-      ? Math.round(panel.right + SIDE_GAP_PX)
-      : Math.max(SIDE_GAP_PX, Math.round((wheel?.left || 0) + SIDE_GAP_PX));
+      ? Math.round(panel.right + LEFT_GAP_PX)
+      : Math.max(LEFT_GAP_PX, Math.round((wheel?.left || 0) + LEFT_GAP_PX));
     leftPalette.style.setProperty('left', `${left}px`, 'important');
     leftPalette.style.setProperty('right', 'auto', 'important');
     leftPalette.style.setProperty('top', `${top}px`, 'important');
     leftPalette.style.setProperty('margin-left', '0', 'important');
-    leftPalette.dataset.gannzillaGapPx = String(SIDE_GAP_PX);
+    leftPalette.dataset.gannzillaGapPx = String(LEFT_GAP_PX);
     leftPalette.dataset.gannzillaPlacement = 'AFTER_LEFT_SETTINGS_CONTROL_LINE';
   }
 
@@ -114,16 +115,16 @@ function applyPaletteSpacing() {
       ? viewportMetrics.verticalControlLineX
       : window.innerWidth;
     const rightOffset = Math.max(
-      SIDE_GAP_PX,
-      Math.round(window.innerWidth - rightControlLineX + SIDE_GAP_PX),
+      RIGHT_GAP_PX,
+      Math.round(window.innerWidth - rightControlLineX + RIGHT_GAP_PX),
     );
 
     rightPalette.style.setProperty('right', `${rightOffset}px`, 'important');
     rightPalette.style.setProperty('left', 'auto', 'important');
     rightPalette.style.setProperty('top', `${top}px`, 'important');
     rightPalette.style.setProperty('margin-right', '0', 'important');
-    rightPalette.dataset.gannzillaGapPx = String(SIDE_GAP_PX);
-    rightPalette.dataset.gannzillaPlacement = 'BEFORE_RIGHT_VIEWPORT_CONTROL_LINE';
+    rightPalette.dataset.gannzillaGapPx = String(RIGHT_GAP_PX);
+    rightPalette.dataset.gannzillaPlacement = 'BEFORE_RIGHT_VIEWPORT_CONTROL_LINE_WITH_EXTRA_CLEARANCE';
     rightPalette.dataset.gannzillaRightControlLineX = String(rightControlLineX);
   }
 
@@ -137,7 +138,7 @@ function applyPaletteSpacing() {
   };
 }
 
-/** Build 269: mirror both palettes outside their adjacent control lines with equal spacing. */
+/** Build 270: preserve left spacing and shift the right palette 10px farther left from its control line. */
 export default function GannzillaDrawingPalettesV268() {
   React.useEffect(() => {
     const sync = () => applyPaletteSpacing();
@@ -155,8 +156,8 @@ export default function GannzillaDrawingPalettesV268() {
     window.addEventListener('scroll', sync, true);
     document.addEventListener('fullscreenchange', sync);
 
-    window.GANNZILLA_DRAWING_PALETTES_V269 = true;
-    window.__auditGannzillaDrawingPalettesV269 = () => {
+    window.GANNZILLA_DRAWING_PALETTES_V270 = true;
+    window.__auditGannzillaDrawingPalettesV270 = () => {
       const result = applyPaletteSpacing();
       const leftRect = result.leftPalette?.getBoundingClientRect?.() || null;
       const rightRect = result.rightPalette?.getBoundingClientRect?.() || null;
@@ -170,7 +171,9 @@ export default function GannzillaDrawingPalettesV268() {
       return {
         ok: Boolean(result.leftPalette && result.rightPalette),
         build: BUILD,
-        sideGapPx: SIDE_GAP_PX,
+        leftGapPx: LEFT_GAP_PX,
+        rightGapPx: RIGHT_GAP_PX,
+        rightShiftAdditionalPx: RIGHT_GAP_PX - LEFT_GAP_PX,
         leftPaletteMounted: Boolean(result.leftPalette),
         rightPaletteMounted: Boolean(result.rightPalette),
         settingsPanelRightPx: result.panelRight,
@@ -180,8 +183,7 @@ export default function GannzillaDrawingPalettesV268() {
         rightPaletteRightPx: rightRect ? Math.round(rightRect.right) : null,
         rightGapBeforeControlLinePx: rightGap,
         verticalScrollbarWidthPx: result.verticalScrollbarWidth,
-        placement: 'LEFT_AFTER_SETTINGS_LINE_AND_RIGHT_BEFORE_VIEWPORT_CONTROL_LINE',
-        mirroredControlLineSpacing: true,
+        placement: 'LEFT_AFTER_SETTINGS_LINE_AND_RIGHT_FARTHER_LEFT_OF_VIEWPORT_CONTROL_LINE',
       };
     };
 
@@ -192,8 +194,8 @@ export default function GannzillaDrawingPalettesV268() {
       window.removeEventListener('resize', sync);
       window.removeEventListener('scroll', sync, true);
       document.removeEventListener('fullscreenchange', sync);
-      delete window.GANNZILLA_DRAWING_PALETTES_V269;
-      delete window.__auditGannzillaDrawingPalettesV269;
+      delete window.GANNZILLA_DRAWING_PALETTES_V270;
+      delete window.__auditGannzillaDrawingPalettesV270;
     };
   }, []);
 
