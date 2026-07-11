@@ -2,19 +2,20 @@ import React from 'react';
 import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
+import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 
 const TOOLBAR_HEIGHT = 24;
 
 /**
- * Build 247: stable V228 wheel, toolbar-height language/information controls,
- * and the restored About logo rendered from the embedded brand image.
+ * Build 248: stable wheel with comprehensive Arabic interface localization,
+ * right-to-left layout, Arabic wheel digits, and the restored About logo.
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V247 = true;
-    window.__auditGannzillaBareWheelV247 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V248 = true;
+    window.__auditGannzillaBareWheelV248 = () => ({
       ok: true,
-      build: 247,
+      build: 248,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -24,6 +25,11 @@ export default function GannzillaBareWheelV224() {
       sideToolbarsMounted: false,
       aboutControlMounted: true,
       languageControlMounted: true,
+      defaultLanguage: 'ar',
+      urlLanguageAuthority: true,
+      fullArabicInterface: true,
+      rtlLayout: true,
+      arabicWheelDigits: true,
       customLanguageSelector: true,
       nativeSelectRemoved: true,
       cssFlags: true,
@@ -45,6 +51,7 @@ export default function GannzillaBareWheelV224() {
       aboutLogoDisplayMaxWidthPx: 420,
       aboutLogoFullVisible: true,
       ringOneMode: 'INDEX_1_TO_36',
+      digitSystem: 'ARABIC_INDIC_٠١٢٣٤٥٦٧٨٩',
       allNumericRingsGateColored: true,
       ringPalette: {
         shaded: '#d8d4cc',
@@ -57,8 +64,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V247;
-      delete window.__auditGannzillaBareWheelV247;
+      delete window.GANNZILLA_BARE_WHEEL_V248;
+      delete window.__auditGannzillaBareWheelV248;
     };
   }, []);
 
@@ -75,30 +82,30 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="247"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
+        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="247"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
+        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="247"] > div:not([data-gannzilla-toolbar="true"]) > button {
+        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > button {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="247"] > div:not([data-gannzilla-toolbar="true"]) > aside {
+        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > aside {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
 
-        [data-gannzilla-build="247"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
+        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
@@ -106,6 +113,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
+      <GannzillaArabicLocalizationV248 />
     </>
   );
 }
