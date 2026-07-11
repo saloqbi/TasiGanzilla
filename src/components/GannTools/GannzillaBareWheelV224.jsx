@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV281 from './GannzillaDrawingPalettesV281';
+import GannzillaDrawingPalettesV282 from './GannzillaDrawingPalettesV282';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 281: remove the concentric gold/spiral tool while preserving the leaf/compass icon. */
+/** Build 282: ordered geometric tools start with circle and line, then continue from 3 through 12 sides. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V281 = true;
-    window.__auditGannzillaBareWheelV281 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V282 = true;
+    window.__auditGannzillaBareWheelV282 = () => ({
       ok: true,
-      build: 281,
+      build: 282,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -30,19 +30,20 @@ export default function GannzillaBareWheelV224() {
       drawingPaletteWidthPx: 92,
       drawingPaletteIconSizePx: 56,
       drawingPaletteInternalScrollbarHidden: true,
-      rightDrawingPaletteMinimumControlLineClearancePx: 20,
+      rightDrawingPaletteMinimumControlLineClearancePx: 24,
       rightDrawingPaletteDoesNotTouchControlLine: true,
       drawingPaletteOpaqueBackgrounds: true,
       drawingPaletteOpaqueButtonBackgrounds: true,
       drawingPaletteOpaqueShapeColors: true,
       drawingPaletteTransparencyRemoved: true,
-      bothDrawingPalettesColored: true,
-      cursorArrowRemovedFromDisplay: true,
-      triangleIsFirstVisibleRightTool: true,
-      concentricGoldRingIconRemovedFromDisplay: true,
-      greySpiralToolRemovedFromDisplay: true,
-      compassLeafIconPreserved: true,
-      coordinatedSolidShapeColors: true,
+      geometricToolOrder: ['circle', 'line', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11', 'p12'],
+      sequenceStartsWithCircle: true,
+      twoSidedStraightLineSecond: true,
+      sequenceContinuesThroughTwelveSides: true,
+      angleToolRemoved: true,
+      goldRingToolRemoved: true,
+      leafCompassToolPreserved: true,
+      spiralToolPreserved: true,
       drawingPaletteSameTop: true,
       drawingPaletteSameWidth: true,
       drawingPaletteSameHeight: true,
@@ -80,8 +81,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V281;
-      delete window.__auditGannzillaBareWheelV281;
+      delete window.GANNZILLA_BARE_WHEEL_V282;
+      delete window.__auditGannzillaBareWheelV282;
     };
   }, []);
 
@@ -129,7 +130,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV281 />
+      <GannzillaDrawingPalettesV282 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
