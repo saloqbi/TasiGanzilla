@@ -7,7 +7,7 @@ import TestPage from './pages/TestPage';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 import GannzillaBareWheelV224 from './components/GannTools/GannzillaBareWheelV224';
 
-// Build 224: clean baseline with only the canonical wheel and settings panel.
+// Build 225: ring 1 is 1..36; ten numeric rings begin from ring 2.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -18,7 +18,7 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="224">
+        <div data-gannzilla-build="225">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
