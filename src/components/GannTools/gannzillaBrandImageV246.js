@@ -1,0 +1,1 @@
+export default 'data:image/webp;base64,UklGRhKqAgBXRUJQVlA4IAaqAgCQYAadASogAyADPoUyk0elIqIhNbnN4KAQiWhspPl+8noq2yjAvKPTx...TRUNCATED_FOR_TOOL_SAFETY...';
