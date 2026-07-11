@@ -1,0 +1,1 @@
+Build 269: position the right drawing palette to the left of the viewport control/scroll line with the same 12px gap used after the left settings panel.
