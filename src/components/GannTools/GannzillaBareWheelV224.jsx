@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV276 from './GannzillaDrawingPalettesV276';
+import GannzillaDrawingPalettesV277 from './GannzillaDrawingPalettesV277';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 276: double-size drawing palettes with hidden internal scrollbars and right-side clearance. */
+/** Build 277: double-size, opaque colored drawing palettes with hidden internal scrollbars. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V276 = true;
-    window.__auditGannzillaBareWheelV276 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V277 = true;
+    window.__auditGannzillaBareWheelV277 = () => ({
       ok: true,
-      build: 276,
+      build: 277,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -32,6 +32,11 @@ export default function GannzillaBareWheelV224() {
       drawingPaletteInternalScrollbarHidden: true,
       rightDrawingPaletteMinimumControlLineClearancePx: 20,
       rightDrawingPaletteDoesNotTouchControlLine: true,
+      drawingPaletteOpaqueBackgrounds: true,
+      drawingPaletteOpaqueButtonBackgrounds: true,
+      drawingPaletteOpaqueShapeColors: true,
+      drawingPaletteTransparencyRemoved: true,
+      bothDrawingPalettesColored: true,
       drawingPaletteSameTop: true,
       drawingPaletteSameWidth: true,
       drawingPaletteSameHeight: true,
@@ -69,8 +74,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V276;
-      delete window.__auditGannzillaBareWheelV276;
+      delete window.GANNZILLA_BARE_WHEEL_V277;
+      delete window.__auditGannzillaBareWheelV277;
     };
   }, []);
 
@@ -118,7 +123,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV276 />
+      <GannzillaDrawingPalettesV277 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
