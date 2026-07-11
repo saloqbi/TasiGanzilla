@@ -1,39 +1,41 @@
 import React from 'react';
 import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
+import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 
+const BUILD = 250;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const CONTROL_GAP_PX = 2;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/**
- * Build 244: language and information controls are fully contained inside the
- * toolbar and use the toolbar's exact height without exceeding it.
- */
+/** Build 250: active connection, language, and information controls. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V244 = true;
-    window.__auditGannzillaTopToolbarV244 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V250 = true;
+    window.__auditGannzillaTopToolbarV250 = () => ({
       ok: true,
-      build: 244,
+      build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
       languageControlHeightPx: TOOLBAR_HEIGHT,
       languageControlWidthPx: 100,
+      connectionControlSizePx: TOOLBAR_HEIGHT,
       infoButtonSizePx: INFO_BUTTON_SIZE,
       controlsMatchToolbarHeight: true,
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
       controlGapPx: CONTROL_GAP_PX,
-      mountedControls: ['LANGUAGE_CUSTOM_FLAG', 'ABOUT_INFO_GLYPH'],
+      mountedControls: ['CONNECTION_SETTINGS', 'LANGUAGE_CUSTOM_FLAG', 'ABOUT_INFO_GLYPH'],
+      connectionDialogFunctional: true,
+      controlVisualOrder: 'CONNECTION_LANGUAGE_INFORMATION',
       flagAlwaysVisible: true,
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V244;
-      delete window.__auditGannzillaTopToolbarV244;
+      delete window.GANNZILLA_TOP_TOOLBAR_V250;
+      delete window.__auditGannzillaTopToolbarV250;
     };
   }, []);
 
@@ -53,7 +55,6 @@ export default function GannzillaTopToolbarV231() {
         display: 'flex',
         alignItems: 'stretch',
         justifyContent: 'flex-end',
-        gap: CONTROL_GAP_PX,
         paddingRight: RIGHT_INSET_PX,
         background: 'linear-gradient(180deg,#fafafa 0%,#f1f1f1 55%,#e7e7e7 100%)',
         boxShadow: 'inset 0 1px 0 #ffffff, inset 0 -1px 0 #b7b7b7',
@@ -64,7 +65,7 @@ export default function GannzillaTopToolbarV231() {
       }}
     >
       <style>{`
-        [data-gannzilla-toolbar="true"] > button[aria-label="حول البرنامج"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > button[aria-label="حول البرنامج"] {
           width: ${INFO_BUTTON_SIZE}px !important;
           height: ${INFO_BUTTON_SIZE}px !important;
           min-width: ${INFO_BUTTON_SIZE}px !important;
@@ -85,7 +86,7 @@ export default function GannzillaTopToolbarV231() {
           place-items: center !important;
           box-sizing: border-box !important;
         }
-        [data-gannzilla-toolbar="true"] > button[aria-label="حول البرنامج"]::before {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > button[aria-label="حول البرنامج"]::before {
           content: 'ⓘ';
           color: #2469b2;
           font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial, sans-serif;
@@ -94,8 +95,23 @@ export default function GannzillaTopToolbarV231() {
           line-height: 1;
         }
       `}</style>
-      <GannzillaLanguageToggleV237 />
-      <GannzillaAboutOnlyV229 toolbarHeight={TOOLBAR_HEIGHT} />
+
+      <div
+        data-gannzilla-control-strip="true"
+        style={{
+          height: TOOLBAR_HEIGHT,
+          display: 'flex',
+          alignItems: 'stretch',
+          gap: CONTROL_GAP_PX,
+          direction: 'ltr',
+          flex: '0 0 auto',
+          overflow: 'visible',
+        }}
+      >
+        <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
+        <GannzillaLanguageToggleV237 />
+        <GannzillaAboutOnlyV229 toolbarHeight={TOOLBAR_HEIGHT} />
+      </div>
     </div>
   );
 }
