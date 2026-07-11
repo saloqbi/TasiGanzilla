@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV266 from './GannzillaDrawingPalettesV266';
+import GannzillaDrawingPalettesV273 from './GannzillaDrawingPalettesV273';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 272: exact mirrored left/right drawing palette format. */
+/** Build 273: exact mirrored drawing-palette gaps from the visible control lines. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V272 = true;
-    window.__auditGannzillaBareWheelV272 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V273 = true;
+    window.__auditGannzillaBareWheelV273 = () => ({
       ok: true,
-      build: 272,
+      build: 273,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -21,20 +21,20 @@ export default function GannzillaBareWheelV224() {
       toolbarRightInsetPx: 4,
       drawingPalettesMounted: true,
       drawingPaletteSingleOwner: true,
-      drawingPaletteExactMirrorMode: true,
+      drawingPaletteExactVisibleControlLineMirror: true,
       drawingPaletteButtonSizePx: 34,
       drawingPaletteButtonGapPx: 4,
       drawingPaletteWidthPx: 46,
       drawingPaletteSharedSideGapPx: 24,
       drawingPaletteSharedSideGapUrlParam: 'drawingToolsSideGap',
+      rightBoundaryUsesVisibleOuterControlLine: true,
+      rightScrollbarSubtractionRemoved: true,
       drawingPaletteSameTop: true,
       drawingPaletteSameWidth: true,
       drawingPaletteSameHeight: true,
       drawingPaletteSameBorderAndBackground: true,
       leftPaletteSeparatedFromSettingsControlLine: true,
       rightPaletteSeparatedFromViewportControlLine: true,
-      continuousDrawingLayoutPollingRemoved: true,
-      fullPageDrawingMutationObserverRemoved: true,
       drawingPalettesMatchGannzillaColorsAndShapes: true,
       drawingPalettesToggleLeftOfMovement: true,
       aboutControlMounted: true,
@@ -68,8 +68,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V272;
-      delete window.__auditGannzillaBareWheelV272;
+      delete window.GANNZILLA_BARE_WHEEL_V273;
+      delete window.__auditGannzillaBareWheelV273;
     };
   }, []);
 
@@ -117,7 +117,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV266 />
+      <GannzillaDrawingPalettesV273 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
