@@ -12,19 +12,20 @@ export default function GannzillaAboutOnlyV229() {
       if (event.key === 'Escape') setOpen(false);
     };
     window.addEventListener('keydown', onKeyDown);
-    window.GANNZILLA_ABOUT_ONLY_V229 = true;
-    window.__auditGannzillaAboutOnlyV229 = () => ({
+    window.GANNZILLA_ABOUT_ONLY_V230 = true;
+    window.__auditGannzillaAboutOnlyV230 = () => ({
       ok: true,
-      build: 229,
+      build: 230,
       singleReactOwner: true,
       intervalCount: 0,
       mutationObserverCount: 0,
+      iconSizePx: 32,
       dialogOpen: open,
     });
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      delete window.GANNZILLA_ABOUT_ONLY_V229;
-      delete window.__auditGannzillaAboutOnlyV229;
+      delete window.GANNZILLA_ABOUT_ONLY_V230;
+      delete window.__auditGannzillaAboutOnlyV230;
     };
   }, [open]);
 
@@ -37,21 +38,23 @@ export default function GannzillaAboutOnlyV229() {
         onClick={() => setOpen(true)}
         style={{
           position: 'fixed',
-          top: 4,
-          right: 4,
+          top: 6,
+          right: 6,
           zIndex: 120,
-          width: 18,
-          height: 18,
+          width: 32,
+          height: 32,
+          minWidth: 32,
+          minHeight: 32,
           padding: 0,
           display: 'grid',
           placeItems: 'center',
-          border: '1px solid #7898b7',
-          borderRadius: 2,
-          background: 'linear-gradient(180deg, #4f91d8 0%, #1765b3 100%)',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.35)',
+          border: '1px solid #527da8',
+          borderRadius: 4,
+          background: 'linear-gradient(180deg, #63a6e8 0%, #1765b3 100%)',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.42), 0 1px 3px rgba(0,0,0,.28)',
           color: '#fff',
-          fontFamily: 'Arial, sans-serif',
-          fontSize: 13,
+          fontFamily: 'Arial, Helvetica, sans-serif',
+          fontSize: 23,
           lineHeight: 1,
           fontWeight: 900,
           cursor: 'pointer',
@@ -80,7 +83,7 @@ export default function GannzillaAboutOnlyV229() {
           <section
             role="dialog"
             aria-modal="true"
-            aria-labelledby="gannzilla-about-title-v229"
+            aria-labelledby="gannzilla-about-title-v230"
             dir="rtl"
             style={{
               width: 'min(280px, calc(100vw - 20px))',
@@ -106,7 +109,7 @@ export default function GannzillaAboutOnlyV229() {
                 fontWeight: 800,
               }}
             >
-              <span id="gannzilla-about-title-v229">حول البرنامج</span>
+              <span id="gannzilla-about-title-v230">حول البرنامج</span>
               <button
                 type="button"
                 aria-label="إغلاق"
