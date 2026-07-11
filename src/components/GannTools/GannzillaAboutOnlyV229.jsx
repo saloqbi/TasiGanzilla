@@ -15,10 +15,10 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
     };
 
     window.addEventListener('keydown', onKeyDown);
-    window.GANNZILLA_ABOUT_ONLY_V234 = true;
-    window.__auditGannzillaAboutOnlyV234 = () => ({
+    window.GANNZILLA_ABOUT_ONLY_V235 = true;
+    window.__auditGannzillaAboutOnlyV235 = () => ({
       ok: true,
-      build: 234,
+      build: 235,
       singleReactOwner: true,
       intervalCount: 0,
       mutationObserverCount: 0,
@@ -28,14 +28,16 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
       logoNativeSize: '800x800',
       logoDisplayMaxWidthPx: 1520,
       logoDisplayScale: 2,
+      informationTextScale: 2,
+      emailTextScale: 2,
       fullLogoVisible: true,
       dialogOpen: open,
     });
 
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      delete window.GANNZILLA_ABOUT_ONLY_V234;
-      delete window.__auditGannzillaAboutOnlyV234;
+      delete window.GANNZILLA_ABOUT_ONLY_V235;
+      delete window.__auditGannzillaAboutOnlyV235;
     };
   }, [iconSize, open, toolbarHeight]);
 
@@ -92,7 +94,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
           <section
             role="dialog"
             aria-modal="true"
-            aria-labelledby="gannzilla-about-title-v234"
+            aria-labelledby="gannzilla-about-title-v235"
             dir="rtl"
             style={{
               width: 'min(1580px, calc(100vw - 24px))',
@@ -123,7 +125,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
                 background: '#050505',
               }}
             >
-              <span id="gannzilla-about-title-v234">حول البرنامج</span>
+              <span id="gannzilla-about-title-v235">حول البرنامج</span>
               <button
                 type="button"
                 aria-label="إغلاق"
@@ -154,27 +156,45 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
                   height: 'auto',
                   aspectRatio: '1 / 1',
                   objectFit: 'contain',
-                  margin: '0 auto 18px',
+                  margin: '0 auto 28px',
                   borderRadius: 14,
                   boxShadow: '0 0 28px rgba(244,184,32,.38)',
                 }}
               />
 
-              <div style={{ color: GOLD_LIGHT, fontSize: 24, fontWeight: 900, marginBottom: 14 }}>
+              <div
+                style={{
+                  color: GOLD_LIGHT,
+                  fontSize: 48,
+                  lineHeight: 1.35,
+                  fontWeight: 900,
+                  marginBottom: 24,
+                  textShadow: '0 1px 8px rgba(255,196,64,.28)',
+                }}
+              >
                 كوكبة الأرقام السحرية
               </div>
-              <div style={{ fontSize: 14, lineHeight: 1.75 }}>الإصدار: 1</div>
-              <div style={{ fontSize: 14, lineHeight: 1.75 }}>المؤلف: محمود سمان</div>
+              <div style={{ fontSize: 28, lineHeight: 1.75, fontWeight: 800 }}>الإصدار: 1</div>
+              <div style={{ fontSize: 28, lineHeight: 1.75, fontWeight: 800 }}>المؤلف: محمود سمان</div>
               <a
                 href="mailto:m.a.m.1392@gmail.com"
-                style={{ color: GOLD_LIGHT, fontSize: 14, lineHeight: 1.75, textDecoration: 'none' }}
+                style={{
+                  color: GOLD_LIGHT,
+                  fontSize: 28,
+                  lineHeight: 1.75,
+                  fontWeight: 900,
+                  textDecoration: 'none',
+                  textShadow: '0 1px 8px rgba(255,196,64,.24)',
+                }}
               >
                 m.a.m.1392@gmail.com
               </a>
-              <div style={{ marginTop: 18, fontSize: 13, lineHeight: 1.7 }}>© 2026 كوكبة تاسي</div>
-              <div style={{ fontSize: 13, lineHeight: 1.7 }}>جميع الحقوق محفوظة</div>
+              <div style={{ marginTop: 28, fontSize: 26, lineHeight: 1.7, fontWeight: 800 }}>
+                © 2026 كوكبة تاسي
+              </div>
+              <div style={{ fontSize: 26, lineHeight: 1.7, fontWeight: 800 }}>جميع الحقوق محفوظة</div>
 
-              <div style={{ marginTop: 16, textAlign: 'left' }}>
+              <div style={{ marginTop: 24, textAlign: 'left' }}>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
