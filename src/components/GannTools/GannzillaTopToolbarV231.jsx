@@ -3,17 +3,17 @@ import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 
-const BUILD = 251;
+const BUILD = 252;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const CONTROL_GAP_PX = 2;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 251: connection, language, and original Gannzilla About controls. */
+/** Build 252: exact connection settings, language, and original About controls. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V251 = true;
-    window.__auditGannzillaTopToolbarV251 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V252 = true;
+    window.__auditGannzillaTopToolbarV252 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
@@ -25,8 +25,9 @@ export default function GannzillaTopToolbarV231() {
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
       controlGapPx: CONTROL_GAP_PX,
-      mountedControls: ['CONNECTION_SETTINGS', 'LANGUAGE_CUSTOM_FLAG', 'ORIGINAL_GANNZILLA_ABOUT'],
+      mountedControls: ['CONNECTION_SETTINGS_EXACT', 'LANGUAGE_CUSTOM_FLAG', 'ORIGINAL_GANNZILLA_ABOUT'],
       connectionDialogFunctional: true,
+      connectionVisualReference: 'GANNZILLA_CONNECTION_SETTINGS_222x211',
       aboutDialogFunctional: true,
       aboutVisualReference: 'GANNZILLA_PRO_8_3',
       controlVisualOrder: 'CONNECTION_LANGUAGE_INFORMATION',
@@ -36,8 +37,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V251;
-      delete window.__auditGannzillaTopToolbarV251;
+      delete window.GANNZILLA_TOP_TOOLBAR_V252;
+      delete window.__auditGannzillaTopToolbarV252;
     };
   }, []);
 
