@@ -5,22 +5,25 @@ import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 import GannzillaWheelZoomV256 from './GannzillaWheelZoomV256';
 
-const BUILD = 259;
+const BUILD = 260;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 259: movement icon is embedded directly inside the visible zoom control. */
+/** Build 260: keep one wheel movement authority inside the visible zoom control. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V259 = true;
-    window.__auditGannzillaTopToolbarV259 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V260 = true;
+    window.__auditGannzillaTopToolbarV260 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
       wheelMovementIntegratedWithZoom: true,
       wheelMovementIconPlacement: 'IMMEDIATELY_LEFT_OF_ZOOM_MINUS',
       wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
+      duplicateMovementIconSuppressed: true,
+      movementAuthorityCount: 1,
+      legacyStandalonePanControlVisible: false,
       wheelZoomControlMounted: true,
       wheelZoomControlMode: 'DIRECT_NATIVE_GANNZILLA_MIRROR',
       pageMaximizeControlSizePx: TOOLBAR_HEIGHT,
@@ -32,7 +35,7 @@ export default function GannzillaTopToolbarV231() {
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
       mountedControls: [
-        'INTEGRATED_WHEEL_MOVEMENT_AND_ZOOM',
+        'SINGLE_INTEGRATED_WHEEL_MOVEMENT_AND_ZOOM',
         'PAGE_MAXIMIZE_GANNZILLA_STYLE',
         'CONNECTION_SETTINGS_EXACT',
         'LANGUAGE_CUSTOM_FLAG',
@@ -47,8 +50,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V259;
-      delete window.__auditGannzillaTopToolbarV259;
+      delete window.GANNZILLA_TOP_TOOLBAR_V260;
+      delete window.__auditGannzillaTopToolbarV260;
     };
   }, []);
 
@@ -80,6 +83,22 @@ export default function GannzillaTopToolbarV231() {
     >
       <style>{`
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] { direction:ltr !important; }
+
+        /* Build 260 single-owner rule: hide any legacy standalone movement control. */
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-pan-control="true"] {
+          display:none !important;
+          visibility:hidden !important;
+          pointer-events:none !important;
+          width:0 !important;
+          min-width:0 !important;
+          max-width:0 !important;
+          flex:0 0 0 !important;
+          overflow:hidden !important;
+          border:0 !important;
+          margin:0 !important;
+          padding:0 !important;
+        }
+
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-control="true"] { order:0 !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:1 !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:2 !important; }
