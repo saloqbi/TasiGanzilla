@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV278 from './GannzillaDrawingPalettesV278';
+import GannzillaDrawingPalettesV279 from './GannzillaDrawingPalettesV279';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 278: triangle replaces the cursor icon and all shape tools use coordinated solid colors. */
+/** Build 279: remove the cursor arrow and keep the triangle as the first visible drawing tool. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V278 = true;
-    window.__auditGannzillaBareWheelV278 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V279 = true;
+    window.__auditGannzillaBareWheelV279 = () => ({
       ok: true,
-      build: 278,
+      build: 279,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -37,9 +37,8 @@ export default function GannzillaBareWheelV224() {
       drawingPaletteOpaqueShapeColors: true,
       drawingPaletteTransparencyRemoved: true,
       bothDrawingPalettesColored: true,
-      firstRightToolIsTriangle: true,
-      cursorIconRemovedFromRightPalette: true,
-      duplicateTriangleHidden: true,
+      cursorArrowRemovedFromDisplay: true,
+      triangleIsFirstVisibleRightTool: true,
       coordinatedSolidShapeColors: true,
       drawingPaletteSameTop: true,
       drawingPaletteSameWidth: true,
@@ -78,8 +77,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V278;
-      delete window.__auditGannzillaBareWheelV278;
+      delete window.GANNZILLA_BARE_WHEEL_V279;
+      delete window.__auditGannzillaBareWheelV279;
     };
   }, []);
 
@@ -127,7 +126,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV278 />
+      <GannzillaDrawingPalettesV279 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
