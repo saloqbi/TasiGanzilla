@@ -71,14 +71,20 @@ export default function GannzillaTopToolbarV231() {
           border-radius: 1px !important;
           background: linear-gradient(#ffffff,#e9e9e9) !important;
           box-shadow: none !important;
-          color: #236bb0 !important;
-          font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial, sans-serif !important;
-          font-size: 16px !important;
-          font-weight: 900 !important;
+          color: transparent !important;
+          font-size: 0 !important;
           line-height: 1 !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
+        }
+        [data-gannzilla-toolbar="true"] > button[aria-label="حول البرنامج"]::before {
+          content: 'ⓘ';
+          color: #236bb0;
+          font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial, sans-serif;
+          font-size: 16px;
+          font-weight: 900;
+          line-height: 1;
         }
       `}</style>
       <GannzillaLanguageToggleV237 />
