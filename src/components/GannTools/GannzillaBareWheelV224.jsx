@@ -1,27 +1,29 @@
 import React from 'react';
 import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
-import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
+import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
+
+const TOOLBAR_HEIGHT = 38;
 
 /**
- * Build 230: stable V228 wheel plus the enlarged About control.
+ * Build 231: stable V228 wheel plus a single-owner top toolbar.
  *
- * Ring 1 is a standalone 1..36 index ring using 147/258/369 colors.
- * Ten numeric rings start from ring 2 and use the same gate colors.
- * The wheel uses the warm Gannzilla-style alternating ring palette.
- * The About icon/dialog is React-owned with no interval or MutationObserver.
+ * The About icon is the first control inside the toolbar. Every toolbar icon
+ * derives its size from the toolbar height so future controls remain aligned.
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V230 = true;
-    window.__auditGannzillaBareWheelV230 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V231 = true;
+    window.__auditGannzillaBareWheelV231 = () => ({
       ok: true,
-      build: 230,
+      build: 231,
       canonicalRendererMounted: true,
-      topToolbarMounted: false,
+      topToolbarMounted: true,
+      topToolbarHeightPx: TOOLBAR_HEIGHT,
+      toolbarSingleOwner: true,
       sideToolbarsMounted: false,
       aboutControlMounted: true,
-      aboutIconSizePx: 32,
+      aboutIconGovernedByToolbar: true,
       ringOneMode: 'INDEX_1_TO_36',
       allNumericRingsGateColored: true,
       ringPalette: {
@@ -35,50 +37,57 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V230;
-      delete window.__auditGannzillaBareWheelV230;
+      delete window.GANNZILLA_BARE_WHEEL_V231;
+      delete window.__auditGannzillaBareWheelV231;
     };
   }, []);
 
   return (
     <>
       <style>{`
+        :root {
+          --gannzilla-toolbar-height: ${TOOLBAR_HEIGHT}px;
+        }
+
         body {
           margin: 0 !important;
           overflow: hidden !important;
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="230"] > div > div:first-of-type {
+        /* Keep the legacy toolbar and side tool strip disabled. */
+        [data-gannzilla-build="231"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="230"] > div > div:nth-of-type(2) {
+        [data-gannzilla-build="231"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="230"] > div > button {
+        [data-gannzilla-build="231"] > div:not([data-gannzilla-toolbar="true"]) > button {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="230"] > div > aside {
-          top: 0 !important;
-          height: 100vh !important;
+        /* Reserve real layout space for the new toolbar instead of overlaying it. */
+        [data-gannzilla-build="231"] > div:not([data-gannzilla-toolbar="true"]) > aside {
+          top: var(--gannzilla-toolbar-height) !important;
+          height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
 
-        [data-gannzilla-build="230"] > div > div:last-of-type {
-          top: 0 !important;
+        [data-gannzilla-build="231"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
+          top: var(--gannzilla-toolbar-height) !important;
+          height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
       `}</style>
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
-      <GannzillaAboutOnlyV229 />
+      <GannzillaTopToolbarV231 />
     </>
   );
 }
