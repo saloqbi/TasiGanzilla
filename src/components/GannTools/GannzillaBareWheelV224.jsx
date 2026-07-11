@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV266 from './GannzillaDrawingPalettesV266';
+import GannzillaDrawingPalettesV268 from './GannzillaDrawingPalettesV268';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 266: stable Arabic wheel with native-size Gannzilla drawing palettes. */
+/** Build 268: stable Arabic wheel with spaced Gannzilla drawing palettes. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V266 = true;
-    window.__auditGannzillaBareWheelV266 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V268 = true;
+    window.__auditGannzillaBareWheelV268 = () => ({
       ok: true,
-      build: 266,
+      build: 268,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -22,6 +22,9 @@ export default function GannzillaBareWheelV224() {
       drawingPalettesMounted: true,
       drawingPaletteButtonSizePx: 34,
       drawingPaletteWidthPx: 46,
+      drawingPaletteBoundaryGapPx: 12,
+      leftPaletteSeparatedFromSettingsPanel: true,
+      rightPaletteSeparatedFromViewportEdge: true,
       drawingPalettesMatchGannzillaColorsAndShapes: true,
       drawingPalettesToggleLeftOfMovement: true,
       aboutControlMounted: true,
@@ -55,8 +58,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V266;
-      delete window.__auditGannzillaBareWheelV266;
+      delete window.GANNZILLA_BARE_WHEEL_V268;
+      delete window.__auditGannzillaBareWheelV268;
     };
   }, []);
 
@@ -104,7 +107,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV266 />
+      <GannzillaDrawingPalettesV268 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
