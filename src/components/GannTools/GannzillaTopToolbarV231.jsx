@@ -3,20 +3,24 @@ import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
+import GannzillaWheelZoomV255 from './GannzillaWheelZoomV255';
 
-const BUILD = 254;
+const BUILD = 255;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 254: maximize is fixed immediately left of connection with native Gannzilla toolbar styling. */
+/** Build 255: native wheel zoom, maximize, connection, language, and About controls. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V254 = true;
-    window.__auditGannzillaTopToolbarV254 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V255 = true;
+    window.__auditGannzillaTopToolbarV255 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
+      wheelZoomControlMounted: true,
+      wheelZoomControlMode: 'NATIVE_HIDDEN_REACT_CONTROL_BRIDGE',
+      wheelZoomUsesCssTransform: false,
       pageMaximizeControlSizePx: TOOLBAR_HEIGHT,
       connectionControlSizePx: TOOLBAR_HEIGHT,
       languageControlHeightPx: TOOLBAR_HEIGHT,
@@ -26,25 +30,25 @@ export default function GannzillaTopToolbarV231() {
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
       mountedControls: [
+        'WHEEL_ZOOM_MINUS_PERCENT_PLUS',
         'PAGE_MAXIMIZE_GANNZILLA_STYLE',
         'CONNECTION_SETTINGS_EXACT',
         'LANGUAGE_CUSTOM_FLAG',
         'ORIGINAL_GANNZILLA_ABOUT',
       ],
-      maximizeImmediatelyLeftOfConnection: true,
-      controlVisualOrderLeftToRight: 'PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
-      sharedNativeToolbarStyling: true,
+      controlVisualOrderLeftToRight: 'WHEEL_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
+      wheelZoomFunctional: true,
       pageMaximizeFunctional: true,
       connectionDialogFunctional: true,
       aboutDialogFunctional: true,
       flagAlwaysVisible: true,
       intervalCount: 0,
-      mutationObserverCount: 0,
+      fullPageMutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V254;
-      delete window.__auditGannzillaTopToolbarV254;
+      delete window.GANNZILLA_TOP_TOOLBAR_V255;
+      delete window.__auditGannzillaTopToolbarV255;
     };
   }, []);
 
@@ -74,29 +78,33 @@ export default function GannzillaTopToolbarV231() {
       }}
     >
       <style>{`
-        [data-gannzilla-toolbar="true"] [data-gannzilla-control-strip="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] {
           direction: ltr !important;
         }
 
-        [data-gannzilla-toolbar="true"] [data-gannzilla-page-fullscreen-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-control="true"] {
           order: 0 !important;
         }
 
-        [data-gannzilla-toolbar="true"] [data-gannzilla-connection-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] {
           order: 1 !important;
         }
 
-        [data-gannzilla-toolbar="true"] [data-gannzilla-language-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] {
           order: 2 !important;
         }
 
-        [data-gannzilla-toolbar="true"] [data-gannzilla-about-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] {
           order: 3 !important;
         }
 
-        [data-gannzilla-toolbar="true"] [data-gannzilla-page-fullscreen-control="true"],
-        [data-gannzilla-toolbar="true"] [data-gannzilla-connection-control="true"],
-        [data-gannzilla-toolbar="true"] [data-gannzilla-about-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] {
+          order: 4 !important;
+        }
+
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"],
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"],
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] {
           width: ${TOOLBAR_HEIGHT}px !important;
           height: ${TOOLBAR_HEIGHT}px !important;
           min-width: ${TOOLBAR_HEIGHT}px !important;
@@ -118,13 +126,13 @@ export default function GannzillaTopToolbarV231() {
           pointer-events: auto !important;
         }
 
-        [data-gannzilla-toolbar="true"] [data-gannzilla-page-fullscreen-control="true"]:hover,
-        [data-gannzilla-toolbar="true"] [data-gannzilla-connection-control="true"]:hover,
-        [data-gannzilla-toolbar="true"] [data-gannzilla-about-control="true"]:hover {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"]:hover,
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"]:hover,
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"]:hover {
           background: #dceaf5 !important;
         }
 
-        [data-gannzilla-toolbar="true"] [data-gannzilla-about-control="true"] {
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] {
           color: #2469b2 !important;
           font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial, sans-serif !important;
           font-size: 17px !important;
@@ -145,6 +153,7 @@ export default function GannzillaTopToolbarV231() {
           overflow: 'visible',
         }}
       >
+        <GannzillaWheelZoomV255 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaPageFullscreenV253 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaLanguageToggleV237 />
