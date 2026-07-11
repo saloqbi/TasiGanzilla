@@ -1,23 +1,23 @@
 import React from 'react';
 import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
-import GannzillaLanguageToggleV236 from './GannzillaLanguageToggleV236';
+import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 
 const TOOLBAR_HEIGHT = 38;
 const RIGHT_INSET_PX = 38;
 const CONTROL_GAP_PX = 3;
 
 /**
- * Build 236: single-owner top toolbar with Arabic/English language selector.
+ * Build 237: classic Arabic/English flag language selector beside About.
  * All toolbar controls derive their height from TOOLBAR_HEIGHT.
  */
 export default function GannzillaTopToolbarV231() {
   const iconSize = TOOLBAR_HEIGHT - 8;
 
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V236 = true;
-    window.__auditGannzillaTopToolbarV236 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V237 = true;
+    window.__auditGannzillaTopToolbarV237 = () => ({
       ok: true,
-      build: 236,
+      build: 237,
       singleReactOwner: true,
       heightPx: TOOLBAR_HEIGHT,
       iconSizePx: iconSize,
@@ -25,15 +25,17 @@ export default function GannzillaTopToolbarV231() {
       iconAlignment: 'RIGHT',
       rightInsetPx: RIGHT_INSET_PX,
       controlGapPx: CONTROL_GAP_PX,
-      mountedControls: ['LANGUAGE', 'ABOUT'],
+      mountedControls: ['LANGUAGE_CLASSIC', 'ABOUT'],
       languageControlPosition: 'LEFT_OF_ABOUT',
+      languageControlVisible: true,
+      languageFlags: ['UNITED_KINGDOM_SVG', 'SAUDI_ARABIA_SVG'],
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V236;
-      delete window.__auditGannzillaTopToolbarV236;
+      delete window.GANNZILLA_TOP_TOOLBAR_V237;
+      delete window.__auditGannzillaTopToolbarV237;
     };
   }, [iconSize]);
 
@@ -67,7 +69,7 @@ export default function GannzillaTopToolbarV231() {
         boxShadow: 'inset 0 -1px 0 rgba(255,255,255,.75), 0 1px 2px rgba(0,0,0,.18)',
       }}
     >
-      <GannzillaLanguageToggleV236 toolbarHeight={TOOLBAR_HEIGHT} />
+      <GannzillaLanguageToggleV237 toolbarHeight={TOOLBAR_HEIGHT} />
       <GannzillaAboutOnlyV229 toolbarHeight={TOOLBAR_HEIGHT} />
     </div>
   );
