@@ -8,30 +8,30 @@ const CONTROL_GAP_PX = 2;
 const INFO_BUTTON_SIZE = 18;
 
 /**
- * Build 241: original Gannzilla-style native language selector and information
- * glyph, matched to the supplied desktop reference.
+ * Build 242: custom classic language selector with guaranteed flag visibility
+ * and compact Gannzilla-style information glyph.
  */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V241 = true;
-    window.__auditGannzillaTopToolbarV241 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V242 = true;
+    window.__auditGannzillaTopToolbarV242 = () => ({
       ok: true,
-      build: 241,
-      copiedFrom: ['GannzillaLanguageSwitch', 'GannzillaExactToolbarV97'],
+      build: 242,
       heightPx: TOOLBAR_HEIGHT,
       infoButtonSizePx: INFO_BUTTON_SIZE,
       rightInsetPx: RIGHT_INSET_PX,
       controlGapPx: CONTROL_GAP_PX,
-      mountedControls: ['LANGUAGE_NATIVE_SELECT', 'ABOUT_INFO_GLYPH'],
+      mountedControls: ['LANGUAGE_CUSTOM_FLAG', 'ABOUT_INFO_GLYPH'],
       languageControlWidthPx: 96,
       languageTextColor: '#111111',
+      flagAlwaysVisible: true,
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V241;
-      delete window.__auditGannzillaTopToolbarV241;
+      delete window.GANNZILLA_TOP_TOOLBAR_V242;
+      delete window.__auditGannzillaTopToolbarV242;
     };
   }, []);
 
