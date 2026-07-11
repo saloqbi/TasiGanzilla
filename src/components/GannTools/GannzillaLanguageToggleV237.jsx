@@ -1,9 +1,10 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 
-const CONTROL_WIDTH = 154;
-const FLAG_WIDTH = 28;
-const FLAG_HEIGHT = 20;
+const CONTROL_WIDTH = 100;
+const FLAG_WIDTH = 20;
+const FLAG_HEIGHT = 14;
+const ARROW_WIDTH = 18;
 
 function UnitedKingdomFlag() {
   return (
@@ -42,11 +43,11 @@ function LanguageFlag({ language }) {
   return language === 'ar' ? <SaudiArabiaFlag /> : <UnitedKingdomFlag />;
 }
 
-export default function GannzillaLanguageToggleV237({ toolbarHeight = 50 }) {
+export default function GannzillaLanguageToggleV237({ toolbarHeight = 30 }) {
   const { lang, setLang } = useLanguage();
   const [open, setOpen] = React.useState(false);
   const rootRef = React.useRef(null);
-  const controlHeight = Math.max(30, toolbarHeight - 8);
+  const controlHeight = Math.max(20, toolbarHeight - 8);
   const isArabic = lang === 'ar';
 
   React.useEffect(() => {
@@ -68,10 +69,10 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 50 }) {
   }, [open]);
 
   React.useEffect(() => {
-    window.GANNZILLA_LANGUAGE_TOGGLE_V238 = true;
-    window.__auditGannzillaLanguageToggleV238 = () => ({
+    window.GANNZILLA_LANGUAGE_TOGGLE_V239 = true;
+    window.__auditGannzillaLanguageToggleV239 = () => ({
       ok: true,
-      build: 238,
+      build: 239,
       singleReactOwner: true,
       visible: true,
       language: lang,
@@ -82,17 +83,18 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 50 }) {
       controlWidthPx: CONTROL_WIDTH,
       flagWidthPx: FLAG_WIDTH,
       flagHeightPx: FLAG_HEIGHT,
+      arrowWidthPx: ARROW_WIDTH,
       textColor: '#111111',
-      fontSizePx: 14,
-      referenceSizeMatch: true,
+      fontSizePx: 12,
+      referencePixelMatch: true,
       dropdownOpen: open,
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_LANGUAGE_TOGGLE_V238;
-      delete window.__auditGannzillaLanguageToggleV238;
+      delete window.GANNZILLA_LANGUAGE_TOGGLE_V239;
+      delete window.__auditGannzillaLanguageToggleV239;
     };
   }, [controlHeight, lang, open]);
 
@@ -103,22 +105,21 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 50 }) {
 
   const optionStyle = (active) => ({
     width: '100%',
-    minHeight: 40,
-    padding: '5px 9px',
+    minHeight: 28,
+    padding: '4px 6px',
     display: 'flex',
     alignItems: 'center',
-    gap: 9,
+    gap: 6,
     border: 0,
     borderBottom: '1px solid #c6c6c6',
-    background: active ? '#168fd7' : '#f4f4f4',
+    background: active ? '#0d7fd1' : '#f4f4f4',
     color: '#111111',
     fontFamily: 'Tahoma, Arial, sans-serif',
-    fontSize: 14,
-    fontWeight: 800,
+    fontSize: 12,
+    fontWeight: 700,
     cursor: 'pointer',
     textAlign: 'left',
     whiteSpace: 'nowrap',
-    textShadow: active ? '0 1px 0 rgba(255,255,255,.34)' : 'none',
   });
 
   return (
@@ -151,36 +152,34 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 50 }) {
           display: 'flex',
           alignItems: 'stretch',
           boxSizing: 'border-box',
-          border: '1px solid #6f6f6f',
-          borderRadius: 1,
-          background: '#ececec',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.72), 0 1px 2px rgba(0,0,0,.16)',
+          border: '1px solid #777777',
+          borderRadius: 0,
+          background: '#e8e8e8',
+          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.70)',
           color: '#111111',
           fontFamily: 'Tahoma, Arial, sans-serif',
-          fontSize: 14,
+          fontSize: 12,
           lineHeight: 1,
-          fontWeight: 800,
+          fontWeight: 700,
           cursor: 'pointer',
           userSelect: 'none',
           overflow: 'hidden',
-          visibility: 'visible',
-          opacity: 1,
         }}
       >
         <span
           style={{
-            minWidth: 120,
             flex: '1 1 auto',
+            minWidth: 0,
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
-            padding: '0 8px',
-            background: 'linear-gradient(180deg,#45b8ef 0%,#1b9cde 48%,#0a82cb 100%)',
+            gap: 4,
+            padding: '0 4px',
+            background: 'linear-gradient(180deg,#1899e5 0%,#087fd2 52%,#006fbd 100%)',
             color: '#111111',
-            fontWeight: 800,
+            fontWeight: 700,
             textAlign: 'left',
             whiteSpace: 'nowrap',
-            textShadow: '0 1px 0 rgba(255,255,255,.36)',
+            textShadow: '0 1px 0 rgba(255,255,255,.35)',
           }}
         >
           <span
@@ -190,8 +189,6 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 50 }) {
               display: 'grid',
               placeItems: 'center',
               flex: '0 0 auto',
-              border: '1px solid rgba(255,255,255,.92)',
-              boxSizing: 'content-box',
               overflow: 'hidden',
               background: '#fff',
             }}
@@ -204,14 +201,14 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 50 }) {
         <span
           aria-hidden="true"
           style={{
-            width: 32,
-            flex: '0 0 32px',
+            width: ARROW_WIDTH,
+            flex: `0 0 ${ARROW_WIDTH}px`,
             display: 'grid',
             placeItems: 'center',
-            borderLeft: '1px solid #7f7f7f',
-            background: 'linear-gradient(180deg,#ffffff 0%,#ececec 54%,#d5d5d5 100%)',
+            borderLeft: '1px solid #8a8a8a',
+            background: 'linear-gradient(180deg,#ffffff 0%,#eeeeee 52%,#d4d4d4 100%)',
             color: '#111111',
-            fontSize: 12,
+            fontSize: 9,
             fontWeight: 900,
             lineHeight: 1,
           }}
@@ -226,15 +223,15 @@ export default function GannzillaLanguageToggleV237({ toolbarHeight = 50 }) {
           aria-label={isArabic ? 'اللغات' : 'Languages'}
           style={{
             position: 'absolute',
-            top: controlHeight + 2,
+            top: controlHeight + 1,
             left: 0,
             zIndex: 1400,
             width: CONTROL_WIDTH,
             overflow: 'hidden',
             border: '1px solid #707070',
-            borderRadius: 1,
+            borderRadius: 0,
             background: '#f4f4f4',
-            boxShadow: '0 4px 12px rgba(0,0,0,.30)',
+            boxShadow: '0 4px 10px rgba(0,0,0,.28)',
           }}
         >
           <button type="button" role="menuitem" onClick={() => chooseLanguage('en')} style={optionStyle(lang === 'en')}>
