@@ -4,29 +4,28 @@ import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 import GannzillaWheelZoomV256 from './GannzillaWheelZoomV256';
+import GannzillaDrawingToolsToggleV266 from './GannzillaDrawingToolsToggleV266';
 
-const BUILD = 264;
+const BUILD = 266;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 264: functional click and press-and-hold wheel direction pad. */
+/** Build 266: drawing palettes toggle, movement, zoom, fullscreen, connection, language, and About. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V264 = true;
-    window.__auditGannzillaTopToolbarV264 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V266 = true;
+    window.__auditGannzillaTopToolbarV266 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
-      directionPadFunctional: true,
-      directionPadClickEnabled: true,
-      directionPadPressAndHoldEnabled: true,
-      directionButtonsProtectedFromLegacySuppression: true,
+      drawingToolsToggleMounted: true,
+      drawingToolsTogglePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
+      drawingToolsNativeSizeAndColor: true,
       wheelMovementIntegratedWithZoom: true,
       wheelMovementIconPlacement: 'IMMEDIATELY_LEFT_OF_ZOOM_MINUS',
       wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
       wheelZoomControlMounted: true,
-      wheelZoomControlMode: 'DIRECT_NATIVE_GANNZILLA_MIRROR',
       pageMaximizeControlSizePx: TOOLBAR_HEIGHT,
       connectionControlSizePx: TOOLBAR_HEIGHT,
       languageControlHeightPx: TOOLBAR_HEIGHT,
@@ -35,24 +34,12 @@ export default function GannzillaTopToolbarV231() {
       controlsMatchToolbarHeight: true,
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
-      mountedControls: [
-        'FUNCTIONAL_WHEEL_DIRECTION_PAD_AND_ZOOM',
-        'PAGE_MAXIMIZE_GANNZILLA_STYLE',
-        'CONNECTION_SETTINGS_EXACT',
-        'LANGUAGE_CUSTOM_FLAG',
-        'ORIGINAL_GANNZILLA_ABOUT',
-      ],
-      controlVisualOrderLeftToRight: 'WHEEL_MOVE_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
-      wheelMovementFunctional: true,
-      wheelZoomFunctional: true,
-      pageMaximizeFunctional: true,
-      connectionDialogFunctional: true,
-      aboutDialogFunctional: true,
+      controlVisualOrderLeftToRight: 'DRAWING_PALETTES_WHEEL_MOVE_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V264;
-      delete window.__auditGannzillaTopToolbarV264;
+      delete window.GANNZILLA_TOP_TOOLBAR_V266;
+      delete window.__auditGannzillaTopToolbarV266;
     };
   }, []);
 
@@ -84,11 +71,12 @@ export default function GannzillaTopToolbarV231() {
     >
       <style>{`
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] { direction:ltr !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-control="true"] { order:0 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:1 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:2 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] { order:3 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] { order:4 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-drawing-tools-toggle="true"] { order:0 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-control="true"] { order:1 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:2 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:3 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] { order:4 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] { order:5 !important; }
 
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"],
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"],
@@ -139,6 +127,7 @@ export default function GannzillaTopToolbarV231() {
           overflow: 'visible',
         }}
       >
+        <GannzillaDrawingToolsToggleV266 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaWheelZoomV256 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaPageFullscreenV253 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
