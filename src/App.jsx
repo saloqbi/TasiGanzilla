@@ -101,7 +101,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '220');
+    url.searchParams.set('v', '222');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -153,7 +153,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 220: direct wheel drag and fit controls without the legacy overlay conflict.
+// Build 222: direct page fullscreen control plus wheel drag.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -170,7 +170,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="220">
+        <div data-gannzilla-build="222">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
