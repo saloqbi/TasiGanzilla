@@ -4,24 +4,25 @@ import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 import GannzillaWheelZoomV256 from './GannzillaWheelZoomV256';
-import GannzillaDrawingToolsToggleV266 from './GannzillaDrawingToolsToggleV266';
+import GannzillaDrawingToolsToggleV284 from './GannzillaDrawingToolsToggleV284';
 
-const BUILD = 266;
+const BUILD = 284;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 266: drawing palettes toggle, movement, zoom, fullscreen, connection, language, and About. */
+/** Build 284: the existing drawing-tools control opens the categorized drawing library. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V266 = true;
-    window.__auditGannzillaTopToolbarV266 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V284 = true;
+    window.__auditGannzillaTopToolbarV284 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
       drawingToolsToggleMounted: true,
+      drawingLibraryOpensFromExistingToolsControl: true,
+      noAdditionalToolbarButton: true,
       drawingToolsTogglePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
-      drawingToolsNativeSizeAndColor: true,
       wheelMovementIntegratedWithZoom: true,
       wheelMovementIconPlacement: 'IMMEDIATELY_LEFT_OF_ZOOM_MINUS',
       wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
@@ -34,12 +35,12 @@ export default function GannzillaTopToolbarV231() {
       controlsMatchToolbarHeight: true,
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
-      controlVisualOrderLeftToRight: 'DRAWING_PALETTES_WHEEL_MOVE_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
+      controlVisualOrderLeftToRight: 'DRAWING_LIBRARY_WHEEL_MOVE_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V266;
-      delete window.__auditGannzillaTopToolbarV266;
+      delete window.GANNZILLA_TOP_TOOLBAR_V284;
+      delete window.__auditGannzillaTopToolbarV284;
     };
   }, []);
 
@@ -127,7 +128,7 @@ export default function GannzillaTopToolbarV231() {
           overflow: 'visible',
         }}
       >
-        <GannzillaDrawingToolsToggleV266 toolbarHeight={TOOLBAR_HEIGHT} />
+        <GannzillaDrawingToolsToggleV284 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaWheelZoomV256 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaPageFullscreenV253 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
