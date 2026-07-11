@@ -1,0 +1,3 @@
+Build 268 deployment marker.
+Left drawing palette: 12px after the settings panel boundary.
+Right drawing palette: 12px inside the viewport boundary.
