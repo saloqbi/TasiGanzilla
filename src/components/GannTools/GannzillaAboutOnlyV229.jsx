@@ -6,6 +6,7 @@ const GOLD_LIGHT = '#ffd86a';
 
 export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
   const [open, setOpen] = React.useState(false);
+  const [logoFailed, setLogoFailed] = React.useState(false);
   const iconSize = Math.max(22, toolbarHeight - 8);
   const iconFontSize = Math.max(16, Math.round(iconSize * 0.72));
 
@@ -15,10 +16,10 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
     };
 
     window.addEventListener('keydown', onKeyDown);
-    window.GANNZILLA_ABOUT_ONLY_V245 = true;
-    window.__auditGannzillaAboutOnlyV245 = () => ({
+    window.GANNZILLA_ABOUT_ONLY_V246 = true;
+    window.__auditGannzillaAboutOnlyV246 = () => ({
       ok: true,
-      build: 245,
+      build: 246,
       singleReactOwner: true,
       intervalCount: 0,
       mutationObserverCount: 0,
@@ -26,19 +27,19 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
       iconSizePx: iconSize,
       iconGovernedByToolbar: true,
       logoSource: 'GANNZILLA_BRAND_IMAGE_V159_SINGLE_DATA_URI',
-      logoRenderingMode: 'CSS_BACKGROUND_IMAGE',
-      brokenImageElementRemoved: true,
-      logoDisplayMaxWidthPx: 1254,
+      logoRenderingMode: 'DIRECT_IMG',
+      logoDisplayMaxWidthPx: 420,
+      logoFailed,
       fullLogoVisible: true,
       dialogOpen: open,
     });
 
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      delete window.GANNZILLA_ABOUT_ONLY_V245;
-      delete window.__auditGannzillaAboutOnlyV245;
+      delete window.GANNZILLA_ABOUT_ONLY_V246;
+      delete window.__auditGannzillaAboutOnlyV246;
     };
-  }, [iconSize, open, toolbarHeight]);
+  }, [iconSize, logoFailed, open, toolbarHeight]);
 
   return (
     <>
@@ -93,10 +94,10 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
           <section
             role="dialog"
             aria-modal="true"
-            aria-labelledby="gannzilla-about-title-v245"
+            aria-labelledby="gannzilla-about-title-v246"
             dir="rtl"
             style={{
-              width: 'min(1320px, calc(100vw - 24px))',
+              width: 'min(620px, calc(100vw - 24px))',
               maxHeight: 'calc(100vh - 24px)',
               overflow: 'auto',
               background: 'linear-gradient(180deg,#090909 0%,#020202 100%)',
@@ -124,7 +125,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
                 background: '#050505',
               }}
             >
-              <span id="gannzilla-about-title-v245">حول البرنامج</span>
+              <span id="gannzilla-about-title-v246">حول البرنامج</span>
               <button
                 type="button"
                 aria-label="إغلاق"
@@ -145,43 +146,64 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
             </header>
 
             <div style={{ padding: '16px 20px 16px', textAlign: 'center' }}>
-              <div
-                role="img"
-                aria-label="شعار كوكبة تاسي GOLD عالي الدقة"
-                style={{
-                  display: 'block',
-                  width: 'min(1254px, 100%)',
-                  aspectRatio: '1 / 1',
-                  margin: '0 auto 28px',
-                  backgroundImage: `url("${BRAND_IMAGE}")`,
-                  backgroundSize: 'contain',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'center',
-                  backgroundColor: '#020202',
-                  borderRadius: 14,
-                  boxShadow: '0 0 28px rgba(244,184,32,.38)',
-                }}
-              />
+              {!logoFailed ? (
+                <img
+                  src={BRAND_IMAGE}
+                  alt="شعار كوكبة تاسي GOLD عالي الدقة"
+                  draggable="false"
+                  loading="eager"
+                  decoding="sync"
+                  onError={() => setLogoFailed(true)}
+                  style={{
+                    display: 'block',
+                    width: 'min(420px, 100%)',
+                    height: 'auto',
+                    objectFit: 'contain',
+                    margin: '0 auto 24px',
+                    borderRadius: 14,
+                    boxShadow: '0 0 28px rgba(244,184,32,.38)',
+                    background: '#020202',
+                  }}
+                />
+              ) : (
+                <div
+                  role="alert"
+                  style={{
+                    width: 'min(420px, 100%)',
+                    minHeight: 120,
+                    margin: '0 auto 24px',
+                    display: 'grid',
+                    placeItems: 'center',
+                    border: `1px solid ${GOLD}`,
+                    color: GOLD_LIGHT,
+                    background: '#080808',
+                    fontSize: 16,
+                    fontWeight: 800,
+                  }}
+                >
+                  تعذر تحميل شعار البرنامج
+                </div>
+              )}
 
               <div
                 style={{
                   color: GOLD_LIGHT,
-                  fontSize: 48,
+                  fontSize: 32,
                   lineHeight: 1.35,
                   fontWeight: 900,
-                  marginBottom: 24,
+                  marginBottom: 18,
                   textShadow: '0 1px 8px rgba(255,196,64,.28)',
                 }}
               >
                 كوكبة الأرقام السحرية
               </div>
-              <div style={{ fontSize: 28, lineHeight: 1.75, fontWeight: 800 }}>الإصدار: 1</div>
-              <div style={{ fontSize: 28, lineHeight: 1.75, fontWeight: 800 }}>المؤلف: محمود سمان</div>
+              <div style={{ fontSize: 20, lineHeight: 1.75, fontWeight: 800 }}>الإصدار: 1</div>
+              <div style={{ fontSize: 20, lineHeight: 1.75, fontWeight: 800 }}>المؤلف: محمود سمان</div>
               <a
                 href="mailto:m.a.m.1392@gmail.com"
                 style={{
                   color: GOLD_LIGHT,
-                  fontSize: 28,
+                  fontSize: 20,
                   lineHeight: 1.75,
                   fontWeight: 900,
                   textDecoration: 'none',
@@ -190,12 +212,12 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
               >
                 m.a.m.1392@gmail.com
               </a>
-              <div style={{ marginTop: 28, fontSize: 26, lineHeight: 1.7, fontWeight: 800 }}>
+              <div style={{ marginTop: 22, fontSize: 18, lineHeight: 1.7, fontWeight: 800 }}>
                 © 2026 كوكبة تاسي
               </div>
-              <div style={{ fontSize: 26, lineHeight: 1.7, fontWeight: 800 }}>جميع الحقوق محفوظة</div>
+              <div style={{ fontSize: 18, lineHeight: 1.7, fontWeight: 800 }}>جميع الحقوق محفوظة</div>
 
-              <div style={{ marginTop: 24, textAlign: 'left' }}>
+              <div style={{ marginTop: 20, textAlign: 'left' }}>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
