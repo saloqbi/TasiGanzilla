@@ -7,7 +7,7 @@ import TestPage from './pages/TestPage';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 import GannzillaBareWheelV224 from './components/GannTools/GannzillaBareWheelV224';
 
-// Build 239: exact classic Arabic/English selector and circular information icon.
+// Build 240: original Gannzilla language and information controls copied from V97.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -18,7 +18,7 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="239">
+        <div data-gannzilla-build="240">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
