@@ -1,0 +1,1 @@
+Build 233 stores the 800x800 WebP About logo as four JavaScript string chunks because the repository connector writes UTF-8 text files. gannzillaBrandImageV233.js assembles the chunks into one data URL at build time.

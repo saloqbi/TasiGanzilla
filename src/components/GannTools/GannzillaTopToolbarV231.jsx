@@ -5,20 +5,17 @@ const TOOLBAR_HEIGHT = 38;
 const RIGHT_INSET_PX = 38;
 
 /**
- * Build 232: single-owner top toolbar with a fixed right safety inset.
- *
- * All toolbar icons derive their dimensions from TOOLBAR_HEIGHT. New controls
- * must be added inside this component so the toolbar remains the only layout
- * owner and icon sizing stays consistent.
+ * Build 233: single-owner top toolbar with a fixed right safety inset.
+ * All toolbar icons derive their dimensions from TOOLBAR_HEIGHT.
  */
 export default function GannzillaTopToolbarV231() {
   const iconSize = TOOLBAR_HEIGHT - 8;
 
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V232 = true;
-    window.__auditGannzillaTopToolbarV232 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V233 = true;
+    window.__auditGannzillaTopToolbarV233 = () => ({
       ok: true,
-      build: 232,
+      build: 233,
       singleReactOwner: true,
       heightPx: TOOLBAR_HEIGHT,
       iconSizePx: iconSize,
@@ -31,8 +28,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V232;
-      delete window.__auditGannzillaTopToolbarV232;
+      delete window.GANNZILLA_TOP_TOOLBAR_V233;
+      delete window.__auditGannzillaTopToolbarV233;
     };
   }, [iconSize]);
 

@@ -7,7 +7,7 @@ import TestPage from './pages/TestPage';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 import GannzillaBareWheelV224 from './components/GannTools/GannzillaBareWheelV224';
 
-// Build 232: About icon aligned right with a 38px toolbar inset.
+// Build 233: full-size high-definition About logo.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -18,7 +18,7 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="232">
+        <div data-gannzilla-build="233">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
