@@ -3,26 +3,25 @@ import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
-import GannzillaWheelZoomV256 from './GannzillaWheelZoomV256';
-import GannzillaChartVisibilityToggleV288 from './GannzillaChartVisibilityToggleV288';
+import GannzillaWheelZoomV289 from './GannzillaWheelZoomV289';
 
-const BUILD = 288;
+const BUILD = 289;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 288: chart visibility, movement, zoom, fullscreen, connection, language, and About. */
+/** Build 289: integrated chart visibility eye, movement, zoom, fullscreen, connection, language, and About. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V288 = true;
-    window.__auditGannzillaTopToolbarV288 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V289 = true;
+    window.__auditGannzillaTopToolbarV289 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
       drawingToolsToggleMounted: false,
       drawingToolsToggleRemoved: true,
       chartVisibilityToggleMounted: true,
-      chartVisibilityTogglePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
+      chartVisibilityTogglePlacement: 'PHYSICALLY_INTEGRATED_IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
       chartVisibilityToggleSizePx: TOOLBAR_HEIGHT,
       wheelMovementIntegratedWithZoom: true,
       wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
@@ -39,8 +38,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V288;
-      delete window.__auditGannzillaTopToolbarV288;
+      delete window.GANNZILLA_TOP_TOOLBAR_V289;
+      delete window.__auditGannzillaTopToolbarV289;
     };
   }, []);
 
@@ -72,12 +71,16 @@ export default function GannzillaTopToolbarV231() {
     >
       <style>{`
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] { direction:ltr !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-chart-visibility-toggle="true"] { order:0 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-control="true"] { order:1 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:2 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:3 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] { order:4 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] { order:5 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-v289="true"] { order:0 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:1 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:2 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] { order:3 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] { order:4 !important; }
+
+        [data-gannzilla-toolbar="true"] [data-gannzilla-chart-visibility-toggle-v289="true"]:hover,
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"]:hover,
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"]:hover,
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"]:hover { background:#dceaf5 !important; }
 
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"],
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"],
@@ -103,11 +106,6 @@ export default function GannzillaTopToolbarV231() {
           pointer-events:auto !important;
         }
 
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-chart-visibility-toggle="true"]:hover,
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"]:hover,
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"]:hover,
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"]:hover { background:#dceaf5 !important; }
-
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] {
           color:#2469b2 !important;
           font-family:'Segoe UI Symbol','Arial Unicode MS',Arial,sans-serif !important;
@@ -129,8 +127,7 @@ export default function GannzillaTopToolbarV231() {
           overflow: 'visible',
         }}
       >
-        <GannzillaChartVisibilityToggleV288 toolbarHeight={TOOLBAR_HEIGHT} />
-        <GannzillaWheelZoomV256 toolbarHeight={TOOLBAR_HEIGHT} />
+        <GannzillaWheelZoomV289 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaPageFullscreenV253 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaLanguageToggleV237 />
