@@ -101,7 +101,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '215');
+    url.searchParams.set('v', '216');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -153,7 +153,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 215: keep the full-size Gannzilla drawing toolbar and restore the wheel zoom-out button.
+// Build 216: keep the full-size Gannzilla toolbar and provide an independent wheel zoom-out control.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -170,7 +170,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="215">
+        <div data-gannzilla-build="216">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
