@@ -3,35 +3,35 @@ import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 
 const TOOLBAR_HEIGHT = 24;
-const RIGHT_INSET_PX = 6;
+const RIGHT_INSET_PX = 4;
 const CONTROL_GAP_PX = 2;
-const INFO_BUTTON_WIDTH = 27;
+const INFO_BUTTON_SIZE = 18;
 
 /**
- * Build 240: copied from the original Gannzilla toolbar container and controls
- * in GannzillaExactToolbarV97.
+ * Build 241: original Gannzilla-style native language selector and information
+ * glyph, matched to the supplied desktop reference.
  */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V240 = true;
-    window.__auditGannzillaTopToolbarV240 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V241 = true;
+    window.__auditGannzillaTopToolbarV241 = () => ({
       ok: true,
-      build: 240,
-      copiedFrom: 'GannzillaExactToolbarV97',
+      build: 241,
+      copiedFrom: ['GannzillaLanguageSwitch', 'GannzillaExactToolbarV97'],
       heightPx: TOOLBAR_HEIGHT,
-      infoButtonWidthPx: INFO_BUTTON_WIDTH,
+      infoButtonSizePx: INFO_BUTTON_SIZE,
       rightInsetPx: RIGHT_INSET_PX,
       controlGapPx: CONTROL_GAP_PX,
-      mountedControls: ['LANGUAGE_ORIGINAL', 'ABOUT_ORIGINAL'],
-      languageControlWidthPx: 100,
+      mountedControls: ['LANGUAGE_NATIVE_SELECT', 'ABOUT_INFO_GLYPH'],
+      languageControlWidthPx: 96,
       languageTextColor: '#111111',
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V240;
-      delete window.__auditGannzillaTopToolbarV240;
+      delete window.GANNZILLA_TOP_TOOLBAR_V241;
+      delete window.__auditGannzillaTopToolbarV241;
     };
   }, []);
 
@@ -53,34 +53,34 @@ export default function GannzillaTopToolbarV231() {
         justifyContent: 'flex-end',
         gap: CONTROL_GAP_PX,
         paddingRight: RIGHT_INSET_PX,
-        background: '#efefef',
-        borderBottom: '1px solid #bdbdbd',
+        background: 'linear-gradient(180deg,#fafafa 0%,#f1f1f1 55%,#e7e7e7 100%)',
+        borderTop: '1px solid #ffffff',
+        borderBottom: '1px solid #b7b7b7',
         direction: 'ltr',
-        fontFamily: 'Segoe UI, Arial, sans-serif',
+        fontFamily: 'Segoe UI, Tahoma, Arial, sans-serif',
         boxSizing: 'border-box',
       }}
     >
       <style>{`
         [data-gannzilla-toolbar="true"] > button[aria-label="حول البرنامج"] {
-          width: ${INFO_BUTTON_WIDTH}px !important;
-          height: ${TOOLBAR_HEIGHT}px !important;
-          min-width: ${INFO_BUTTON_WIDTH}px !important;
-          min-height: ${TOOLBAR_HEIGHT}px !important;
+          width: ${INFO_BUTTON_SIZE}px !important;
+          height: ${INFO_BUTTON_SIZE}px !important;
+          min-width: ${INFO_BUTTON_SIZE}px !important;
+          min-height: ${INFO_BUTTON_SIZE}px !important;
           padding: 0 !important;
-          border: 1px solid #aeb6bb !important;
-          border-radius: 1px !important;
-          background: linear-gradient(#ffffff,#e9e9e9) !important;
+          border: 0 !important;
+          border-radius: 50% !important;
+          background: transparent !important;
           box-shadow: none !important;
           color: transparent !important;
           font-size: 0 !important;
           line-height: 1 !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
+          display: grid !important;
+          place-items: center !important;
         }
         [data-gannzilla-toolbar="true"] > button[aria-label="حول البرنامج"]::before {
           content: 'ⓘ';
-          color: #236bb0;
+          color: #2469b2;
           font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial, sans-serif;
           font-size: 16px;
           font-weight: 900;
