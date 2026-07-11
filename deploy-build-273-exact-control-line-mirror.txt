@@ -1,0 +1,1 @@
+Build 273 aligns both drawing palettes to equal visible control-line gaps and removes the right-side scrollbar subtraction offset.
