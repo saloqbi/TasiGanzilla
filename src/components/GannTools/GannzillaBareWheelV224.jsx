@@ -6,15 +6,15 @@ import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 const TOOLBAR_HEIGHT = 24;
 
 /**
- * Build 246: stable V228 wheel, toolbar-height language/information controls,
- * and a compact About logo rendered as a direct image.
+ * Build 247: stable V228 wheel, toolbar-height language/information controls,
+ * and the restored About logo rendered from the embedded brand image.
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V246 = true;
-    window.__auditGannzillaBareWheelV246 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V247 = true;
+    window.__auditGannzillaBareWheelV247 = () => ({
       ok: true,
-      build: 246,
+      build: 247,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -40,7 +40,7 @@ export default function GannzillaBareWheelV224() {
       languageFlags: ['SAUDI_ARABIA_CSS', 'UNITED_STATES_CSS'],
       aboutIconGlyph: 'ⓘ',
       aboutIconAlignment: 'RIGHT',
-      aboutLogoSource: 'GANNZILLA_BRAND_IMAGE_V159_SINGLE_DATA_URI',
+      aboutLogoSource: 'GANNZILLA_BRAND_IMAGE_V247_EMBEDDED_WEBP',
       aboutLogoRenderingMode: 'DIRECT_IMG',
       aboutLogoDisplayMaxWidthPx: 420,
       aboutLogoFullVisible: true,
@@ -57,8 +57,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V246;
-      delete window.__auditGannzillaBareWheelV246;
+      delete window.GANNZILLA_BARE_WHEEL_V247;
+      delete window.__auditGannzillaBareWheelV247;
     };
   }, []);
 
@@ -75,30 +75,30 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="246"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
+        [data-gannzilla-build="247"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="246"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
+        [data-gannzilla-build="247"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="246"] > div:not([data-gannzilla-toolbar="true"]) > button {
+        [data-gannzilla-build="247"] > div:not([data-gannzilla-toolbar="true"]) > button {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="246"] > div:not([data-gannzilla-toolbar="true"]) > aside {
+        [data-gannzilla-build="247"] > div:not([data-gannzilla-toolbar="true"]) > aside {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
 
-        [data-gannzilla-build="246"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
+        [data-gannzilla-build="247"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
