@@ -3,20 +3,25 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV283 from './GannzillaDrawingPalettesV283';
+import GannzillaDrawingPalettesV286 from './GannzillaDrawingPalettesV286';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 285: keep all accepted work and remove only the last categorized drawing-library addition. */
+/** Build 286: remove all visible tools from the right side and release wheel interaction. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V285 = true;
-    window.__auditGannzillaBareWheelV285 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V286 = true;
+    window.__auditGannzillaBareWheelV286 = () => ({
       ok: true,
-      build: 285,
+      build: 286,
+      completeRightDrawingPaletteRemovedFromDisplay: true,
+      allRightGeometryIconsRemovedFromDisplay: true,
+      spiralIconRemovedFromDisplay: true,
+      drawingOverlayDisabled: true,
+      wheelInteractionReleased: true,
+      leftDrawingPalettePreserved: true,
       lastDrawingLibraryAdditionRemoved: true,
-      previousAcceptedDrawingToolbarPreserved: true,
-      pageMovementPreserved: true,
+      previousAcceptedWorkPreserved: true,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -25,34 +30,16 @@ export default function GannzillaBareWheelV224() {
       drawingPalettesMounted: true,
       drawingPaletteSingleOwner: true,
       drawingPaletteScale: 2,
-      bothDrawingPalettesEnlarged: true,
       leftDrawingPaletteEnlarged: true,
-      rightDrawingPaletteEnlarged: true,
       drawingPaletteButtonSizePx: 68,
       drawingPaletteButtonGapPx: 8,
       drawingPaletteWidthPx: 92,
       drawingPaletteIconSizePx: 56,
       drawingPaletteInternalScrollbarHidden: true,
-      rightDrawingPaletteMinimumControlLineClearancePx: 24,
-      rightDrawingPaletteDoesNotTouchControlLine: true,
       drawingPaletteOpaqueBackgrounds: true,
       drawingPaletteOpaqueButtonBackgrounds: true,
       drawingPaletteOpaqueShapeColors: true,
       drawingPaletteTransparencyRemoved: true,
-      geometricToolOrder: ['circle', 'line', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11', 'p12'],
-      sequenceStartsWithCircle: true,
-      twoSidedStraightLineSecond: true,
-      sequenceContinuesThroughTwelveSides: true,
-      angleToolRemoved: true,
-      leafCompassToolRemoved: true,
-      goldRingToolRemoved: true,
-      spiralToolPreserved: true,
-      drawingPaletteSameTop: true,
-      drawingPaletteSameWidth: true,
-      drawingPaletteSameHeight: true,
-      drawingPaletteSameBorderAndBackground: true,
-      drawingPalettesMatchGannzillaColorsAndShapes: true,
-      drawingPalettesToggleLeftOfMovement: true,
       aboutControlMounted: true,
       languageControlMounted: true,
       defaultLanguage: 'ar',
@@ -84,8 +71,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V285;
-      delete window.__auditGannzillaBareWheelV285;
+      delete window.GANNZILLA_BARE_WHEEL_V286;
+      delete window.__auditGannzillaBareWheelV286;
     };
   }, []);
 
@@ -133,7 +120,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV283 />
+      <GannzillaDrawingPalettesV286 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
