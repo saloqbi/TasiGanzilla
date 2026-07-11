@@ -1,12 +1,17 @@
 import React from 'react';
 
-const BUILD = 228;
+const BUILD = 248;
 const TWO_PI = Math.PI * 2;
 
 const RING_PALETTE = Object.freeze({
   shaded: '#d8d4cc',
   light: '#f7f5f0',
   stroke: '#c9c4b8',
+});
+
+const ARABIC_DIGITS = Object.freeze({
+  0: '٠', 1: '١', 2: '٢', 3: '٣', 4: '٤',
+  5: '٥', 6: '٦', 7: '٧', 8: '٨', 9: '٩',
 });
 
 function clamp(value, min, max) {
@@ -31,6 +36,22 @@ function boolParam(name, fallback) {
   } catch (_) {
     return fallback;
   }
+}
+
+function shouldUseArabicDigits() {
+  try {
+    const queryLanguage = new URLSearchParams(window.location.search).get('lang');
+    if (queryLanguage) return queryLanguage !== 'en';
+  } catch (_) {
+    // Ignore malformed URLs.
+  }
+  return document.documentElement.lang !== 'en';
+}
+
+function localizeDigits(value) {
+  const text = String(value ?? '');
+  if (!shouldUseArabicDigits()) return text;
+  return text.replace(/[0-9]/g, (digit) => ARABIC_DIGITS[digit]);
 }
 
 function polar(cx, cy, radius, degrees) {
@@ -63,11 +84,11 @@ function drawText(ctx, text, x, y, angleDegrees, fontSize, maxWidth, weight, col
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
   ctx.rotate(normalizeRotation(angleDegrees));
-  ctx.font = `${weight} ${fontSize}px Segoe UI, Arial, Helvetica, sans-serif`;
+  ctx.font = `${weight} ${fontSize}px Tahoma, Arial, Helvetica, sans-serif`;
   ctx.fillStyle = color;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(String(text), 0, 0, Math.max(8, maxWidth));
+  ctx.fillText(localizeDigits(text), 0, 0, Math.max(8, maxWidth));
   ctx.restore();
 }
 
@@ -94,7 +115,7 @@ function findWheelCanvas() {
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
 }
 
-function redrawWheelNumberingV228() {
+function redrawWheelNumberingV248() {
   const canvas = findWheelCanvas();
   if (!canvas) return false;
 
@@ -103,7 +124,6 @@ function redrawWheelNumberingV228() {
   const coordinateHeight = canvas.height / dpr;
   if (!Number.isFinite(coordinateWidth) || coordinateWidth <= 0 || coordinateHeight <= 0) return false;
 
-  // `levels` means ten numeric wheels. Ring 1 is a separate 1..36 index ring.
   const numericRingCount = Math.round(numberParam('levels', 10, 1, 12));
   const totalRingCount = numericRingCount + 1;
   const divisions = Math.round(numberParam('divisions', 36, 3, 360));
@@ -115,8 +135,6 @@ function redrawWheelNumberingV228() {
   const fontWeight = Math.round(numberParam('gannzillaFontWeight', 700, 500, 900));
   const clockwise = boolParam('clockwise', true);
 
-  // Keep the wheel's existing outer radius while fitting the independent index
-  // ring plus all ten numeric rings inside it.
   const availableWheelWidth = numericRingCount * configuredRingWidth;
   const ringWidth = availableWheelWidth / totalRingCount;
   const direction = clockwise ? 1 : -1;
@@ -198,7 +216,7 @@ export default function GannzillaRingTwoNumberingV223() {
 
     const draw = () => {
       frame = 0;
-      if (!disposed) redrawWheelNumberingV228();
+      if (!disposed) redrawWheelNumberingV248();
     };
 
     const schedule = (delay = 0) => {
@@ -228,12 +246,14 @@ export default function GannzillaRingTwoNumberingV223() {
     document.addEventListener('change', scheduleAfterUiChange, true);
     window.addEventListener('resize', scheduleAfterUiChange);
     window.addEventListener('gannzilla:ring-two-numbering-refresh', scheduleAfterUiChange);
+    window.addEventListener('gannzilla:language-change', scheduleAfterUiChange);
 
-    window.GANNZILLA_RING_INDEX_V228 = true;
-    window.__auditGannzillaRingIndexV228 = () => ({
+    window.GANNZILLA_RING_INDEX_V248 = true;
+    window.__auditGannzillaRingIndexV248 = () => ({
       ok: Boolean(findWheelCanvas()),
       build: BUILD,
       ring1Mode: 'INDEX_1_TO_36',
+      digitSystem: shouldUseArabicDigits() ? 'ARABIC_INDIC_٠١٢٣٤٥٦٧٨٩' : 'LATIN_0123456789',
       gateColors: { red: '1/4/7', blue: '2/5/8', black: '3/6/9' },
       ringPalette: RING_PALETTE,
       allNumericRingsGateColored: true,
@@ -253,8 +273,9 @@ export default function GannzillaRingTwoNumberingV223() {
       document.removeEventListener('change', scheduleAfterUiChange, true);
       window.removeEventListener('resize', scheduleAfterUiChange);
       window.removeEventListener('gannzilla:ring-two-numbering-refresh', scheduleAfterUiChange);
-      delete window.GANNZILLA_RING_INDEX_V228;
-      delete window.__auditGannzillaRingIndexV228;
+      window.removeEventListener('gannzilla:language-change', scheduleAfterUiChange);
+      delete window.GANNZILLA_RING_INDEX_V248;
+      delete window.__auditGannzillaRingIndexV248;
     };
   }, []);
 
