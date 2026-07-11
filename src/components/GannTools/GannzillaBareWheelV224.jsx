@@ -7,13 +7,13 @@ import GannzillaDrawingPalettesV268 from './GannzillaDrawingPalettesV268';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 268: stable Arabic wheel with spaced Gannzilla drawing palettes. */
+/** Build 269: stable Arabic wheel with mirrored drawing palettes outside both control lines. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V268 = true;
-    window.__auditGannzillaBareWheelV268 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V269 = true;
+    window.__auditGannzillaBareWheelV269 = () => ({
       ok: true,
-      build: 268,
+      build: 269,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -24,7 +24,9 @@ export default function GannzillaBareWheelV224() {
       drawingPaletteWidthPx: 46,
       drawingPaletteBoundaryGapPx: 12,
       leftPaletteSeparatedFromSettingsPanel: true,
-      rightPaletteSeparatedFromViewportEdge: true,
+      rightPaletteSeparatedFromViewportControlLine: true,
+      mirroredControlLineSpacing: true,
+      rightPaletteOutsideWheelControlLine: true,
       drawingPalettesMatchGannzillaColorsAndShapes: true,
       drawingPalettesToggleLeftOfMovement: true,
       aboutControlMounted: true,
@@ -58,8 +60,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V268;
-      delete window.__auditGannzillaBareWheelV268;
+      delete window.GANNZILLA_BARE_WHEEL_V269;
+      delete window.__auditGannzillaBareWheelV269;
     };
   }, []);
 
