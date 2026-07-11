@@ -3,17 +3,17 @@ import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 
-const BUILD = 250;
+const BUILD = 251;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const CONTROL_GAP_PX = 2;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 250: active connection, language, and information controls. */
+/** Build 251: connection, language, and original Gannzilla About controls. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V250 = true;
-    window.__auditGannzillaTopToolbarV250 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V251 = true;
+    window.__auditGannzillaTopToolbarV251 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
@@ -25,8 +25,10 @@ export default function GannzillaTopToolbarV231() {
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
       controlGapPx: CONTROL_GAP_PX,
-      mountedControls: ['CONNECTION_SETTINGS', 'LANGUAGE_CUSTOM_FLAG', 'ABOUT_INFO_GLYPH'],
+      mountedControls: ['CONNECTION_SETTINGS', 'LANGUAGE_CUSTOM_FLAG', 'ORIGINAL_GANNZILLA_ABOUT'],
       connectionDialogFunctional: true,
+      aboutDialogFunctional: true,
+      aboutVisualReference: 'GANNZILLA_PRO_8_3',
       controlVisualOrder: 'CONNECTION_LANGUAGE_INFORMATION',
       flagAlwaysVisible: true,
       intervalCount: 0,
@@ -34,8 +36,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V250;
-      delete window.__auditGannzillaTopToolbarV250;
+      delete window.GANNZILLA_TOP_TOOLBAR_V251;
+      delete window.__auditGannzillaTopToolbarV251;
     };
   }, []);
 
@@ -65,7 +67,7 @@ export default function GannzillaTopToolbarV231() {
       }}
     >
       <style>{`
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > button[aria-label="حول البرنامج"] {
+        [data-gannzilla-toolbar="true"] [data-gannzilla-about-control="true"] {
           width: ${INFO_BUTTON_SIZE}px !important;
           height: ${INFO_BUTTON_SIZE}px !important;
           min-width: ${INFO_BUTTON_SIZE}px !important;
@@ -76,23 +78,19 @@ export default function GannzillaTopToolbarV231() {
           margin: 0 !important;
           padding: 0 !important;
           border: 0 !important;
+          border-left: 1px solid #c9c9c9 !important;
           border-radius: 0 !important;
           background: transparent !important;
           box-shadow: none !important;
-          color: transparent !important;
-          font-size: 0 !important;
+          color: #2469b2 !important;
+          font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial, sans-serif !important;
+          font-size: 17px !important;
+          font-weight: 900 !important;
           line-height: 1 !important;
           display: grid !important;
           place-items: center !important;
           box-sizing: border-box !important;
-        }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > button[aria-label="حول البرنامج"]::before {
-          content: 'ⓘ';
-          color: #2469b2;
-          font-family: 'Segoe UI Symbol', 'Arial Unicode MS', Arial, sans-serif;
-          font-size: 20px;
-          font-weight: 900;
-          line-height: 1;
+          pointer-events: auto !important;
         }
       `}</style>
 
