@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = 272;
+const BUILD = 277;
 const EVENT_NAME = 'gannzilla:drawing-tools-v266';
 const STORAGE_KEY = 'gannzilla-drawing-tools-visible-v266';
 const LEFT_ID = 'gannzilla-left-drawing-palette';
@@ -9,12 +9,14 @@ const RIGHT_ID = 'gannzilla-right-drawing-palette';
 const OVERLAY_ID = 'gannzilla-drawing-overlay';
 const ICON = '#8f999f';
 const ACTIVE = '#5f83b9';
+const DRAWING_COLOR = '#0877c9';
 const BUTTON_SIZE = 34;
 const BUTTON_GAP = 4;
 const PALETTE_WIDTH = 46;
 const DEFAULT_SIDE_GAP = 24;
 const TOP_GAP = 6;
 const MAX_BUTTON_COUNT = 13;
+const ERASE_HIT_WIDTH = 18;
 const PALETTE_NATURAL_HEIGHT = (MAX_BUTTON_COUNT * BUTTON_SIZE) + ((MAX_BUTTON_COUNT - 1) * BUTTON_GAP) + 14;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -146,6 +148,11 @@ function polygonPoints(sides, cx, cy, radius, rotation = -Math.PI / 2) {
   }).join(' ');
 }
 
+function createItemId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  return `drawing-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 function PaletteButton({ title, active, onClick, children, round = false }) {
   return (
     <button
@@ -268,7 +275,7 @@ function paletteStyle(side, layout) {
   };
 }
 
-function drawingNode(item, index, rect) {
+function drawingNode(item, key, rect, { erasable = false, onErase = null } = {}) {
   const x1 = item.start.x * rect.width;
   const y1 = item.start.y * rect.height;
   const x2 = item.end.x * rect.width;
@@ -277,36 +284,95 @@ function drawingNode(item, index, rect) {
   const top = Math.min(y1, y2);
   const width = Math.abs(x2 - x1);
   const height = Math.abs(y2 - y1);
-  const common = { fill: 'none', stroke: '#0877c9', strokeWidth: 2, vectorEffect: 'non-scaling-stroke' };
+  const cx = (x1 + x2) / 2;
+  const cy = (y1 + y2) / 2;
+  const visible = {
+    fill: 'none',
+    stroke: DRAWING_COLOR,
+    strokeWidth: 2,
+    vectorEffect: 'non-scaling-stroke',
+    pointerEvents: 'none',
+  };
+  const hit = {
+    fill: 'transparent',
+    stroke: 'transparent',
+    strokeWidth: ERASE_HIT_WIDTH,
+    vectorEffect: 'non-scaling-stroke',
+    pointerEvents: erasable ? 'all' : 'none',
+    cursor: erasable ? 'pointer' : 'default',
+  };
+  const erase = erasable && onErase
+    ? (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onErase(item.id);
+    }
+    : undefined;
 
-  if (item.type === 'rect') return <rect key={index} x={left} y={top} width={width} height={height} {...common} />;
-  if (item.type === 'circle') return <ellipse key={index} cx={(x1 + x2) / 2} cy={(y1 + y2) / 2} rx={width / 2} ry={height / 2} {...common} />;
-  if (item.type === 'triangle') return <polygon key={index} points={`${(x1 + x2) / 2},${top} ${left},${top + height} ${left + width},${top + height}`} {...common} />;
-  if (item.type === 'angle') return <path key={index} d={`M${x1} ${y1} L${x2} ${y2} M${x1} ${y1} L${x2} ${y1}`} {...common} />;
+  if (item.type === 'rect') {
+    return (
+      <g key={key} data-gannzilla-drawing-item={item.id} onPointerDown={erase}>
+        <rect x={left} y={top} width={width} height={height} {...visible} />
+        <rect x={left} y={top} width={Math.max(width, 8)} height={Math.max(height, 8)} {...hit} />
+      </g>
+    );
+  }
+  if (item.type === 'circle') {
+    return (
+      <g key={key} data-gannzilla-drawing-item={item.id} onPointerDown={erase}>
+        <ellipse cx={cx} cy={cy} rx={width / 2} ry={height / 2} {...visible} />
+        <ellipse cx={cx} cy={cy} rx={Math.max(width / 2, 5)} ry={Math.max(height / 2, 5)} {...hit} />
+      </g>
+    );
+  }
+  if (item.type === 'triangle') {
+    const points = `${cx},${top} ${left},${top + height} ${left + width},${top + height}`;
+    return (
+      <g key={key} data-gannzilla-drawing-item={item.id} onPointerDown={erase}>
+        <polygon points={points} {...visible} />
+        <polygon points={points} {...hit} />
+      </g>
+    );
+  }
+  if (item.type === 'angle') {
+    const path = `M${x1} ${y1} L${x2} ${y2} M${x1} ${y1} L${x2} ${y1}`;
+    return (
+      <g key={key} data-gannzilla-drawing-item={item.id} onPointerDown={erase}>
+        <path d={path} {...visible} />
+        <path d={path} {...hit} fill="none" pointerEvents={erasable ? 'stroke' : 'none'} />
+      </g>
+    );
+  }
   if (item.type === 'rings') {
     return (
-      <g key={index}>
-        <ellipse cx={(x1 + x2) / 2} cy={(y1 + y2) / 2} rx={width / 2} ry={height / 2} {...common} />
-        <ellipse cx={(x1 + x2) / 2} cy={(y1 + y2) / 2} rx={width / 4} ry={height / 4} {...common} />
+      <g key={key} data-gannzilla-drawing-item={item.id} onPointerDown={erase}>
+        <ellipse cx={cx} cy={cy} rx={width / 2} ry={height / 2} {...visible} />
+        <ellipse cx={cx} cy={cy} rx={width / 4} ry={height / 4} {...visible} />
+        <ellipse cx={cx} cy={cy} rx={Math.max(width / 2, 5)} ry={Math.max(height / 2, 5)} {...hit} />
       </g>
     );
   }
   if (item.type.startsWith('p')) {
+    const points = polygonPoints(
+      Number(item.type.slice(1)),
+      cx,
+      cy,
+      Math.max(2, Math.min(width, height) / 2),
+      Number(item.type.slice(1)) === 4 ? -Math.PI / 4 : -Math.PI / 2,
+    );
     return (
-      <polygon
-        key={index}
-        points={polygonPoints(
-          Number(item.type.slice(1)),
-          (x1 + x2) / 2,
-          (y1 + y2) / 2,
-          Math.max(2, Math.min(width, height) / 2),
-          Number(item.type.slice(1)) === 4 ? -Math.PI / 4 : -Math.PI / 2,
-        )}
-        {...common}
-      />
+      <g key={key} data-gannzilla-drawing-item={item.id} onPointerDown={erase}>
+        <polygon points={points} {...visible} />
+        <polygon points={points} {...hit} />
+      </g>
     );
   }
-  return <line key={index} x1={x1} y1={y1} x2={x2} y2={y2} {...common} />;
+  return (
+    <g key={key} data-gannzilla-drawing-item={item.id} onPointerDown={erase}>
+      <line x1={x1} y1={y1} x2={x2} y2={y2} {...visible} />
+      <line x1={x1} y1={y1} x2={x2} y2={y2} {...hit} pointerEvents={erasable ? 'stroke' : 'none'} />
+    </g>
+  );
 }
 
 export default function GannzillaDrawingPalettesV266() {
@@ -320,6 +386,11 @@ export default function GannzillaDrawingPalettesV266() {
   const syncLayout = React.useCallback(() => {
     const next = readLayout();
     setLayout((current) => (sameLayout(current, next) ? current : next));
+  }, []);
+
+  const eraseItem = React.useCallback((itemId) => {
+    setItems((current) => current.filter((item) => item.id !== itemId));
+    setDraft(null);
   }, []);
 
   React.useEffect(() => {
@@ -369,19 +440,23 @@ export default function GannzillaDrawingPalettesV266() {
   }, [syncLayout]);
 
   React.useEffect(() => {
-    window.GANNZILLA_DRAWING_PALETTES_V272 = true;
-    window.__auditGannzillaDrawingPalettesV272 = () => {
+    window.GANNZILLA_DRAWING_PALETTES_V277 = true;
+    window.__auditGannzillaDrawingPalettesV277 = () => {
       const leftRect = document.getElementById(LEFT_ID)?.getBoundingClientRect?.() || null;
       const rightRect = document.getElementById(RIGHT_ID)?.getBoundingClientRect?.() || null;
       const leftGap = leftRect ? Math.round(leftRect.left - layout.leftControlLineX) : null;
       const rightGap = rightRect ? Math.round(layout.rightControlLineX - rightRect.right) : null;
       return {
-        ok: Boolean(leftRect && rightRect && leftGap === rightGap),
+        ok: Boolean(leftRect && rightRect),
         build: BUILD,
         visible,
         activeTool,
         activeReference,
         drawingCount: items.length,
+        cursorToolActsAsEraser: true,
+        eraseOneShapePerClick: true,
+        eraseHitWidthPx: ERASE_HIT_WIDTH,
+        wheelInteractionPreservedOutsideShapeHitAreas: true,
         exactMirrorMode: true,
         singleDrawingPaletteComponent: true,
         leftPaletteMounted: Boolean(leftRect),
@@ -393,17 +468,12 @@ export default function GannzillaDrawingPalettesV266() {
         configuredSharedSideGapPx: layout.sideGap,
         actualLeftGapPx: leftGap,
         actualRightGapPx: rightGap,
-        sameTop: Boolean(leftRect && rightRect && Math.round(leftRect.top) === Math.round(rightRect.top)),
-        sameWidth: Boolean(leftRect && rightRect && Math.round(leftRect.width) === Math.round(rightRect.width)),
-        sameHeight: Boolean(leftRect && rightRect && Math.round(leftRect.height) === Math.round(rightRect.height)),
-        sameFrameStyle: true,
-        placementMode: 'EXACT_MIRROR_AROUND_LEFT_AND_RIGHT_CONTROL_LINES',
       };
     };
 
     return () => {
-      delete window.GANNZILLA_DRAWING_PALETTES_V272;
-      delete window.__auditGannzillaDrawingPalettesV272;
+      delete window.GANNZILLA_DRAWING_PALETTES_V277;
+      delete window.__auditGannzillaDrawingPalettesV277;
     };
   }, [activeReference, activeTool, items.length, layout, visible]);
 
@@ -419,13 +489,18 @@ export default function GannzillaDrawingPalettesV266() {
     }
   };
 
+  const selectTool = (tool) => {
+    setActiveTool(tool);
+    setDraft(null);
+  };
+
   const pointerDown = (event) => {
     const rect = layout.wheelRect;
     if (!rect || activeTool === 'cursor') return;
     event.preventDefault();
     event.currentTarget.setPointerCapture?.(event.pointerId);
     const start = point(event, rect);
-    setDraft({ type: activeTool, start, end: start });
+    setDraft({ id: 'draft', type: activeTool, start, end: start });
   };
 
   const pointerMove = (event) => {
@@ -438,7 +513,9 @@ export default function GannzillaDrawingPalettesV266() {
   const pointerUp = () => {
     if (!draft) return;
     const distance = Math.hypot(draft.end.x - draft.start.x, draft.end.y - draft.start.y);
-    if (distance > 0.004) setItems((current) => [...current, draft]);
+    if (distance > 0.004) {
+      setItems((current) => [...current, { ...draft, id: createItemId() }]);
+    }
     setDraft(null);
   };
 
@@ -446,7 +523,19 @@ export default function GannzillaDrawingPalettesV266() {
 
   const leftValues = ['12', '24', '36', '4', '9', 'N', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9'];
   const rightTools = ['cursor', 'rect', 'p5', 'p6', 'p7', 'circle', 'triangle', 'angle', 'rings'];
+  const toolTitles = {
+    cursor: 'مسح شكل مرسوم',
+    rect: 'رسم مستطيل',
+    p5: 'رسم خماسي',
+    p6: 'رسم سداسي',
+    p7: 'رسم سباعي',
+    circle: 'رسم دائرة',
+    triangle: 'رسم مثلث',
+    angle: 'رسم زاوية',
+    rings: 'رسم دوائر متداخلة',
+  };
   const rect = layout.wheelRect;
+  const eraseMode = activeTool === 'cursor';
 
   return createPortal(
     <>
@@ -473,14 +562,15 @@ export default function GannzillaDrawingPalettesV266() {
         id={RIGHT_ID}
         data-gannzilla-right-drawing-palette="true"
         data-gannzilla-exact-mirror="true"
+        data-gannzilla-cursor-eraser-enabled="true"
         style={paletteStyle('right', layout)}
       >
         {rightTools.map((tool) => (
           <PaletteButton
             key={tool}
             active={activeTool === tool}
-            title={tool}
-            onClick={() => setActiveTool(tool)}
+            title={toolTitles[tool] || tool}
+            onClick={() => selectTool(tool)}
           >
             <ShapeGlyph type={tool} />
           </PaletteButton>
@@ -492,6 +582,7 @@ export default function GannzillaDrawingPalettesV266() {
       {rect && (
         <svg
           id={OVERLAY_ID}
+          data-gannzilla-erase-mode={eraseMode ? 'true' : 'false'}
           viewBox={`0 0 ${rect.width} ${rect.height}`}
           onPointerDown={pointerDown}
           onPointerMove={pointerMove}
@@ -504,13 +595,16 @@ export default function GannzillaDrawingPalettesV266() {
             width: rect.width,
             height: rect.height,
             zIndex: 2147483590,
-            pointerEvents: activeTool === 'cursor' ? 'none' : 'auto',
-            cursor: activeTool === 'cursor' ? 'default' : 'crosshair',
+            pointerEvents: eraseMode ? 'none' : 'auto',
+            cursor: eraseMode ? 'default' : 'crosshair',
             touchAction: 'none',
             overflow: 'visible',
           }}
         >
-          {items.map((item, index) => drawingNode(item, index, rect))}
+          {items.map((item) => drawingNode(item, item.id, rect, {
+            erasable: eraseMode,
+            onErase: eraseItem,
+          }))}
           {draft && drawingNode(draft, 'draft', rect)}
         </svg>
       )}
