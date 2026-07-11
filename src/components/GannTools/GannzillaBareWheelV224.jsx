@@ -3,31 +3,33 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV268 from './GannzillaDrawingPalettesV268';
+import GannzillaDrawingPalettesV266 from './GannzillaDrawingPalettesV266';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 270: stable Arabic wheel with extra right drawing-palette clearance. */
+/** Build 271: one drawing-palette owner with a real gap before the right scroll/control line. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V270 = true;
-    window.__auditGannzillaBareWheelV270 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V271 = true;
+    window.__auditGannzillaBareWheelV271 = () => ({
       ok: true,
-      build: 270,
+      build: 271,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
       toolbarSingleOwner: true,
       toolbarRightInsetPx: 4,
       drawingPalettesMounted: true,
+      drawingPaletteSingleOwner: true,
+      drawingPaletteWrapperRemovedFromRuntime: true,
       drawingPaletteButtonSizePx: 34,
       drawingPaletteWidthPx: 46,
       leftDrawingPaletteGapPx: 12,
-      rightDrawingPaletteGapPx: 22,
-      rightPaletteAdditionalLeftShiftPx: 10,
-      leftPaletteSeparatedFromSettingsPanel: true,
+      defaultRightDrawingPaletteGapPx: 36,
+      rightDrawingPaletteGapUrlParam: 'drawingToolsRightGap',
       rightPaletteSeparatedFromViewportControlLine: true,
-      rightPaletteOutsideWheelControlLine: true,
+      continuousDrawingLayoutPollingRemoved: true,
+      fullPageDrawingMutationObserverRemoved: true,
       drawingPalettesMatchGannzillaColorsAndShapes: true,
       drawingPalettesToggleLeftOfMovement: true,
       aboutControlMounted: true,
@@ -61,8 +63,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V270;
-      delete window.__auditGannzillaBareWheelV270;
+      delete window.GANNZILLA_BARE_WHEEL_V271;
+      delete window.__auditGannzillaBareWheelV271;
     };
   }, []);
 
@@ -110,7 +112,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV268 />
+      <GannzillaDrawingPalettesV266 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
