@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV279 from './GannzillaDrawingPalettesV279';
+import GannzillaDrawingPalettesV280 from './GannzillaDrawingPalettesV280';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 279: remove the cursor arrow and keep the triangle as the first visible drawing tool. */
+/** Build 280: remove arrow, replace gold rings with grey spiral, and add compass/leaf tool. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V279 = true;
-    window.__auditGannzillaBareWheelV279 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V280 = true;
+    window.__auditGannzillaBareWheelV280 = () => ({
       ok: true,
-      build: 279,
+      build: 280,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -39,6 +39,9 @@ export default function GannzillaBareWheelV224() {
       bothDrawingPalettesColored: true,
       cursorArrowRemovedFromDisplay: true,
       triangleIsFirstVisibleRightTool: true,
+      goldenRingsIconRemoved: true,
+      greySpiralIconAdded: true,
+      compassLeafIconAdded: true,
       coordinatedSolidShapeColors: true,
       drawingPaletteSameTop: true,
       drawingPaletteSameWidth: true,
@@ -77,8 +80,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V279;
-      delete window.__auditGannzillaBareWheelV279;
+      delete window.GANNZILLA_BARE_WHEEL_V280;
+      delete window.__auditGannzillaBareWheelV280;
     };
   }, []);
 
@@ -126,7 +129,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV279 />
+      <GannzillaDrawingPalettesV280 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
