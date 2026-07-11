@@ -1,3 +1,4 @@
 Build 257 deployment marker.
 Four-direction wheel movement controls: left, up, center, down, right.
-Deployment retry 2.
+Placement: immediately left of the wheel zoom control with matching toolbar styling.
+Deployment retry 3.
