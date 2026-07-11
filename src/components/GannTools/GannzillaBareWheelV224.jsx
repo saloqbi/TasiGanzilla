@@ -6,19 +6,24 @@ import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 287: remove all left/right drawing-tool code from the active runtime. */
+/** Build 288: add chart hide/show control while keeping drawing-tool code removed. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V287 = true;
-    window.__auditGannzillaBareWheelV287 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V288 = true;
+    window.__auditGannzillaBareWheelV288 = () => ({
       ok: true,
-      build: 287,
+      build: 288,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
       drawingToolsRuntimeRemoved: true,
       drawingToolsToggleRemoved: true,
       wheelInteractionReleased: true,
+      chartVisibilityToggleMounted: true,
+      chartVisibilityTogglePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
+      chartHideShowPreservesSettingsPanel: true,
+      chartHideShowPreservesToolbar: true,
+      chartVisibilityStatePersisted: true,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -55,8 +60,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V287;
-      delete window.__auditGannzillaBareWheelV287;
+      delete window.GANNZILLA_BARE_WHEEL_V288;
+      delete window.__auditGannzillaBareWheelV288;
     };
   }, []);
 
