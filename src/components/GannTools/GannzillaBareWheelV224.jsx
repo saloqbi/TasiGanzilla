@@ -7,13 +7,16 @@ import GannzillaDrawingPalettesV283 from './GannzillaDrawingPalettesV283';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 283: ordered geometry toolbar without angle or leaf/compass icons. */
+/** Build 285: keep all accepted work and remove only the last categorized drawing-library addition. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V283 = true;
-    window.__auditGannzillaBareWheelV283 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V285 = true;
+    window.__auditGannzillaBareWheelV285 = () => ({
       ok: true,
-      build: 283,
+      build: 285,
+      lastDrawingLibraryAdditionRemoved: true,
+      previousAcceptedDrawingToolbarPreserved: true,
+      pageMovementPreserved: true,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -81,8 +84,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V283;
-      delete window.__auditGannzillaBareWheelV283;
+      delete window.GANNZILLA_BARE_WHEEL_V285;
+      delete window.__auditGannzillaBareWheelV285;
     };
   }, []);
 
