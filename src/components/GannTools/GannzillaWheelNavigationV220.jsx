@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = 221;
+const BUILD = 222;
 const MOVE_ID = 'gannzilla-wheel-move-v220';
 const FIT_ID = 'gannzilla-wheel-fit-v220';
 
@@ -162,8 +162,14 @@ export default function GannzillaWheelNavigationV220() {
   const [layout, setLayout] = React.useState(getLayout);
   const [dragEnabled, setDragEnabled] = React.useState(false);
   const [pan, setPan] = React.useState({ x: 0, y: 0 });
+  const [fullscreen, setFullscreen] = React.useState(Boolean(document.fullscreenElement));
   const panRef = React.useRef(pan);
-  const fitLockRef = React.useRef(false);
+
+  React.useEffect(() => {
+    const syncFullscreen = () => setFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', syncFullscreen);
+    return () => document.removeEventListener('fullscreenchange', syncFullscreen);
+  }, []);
 
   React.useEffect(() => {
     panRef.current = pan;
@@ -263,42 +269,39 @@ export default function GannzillaWheelNavigationV220() {
     };
   }, [dragEnabled]);
 
-  const fitToScreen = React.useCallback((event) => {
+  const togglePageFullscreen = React.useCallback(async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    if (fitLockRef.current) return;
-    fitLockRef.current = true;
 
-    setPan({ x: 0, y: 0 });
-    const canvas = findWheelCanvas();
-    if (canvas) canvas.style.setProperty('transform', 'translate3d(0,0,0)', 'important');
-
-    const nativeFit = findNativeFitButton() || layout.nativeFit;
-    nativeFit?.click?.();
-
-    const apply = () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+      window.setTimeout(centerViewport, 120);
+      window.setTimeout(centerViewport, 420);
+    } catch (_) {
+      setPan({ x: 0, y: 0 });
       forceFitToViewport();
-      centerViewport();
-    };
-
-    apply();
-    window.requestAnimationFrame(apply);
-    [80, 220, 500, 900].forEach((delay) => window.setTimeout(apply, delay));
-    window.setTimeout(() => { fitLockRef.current = false; }, 1000);
-  }, [layout.nativeFit]);
+      window.setTimeout(forceFitToViewport, 120);
+      window.setTimeout(centerViewport, 300);
+    }
+  }, []);
 
   React.useEffect(() => {
-    window.GANNZILLA_WHEEL_NAVIGATION_V221 = true;
-    window.__auditGannzillaWheelNavigationV221 = () => ({
+    window.GANNZILLA_WHEEL_NAVIGATION_V222 = true;
+    window.__auditGannzillaWheelNavigationV222 = () => ({
       ok: Boolean(document.getElementById(MOVE_ID)) && Boolean(document.getElementById(FIT_ID)),
       build: BUILD,
       dragEnabled,
-      nativeFitFound: Boolean(findNativeFitButton()),
+      fullscreen: Boolean(document.fullscreenElement),
+      fullscreenSupported: typeof document.documentElement.requestFullscreen === 'function',
       viewportFound: Boolean(findWheelViewport()),
       canvasFound: Boolean(findWheelCanvas()),
       pan,
     });
-  }, [dragEnabled, pan]);
+  }, [dragEnabled, pan, fullscreen]);
 
   return createPortal(
     <>
@@ -328,14 +331,12 @@ export default function GannzillaWheelNavigationV220() {
       <button
         id={FIT_ID}
         type="button"
-        title="تكبير وملاءمة العجلة داخل الصفحة"
-        aria-label="تكبير وملاءمة العجلة داخل الصفحة"
-        onPointerDown={fitToScreen}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') fitToScreen(event);
-        }}
+        title={fullscreen ? 'الخروج من ملء الشاشة' : 'تكبير الصفحة إلى ملء الشاشة'}
+        aria-label={fullscreen ? 'الخروج من ملء الشاشة' : 'تكبير الصفحة إلى ملء الشاشة'}
+        aria-pressed={fullscreen}
+        onClick={togglePageFullscreen}
         style={{
-          ...controlStyle(false),
+          ...controlStyle(fullscreen),
           left: layout.fit.left,
           top: layout.fit.top,
           width: layout.fit.width,
