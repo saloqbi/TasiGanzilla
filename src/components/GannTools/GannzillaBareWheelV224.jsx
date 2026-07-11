@@ -6,15 +6,15 @@ import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 const TOOLBAR_HEIGHT = 24;
 
 /**
- * Build 241: stable V228 wheel plus the original Gannzilla native flag/select
- * language pattern and compact information glyph.
+ * Build 242: stable V228 wheel plus a custom classic language selector whose
+ * UK/Saudi flag colors always render above the control.
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V241 = true;
-    window.__auditGannzillaBareWheelV241 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V242 = true;
+    window.__auditGannzillaBareWheelV242 = () => ({
       ok: true,
-      build: 241,
+      build: 242,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -24,8 +24,9 @@ export default function GannzillaBareWheelV224() {
       sideToolbarsMounted: false,
       aboutControlMounted: true,
       languageControlMounted: true,
-      controlsCopiedFrom: ['GannzillaLanguageSwitch', 'GannzillaExactToolbarV97'],
-      nativeLanguageSelect: true,
+      customLanguageSelector: true,
+      nativeSelectRemoved: true,
+      flagAlwaysVisible: true,
       languageControlWidthPx: 96,
       languageControlHeightPx: 22,
       languageTextColor: '#111111',
@@ -51,8 +52,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V241;
-      delete window.__auditGannzillaBareWheelV241;
+      delete window.GANNZILLA_BARE_WHEEL_V242;
+      delete window.__auditGannzillaBareWheelV242;
     };
   }, []);
 
@@ -69,30 +70,30 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="241"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
+        [data-gannzilla-build="242"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="241"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
+        [data-gannzilla-build="242"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="241"] > div:not([data-gannzilla-toolbar="true"]) > button {
+        [data-gannzilla-build="242"] > div:not([data-gannzilla-toolbar="true"]) > button {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="241"] > div:not([data-gannzilla-toolbar="true"]) > aside {
+        [data-gannzilla-build="242"] > div:not([data-gannzilla-toolbar="true"]) > aside {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
 
-        [data-gannzilla-build="241"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
+        [data-gannzilla-build="242"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
