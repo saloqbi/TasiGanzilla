@@ -1,7 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = 220;
+const BUILD = 221;
 const MOVE_ID = 'gannzilla-wheel-move-v220';
 const FIT_ID = 'gannzilla-wheel-fit-v220';
 
@@ -64,7 +64,7 @@ function centerViewport() {
   return true;
 }
 
-function fallbackFitToViewport() {
+function forceFitToViewport() {
   const canvas = findWheelCanvas();
   const viewport = findWheelViewport(canvas);
   if (!canvas || !viewport) return false;
@@ -74,14 +74,20 @@ function fallbackFitToViewport() {
   const naturalHeight = canvas.height / dpr;
   if (!naturalWidth || !naturalHeight) return false;
 
-  const fit = Math.max(0.1, Math.min(1,
-    (viewport.clientWidth - 60) / naturalWidth,
-    (viewport.clientHeight - 60) / naturalHeight));
+  const availableWidth = Math.max(120, viewport.clientWidth - 24);
+  const availableHeight = Math.max(120, viewport.clientHeight - 24);
+  const fit = Math.max(0.10, Math.min(3,
+    availableWidth / naturalWidth,
+    availableHeight / naturalHeight));
 
-  canvas.style.width = `${Math.round(naturalWidth * fit)}px`;
-  canvas.style.height = `${Math.round(naturalHeight * fit)}px`;
-  window.setTimeout(centerViewport, 30);
-  return true;
+  canvas.style.setProperty('width', `${Math.round(naturalWidth * fit)}px`, 'important');
+  canvas.style.setProperty('height', `${Math.round(naturalHeight * fit)}px`, 'important');
+  canvas.style.setProperty('max-width', 'none', 'important');
+  canvas.style.setProperty('max-height', 'none', 'important');
+  canvas.style.setProperty('transform-origin', 'center center', 'important');
+
+  centerViewport();
+  return fit;
 }
 
 function getLayout() {
@@ -156,6 +162,16 @@ export default function GannzillaWheelNavigationV220() {
   const [layout, setLayout] = React.useState(getLayout);
   const [dragEnabled, setDragEnabled] = React.useState(false);
   const [pan, setPan] = React.useState({ x: 0, y: 0 });
+  const panRef = React.useRef(pan);
+  const fitLockRef = React.useRef(false);
+
+  React.useEffect(() => {
+    panRef.current = pan;
+    const canvas = findWheelCanvas();
+    if (!canvas) return;
+    canvas.style.setProperty('transform', `translate3d(${pan.x}px, ${pan.y}px, 0)`, 'important');
+    canvas.style.setProperty('transform-origin', 'center center', 'important');
+  }, [pan]);
 
   React.useEffect(() => {
     let disposed = false;
@@ -192,13 +208,6 @@ export default function GannzillaWheelNavigationV220() {
   }, []);
 
   React.useEffect(() => {
-    const canvas = findWheelCanvas();
-    if (!canvas) return;
-    canvas.style.setProperty('transform', `translate3d(${pan.x}px, ${pan.y}px, 0)`, 'important');
-    canvas.style.setProperty('transform-origin', 'center center', 'important');
-  }, [pan]);
-
-  React.useEffect(() => {
     const viewport = findWheelViewport();
     if (!viewport) return undefined;
 
@@ -209,7 +218,7 @@ export default function GannzillaWheelNavigationV220() {
     let dragging = false;
     let startX = 0;
     let startY = 0;
-    let startPan = pan;
+    let startPan = panRef.current;
 
     const down = (event) => {
       if (event.button !== 0) return;
@@ -218,7 +227,7 @@ export default function GannzillaWheelNavigationV220() {
       dragging = true;
       startX = event.clientX;
       startY = event.clientY;
-      startPan = pan;
+      startPan = panRef.current;
       viewport.style.setProperty('cursor', 'grabbing', 'important');
       event.preventDefault();
       event.stopPropagation();
@@ -252,25 +261,35 @@ export default function GannzillaWheelNavigationV220() {
       viewport.style.removeProperty('cursor');
       viewport.style.removeProperty('touch-action');
     };
-  }, [dragEnabled, pan]);
+  }, [dragEnabled]);
 
   const fitToScreen = React.useCallback((event) => {
     event.preventDefault();
     event.stopPropagation();
+    if (fitLockRef.current) return;
+    fitLockRef.current = true;
+
     setPan({ x: 0, y: 0 });
+    const canvas = findWheelCanvas();
+    if (canvas) canvas.style.setProperty('transform', 'translate3d(0,0,0)', 'important');
 
     const nativeFit = findNativeFitButton() || layout.nativeFit;
-    if (nativeFit) nativeFit.click();
-    else fallbackFitToViewport();
+    nativeFit?.click?.();
 
-    window.setTimeout(centerViewport, 80);
-    window.setTimeout(centerViewport, 260);
-    window.setTimeout(centerViewport, 600);
+    const apply = () => {
+      forceFitToViewport();
+      centerViewport();
+    };
+
+    apply();
+    window.requestAnimationFrame(apply);
+    [80, 220, 500, 900].forEach((delay) => window.setTimeout(apply, delay));
+    window.setTimeout(() => { fitLockRef.current = false; }, 1000);
   }, [layout.nativeFit]);
 
   React.useEffect(() => {
-    window.GANNZILLA_WHEEL_NAVIGATION_V220 = true;
-    window.__auditGannzillaWheelNavigationV220 = () => ({
+    window.GANNZILLA_WHEEL_NAVIGATION_V221 = true;
+    window.__auditGannzillaWheelNavigationV221 = () => ({
       ok: Boolean(document.getElementById(MOVE_ID)) && Boolean(document.getElementById(FIT_ID)),
       build: BUILD,
       dragEnabled,
@@ -309,9 +328,12 @@ export default function GannzillaWheelNavigationV220() {
       <button
         id={FIT_ID}
         type="button"
-        title="ملاءمة العجلة داخل الصفحة"
-        aria-label="ملاءمة العجلة داخل الصفحة"
-        onClick={fitToScreen}
+        title="تكبير وملاءمة العجلة داخل الصفحة"
+        aria-label="تكبير وملاءمة العجلة داخل الصفحة"
+        onPointerDown={fitToScreen}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') fitToScreen(event);
+        }}
         style={{
           ...controlStyle(false),
           left: layout.fit.left,
