@@ -5,24 +5,14 @@ import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 import GannzillaWheelZoomV256 from './GannzillaWheelZoomV256';
 
-const BUILD = 261;
+const BUILD = 262;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-function suppressDuplicateMovementControls() {
-  const owner = document.querySelector('[data-gannzilla-toolbar="true"] [data-gannzilla-wheel-zoom-control="true"]');
-  if (!owner) return 0;
-
-  const candidates = Array.from(document.querySelectorAll([
-    '[data-gannzilla-wheel-pan-control="true"]',
-    'button[title="تحريك العجلة"]',
-    'button[aria-label*="تحريك العجلة"]',
-  ].join(',')));
-
-  let suppressed = 0;
-  candidates.forEach((node) => {
-    if (owner.contains(node)) return;
+function suppressStandaloneDuplicatePanControls() {
+  const duplicates = Array.from(document.querySelectorAll('[data-gannzilla-wheel-pan-control="true"]'));
+  duplicates.forEach((node) => {
     node.setAttribute('data-gannzilla-duplicate-pan-suppressed', 'true');
     node.style.setProperty('display', 'none', 'important');
     node.style.setProperty('visibility', 'hidden', 'important');
@@ -34,40 +24,43 @@ function suppressDuplicateMovementControls() {
     node.style.setProperty('padding', '0', 'important');
     node.style.setProperty('border', '0', 'important');
     node.style.setProperty('overflow', 'hidden', 'important');
-    suppressed += 1;
   });
-
-  return suppressed;
+  return duplicates.length;
 }
 
-/** Build 261: one visible wheel movement authority only, even if a legacy control mounts elsewhere. */
+/** Build 262: restore the original responsive direction pad and hide only the standalone duplicate icon. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
     const timers = [0, 50, 180, 420, 900].map((delay) => (
-      window.setTimeout(suppressDuplicateMovementControls, delay)
+      window.setTimeout(suppressStandaloneDuplicatePanControls, delay)
     ));
-    const onResize = () => window.setTimeout(suppressDuplicateMovementControls, 30);
+    const onResize = () => window.setTimeout(suppressStandaloneDuplicatePanControls, 30);
     window.addEventListener('resize', onResize);
-    window.addEventListener('load', suppressDuplicateMovementControls);
+    window.addEventListener('load', suppressStandaloneDuplicatePanControls);
 
-    window.GANNZILLA_TOP_TOOLBAR_V261 = true;
-    window.__auditGannzillaTopToolbarV261 = () => {
-      const owner = document.querySelector('[data-gannzilla-toolbar="true"] [data-gannzilla-wheel-zoom-control="true"]');
-      const visibleMovementButtons = Array.from(document.querySelectorAll('button[title="تحريك العجلة"],button[aria-label*="تحريك العجلة"]'))
-        .filter((node) => {
-          const style = window.getComputedStyle(node);
-          return style.display !== 'none' && style.visibility !== 'hidden' && node.getBoundingClientRect().width > 0;
-        });
+    window.GANNZILLA_TOP_TOOLBAR_V262 = true;
+    window.__auditGannzillaTopToolbarV262 = () => {
+      const integratedTrigger = document.querySelector(
+        '[data-gannzilla-wheel-zoom-control="true"] > button[title="تحريك العجلة"]'
+      );
+      const visibleStandaloneDuplicates = Array.from(
+        document.querySelectorAll('[data-gannzilla-wheel-pan-control="true"]')
+      ).filter((node) => {
+        const style = window.getComputedStyle(node);
+        return style.display !== 'none' && style.visibility !== 'hidden' && node.getBoundingClientRect().width > 0;
+      });
 
       return {
-        ok: visibleMovementButtons.length === 1,
+        ok: Boolean(integratedTrigger) && visibleStandaloneDuplicates.length === 0,
         build: BUILD,
         heightPx: TOOLBAR_HEIGHT,
         wheelMovementIntegratedWithZoom: true,
         wheelMovementIconPlacement: 'IMMEDIATELY_LEFT_OF_ZOOM_MINUS',
-        duplicateMovementIconSuppressed: true,
-        visibleMovementAuthorityCount: visibleMovementButtons.length,
-        integratedOwnerMounted: Boolean(owner),
+        directionPadRestored: true,
+        directionButtonsPreserved: true,
+        duplicateSuppressionScope: 'STANDALONE_PAN_CONTROL_ONLY',
+        visibleMovementAuthorityCount: integratedTrigger ? 1 : 0,
+        visibleStandaloneDuplicateCount: visibleStandaloneDuplicates.length,
         suppressedDuplicateCount: document.querySelectorAll('[data-gannzilla-duplicate-pan-suppressed="true"]').length,
         wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
         wheelZoomControlMounted: true,
@@ -85,9 +78,9 @@ export default function GannzillaTopToolbarV231() {
     return () => {
       timers.forEach(window.clearTimeout);
       window.removeEventListener('resize', onResize);
-      window.removeEventListener('load', suppressDuplicateMovementControls);
-      delete window.GANNZILLA_TOP_TOOLBAR_V261;
-      delete window.__auditGannzillaTopToolbarV261;
+      window.removeEventListener('load', suppressStandaloneDuplicatePanControls);
+      delete window.GANNZILLA_TOP_TOOLBAR_V262;
+      delete window.__auditGannzillaTopToolbarV262;
     };
   }, []);
 
@@ -120,10 +113,8 @@ export default function GannzillaTopToolbarV231() {
       <style>{`
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] { direction:ltr !important; }
 
-        /* Global single-owner guard: hide every legacy movement control outside the integrated zoom owner. */
-        [data-gannzilla-wheel-pan-control="true"],
-        *:not([data-gannzilla-wheel-zoom-control="true"]) > button[title="تحريك العجلة"],
-        *:not([data-gannzilla-wheel-zoom-control="true"]) > button[aria-label*="تحريك العجلة"] {
+        /* Hide only the old standalone duplicate. Never hide buttons inside the active direction pad. */
+        [data-gannzilla-wheel-pan-control="true"] {
           display:none !important;
           visibility:hidden !important;
           pointer-events:none !important;
