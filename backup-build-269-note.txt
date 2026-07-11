@@ -1,0 +1,1 @@
+Pre-layout state preserved in Git history before Build 269 right palette mirroring.
