@@ -1,0 +1,1 @@
+Build 281 removes the concentric gold/spiral icon from the visible drawing tools while preserving the leaf/compass tool.
