@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV282 from './GannzillaDrawingPalettesV282';
+import GannzillaDrawingPalettesV283 from './GannzillaDrawingPalettesV283';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 282: ordered geometric tools start with circle and line, then continue from 3 through 12 sides. */
+/** Build 283: ordered geometry toolbar without angle or leaf/compass icons. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V282 = true;
-    window.__auditGannzillaBareWheelV282 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V283 = true;
+    window.__auditGannzillaBareWheelV283 = () => ({
       ok: true,
-      build: 282,
+      build: 283,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -41,8 +41,8 @@ export default function GannzillaBareWheelV224() {
       twoSidedStraightLineSecond: true,
       sequenceContinuesThroughTwelveSides: true,
       angleToolRemoved: true,
+      leafCompassToolRemoved: true,
       goldRingToolRemoved: true,
-      leafCompassToolPreserved: true,
       spiralToolPreserved: true,
       drawingPaletteSameTop: true,
       drawingPaletteSameWidth: true,
@@ -81,8 +81,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V282;
-      delete window.__auditGannzillaBareWheelV282;
+      delete window.GANNZILLA_BARE_WHEEL_V283;
+      delete window.__auditGannzillaBareWheelV283;
     };
   }, []);
 
@@ -130,7 +130,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV282 />
+      <GannzillaDrawingPalettesV283 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
