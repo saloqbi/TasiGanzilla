@@ -1,14 +1,16 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = 266;
+const BUILD = 267;
 const EVENT_NAME = 'gannzilla:drawing-tools-v266';
 const STORAGE_KEY = 'gannzilla-drawing-tools-visible-v266';
-const LEFT_ID = 'gannzilla-left-drawing-palette-v266';
-const RIGHT_ID = 'gannzilla-right-drawing-palette-v266';
-const OVERLAY_ID = 'gannzilla-drawing-overlay-v266';
+const LEFT_ID = 'gannzilla-left-drawing-palette-v267';
+const RIGHT_ID = 'gannzilla-right-drawing-palette-v267';
+const OVERLAY_ID = 'gannzilla-drawing-overlay-v267';
 const ICON = '#8f999f';
 const ACTIVE = '#5f83b9';
+const PALETTE_WIDTH = 46;
+const EDGE_GAP = 6;
 
 function readVisible() {
   const query = new URLSearchParams(window.location.search || '');
@@ -25,6 +27,49 @@ function wheelRect() {
   if (!canvas) return null;
   const { left, top, width, height } = canvas.rect;
   return { left, top, width, height };
+}
+
+function visibleSettingsPanelRect() {
+  const candidates = Array.from(document.querySelectorAll('aside, [data-gannzilla-settings-panel="true"]'))
+    .map((node) => ({ node, rect: node.getBoundingClientRect(), style: window.getComputedStyle(node) }))
+    .filter(({ rect, style }) => (
+      rect.width >= 180
+      && rect.height >= 250
+      && rect.left <= 8
+      && style.display !== 'none'
+      && style.visibility !== 'hidden'
+    ))
+    .sort((a, b) => b.rect.height - a.rect.height);
+  return candidates[0]?.rect || null;
+}
+
+function readLayout() {
+  const wheel = wheelRect();
+  const panel = visibleSettingsPanelRect();
+  const toolbarHeight = Number.parseFloat(
+    window.getComputedStyle(document.documentElement).getPropertyValue('--gannzilla-toolbar-height'),
+  ) || 24;
+  const top = Math.max(toolbarHeight + 6, Math.round((wheel?.top || toolbarHeight) + 6));
+  const left = panel
+    ? Math.round(panel.right + EDGE_GAP)
+    : Math.max(EDGE_GAP, Math.round((wheel?.left || 0) + EDGE_GAP));
+  return {
+    left,
+    right: EDGE_GAP,
+    top,
+    maxHeight: Math.max(180, Math.round(window.innerHeight - top - 8)),
+    panelRight: panel ? Math.round(panel.right) : null,
+  };
+}
+
+function sameLayout(a, b) {
+  return a
+    && b
+    && a.left === b.left
+    && a.right === b.right
+    && a.top === b.top
+    && a.maxHeight === b.maxHeight
+    && a.panelRight === b.panelRight;
 }
 
 function point(event, rect) {
@@ -79,10 +124,11 @@ function ReferenceGlyph({ value }) {
   return <ShapeGlyph type={value} />;
 }
 
-function paletteStyle(side) {
+function paletteStyle(side, layout) {
+  const anchor = side === 'left' ? { left: layout.left } : { right: layout.right };
   return {
-    position: 'fixed', [side]: 10, top: 88, zIndex: 2147483605,
-    width: 46, maxHeight: 'calc(100vh - 106px)', padding: '6px 5px',
+    position: 'fixed', ...anchor, top: layout.top, zIndex: 2147483605,
+    width: PALETTE_WIDTH, maxHeight: layout.maxHeight, padding: '6px 5px',
     background: 'rgba(248,248,248,.97)', border: '1px solid #d5d5d5', borderRadius: 23,
     boxShadow: '0 1px 5px rgba(0,0,0,.14)', display: 'flex', flexDirection: 'column',
     alignItems: 'center', gap: 4, overflowY: 'auto', overflowX: 'hidden',
@@ -112,6 +158,7 @@ export default function GannzillaDrawingPalettesV266() {
   const [activeTool, setActiveTool] = React.useState('cursor');
   const [activeReference, setActiveReference] = React.useState('36');
   const [rect, setRect] = React.useState(wheelRect);
+  const [layout, setLayout] = React.useState(readLayout);
   const [items, setItems] = React.useState([]);
   const [draft, setDraft] = React.useState(null);
 
@@ -127,17 +174,28 @@ export default function GannzillaDrawingPalettesV266() {
 
   React.useEffect(() => {
     const sync = () => {
-      const next = wheelRect();
-      if (!next) return;
-      setRect((current) => current && Math.abs(current.left-next.left)<.5 && Math.abs(current.top-next.top)<.5 && Math.abs(current.width-next.width)<.5 && Math.abs(current.height-next.height)<.5 ? current : next);
+      const nextRect = wheelRect();
+      if (nextRect) {
+        setRect((current) => current
+          && Math.abs(current.left-nextRect.left)<.5
+          && Math.abs(current.top-nextRect.top)<.5
+          && Math.abs(current.width-nextRect.width)<.5
+          && Math.abs(current.height-nextRect.height)<.5
+          ? current : nextRect);
+      }
+      const nextLayout = readLayout();
+      setLayout((current) => sameLayout(current, nextLayout) ? current : nextLayout);
     };
     sync();
     const timer = window.setInterval(sync, 250);
+    const observer = new MutationObserver(sync);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
     window.addEventListener('resize', sync);
     window.addEventListener('scroll', sync, true);
     document.addEventListener('fullscreenchange', sync);
     return () => {
       window.clearInterval(timer);
+      observer.disconnect();
       window.removeEventListener('resize', sync);
       window.removeEventListener('scroll', sync, true);
       document.removeEventListener('fullscreenchange', sync);
@@ -145,20 +203,23 @@ export default function GannzillaDrawingPalettesV266() {
   }, []);
 
   React.useEffect(() => {
-    window.GANNZILLA_DRAWING_PALETTES_V266 = true;
-    window.__auditGannzillaDrawingPalettesV266 = () => ({
+    window.GANNZILLA_DRAWING_PALETTES_V267 = true;
+    window.__auditGannzillaDrawingPalettesV267 = () => ({
       ok: true, build: BUILD, visible, activeTool, activeReference, drawingCount: items.length,
       leftPaletteMounted: Boolean(document.getElementById(LEFT_ID)),
       rightPaletteMounted: Boolean(document.getElementById(RIGHT_ID)),
-      nativeButtonSizePx: 34, nativePaletteWidthPx: 46,
+      nativeButtonSizePx: 34, nativePaletteWidthPx: PALETTE_WIDTH,
+      leftPalettePosition: { left: layout.left, top: layout.top, settingsPanelRight: layout.panelRight },
+      rightPalettePosition: { right: layout.right, top: layout.top },
+      placementMode: 'ORIGINAL_GANNZILLA_PANEL_EDGE_AND_VIEWPORT_EDGE',
       colors: { icon: ICON, active: ACTIVE, background: '#ffffff' },
       exactRightShapes: ['CURSOR','RECTANGLE','PENTAGON','HEXAGON','HEPTAGON','CIRCLE','TRIANGLE','ANGLE','RINGS'],
     });
     return () => {
-      delete window.GANNZILLA_DRAWING_PALETTES_V266;
-      delete window.__auditGannzillaDrawingPalettesV266;
+      delete window.GANNZILLA_DRAWING_PALETTES_V267;
+      delete window.__auditGannzillaDrawingPalettesV267;
     };
-  }, [activeReference, activeTool, items.length, visible]);
+  }, [activeReference, activeTool, items.length, layout, visible]);
 
   const selectReference = (value) => {
     setActiveReference(value);
@@ -196,11 +257,11 @@ export default function GannzillaDrawingPalettesV266() {
   const rightTools = ['cursor','rect','p5','p6','p7','circle','triangle','angle','rings'];
 
   return createPortal(<>
-    <div id={LEFT_ID} data-gannzilla-left-drawing-palette="true" style={paletteStyle('left')}>
+    <div id={LEFT_ID} data-gannzilla-left-drawing-palette="true" style={paletteStyle('left', layout)}>
       {leftValues.map((value) => <PaletteButton key={value} round={['12','24','36'].includes(value)} active={activeReference===value} title={value==='N'?'North':value.startsWith('p')?`${value.slice(1)}-sided shape`:`${value}${['4','9'].includes(value)?'°':''}`} onClick={() => selectReference(value)}><ReferenceGlyph value={value}/></PaletteButton>)}
     </div>
 
-    <div id={RIGHT_ID} data-gannzilla-right-drawing-palette="true" style={paletteStyle('right')}>
+    <div id={RIGHT_ID} data-gannzilla-right-drawing-palette="true" style={paletteStyle('right', layout)}>
       {rightTools.map((tool) => <PaletteButton key={tool} active={activeTool===tool} title={tool} onClick={() => setActiveTool(tool)}><ShapeGlyph type={tool}/></PaletteButton>)}
       <PaletteButton title="تراجع" onClick={() => setItems((current) => current.slice(0,-1))}>↶</PaletteButton>
       <PaletteButton title="مسح الكل" onClick={() => { setItems([]); setDraft(null); }}>×</PaletteButton>
