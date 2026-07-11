@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV273 from './GannzillaDrawingPalettesV273';
+import GannzillaDrawingPalettesV274 from './GannzillaDrawingPalettesV274';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 273: exact mirrored drawing-palette gaps from the visible control lines. */
+/** Build 274: exact left/right drawing geometry with a single post-render authority. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V273 = true;
-    window.__auditGannzillaBareWheelV273 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V274 = true;
+    window.__auditGannzillaBareWheelV274 = () => ({
       ok: true,
-      build: 273,
+      build: 274,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -21,7 +21,9 @@ export default function GannzillaBareWheelV224() {
       toolbarRightInsetPx: 4,
       drawingPalettesMounted: true,
       drawingPaletteSingleOwner: true,
-      drawingPaletteExactVisibleControlLineMirror: true,
+      drawingPalettePostRenderGeometryAuthority: true,
+      drawingPaletteRightStyleMutationGuard: true,
+      drawingPaletteLeftStyleMutationGuard: true,
       drawingPaletteButtonSizePx: 34,
       drawingPaletteButtonGapPx: 4,
       drawingPaletteWidthPx: 46,
@@ -68,8 +70,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V273;
-      delete window.__auditGannzillaBareWheelV273;
+      delete window.GANNZILLA_BARE_WHEEL_V274;
+      delete window.__auditGannzillaBareWheelV274;
     };
   }, []);
 
@@ -117,7 +119,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV273 />
+      <GannzillaDrawingPalettesV274 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
