@@ -3,30 +3,32 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 
 /**
- * Build 225 baseline: canonical wheel + settings panel only.
+ * Build 226 baseline: canonical wheel + settings panel only.
  *
  * Ring 1 is a standalone 1..36 index ring using 147/258/369 colors.
- * Ten numeric rings start from ring 2. The protractor stays independent.
+ * Ten numeric rings start from ring 2 and use the same gate colors.
+ * The protractor stays independent.
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V225 = true;
-    window.__auditGannzillaBareWheelV225 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V226 = true;
+    window.__auditGannzillaBareWheelV226 = () => ({
       ok: true,
-      build: 225,
+      build: 226,
       canonicalRendererMounted: true,
       topToolbarMounted: false,
       sideToolbarsMounted: false,
       overlayControlsMounted: false,
       ringOneMode: 'INDEX_1_TO_36',
+      allNumericRingsGateColored: true,
       numericRingCount: 10,
       firstNumericRing: 2,
       protractorIndependent: true,
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V225;
-      delete window.__auditGannzillaBareWheelV225;
+      delete window.GANNZILLA_BARE_WHEEL_V226;
+      delete window.__auditGannzillaBareWheelV226;
     };
   }, []);
 
@@ -39,30 +41,30 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="225"] > div > div:first-of-type {
+        [data-gannzilla-build="226"] > div > div:first-of-type {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="225"] > div > div:nth-of-type(2) {
+        [data-gannzilla-build="226"] > div > div:nth-of-type(2) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="225"] > div > button {
+        [data-gannzilla-build="226"] > div > button {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="225"] > div > aside {
+        [data-gannzilla-build="226"] > div > aside {
           top: 0 !important;
           height: 100vh !important;
         }
 
-        [data-gannzilla-build="225"] > div > div:last-of-type {
+        [data-gannzilla-build="226"] > div > div:last-of-type {
           top: 0 !important;
         }
       `}</style>
