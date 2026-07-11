@@ -1,0 +1,4 @@
+Build 266 deployment retry.
+Show left and right Gannzilla-style drawing palettes.
+Toolbar toggle is immediately left of wheel movement control.
+Use drawingTools=true to open both palettes by default.
