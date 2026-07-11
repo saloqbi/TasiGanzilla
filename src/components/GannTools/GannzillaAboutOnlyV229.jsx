@@ -15,10 +15,10 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
     };
 
     window.addEventListener('keydown', onKeyDown);
-    window.GANNZILLA_ABOUT_ONLY_V233 = true;
-    window.__auditGannzillaAboutOnlyV233 = () => ({
+    window.GANNZILLA_ABOUT_ONLY_V234 = true;
+    window.__auditGannzillaAboutOnlyV234 = () => ({
       ok: true,
-      build: 233,
+      build: 234,
       singleReactOwner: true,
       intervalCount: 0,
       mutationObserverCount: 0,
@@ -26,15 +26,16 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
       iconSizePx: iconSize,
       iconGovernedByToolbar: true,
       logoNativeSize: '800x800',
-      logoDisplayMaxWidthPx: 760,
+      logoDisplayMaxWidthPx: 1520,
+      logoDisplayScale: 2,
       fullLogoVisible: true,
       dialogOpen: open,
     });
 
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      delete window.GANNZILLA_ABOUT_ONLY_V233;
-      delete window.__auditGannzillaAboutOnlyV233;
+      delete window.GANNZILLA_ABOUT_ONLY_V234;
+      delete window.__auditGannzillaAboutOnlyV234;
     };
   }, [iconSize, open, toolbarHeight]);
 
@@ -91,10 +92,10 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
           <section
             role="dialog"
             aria-modal="true"
-            aria-labelledby="gannzilla-about-title-v233"
+            aria-labelledby="gannzilla-about-title-v234"
             dir="rtl"
             style={{
-              width: 'min(820px, calc(100vw - 24px))',
+              width: 'min(1580px, calc(100vw - 24px))',
               maxHeight: 'calc(100vh - 24px)',
               overflow: 'auto',
               background: 'linear-gradient(180deg,#090909 0%,#020202 100%)',
@@ -122,7 +123,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
                 background: '#050505',
               }}
             >
-              <span id="gannzilla-about-title-v233">حول البرنامج</span>
+              <span id="gannzilla-about-title-v234">حول البرنامج</span>
               <button
                 type="button"
                 aria-label="إغلاق"
@@ -149,7 +150,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
                 draggable="false"
                 style={{
                   display: 'block',
-                  width: 'min(760px, 100%)',
+                  width: 'min(1520px, 100%)',
                   height: 'auto',
                   aspectRatio: '1 / 1',
                   objectFit: 'contain',

@@ -6,15 +6,15 @@ import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 const TOOLBAR_HEIGHT = 38;
 
 /**
- * Build 233: stable V228 wheel plus a single-owner top toolbar and a
- * full-size high-definition About logo.
+ * Build 234: stable V228 wheel plus a single-owner top toolbar and a
+ * doubled high-definition About logo display.
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V233 = true;
-    window.__auditGannzillaBareWheelV233 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V234 = true;
+    window.__auditGannzillaBareWheelV234 = () => ({
       ok: true,
-      build: 233,
+      build: 234,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -25,6 +25,7 @@ export default function GannzillaBareWheelV224() {
       aboutIconGovernedByToolbar: true,
       aboutIconAlignment: 'RIGHT',
       aboutLogoNativeSize: '800x800',
+      aboutLogoDisplayScale: 2,
       aboutLogoFullVisible: true,
       ringOneMode: 'INDEX_1_TO_36',
       allNumericRingsGateColored: true,
@@ -39,8 +40,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V233;
-      delete window.__auditGannzillaBareWheelV233;
+      delete window.GANNZILLA_BARE_WHEEL_V234;
+      delete window.__auditGannzillaBareWheelV234;
     };
   }, []);
 
@@ -57,30 +58,30 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="233"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
+        [data-gannzilla-build="234"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="233"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
+        [data-gannzilla-build="234"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="233"] > div:not([data-gannzilla-toolbar="true"]) > button {
+        [data-gannzilla-build="234"] > div:not([data-gannzilla-toolbar="true"]) > button {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="233"] > div:not([data-gannzilla-toolbar="true"]) > aside {
+        [data-gannzilla-build="234"] > div:not([data-gannzilla-toolbar="true"]) > aside {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
 
-        [data-gannzilla-build="233"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
+        [data-gannzilla-build="234"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
