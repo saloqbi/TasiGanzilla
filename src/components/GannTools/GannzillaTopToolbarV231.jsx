@@ -3,23 +3,23 @@ import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
-import GannzillaWheelZoomV255 from './GannzillaWheelZoomV255';
+import GannzillaWheelZoomV256 from './GannzillaWheelZoomV256';
 
-const BUILD = 255;
+const BUILD = 256;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 255: native wheel zoom, maximize, connection, language, and About controls. */
+/** Build 256: direct native Gannzilla wheel zoom, maximize, connection, language, and About controls. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V255 = true;
-    window.__auditGannzillaTopToolbarV255 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V256 = true;
+    window.__auditGannzillaTopToolbarV256 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
       wheelZoomControlMounted: true,
-      wheelZoomControlMode: 'NATIVE_HIDDEN_REACT_CONTROL_BRIDGE',
+      wheelZoomControlMode: 'DIRECT_NATIVE_GANNZILLA_MIRROR',
       wheelZoomUsesCssTransform: false,
       pageMaximizeControlSizePx: TOOLBAR_HEIGHT,
       connectionControlSizePx: TOOLBAR_HEIGHT,
@@ -47,8 +47,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V255;
-      delete window.__auditGannzillaTopToolbarV255;
+      delete window.GANNZILLA_TOP_TOOLBAR_V256;
+      delete window.__auditGannzillaTopToolbarV256;
     };
   }, []);
 
@@ -154,7 +154,7 @@ export default function GannzillaTopToolbarV231() {
           overflow: 'visible',
         }}
       >
-        <GannzillaWheelZoomV255 toolbarHeight={TOOLBAR_HEIGHT} />
+        <GannzillaWheelZoomV256 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaPageFullscreenV253 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaLanguageToggleV237 />
