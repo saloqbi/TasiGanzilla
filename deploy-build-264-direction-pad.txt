@@ -1,0 +1,4 @@
+Build 264 deployment marker.
+Wheel direction pad: four visible arrows plus center.
+Single click and press-and-hold movement enabled.
+Legacy suppression-resistant labels and styles applied.
