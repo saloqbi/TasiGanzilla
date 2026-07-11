@@ -1,11 +1,21 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 
+const BUILD = 249;
 const CONTROL_WIDTH = 100;
 const CONTROL_HEIGHT = 24;
 const FLAG_WIDTH = 18;
 const FLAG_HEIGHT = 12;
 const ARROW_WIDTH = 18;
+
+function getUrlLanguage() {
+  try {
+    const value = new URLSearchParams(window.location.search).get('lang');
+    return value === 'en' ? 'en' : value === 'ar' ? 'ar' : null;
+  } catch {
+    return null;
+  }
+}
 
 function AmericanFlag() {
   return (
@@ -84,7 +94,8 @@ export default function GannzillaLanguageToggleV237() {
   const { lang, setLang } = useLanguage();
   const [open, setOpen] = React.useState(false);
   const rootRef = React.useRef(null);
-  const isArabic = lang === 'ar';
+  const effectiveLanguage = getUrlLanguage() || lang || 'ar';
+  const isArabic = effectiveLanguage === 'ar';
 
   React.useEffect(() => {
     if (!open) return undefined;
@@ -105,60 +116,69 @@ export default function GannzillaLanguageToggleV237() {
   }, [open]);
 
   React.useEffect(() => {
-    window.GANNZILLA_LANGUAGE_TOGGLE_V244 = true;
-    window.__auditGannzillaLanguageToggleV244 = () => ({
+    window.GANNZILLA_LANGUAGE_TOGGLE_V249 = true;
+    window.__auditGannzillaLanguageToggleV249 = () => ({
       ok: true,
-      build: 244,
+      build: BUILD,
       customSelector: true,
+      forcedUrlReload: true,
+      pointerSelectionAuthority: true,
       cssFlags: true,
       externalImageCount: 0,
       svgFlagCount: 0,
       flagAlwaysVisible: true,
-      language: lang,
+      language: effectiveLanguage,
       supportedLanguages: ['ar', 'en'],
       controlWidthPx: CONTROL_WIDTH,
       controlHeightPx: CONTROL_HEIGHT,
-      flagWidthPx: FLAG_WIDTH,
-      flagHeightPx: FLAG_HEIGHT,
-      arrowWidthPx: ARROW_WIDTH,
-      englishFlag: 'UNITED_STATES_CSS',
-      arabicFlag: 'SAUDI_ARABIA_CSS',
-      controlsMatchToolbarHeight: true,
-      usFlagColors: ['#b22234', '#ffffff', '#3c3b6e'],
-      saFlagColors: ['#006c35', '#ffffff'],
       dropdownOpen: open,
-      intervalCount: 0,
-      mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_LANGUAGE_TOGGLE_V244;
-      delete window.__auditGannzillaLanguageToggleV244;
+      delete window.GANNZILLA_LANGUAGE_TOGGLE_V249;
+      delete window.__auditGannzillaLanguageToggleV249;
     };
-  }, [lang, open]);
+  }, [effectiveLanguage, open]);
 
-  const chooseLanguage = (nextLang) => {
-    setLang(nextLang);
+  const chooseLanguage = React.useCallback((nextLang) => {
+    const safeLang = nextLang === 'en' ? 'en' : 'ar';
     setOpen(false);
-  };
+    setLang(safeLang);
+
+    document.documentElement.lang = safeLang;
+    document.documentElement.dir = safeLang === 'ar' ? 'rtl' : 'ltr';
+    document.body.dir = safeLang === 'ar' ? 'rtl' : 'ltr';
+
+    try {
+      localStorage.setItem('tasi-gannzilla-language-v1', safeLang);
+    } catch {
+      // Storage may be unavailable; URL remains the final authority.
+    }
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('lang', safeLang);
+    url.searchParams.set('v', String(BUILD));
+    window.location.assign(url.toString());
+  }, [setLang]);
 
   const optionStyle = (active) => ({
     width: '100%',
-    height: 24,
-    padding: '0 5px',
+    height: 26,
+    padding: '0 6px',
     border: 0,
     borderBottom: '1px solid #d0d0d0',
     background: active ? '#dbeaf5' : '#ffffff',
     color: '#111111',
     display: 'flex',
     alignItems: 'center',
-    gap: 5,
+    gap: 6,
     fontFamily: 'Segoe UI, Tahoma, Arial, sans-serif',
     fontSize: 12,
-    fontWeight: 600,
+    fontWeight: 700,
     textAlign: 'left',
     cursor: 'pointer',
     whiteSpace: 'nowrap',
+    pointerEvents: 'auto',
   });
 
   return (
@@ -172,7 +192,8 @@ export default function GannzillaLanguageToggleV237() {
         flex: `0 0 ${CONTROL_WIDTH}px`,
         alignSelf: 'stretch',
         direction: 'ltr',
-        zIndex: 650,
+        zIndex: 2147483647,
+        pointerEvents: 'auto',
       }}
     >
       <button
@@ -181,7 +202,11 @@ export default function GannzillaLanguageToggleV237() {
         aria-expanded={open}
         aria-label={isArabic ? 'اختيار اللغة' : 'Choose language'}
         title={isArabic ? 'اختيار اللغة' : 'Choose language'}
-        onClick={() => setOpen((value) => !value)}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          setOpen((value) => !value);
+        }}
         style={{
           width: CONTROL_WIDTH,
           height: CONTROL_HEIGHT,
@@ -201,6 +226,7 @@ export default function GannzillaLanguageToggleV237() {
           fontWeight: 700,
           lineHeight: 1,
           textShadow: '0 1px 0 rgba(0,0,0,.25)',
+          pointerEvents: 'auto',
         }}
       >
         <span
@@ -215,7 +241,7 @@ export default function GannzillaLanguageToggleV237() {
             whiteSpace: 'nowrap',
           }}
         >
-          <LanguageFlag language={lang} />
+          <LanguageFlag language={effectiveLanguage} />
           <span>{isArabic ? 'العربية' : 'English'}</span>
         </span>
 
@@ -243,6 +269,7 @@ export default function GannzillaLanguageToggleV237() {
         <div
           role="menu"
           aria-label={isArabic ? 'اللغات' : 'Languages'}
+          onMouseDown={(event) => event.stopPropagation()}
           style={{
             position: 'absolute',
             top: CONTROL_HEIGHT + 1,
@@ -252,14 +279,33 @@ export default function GannzillaLanguageToggleV237() {
             background: '#ffffff',
             boxShadow: '0 3px 8px rgba(0,0,0,.25)',
             overflow: 'hidden',
-            zIndex: 2000,
+            zIndex: 2147483647,
+            pointerEvents: 'auto',
           }}
         >
-          <button type="button" role="menuitem" onClick={() => chooseLanguage('en')} style={optionStyle(lang === 'en')}>
+          <button
+            type="button"
+            role="menuitem"
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              chooseLanguage('en');
+            }}
+            style={optionStyle(effectiveLanguage === 'en')}
+          >
             <AmericanFlag />
             <span>English</span>
           </button>
-          <button type="button" role="menuitem" onClick={() => chooseLanguage('ar')} style={optionStyle(lang === 'ar')}>
+          <button
+            type="button"
+            role="menuitem"
+            onPointerDown={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              chooseLanguage('ar');
+            }}
+            style={optionStyle(effectiveLanguage === 'ar')}
+          >
             <SaudiArabiaFlag />
             <span>العربية</span>
           </button>
