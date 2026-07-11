@@ -1,17 +1,59 @@
 import React from 'react';
-import BRAND_IMAGE_PART_0 from './gannzillaBrandImageV247Part0';
-import BRAND_IMAGE_PART_1 from './gannzillaBrandImageV247Part1';
-import BRAND_IMAGE_PART_2 from './gannzillaBrandImageV247Part2';
 
-const BRAND_IMAGE = `data:image/webp;base64,${BRAND_IMAGE_PART_0}${BRAND_IMAGE_PART_1}${BRAND_IMAGE_PART_2}`;
-const GOLD = '#d79a18';
-const GOLD_LIGHT = '#ffd86a';
+const BUILD = 251;
 
-export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
+function GannzillaOriginalLogo() {
+  return (
+    <div
+      aria-hidden="true"
+      style={{
+        position: 'relative',
+        width: 58,
+        height: 56,
+        margin: '0 auto',
+      }}
+    >
+      <span
+        style={{
+          position: 'absolute',
+          left: 22,
+          top: 2,
+          width: 28,
+          height: 34,
+          border: '5px solid #83a925',
+          borderLeftWidth: 6,
+          boxSizing: 'border-box',
+        }}
+      />
+      <span
+        style={{
+          position: 'absolute',
+          left: 9,
+          top: 14,
+          width: 27,
+          height: 34,
+          border: '5px solid #e6a314',
+          borderRightWidth: 6,
+          boxSizing: 'border-box',
+        }}
+      />
+      <span
+        style={{
+          position: 'absolute',
+          left: 13,
+          top: 29,
+          width: 14,
+          height: 6,
+          background: '#c94323',
+        }}
+      />
+    </div>
+  );
+}
+
+export default function GannzillaAboutOnlyV229({ toolbarHeight = 24 }) {
   const [open, setOpen] = React.useState(false);
-  const [logoFailed, setLogoFailed] = React.useState(false);
-  const iconSize = Math.max(22, toolbarHeight - 8);
-  const iconFontSize = Math.max(16, Math.round(iconSize * 0.72));
+  const iconSize = Math.max(22, toolbarHeight);
 
   React.useEffect(() => {
     const onKeyDown = (event) => {
@@ -19,127 +61,125 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
     };
 
     window.addEventListener('keydown', onKeyDown);
-    window.GANNZILLA_ABOUT_ONLY_V247 = true;
-    window.__auditGannzillaAboutOnlyV247 = () => ({
+    window.GANNZILLA_ABOUT_ONLY_V251 = true;
+    window.__auditGannzillaAboutOnlyV251 = () => ({
       ok: true,
-      build: 247,
-      singleReactOwner: true,
-      intervalCount: 0,
-      mutationObserverCount: 0,
+      build: BUILD,
+      iconMounted: true,
+      dialogFunctional: true,
+      copiedVisualReference: 'GANNZILLA_PRO_ABOUT_8_3',
+      originalContentPreserved: true,
+      dialogOpen: open,
       toolbarHeightPx: toolbarHeight,
       iconSizePx: iconSize,
-      iconGovernedByToolbar: true,
-      logoSource: 'GANNZILLA_BRAND_IMAGE_V247_EMBEDDED_WEBP',
-      logoRenderingMode: 'DIRECT_IMG',
-      logoDisplayMaxWidthPx: 420,
-      logoFailed,
-      fullLogoVisible: true,
-      dialogOpen: open,
     });
 
     return () => {
       window.removeEventListener('keydown', onKeyDown);
-      delete window.GANNZILLA_ABOUT_ONLY_V247;
-      delete window.__auditGannzillaAboutOnlyV247;
+      delete window.GANNZILLA_ABOUT_ONLY_V251;
+      delete window.__auditGannzillaAboutOnlyV251;
     };
-  }, [iconSize, logoFailed, open, toolbarHeight]);
+  }, [iconSize, open, toolbarHeight]);
+
+  const close = () => setOpen(false);
 
   return (
     <>
       <button
         type="button"
+        data-gannzilla-about-control="true"
         aria-label="حول البرنامج"
-        title="حول البرنامج"
+        title="About"
         onClick={() => setOpen(true)}
         style={{
-          position: 'static',
-          flex: '0 0 auto',
           width: iconSize,
           height: iconSize,
           minWidth: iconSize,
           minHeight: iconSize,
           padding: 0,
+          margin: 0,
           display: 'grid',
           placeItems: 'center',
-          boxSizing: 'border-box',
-          border: '1px solid #527da8',
-          borderRadius: 3,
-          background: 'linear-gradient(180deg, #63a6e8 0%, #1765b3 100%)',
-          boxShadow: 'inset 0 0 0 1px rgba(255,255,255,.42), 0 1px 2px rgba(0,0,0,.24)',
-          color: '#fff',
-          fontFamily: 'Arial, Helvetica, sans-serif',
-          fontSize: iconFontSize,
-          lineHeight: 1,
+          border: 0,
+          borderLeft: '1px solid #c9c9c9',
+          background: 'transparent',
+          color: '#2469b2',
+          fontFamily: 'Segoe UI Symbol, Arial Unicode MS, Arial, sans-serif',
+          fontSize: 17,
           fontWeight: 900,
+          lineHeight: 1,
           cursor: 'pointer',
-          userSelect: 'none',
+          boxSizing: 'border-box',
+          pointerEvents: 'auto',
         }}
       >
-        i
+        ⓘ
       </button>
 
       {open && (
         <div
+          data-gannzilla-original-about="true"
           role="presentation"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) setOpen(false);
+            if (event.target === event.currentTarget) close();
           }}
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 1000,
+            zIndex: 2147483647,
             display: 'grid',
             placeItems: 'center',
             padding: 12,
-            background: 'rgba(0,0,0,.70)',
+            background: 'rgba(0,0,0,0.05)',
+            boxSizing: 'border-box',
+            direction: 'ltr',
           }}
         >
           <section
             role="dialog"
             aria-modal="true"
-            aria-labelledby="gannzilla-about-title-v247"
-            dir="rtl"
+            aria-labelledby="gannzilla-original-about-title"
+            lang="en"
+            dir="ltr"
             style={{
-              width: 'min(620px, calc(100vw - 24px))',
-              maxHeight: 'calc(100vh - 24px)',
-              overflow: 'auto',
-              background: 'linear-gradient(180deg,#090909 0%,#020202 100%)',
-              border: `2px solid ${GOLD}`,
-              boxShadow: '0 0 34px rgba(235,164,18,.42)',
-              color: '#f2c454',
-              fontFamily: 'Tahoma, Arial, sans-serif',
+              width: 204,
+              minHeight: 302,
+              background: '#f6f6f6',
+              border: '1px solid #8f8f8f',
+              boxShadow: '0 10px 28px rgba(0,0,0,.28)',
+              color: '#111111',
+              fontFamily: 'Segoe UI, Tahoma, Arial, sans-serif',
               boxSizing: 'border-box',
+              userSelect: 'text',
             }}
           >
             <header
               style={{
-                height: 44,
+                height: 29,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '0 12px',
-                borderBottom: '1px solid #9d690e',
-                color: GOLD_LIGHT,
-                fontSize: 17,
-                fontWeight: 800,
-                position: 'sticky',
-                top: 0,
-                zIndex: 2,
-                background: '#050505',
+                padding: '0 7px',
+                background: '#ffffff',
+                borderBottom: '1px solid #d2d2d2',
+                boxSizing: 'border-box',
+                fontSize: 12,
               }}
             >
-              <span id="gannzilla-about-title-v247">حول البرنامج</span>
+              <span id="gannzilla-original-about-title">About</span>
               <button
                 type="button"
-                aria-label="إغلاق"
-                onClick={() => setOpen(false)}
+                aria-label="Close"
+                onClick={close}
                 style={{
-                  width: 30,
-                  height: 30,
+                  width: 28,
+                  height: 27,
+                  marginRight: -7,
                   border: 0,
                   background: 'transparent',
-                  color: GOLD_LIGHT,
-                  fontSize: 24,
+                  color: '#111111',
+                  fontSize: 20,
+                  fontWeight: 300,
                   lineHeight: 1,
                   cursor: 'pointer',
                 }}
@@ -148,96 +188,50 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 38 }) {
               </button>
             </header>
 
-            <div style={{ padding: '16px 20px 16px', textAlign: 'center' }}>
-              {!logoFailed ? (
-                <img
-                  src={BRAND_IMAGE}
-                  alt="شعار كوكبة تاسي GOLD عالي الدقة"
-                  draggable="false"
-                  loading="eager"
-                  decoding="sync"
-                  onError={() => setLogoFailed(true)}
-                  style={{
-                    display: 'block',
-                    width: 'min(420px, 100%)',
-                    height: 'auto',
-                    aspectRatio: '1 / 1',
-                    objectFit: 'contain',
-                    margin: '0 auto 24px',
-                    borderRadius: 14,
-                    boxShadow: '0 0 28px rgba(244,184,32,.38)',
-                    background: '#020202',
-                  }}
-                />
-              ) : (
-                <div
-                  role="alert"
-                  style={{
-                    width: 'min(420px, 100%)',
-                    minHeight: 120,
-                    margin: '0 auto 24px',
-                    display: 'grid',
-                    placeItems: 'center',
-                    border: `1px solid ${GOLD}`,
-                    color: GOLD_LIGHT,
-                    background: '#080808',
-                    fontSize: 16,
-                    fontWeight: 800,
-                  }}
-                >
-                  تعذر تحميل شعار البرنامج
-                </div>
-              )}
+            <div style={{ padding: '13px 8px 8px', textAlign: 'center', fontSize: 11, lineHeight: 1.25 }}>
+              <GannzillaOriginalLogo />
 
-              <div
-                style={{
-                  color: GOLD_LIGHT,
-                  fontSize: 32,
-                  lineHeight: 1.35,
-                  fontWeight: 900,
-                  marginBottom: 18,
-                  textShadow: '0 1px 8px rgba(255,196,64,.28)',
-                }}
-              >
-                كوكبة الأرقام السحرية
-              </div>
-              <div style={{ fontSize: 20, lineHeight: 1.75, fontWeight: 800 }}>الإصدار: 1</div>
-              <div style={{ fontSize: 20, lineHeight: 1.75, fontWeight: 800 }}>المؤلف: محمود سمان</div>
+              <div style={{ marginTop: 2, fontSize: 13, fontWeight: 800 }}>Gannzilla Pro</div>
+
+              <div style={{ marginTop: 18 }}>Version: 8.3</div>
+              <div>Author: Artem Kalashnikov</div>
               <a
-                href="mailto:m.a.m.1392@gmail.com"
-                style={{
-                  color: GOLD_LIGHT,
-                  fontSize: 20,
-                  lineHeight: 1.75,
-                  fontWeight: 900,
-                  textDecoration: 'none',
-                  textShadow: '0 1px 8px rgba(255,196,64,.24)',
-                }}
+                href="mailto:support@gannzilla.ru"
+                style={{ display: 'block', color: '#0b70aa', textDecoration: 'none' }}
               >
-                m.a.m.1392@gmail.com
+                support@gannzilla.ru
               </a>
-              <div style={{ marginTop: 22, fontSize: 18, lineHeight: 1.7, fontWeight: 800 }}>
-                © 2026 كوكبة تاسي
-              </div>
-              <div style={{ fontSize: 18, lineHeight: 1.7, fontWeight: 800 }}>جميع الحقوق محفوظة</div>
+              <a
+                href="https://gannzilla.ru"
+                target="_blank"
+                rel="noreferrer"
+                style={{ display: 'block', color: '#0b70aa', textDecoration: 'none' }}
+              >
+                gannzilla.ru
+              </a>
 
-              <div style={{ marginTop: 20, textAlign: 'left' }}>
+              <div style={{ marginTop: 17, color: '#5d5d5d' }}>© 2020 Artem Kalashnikov</div>
+              <div style={{ color: '#9a9a9a' }}>All rights reserved</div>
+
+              <div style={{ marginTop: 13, display: 'flex', justifyContent: 'flex-end' }}>
                 <button
                   type="button"
-                  onClick={() => setOpen(false)}
+                  autoFocus
+                  onClick={close}
                   style={{
-                    minWidth: 70,
-                    height: 32,
-                    border: `1px solid ${GOLD}`,
-                    background: 'linear-gradient(#251a05,#080808)',
-                    color: GOLD_LIGHT,
-                    fontFamily: 'Tahoma, Arial, sans-serif',
-                    fontSize: 13,
-                    fontWeight: 800,
+                    minWidth: 56,
+                    height: 22,
+                    padding: '0 8px',
+                    border: '1px solid #2c7fc5',
+                    outline: '1px solid #8bb7dc',
+                    background: 'linear-gradient(#ffffff,#e7e7e7)',
+                    color: '#111111',
+                    fontFamily: 'Segoe UI, Tahoma, Arial, sans-serif',
+                    fontSize: 11,
                     cursor: 'pointer',
                   }}
                 >
-                  إغلاق
+                  Cancel
                 </button>
               </div>
             </div>
