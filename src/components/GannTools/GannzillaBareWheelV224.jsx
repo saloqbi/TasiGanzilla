@@ -6,13 +6,13 @@ import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 288: add chart hide/show control while keeping drawing-tool code removed. */
+/** Build 289: integrate a guaranteed-visible chart eye directly with the wheel controls. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V288 = true;
-    window.__auditGannzillaBareWheelV288 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V289 = true;
+    window.__auditGannzillaBareWheelV289 = () => ({
       ok: true,
-      build: 288,
+      build: 289,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -20,6 +20,7 @@ export default function GannzillaBareWheelV224() {
       drawingToolsToggleRemoved: true,
       wheelInteractionReleased: true,
       chartVisibilityToggleMounted: true,
+      chartVisibilityEyePhysicallyIntegratedWithWheelControls: true,
       chartVisibilityTogglePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
       chartHideShowPreservesSettingsPanel: true,
       chartHideShowPreservesToolbar: true,
@@ -60,8 +61,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V288;
-      delete window.__auditGannzillaBareWheelV288;
+      delete window.GANNZILLA_BARE_WHEEL_V289;
+      delete window.__auditGannzillaBareWheelV289;
     };
   }, []);
 
