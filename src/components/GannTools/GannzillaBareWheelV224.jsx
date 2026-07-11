@@ -6,24 +6,27 @@ import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 const TOOLBAR_HEIGHT = 38;
 
 /**
- * Build 231: stable V228 wheel plus a single-owner top toolbar.
+ * Build 232: stable V228 wheel plus a single-owner top toolbar.
  *
- * The About icon is the first control inside the toolbar. Every toolbar icon
- * derives its size from the toolbar height so future controls remain aligned.
+ * The About icon is aligned on the right with a 38px safety inset. Every
+ * toolbar icon derives its size from the toolbar height so future controls
+ * remain aligned.
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V231 = true;
-    window.__auditGannzillaBareWheelV231 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V232 = true;
+    window.__auditGannzillaBareWheelV232 = () => ({
       ok: true,
-      build: 231,
+      build: 232,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
       toolbarSingleOwner: true,
+      toolbarRightInsetPx: 38,
       sideToolbarsMounted: false,
       aboutControlMounted: true,
       aboutIconGovernedByToolbar: true,
+      aboutIconAlignment: 'RIGHT',
       ringOneMode: 'INDEX_1_TO_36',
       allNumericRingsGateColored: true,
       ringPalette: {
@@ -37,8 +40,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V231;
-      delete window.__auditGannzillaBareWheelV231;
+      delete window.GANNZILLA_BARE_WHEEL_V232;
+      delete window.__auditGannzillaBareWheelV232;
     };
   }, []);
 
@@ -56,31 +59,31 @@ export default function GannzillaBareWheelV224() {
         }
 
         /* Keep the legacy toolbar and side tool strip disabled. */
-        [data-gannzilla-build="231"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
+        [data-gannzilla-build="232"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="231"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
+        [data-gannzilla-build="232"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="231"] > div:not([data-gannzilla-toolbar="true"]) > button {
+        [data-gannzilla-build="232"] > div:not([data-gannzilla-toolbar="true"]) > button {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
         /* Reserve real layout space for the new toolbar instead of overlaying it. */
-        [data-gannzilla-build="231"] > div:not([data-gannzilla-toolbar="true"]) > aside {
+        [data-gannzilla-build="232"] > div:not([data-gannzilla-toolbar="true"]) > aside {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
 
-        [data-gannzilla-build="231"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
+        [data-gannzilla-build="232"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
