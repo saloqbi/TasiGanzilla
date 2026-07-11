@@ -1,0 +1,4 @@
+Build 267 deployment marker.
+Left palette is anchored immediately after the settings panel.
+Right palette is anchored to the wheel viewport right edge.
+Both palettes start below the top toolbar and track resize/fullscreen changes.
