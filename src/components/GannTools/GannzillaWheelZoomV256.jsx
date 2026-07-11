@@ -1,11 +1,11 @@
 import React from 'react';
 
-const BUILD = 259;
+const BUILD = 264;
 const MIN_ZOOM = 0.10;
 const MAX_ZOOM = 3.00;
 const MOVE_STEP_PX = 48;
 const HOLD_STEP_PX = 14;
-const PAN_STORAGE_KEY = 'gannzilla-wheel-pan-v259';
+const PAN_STORAGE_KEY = 'gannzilla-wheel-pan-v264';
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -39,11 +39,16 @@ function readCurrentZoom() {
   return Number.isFinite(value) ? clamp(value, MIN_ZOOM, MAX_ZOOM) : 1;
 }
 
-function findWheelCanvas() {
-  return Array.from(document.querySelectorAll('canvas'))
-    .map((canvas) => ({ canvas, rect: canvas.getBoundingClientRect() }))
-    .filter(({ rect }) => rect.width > 250 && rect.height > 250)
-    .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
+function findWheelTarget() {
+  const selectors = ['canvas', 'svg'];
+  for (const selector of selectors) {
+    const target = Array.from(document.querySelectorAll(selector))
+      .map((node) => ({ node, rect: node.getBoundingClientRect() }))
+      .filter(({ rect }) => rect.width > 250 && rect.height > 250)
+      .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.node;
+    if (target) return target;
+  }
+  return null;
 }
 
 function readStoredOffset() {
@@ -84,8 +89,21 @@ function FourWayGlyph() {
 function ArrowGlyph({ direction }) {
   const rotation = { up: 0, right: 90, down: 180, left: 270 }[direction] || 0;
   return (
-    <svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true" focusable="false" style={{ transform: `rotate(${rotation}deg)` }}>
-      <path d="M8.5 2 3.4 7.1h3.2V15h3.8V7.1h3.2L8.5 2Z" fill="#2d73a8" stroke="#1d5f91" strokeWidth=".55" strokeLinejoin="round" />
+    <svg
+      width="17"
+      height="17"
+      viewBox="0 0 17 17"
+      aria-hidden="true"
+      focusable="false"
+      style={{ transform: `rotate(${rotation}deg)` }}
+    >
+      <path
+        d="M8.5 2 3.4 7.1h3.2V15h3.8V7.1h3.2L8.5 2Z"
+        fill="#2d73a8"
+        stroke="#1d5f91"
+        strokeWidth=".55"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -104,6 +122,7 @@ export default function GannzillaWheelZoomV256({ toolbarHeight = 24 }) {
   const rootRef = React.useRef(null);
   const repeatDelayRef = React.useRef(0);
   const repeatIntervalRef = React.useRef(0);
+  const holdActivatedRef = React.useRef(false);
   const initialOffset = React.useMemo(readStoredOffset, []);
   const offsetRef = React.useRef(initialOffset);
   const [zoom, setZoom] = React.useState(() => readCurrentZoom());
@@ -116,14 +135,16 @@ export default function GannzillaWheelZoomV256({ toolbarHeight = 24 }) {
   }, []);
 
   const applyOffset = React.useCallback((offset = offsetRef.current) => {
-    const canvas = findWheelCanvas();
-    if (!canvas) return false;
-    canvas.style.transform = `translate3d(${Math.round(offset.x)}px, ${Math.round(offset.y)}px, 0)`;
-    canvas.style.transformOrigin = 'center center';
-    canvas.style.willChange = 'transform';
-    canvas.style.transition = 'transform 100ms ease-out';
-    canvas.dataset.gannzillaPanX = String(Math.round(offset.x));
-    canvas.dataset.gannzillaPanY = String(Math.round(offset.y));
+    const target = findWheelTarget();
+    if (!target) return false;
+
+    const x = Math.round(offset.x);
+    const y = Math.round(offset.y);
+    target.style.setProperty('translate', `${x}px ${y}px`);
+    target.style.setProperty('will-change', 'translate');
+    target.style.setProperty('transition', 'translate 100ms ease-out');
+    target.dataset.gannzillaPanX = String(x);
+    target.dataset.gannzillaPanY = String(y);
     return true;
   }, []);
 
@@ -156,13 +177,27 @@ export default function GannzillaWheelZoomV256({ toolbarHeight = 24 }) {
     repeatIntervalRef.current = 0;
   }, []);
 
-  const startRepeat = React.useCallback((direction) => {
+  const beginHold = React.useCallback((direction) => {
     stopRepeat();
-    moveWheel(direction);
+    holdActivatedRef.current = false;
     repeatDelayRef.current = window.setTimeout(() => {
-      repeatIntervalRef.current = window.setInterval(() => moveWheel(direction, HOLD_STEP_PX), 55);
-    }, 330);
+      holdActivatedRef.current = true;
+      moveWheel(direction, HOLD_STEP_PX);
+      repeatIntervalRef.current = window.setInterval(() => moveWheel(direction, HOLD_STEP_PX), 65);
+    }, 360);
   }, [moveWheel, stopRepeat]);
+
+  const finishHold = React.useCallback(() => {
+    stopRepeat();
+  }, [stopRepeat]);
+
+  const handleDirectionClick = React.useCallback((direction) => {
+    if (holdActivatedRef.current) {
+      holdActivatedRef.current = false;
+      return;
+    }
+    moveWheel(direction);
+  }, [moveWheel]);
 
   const resetWheelPosition = React.useCallback(() => {
     commitOffset({ x: 0, y: 0 });
@@ -177,16 +212,19 @@ export default function GannzillaWheelZoomV256({ toolbarHeight = 24 }) {
     document.addEventListener('fullscreenchange', reapply);
     window.addEventListener('gannzilla:ring-two-numbering-refresh', reapply);
 
-    window.GANNZILLA_WHEEL_ZOOM_V259 = true;
-    window.GANNZILLA_WHEEL_PAN_V259 = true;
-    window.__auditGannzillaWheelControlsV259 = () => ({
-      ok: true,
+    window.GANNZILLA_WHEEL_ZOOM_V264 = true;
+    window.GANNZILLA_WHEEL_PAN_V264 = true;
+    window.__auditGannzillaWheelControlsV264 = () => ({
+      ok: Boolean(findWheelTarget()),
       build: BUILD,
       zoomVisible: true,
-      compactMovementIconVisible: true,
+      movementTriggerVisible: true,
+      directionPadOpen: panOpen,
+      directionButtonCount: document.querySelectorAll('[data-gannzilla-pan-direction]').length,
       movementIconPlacement: 'INSIDE_ZOOM_CONTROL_IMMEDIATELY_LEFT_OF_MINUS',
       movementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
       movementOffset: { ...offsetRef.current },
+      clickMovementEnabled: true,
       pressAndHoldEnabled: true,
       currentPercent: Math.round(readCurrentZoom() * 100),
       minPercent: MIN_ZOOM * 100,
@@ -201,11 +239,11 @@ export default function GannzillaWheelZoomV256({ toolbarHeight = 24 }) {
       window.removeEventListener('resize', reapply);
       document.removeEventListener('fullscreenchange', reapply);
       window.removeEventListener('gannzilla:ring-two-numbering-refresh', reapply);
-      delete window.GANNZILLA_WHEEL_ZOOM_V259;
-      delete window.GANNZILLA_WHEEL_PAN_V259;
-      delete window.__auditGannzillaWheelControlsV259;
+      delete window.GANNZILLA_WHEEL_ZOOM_V264;
+      delete window.GANNZILLA_WHEEL_PAN_V264;
+      delete window.__auditGannzillaWheelControlsV264;
     };
-  }, [applyOffset, stopRepeat, syncZoom, toolbarHeight]);
+  }, [applyOffset, panOpen, stopRepeat, syncZoom, toolbarHeight]);
 
   React.useEffect(() => {
     if (!panOpen) return undefined;
@@ -299,22 +337,25 @@ export default function GannzillaWheelZoomV256({ toolbarHeight = 24 }) {
     cursor: 'pointer',
     userSelect: 'none',
     touchAction: 'none',
+    visibility: 'visible',
+    pointerEvents: 'auto',
   };
 
   const directionButton = (direction, label, gridColumn, gridRow) => (
     <button
       key={direction}
       type="button"
+      data-gannzilla-pan-direction={direction}
       aria-label={label}
       title={label}
+      onClick={() => handleDirectionClick(direction)}
       onPointerDown={(event) => {
         event.preventDefault();
-        event.currentTarget.setPointerCapture?.(event.pointerId);
-        startRepeat(direction);
+        beginHold(direction);
       }}
-      onPointerUp={stopRepeat}
-      onPointerCancel={stopRepeat}
-      onPointerLeave={stopRepeat}
+      onPointerUp={finishHold}
+      onPointerCancel={finishHold}
+      onPointerLeave={finishHold}
       style={{ ...padButton, gridColumn, gridRow }}
     >
       <ArrowGlyph direction={direction} />
@@ -342,14 +383,26 @@ export default function GannzillaWheelZoomV256({ toolbarHeight = 24 }) {
       <style>{`
         [data-gannzilla-wheel-zoom-control="true"] button:hover { background:#dceaf5 !important; }
         [data-gannzilla-wheel-zoom-control="true"] button:active { background:#c8deef !important; }
+        [data-gannzilla-direction-pad="true"] [data-gannzilla-pan-direction] {
+          display:grid !important;
+          visibility:visible !important;
+          pointer-events:auto !important;
+          width:28px !important;
+          min-width:28px !important;
+          max-width:28px !important;
+          height:28px !important;
+          min-height:28px !important;
+          max-height:28px !important;
+          opacity:1 !important;
+        }
       `}</style>
 
       <button
         type="button"
         aria-haspopup="menu"
         aria-expanded={panOpen}
-        aria-label="تحريك العجلة يمينًا ويسارًا وأعلى وأسفل"
-        title="تحريك العجلة"
+        aria-label="أداة اتجاهات العجلة"
+        title="اتجاهات العجلة"
         onClick={() => setPanOpen((value) => !value)}
         style={{ ...iconButton, background: panOpen ? '#dceaf5' : 'transparent' }}
       >
@@ -358,8 +411,9 @@ export default function GannzillaWheelZoomV256({ toolbarHeight = 24 }) {
 
       {panOpen && (
         <div
+          data-gannzilla-direction-pad="true"
           role="menu"
-          aria-label="اتجاه تحريك العجلة"
+          aria-label="اتجاهات العجلة"
           style={{
             position: 'absolute',
             top: toolbarHeight + 3,
@@ -377,21 +431,23 @@ export default function GannzillaWheelZoomV256({ toolbarHeight = 24 }) {
             boxShadow: '0 3px 10px rgba(0,0,0,.28)',
             boxSizing: 'border-box',
             zIndex: 2147483647,
+            pointerEvents: 'auto',
           }}
         >
-          {directionButton('up', 'تحريك العجلة إلى الأعلى', 2, 1)}
-          {directionButton('left', 'تحريك العجلة إلى اليسار', 1, 2)}
+          {directionButton('up', 'أعلى', 2, 1)}
+          {directionButton('left', 'يسار', 1, 2)}
           <button
             type="button"
-            aria-label="إعادة العجلة إلى المنتصف"
-            title="إعادة العجلة إلى المنتصف"
+            data-gannzilla-pan-center="true"
+            aria-label="توسيط"
+            title="توسيط"
             onClick={resetWheelPosition}
             style={{ ...padButton, gridColumn: 2, gridRow: 2 }}
           >
             <CenterGlyph />
           </button>
-          {directionButton('right', 'تحريك العجلة إلى اليمين', 3, 2)}
-          {directionButton('down', 'تحريك العجلة إلى الأسفل', 2, 3)}
+          {directionButton('right', 'يمين', 3, 2)}
+          {directionButton('down', 'أسفل', 2, 3)}
         </div>
       )}
 
