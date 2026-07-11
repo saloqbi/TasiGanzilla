@@ -2,9 +2,10 @@ import React from 'react';
 import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 
 const TOOLBAR_HEIGHT = 38;
+const RIGHT_INSET_PX = 38;
 
 /**
- * Build 231: single-owner top toolbar.
+ * Build 232: single-owner top toolbar with a fixed right safety inset.
  *
  * All toolbar icons derive their dimensions from TOOLBAR_HEIGHT. New controls
  * must be added inside this component so the toolbar remains the only layout
@@ -14,22 +15,24 @@ export default function GannzillaTopToolbarV231() {
   const iconSize = TOOLBAR_HEIGHT - 8;
 
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V231 = true;
-    window.__auditGannzillaTopToolbarV231 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V232 = true;
+    window.__auditGannzillaTopToolbarV232 = () => ({
       ok: true,
-      build: 231,
+      build: 232,
       singleReactOwner: true,
       heightPx: TOOLBAR_HEIGHT,
       iconSizePx: iconSize,
       iconSizingAuthority: 'TOOLBAR_HEIGHT_MINUS_8',
+      iconAlignment: 'RIGHT',
+      rightInsetPx: RIGHT_INSET_PX,
       mountedControls: ['ABOUT'],
       intervalCount: 0,
       mutationObserverCount: 0,
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V231;
-      delete window.__auditGannzillaTopToolbarV231;
+      delete window.GANNZILLA_TOP_TOOLBAR_V232;
+      delete window.__auditGannzillaTopToolbarV232;
     };
   }, [iconSize]);
 
@@ -48,10 +51,15 @@ export default function GannzillaTopToolbarV231() {
         height: TOOLBAR_HEIGHT,
         boxSizing: 'border-box',
         display: 'flex',
+        flexDirection: 'row',
+        direction: 'ltr',
         alignItems: 'center',
         justifyContent: 'flex-end',
         gap: 3,
-        padding: '4px 5px',
+        paddingTop: 4,
+        paddingBottom: 4,
+        paddingLeft: 5,
+        paddingRight: RIGHT_INSET_PX,
         background: 'linear-gradient(180deg, #fbfbfb 0%, #eeeeee 58%, #e4e4e4 100%)',
         borderTop: '1px solid #ffffff',
         borderBottom: '1px solid #8e8e8e',
