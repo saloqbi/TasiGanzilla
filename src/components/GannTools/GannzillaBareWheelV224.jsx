@@ -6,15 +6,15 @@ import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 const TOOLBAR_HEIGHT = 24;
 
 /**
- * Build 242: stable V228 wheel plus a custom classic language selector whose
- * UK/Saudi flag colors always render above the control.
+ * Build 243: stable V228 wheel plus always-visible United States and Saudi
+ * Arabia flags drawn entirely with CSS, without external images or SVG.
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V242 = true;
-    window.__auditGannzillaBareWheelV242 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V243 = true;
+    window.__auditGannzillaBareWheelV243 = () => ({
       ok: true,
-      build: 242,
+      build: 243,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -26,12 +26,14 @@ export default function GannzillaBareWheelV224() {
       languageControlMounted: true,
       customLanguageSelector: true,
       nativeSelectRemoved: true,
+      cssFlags: true,
+      externalImageCount: 0,
+      svgFlagCount: 0,
       flagAlwaysVisible: true,
       languageControlWidthPx: 96,
       languageControlHeightPx: 22,
-      languageTextColor: '#111111',
       supportedLanguages: ['ar', 'en'],
-      languageFlags: ['SAUDI_ARABIA_SVG', 'UNITED_KINGDOM_SVG'],
+      languageFlags: ['SAUDI_ARABIA_CSS', 'UNITED_STATES_CSS'],
       aboutIconGlyph: 'ⓘ',
       aboutIconAlignment: 'RIGHT',
       aboutLogoNativeSize: '800x800',
@@ -52,8 +54,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V242;
-      delete window.__auditGannzillaBareWheelV242;
+      delete window.GANNZILLA_BARE_WHEEL_V243;
+      delete window.__auditGannzillaBareWheelV243;
     };
   }, []);
 
@@ -70,30 +72,30 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="242"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
+        [data-gannzilla-build="243"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="242"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
+        [data-gannzilla-build="243"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="242"] > div:not([data-gannzilla-toolbar="true"]) > button {
+        [data-gannzilla-build="243"] > div:not([data-gannzilla-toolbar="true"]) > button {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="242"] > div:not([data-gannzilla-toolbar="true"]) > aside {
+        [data-gannzilla-build="243"] > div:not([data-gannzilla-toolbar="true"]) > aside {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
 
-        [data-gannzilla-build="242"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
+        [data-gannzilla-build="243"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
