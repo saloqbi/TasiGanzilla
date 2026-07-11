@@ -15,7 +15,7 @@ import GannzillaToolbarCleanupV151 from './components/GannTools/GannzillaToolbar
 import GannzillaAboutDialogScaleV157 from './components/GannTools/GannzillaAboutDialogScaleV157';
 import GannzillaAboutBrandV159 from './components/GannTools/GannzillaAboutBrandV159';
 import GannzillaAboutClickFixV160 from './components/GannTools/GannzillaAboutClickFixV160';
-import GannzillaWheelPanControlV180 from './components/GannTools/GannzillaWheelPanControlV180';
+import GannzillaWheelNavigationV220 from './components/GannTools/GannzillaWheelNavigationV220';
 import GannzillaExactDrawingToolbarV208 from './components/GannTools/GannzillaExactDrawingToolbarV208';
 import GannzillaFinalDrawingToolbarV214 from './components/GannTools/GannzillaFinalDrawingToolbarV214';
 import GannzillaRestoreWheelZoomMinusV215 from './components/GannTools/GannzillaRestoreWheelZoomMinusV215';
@@ -101,7 +101,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
 
     const url = new URL(window.location.href);
     url.searchParams.set('drawingTools', String(nextVisible));
-    url.searchParams.set('v', '219');
+    url.searchParams.set('v', '220');
     window.location.replace(url.toString());
   }, [visible]);
 
@@ -153,7 +153,7 @@ function GannzillaDrawingToolsUrlToggleV182() {
   );
 }
 
-// Build 219: working wheel drag mode and fit-to-screen overlay controls.
+// Build 220: direct wheel drag and fit controls without the legacy overlay conflict.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -170,7 +170,7 @@ const App = () => {
             max-height: calc(100vh - 128px) !important;
           }
         `}</style>
-        <div data-gannzilla-build="219">
+        <div data-gannzilla-build="220">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
@@ -182,7 +182,7 @@ const App = () => {
               <GannzillaAboutDialogScaleV157 />
               <GannzillaAboutBrandV159 />
               <GannzillaAboutClickFixV160 />
-              <GannzillaWheelPanControlV180 />
+              <GannzillaWheelNavigationV220 />
               <GannzillaUnifiedDrawingPalettesV122 />
               <GannzillaRightDrawingPaletteV126 />
               <GannzillaLeftReferencePaletteV129 />
