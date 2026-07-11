@@ -3,17 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaDrawingPalettesV274 from './GannzillaDrawingPalettesV274';
+import GannzillaDrawingPalettesV275 from './GannzillaDrawingPalettesV275';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 274: exact left/right drawing geometry with a single post-render authority. */
+/** Build 275: both left and right drawing palettes enlarged to 200%. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V274 = true;
-    window.__auditGannzillaBareWheelV274 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V275 = true;
+    window.__auditGannzillaBareWheelV275 = () => ({
       ok: true,
-      build: 274,
+      build: 275,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -24,9 +24,14 @@ export default function GannzillaBareWheelV224() {
       drawingPalettePostRenderGeometryAuthority: true,
       drawingPaletteRightStyleMutationGuard: true,
       drawingPaletteLeftStyleMutationGuard: true,
-      drawingPaletteButtonSizePx: 34,
-      drawingPaletteButtonGapPx: 4,
-      drawingPaletteWidthPx: 46,
+      drawingPaletteScale: 2,
+      bothDrawingPalettesEnlarged: true,
+      leftDrawingPaletteEnlarged: true,
+      rightDrawingPaletteEnlarged: true,
+      drawingPaletteButtonSizePx: 68,
+      drawingPaletteButtonGapPx: 8,
+      drawingPaletteWidthPx: 92,
+      drawingPaletteIconSizePx: 56,
       drawingPaletteSharedSideGapPx: 24,
       drawingPaletteSharedSideGapUrlParam: 'drawingToolsSideGap',
       rightBoundaryUsesVisibleOuterControlLine: true,
@@ -70,8 +75,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V274;
-      delete window.__auditGannzillaBareWheelV274;
+      delete window.GANNZILLA_BARE_WHEEL_V275;
+      delete window.__auditGannzillaBareWheelV275;
     };
   }, []);
 
@@ -119,7 +124,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaDrawingPalettesV274 />
+      <GannzillaDrawingPalettesV275 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
