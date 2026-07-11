@@ -7,7 +7,7 @@ import TestPage from './pages/TestPage';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 import GannzillaBareWheelV224 from './components/GannTools/GannzillaBareWheelV224';
 
-// Build 246: compact direct-image About logo.
+// Build 247: restore the About logo from the embedded brand image.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -18,7 +18,7 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="246">
+        <div data-gannzilla-build="247">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
