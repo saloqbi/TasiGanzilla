@@ -3,32 +3,34 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 
-const TOOLBAR_HEIGHT = 30;
+const TOOLBAR_HEIGHT = 24;
 
 /**
- * Build 239: stable V228 wheel plus exact classic language and information controls.
+ * Build 240: stable V228 wheel plus the original Gannzilla language and
+ * information controls copied from GannzillaExactToolbarV97.
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V239 = true;
-    window.__auditGannzillaBareWheelV239 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V240 = true;
+    window.__auditGannzillaBareWheelV240 = () => ({
       ok: true,
-      build: 239,
+      build: 240,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
       toolbarSingleOwner: true,
-      toolbarRightInsetPx: 38,
-      toolbarControlGapPx: 3,
+      toolbarRightInsetPx: 6,
+      toolbarControlGapPx: 2,
       sideToolbarsMounted: false,
       aboutControlMounted: true,
       languageControlMounted: true,
-      languageControlReferencePixelMatch: true,
+      controlsCopiedFrom: 'GannzillaExactToolbarV97',
       languageControlWidthPx: 100,
+      languageControlHeightPx: 24,
       languageTextColor: '#111111',
       supportedLanguages: ['ar', 'en'],
-      languageFlags: ['SAUDI_ARABIA_SVG', 'UNITED_KINGDOM_SVG'],
-      aboutIconShape: 'CIRCLE',
+      languageFlags: ['SAUDI_ARABIA_EMOJI', 'UNITED_KINGDOM_EMOJI'],
+      aboutIconGlyph: 'ⓘ',
       aboutIconAlignment: 'RIGHT',
       aboutLogoNativeSize: '800x800',
       aboutLogoDisplayScale: 2,
@@ -48,8 +50,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V239;
-      delete window.__auditGannzillaBareWheelV239;
+      delete window.GANNZILLA_BARE_WHEEL_V240;
+      delete window.__auditGannzillaBareWheelV240;
     };
   }, []);
 
@@ -66,30 +68,30 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="239"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
+        [data-gannzilla-build="240"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="239"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
+        [data-gannzilla-build="240"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="239"] > div:not([data-gannzilla-toolbar="true"]) > button {
+        [data-gannzilla-build="240"] > div:not([data-gannzilla-toolbar="true"]) > button {
           display: none !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        [data-gannzilla-build="239"] > div:not([data-gannzilla-toolbar="true"]) > aside {
+        [data-gannzilla-build="240"] > div:not([data-gannzilla-toolbar="true"]) > aside {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
 
-        [data-gannzilla-build="239"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
+        [data-gannzilla-build="240"] > div:not([data-gannzilla-toolbar="true"]) > div:last-of-type {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
