@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 226;
+const BUILD = 227;
 const TWO_PI = Math.PI * 2;
 
 function clamp(value, min, max) {
@@ -76,7 +76,7 @@ function digitalRoot(value) {
 
 function gateColor(value) {
   const root = digitalRoot(value);
-  if (root === 1 || root === 4 || root === 7) return '#d71920';
+  if (root === 1 || root === 4 || root === 7) return '#a10f1f';
   if (root === 2 || root === 5 || root === 8) return '#1457d9';
   return '#111111';
 }
