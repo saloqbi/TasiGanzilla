@@ -1,5 +1,6 @@
 import React from 'react';
 import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
+import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 
 /**
  * Build 224 baseline: canonical wheel + settings panel only.
@@ -19,6 +20,8 @@ export default function GannzillaBareWheelV224() {
       topToolbarMounted: false,
       sideToolbarsMounted: false,
       overlayControlsMounted: false,
+      ringOneMode: 'ANGLES_ONLY',
+      firstNumericRing: 2,
     });
 
     return () => {
@@ -68,6 +71,7 @@ export default function GannzillaBareWheelV224() {
         }
       `}</style>
       <GannzillaClassicFullOptionsV94 />
+      <GannzillaRingTwoNumberingV223 />
     </>
   );
 }
