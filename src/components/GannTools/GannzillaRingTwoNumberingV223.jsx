@@ -1,7 +1,13 @@
 import React from 'react';
 
-const BUILD = 227;
+const BUILD = 228;
 const TWO_PI = Math.PI * 2;
+
+const RING_PALETTE = Object.freeze({
+  shaded: '#d8d4cc',
+  light: '#f7f5f0',
+  stroke: '#c9c4b8',
+});
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -88,7 +94,7 @@ function findWheelCanvas() {
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
 }
 
-function redrawWheelNumberingV226() {
+function redrawWheelNumberingV228() {
   const canvas = findWheelCanvas();
   if (!canvas) return false;
 
@@ -131,8 +137,8 @@ function redrawWheelNumberingV226() {
     const mid = (inner + outer) / 2;
     const numericRingIndex = ring - 2;
     const fill = ring === 1
-      ? '#ffffff'
-      : (numericRingIndex % 2 === 0 ? '#dededb' : '#ffffff');
+      ? RING_PALETTE.light
+      : (numericRingIndex % 2 === 0 ? RING_PALETTE.shaded : RING_PALETTE.light);
     const arcWidth = (TWO_PI * mid) / divisions;
     const maxWidth = arcWidth * 0.78;
 
@@ -144,7 +150,7 @@ function redrawWheelNumberingV226() {
       wedge(ctx, cx, cy, inner, outer, startDegrees, endDegrees);
       ctx.fillStyle = fill;
       ctx.fill();
-      ctx.strokeStyle = '#c5c5c5';
+      ctx.strokeStyle = RING_PALETTE.stroke;
       ctx.lineWidth = 0.82;
       ctx.stroke();
 
@@ -192,7 +198,7 @@ export default function GannzillaRingTwoNumberingV223() {
 
     const draw = () => {
       frame = 0;
-      if (!disposed) redrawWheelNumberingV226();
+      if (!disposed) redrawWheelNumberingV228();
     };
 
     const schedule = (delay = 0) => {
@@ -223,12 +229,13 @@ export default function GannzillaRingTwoNumberingV223() {
     window.addEventListener('resize', scheduleAfterUiChange);
     window.addEventListener('gannzilla:ring-two-numbering-refresh', scheduleAfterUiChange);
 
-    window.GANNZILLA_RING_INDEX_V226 = true;
-    window.__auditGannzillaRingIndexV226 = () => ({
+    window.GANNZILLA_RING_INDEX_V228 = true;
+    window.__auditGannzillaRingIndexV228 = () => ({
       ok: Boolean(findWheelCanvas()),
       build: BUILD,
       ring1Mode: 'INDEX_1_TO_36',
       gateColors: { red: '1/4/7', blue: '2/5/8', black: '3/6/9' },
+      ringPalette: RING_PALETTE,
       allNumericRingsGateColored: true,
       numericRingCount: Math.round(numberParam('levels', 10, 1, 12)),
       firstNumericRing: 2,
@@ -246,8 +253,8 @@ export default function GannzillaRingTwoNumberingV223() {
       document.removeEventListener('change', scheduleAfterUiChange, true);
       window.removeEventListener('resize', scheduleAfterUiChange);
       window.removeEventListener('gannzilla:ring-two-numbering-refresh', scheduleAfterUiChange);
-      delete window.GANNZILLA_RING_INDEX_V226;
-      delete window.__auditGannzillaRingIndexV226;
+      delete window.GANNZILLA_RING_INDEX_V228;
+      delete window.__auditGannzillaRingIndexV228;
     };
   }, []);
 
