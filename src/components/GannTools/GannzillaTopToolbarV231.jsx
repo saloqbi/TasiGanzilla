@@ -55,6 +55,7 @@ export default function GannzillaTopToolbarV231() {
   return (
     <div
       data-gannzilla-toolbar="true"
+      data-gannzilla-toolbar-build={BUILD}
       role="toolbar"
       aria-label="شريط أدوات كوكبة الأرقام السحرية"
       style={{
