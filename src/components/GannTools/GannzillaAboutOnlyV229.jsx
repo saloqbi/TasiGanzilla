@@ -119,6 +119,7 @@ export default function GannzillaAboutOnlyV229({ toolbarHeight = 24 }) {
       {open && (
         <div
           data-gannzilla-original-about="true"
+          data-gannzilla-language-control="true"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) close();
