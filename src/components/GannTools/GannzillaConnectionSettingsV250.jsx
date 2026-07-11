@@ -1,7 +1,6 @@
 import React from 'react';
-import { useLanguage } from '../../context/LanguageContext';
 
-const BUILD = 250;
+const BUILD = 252;
 const STORAGE_KEY = 'tasi-gannzilla-connection-settings-v1';
 const DEFAULT_SETTINGS = Object.freeze({
   useProxy: false,
@@ -25,26 +24,82 @@ function readSettings() {
 
 function ConnectionGlyph() {
   return (
-    <svg width="17" height="17" viewBox="0 0 17 17" aria-hidden="true" focusable="false">
-      <rect x="1.5" y="2" width="9" height="7" rx="0.7" fill="#f7fbff" stroke="#527da8" />
-      <rect x="4" y="10.5" width="4" height="1.2" fill="#527da8" />
-      <rect x="3" y="12" width="6" height="1.2" fill="#527da8" />
-      <path d="M11.5 5.2h2.2v2.1h1.8v3.3h-1.2V8.5h-2.8z" fill="#2a84c9" stroke="#1d5f98" strokeWidth="0.45" />
-      <circle cx="13.9" cy="12.6" r="1.4" fill="#2fad52" stroke="#187634" strokeWidth="0.55" />
-    </svg>
+    <span
+      aria-hidden="true"
+      style={{
+        position: 'relative',
+        display: 'block',
+        width: 16,
+        height: 16,
+      }}
+    >
+      <span
+        style={{
+          position: 'absolute',
+          left: 1,
+          top: 2,
+          width: 9,
+          height: 7,
+          border: '1px solid #777',
+          background: '#f4f4f4',
+          boxSizing: 'border-box',
+        }}
+      />
+      <span
+        style={{
+          position: 'absolute',
+          left: 4,
+          top: 10,
+          width: 4,
+          height: 1,
+          background: '#777',
+        }}
+      />
+      <span
+        style={{
+          position: 'absolute',
+          left: 3,
+          top: 12,
+          width: 6,
+          height: 1,
+          background: '#777',
+        }}
+      />
+      <span
+        style={{
+          position: 'absolute',
+          right: 1,
+          top: 4,
+          width: 5,
+          height: 7,
+          border: '1px solid #5a7d9c',
+          background: '#d9edf8',
+          boxSizing: 'border-box',
+        }}
+      />
+      <span
+        style={{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: 4,
+          height: 4,
+          border: '1px solid #35723f',
+          borderRadius: '50%',
+          background: '#45ad5c',
+          boxSizing: 'border-box',
+        }}
+      />
+    </span>
   );
 }
 
 export default function GannzillaConnectionSettingsV250({ toolbarHeight = 24 }) {
-  const { lang } = useLanguage();
-  const isArabic = lang === 'ar' || new URLSearchParams(window.location.search).get('lang') === 'ar';
   const [open, setOpen] = React.useState(false);
   const [settings, setSettings] = React.useState(readSettings);
-  const [status, setStatus] = React.useState({ type: 'idle', text: '' });
+  const [status, setStatus] = React.useState('');
   const [testing, setTesting] = React.useState(false);
   const iconSize = Math.max(22, toolbarHeight);
-
-  const t = React.useCallback((arabic, english) => (isArabic ? arabic : english), [isArabic]);
 
   React.useEffect(() => {
     const onEscape = (event) => {
@@ -52,12 +107,16 @@ export default function GannzillaConnectionSettingsV250({ toolbarHeight = 24 }) 
     };
     window.addEventListener('keydown', onEscape);
 
-    window.GANNZILLA_CONNECTION_SETTINGS_V250 = true;
-    window.__auditGannzillaConnectionSettingsV250 = () => ({
+    window.GANNZILLA_CONNECTION_SETTINGS_V252 = true;
+    window.__auditGannzillaConnectionSettingsV252 = () => ({
       ok: true,
       build: BUILD,
       iconMounted: true,
       dialogFunctional: true,
+      copiedVisualReference: 'GANNZILLA_CONNECTION_SETTINGS_EXACT_222x211',
+      dialogWidthPx: 220,
+      dialogHeightPx: 207,
+      fixedEnglishReferenceLabels: true,
       settingsPersisted: true,
       testButtonFunctional: true,
       supportedTypes: ['HTTP', 'HTTPS', 'SOCKS4', 'SOCKS5'],
@@ -67,36 +126,33 @@ export default function GannzillaConnectionSettingsV250({ toolbarHeight = 24 }) 
 
     return () => {
       window.removeEventListener('keydown', onEscape);
-      delete window.GANNZILLA_CONNECTION_SETTINGS_V250;
-      delete window.__auditGannzillaConnectionSettingsV250;
+      delete window.GANNZILLA_CONNECTION_SETTINGS_V252;
+      delete window.__auditGannzillaConnectionSettingsV252;
     };
   }, [open, settings.useProxy]);
 
   const update = (key, value) => {
     setSettings((previous) => ({ ...previous, [key]: value }));
-    setStatus({ type: 'idle', text: '' });
+    setStatus('');
   };
 
   const validate = () => {
     if (!settings.useProxy) return null;
-    if (!settings.server.trim()) return t('أدخل عنوان الخادم.', 'Enter the server address.');
+    if (!settings.server.trim()) return 'Enter server address';
     const port = Number(settings.port);
-    if (!Number.isInteger(port) || port < 1 || port > 65535) {
-      return t('أدخل منفذًا صحيحًا من 1 إلى 65535.', 'Enter a valid port from 1 to 65535.');
-    }
+    if (!Number.isInteger(port) || port < 1 || port > 65535) return 'Invalid port';
     return null;
   };
 
   const testConnection = async () => {
     const validationError = validate();
     if (validationError) {
-      setStatus({ type: 'error', text: validationError });
+      setStatus(validationError);
       return;
     }
 
     setTesting(true);
-    setStatus({ type: 'working', text: t('جارٍ اختبار الاتصال…', 'Testing connection…') });
-
+    setStatus('Testing...');
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 6000);
 
@@ -107,20 +163,9 @@ export default function GannzillaConnectionSettingsV250({ toolbarHeight = 24 }) 
         signal: controller.signal,
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      setStatus({
-        type: 'success',
-        text: settings.useProxy
-          ? t('تم التحقق من الاتصال بالموقع وحفظ إعدادات الوكيل محليًا.', 'Site connection verified and proxy settings are ready to save locally.')
-          : t('الاتصال المباشر يعمل بنجاح.', 'Direct connection is working.'),
-      });
+      setStatus('Connection successful');
     } catch {
-      setStatus({
-        type: 'error',
-        text: navigator.onLine
-          ? t('تعذر إكمال اختبار الخادم. تحقق من الإعدادات ثم أعد المحاولة.', 'The server test could not be completed. Check the settings and try again.')
-          : t('الجهاز غير متصل بالإنترنت.', 'The device is offline.'),
-      });
+      setStatus(navigator.onLine ? 'Connection test failed' : 'Offline');
     } finally {
       window.clearTimeout(timer);
       setTesting(false);
@@ -130,66 +175,81 @@ export default function GannzillaConnectionSettingsV250({ toolbarHeight = 24 }) 
   const save = () => {
     const validationError = validate();
     if (validationError) {
-      setStatus({ type: 'error', text: validationError });
+      setStatus(validationError);
       return;
     }
 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      window.dispatchEvent(new CustomEvent('gannzilla:connection-settings-change', { detail: { ...settings } }));
+      setOpen(false);
     } catch {
-      setStatus({ type: 'error', text: t('تعذر حفظ الإعدادات في المتصفح.', 'Unable to save settings in the browser.') });
-      return;
+      setStatus('Unable to save');
     }
-
-    window.dispatchEvent(new CustomEvent('gannzilla:connection-settings-change', { detail: { ...settings } }));
-    setStatus({ type: 'success', text: t('تم حفظ إعدادات الاتصال.', 'Connection settings saved.') });
-    window.setTimeout(() => setOpen(false), 350);
   };
 
-  const resetAndClose = () => {
+  const cancel = () => {
     setSettings(readSettings());
-    setStatus({ type: 'idle', text: '' });
+    setStatus('');
     setOpen(false);
   };
 
-  const inputStyle = {
+  const fieldStyle = {
     width: '100%',
-    height: 24,
+    height: 20,
+    minHeight: 20,
+    padding: '1px 4px',
     border: '1px solid #aeb4ba',
+    borderRadius: 0,
     background: '#ffffff',
+    color: '#222',
+    fontFamily: 'Segoe UI, Tahoma, Arial, sans-serif',
+    fontSize: 9,
+    lineHeight: '16px',
     boxSizing: 'border-box',
-    padding: '2px 6px',
-    fontFamily: 'Tahoma, Segoe UI, Arial, sans-serif',
-    fontSize: 12,
-    color: '#222222',
+    outline: 'none',
   };
 
-  const disabledInputStyle = {
-    ...inputStyle,
-    background: '#e4e4e4',
-    color: '#777777',
+  const disabledFieldStyle = {
+    ...fieldStyle,
+    background: '#e5e5e5',
+    color: '#7c7c7c',
+  };
+
+  const labelStyle = {
+    display: 'block',
+    marginBottom: 2,
+    color: '#555',
+    fontSize: 8,
+    lineHeight: '10px',
+    whiteSpace: 'nowrap',
   };
 
   const buttonStyle = {
-    minWidth: 58,
-    height: 25,
-    border: '1px solid #8e959b',
+    height: 16,
+    minWidth: 28,
+    padding: '0 5px',
+    border: '1px solid #9aa1a7',
+    borderRadius: 0,
     background: 'linear-gradient(#ffffff,#e8e8e8)',
-    color: '#222222',
-    fontFamily: 'Tahoma, Segoe UI, Arial, sans-serif',
-    fontSize: 12,
+    color: '#222',
+    fontFamily: 'Segoe UI, Tahoma, Arial, sans-serif',
+    fontSize: 8,
+    lineHeight: '13px',
     cursor: 'pointer',
+    boxSizing: 'border-box',
   };
 
   return (
     <>
       <button
         type="button"
-        aria-label={t('إعدادات الاتصال', 'Connection settings')}
-        title={t('إعدادات الاتصال', 'Connection settings')}
+        data-gannzilla-connection-control="true"
+        aria-label="Connection settings"
+        title="Connection settings"
         onClick={() => {
           setSettings(readSettings());
-          setStatus({ type: 'idle', text: '' });
+          setStatus('');
           setOpen(true);
         }}
         style={{
@@ -197,6 +257,7 @@ export default function GannzillaConnectionSettingsV250({ toolbarHeight = 24 }) 
           height: iconSize,
           minWidth: iconSize,
           minHeight: iconSize,
+          margin: 0,
           padding: 0,
           display: 'grid',
           placeItems: 'center',
@@ -213,9 +274,11 @@ export default function GannzillaConnectionSettingsV250({ toolbarHeight = 24 }) 
 
       {open && (
         <div
+          data-gannzilla-language-control="true"
+          data-gannzilla-connection-dialog="true"
           role="presentation"
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) resetAndClose();
+            if (event.target === event.currentTarget) cancel();
           }}
           style={{
             position: 'fixed',
@@ -223,163 +286,213 @@ export default function GannzillaConnectionSettingsV250({ toolbarHeight = 24 }) 
             zIndex: 2147483647,
             display: 'grid',
             placeItems: 'center',
-            background: 'rgba(0,0,0,.25)',
-            padding: 12,
+            padding: 0,
+            background: 'transparent',
             boxSizing: 'border-box',
+            direction: 'ltr',
           }}
         >
           <section
             role="dialog"
             aria-modal="true"
-            aria-labelledby="gannzilla-connection-title-v250"
-            dir={isArabic ? 'rtl' : 'ltr'}
+            aria-labelledby="gannzilla-connection-title-v252"
+            lang="en"
+            dir="ltr"
             style={{
-              width: 'min(430px, calc(100vw - 24px))',
-              background: '#f4f4f4',
-              border: '1px solid #8c8c8c',
-              boxShadow: '0 12px 34px rgba(0,0,0,.34)',
-              color: '#222222',
-              fontFamily: 'Tahoma, Segoe UI, Arial, sans-serif',
+              width: 220,
+              height: 207,
+              background: '#f3f3f3',
+              border: '1px solid #8e8e8e',
+              boxShadow: '0 7px 18px rgba(0,0,0,.28)',
+              color: '#222',
+              fontFamily: 'Segoe UI, Tahoma, Arial, sans-serif',
               boxSizing: 'border-box',
+              overflow: 'hidden',
+              userSelect: 'text',
             }}
           >
             <header
               style={{
-                height: 34,
+                height: 28,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                padding: '0 9px',
+                padding: '0 7px',
                 background: '#ffffff',
-                borderBottom: '1px solid #c7c7c7',
-                fontSize: 13,
-                fontWeight: 700,
+                borderBottom: '1px solid #d0d0d0',
+                boxSizing: 'border-box',
+                fontSize: 9,
+                fontWeight: 600,
               }}
             >
-              <span id="gannzilla-connection-title-v250">{t('إعدادات الاتصال', 'Connection settings')}</span>
+              <span id="gannzilla-connection-title-v252">Connection settings</span>
               <button
                 type="button"
-                aria-label={t('إغلاق', 'Close')}
-                onClick={resetAndClose}
-                style={{ border: 0, background: 'transparent', fontSize: 20, lineHeight: 1, cursor: 'pointer' }}
+                aria-label="Close"
+                onClick={cancel}
+                style={{
+                  width: 27,
+                  height: 27,
+                  marginRight: -7,
+                  padding: 0,
+                  border: 0,
+                  background: 'transparent',
+                  color: '#222',
+                  fontFamily: 'Segoe UI, Arial, sans-serif',
+                  fontSize: 15,
+                  fontWeight: 300,
+                  lineHeight: 1,
+                  cursor: 'pointer',
+                }}
               >
                 ×
               </button>
             </header>
 
-            <div style={{ padding: 12 }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10, fontSize: 12, cursor: 'pointer' }}>
+            <div style={{ position: 'relative', height: 178, padding: '7px 10px 7px', boxSizing: 'border-box' }}>
+              <label
+                style={{
+                  height: 14,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  margin: 0,
+                  color: '#555',
+                  fontSize: 8,
+                  lineHeight: '12px',
+                  cursor: 'pointer',
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={settings.useProxy}
                   onChange={(event) => update('useProxy', event.target.checked)}
+                  style={{ width: 10, height: 10, margin: 0 }}
                 />
-                <span>{t('استخدام خادم وكيل', 'Use proxy')}</span>
+                <span>Use proxy</span>
               </label>
 
-              <div style={{ display: 'grid', gap: 8 }}>
-                <label style={{ display: 'grid', gap: 3, fontSize: 12 }}>
-                  <span>{t('النوع:', 'Type:')}</span>
-                  <select
-                    value={settings.type}
+              <div style={{ marginTop: 5 }}>
+                <label style={labelStyle}>Type:</label>
+                <select
+                  value={settings.type}
+                  disabled={!settings.useProxy}
+                  onChange={(event) => update('type', event.target.value)}
+                  style={settings.useProxy ? fieldStyle : disabledFieldStyle}
+                >
+                  <option value="HTTP">HTTP</option>
+                  <option value="HTTPS">HTTPS</option>
+                  <option value="SOCKS4">SOCKS4</option>
+                  <option value="SOCKS5">SOCKS5</option>
+                </select>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '145px 49px', gap: 6, marginTop: 5 }}>
+                <label style={{ display: 'block' }}>
+                  <span style={labelStyle}>Server:</span>
+                  <input
+                    type="text"
+                    value={settings.server}
                     disabled={!settings.useProxy}
-                    onChange={(event) => update('type', event.target.value)}
-                    style={settings.useProxy ? inputStyle : disabledInputStyle}
-                  >
-                    <option value="HTTP">HTTP</option>
-                    <option value="HTTPS">HTTPS</option>
-                    <option value="SOCKS4">SOCKS4</option>
-                    <option value="SOCKS5">SOCKS5</option>
-                  </select>
+                    onChange={(event) => update('server', event.target.value)}
+                    style={settings.useProxy ? fieldStyle : disabledFieldStyle}
+                    autoComplete="off"
+                  />
                 </label>
+                <label style={{ display: 'block' }}>
+                  <span style={labelStyle}>Port:</span>
+                  <input
+                    type="number"
+                    value={settings.port}
+                    disabled={!settings.useProxy}
+                    min="1"
+                    max="65535"
+                    onChange={(event) => update('port', event.target.value)}
+                    style={settings.useProxy ? fieldStyle : disabledFieldStyle}
+                  />
+                </label>
+              </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 92px', gap: 8 }}>
-                  <label style={{ display: 'grid', gap: 3, fontSize: 12 }}>
-                    <span>{t('الخادم:', 'Server:')}</span>
-                    <input
-                      type="text"
-                      value={settings.server}
-                      disabled={!settings.useProxy}
-                      onChange={(event) => update('server', event.target.value)}
-                      style={settings.useProxy ? inputStyle : disabledInputStyle}
-                      autoComplete="off"
-                    />
-                  </label>
-                  <label style={{ display: 'grid', gap: 3, fontSize: 12 }}>
-                    <span>{t('المنفذ:', 'Port:')}</span>
-                    <input
-                      type="number"
-                      value={settings.port}
-                      disabled={!settings.useProxy}
-                      min="1"
-                      max="65535"
-                      onChange={(event) => update('port', event.target.value)}
-                      style={settings.useProxy ? inputStyle : disabledInputStyle}
-                    />
-                  </label>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                  <label style={{ display: 'grid', gap: 3, fontSize: 12 }}>
-                    <span>{t('اسم الدخول:', 'Login:')}</span>
-                    <input
-                      type="text"
-                      value={settings.login}
-                      disabled={!settings.useProxy}
-                      onChange={(event) => update('login', event.target.value)}
-                      style={settings.useProxy ? inputStyle : disabledInputStyle}
-                      autoComplete="username"
-                    />
-                  </label>
-                  <label style={{ display: 'grid', gap: 3, fontSize: 12 }}>
-                    <span>{t('كلمة المرور:', 'Password:')}</span>
-                    <input
-                      type="password"
-                      value={settings.password}
-                      disabled={!settings.useProxy}
-                      onChange={(event) => update('password', event.target.value)}
-                      style={settings.useProxy ? inputStyle : disabledInputStyle}
-                      autoComplete="current-password"
-                    />
-                  </label>
-                </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '97px 97px', gap: 6, marginTop: 5 }}>
+                <label style={{ display: 'block' }}>
+                  <span style={labelStyle}>Login:</span>
+                  <input
+                    type="text"
+                    value={settings.login}
+                    disabled={!settings.useProxy}
+                    onChange={(event) => update('login', event.target.value)}
+                    style={settings.useProxy ? fieldStyle : disabledFieldStyle}
+                    autoComplete="username"
+                  />
+                </label>
+                <label style={{ display: 'block' }}>
+                  <span style={labelStyle}>Password:</span>
+                  <input
+                    type="password"
+                    value={settings.password}
+                    disabled={!settings.useProxy}
+                    onChange={(event) => update('password', event.target.value)}
+                    style={settings.useProxy ? fieldStyle : disabledFieldStyle}
+                    autoComplete="current-password"
+                  />
+                </label>
               </div>
 
               <div
                 aria-live="polite"
                 style={{
-                  minHeight: 34,
-                  marginTop: 10,
-                  padding: status.text ? '7px 8px' : 0,
-                  border: status.text ? '1px solid #c6c6c6' : 0,
-                  background: status.type === 'success' ? '#eaf7ed' : status.type === 'error' ? '#fff0f0' : status.text ? '#eef5fb' : 'transparent',
-                  color: status.type === 'success' ? '#176b2d' : status.type === 'error' ? '#9d1e1e' : '#245477',
-                  fontSize: 12,
-                  boxSizing: 'border-box',
+                  position: 'absolute',
+                  left: 11,
+                  right: 11,
+                  bottom: 29,
+                  height: 13,
+                  overflow: 'hidden',
+                  color: /failed|invalid|unable|offline|enter/i.test(status) ? '#a12626' : '#38658a',
+                  fontSize: 8,
+                  lineHeight: '13px',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
                 }}
               >
-                {status.text}
+                {status}
               </div>
 
               <footer
                 style={{
-                  marginTop: 10,
+                  position: 'absolute',
+                  left: 10,
+                  right: 8,
+                  bottom: 7,
+                  height: 16,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  gap: 8,
-                  direction: isArabic ? 'rtl' : 'ltr',
                 }}
               >
-                <button type="button" onClick={testConnection} disabled={testing} style={{ ...buttonStyle, opacity: testing ? 0.6 : 1 }}>
-                  {testing ? t('جارٍ الاختبار…', 'Testing…') : t('اختبار', 'Test')}
+                <button
+                  type="button"
+                  onClick={testConnection}
+                  disabled={testing}
+                  style={{ ...buttonStyle, opacity: testing ? 0.65 : 1 }}
+                >
+                  Test
                 </button>
-                <div style={{ display: 'flex', gap: 7 }}>
-                  <button type="button" onClick={save} style={{ ...buttonStyle, borderColor: '#1683d8', boxShadow: 'inset 0 0 0 1px #83bce9' }}>
-                    {t('موافق', 'OK')}
+
+                <div style={{ display: 'flex', gap: 5 }}>
+                  <button
+                    type="button"
+                    onClick={save}
+                    style={{
+                      ...buttonStyle,
+                      minWidth: 29,
+                      borderColor: '#1683d8',
+                      boxShadow: 'inset 0 0 0 1px #8dc2e9',
+                    }}
+                  >
+                    OK
                   </button>
-                  <button type="button" onClick={resetAndClose} style={buttonStyle}>
-                    {t('إلغاء', 'Cancel')}
+                  <button type="button" onClick={cancel} style={{ ...buttonStyle, minWidth: 31 }}>
+                    Cancel
                   </button>
                 </div>
               </footer>
