@@ -1,10 +1,10 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 
-const CONTROL_WIDTH = 96;
-const CONTROL_HEIGHT = 22;
-const FLAG_WIDTH = 17;
-const FLAG_HEIGHT = 11;
+const CONTROL_WIDTH = 100;
+const CONTROL_HEIGHT = 24;
+const FLAG_WIDTH = 18;
+const FLAG_HEIGHT = 12;
 const ARROW_WIDTH = 18;
 
 function AmericanFlag() {
@@ -17,7 +17,7 @@ function AmericanFlag() {
         width: FLAG_WIDTH,
         height: FLAG_HEIGHT,
         overflow: 'hidden',
-        background: 'repeating-linear-gradient(to bottom,#b22234 0,#b22234 0.846px,#ffffff 0.846px,#ffffff 1.692px)',
+        background: 'repeating-linear-gradient(to bottom,#b22234 0,#b22234 0.923px,#ffffff 0.923px,#ffffff 1.846px)',
         boxShadow: '0 0 0 1px rgba(0,0,0,.22)',
       }}
     >
@@ -26,8 +26,8 @@ function AmericanFlag() {
           position: 'absolute',
           left: 0,
           top: 0,
-          width: 7.5,
-          height: 6,
+          width: 8,
+          height: 6.5,
           backgroundColor: '#3c3b6e',
           backgroundImage: 'radial-gradient(circle,#ffffff 0 0.45px,transparent 0.55px)',
           backgroundSize: '2px 2px',
@@ -57,8 +57,8 @@ function SaudiArabiaFlag() {
           left: 2,
           right: 2,
           top: 2,
-          height: 4,
-          background: 'repeating-linear-gradient(to bottom,#ffffff 0,#ffffff .7px,transparent .7px,transparent 1.45px)',
+          height: 4.5,
+          background: 'repeating-linear-gradient(to bottom,#ffffff 0,#ffffff .75px,transparent .75px,transparent 1.5px)',
         }}
       />
       <span
@@ -105,10 +105,10 @@ export default function GannzillaLanguageToggleV237() {
   }, [open]);
 
   React.useEffect(() => {
-    window.GANNZILLA_LANGUAGE_TOGGLE_V243 = true;
-    window.__auditGannzillaLanguageToggleV243 = () => ({
+    window.GANNZILLA_LANGUAGE_TOGGLE_V244 = true;
+    window.__auditGannzillaLanguageToggleV244 = () => ({
       ok: true,
-      build: 243,
+      build: 244,
       customSelector: true,
       cssFlags: true,
       externalImageCount: 0,
@@ -123,6 +123,7 @@ export default function GannzillaLanguageToggleV237() {
       arrowWidthPx: ARROW_WIDTH,
       englishFlag: 'UNITED_STATES_CSS',
       arabicFlag: 'SAUDI_ARABIA_CSS',
+      controlsMatchToolbarHeight: true,
       usFlagColors: ['#b22234', '#ffffff', '#3c3b6e'],
       saFlagColors: ['#006c35', '#ffffff'],
       dropdownOpen: open,
@@ -131,8 +132,8 @@ export default function GannzillaLanguageToggleV237() {
     });
 
     return () => {
-      delete window.GANNZILLA_LANGUAGE_TOGGLE_V243;
-      delete window.__auditGannzillaLanguageToggleV243;
+      delete window.GANNZILLA_LANGUAGE_TOGGLE_V244;
+      delete window.__auditGannzillaLanguageToggleV244;
     };
   }, [lang, open]);
 
@@ -169,6 +170,7 @@ export default function GannzillaLanguageToggleV237() {
         width: CONTROL_WIDTH,
         height: CONTROL_HEIGHT,
         flex: `0 0 ${CONTROL_WIDTH}px`,
+        alignSelf: 'stretch',
         direction: 'ltr',
         zIndex: 650,
       }}
