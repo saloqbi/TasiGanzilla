@@ -6,6 +6,7 @@ import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
 import GannzillaPanelFixedLeftV315 from './GannzillaPanelFixedLeftV315';
+import GannzillaPanelReadableTypographyV316 from './GannzillaPanelReadableTypographyV316';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
@@ -13,13 +14,19 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 315: language changes content direction only; the settings panel remains fixed on the left. */
+/** Build 316: enlarge every small settings-panel word while preserving the fixed-left layout. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V315 = true;
-    window.__auditGannzillaBareWheelV315 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V316 = true;
+    window.__auditGannzillaBareWheelV316 = () => ({
       ok: true,
-      build: 315,
+      build: 316,
+      settingsPanelTypographyReadable: true,
+      panelSmallWordsMatchLayoutHeadingReadability: true,
+      targetPanelFontSizePx: 14,
+      minimumPanelFontSizePx: 13,
+      panelFieldsMinimumHeightPx: 26,
+      typographyAuthorityMounted: true,
       settingsPanelFixedSide: 'left',
       settingsPanelSideIndependentFromLanguage: true,
       arabicTranslationChangesTextOnly: true,
@@ -77,7 +84,7 @@ export default function GannzillaBareWheelV224() {
       horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'V315_FIXED_LEFT_PANEL_WITH_V314_SAFE_FULLSCREEN_AND_V312_TOP_SCROLLBAR',
+      movementAuthority: 'V316_READABLE_PANEL_TEXT_WITH_V315_FIXED_LEFT_PANEL_AND_V314_SAFE_FULLSCREEN',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -134,8 +141,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V315;
-      delete window.__auditGannzillaBareWheelV315;
+      delete window.GANNZILLA_BARE_WHEEL_V316;
+      delete window.__auditGannzillaBareWheelV316;
     };
   }, []);
 
@@ -178,6 +185,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaPanelFrameCleanupV297 />
       <GannzillaPanelFullWidthV302 />
       <GannzillaPanelFixedLeftV315 />
+      <GannzillaPanelReadableTypographyV316 />
       <GannzillaWheelQuarterHiddenPanV303 />
       <GannzillaPagePanScrollbarsV305 />
       <GannzillaHorizontalPanAssistV308 />
