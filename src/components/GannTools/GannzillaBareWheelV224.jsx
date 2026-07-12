@@ -8,16 +8,17 @@ import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
+import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopPlacementV312';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 311: preserve vertical navigation and force the compact horizontal control above the bottom edge. */
+/** Build 312: preserve vertical navigation and place the horizontal control below the top icon toolbar. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V311 = true;
-    window.__auditGannzillaBareWheelV311 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V312 = true;
+    window.__auditGannzillaBareWheelV312 = () => ({
       ok: true,
-      build: 311,
+      build: 312,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -40,9 +41,9 @@ export default function GannzillaBareWheelV224() {
       keyboardArrowUpArrowDownEnabled: true,
       verticalBehaviorUnchangedFromV307: true,
       portalHorizontalPanBarMounted: true,
-      portalHorizontalBarCannotBeClippedByAppFrame: true,
+      horizontalBarPlacedBelowTopToolbar: true,
+      horizontalBarTopPx: 24,
       horizontalBarHeightPx: 14,
-      horizontalBarBottomPx: 18,
       horizontalThumbWidthPx: 18,
       horizontalButtonWidthPx: 14,
       horizontalMovementRangePx: 80000,
@@ -54,7 +55,7 @@ export default function GannzillaBareWheelV224() {
       horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'V307_VERTICAL_PRESERVED_WITH_V311_PORTAL_HORIZONTAL_SCROLLBAR',
+      movementAuthority: 'V307_VERTICAL_PRESERVED_WITH_V312_TOP_HORIZONTAL_SCROLLBAR',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -111,8 +112,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V311;
-      delete window.__auditGannzillaBareWheelV311;
+      delete window.GANNZILLA_BARE_WHEEL_V312;
+      delete window.__auditGannzillaBareWheelV312;
     };
   }, []);
 
@@ -157,6 +158,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaWheelQuarterHiddenPanV303 />
       <GannzillaPagePanScrollbarsV305 />
       <GannzillaHorizontalPanAssistV308 />
+      <GannzillaHorizontalPanTopPlacementV312 />
     </>
   );
 }
