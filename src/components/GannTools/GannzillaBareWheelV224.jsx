@@ -5,6 +5,7 @@ import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
+import GannzillaPanelFixedLeftV315 from './GannzillaPanelFixedLeftV315';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
@@ -12,13 +13,22 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 314: remove the unsafe nested fixed layout while preserving all wheel, panel, and movement work. */
+/** Build 315: language changes content direction only; the settings panel remains fixed on the left. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V314 = true;
-    window.__auditGannzillaBareWheelV314 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V315 = true;
+    window.__auditGannzillaBareWheelV315 = () => ({
       ok: true,
-      build: 314,
+      build: 315,
+      settingsPanelFixedSide: 'left',
+      settingsPanelSideIndependentFromLanguage: true,
+      arabicTranslationChangesTextOnly: true,
+      arabicPanelContentDirection: 'rtl',
+      englishPanelContentDirection: 'ltr',
+      wheelPositionUnaffectedByLanguage: true,
+      wheelViewportUnaffectedByLanguage: true,
+      noPanelSideJumpDuringLanguageSwitch: true,
+      fixedLeftPanelAuthorityMounted: true,
       fullscreenBlankScreenRegressionFixed: true,
       nativeFullscreenUsesBrowserLayoutAuthority: true,
       legacyV313NestedFixedViewportRemoved: true,
@@ -67,7 +77,7 @@ export default function GannzillaBareWheelV224() {
       horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'V314_SAFE_FULLSCREEN_WITH_V312_TOP_HORIZONTAL_SCROLLBAR',
+      movementAuthority: 'V315_FIXED_LEFT_PANEL_WITH_V314_SAFE_FULLSCREEN_AND_V312_TOP_SCROLLBAR',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -124,8 +134,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V314;
-      delete window.__auditGannzillaBareWheelV314;
+      delete window.GANNZILLA_BARE_WHEEL_V315;
+      delete window.__auditGannzillaBareWheelV315;
     };
   }, []);
 
@@ -167,6 +177,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaArabicLocalizationV248 />
       <GannzillaPanelFrameCleanupV297 />
       <GannzillaPanelFullWidthV302 />
+      <GannzillaPanelFixedLeftV315 />
       <GannzillaWheelQuarterHiddenPanV303 />
       <GannzillaPagePanScrollbarsV305 />
       <GannzillaHorizontalPanAssistV308 />
