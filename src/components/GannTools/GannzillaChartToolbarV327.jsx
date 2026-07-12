@@ -1,43 +1,49 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = 327;
+const BUILD = 328;
+const HOST_ID = 'gannzilla-clean-property-panel-v325';
 const PANEL_STATE_KEY = 'tasi-gannzilla-canonical-panel-v326';
-const CHARTS_KEY = 'tasi-gannzilla-chart-registry-v327';
-const ACTIVE_KEY = 'tasi-gannzilla-active-chart-v327';
+const CHARTS_KEY = 'tasi-gannzilla-chart-registry-v328';
+const ACTIVE_KEY = 'tasi-gannzilla-active-chart-v328';
 
-const clone = (value) => JSON.parse(JSON.stringify(value));
+const clone = (value) => JSON.parse(JSON.stringify(value ?? {}));
 
 function readCurrentPanelState() {
   try {
     const runtime = window.__gannzillaCanonicalPanelStateV326;
     if (runtime && typeof runtime === 'object') return clone(runtime);
     const saved = JSON.parse(localStorage.getItem(PANEL_STATE_KEY) || 'null');
-    return saved && typeof saved === 'object' ? saved : {};
+    return saved && typeof saved === 'object' ? clone(saved) : {};
   } catch (_) {
     return {};
   }
 }
 
-function defaultCharts() {
+function createDefaultCharts() {
   return [{ id: 'default', name: 'Default', state: readCurrentPanelState() }];
 }
 
 function loadCharts() {
   try {
     const parsed = JSON.parse(localStorage.getItem(CHARTS_KEY) || 'null');
-    if (!Array.isArray(parsed) || parsed.length === 0) return defaultCharts();
-    return parsed
+    if (!Array.isArray(parsed) || parsed.length === 0) return createDefaultCharts();
+    const valid = parsed
       .filter((chart) => chart && chart.id && chart.name && chart.state && typeof chart.state === 'object')
       .map((chart) => ({ id: String(chart.id), name: String(chart.name), state: clone(chart.state) }));
+    return valid.length ? valid : createDefaultCharts();
   } catch (_) {
-    return defaultCharts();
+    return createDefaultCharts();
   }
 }
 
 function loadActiveId(charts) {
-  const saved = localStorage.getItem(ACTIVE_KEY);
-  return charts.some((chart) => chart.id === saved) ? saved : charts[0].id;
+  try {
+    const saved = localStorage.getItem(ACTIVE_KEY);
+    return charts.some((chart) => chart.id === saved) ? saved : charts[0].id;
+  } catch (_) {
+    return charts[0].id;
+  }
 }
 
 function isTypingTarget(target) {
@@ -47,25 +53,31 @@ function isTypingTarget(target) {
     || target?.isContentEditable === true;
 }
 
-const buttonBase = {
-  minWidth: 25,
-  height: 24,
-  padding: '0 5px',
-  border: '1px solid #a8a8a8',
+const buttonStyle = {
+  width: 27,
+  minWidth: 27,
+  height: 25,
+  padding: 0,
+  border: '1px solid #9d9d9d',
   borderRadius: 2,
-  background: '#f7f7f7',
+  background: '#f8f8f8',
   color: '#222',
   fontFamily: 'Tahoma, Segoe UI, Arial, sans-serif',
-  fontSize: 13,
+  fontSize: 16,
   fontWeight: 800,
-  lineHeight: '22px',
+  lineHeight: '23px',
+  textAlign: 'center',
   cursor: 'pointer',
+  pointerEvents: 'auto',
 };
 
 export default function GannzillaChartToolbarV327() {
-  const [header, setHeader] = useState(null);
+  const [host, setHost] = useState(null);
   const [charts, setCharts] = useState(loadCharts);
-  const [activeId, setActiveId] = useState(() => loadActiveId(loadCharts()));
+  const [activeId, setActiveId] = useState(() => {
+    const initial = loadCharts();
+    return loadActiveId(initial);
+  });
   const [savedFlash, setSavedFlash] = useState(false);
   const ar = useMemo(() => {
     try { return new URLSearchParams(window.location.search).get('lang') !== 'en'; }
@@ -75,17 +87,17 @@ export default function GannzillaChartToolbarV327() {
 
   useEffect(() => {
     let cancelled = false;
-    const findHeader = () => {
+    const findHost = () => {
       if (cancelled) return;
-      const node = document.querySelector('.gannzilla-canonical-property-panel-v326 > div:first-child');
-      if (node) setHeader(node);
-      else window.setTimeout(findHeader, 50);
+      const node = document.getElementById(HOST_ID);
+      if (node) setHost(node);
+      else window.setTimeout(findHost, 50);
     };
-    findHeader();
+    findHost();
     return () => { cancelled = true; };
   }, []);
 
-  const persistRegistry = (nextCharts, nextActiveId = activeId) => {
+  const persistRegistry = (nextCharts, nextActiveId) => {
     localStorage.setItem(CHARTS_KEY, JSON.stringify(nextCharts));
     localStorage.setItem(ACTIVE_KEY, nextActiveId);
   };
@@ -100,14 +112,13 @@ export default function GannzillaChartToolbarV327() {
     localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(currentState));
     if (showFeedback) {
       setSavedFlash(true);
-      window.setTimeout(() => setSavedFlash(false), 1400);
+      window.setTimeout(() => setSavedFlash(false), 1200);
     }
-    window.__gannzillaLastChartToolbarActionV327 = { action: 'save', activeId, at: Date.now() };
-    return nextCharts;
+    window.__gannzillaLastChartToolbarActionV328 = { action: 'save', activeId, at: Date.now() };
   };
 
-  const switchChart = (nextId) => {
-    if (nextId === activeId) return;
+  const activateChart = (nextId) => {
+    if (!nextId || nextId === activeId) return;
     const currentState = readCurrentPanelState();
     const nextCharts = charts.map((chart) => (
       chart.id === activeId ? { ...chart, state: currentState } : chart
@@ -116,21 +127,26 @@ export default function GannzillaChartToolbarV327() {
     if (!target) return;
     persistRegistry(nextCharts, nextId);
     localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(target.state));
-    window.__gannzillaLastChartToolbarActionV327 = { action: 'switch', activeId: nextId, at: Date.now() };
+    window.__gannzillaLastChartToolbarActionV328 = { action: 'switch', activeId: nextId, at: Date.now() };
     window.location.reload();
   };
 
   const addChart = () => {
+    const currentState = readCurrentPanelState();
     const suggested = t(`مخطط ${charts.length + 1}`, `Chart ${charts.length + 1}`);
     const entered = window.prompt(t('اسم المخطط الجديد', 'New chart name'), suggested);
     const name = String(entered || '').trim();
     if (!name) return;
+
     const id = `chart-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    const nextCharts = [...charts, { id, name, state: readCurrentPanelState() }];
-    setCharts(nextCharts);
-    setActiveId(id);
+    const savedCurrent = charts.map((chart) => (
+      chart.id === activeId ? { ...chart, state: currentState } : chart
+    ));
+    const nextCharts = [...savedCurrent, { id, name, state: clone(currentState) }];
     persistRegistry(nextCharts, id);
-    window.__gannzillaLastChartToolbarActionV327 = { action: 'add', activeId: id, at: Date.now() };
+    localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(currentState));
+    window.__gannzillaLastChartToolbarActionV328 = { action: 'add', activeId: id, at: Date.now() };
+    window.location.reload();
   };
 
   const deleteChart = () => {
@@ -140,11 +156,12 @@ export default function GannzillaChartToolbarV327() {
     }
     const active = charts.find((chart) => chart.id === activeId);
     if (!window.confirm(t(`حذف المخطط «${active?.name || ''}»؟`, `Delete chart “${active?.name || ''}”?`))) return;
+
     const nextCharts = charts.filter((chart) => chart.id !== activeId);
     const nextActive = nextCharts[0];
     persistRegistry(nextCharts, nextActive.id);
     localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(nextActive.state));
-    window.__gannzillaLastChartToolbarActionV327 = { action: 'delete', activeId, at: Date.now() };
+    window.__gannzillaLastChartToolbarActionV328 = { action: 'delete', activeId, at: Date.now() };
     window.location.reload();
   };
 
@@ -157,7 +174,7 @@ export default function GannzillaChartToolbarV327() {
     const nextCharts = charts.map((chart) => (chart.id === activeId ? { ...chart, name } : chart));
     setCharts(nextCharts);
     persistRegistry(nextCharts, activeId);
-    window.__gannzillaLastChartToolbarActionV327 = { action: 'rename', activeId, at: Date.now() };
+    window.__gannzillaLastChartToolbarActionV328 = { action: 'rename', activeId, at: Date.now() };
   };
 
   useEffect(() => {
@@ -183,10 +200,13 @@ export default function GannzillaChartToolbarV327() {
 
   useEffect(() => {
     window.GANNZILLA_CHART_TOOLBAR_V327 = true;
-    window.__auditGannzillaChartToolbarV327 = () => ({
-      ok: Boolean(header) && charts.length > 0 && charts.some((chart) => chart.id === activeId),
+    window.GANNZILLA_CHART_TOOLBAR_V328 = true;
+    window.__auditGannzillaChartToolbarV328 = () => ({
+      ok: Boolean(host) && charts.length > 0 && charts.some((chart) => chart.id === activeId),
       build: BUILD,
-      headerMounted: Boolean(header),
+      hostMounted: Boolean(host),
+      directHostPortal: true,
+      toolbarVisible: Boolean(document.querySelector('.gannzilla-chart-toolbar-v328')),
       chartCount: charts.length,
       activeChartId: activeId,
       addEnabled: true,
@@ -195,55 +215,77 @@ export default function GannzillaChartToolbarV327() {
       saveEnabled: true,
       switchEnabled: true,
       autoSaveBeforeSwitch: true,
+      reloadAfterAddDeleteSwitch: true,
       keyboardShortcuts: ['Insert', 'Delete', 'F2', 'Ctrl+S'],
-      lastAction: window.__gannzillaLastChartToolbarActionV327 || null,
+      lastAction: window.__gannzillaLastChartToolbarActionV328 || null,
     });
+    window.__auditGannzillaChartToolbarV327 = window.__auditGannzillaChartToolbarV328;
     return () => {
       delete window.GANNZILLA_CHART_TOOLBAR_V327;
+      delete window.GANNZILLA_CHART_TOOLBAR_V328;
       delete window.__auditGannzillaChartToolbarV327;
-      delete window.__gannzillaLastChartToolbarActionV327;
+      delete window.__auditGannzillaChartToolbarV328;
+      delete window.__gannzillaLastChartToolbarActionV328;
     };
-  }, [header, charts, activeId]);
+  }, [host, charts, activeId]);
 
-  if (!header) return null;
+  if (!host) return null;
 
   return createPortal(
     <>
       <style>{`
-        .gannzilla-canonical-property-panel-v326 > div:first-child > span,
-        .gannzilla-canonical-property-panel-v326 > div:first-child > button,
-        .gannzilla-canonical-property-panel-v326 > div:first-child > input {
+        #${HOST_ID} {
+          position: fixed !important;
+        }
+        #${HOST_ID} .gannzilla-canonical-property-panel-v326 {
+          box-sizing: border-box !important;
+          padding-top: 35px !important;
+        }
+        #${HOST_ID} .gannzilla-canonical-property-panel-v326 > div:first-child {
           display: none !important;
         }
-        .gannzilla-chart-toolbar-v327 button:hover {
-          background: #ffffff !important;
-          border-color: #777 !important;
+        #${HOST_ID} .gannzilla-chart-toolbar-v328 {
+          position: absolute !important;
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          height: 35px !important;
+          z-index: 1000 !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 3px !important;
+          padding: 4px 5px !important;
+          box-sizing: border-box !important;
+          background: linear-gradient(#f4f4ed, #dedfd2) !important;
+          border-bottom: 1px solid #aeb0a4 !important;
+          pointer-events: auto !important;
+          direction: ltr !important;
         }
-        .gannzilla-chart-toolbar-v327 button:active {
+        #${HOST_ID} .gannzilla-chart-toolbar-v328 button:hover {
+          background: #ffffff !important;
+          border-color: #666 !important;
+        }
+        #${HOST_ID} .gannzilla-chart-toolbar-v328 button:active {
           transform: translateY(1px);
         }
       `}</style>
-      <div
-        className="gannzilla-chart-toolbar-v327"
-        dir={ar ? 'rtl' : 'ltr'}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 3, minWidth: 0 }}
-      >
+      <div className="gannzilla-chart-toolbar-v328" aria-label={t('أدوات المخطط', 'Chart tools')}>
         <select
           aria-label={t('اختيار المخطط', 'Select chart')}
           title={t('اختيار المخطط', 'Select chart')}
           value={activeId}
-          onChange={(event) => switchChart(event.target.value)}
-          style={{ flex: 1, minWidth: 90, height: 24, border: '1px solid #aaa', background: '#fff', fontFamily: 'inherit', fontWeight: 700 }}
+          onChange={(event) => activateChart(event.target.value)}
+          style={{ flex: 1, minWidth: 90, height: 25, border: '1px solid #999', background: '#fff', fontFamily: 'Tahoma, Segoe UI, Arial, sans-serif', fontSize: 13, fontWeight: 700, direction: ar ? 'rtl' : 'ltr' }}
         >
           {charts.map((chart) => <option key={chart.id} value={chart.id}>{chart.name}</option>)}
         </select>
 
-        <button type="button" onClick={addChart} title={t('إضافة مخطط — Insert', 'Add chart — Insert')} aria-label={t('إضافة مخطط', 'Add chart')} style={{ ...buttonBase, color: '#149b35' }}>＋ {t('إضافة', 'Add')}</button>
-        <button type="button" onClick={deleteChart} title={t('حذف المخطط — Delete', 'Delete chart — Delete')} aria-label={t('حذف المخطط', 'Delete chart')} style={{ ...buttonBase, color: '#cc2525', minWidth: 26 }}>−</button>
-        <button type="button" onClick={renameChart} title={t('إعادة تسمية المخطط — F2', 'Rename chart — F2')} aria-label={t('إعادة تسمية المخطط', 'Rename chart')} style={{ ...buttonBase, minWidth: 28 }}>✎</button>
-        <button type="button" onClick={() => saveActive(true)} title={t('حفظ المخطط — Ctrl+S', 'Save chart — Ctrl+S')} aria-label={t('حفظ المخطط', 'Save chart')} style={{ ...buttonBase, minWidth: 28, color: savedFlash ? '#159447' : '#333' }}>{savedFlash ? '✓' : '▣'}</button>
+        <button type="button" onClick={addChart} title={t('إضافة مخطط — Insert', 'Add chart — Insert')} aria-label={t('إضافة مخطط', 'Add chart')} style={{ ...buttonStyle, color: '#159537' }}>＋</button>
+        <button type="button" onClick={deleteChart} title={t('حذف المخطط — Delete', 'Delete chart — Delete')} aria-label={t('حذف المخطط', 'Delete chart')} style={{ ...buttonStyle, color: '#cf2525' }}>−</button>
+        <button type="button" onClick={renameChart} title={t('إعادة التسمية — F2', 'Rename — F2')} aria-label={t('إعادة تسمية المخطط', 'Rename chart')} style={buttonStyle}>✎</button>
+        <button type="button" onClick={() => saveActive(true)} title={t('حفظ المخطط — Ctrl+S', 'Save chart — Ctrl+S')} aria-label={t('حفظ المخطط', 'Save chart')} style={{ ...buttonStyle, color: savedFlash ? '#159537' : '#333' }}>{savedFlash ? '✓' : '💾'}</button>
       </div>
     </>,
-    header,
+    host,
   );
 }
