@@ -17,7 +17,7 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 329: unblock canonical panel interactions by keeping the top horizontal pan bar outside the panel. */
+/** Build 329 deployment retry: panel interactions remain unblocked by keeping the top horizontal pan bar outside the panel. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
