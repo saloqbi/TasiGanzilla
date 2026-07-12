@@ -6,16 +6,17 @@ import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
+import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 304: right keeps the quarter limit; left, up and down return to open movement. */
+/** Build 305: page-edge scrollbars and toolbar arrows share wheel navigation authority. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V304 = true;
-    window.__auditGannzillaBareWheelV304 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V305 = true;
+    window.__auditGannzillaBareWheelV305 = () => ({
       ok: true,
-      build: 304,
+      build: 305,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -28,9 +29,14 @@ export default function GannzillaBareWheelV224() {
       layoutPanelEyeOnlyTogglesSettingsPanel: true,
       wheelVisibilityEyeOnlyTogglesWheel: true,
       asymmetricOpenPanMounted: true,
+      pageEdgeScrollbarsMounted: true,
+      verticalScrollbarAtFarRight: true,
+      horizontalScrollbarAtBottom: true,
+      verticalScrollbarControlsUpDown: true,
+      horizontalScrollbarControlsLeftRight: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN',
+      movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN_WITH_PAGE_SCROLLBARS',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -87,8 +93,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V304;
-      delete window.__auditGannzillaBareWheelV304;
+      delete window.GANNZILLA_BARE_WHEEL_V305;
+      delete window.__auditGannzillaBareWheelV305;
     };
   }, []);
 
@@ -131,6 +137,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaPanelFrameCleanupV297 />
       <GannzillaPanelFullWidthV302 />
       <GannzillaWheelQuarterHiddenPanV303 />
+      <GannzillaPagePanScrollbarsV305 />
     </>
   );
 }
