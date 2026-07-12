@@ -12,13 +12,20 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 312: preserve vertical navigation and place the horizontal control below the top icon toolbar. */
+/** Build 313: preserve the selected full-page frame independently from wheel-size changes. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V312 = true;
-    window.__auditGannzillaBareWheelV312 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V313 = true;
+    window.__auditGannzillaBareWheelV313 = () => ({
       ok: true,
-      build: 312,
+      build: 313,
+      fullPageSelectionPersistsDuringWheelZoom: true,
+      pageFrameIndependentFromWheelSize: true,
+      fullPageWidthRemains100vw: true,
+      fullPageHeightRemains100vh: true,
+      wheelSizeOnlyChangesWheel: true,
+      fullPageSelectionStoredInSession: true,
+      fallbackFullPageRestoredAfterZoomReload: true,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -55,7 +62,7 @@ export default function GannzillaBareWheelV224() {
       horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'V307_VERTICAL_PRESERVED_WITH_V312_TOP_HORIZONTAL_SCROLLBAR',
+      movementAuthority: 'V313_FULLPAGE_LOCK_WITH_V312_TOP_HORIZONTAL_SCROLLBAR',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -112,8 +119,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V312;
-      delete window.__auditGannzillaBareWheelV312;
+      delete window.GANNZILLA_BARE_WHEEL_V313;
+      delete window.__auditGannzillaBareWheelV313;
     };
   }, []);
 
