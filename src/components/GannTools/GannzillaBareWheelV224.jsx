@@ -9,13 +9,13 @@ import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPan
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 303: fully readable settings panel plus quarter-wheel edge tuck. */
+/** Build 304: right keeps the quarter limit; left, up and down return to open movement. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V303 = true;
-    window.__auditGannzillaBareWheelV303 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V304 = true;
+    window.__auditGannzillaBareWheelV304 = () => ({
       ok: true,
-      build: 303,
+      build: 304,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -27,13 +27,15 @@ export default function GannzillaBareWheelV224() {
       separateLayoutAndWheelVisibilityControls: true,
       layoutPanelEyeOnlyTogglesSettingsPanel: true,
       wheelVisibilityEyeOnlyTogglesWheel: true,
-      quarterHiddenPanMounted: true,
-      exactEdgePanRemoved: true,
+      asymmetricOpenPanMounted: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'CLAMPED_CANVAS_TRANSLATION',
-      permittedHiddenWheelFraction: 0.25,
-      minimumVisibleWheelFraction: 0.75,
+      movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN',
+      permittedRightHiddenWheelFraction: 0.25,
+      rightMovementQuarterLimitPreserved: true,
+      leftMovementUnrestricted: true,
+      upwardMovementUnrestricted: true,
+      downwardMovementUnrestricted: true,
       panelAutoDocksWheelAwayFromPanel: true,
       panelUsesOverlayMode: true,
       panelDoesNotShrinkWheelViewport: true,
@@ -41,14 +43,11 @@ export default function GannzillaBareWheelV224() {
       settingsPanelMinimumWidthPx: 360,
       settingsPanelMaximumWidthPx: 520,
       settingsControlsCannotCollapse: true,
-      wheelMayPassRightEdgeByQuarter: true,
-      wheelMayPassLeftEdgeByQuarter: true,
-      wheelCannotFullyDisappearOutsidePage: true,
       hiddenPanelFrameRemoved: true,
       hiddenPanelWidthReservationRemoved: true,
       internalWheelScrollbarHidden: true,
       browserWindowIsVisibleWidthAuthority: true,
-      pressAndHoldMovementBounded: true,
+      pressAndHoldMovementEnabled: true,
       centerResetPreserved: true,
       panelResizeReflowSupported: true,
       wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
@@ -88,8 +87,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V303;
-      delete window.__auditGannzillaBareWheelV303;
+      delete window.GANNZILLA_BARE_WHEEL_V304;
+      delete window.__auditGannzillaBareWheelV304;
     };
   }, []);
 
