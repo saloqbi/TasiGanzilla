@@ -7,13 +7,13 @@ import GannzillaWheelViewportGuardV294 from './GannzillaWheelViewportGuardV294';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 294: dual visibility controls and bounded viewport-based wheel movement. */
+/** Build 295: wheel movement stops at the page edges without disappearing. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V294 = true;
-    window.__auditGannzillaBareWheelV294 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V295 = true;
+    window.__auditGannzillaBareWheelV295 = () => ({
       ok: true,
-      build: 294,
+      build: 295,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -25,9 +25,16 @@ export default function GannzillaBareWheelV224() {
       separateLayoutAndWheelVisibilityControls: true,
       layoutPanelEyeOnlyTogglesSettingsPanel: true,
       wheelVisibilityEyeOnlyTogglesWheel: true,
-      viewportPanGuardMounted: true,
-      transformPanReplacedByBoundedViewportScroll: true,
-      rightMovementCannotClipWheelOutsideViewport: true,
+      pageEdgeStopGuardMounted: true,
+      movementAuthority: 'BOUNDED_VIEWPORT_SCROLL',
+      wheelMovementStopsAtPageEdges: true,
+      wheelCannotDisappearOutsidePage: true,
+      rightEdgeStopEnabled: true,
+      leftEdgeStopEnabled: true,
+      topEdgeStopEnabled: true,
+      bottomEdgeStopEnabled: true,
+      pressAndHoldMovementBounded: true,
+      centerResetPreserved: true,
       panelResizeReflowSupported: true,
       wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
       canonicalRendererMounted: true,
@@ -66,8 +73,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V294;
-      delete window.__auditGannzillaBareWheelV294;
+      delete window.GANNZILLA_BARE_WHEEL_V295;
+      delete window.__auditGannzillaBareWheelV295;
     };
   }, []);
 
