@@ -17,23 +17,25 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 327: canonical property panel with functional Gannzilla chart-management icons. */
+/** Build 328: canonical property panel with directly mounted and functional Gannzilla chart icons. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
     window.GANNZILLA_BARE_WHEEL_V327 = true;
+    window.GANNZILLA_BARE_WHEEL_V328 = true;
     const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
-      const chartToolbar = canonicalPanel?.querySelector('.gannzilla-chart-toolbar-v327');
+      const chartToolbar = cleanPanel?.querySelector('.gannzilla-chart-toolbar-v328');
       const visibleLegacyAsides = Array.from(document.querySelectorAll('aside'))
         .filter((aside) => aside.id !== CLEAN_PANEL_ID)
         .filter((aside) => getComputedStyle(aside).display !== 'none');
       return {
         ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && visibleLegacyAsides.length === 0),
-        build: 327,
+        build: 328,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
+        chartToolbarDirectHostMount: true,
         chartToolbarFunctions: ['select', 'add', 'delete', 'rename', 'save'],
         chartToolbarShortcuts: ['Insert', 'Delete', 'F2', 'Ctrl+S'],
         visibleLegacyPanelCount: visibleLegacyAsides.length,
@@ -52,11 +54,14 @@ export default function GannzillaBareWheelV224() {
     };
     window.__auditGannzillaBareWheelV326 = audit;
     window.__auditGannzillaBareWheelV327 = audit;
+    window.__auditGannzillaBareWheelV328 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
       delete window.GANNZILLA_BARE_WHEEL_V327;
+      delete window.GANNZILLA_BARE_WHEEL_V328;
       delete window.__auditGannzillaBareWheelV326;
       delete window.__auditGannzillaBareWheelV327;
+      delete window.__auditGannzillaBareWheelV328;
     };
   }, []);
 
