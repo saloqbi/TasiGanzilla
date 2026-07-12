@@ -8,6 +8,7 @@ import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
 import GannzillaPanelFixedLeftV315 from './GannzillaPanelFixedLeftV315';
 import GannzillaPanelReadableTypographyV316 from './GannzillaPanelReadableTypographyV316';
 import GannzillaFullPropertyPanelParityV318 from './GannzillaFullPropertyPanelParityV318';
+import GannzillaLayoutPriceHighlightRuntimeV319 from './GannzillaLayoutPriceHighlightRuntimeV319';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
@@ -15,17 +16,24 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 318: mount the complete property-panel and project-persistence foundation. */
+/** Build 319: activate Layout, Price, and Highlight controls against the live wheel renderer. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V317 = true;
     window.GANNZILLA_BARE_WHEEL_V318 = true;
-    window.__auditGannzillaBareWheelV317 = () => window.__auditGannzillaBareWheelV318?.();
-    window.__auditGannzillaBareWheelV318 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V319 = true;
+    window.__auditGannzillaBareWheelV317 = () => window.__auditGannzillaBareWheelV319?.();
+    window.__auditGannzillaBareWheelV318 = () => window.__auditGannzillaBareWheelV319?.();
+    window.__auditGannzillaBareWheelV319 = () => ({
       ok: true,
-      build: 318,
+      build: 319,
       fullPropertyPanelParityMounted: true,
       fullPropertyPanelBuild: 318,
+      layoutPriceHighlightRuntimeMounted: true,
+      layoutPriceHighlightRuntimeBuild: 319,
+      liveLayoutControlsActivated: true,
+      livePriceControlsActivated: true,
+      liveHighlightControlsActivated: true,
       projectPersistenceMounted: true,
       projectImportExportMounted: true,
       panelOpenStatePersistenceMounted: true,
@@ -95,7 +103,7 @@ export default function GannzillaBareWheelV224() {
       horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'V318_FULL_PROPERTY_PANEL_WITH_V317_MOVEMENT_AND_V315_FIXED_LEFT_PANEL',
+      movementAuthority: 'V319_ACTIVE_LAYOUT_PRICE_HIGHLIGHT_WITH_V318_FULL_PANEL_AND_V317_MOVEMENT',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -154,8 +162,10 @@ export default function GannzillaBareWheelV224() {
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V317;
       delete window.GANNZILLA_BARE_WHEEL_V318;
+      delete window.GANNZILLA_BARE_WHEEL_V319;
       delete window.__auditGannzillaBareWheelV317;
       delete window.__auditGannzillaBareWheelV318;
+      delete window.__auditGannzillaBareWheelV319;
     };
   }, []);
 
@@ -200,6 +210,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaPanelFixedLeftV315 />
       <GannzillaPanelReadableTypographyV316 />
       <GannzillaFullPropertyPanelParityV318 />
+      <GannzillaLayoutPriceHighlightRuntimeV319 />
       <GannzillaWheelQuarterHiddenPanV303 />
       <GannzillaPagePanScrollbarsV305 />
       <GannzillaHorizontalPanAssistV308 />
