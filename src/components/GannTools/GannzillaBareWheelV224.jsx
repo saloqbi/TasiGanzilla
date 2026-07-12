@@ -3,18 +3,18 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaWheelViewportGuardV294 from './GannzillaWheelViewportGuardV294';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
+import GannzillaWheelExactEdgePanV301 from './GannzillaWheelExactEdgePanV301';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 300: settings panel overlays a full-width wheel viewport with complete edge-to-edge movement. */
+/** Build 301: settings panel overlays a full-width viewport and the wheel reaches the browser edges exactly. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V300 = true;
-    window.__auditGannzillaBareWheelV300 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V301 = true;
+    window.__auditGannzillaBareWheelV301 = () => ({
       ok: true,
-      build: 300,
+      build: 301,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -26,19 +26,22 @@ export default function GannzillaBareWheelV224() {
       separateLayoutAndWheelVisibilityControls: true,
       layoutPanelEyeOnlyTogglesSettingsPanel: true,
       wheelVisibilityEyeOnlyTogglesWheel: true,
-      pageEdgeStopGuardMounted: true,
+      exactEdgePanMounted: true,
       panelFrameCleanupMounted: true,
-      movementAuthority: 'BOUNDED_VIEWPORT_SCROLL',
+      movementAuthority: 'CLAMPED_CANVAS_TRANSLATION',
+      oldScrollTrackMovementRemoved: true,
       panelUsesOverlayMode: true,
       panelDoesNotShrinkWheelViewport: true,
       wheelViewportFullWidthWithPanelOpen: true,
-      rightwardTravelReachesBrowserEdge: true,
+      rightwardTravelReachesBrowserEdgeExactly: true,
+      leftwardTravelReachesBrowserEdgeExactly: true,
       hiddenPanelFrameRemoved: true,
       hiddenPanelWidthReservationRemoved: true,
       internalWheelScrollbarHidden: true,
       browserWindowIsVisibleWidthAuthority: true,
       wheelMovementStopsAtPageEdges: true,
       wheelCannotDisappearOutsidePage: true,
+      exactEdgeMarginPx: 0,
       rightEdgeStopEnabled: true,
       leftEdgeStopEnabled: true,
       topEdgeStopEnabled: true,
@@ -83,8 +86,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V300;
-      delete window.__auditGannzillaBareWheelV300;
+      delete window.GANNZILLA_BARE_WHEEL_V301;
+      delete window.__auditGannzillaBareWheelV301;
     };
   }, []);
 
@@ -133,9 +136,9 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
-      <GannzillaWheelViewportGuardV294 />
       <GannzillaArabicLocalizationV248 />
       <GannzillaPanelFrameCleanupV297 />
+      <GannzillaWheelExactEdgePanV301 />
     </>
   );
 }
