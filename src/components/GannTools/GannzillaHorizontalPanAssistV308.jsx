@@ -1,12 +1,13 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
-const BUILD = 310;
-const BAR_HEIGHT_PX = 12;
-const BAR_BOTTOM_PX = 0;
-const EDGE_GAP_PX = 1;
-const VERTICAL_RAIL_CLEARANCE_PX = 19;
-const THUMB_WIDTH_PX = 12;
-const BUTTON_WIDTH_PX = 12;
+const BUILD = 311;
+const BAR_HEIGHT_PX = 14;
+const BAR_BOTTOM_PX = 18;
+const EDGE_GAP_PX = 2;
+const VERTICAL_RAIL_CLEARANCE_PX = 20;
+const THUMB_WIDTH_PX = 18;
+const BUTTON_WIDTH_PX = 14;
 const MOVEMENT_RANGE_PX = 80000;
 const STEP_PX = 64;
 const HOLD_STEP_PX = 24;
@@ -58,7 +59,7 @@ function getPanelInsets() {
   };
 }
 
-/** Build 310: native-size mini horizontal scrollbar; vertical movement remains untouched. */
+/** Build 311: portal-mounted compact horizontal scrollbar that cannot be clipped by the app frame. */
 export default function GannzillaHorizontalPanAssistV308() {
   const trackRef = React.useRef(null);
   const dragRef = React.useRef(null);
@@ -129,28 +130,33 @@ export default function GannzillaHorizontalPanAssistV308() {
 
     const observer = new MutationObserver(syncInsets);
     observer.observe(document.body, { childList: true, subtree: true });
-    const timers = [0, 80, 220, 520].map((delay) => window.setTimeout(syncInsets, delay));
+    const timers = [0, 80, 220, 520, 1000].map((delay) => window.setTimeout(syncInsets, delay));
 
-    window.GANNZILLA_HORIZONTAL_PAN_ASSIST_V310 = true;
-    window.__auditGannzillaHorizontalPanAssistV310 = () => ({
-      ok: true,
-      build: BUILD,
-      nativeMiniHorizontalBarMounted: Boolean(document.querySelector('[data-gannzilla-horizontal-pan-assist-v310="true"]')),
-      verticalBehaviorUntouched: true,
-      barHeightPx: BAR_HEIGHT_PX,
-      thumbWidthPx: THUMB_WIDTH_PX,
-      buttonWidthPx: BUTTON_WIDTH_PX,
-      movementRangePx: MOVEMENT_RANGE_PX,
-      maximumTrackTravelEnabled: true,
-      centerResetByDoubleClick: true,
-      leftRightButtonsEnabled: true,
-      pressAndHoldEnabled: true,
-      draggableThumbEnabled: true,
-      trackClickEnabled: true,
-      panelAwareInsets: insets,
-      currentOffsetX: offsetRef.current.x,
-      currentOffsetYPreserved: offsetRef.current.y,
-    });
+    window.GANNZILLA_HORIZONTAL_PAN_ASSIST_V311 = true;
+    window.__auditGannzillaHorizontalPanAssistV311 = () => {
+      const bar = document.querySelector('[data-gannzilla-horizontal-pan-assist-v311="true"]');
+      const rect = bar?.getBoundingClientRect?.();
+      return {
+        ok: Boolean(bar),
+        build: BUILD,
+        portalMountedDirectlyUnderBody: Boolean(bar?.parentElement === document.body),
+        compactHorizontalBarVisible: Boolean(rect && rect.height >= BAR_HEIGHT_PX && rect.bottom <= window.innerHeight - BAR_BOTTOM_PX + 1),
+        verticalBehaviorUntouched: true,
+        barHeightPx: BAR_HEIGHT_PX,
+        barBottomPx: BAR_BOTTOM_PX,
+        thumbWidthPx: THUMB_WIDTH_PX,
+        buttonWidthPx: BUTTON_WIDTH_PX,
+        movementRangePx: MOVEMENT_RANGE_PX,
+        leftRightButtonsEnabled: true,
+        pressAndHoldEnabled: true,
+        draggableThumbEnabled: true,
+        trackClickEnabled: true,
+        centerResetByDoubleClick: true,
+        panelAwareInsets: getPanelInsets(),
+        currentOffsetX: offsetRef.current.x,
+        currentOffsetYPreserved: offsetRef.current.y,
+      };
+    };
 
     return () => {
       timers.forEach(window.clearTimeout);
@@ -164,13 +170,14 @@ export default function GannzillaHorizontalPanAssistV308() {
       window.removeEventListener('gannzilla:layout-panel-visibility-change', syncInsets);
       window.removeEventListener('gannzilla:panel-frame-cleanup-sync', syncInsets);
       window.removeEventListener('gannzilla:panel-width-v302-sync', syncInsets);
-      delete window.GANNZILLA_HORIZONTAL_PAN_ASSIST_V310;
-      delete window.__auditGannzillaHorizontalPanAssistV310;
+      delete window.GANNZILLA_HORIZONTAL_PAN_ASSIST_V311;
+      delete window.__auditGannzillaHorizontalPanAssistV311;
     };
-  }, [commitX, insets]);
+  }, [commitX]);
 
   const startHold = (direction, event) => {
     event.preventDefault();
+    event.stopPropagation();
     const delta = direction === 'left' ? -STEP_PX : STEP_PX;
     commitX(offsetRef.current.x + delta);
     holdDelayRef.current = window.setTimeout(() => {
@@ -194,9 +201,11 @@ export default function GannzillaHorizontalPanAssistV308() {
     document.body.style.setProperty('cursor', 'ew-resize', 'important');
   };
 
+  if (typeof document === 'undefined') return null;
+
   const fraction = fractionFromOffset(offsetX);
 
-  return (
+  return createPortal(
     <>
       <style>{`
         [data-gannzilla-page-horizontal-rail-v306="true"],
@@ -205,28 +214,37 @@ export default function GannzillaHorizontalPanAssistV308() {
           visibility: hidden !important;
           pointer-events: none !important;
         }
+
+        [data-gannzilla-horizontal-pan-assist-v311="true"] {
+          position: fixed !important;
+          bottom: ${BAR_BOTTOM_PX}px !important;
+          height: ${BAR_HEIGHT_PX}px !important;
+          min-height: ${BAR_HEIGHT_PX}px !important;
+          max-height: ${BAR_HEIGHT_PX}px !important;
+          display: flex !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          transform: none !important;
+          filter: none !important;
+          z-index: 2147483647 !important;
+          pointer-events: auto !important;
+        }
       `}</style>
 
       <div
-        data-gannzilla-horizontal-pan-assist-v310="true"
+        data-gannzilla-horizontal-pan-assist-v311="true"
         aria-label="شريط التحكم بحركة العجلة يمينًا ويسارًا"
         style={{
-          position: 'fixed',
           left: insets.left,
           right: insets.right,
-          bottom: BAR_BOTTOM_PX,
-          height: BAR_HEIGHT_PX,
-          zIndex: 2147483646,
-          display: 'flex',
           alignItems: 'stretch',
-          background: '#eeeeee',
-          border: '1px solid #a8a8a8',
+          background: '#d8d8d8',
+          border: '1px solid #777777',
           borderRadius: 0,
-          boxShadow: 'none',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.8)',
           overflow: 'hidden',
           boxSizing: 'border-box',
           direction: 'ltr',
-          pointerEvents: 'auto',
         }}
       >
         <button
@@ -234,7 +252,7 @@ export default function GannzillaHorizontalPanAssistV308() {
           aria-label="تحريك العجلة لليسار"
           title="تحريك العجلة لليسار"
           onPointerDown={(event) => startHold('left', event)}
-          style={{ width: BUTTON_WIDTH_PX, minWidth: BUTTON_WIDTH_PX, padding: 0, border: 0, borderRight: '1px solid #b5b5b5', background: '#f5f5f5', fontSize: 8, lineHeight: 1, cursor: 'pointer' }}
+          style={{ width: BUTTON_WIDTH_PX, minWidth: BUTTON_WIDTH_PX, padding: 0, border: 0, borderRight: '1px solid #888888', background: '#eeeeee', color: '#222222', fontSize: 9, lineHeight: 1, cursor: 'pointer' }}
         >◀</button>
 
         <div
@@ -250,12 +268,12 @@ export default function GannzillaHorizontalPanAssistV308() {
             position: 'relative',
             flex: '1 1 auto',
             minWidth: 60,
-            background: '#fafafa',
-            boxShadow: 'inset 0 0 0 1px #d1d1d1',
+            background: '#f4f4f4',
+            boxShadow: 'inset 0 0 0 1px #b8b8b8',
           }}
         >
           <div
-            data-gannzilla-horizontal-pan-thumb-v310="true"
+            data-gannzilla-horizontal-pan-thumb-v311="true"
             onPointerDown={startDrag}
             style={{
               position: 'absolute',
@@ -264,8 +282,8 @@ export default function GannzillaHorizontalPanAssistV308() {
               left: `calc(${fraction * 100}% - ${fraction * THUMB_WIDTH_PX}px)`,
               width: THUMB_WIDTH_PX,
               borderRadius: 1,
-              background: '#858585',
-              boxShadow: 'inset 0 0 0 1px #6e6e6e',
+              background: '#686868',
+              boxShadow: 'inset 0 0 0 1px #4d4d4d',
               cursor: 'ew-resize',
             }}
           />
@@ -276,9 +294,10 @@ export default function GannzillaHorizontalPanAssistV308() {
           aria-label="تحريك العجلة لليمين"
           title="تحريك العجلة لليمين"
           onPointerDown={(event) => startHold('right', event)}
-          style={{ width: BUTTON_WIDTH_PX, minWidth: BUTTON_WIDTH_PX, padding: 0, border: 0, borderLeft: '1px solid #b5b5b5', background: '#f5f5f5', fontSize: 8, lineHeight: 1, cursor: 'pointer' }}
+          style={{ width: BUTTON_WIDTH_PX, minWidth: BUTTON_WIDTH_PX, padding: 0, border: 0, borderLeft: '1px solid #888888', background: '#eeeeee', color: '#222222', fontSize: 9, lineHeight: 1, cursor: 'pointer' }}
         >▶</button>
       </div>
-    </>
+    </>,
+    document.body,
   );
 }
