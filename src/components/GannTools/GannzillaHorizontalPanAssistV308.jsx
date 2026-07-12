@@ -1,14 +1,15 @@
 import React from 'react';
 
-const BUILD = 308;
-const BAR_HEIGHT_PX = 30;
-const BAR_BOTTOM_PX = 8;
-const EDGE_GAP_PX = 8;
-const VERTICAL_RAIL_CLEARANCE_PX = 28;
-const THUMB_WIDTH_PX = 128;
-const MOVEMENT_RANGE_PX = 12000;
+const BUILD = 309;
+const BAR_HEIGHT_PX = 16;
+const BAR_BOTTOM_PX = 0;
+const EDGE_GAP_PX = 2;
+const VERTICAL_RAIL_CLEARANCE_PX = 20;
+const THUMB_WIDTH_PX = 24;
+const BUTTON_WIDTH_PX = 18;
+const MOVEMENT_RANGE_PX = 40000;
 const STEP_PX = 56;
-const HOLD_STEP_PX = 16;
+const HOLD_STEP_PX = 20;
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -57,7 +58,7 @@ function getPanelInsets() {
   };
 }
 
-/** Build 308: a dedicated visible horizontal bar; vertical movement remains owned by v307 unchanged. */
+/** Build 309: ultra-compact horizontal control; vertical movement remains untouched. */
 export default function GannzillaHorizontalPanAssistV308() {
   const trackRef = React.useRef(null);
   const dragRef = React.useRef(null);
@@ -130,12 +131,17 @@ export default function GannzillaHorizontalPanAssistV308() {
     observer.observe(document.body, { childList: true, subtree: true });
     const timers = [0, 80, 220, 520].map((delay) => window.setTimeout(syncInsets, delay));
 
-    window.GANNZILLA_HORIZONTAL_PAN_ASSIST_V308 = true;
-    window.__auditGannzillaHorizontalPanAssistV308 = () => ({
+    window.GANNZILLA_HORIZONTAL_PAN_ASSIST_V309 = true;
+    window.__auditGannzillaHorizontalPanAssistV309 = () => ({
       ok: true,
       build: BUILD,
-      dedicatedHorizontalBarMounted: Boolean(document.querySelector('[data-gannzilla-horizontal-pan-assist-v308="true"]')),
+      compactHorizontalBarMounted: Boolean(document.querySelector('[data-gannzilla-horizontal-pan-assist-v309="true"]')),
       verticalBehaviorUntouched: true,
+      barHeightPx: BAR_HEIGHT_PX,
+      thumbWidthPx: THUMB_WIDTH_PX,
+      buttonWidthPx: BUTTON_WIDTH_PX,
+      movementRangePx: MOVEMENT_RANGE_PX,
+      maximumTrackTravelEnabled: true,
       leftRightButtonsEnabled: true,
       pressAndHoldEnabled: true,
       draggableThumbEnabled: true,
@@ -157,8 +163,8 @@ export default function GannzillaHorizontalPanAssistV308() {
       window.removeEventListener('gannzilla:layout-panel-visibility-change', syncInsets);
       window.removeEventListener('gannzilla:panel-frame-cleanup-sync', syncInsets);
       window.removeEventListener('gannzilla:panel-width-v302-sync', syncInsets);
-      delete window.GANNZILLA_HORIZONTAL_PAN_ASSIST_V308;
-      delete window.__auditGannzillaHorizontalPanAssistV308;
+      delete window.GANNZILLA_HORIZONTAL_PAN_ASSIST_V309;
+      delete window.__auditGannzillaHorizontalPanAssistV309;
     };
   }, [commitX, insets]);
 
@@ -201,7 +207,7 @@ export default function GannzillaHorizontalPanAssistV308() {
       `}</style>
 
       <div
-        data-gannzilla-horizontal-pan-assist-v308="true"
+        data-gannzilla-horizontal-pan-assist-v309="true"
         aria-label="شريط التحكم بحركة العجلة يمينًا ويسارًا"
         style={{
           position: 'fixed',
@@ -214,8 +220,8 @@ export default function GannzillaHorizontalPanAssistV308() {
           alignItems: 'stretch',
           background: '#eeeeee',
           border: '1px solid #a8a8a8',
-          borderRadius: 3,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.28)',
+          borderRadius: 0,
+          boxShadow: 'none',
           overflow: 'hidden',
           boxSizing: 'border-box',
           direction: 'ltr',
@@ -227,7 +233,7 @@ export default function GannzillaHorizontalPanAssistV308() {
           aria-label="تحريك العجلة لليسار"
           title="تحريك العجلة لليسار"
           onPointerDown={(event) => startHold('left', event)}
-          style={{ width: 38, border: 0, borderRight: '1px solid #b5b5b5', background: '#f5f5f5', fontSize: 17, cursor: 'pointer' }}
+          style={{ width: BUTTON_WIDTH_PX, minWidth: BUTTON_WIDTH_PX, padding: 0, border: 0, borderRight: '1px solid #b5b5b5', background: '#f5f5f5', fontSize: 10, lineHeight: 1, cursor: 'pointer' }}
         >◀</button>
 
         <div
@@ -240,21 +246,21 @@ export default function GannzillaHorizontalPanAssistV308() {
           style={{
             position: 'relative',
             flex: '1 1 auto',
-            minWidth: 120,
+            minWidth: 80,
             background: '#fafafa',
             boxShadow: 'inset 0 0 0 1px #d1d1d1',
           }}
         >
           <div
-            data-gannzilla-horizontal-pan-thumb-v308="true"
+            data-gannzilla-horizontal-pan-thumb-v309="true"
             onPointerDown={startDrag}
             style={{
               position: 'absolute',
-              top: 4,
-              bottom: 4,
+              top: 2,
+              bottom: 2,
               left: `calc(${fraction * 100}% - ${fraction * THUMB_WIDTH_PX}px)`,
               width: THUMB_WIDTH_PX,
-              borderRadius: 8,
+              borderRadius: 2,
               background: '#858585',
               boxShadow: 'inset 0 0 0 1px #6e6e6e',
               cursor: 'ew-resize',
@@ -267,7 +273,7 @@ export default function GannzillaHorizontalPanAssistV308() {
           aria-label="إعادة العجلة للمنتصف أفقيًا"
           title="إعادة العجلة للمنتصف أفقيًا"
           onClick={() => commitX(0)}
-          style={{ width: 34, border: 0, borderLeft: '1px solid #b5b5b5', borderRight: '1px solid #b5b5b5', background: '#e8eef3', fontSize: 14, cursor: 'pointer' }}
+          style={{ width: BUTTON_WIDTH_PX, minWidth: BUTTON_WIDTH_PX, padding: 0, border: 0, borderLeft: '1px solid #b5b5b5', borderRight: '1px solid #b5b5b5', background: '#e8eef3', fontSize: 9, lineHeight: 1, cursor: 'pointer' }}
         >●</button>
 
         <button
@@ -275,7 +281,7 @@ export default function GannzillaHorizontalPanAssistV308() {
           aria-label="تحريك العجلة لليمين"
           title="تحريك العجلة لليمين"
           onPointerDown={(event) => startHold('right', event)}
-          style={{ width: 38, border: 0, background: '#f5f5f5', fontSize: 17, cursor: 'pointer' }}
+          style={{ width: BUTTON_WIDTH_PX, minWidth: BUTTON_WIDTH_PX, padding: 0, border: 0, background: '#f5f5f5', fontSize: 10, lineHeight: 1, cursor: 'pointer' }}
         >▶</button>
       </div>
     </>
