@@ -8,6 +8,7 @@ import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
 import GannzillaPanelFixedLeftV315 from './GannzillaPanelFixedLeftV315';
 import GannzillaPanelReadableTypographyV316 from './GannzillaPanelReadableTypographyV316';
 import GannzillaCanonicalPropertyPanelV326 from './GannzillaCanonicalPropertyPanelV326';
+import GannzillaChartToolbarV327 from './GannzillaChartToolbarV327';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
@@ -16,20 +17,25 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 326: complete single-authority property panel rebuilt from the Gannzilla screenshot/CHR contract. */
+/** Build 327: canonical property panel with functional Gannzilla chart-management icons. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
-    window.__auditGannzillaBareWheelV326 = () => {
+    window.GANNZILLA_BARE_WHEEL_V327 = true;
+    const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
+      const chartToolbar = canonicalPanel?.querySelector('.gannzilla-chart-toolbar-v327');
       const visibleLegacyAsides = Array.from(document.querySelectorAll('aside'))
         .filter((aside) => aside.id !== CLEAN_PANEL_ID)
         .filter((aside) => getComputedStyle(aside).display !== 'none');
       return {
-        ok: Boolean(cleanPanel && canonicalPanel && visibleLegacyAsides.length === 0),
-        build: 326,
+        ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && visibleLegacyAsides.length === 0),
+        build: 327,
         canonicalPanelMounted: Boolean(canonicalPanel),
+        chartToolbarMounted: Boolean(chartToolbar),
+        chartToolbarFunctions: ['select', 'add', 'delete', 'rename', 'save'],
+        chartToolbarShortcuts: ['Insert', 'Delete', 'F2', 'Ctrl+S'],
         visibleLegacyPanelCount: visibleLegacyAsides.length,
         singleVisiblePanelAuthority: true,
         oldV318PanelMounted: false,
@@ -44,9 +50,13 @@ export default function GannzillaBareWheelV224() {
         verticalScrollbarPreserved: true,
       };
     };
+    window.__auditGannzillaBareWheelV326 = audit;
+    window.__auditGannzillaBareWheelV327 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
+      delete window.GANNZILLA_BARE_WHEEL_V327;
       delete window.__auditGannzillaBareWheelV326;
+      delete window.__auditGannzillaBareWheelV327;
     };
   }, []);
 
@@ -129,6 +139,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaPanelFixedLeftV315 />
       <GannzillaPanelReadableTypographyV316 />
       <GannzillaCanonicalPropertyPanelV326 />
+      <GannzillaChartToolbarV327 />
       <GannzillaWheelQuarterHiddenPanV303 />
       <GannzillaPagePanScrollbarsV305 />
       <GannzillaHorizontalPanAssistV308 />
