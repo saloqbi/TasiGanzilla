@@ -11,13 +11,13 @@ import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 308: preserve vertical navigation and add a dedicated visible horizontal movement bar. */
+/** Build 309: preserve vertical navigation and use an ultra-compact long-range horizontal control. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V308 = true;
-    window.__auditGannzillaBareWheelV308 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V309 = true;
+    window.__auditGannzillaBareWheelV309 = () => ({
       ok: true,
-      build: 308,
+      build: 309,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -39,7 +39,10 @@ export default function GannzillaBareWheelV224() {
       keyboardPageUpPageDownEnabled: true,
       keyboardArrowUpArrowDownEnabled: true,
       verticalBehaviorUnchangedFromV307: true,
-      dedicatedHorizontalPanBarMounted: true,
+      compactHorizontalPanBarMounted: true,
+      horizontalBarHeightPx: 16,
+      horizontalThumbWidthPx: 24,
+      horizontalMovementRangePx: 40000,
       horizontalBarControlsLeftRight: true,
       horizontalPressAndHoldEnabled: true,
       horizontalThumbDraggingEnabled: true,
@@ -48,7 +51,7 @@ export default function GannzillaBareWheelV224() {
       horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'V307_VERTICAL_PRESERVED_WITH_V308_DEDICATED_HORIZONTAL_BAR',
+      movementAuthority: 'V307_VERTICAL_PRESERVED_WITH_V309_MINI_LONG_RANGE_HORIZONTAL_BAR',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -105,8 +108,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V308;
-      delete window.__auditGannzillaBareWheelV308;
+      delete window.GANNZILLA_BARE_WHEEL_V309;
+      delete window.__auditGannzillaBareWheelV309;
     };
   }, []);
 
