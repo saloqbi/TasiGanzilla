@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 332;
+const BUILD = 333;
 const TWO_PI = Math.PI * 2;
 const PANEL_STORAGE_KEY = 'tasi-gannzilla-canonical-panel-v326';
 const runtimeOverrides = new Map();
@@ -143,6 +143,18 @@ function gateColor(value) {
   return '#111111';
 }
 
+function positiveModulo(value, modulus) {
+  return ((value % modulus) + modulus) % modulus;
+}
+
+function ringIndexForCell(startValue, increment, index, divisions) {
+  const cellValue = startValue + index * increment;
+  if (Number.isInteger(cellValue)) {
+    return positiveModulo(cellValue - 1, divisions) + 1;
+  }
+  return index + 1;
+}
+
 function findWheelCanvas() {
   return Array.from(document.querySelectorAll('canvas'))
     .map((canvas) => ({ canvas, rect: canvas.getBoundingClientRect() }))
@@ -150,7 +162,7 @@ function findWheelCanvas() {
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
 }
 
-function redrawWheelNumberingV332() {
+function redrawWheelNumberingV333() {
   const canvas = findWheelCanvas();
   if (!canvas) return false;
 
@@ -212,9 +224,7 @@ function redrawWheelNumberingV332() {
 
       const point = polar(cx, cy, mid, centerDegrees);
       if (ring === 1) {
-        // The first price cell contains startValue (for example 3600), so its
-        // gate/index label must be 36. The following cells continue 1..35.
-        const indexNumber = ((index + divisions - 1) % divisions) + 1;
+        const indexNumber = ringIndexForCell(startValue, increment, index, divisions);
         drawText(ctx, indexNumber, point.x, point.y, centerDegrees, Math.max(11, fontSize), maxWidth, 800, gateColor(indexNumber));
       } else {
         const value = startValue + (numericRingIndex * divisions + index) * increment;
@@ -236,7 +246,7 @@ export default function GannzillaRingTwoNumberingV223() {
 
     const draw = () => {
       frame = 0;
-      if (!disposed) redrawWheelNumberingV332();
+      if (!disposed) redrawWheelNumberingV333();
     };
 
     const schedule = (delay = 0) => {
@@ -283,12 +293,20 @@ export default function GannzillaRingTwoNumberingV223() {
     window.GANNZILLA_RING_INDEX_V330 = true;
     window.GANNZILLA_RING_INDEX_V331 = true;
     window.GANNZILLA_RING_INDEX_V332 = true;
-    window.__auditGannzillaRingIndexV332 = () => ({
+    window.GANNZILLA_RING_INDEX_V333 = true;
+    window.__auditGannzillaRingIndexV333 = () => ({
       ok: Boolean(findWheelCanvas()),
       build: BUILD,
-      ring1Mode: 'INDEX_36_THEN_1_TO_35',
-      ring1FirstCell: divisions,
-      ring1FirstCellAlignedWithStartValue: true,
+      ring1Mode: 'DYNAMIC_VALUE_MODULO_DIVISIONS',
+      startValue: canonicalNumber('price.value', numberParam('startValue', 79680, -1000000000, 1000000000), -1000000000, 1000000000),
+      increment: canonicalNumber('price.increment', numberParam('increment', 1, -1000000, 1000000), -1000000, 1000000),
+      ring1FirstCell: ringIndexForCell(
+        canonicalNumber('price.value', numberParam('startValue', 79680, -1000000000, 1000000000), -1000000000, 1000000000),
+        canonicalNumber('price.increment', numberParam('increment', 1, -1000000, 1000000), -1000000, 1000000),
+        0,
+        Math.round(canonicalNumber('layout.view', numberParam('divisions', 36, 3, 360), 3, 360)),
+      ),
+      examples: { start1: 1, start3600: 36 },
       digitSystem: shouldUseArabicDigits() ? 'ARABIC_INDIC_٠١٢٣٤٥٦٧٨٩' : 'LATIN_0123456789',
       gateColors: { red: '1/4/7', blue: '2/5/8', black: '3/6/9' },
       ringPalette: RING_PALETTE,
@@ -307,9 +325,10 @@ export default function GannzillaRingTwoNumberingV223() {
       continuousInterval: false,
       bodyMutationObserver: false,
     });
-    window.__auditGannzillaRingIndexV331 = window.__auditGannzillaRingIndexV332;
-    window.__auditGannzillaRingIndexV330 = window.__auditGannzillaRingIndexV332;
-    window.__auditGannzillaRingIndexV248 = window.__auditGannzillaRingIndexV332;
+    window.__auditGannzillaRingIndexV332 = window.__auditGannzillaRingIndexV333;
+    window.__auditGannzillaRingIndexV331 = window.__auditGannzillaRingIndexV333;
+    window.__auditGannzillaRingIndexV330 = window.__auditGannzillaRingIndexV333;
+    window.__auditGannzillaRingIndexV248 = window.__auditGannzillaRingIndexV333;
 
     return () => {
       disposed = true;
@@ -326,10 +345,12 @@ export default function GannzillaRingTwoNumberingV223() {
       delete window.GANNZILLA_RING_INDEX_V330;
       delete window.GANNZILLA_RING_INDEX_V331;
       delete window.GANNZILLA_RING_INDEX_V332;
+      delete window.GANNZILLA_RING_INDEX_V333;
       delete window.__auditGannzillaRingIndexV248;
       delete window.__auditGannzillaRingIndexV330;
       delete window.__auditGannzillaRingIndexV331;
       delete window.__auditGannzillaRingIndexV332;
+      delete window.__auditGannzillaRingIndexV333;
     };
   }, []);
 
