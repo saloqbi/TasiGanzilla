@@ -14,18 +14,21 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 316: enlarge every small settings-panel word while preserving the fixed-left layout. */
+/** Build 317: increase panel text and fields for comfortable visual reading. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V316 = true;
-    window.__auditGannzillaBareWheelV316 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V317 = true;
+    window.__auditGannzillaBareWheelV317 = () => ({
       ok: true,
-      build: 316,
+      build: 317,
       settingsPanelTypographyReadable: true,
-      panelSmallWordsMatchLayoutHeadingReadability: true,
-      targetPanelFontSizePx: 14,
-      minimumPanelFontSizePx: 13,
-      panelFieldsMinimumHeightPx: 26,
+      panelSmallWordsComfortablyEnlarged: true,
+      targetPanelFontSizePx: 16,
+      minimumPanelFontSizePx: 16,
+      panelSectionHeadingSizePx: 17,
+      panelFieldsMinimumHeightPx: 30,
+      strongerPanelLabelWeightEnabled: true,
+      comfortablePanelLineHeightEnabled: true,
       typographyAuthorityMounted: true,
       settingsPanelFixedSide: 'left',
       settingsPanelSideIndependentFromLanguage: true,
@@ -84,7 +87,7 @@ export default function GannzillaBareWheelV224() {
       horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'V316_READABLE_PANEL_TEXT_WITH_V315_FIXED_LEFT_PANEL_AND_V314_SAFE_FULLSCREEN',
+      movementAuthority: 'V317_LARGER_PANEL_TEXT_WITH_V315_FIXED_LEFT_PANEL_AND_V314_SAFE_FULLSCREEN',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -141,8 +144,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V316;
-      delete window.__auditGannzillaBareWheelV316;
+      delete window.GANNZILLA_BARE_WHEEL_V317;
+      delete window.__auditGannzillaBareWheelV317;
     };
   }, []);
 
