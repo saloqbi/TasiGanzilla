@@ -12,20 +12,25 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 313: preserve the selected full-page frame independently from wheel-size changes. */
+/** Build 314: remove the unsafe nested fixed layout while preserving all wheel, panel, and movement work. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V313 = true;
-    window.__auditGannzillaBareWheelV313 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V314 = true;
+    window.__auditGannzillaBareWheelV314 = () => ({
       ok: true,
-      build: 313,
-      fullPageSelectionPersistsDuringWheelZoom: true,
-      pageFrameIndependentFromWheelSize: true,
-      fullPageWidthRemains100vw: true,
-      fullPageHeightRemains100vh: true,
+      build: 314,
+      fullscreenBlankScreenRegressionFixed: true,
+      nativeFullscreenUsesBrowserLayoutAuthority: true,
+      legacyV313NestedFixedViewportRemoved: true,
+      innerWheelContainerNeverForcedFixedByFullscreen: true,
+      fullPageSelectionRemainsActiveDuringWheelZoom: true,
       wheelSizeOnlyChangesWheel: true,
-      fullPageSelectionStoredInSession: true,
-      fallbackFullPageRestoredAfterZoomReload: true,
+      wheelRendererPreserved: true,
+      wheelZoomPreserved: true,
+      wheelPanPreserved: true,
+      settingsPanelPreserved: true,
+      topHorizontalScrollbarPreserved: true,
+      verticalScrollbarPreserved: true,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -62,7 +67,7 @@ export default function GannzillaBareWheelV224() {
       horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'V313_FULLPAGE_LOCK_WITH_V312_TOP_HORIZONTAL_SCROLLBAR',
+      movementAuthority: 'V314_SAFE_FULLSCREEN_WITH_V312_TOP_HORIZONTAL_SCROLLBAR',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -119,8 +124,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V313;
-      delete window.__auditGannzillaBareWheelV313;
+      delete window.GANNZILLA_BARE_WHEEL_V314;
+      delete window.__auditGannzillaBareWheelV314;
     };
   }, []);
 
