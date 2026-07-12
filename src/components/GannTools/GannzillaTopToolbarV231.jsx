@@ -5,16 +5,16 @@ import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 import GannzillaWheelZoomV293 from './GannzillaWheelZoomV293';
 
-const BUILD = 293;
+const BUILD = 294;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 293: separate layout-panel and wheel visibility controls, then movement and zoom. */
+/** Build 294: dual visibility controls plus bounded viewport-based wheel movement. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V293 = true;
-    window.__auditGannzillaTopToolbarV293 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V294 = true;
+    window.__auditGannzillaTopToolbarV294 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
@@ -27,6 +27,8 @@ export default function GannzillaTopToolbarV231() {
       wheelVisibilityEyePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
       layoutPanelEyeOnlyTogglesSettingsPanel: true,
       wheelVisibilityEyeOnlyTogglesWheel: true,
+      viewportBasedWheelMovement: true,
+      boundedRightMovement: true,
       wheelMovementIntegratedWithZoom: true,
       wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
       wheelZoomControlMounted: true,
@@ -42,8 +44,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V293;
-      delete window.__auditGannzillaTopToolbarV293;
+      delete window.GANNZILLA_TOP_TOOLBAR_V294;
+      delete window.__auditGannzillaTopToolbarV294;
     };
   }, []);
 
@@ -75,13 +77,13 @@ export default function GannzillaTopToolbarV231() {
     >
       <style>{`
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] { direction:ltr !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-v293="true"] { order:0 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-v294="true"] { order:0 !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:1 !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:2 !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] { order:3 !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] { order:4 !important; }
 
-        [data-gannzilla-toolbar="true"] [data-gannzilla-layout-eye-v293="true"]:hover,
+        [data-gannzilla-toolbar="true"] [data-gannzilla-layout-eye-v294="true"]:hover,
         [data-gannzilla-toolbar="true"] [data-gannzilla-chart-visibility-toggle-v291="true"]:hover,
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"]:hover,
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"]:hover,
