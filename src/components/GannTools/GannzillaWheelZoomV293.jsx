@@ -1,7 +1,7 @@
 import React from 'react';
 import GannzillaWheelZoomV289 from './GannzillaWheelZoomV289';
 
-const BUILD = 294;
+const BUILD = 297;
 
 function getClassicRoot() {
   return document.querySelector('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
@@ -26,6 +26,18 @@ function findNativePanelToggle() {
   }) || directButtons[0] || null;
 }
 
+function readPanelVisible() {
+  const toggle = findNativePanelToggle();
+  const text = String(toggle?.textContent || '').trim();
+  if (/^(Show|إظهار)$/i.test(text)) return false;
+  if (/^(Hide|إخفاء)$/i.test(text)) return true;
+
+  const panel = findLayoutPanel();
+  if (!(panel instanceof HTMLElement)) return false;
+  const style = window.getComputedStyle(panel);
+  return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+}
+
 function LayoutEyeGlyph({ visible }) {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -43,36 +55,34 @@ function LayoutEyeGlyph({ visible }) {
   );
 }
 
-/** Build 294: separate controls for layout-panel visibility and wheel visibility, with viewport resync. */
+/** Build 297: separate panel/wheel controls with authoritative panel-state cleanup. */
 export default function GannzillaWheelZoomV293({ toolbarHeight = 24 }) {
-  const [panelVisible, setPanelVisible] = React.useState(() => Boolean(findLayoutPanel()));
+  const [panelVisible, setPanelVisible] = React.useState(() => readPanelVisible());
   const size = Math.max(22, toolbarHeight);
 
   const syncPanelState = React.useCallback(() => {
-    setPanelVisible(Boolean(findLayoutPanel()));
+    setPanelVisible(readPanelVisible());
   }, []);
 
   React.useEffect(() => {
     syncPanelState();
     const timers = [0, 80, 220, 520, 1000].map((delay) => window.setTimeout(syncPanelState, delay));
     const observer = new MutationObserver(syncPanelState);
-    observer.observe(document.body, { childList: true, subtree: true });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true });
     window.addEventListener('resize', syncPanelState);
     document.addEventListener('fullscreenchange', syncPanelState);
 
-    window.GANNZILLA_DUAL_VISIBILITY_CONTROLS_V294 = true;
-    window.__auditGannzillaDualVisibilityControlsV294 = () => ({
+    window.GANNZILLA_DUAL_VISIBILITY_CONTROLS_V297 = true;
+    window.__auditGannzillaDualVisibilityControlsV297 = () => ({
       ok: Boolean(findNativePanelToggle()),
       build: BUILD,
-      layoutPanelVisible: Boolean(findLayoutPanel()),
-      layoutEyeMounted: Boolean(document.querySelector('[data-gannzilla-layout-eye-v294="true"]')),
+      layoutPanelVisible: readPanelVisible(),
+      layoutEyeMounted: Boolean(document.querySelector('[data-gannzilla-layout-eye-v297="true"]')),
       wheelVisibilityControlMounted: Boolean(document.querySelector('[data-gannzilla-chart-visibility-toggle-v291="true"]')),
       separateLayoutAndWheelControls: true,
-      layoutEyeOnlyTogglesSettingsPanel: true,
-      wheelEyeOnlyTogglesWheel: true,
-      layoutEyeImmediatelyLeftOfWheelEye: true,
+      nativeToggleTextIsPanelAuthority: true,
+      residualAsideCannotReportFalseVisible: true,
       viewportResyncDispatchedAfterPanelToggle: true,
-      wheelMovementAndZoomPreserved: true,
     });
 
     return () => {
@@ -80,8 +90,8 @@ export default function GannzillaWheelZoomV293({ toolbarHeight = 24 }) {
       observer.disconnect();
       window.removeEventListener('resize', syncPanelState);
       document.removeEventListener('fullscreenchange', syncPanelState);
-      delete window.GANNZILLA_DUAL_VISIBILITY_CONTROLS_V294;
-      delete window.__auditGannzillaDualVisibilityControlsV294;
+      delete window.GANNZILLA_DUAL_VISIBILITY_CONTROLS_V297;
+      delete window.__auditGannzillaDualVisibilityControlsV297;
     };
   }, [syncPanelState]);
 
@@ -91,20 +101,22 @@ export default function GannzillaWheelZoomV293({ toolbarHeight = 24 }) {
     nativeToggle.click();
 
     const dispatchViewportResync = () => {
-      syncPanelState();
+      const visible = readPanelVisible();
+      setPanelVisible(visible);
       window.dispatchEvent(new CustomEvent('gannzilla:layout-panel-visibility-change', {
-        detail: { visible: Boolean(findLayoutPanel()) },
+        detail: { visible },
       }));
     };
 
     window.setTimeout(dispatchViewportResync, 0);
     window.setTimeout(dispatchViewportResync, 90);
     window.setTimeout(dispatchViewportResync, 260);
+    window.setTimeout(dispatchViewportResync, 520);
   };
 
   return (
     <div
-      data-gannzilla-wheel-zoom-v294="true"
+      data-gannzilla-wheel-zoom-v297="true"
       style={{
         height: toolbarHeight,
         display: 'flex',
@@ -118,7 +130,7 @@ export default function GannzillaWheelZoomV293({ toolbarHeight = 24 }) {
     >
       <button
         type="button"
-        data-gannzilla-layout-eye-v294="true"
+        data-gannzilla-layout-eye-v297="true"
         aria-label={panelVisible ? 'إخفاء لوحة التخطيط' : 'إظهار لوحة التخطيط'}
         title={panelVisible ? 'إخفاء لوحة التخطيط' : 'إظهار لوحة التخطيط'}
         aria-pressed={!panelVisible}
