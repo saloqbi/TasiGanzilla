@@ -4,18 +4,18 @@ import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
-import GannzillaWheelExactEdgePanV301 from './GannzillaWheelExactEdgePanV301';
 import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
+import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 302: full-width wheel movement plus a fully readable responsive settings panel. */
+/** Build 303: fully readable settings panel plus quarter-wheel edge tuck. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V302 = true;
-    window.__auditGannzillaBareWheelV302 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V303 = true;
+    window.__auditGannzillaBareWheelV303 = () => ({
       ok: true,
-      build: 302,
+      build: 303,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -27,30 +27,27 @@ export default function GannzillaBareWheelV224() {
       separateLayoutAndWheelVisibilityControls: true,
       layoutPanelEyeOnlyTogglesSettingsPanel: true,
       wheelVisibilityEyeOnlyTogglesWheel: true,
-      exactEdgePanMounted: true,
+      quarterHiddenPanMounted: true,
+      exactEdgePanRemoved: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
       movementAuthority: 'CLAMPED_CANVAS_TRANSLATION',
-      oldScrollTrackMovementRemoved: true,
+      permittedHiddenWheelFraction: 0.25,
+      minimumVisibleWheelFraction: 0.75,
+      panelAutoDocksWheelAwayFromPanel: true,
       panelUsesOverlayMode: true,
       panelDoesNotShrinkWheelViewport: true,
       wheelViewportFullWidthWithPanelOpen: true,
       settingsPanelMinimumWidthPx: 360,
       settingsPanelMaximumWidthPx: 520,
       settingsControlsCannotCollapse: true,
-      rightwardTravelReachesBrowserEdgeExactly: true,
-      leftwardTravelReachesBrowserEdgeExactly: true,
+      wheelMayPassRightEdgeByQuarter: true,
+      wheelMayPassLeftEdgeByQuarter: true,
+      wheelCannotFullyDisappearOutsidePage: true,
       hiddenPanelFrameRemoved: true,
       hiddenPanelWidthReservationRemoved: true,
       internalWheelScrollbarHidden: true,
       browserWindowIsVisibleWidthAuthority: true,
-      wheelMovementStopsAtPageEdges: true,
-      wheelCannotDisappearOutsidePage: true,
-      exactEdgeMarginPx: 0,
-      rightEdgeStopEnabled: true,
-      leftEdgeStopEnabled: true,
-      topEdgeStopEnabled: true,
-      bottomEdgeStopEnabled: true,
       pressAndHoldMovementBounded: true,
       centerResetPreserved: true,
       panelResizeReflowSupported: true,
@@ -91,8 +88,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V302;
-      delete window.__auditGannzillaBareWheelV302;
+      delete window.GANNZILLA_BARE_WHEEL_V303;
+      delete window.__auditGannzillaBareWheelV303;
     };
   }, []);
 
@@ -115,18 +112,8 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type {
-          display: none !important;
-          visibility: hidden !important;
-          pointer-events: none !important;
-        }
-
-        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2) {
-          display: none !important;
-          visibility: hidden !important;
-          pointer-events: none !important;
-        }
-
+        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type,
+        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2),
         [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > button {
           display: none !important;
           visibility: hidden !important;
@@ -144,7 +131,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaArabicLocalizationV248 />
       <GannzillaPanelFrameCleanupV297 />
       <GannzillaPanelFullWidthV302 />
-      <GannzillaWheelExactEdgePanV301 />
+      <GannzillaWheelQuarterHiddenPanV303 />
     </>
   );
 }
