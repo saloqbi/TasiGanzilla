@@ -7,16 +7,17 @@ import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
+import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 307: visible page rails plus mouse-wheel/touchpad and keyboard page navigation. */
+/** Build 308: preserve vertical navigation and add a dedicated visible horizontal movement bar. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V307 = true;
-    window.__auditGannzillaBareWheelV307 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V308 = true;
+    window.__auditGannzillaBareWheelV308 = () => ({
       ok: true,
-      build: 307,
+      build: 308,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -32,20 +33,22 @@ export default function GannzillaBareWheelV224() {
       customPageEdgeRailsMounted: true,
       verticalRailAtFarRight: true,
       verticalThumbAlwaysVisible: true,
-      horizontalRailAtBottom: true,
       verticalRailControlsUpDown: true,
-      horizontalRailControlsLeftRight: true,
       mouseWheelControlsVerticalPageMovement: true,
       touchpadControlsVerticalPageMovement: true,
       keyboardPageUpPageDownEnabled: true,
       keyboardArrowUpArrowDownEnabled: true,
-      homeEndNavigationEnabled: true,
-      settingsPanelKeepsIndependentScroll: true,
-      railArrowButtonsEnabled: true,
-      railThumbDraggingEnabled: true,
+      verticalBehaviorUnchangedFromV307: true,
+      dedicatedHorizontalPanBarMounted: true,
+      horizontalBarControlsLeftRight: true,
+      horizontalPressAndHoldEnabled: true,
+      horizontalThumbDraggingEnabled: true,
+      horizontalTrackClickEnabled: true,
+      horizontalCenterResetEnabled: true,
+      horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN_WITH_PAGE_SCROLL_INPUTS',
+      movementAuthority: 'V307_VERTICAL_PRESERVED_WITH_V308_DEDICATED_HORIZONTAL_BAR',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -102,8 +105,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V307;
-      delete window.__auditGannzillaBareWheelV307;
+      delete window.GANNZILLA_BARE_WHEEL_V308;
+      delete window.__auditGannzillaBareWheelV308;
     };
   }, []);
 
@@ -147,6 +150,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaPanelFullWidthV302 />
       <GannzillaWheelQuarterHiddenPanV303 />
       <GannzillaPagePanScrollbarsV305 />
+      <GannzillaHorizontalPanAssistV308 />
     </>
   );
 }
