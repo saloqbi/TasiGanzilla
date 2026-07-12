@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 319;
+const BUILD = 321;
 
 const CONTROL_MAP = {
   'layout.visible': [0, 0],
@@ -49,29 +49,71 @@ function normalizeValue(path, value) {
   return value;
 }
 
-function commitNativeValue(control, value) {
-  if (!control) return false;
+function dispatchReactValue(control) {
+  control.dispatchEvent(new Event('input', { bubbles: true }));
+  control.dispatchEvent(new Event('change', { bubbles: true }));
+}
 
-  if (control instanceof HTMLInputElement && control.type === 'checkbox') {
-    const desired = Boolean(value);
-    if (control.checked !== desired) {
-      control.click();
-    } else {
-      control.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-    return control.checked === desired;
-  }
-
-  const desired = String(value ?? '');
+function setNativeValue(control, value) {
   const prototype = control instanceof HTMLSelectElement
     ? HTMLSelectElement.prototype
     : HTMLInputElement.prototype;
   const setter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
-  if (setter) setter.call(control, desired);
-  else control.value = desired;
+  if (setter) setter.call(control, String(value ?? ''));
+  else control.value = String(value ?? '');
+  dispatchReactValue(control);
+}
 
-  control.dispatchEvent(new Event('input', { bubbles: true }));
-  control.dispatchEvent(new Event('change', { bubbles: true }));
+function commitCheckbox(control, desired) {
+  const wanted = Boolean(desired);
+
+  // V318 may have changed the DOM property without changing the React state.
+  // A two-click pulse forces React to process the value even when DOM already
+  // appears to equal the requested value.
+  if (control.checked === wanted) {
+    control.click();
+    control.click();
+  } else {
+    control.click();
+  }
+
+  return control.checked === wanted;
+}
+
+function alternateValue(control, desired) {
+  if (control instanceof HTMLSelectElement) {
+    const alternative = Array.from(control.options).find((option) => String(option.value) !== String(desired));
+    return alternative?.value ?? desired;
+  }
+
+  if (control instanceof HTMLInputElement && control.type === 'number') {
+    const number = Number(desired);
+    const step = Number(control.step);
+    const delta = Number.isFinite(step) && step > 0 ? step : 1;
+    const maximum = Number(control.max);
+    const minimum = Number(control.min);
+    if (!Number.isFinite(maximum) || number + delta <= maximum) return number + delta;
+    if (!Number.isFinite(minimum) || number - delta >= minimum) return number - delta;
+  }
+
+  return `${desired ?? ''}__react_sync__`;
+}
+
+function commitNativeValue(control, value) {
+  if (!control) return false;
+
+  if (control instanceof HTMLInputElement && control.type === 'checkbox') {
+    return commitCheckbox(control, value);
+  }
+
+  const desired = String(value ?? '');
+  const temporary = alternateValue(control, desired);
+
+  // Pulse through a different value first. This defeats stale React value
+  // trackers left behind by the old DOM bridge, then commits the real value.
+  if (String(temporary) !== desired) setNativeValue(control, temporary);
+  setNativeValue(control, desired);
+
   return String(control.value) === desired;
 }
 
@@ -82,8 +124,9 @@ function activate(path, value) {
 
   const immediate = attempt();
   window.requestAnimationFrame(attempt);
-  window.setTimeout(attempt, 35);
-  window.setTimeout(attempt, 120);
+  window.setTimeout(attempt, 40);
+  window.setTimeout(attempt, 140);
+  window.setTimeout(attempt, 320);
   return immediate;
 }
 
@@ -111,23 +154,33 @@ export default function GannzillaLayoutPriceHighlightRuntimeV319() {
       const path = event?.detail?.path;
       if (!path || !CONTROL_MAP[path]) return;
       activate(path, event.detail.value);
+      window.__gannzillaLastActivatedPropertyV321 = {
+        path,
+        value: event.detail.value,
+        at: Date.now(),
+      };
     };
 
     window.addEventListener('gannzilla:property-change-v318', onPropertyChange);
     syncWhenReady();
 
     window.GANNZILLA_LAYOUT_PRICE_HIGHLIGHT_RUNTIME_V319 = true;
+    window.GANNZILLA_LAYOUT_PRICE_HIGHLIGHT_RUNTIME_V321 = true;
     window.__activateGannzillaPropertyV319 = (path, value) => activate(path, value);
-    window.__auditGannzillaLayoutPriceHighlightRuntimeV319 = () => ({
+    window.__activateGannzillaPropertyV321 = (path, value) => activate(path, value);
+    window.__auditGannzillaLayoutPriceHighlightRuntimeV319 = () => window.__auditGannzillaLayoutPriceHighlightRuntimeV321?.();
+    window.__auditGannzillaLayoutPriceHighlightRuntimeV321 = () => ({
       ok: Boolean(findLegacyAside())
         && Object.keys(CONTROL_MAP).every((path) => Boolean(getLegacyControl(path))),
       build: BUILD,
       activePaths: Object.keys(CONTROL_MAP),
       directReactControlActivation: true,
-      checkboxClickActivation: true,
-      inputAndSelectNativeSetterActivation: true,
+      checkboxDoubleClickPulse: true,
+      inputAndSelectAlternateValuePulse: true,
+      staleDomBridgeRecovery: true,
       retryActivationEnabled: true,
       initialProjectSyncEnabled: true,
+      lastActivatedProperty: window.__gannzillaLastActivatedPropertyV321 || null,
     });
 
     return () => {
@@ -135,8 +188,12 @@ export default function GannzillaLayoutPriceHighlightRuntimeV319() {
       window.clearTimeout(syncTimer);
       window.removeEventListener('gannzilla:property-change-v318', onPropertyChange);
       delete window.GANNZILLA_LAYOUT_PRICE_HIGHLIGHT_RUNTIME_V319;
+      delete window.GANNZILLA_LAYOUT_PRICE_HIGHLIGHT_RUNTIME_V321;
       delete window.__activateGannzillaPropertyV319;
+      delete window.__activateGannzillaPropertyV321;
       delete window.__auditGannzillaLayoutPriceHighlightRuntimeV319;
+      delete window.__auditGannzillaLayoutPriceHighlightRuntimeV321;
+      delete window.__gannzillaLastActivatedPropertyV321;
     };
   }, []);
 
