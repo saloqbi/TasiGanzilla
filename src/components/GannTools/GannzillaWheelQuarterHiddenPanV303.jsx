@@ -1,11 +1,11 @@
 import React from 'react';
 
-const BUILD = 304;
+const BUILD = 305;
 const TOOLBAR_HEIGHT_PX = 24;
 const HIDDEN_FRACTION = 0.25;
 const MOVE_STEP_PX = 48;
 const HOLD_STEP_PX = 12;
-const PAN_STORAGE_KEY = 'gannzilla-wheel-asymmetric-open-pan-v304';
+const PAN_STORAGE_KEY = 'gannzilla-wheel-asymmetric-open-pan-v305';
 
 function getClassicRoot() {
   return document.querySelector('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
@@ -126,7 +126,7 @@ function configureFullPageGeometry(elements) {
   const canvasHeight = Math.max(1, canvas.offsetHeight || canvasRect.height);
 
   // Keep only the user's approved rightward limit: up to 25% of the wheel may
-  // pass beyond the right edge. Left, up and down return to open movement.
+  // pass beyond the right edge. Left, up and down remain open movement.
   const maxRightOffsetX = Math.max(
     0,
     viewportWidth / 2 - canvasWidth * (0.5 - HIDDEN_FRACTION),
@@ -149,9 +149,6 @@ function applyOffset(offset) {
   const rawX = Number.isFinite(Number(offset?.x)) ? Number(offset.x) : 0;
   const rawY = Number.isFinite(Number(offset?.y)) ? Number(offset.y) : 0;
 
-  // Asymmetric authority:
-  // - right (+X): preserve the approved quarter-wheel limit;
-  // - left (-X), up (-Y), down (+Y): no movement clamp.
   const adjusted = {
     x: Math.min(rawX, geometry.maxRightOffsetX),
     y: rawY,
@@ -165,13 +162,17 @@ function applyOffset(offset) {
 
   elements.canvas.dataset.gannzillaAsymmetricOpenX = String(Math.round(adjusted.x));
   elements.canvas.dataset.gannzillaAsymmetricOpenY = String(Math.round(adjusted.y));
-  elements.viewport.dataset.gannzillaAsymmetricOpenPanV304 = 'true';
+  elements.viewport.dataset.gannzillaAsymmetricOpenPanV305 = 'true';
   persistOffset(adjusted);
+
+  window.dispatchEvent(new CustomEvent('gannzilla:wheel-pan-offset-v305', {
+    detail: adjusted,
+  }));
 
   return { ...elements, ...geometry, offset: adjusted };
 }
 
-/** Build 304: right movement keeps its quarter limit; left, up and down are unrestricted. */
+/** Build 305: arrow controls and page-edge scrollbars share one wheel movement authority. */
 export default function GannzillaWheelQuarterHiddenPanV303() {
   const offsetRef = React.useRef(readStoredOffset());
   const repeatDelayRef = React.useRef(0);
@@ -221,8 +222,6 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
       previousPanelVisibleRef.current = visible;
 
       if (justOpened && side !== 'none') {
-        // A left panel uses the approved right quarter-limit. A right panel may
-        // move the wheel left freely because leftward movement is unrestricted.
         const x = side === 'left' ? current.maxRightOffsetX : -current.canvasWidth * HIDDEN_FRACTION;
         return commit({ x, y: offsetRef.current.y });
       }
@@ -288,6 +287,14 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
       }
     };
 
+    const onPageScrollbarPan = (event) => {
+      const detail = event?.detail || {};
+      commit({
+        x: Number(detail.x) || 0,
+        y: Number(detail.y) || 0,
+      });
+    };
+
     sync();
     const timers = [0, 80, 220, 520, 1000, 1800].map((delay) => window.setTimeout(sync, delay));
     const bodyObserver = new MutationObserver(sync);
@@ -303,25 +310,28 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
     window.addEventListener('gannzilla:layout-panel-visibility-change', sync);
     window.addEventListener('gannzilla:panel-frame-cleanup-sync', sync);
     window.addEventListener('gannzilla:panel-width-v302-sync', sync);
+    window.addEventListener('gannzilla:page-scrollbar-pan-v305', onPageScrollbarPan);
 
-    window.GANNZILLA_WHEEL_ASYMMETRIC_OPEN_PAN_V304 = true;
-    window.__auditGannzillaWheelAsymmetricOpenPanV304 = () => {
+    window.GANNZILLA_WHEEL_ASYMMETRIC_OPEN_PAN_V305 = true;
+    window.__auditGannzillaWheelAsymmetricOpenPanV305 = () => {
       const result = commit(offsetRef.current);
       const rect = result?.canvas?.getBoundingClientRect?.();
       return {
         ok: Boolean(result),
         build: BUILD,
-        movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN',
+        movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN_WITH_PAGE_SCROLLBARS',
         rightMovementQuarterLimitPreserved: true,
         permittedRightHiddenFraction: HIDDEN_FRACTION,
         leftMovementUnrestricted: true,
         upwardMovementUnrestricted: true,
         downwardMovementUnrestricted: true,
+        pageVerticalScrollbarConnected: true,
+        pageHorizontalScrollbarConnected: true,
+        arrowAndScrollbarOffsetsSynchronized: true,
         panelAutoDockEnabled: true,
         panelSide: panelSide(result?.panel),
         panelVisible: panelIsVisible(result?.panel),
         viewportUsesFullBrowserWidth: Boolean(result && Math.abs(result.viewportWidth - window.innerWidth) <= 1),
-        panelDoesNotReduceMovementRange: true,
         currentCanvasLeft: rect ? Math.round(rect.left) : null,
         currentCanvasRight: rect ? Math.round(rect.right) : null,
         browserRight: window.innerWidth,
@@ -348,8 +358,9 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
       window.removeEventListener('gannzilla:layout-panel-visibility-change', sync);
       window.removeEventListener('gannzilla:panel-frame-cleanup-sync', sync);
       window.removeEventListener('gannzilla:panel-width-v302-sync', sync);
-      delete window.GANNZILLA_WHEEL_ASYMMETRIC_OPEN_PAN_V304;
-      delete window.__auditGannzillaWheelAsymmetricOpenPanV304;
+      window.removeEventListener('gannzilla:page-scrollbar-pan-v305', onPageScrollbarPan);
+      delete window.GANNZILLA_WHEEL_ASYMMETRIC_OPEN_PAN_V305;
+      delete window.__auditGannzillaWheelAsymmetricOpenPanV305;
     };
   }, []);
 
