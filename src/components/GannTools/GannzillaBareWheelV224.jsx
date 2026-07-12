@@ -8,13 +8,13 @@ import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 298: full-width wheel page with the hidden-panel scrollbar moved outside the visible right edge. */
+/** Build 299: full-width wheel page with the hidden-panel frame and internal scrollbar removed. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V298 = true;
-    window.__auditGannzillaBareWheelV298 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V299 = true;
+    window.__auditGannzillaBareWheelV299 = () => ({
       ok: true,
-      build: 298,
+      build: 299,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -28,13 +28,12 @@ export default function GannzillaBareWheelV224() {
       wheelVisibilityEyeOnlyTogglesWheel: true,
       pageEdgeStopGuardMounted: true,
       panelFrameCleanupMounted: true,
-      oldPageScrollbarEdgeAuthorityRemoved: true,
       movementAuthority: 'BOUNDED_VIEWPORT_SCROLL',
       hiddenPanelFrameRemoved: true,
       hiddenPanelWidthReservationRemoved: true,
       wheelPageExpandedToFullVisibleWidth: true,
-      hiddenPanelScrollbarMovedBeyondRightEdge: true,
-      scrollbarOverscanPx: 24,
+      internalWheelScrollbarHidden: true,
+      browserWindowIsVisibleWidthAuthority: true,
       wheelMovementStopsAtPageEdges: true,
       wheelCannotDisappearOutsidePage: true,
       rightEdgeStopEnabled: true,
@@ -81,8 +80,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V298;
-      delete window.__auditGannzillaBareWheelV298;
+      delete window.GANNZILLA_BARE_WHEEL_V299;
+      delete window.__auditGannzillaBareWheelV299;
     };
   }, []);
 
@@ -97,8 +96,10 @@ export default function GannzillaBareWheelV224() {
         body,
         #root {
           width: 100% !important;
+          min-width: 100% !important;
           max-width: none !important;
           margin: 0 !important;
+          padding: 0 !important;
           overflow: hidden !important;
           background: #ffffff !important;
         }
