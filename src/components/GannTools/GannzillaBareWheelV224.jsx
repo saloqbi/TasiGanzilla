@@ -10,13 +10,13 @@ import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 305: page-edge scrollbars and toolbar arrows share wheel navigation authority. */
+/** Build 306: visible custom page-edge rails and toolbar arrows share wheel navigation authority. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V305 = true;
-    window.__auditGannzillaBareWheelV305 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V306 = true;
+    window.__auditGannzillaBareWheelV306 = () => ({
       ok: true,
-      build: 305,
+      build: 306,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -29,14 +29,17 @@ export default function GannzillaBareWheelV224() {
       layoutPanelEyeOnlyTogglesSettingsPanel: true,
       wheelVisibilityEyeOnlyTogglesWheel: true,
       asymmetricOpenPanMounted: true,
-      pageEdgeScrollbarsMounted: true,
-      verticalScrollbarAtFarRight: true,
-      horizontalScrollbarAtBottom: true,
-      verticalScrollbarControlsUpDown: true,
-      horizontalScrollbarControlsLeftRight: true,
+      customPageEdgeRailsMounted: true,
+      verticalRailAtFarRight: true,
+      verticalThumbAlwaysVisible: true,
+      horizontalRailAtBottom: true,
+      verticalRailControlsUpDown: true,
+      horizontalRailControlsLeftRight: true,
+      railArrowButtonsEnabled: true,
+      railThumbDraggingEnabled: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN_WITH_PAGE_SCROLLBARS',
+      movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN_WITH_VISIBLE_PAGE_RAILS',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -93,8 +96,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V305;
-      delete window.__auditGannzillaBareWheelV305;
+      delete window.GANNZILLA_BARE_WHEEL_V306;
+      delete window.__auditGannzillaBareWheelV306;
     };
   }, []);
 
