@@ -3,16 +3,17 @@ import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
+import GannzillaWheelViewportGuardV294 from './GannzillaWheelViewportGuardV294';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 293: separate layout-panel visibility from wheel visibility. */
+/** Build 294: dual visibility controls and bounded viewport-based wheel movement. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V293 = true;
-    window.__auditGannzillaBareWheelV293 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V294 = true;
+    window.__auditGannzillaBareWheelV294 = () => ({
       ok: true,
-      build: 293,
+      build: 294,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -24,9 +25,11 @@ export default function GannzillaBareWheelV224() {
       separateLayoutAndWheelVisibilityControls: true,
       layoutPanelEyeOnlyTogglesSettingsPanel: true,
       wheelVisibilityEyeOnlyTogglesWheel: true,
-      layoutPanelEyePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_VISIBILITY_EYE',
-      wheelVisibilityEyePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
-      nativeReactPanelToggleBound: true,
+      viewportPanGuardMounted: true,
+      transformPanReplacedByBoundedViewportScroll: true,
+      rightMovementCannotClipWheelOutsideViewport: true,
+      panelResizeReflowSupported: true,
+      wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -63,8 +66,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V293;
-      delete window.__auditGannzillaBareWheelV293;
+      delete window.GANNZILLA_BARE_WHEEL_V294;
+      delete window.__auditGannzillaBareWheelV294;
     };
   }, []);
 
@@ -112,6 +115,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
+      <GannzillaWheelViewportGuardV294 />
       <GannzillaArabicLocalizationV248 />
     </>
   );
