@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 330;
+const BUILD = 331;
 const TWO_PI = Math.PI * 2;
 const PANEL_STORAGE_KEY = 'tasi-gannzilla-canonical-panel-v326';
 const runtimeOverrides = new Map();
@@ -95,12 +95,14 @@ function polar(cx, cy, radius, degrees) {
   };
 }
 
+/** Draw the short annular sector in either direction without wrapping 350°. */
 function wedge(ctx, cx, cy, innerRadius, outerRadius, startDegrees, endDegrees) {
   const start = ((startDegrees - 90) * Math.PI) / 180;
   const end = ((endDegrees - 90) * Math.PI) / 180;
+  const anticlockwise = endDegrees < startDegrees;
   ctx.beginPath();
-  ctx.arc(cx, cy, outerRadius, start, end, false);
-  ctx.arc(cx, cy, innerRadius, end, start, true);
+  ctx.arc(cx, cy, outerRadius, start, end, anticlockwise);
+  ctx.arc(cx, cy, innerRadius, end, start, !anticlockwise);
   ctx.closePath();
 }
 
@@ -148,7 +150,7 @@ function findWheelCanvas() {
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
 }
 
-function redrawWheelNumberingV330() {
+function redrawWheelNumberingV331() {
   const canvas = findWheelCanvas();
   if (!canvas) return false;
 
@@ -211,30 +213,10 @@ function redrawWheelNumberingV330() {
       const point = polar(cx, cy, mid, centerDegrees);
       if (ring === 1) {
         const indexNumber = index + 1;
-        drawText(
-          ctx,
-          indexNumber,
-          point.x,
-          point.y,
-          centerDegrees,
-          Math.max(11, fontSize),
-          maxWidth,
-          800,
-          gateColor(indexNumber),
-        );
+        drawText(ctx, indexNumber, point.x, point.y, centerDegrees, Math.max(11, fontSize), maxWidth, 800, gateColor(indexNumber));
       } else {
         const value = startValue + (numericRingIndex * divisions + index) * increment;
-        drawText(
-          ctx,
-          formatNumber(value),
-          point.x,
-          point.y,
-          centerDegrees,
-          fontSize,
-          maxWidth,
-          fontWeight,
-          gateColor(value),
-        );
+        drawText(ctx, formatNumber(value), point.x, point.y, centerDegrees, fontSize, maxWidth, fontWeight, gateColor(value));
       }
     }
   }
@@ -252,7 +234,7 @@ export default function GannzillaRingTwoNumberingV223() {
 
     const draw = () => {
       frame = 0;
-      if (!disposed) redrawWheelNumberingV330();
+      if (!disposed) redrawWheelNumberingV331();
     };
 
     const schedule = (delay = 0) => {
@@ -297,7 +279,8 @@ export default function GannzillaRingTwoNumberingV223() {
 
     window.GANNZILLA_RING_INDEX_V248 = true;
     window.GANNZILLA_RING_INDEX_V330 = true;
-    window.__auditGannzillaRingIndexV330 = () => ({
+    window.GANNZILLA_RING_INDEX_V331 = true;
+    window.__auditGannzillaRingIndexV331 = () => ({
       ok: Boolean(findWheelCanvas()),
       build: BUILD,
       ring1Mode: 'INDEX_1_TO_36',
@@ -309,6 +292,8 @@ export default function GannzillaRingTwoNumberingV223() {
       firstNumericRing: 2,
       clockwise: canonicalBoolean('layout.clockwise', boolParam('clockwise', true)),
       clockwiseAuthority: 'CANONICAL_PANEL_RUNTIME_STATE',
+      counterClockwiseShortArcWedges: true,
+      numbersRemainVisibleCounterClockwise: true,
       layoutSizeAuthority: 'CANONICAL_PANEL_RUNTIME_STATE',
       layoutViewAuthority: 'CANONICAL_PANEL_RUNTIME_STATE',
       priceValueAuthority: 'CANONICAL_PANEL_RUNTIME_STATE',
@@ -317,7 +302,8 @@ export default function GannzillaRingTwoNumberingV223() {
       continuousInterval: false,
       bodyMutationObserver: false,
     });
-    window.__auditGannzillaRingIndexV248 = window.__auditGannzillaRingIndexV330;
+    window.__auditGannzillaRingIndexV330 = window.__auditGannzillaRingIndexV331;
+    window.__auditGannzillaRingIndexV248 = window.__auditGannzillaRingIndexV331;
 
     return () => {
       disposed = true;
@@ -332,8 +318,10 @@ export default function GannzillaRingTwoNumberingV223() {
       window.removeEventListener('gannzilla:canonical-property-change-v326', onCanonicalPropertyChange);
       delete window.GANNZILLA_RING_INDEX_V248;
       delete window.GANNZILLA_RING_INDEX_V330;
+      delete window.GANNZILLA_RING_INDEX_V331;
       delete window.__auditGannzillaRingIndexV248;
       delete window.__auditGannzillaRingIndexV330;
+      delete window.__auditGannzillaRingIndexV331;
     };
   }, []);
 
