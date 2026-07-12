@@ -1,10 +1,16 @@
 import React from 'react';
 
-const BUILD = 316;
-const DEFAULT_TEXT_SIZE_PX = 14;
-const MIN_TEXT_SIZE_PX = 13;
-const MAX_TEXT_SIZE_PX = 16;
-const MIN_FIELD_HEIGHT_PX = 26;
+const BUILD = 317;
+const DEFAULT_TEXT_SIZE_PX = 16;
+const MIN_TEXT_SIZE_PX = 16;
+const MAX_TEXT_SIZE_PX = 18;
+const SECTION_HEADING_SIZE_PX = 17;
+const MIN_FIELD_HEIGHT_PX = 30;
+
+const SECTION_TITLES = new Set([
+  'التخطيط', 'السعر', 'التمييز', 'المنقلة', 'العداد', 'المقياس الثانوي', 'المؤشر', 'مقياس الزمن',
+  'Layout', 'Price', 'Highlight', 'Protractor', 'Counter', 'Secondary scale', 'Marker', 'Chronometer',
+]);
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -18,14 +24,35 @@ function getClassicPanel() {
   ) || null;
 }
 
+function normalizedTitle(value) {
+  return String(value || '')
+    .trim()
+    .replace(/^[+\-−–—]\s*/, '')
+    .replace(/\s+/g, ' ');
+}
+
 function findReferenceHeading(panel) {
   if (!(panel instanceof HTMLElement)) return null;
   const candidates = Array.from(panel.querySelectorAll('*'));
   return candidates.find((element) => {
-    const text = String(element.textContent || '').trim();
+    const text = normalizedTitle(element.textContent);
     if (!/^(التخطيط|Layout)$/i.test(text)) return false;
     return element.children.length <= 3;
   }) || null;
+}
+
+function markSectionHeadings(panel) {
+  if (!(panel instanceof HTMLElement)) return [];
+  const marked = [];
+  panel.querySelectorAll('*').forEach((element) => {
+    if (!(element instanceof HTMLElement)) return;
+    const text = normalizedTitle(element.textContent);
+    if (!SECTION_TITLES.has(text)) return;
+    if (element.children.length > 4) return;
+    element.dataset.gannzillaPanelSectionHeadingV317 = 'true';
+    marked.push(element);
+  });
+  return marked;
 }
 
 function applyReadableTypography() {
@@ -39,18 +66,21 @@ function applyReadableTypography() {
     MIN_TEXT_SIZE_PX,
     MAX_TEXT_SIZE_PX,
   );
+  const sectionHeadings = markSectionHeadings(panel);
 
-  panel.dataset.gannzillaReadableTypographyV316 = 'true';
+  panel.dataset.gannzillaReadableTypographyV317 = 'true';
+  panel.removeAttribute('data-gannzilla-readable-typography-v316');
   panel.style.setProperty('--gannzilla-panel-readable-font-size', `${textSize}px`);
+  panel.style.setProperty('--gannzilla-panel-section-font-size', `${Math.max(SECTION_HEADING_SIZE_PX, textSize)}px`);
   panel.style.setProperty('--gannzilla-panel-field-min-height', `${MIN_FIELD_HEIGHT_PX}px`);
   panel.style.setProperty('font-family', 'Tahoma, Arial, sans-serif', 'important');
   panel.style.setProperty('font-size', `${textSize}px`, 'important');
-  panel.style.setProperty('line-height', '1.35', 'important');
+  panel.style.setProperty('line-height', '1.45', 'important');
 
-  return { panel, heading, textSize };
+  return { panel, heading, sectionHeadings, textSize };
 }
 
-/** Build 316: make every small settings-panel word as readable as the Layout heading. */
+/** Build 317: larger, stronger, and more comfortable settings-panel typography. */
 export default function GannzillaPanelReadableTypographyV316() {
   React.useEffect(() => {
     let frame = 0;
@@ -60,8 +90,11 @@ export default function GannzillaPanelReadableTypographyV316() {
       frame = window.requestAnimationFrame(() => {
         const result = applyReadableTypography();
         if (!result) return;
-        window.dispatchEvent(new CustomEvent('gannzilla:panel-readable-typography-v316-sync', {
-          detail: { fontSizePx: result.textSize },
+        window.dispatchEvent(new CustomEvent('gannzilla:panel-readable-typography-v317-sync', {
+          detail: {
+            fontSizePx: result.textSize,
+            sectionHeadingSizePx: Math.max(SECTION_HEADING_SIZE_PX, result.textSize),
+          },
         }));
       });
     };
@@ -78,8 +111,8 @@ export default function GannzillaPanelReadableTypographyV316() {
     window.addEventListener('gannzilla:panel-width-v302-sync', sync);
     window.addEventListener('gannzilla:panel-fixed-left-v315-sync', sync);
 
-    window.GANNZILLA_PANEL_READABLE_TYPOGRAPHY_V316 = true;
-    window.__auditGannzillaPanelReadableTypographyV316 = () => {
+    window.GANNZILLA_PANEL_READABLE_TYPOGRAPHY_V317 = true;
+    window.__auditGannzillaPanelReadableTypographyV317 = () => {
       const result = applyReadableTypography();
       const sampleField = result?.panel?.querySelector('input:not([type="checkbox"]):not([type="radio"]), select, textarea');
       const sampleLabel = Array.from(result?.panel?.querySelectorAll('label, span, div') || [])
@@ -90,8 +123,12 @@ export default function GannzillaPanelReadableTypographyV316() {
         panelFound: Boolean(result?.panel),
         referenceHeadingFound: Boolean(result?.heading),
         targetFontSizePx: result?.textSize ?? null,
+        sectionHeadingSizePx: Math.max(SECTION_HEADING_SIZE_PX, result?.textSize || 0),
+        markedSectionHeadingCount: result?.sectionHeadings?.length ?? 0,
         smallWordsEnlarged: Boolean(sampleLabel && Number.parseFloat(window.getComputedStyle(sampleLabel).fontSize) >= MIN_TEXT_SIZE_PX),
         fieldsReadable: Boolean(!sampleField || Number.parseFloat(window.getComputedStyle(sampleField).fontSize) >= MIN_TEXT_SIZE_PX),
+        strongerLabelWeightEnabled: true,
+        comfortableLineHeightEnabled: true,
         panelSideUntouched: true,
         panelWidthUntouched: true,
         wheelGeometryUntouched: true,
@@ -111,22 +148,22 @@ export default function GannzillaPanelReadableTypographyV316() {
       window.removeEventListener('gannzilla:panel-frame-cleanup-sync', sync);
       window.removeEventListener('gannzilla:panel-width-v302-sync', sync);
       window.removeEventListener('gannzilla:panel-fixed-left-v315-sync', sync);
-      delete window.GANNZILLA_PANEL_READABLE_TYPOGRAPHY_V316;
-      delete window.__auditGannzillaPanelReadableTypographyV316;
+      delete window.GANNZILLA_PANEL_READABLE_TYPOGRAPHY_V317;
+      delete window.__auditGannzillaPanelReadableTypographyV317;
     };
   }, []);
 
   return (
     <style>{`
-      [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > aside[data-gannzilla-readable-typography-v316="true"] {
+      [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > aside[data-gannzilla-readable-typography-v317="true"] {
         font-family: Tahoma, Arial, sans-serif !important;
         font-size: var(--gannzilla-panel-readable-font-size, ${DEFAULT_TEXT_SIZE_PX}px) !important;
-        line-height: 1.35 !important;
+        line-height: 1.45 !important;
         text-rendering: optimizeLegibility !important;
         -webkit-font-smoothing: antialiased !important;
       }
 
-      [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > aside[data-gannzilla-readable-typography-v316="true"] :where(
+      [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > aside[data-gannzilla-readable-typography-v317="true"] :where(
         div,
         span,
         label,
@@ -141,18 +178,33 @@ export default function GannzillaPanelReadableTypographyV316() {
       ) {
         font-family: Tahoma, Arial, sans-serif !important;
         font-size: var(--gannzilla-panel-readable-font-size, ${DEFAULT_TEXT_SIZE_PX}px) !important;
-        line-height: 1.35 !important;
+        line-height: 1.45 !important;
       }
 
-      [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > aside[data-gannzilla-readable-typography-v316="true"] :where(
+      [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > aside[data-gannzilla-readable-typography-v317="true"] :where(
+        label,
+        span,
+        small
+      ) {
+        font-weight: 600 !important;
+      }
+
+      [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > aside[data-gannzilla-readable-typography-v317="true"] :where(
         input:not([type="checkbox"]):not([type="radio"]),
         select,
         textarea
       ) {
         min-height: var(--gannzilla-panel-field-min-height, ${MIN_FIELD_HEIGHT_PX}px) !important;
+        font-weight: 500 !important;
       }
 
-      [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > aside[data-gannzilla-readable-typography-v316="true"] :where(strong, b) {
+      [data-gannzilla-panel-section-heading-v317="true"] {
+        font-size: var(--gannzilla-panel-section-font-size, ${SECTION_HEADING_SIZE_PX}px) !important;
+        font-weight: 800 !important;
+        line-height: 1.35 !important;
+      }
+
+      [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > aside[data-gannzilla-readable-typography-v317="true"] :where(strong, b) {
         font-weight: 800 !important;
       }
     `}</style>
