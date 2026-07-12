@@ -1,7 +1,7 @@
 import React from 'react';
 import GannzillaWheelZoomV289 from './GannzillaWheelZoomV289';
 
-const BUILD = 297;
+const BUILD = 298;
 
 function getClassicRoot() {
   return document.querySelector('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
@@ -55,7 +55,7 @@ function LayoutEyeGlyph({ visible }) {
   );
 }
 
-/** Build 297: separate panel/wheel controls with authoritative panel-state cleanup. */
+/** Build 298: separate panel/wheel controls with authoritative hidden-frame cleanup. */
 export default function GannzillaWheelZoomV293({ toolbarHeight = 24 }) {
   const [panelVisible, setPanelVisible] = React.useState(() => readPanelVisible());
   const size = Math.max(22, toolbarHeight);
@@ -72,12 +72,12 @@ export default function GannzillaWheelZoomV293({ toolbarHeight = 24 }) {
     window.addEventListener('resize', syncPanelState);
     document.addEventListener('fullscreenchange', syncPanelState);
 
-    window.GANNZILLA_DUAL_VISIBILITY_CONTROLS_V297 = true;
-    window.__auditGannzillaDualVisibilityControlsV297 = () => ({
+    window.GANNZILLA_DUAL_VISIBILITY_CONTROLS_V298 = true;
+    window.__auditGannzillaDualVisibilityControlsV298 = () => ({
       ok: Boolean(findNativePanelToggle()),
       build: BUILD,
       layoutPanelVisible: readPanelVisible(),
-      layoutEyeMounted: Boolean(document.querySelector('[data-gannzilla-layout-eye-v297="true"]')),
+      layoutEyeMounted: Boolean(document.querySelector('[data-gannzilla-layout-eye-v298="true"]')),
       wheelVisibilityControlMounted: Boolean(document.querySelector('[data-gannzilla-chart-visibility-toggle-v291="true"]')),
       separateLayoutAndWheelControls: true,
       nativeToggleTextIsPanelAuthority: true,
@@ -90,8 +90,8 @@ export default function GannzillaWheelZoomV293({ toolbarHeight = 24 }) {
       observer.disconnect();
       window.removeEventListener('resize', syncPanelState);
       document.removeEventListener('fullscreenchange', syncPanelState);
-      delete window.GANNZILLA_DUAL_VISIBILITY_CONTROLS_V297;
-      delete window.__auditGannzillaDualVisibilityControlsV297;
+      delete window.GANNZILLA_DUAL_VISIBILITY_CONTROLS_V298;
+      delete window.__auditGannzillaDualVisibilityControlsV298;
     };
   }, [syncPanelState]);
 
@@ -116,7 +116,7 @@ export default function GannzillaWheelZoomV293({ toolbarHeight = 24 }) {
 
   return (
     <div
-      data-gannzilla-wheel-zoom-v297="true"
+      data-gannzilla-wheel-zoom-v298="true"
       style={{
         height: toolbarHeight,
         display: 'flex',
@@ -130,7 +130,7 @@ export default function GannzillaWheelZoomV293({ toolbarHeight = 24 }) {
     >
       <button
         type="button"
-        data-gannzilla-layout-eye-v297="true"
+        data-gannzilla-layout-eye-v298="true"
         aria-label={panelVisible ? 'إخفاء لوحة التخطيط' : 'إظهار لوحة التخطيط'}
         title={panelVisible ? 'إخفاء لوحة التخطيط' : 'إظهار لوحة التخطيط'}
         aria-pressed={!panelVisible}
