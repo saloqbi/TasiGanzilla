@@ -1,7 +1,37 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 
-const BUILD = 253;
+const BUILD = 313;
+const STORAGE_KEY = 'gannzilla-full-page-selected-v313';
+
+function readStoredSelected() {
+  try {
+    return sessionStorage.getItem(STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function persistSelected(selected) {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, String(Boolean(selected)));
+  } catch {
+    // Runtime state remains authoritative when storage is unavailable.
+  }
+}
+
+function applyPageLock(selected) {
+  const html = document.documentElement;
+  if (selected) {
+    html.setAttribute('data-gannzilla-page-maximized', 'true');
+    html.setAttribute('data-gannzilla-fullpage-selected-v313', 'true');
+  } else {
+    html.removeAttribute('data-gannzilla-page-maximized');
+    html.removeAttribute('data-gannzilla-fullpage-selected-v313');
+  }
+  persistSelected(selected);
+  return selected;
+}
 
 function ExpandGlyph({ active = false }) {
   return (
@@ -29,52 +59,93 @@ function ExpandGlyph({ active = false }) {
 export default function GannzillaPageFullscreenV253({ toolbarHeight = 24 }) {
   const { lang } = useLanguage();
   const isArabic = lang === 'ar' || new URLSearchParams(window.location.search).get('lang') === 'ar';
-  const [active, setActive] = React.useState(Boolean(document.fullscreenElement));
-  const [fallbackActive, setFallbackActive] = React.useState(false);
+  const initialStored = React.useMemo(readStoredSelected, []);
+  const [active, setActive] = React.useState(Boolean(document.fullscreenElement) || initialStored);
+  const [fallbackActive, setFallbackActive] = React.useState(initialStored && !document.fullscreenElement);
+  const selectedRef = React.useRef(Boolean(document.fullscreenElement) || initialStored);
+  const nativeWasActiveRef = React.useRef(Boolean(document.fullscreenElement));
   const iconSize = Math.max(22, toolbarHeight);
 
   const notifyResize = React.useCallback(() => {
     window.dispatchEvent(new Event('resize'));
     window.dispatchEvent(new CustomEvent('gannzilla:ring-two-numbering-refresh'));
+    window.dispatchEvent(new CustomEvent('gannzilla:fullpage-layout-lock-v313', {
+      detail: { selected: selectedRef.current },
+    }));
   }, []);
 
+  const setSelected = React.useCallback((selected, fallback = false) => {
+    selectedRef.current = Boolean(selected);
+    applyPageLock(selectedRef.current);
+    setFallbackActive(Boolean(selected) && Boolean(fallback));
+    setActive(Boolean(document.fullscreenElement) || selectedRef.current);
+    window.setTimeout(notifyResize, 0);
+    window.setTimeout(notifyResize, 80);
+    window.setTimeout(notifyResize, 220);
+  }, [notifyResize]);
+
   React.useEffect(() => {
+    if (selectedRef.current) applyPageLock(true);
+
     const onFullscreenChange = () => {
-      setActive(Boolean(document.fullscreenElement));
+      const nativeActive = Boolean(document.fullscreenElement);
+      if (nativeActive) {
+        nativeWasActiveRef.current = true;
+        selectedRef.current = true;
+        applyPageLock(true);
+        setFallbackActive(false);
+        setActive(true);
+      } else if (nativeWasActiveRef.current) {
+        nativeWasActiveRef.current = false;
+        selectedRef.current = false;
+        applyPageLock(false);
+        setFallbackActive(false);
+        setActive(false);
+      } else {
+        setActive(selectedRef.current);
+      }
       window.setTimeout(notifyResize, 30);
       window.setTimeout(notifyResize, 180);
     };
 
+    const reassertSelectedLayout = () => {
+      if (!selectedRef.current) return;
+      applyPageLock(true);
+      window.setTimeout(notifyResize, 0);
+      window.setTimeout(notifyResize, 70);
+    };
+
     document.addEventListener('fullscreenchange', onFullscreenChange);
-    window.GANNZILLA_PAGE_FULLSCREEN_V253 = true;
-    window.__auditGannzillaPageFullscreenV253 = () => ({
+    window.addEventListener('gannzilla:wheel-size-change-start-v313', reassertSelectedLayout);
+    window.addEventListener('gannzilla:wheel-size-change-end-v313', reassertSelectedLayout);
+    window.addEventListener('gannzilla:panel-frame-cleanup-sync', reassertSelectedLayout);
+
+    window.GANNZILLA_PAGE_FULLSCREEN_V313 = true;
+    window.__auditGannzillaPageFullscreenV313 = () => ({
       ok: true,
       build: BUILD,
       iconMounted: true,
       visualReference: 'GANNZILLA_FOUR_CORNER_PAGE_EXPAND_ICON',
       fullscreenApiSupported: Boolean(document.documentElement.requestFullscreen && document.exitFullscreen),
       fullscreenActive: Boolean(document.fullscreenElement),
+      fullPageSelected: selectedRef.current,
       fallbackActive,
+      persistedAcrossWheelSizeChanges: true,
+      pageFrameIndependentFromWheelZoom: true,
+      wheelZoomCannotClearFullPageSelection: true,
       toolbarHeightPx: toolbarHeight,
       iconSizePx: iconSize,
     });
 
     return () => {
       document.removeEventListener('fullscreenchange', onFullscreenChange);
-      document.documentElement.removeAttribute('data-gannzilla-page-maximized');
-      delete window.GANNZILLA_PAGE_FULLSCREEN_V253;
-      delete window.__auditGannzillaPageFullscreenV253;
+      window.removeEventListener('gannzilla:wheel-size-change-start-v313', reassertSelectedLayout);
+      window.removeEventListener('gannzilla:wheel-size-change-end-v313', reassertSelectedLayout);
+      window.removeEventListener('gannzilla:panel-frame-cleanup-sync', reassertSelectedLayout);
+      delete window.GANNZILLA_PAGE_FULLSCREEN_V313;
+      delete window.__auditGannzillaPageFullscreenV313;
     };
   }, [fallbackActive, iconSize, notifyResize, toolbarHeight]);
-
-  const applyFallback = React.useCallback((enabled) => {
-    if (enabled) document.documentElement.setAttribute('data-gannzilla-page-maximized', 'true');
-    else document.documentElement.removeAttribute('data-gannzilla-page-maximized');
-    setFallbackActive(enabled);
-    setActive(enabled);
-    window.setTimeout(notifyResize, 30);
-    window.setTimeout(notifyResize, 180);
-  }, [notifyResize]);
 
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) {
@@ -82,19 +153,21 @@ export default function GannzillaPageFullscreenV253({ toolbarHeight = 24 }) {
       return;
     }
 
-    if (fallbackActive) {
-      applyFallback(false);
+    if (fallbackActive || selectedRef.current) {
+      setSelected(false, false);
       return;
     }
 
     try {
       if (document.documentElement.requestFullscreen) {
+        selectedRef.current = true;
+        applyPageLock(true);
         await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
       } else {
-        applyFallback(true);
+        setSelected(true, true);
       }
     } catch {
-      applyFallback(true);
+      setSelected(true, true);
     }
   };
 
@@ -111,11 +184,31 @@ export default function GannzillaPageFullscreenV253({ toolbarHeight = 24 }) {
           position: fixed !important;
           inset: 0 !important;
           width: 100vw !important;
+          min-width: 100vw !important;
+          max-width: 100vw !important;
           height: 100vh !important;
+          min-height: 100vh !important;
+          max-height: 100vh !important;
           margin: 0 !important;
+          padding: 0 !important;
           overflow: hidden !important;
           background: #ffffff !important;
           z-index: 2147483000 !important;
+          transform: none !important;
+        }
+
+        html[data-gannzilla-fullpage-selected-v313="true"] [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) {
+          position: fixed !important;
+          inset: 0 !important;
+          width: 100vw !important;
+          min-width: 100vw !important;
+          max-width: 100vw !important;
+          height: 100vh !important;
+          min-height: 100vh !important;
+          max-height: 100vh !important;
+          margin: 0 !important;
+          overflow: hidden !important;
+          box-sizing: border-box !important;
         }
       `}</style>
       <button
