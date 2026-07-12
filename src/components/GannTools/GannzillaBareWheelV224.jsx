@@ -7,6 +7,8 @@ import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
 import GannzillaPanelFixedLeftV315 from './GannzillaPanelFixedLeftV315';
 import GannzillaPanelReadableTypographyV316 from './GannzillaPanelReadableTypographyV316';
+import GannzillaFullPropertyPanelParityV318 from './GannzillaFullPropertyPanelParityV318';
+import GannzillaLayoutPriceHighlightRuntimeV319 from './GannzillaLayoutPriceHighlightRuntimeV319';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
@@ -15,26 +17,27 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 
 /**
- * Build 322
- * Clean property-panel reset:
- * - removes the V318/V319/V320 overlay-and-bridge stack
- * - restores the renderer-owned controls as the only state authority
- * - every visible control now calls the renderer React setter directly
- * - preserves the accepted wheel movement/fullscreen/layout infrastructure
+ * Build 323
+ * Visible property-list replacement:
+ * - the renderer's legacy property sections are removed from the visible panel
+ * - the screenshot/CHR parity panel becomes the only visible property list
+ * - the temporary v318 title bar is hidden so the list starts with Layout
+ * - the live renderer remains mounted behind the panel
  */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V322 = true;
-    window.__auditGannzillaBareWheelV322 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V323 = true;
+    window.__auditGannzillaBareWheelV323 = () => ({
       ok: true,
-      build: 322,
-      propertyPanelArchitecture: 'DIRECT_RENDERER_OWNED_CONTROLS',
-      legacyOverlayPanelRemoved: true,
-      domBridgeRuntimeRemoved: true,
-      duplicateClockwiseRuntimeRemoved: true,
-      visibleControlsCallReactSettersDirectly: true,
-      canonicalRendererMounted: true,
-      rendererStateIsSingleAuthority: true,
+      build: 323,
+      visiblePropertyPanelAuthority: 'FULL_SCREENSHOT_CHR_PARITY_PANEL',
+      legacyRendererSectionsVisible: false,
+      legacyRendererSectionsPointerEvents: false,
+      oldPanelHeaderVisible: false,
+      fullPropertyPanelMounted: true,
+      fullPropertyPanelSourceBuild: 318,
+      layoutRuntimeMounted: true,
+      layoutRuntimeSourceBuild: 321,
       wheelRendererPreserved: true,
       wheelZoomPreserved: true,
       wheelPanPreserved: true,
@@ -46,12 +49,11 @@ export default function GannzillaBareWheelV224() {
       verticalScrollbarPreserved: true,
       defaultLanguage: 'ar',
       supportedLanguages: ['ar', 'en'],
-      nextParitySource: 'GANNZILLA_SCREENSHOT_PLUS_CHR_CLEAN_ROOM',
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V322;
-      delete window.__auditGannzillaBareWheelV322;
+      delete window.GANNZILLA_BARE_WHEEL_V323;
+      delete window.__auditGannzillaBareWheelV323;
     };
   }, []);
 
@@ -86,6 +88,23 @@ export default function GannzillaBareWheelV224() {
           top: var(--gannzilla-toolbar-height) !important;
           height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
         }
+
+        aside[data-gannzilla-full-panel-v318="true"] > div:not(.gannzilla-full-property-panel-v318) {
+          display: none !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+          height: 0 !important;
+          min-height: 0 !important;
+          overflow: hidden !important;
+        }
+
+        .gannzilla-full-property-panel-v318 > div:first-of-type {
+          display: none !important;
+        }
+
+        .gannzilla-full-property-panel-v318 {
+          padding-top: 0 !important;
+        }
       `}</style>
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
@@ -95,6 +114,8 @@ export default function GannzillaBareWheelV224() {
       <GannzillaPanelFullWidthV302 />
       <GannzillaPanelFixedLeftV315 />
       <GannzillaPanelReadableTypographyV316 />
+      <GannzillaFullPropertyPanelParityV318 />
+      <GannzillaLayoutPriceHighlightRuntimeV319 />
       <GannzillaWheelQuarterHiddenPanV303 />
       <GannzillaPagePanScrollbarsV305 />
       <GannzillaHorizontalPanAssistV308 />
