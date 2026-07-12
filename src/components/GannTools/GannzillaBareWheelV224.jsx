@@ -11,13 +11,13 @@ import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 310: preserve vertical navigation and use a native-size long-range horizontal scrollbar. */
+/** Build 311: preserve vertical navigation and force the compact horizontal control above the bottom edge. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V310 = true;
-    window.__auditGannzillaBareWheelV310 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V311 = true;
+    window.__auditGannzillaBareWheelV311 = () => ({
       ok: true,
-      build: 310,
+      build: 311,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -39,10 +39,12 @@ export default function GannzillaBareWheelV224() {
       keyboardPageUpPageDownEnabled: true,
       keyboardArrowUpArrowDownEnabled: true,
       verticalBehaviorUnchangedFromV307: true,
-      nativeMiniHorizontalPanBarMounted: true,
-      horizontalBarHeightPx: 12,
-      horizontalThumbWidthPx: 12,
-      horizontalButtonWidthPx: 12,
+      portalHorizontalPanBarMounted: true,
+      portalHorizontalBarCannotBeClippedByAppFrame: true,
+      horizontalBarHeightPx: 14,
+      horizontalBarBottomPx: 18,
+      horizontalThumbWidthPx: 18,
+      horizontalButtonWidthPx: 14,
       horizontalMovementRangePx: 80000,
       horizontalBarControlsLeftRight: true,
       horizontalPressAndHoldEnabled: true,
@@ -52,7 +54,7 @@ export default function GannzillaBareWheelV224() {
       horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'V307_VERTICAL_PRESERVED_WITH_V310_NATIVE_MINI_HORIZONTAL_SCROLLBAR',
+      movementAuthority: 'V307_VERTICAL_PRESERVED_WITH_V311_PORTAL_HORIZONTAL_SCROLLBAR',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -109,8 +111,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V310;
-      delete window.__auditGannzillaBareWheelV310;
+      delete window.GANNZILLA_BARE_WHEEL_V311;
+      delete window.__auditGannzillaBareWheelV311;
     };
   }, []);
 
