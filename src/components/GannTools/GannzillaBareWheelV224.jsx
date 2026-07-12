@@ -7,6 +7,7 @@ import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
 import GannzillaPanelFixedLeftV315 from './GannzillaPanelFixedLeftV315';
 import GannzillaPanelReadableTypographyV316 from './GannzillaPanelReadableTypographyV316';
+import GannzillaCanonicalPropertyPanelV326 from './GannzillaCanonicalPropertyPanelV326';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
@@ -15,38 +16,25 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/**
- * Build 325
- * Clean property-panel baseline:
- * - removes the complete V318 property panel from the runtime
- * - removes the V319/V321 DOM bridge from the runtime
- * - removes the V320 clockwise adapter from the runtime
- * - hides the renderer's historical property aside completely
- * - leaves one clean empty panel host for the new screenshot/CHR rebuild
- * - preserves wheel rendering, zoom, pan, fullscreen and toolbars
- */
+/** Build 326: complete single-authority property panel rebuilt from the Gannzilla screenshot/CHR contract. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V325 = true;
-    window.__auditGannzillaBareWheelV325 = () => {
+    window.GANNZILLA_BARE_WHEEL_V326 = true;
+    window.__auditGannzillaBareWheelV326 = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
-      const oldFullPanel = document.querySelector('.gannzilla-full-property-panel-v318');
+      const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
       const visibleLegacyAsides = Array.from(document.querySelectorAll('aside'))
         .filter((aside) => aside.id !== CLEAN_PANEL_ID)
         .filter((aside) => getComputedStyle(aside).display !== 'none');
-
       return {
-        ok: Boolean(cleanPanel) && !oldFullPanel && visibleLegacyAsides.length === 0,
-        build: 325,
-        cleanPanelMounted: Boolean(cleanPanel),
-        oldFullPanelMounted: Boolean(oldFullPanel),
+        ok: Boolean(cleanPanel && canonicalPanel && visibleLegacyAsides.length === 0),
+        build: 326,
+        canonicalPanelMounted: Boolean(canonicalPanel),
         visibleLegacyPanelCount: visibleLegacyAsides.length,
-        propertyControlsRendered: 0,
-        duplicateSectionsRendered: 0,
-        legacyPropertyPanelRuntimeMounted: false,
-        legacyDomBridgeMounted: false,
-        legacyClockwiseAdapterMounted: false,
-        panelState: 'CLEAN_EMPTY_BASELINE_READY_FOR_REBUILD',
+        singleVisiblePanelAuthority: true,
+        oldV318PanelMounted: false,
+        oldV319BridgeMounted: false,
+        oldV320AdapterMounted: false,
         wheelRendererPreserved: true,
         wheelZoomPreserved: true,
         wheelPanPreserved: true,
@@ -56,10 +44,9 @@ export default function GannzillaBareWheelV224() {
         verticalScrollbarPreserved: true,
       };
     };
-
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V325;
-      delete window.__auditGannzillaBareWheelV325;
+      delete window.GANNZILLA_BARE_WHEEL_V326;
+      delete window.__auditGannzillaBareWheelV326;
     };
   }, []);
 
@@ -107,10 +94,9 @@ export default function GannzillaBareWheelV224() {
           display: block !important;
           visibility: visible !important;
           pointer-events: auto !important;
-          background: #f2f2f2 !important;
+          background: #f2f2ee !important;
           border-right: 1px solid #b8b8b8 !important;
           box-sizing: border-box !important;
-          direction: rtl !important;
         }
 
         [data-gannzilla-build="248"] aside:not(#${CLEAN_PANEL_ID}) {
@@ -126,42 +112,13 @@ export default function GannzillaBareWheelV224() {
           overflow: hidden !important;
           opacity: 0 !important;
         }
-
-        #${CLEAN_PANEL_ID} .gannzilla-clean-panel-title-v325 {
-          display: flex;
-          align-items: center;
-          min-height: 34px;
-          padding: 0 10px;
-          background: #ececdd;
-          border-bottom: 1px solid #c5c5c5;
-          color: #222;
-          font-family: Tahoma, Segoe UI, Arial, sans-serif;
-          font-size: 16px;
-          font-weight: 800;
-          box-sizing: border-box;
-        }
-
-        #${CLEAN_PANEL_ID} .gannzilla-clean-panel-status-v325 {
-          padding: 14px 12px;
-          color: #555;
-          font-family: Tahoma, Segoe UI, Arial, sans-serif;
-          font-size: 14px;
-          line-height: 1.6;
-          background: #f7f7f7;
-          border-bottom: 1px solid #d6d6d6;
-        }
       `}</style>
 
       <aside
         id={CLEAN_PANEL_ID}
         data-gannzilla-clean-panel="true"
-        aria-label="Clean Gannzilla property panel"
-      >
-        <div className="gannzilla-clean-panel-title-v325">قائمة التخطيط</div>
-        <div className="gannzilla-clean-panel-status-v325">
-          تم حذف جميع مكونات القائمة القديمة. هذه مساحة نظيفة لبناء خيارات Gannzilla من جديد دون تكرار.
-        </div>
-      </aside>
+        aria-label="Gannzilla canonical property panel"
+      />
 
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
@@ -171,6 +128,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaPanelFullWidthV302 />
       <GannzillaPanelFixedLeftV315 />
       <GannzillaPanelReadableTypographyV316 />
+      <GannzillaCanonicalPropertyPanelV326 />
       <GannzillaWheelQuarterHiddenPanV303 />
       <GannzillaPagePanScrollbarsV305 />
       <GannzillaHorizontalPanAssistV308 />
