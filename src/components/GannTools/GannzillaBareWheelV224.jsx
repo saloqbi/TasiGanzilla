@@ -17,27 +17,38 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 328: canonical property panel with directly mounted and functional Gannzilla chart icons. */
+/** Build 329: unblock canonical panel interactions by keeping the top horizontal pan bar outside the panel. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
     window.GANNZILLA_BARE_WHEEL_V327 = true;
     window.GANNZILLA_BARE_WHEEL_V328 = true;
+    window.GANNZILLA_BARE_WHEEL_V329 = true;
     const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
       const chartToolbar = cleanPanel?.querySelector('.gannzilla-chart-toolbar-v328');
+      const horizontalBar = document.querySelector('[data-gannzilla-horizontal-pan-assist-v311="true"]');
+      const panelRect = cleanPanel?.getBoundingClientRect?.();
+      const barRect = horizontalBar?.getBoundingClientRect?.();
       const visibleLegacyAsides = Array.from(document.querySelectorAll('aside'))
         .filter((aside) => aside.id !== CLEAN_PANEL_ID)
         .filter((aside) => getComputedStyle(aside).display !== 'none');
+      const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
       return {
-        ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && visibleLegacyAsides.length === 0),
-        build: 328,
+        ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
+        build: 329,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
         chartToolbarDirectHostMount: true,
         chartToolbarFunctions: ['select', 'add', 'delete', 'rename', 'save'],
         chartToolbarShortcuts: ['Insert', 'Delete', 'F2', 'Ctrl+S'],
+        horizontalBarMounted: Boolean(horizontalBar),
+        horizontalBarClearsPropertyPanel: panelClear,
+        panelRightPx: panelRect ? Math.round(panelRect.right) : null,
+        horizontalBarLeftPx: barRect ? Math.round(barRect.left) : null,
+        panelPointerEvents: cleanPanel ? getComputedStyle(cleanPanel).pointerEvents : null,
+        chartToolbarPointerEvents: chartToolbar ? getComputedStyle(chartToolbar).pointerEvents : null,
         visibleLegacyPanelCount: visibleLegacyAsides.length,
         singleVisiblePanelAuthority: true,
         oldV318PanelMounted: false,
@@ -55,13 +66,16 @@ export default function GannzillaBareWheelV224() {
     window.__auditGannzillaBareWheelV326 = audit;
     window.__auditGannzillaBareWheelV327 = audit;
     window.__auditGannzillaBareWheelV328 = audit;
+    window.__auditGannzillaBareWheelV329 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
       delete window.GANNZILLA_BARE_WHEEL_V327;
       delete window.GANNZILLA_BARE_WHEEL_V328;
+      delete window.GANNZILLA_BARE_WHEEL_V329;
       delete window.__auditGannzillaBareWheelV326;
       delete window.__auditGannzillaBareWheelV327;
       delete window.__auditGannzillaBareWheelV328;
+      delete window.__auditGannzillaBareWheelV329;
     };
   }, []);
 
@@ -112,6 +126,11 @@ export default function GannzillaBareWheelV224() {
           background: #f2f2ee !important;
           border-right: 1px solid #b8b8b8 !important;
           box-sizing: border-box !important;
+        }
+
+        #${CLEAN_PANEL_ID},
+        #${CLEAN_PANEL_ID} * {
+          pointer-events: auto;
         }
 
         [data-gannzilla-build="248"] aside:not(#${CLEAN_PANEL_ID}) {
