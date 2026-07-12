@@ -6,25 +6,26 @@ import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 289: integrate a guaranteed-visible chart eye directly with the wheel controls. */
+/** Build 292: hide/show the layout settings panel while keeping the wheel visible. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V289 = true;
-    window.__auditGannzillaBareWheelV289 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V292 = true;
+    window.__auditGannzillaBareWheelV292 = () => ({
       ok: true,
-      build: 289,
+      build: 292,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
       drawingToolsRuntimeRemoved: true,
       drawingToolsToggleRemoved: true,
       wheelInteractionReleased: true,
-      chartVisibilityToggleMounted: true,
-      chartVisibilityEyePhysicallyIntegratedWithWheelControls: true,
-      chartVisibilityTogglePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
-      chartHideShowPreservesSettingsPanel: true,
-      chartHideShowPreservesToolbar: true,
-      chartVisibilityStatePersisted: true,
+      layoutPanelToggleMounted: true,
+      layoutPanelTogglePhysicallyIntegratedWithWheelControls: true,
+      layoutPanelTogglePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
+      layoutPanelOnly: true,
+      wheelAlwaysPreserved: true,
+      wheelVisibilityUnaffected: true,
+      nativeReactPanelToggleBound: true,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
       topToolbarHeightPx: TOOLBAR_HEIGHT,
@@ -61,8 +62,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V289;
-      delete window.__auditGannzillaBareWheelV289;
+      delete window.GANNZILLA_BARE_WHEEL_V292;
+      delete window.__auditGannzillaBareWheelV292;
     };
   }, []);
 
