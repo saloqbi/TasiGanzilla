@@ -6,25 +6,26 @@ import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 292: hide/show the layout settings panel while keeping the wheel visible. */
+/** Build 293: separate layout-panel visibility from wheel visibility. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V292 = true;
-    window.__auditGannzillaBareWheelV292 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V293 = true;
+    window.__auditGannzillaBareWheelV293 = () => ({
       ok: true,
-      build: 292,
+      build: 293,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
       drawingToolsRuntimeRemoved: true,
       drawingToolsToggleRemoved: true,
       wheelInteractionReleased: true,
-      layoutPanelToggleMounted: true,
-      layoutPanelTogglePhysicallyIntegratedWithWheelControls: true,
-      layoutPanelTogglePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
-      layoutPanelOnly: true,
-      wheelAlwaysPreserved: true,
-      wheelVisibilityUnaffected: true,
+      layoutPanelEyeMounted: true,
+      wheelVisibilityEyeMounted: true,
+      separateLayoutAndWheelVisibilityControls: true,
+      layoutPanelEyeOnlyTogglesSettingsPanel: true,
+      wheelVisibilityEyeOnlyTogglesWheel: true,
+      layoutPanelEyePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_VISIBILITY_EYE',
+      wheelVisibilityEyePlacement: 'IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
       nativeReactPanelToggleBound: true,
       canonicalRendererMounted: true,
       topToolbarMounted: true,
@@ -62,8 +63,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V292;
-      delete window.__auditGannzillaBareWheelV292;
+      delete window.GANNZILLA_BARE_WHEEL_V293;
+      delete window.__auditGannzillaBareWheelV293;
     };
   }, []);
 
