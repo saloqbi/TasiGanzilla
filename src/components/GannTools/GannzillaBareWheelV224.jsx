@@ -8,13 +8,13 @@ import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 299: full-width wheel page with the hidden-panel frame and internal scrollbar removed. */
+/** Build 300: settings panel overlays a full-width wheel viewport with complete edge-to-edge movement. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V299 = true;
-    window.__auditGannzillaBareWheelV299 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V300 = true;
+    window.__auditGannzillaBareWheelV300 = () => ({
       ok: true,
-      build: 299,
+      build: 300,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -29,9 +29,12 @@ export default function GannzillaBareWheelV224() {
       pageEdgeStopGuardMounted: true,
       panelFrameCleanupMounted: true,
       movementAuthority: 'BOUNDED_VIEWPORT_SCROLL',
+      panelUsesOverlayMode: true,
+      panelDoesNotShrinkWheelViewport: true,
+      wheelViewportFullWidthWithPanelOpen: true,
+      rightwardTravelReachesBrowserEdge: true,
       hiddenPanelFrameRemoved: true,
       hiddenPanelWidthReservationRemoved: true,
-      wheelPageExpandedToFullVisibleWidth: true,
       internalWheelScrollbarHidden: true,
       browserWindowIsVisibleWidthAuthority: true,
       wheelMovementStopsAtPageEdges: true,
@@ -80,8 +83,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V299;
-      delete window.__auditGannzillaBareWheelV299;
+      delete window.GANNZILLA_BARE_WHEEL_V300;
+      delete window.__auditGannzillaBareWheelV300;
     };
   }, []);
 
