@@ -7,6 +7,7 @@ import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
 import GannzillaPanelFixedLeftV315 from './GannzillaPanelFixedLeftV315';
 import GannzillaPanelReadableTypographyV316 from './GannzillaPanelReadableTypographyV316';
+import GannzillaFullPropertyPanelParityV318 from './GannzillaFullPropertyPanelParityV318';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
@@ -14,13 +15,20 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 317: increase panel text and fields for comfortable visual reading. */
+/** Build 318: mount the complete property-panel and project-persistence foundation. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V317 = true;
-    window.__auditGannzillaBareWheelV317 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V318 = true;
+    window.__auditGannzillaBareWheelV317 = () => window.__auditGannzillaBareWheelV318?.();
+    window.__auditGannzillaBareWheelV318 = () => ({
       ok: true,
-      build: 317,
+      build: 318,
+      fullPropertyPanelParityMounted: true,
+      fullPropertyPanelBuild: 318,
+      projectPersistenceMounted: true,
+      projectImportExportMounted: true,
+      panelOpenStatePersistenceMounted: true,
       settingsPanelTypographyReadable: true,
       panelSmallWordsComfortablyEnlarged: true,
       targetPanelFontSizePx: 16,
@@ -87,7 +95,7 @@ export default function GannzillaBareWheelV224() {
       horizontalBarPanelAware: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'V317_LARGER_PANEL_TEXT_WITH_V315_FIXED_LEFT_PANEL_AND_V314_SAFE_FULLSCREEN',
+      movementAuthority: 'V318_FULL_PROPERTY_PANEL_WITH_V317_MOVEMENT_AND_V315_FIXED_LEFT_PANEL',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -145,7 +153,9 @@ export default function GannzillaBareWheelV224() {
 
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V317;
+      delete window.GANNZILLA_BARE_WHEEL_V318;
       delete window.__auditGannzillaBareWheelV317;
+      delete window.__auditGannzillaBareWheelV318;
     };
   }, []);
 
@@ -189,6 +199,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaPanelFullWidthV302 />
       <GannzillaPanelFixedLeftV315 />
       <GannzillaPanelReadableTypographyV316 />
+      <GannzillaFullPropertyPanelParityV318 />
       <GannzillaWheelQuarterHiddenPanV303 />
       <GannzillaPagePanScrollbarsV305 />
       <GannzillaHorizontalPanAssistV308 />
