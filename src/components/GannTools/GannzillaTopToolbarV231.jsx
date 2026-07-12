@@ -3,26 +3,27 @@ import GannzillaAboutOnlyV229 from './GannzillaAboutOnlyV229';
 import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
-import GannzillaWheelZoomV289 from './GannzillaWheelZoomV289';
+import GannzillaWheelZoomV292 from './GannzillaWheelZoomV292';
 
-const BUILD = 290;
+const BUILD = 292;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 290: force a fresh deployment of the integrated chart visibility eye. */
+/** Build 292: layout-panel visibility, movement, zoom, fullscreen, connection, language, and About. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V290 = true;
-    window.__auditGannzillaTopToolbarV290 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V292 = true;
+    window.__auditGannzillaTopToolbarV292 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
       drawingToolsToggleMounted: false,
       drawingToolsToggleRemoved: true,
-      chartVisibilityToggleMounted: true,
-      chartVisibilityTogglePlacement: 'PHYSICALLY_INTEGRATED_IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
-      chartVisibilityToggleSizePx: TOOLBAR_HEIGHT,
+      layoutPanelToggleMounted: true,
+      layoutPanelTogglePlacement: 'PHYSICALLY_INTEGRATED_IMMEDIATELY_LEFT_OF_WHEEL_MOVEMENT',
+      layoutPanelToggleWidthPx: 104,
+      wheelVisibilityUnaffected: true,
       wheelMovementIntegratedWithZoom: true,
       wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
       wheelZoomControlMounted: true,
@@ -34,12 +35,12 @@ export default function GannzillaTopToolbarV231() {
       controlsMatchToolbarHeight: true,
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
-      controlVisualOrderLeftToRight: 'CHART_VISIBILITY_WHEEL_MOVE_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
+      controlVisualOrderLeftToRight: 'LAYOUT_PANEL_VISIBILITY_WHEEL_MOVE_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V290;
-      delete window.__auditGannzillaTopToolbarV290;
+      delete window.GANNZILLA_TOP_TOOLBAR_V292;
+      delete window.__auditGannzillaTopToolbarV292;
     };
   }, []);
 
@@ -71,13 +72,13 @@ export default function GannzillaTopToolbarV231() {
     >
       <style>{`
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] { direction:ltr !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-v289="true"] { order:0 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-v292="true"] { order:0 !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:1 !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:2 !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] { order:3 !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] { order:4 !important; }
 
-        [data-gannzilla-toolbar="true"] [data-gannzilla-chart-visibility-toggle-v289="true"]:hover,
+        [data-gannzilla-toolbar="true"] [data-gannzilla-layout-panel-toggle-v292="true"]:hover,
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"]:hover,
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"]:hover,
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"]:hover { background:#dceaf5 !important; }
@@ -127,7 +128,7 @@ export default function GannzillaTopToolbarV231() {
           overflow: 'visible',
         }}
       >
-        <GannzillaWheelZoomV289 toolbarHeight={TOOLBAR_HEIGHT} />
+        <GannzillaWheelZoomV292 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaPageFullscreenV253 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaLanguageToggleV237 />
