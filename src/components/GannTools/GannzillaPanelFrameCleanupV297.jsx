@@ -1,8 +1,9 @@
 import React from 'react';
 
-const BUILD = 297;
+const BUILD = 298;
 const PANEL_WIDTH_PX = 330;
 const TOOLBAR_HEIGHT_PX = 24;
+const HIDDEN_SCROLLBAR_OVERSCAN_PX = 24;
 
 function getClassicRoot() {
   return document.querySelector('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
@@ -42,10 +43,8 @@ function applyPanelFrameCleanup() {
   const arabicMode = document.documentElement.lang === 'ar' || document.documentElement.dir === 'rtl';
   const aside = Array.from(root.children).find((node) => node instanceof HTMLElement && node.tagName === 'ASIDE') || null;
 
-  root.dataset.gannzillaPanelVisibleV297 = panelVisible ? 'true' : 'false';
+  root.dataset.gannzillaPanelVisibleV298 = panelVisible ? 'true' : 'false';
 
-  // The viewport is fixed to the actual browser window. This removes any stale
-  // 330px reservation left behind by the settings panel after it is hidden.
   viewport.style.setProperty('position', 'fixed', 'important');
   viewport.style.setProperty('top', `${TOOLBAR_HEIGHT_PX}px`, 'important');
   viewport.style.setProperty('bottom', '0', 'important');
@@ -73,13 +72,15 @@ function applyPanelFrameCleanup() {
       aside.style.removeProperty('width');
       aside.style.removeProperty('min-width');
       aside.style.removeProperty('max-width');
+      aside.style.removeProperty('overflow');
+      aside.style.removeProperty('border');
+      aside.style.removeProperty('padding');
+      aside.style.removeProperty('margin');
     }
   } else {
     viewport.style.setProperty('left', '0', 'important');
-    viewport.style.setProperty('right', '0', 'important');
+    viewport.style.setProperty('right', `-${HIDDEN_SCROLLBAR_OVERSCAN_PX}px`, 'important');
 
-    // Some previous layout rules kept an invisible aside or its scrollbar alive.
-    // Collapse it completely so it cannot reduce the wheel area.
     if (aside instanceof HTMLElement) {
       aside.style.setProperty('display', 'none', 'important');
       aside.style.setProperty('visibility', 'hidden', 'important');
@@ -88,16 +89,20 @@ function applyPanelFrameCleanup() {
       aside.style.setProperty('min-width', '0', 'important');
       aside.style.setProperty('max-width', '0', 'important');
       aside.style.setProperty('overflow', 'hidden', 'important');
+      aside.style.setProperty('border', '0', 'important');
+      aside.style.setProperty('padding', '0', 'important');
+      aside.style.setProperty('margin', '0', 'important');
     }
   }
 
-  viewport.dataset.gannzillaPanelFrameCleanupV297 = 'true';
-  viewport.dataset.gannzillaPanelVisibleV297 = panelVisible ? 'true' : 'false';
+  viewport.dataset.gannzillaPanelFrameCleanupV298 = 'true';
+  viewport.dataset.gannzillaPanelVisibleV298 = panelVisible ? 'true' : 'false';
+  viewport.dataset.gannzillaScrollbarOverscanV298 = panelVisible ? '0' : String(HIDDEN_SCROLLBAR_OVERSCAN_PX);
 
   return { root, viewport, aside, panelVisible, arabicMode };
 }
 
-/** Build 297: hidden settings panel leaves no frame, width reservation, or interior scrollbar. */
+/** Build 298: hidden settings panel leaves no frame, and its scrollbar is moved beyond the right page edge. */
 export default function GannzillaPanelFrameCleanupV297() {
   React.useEffect(() => {
     let frame = 0;
@@ -121,10 +126,9 @@ export default function GannzillaPanelFrameCleanupV297() {
     window.addEventListener('resize', sync);
     document.addEventListener('fullscreenchange', sync);
     window.addEventListener('gannzilla:layout-panel-visibility-change', sync);
-    window.addEventListener('gannzilla:page-scrollbar-edge-sync', sync);
 
-    window.GANNZILLA_PANEL_FRAME_CLEANUP_V297 = true;
-    window.__auditGannzillaPanelFrameCleanupV297 = () => {
+    window.GANNZILLA_PANEL_FRAME_CLEANUP_V298 = true;
+    window.__auditGannzillaPanelFrameCleanupV298 = () => {
       const result = applyPanelFrameCleanup();
       const rect = result?.viewport?.getBoundingClientRect?.();
       return {
@@ -132,10 +136,11 @@ export default function GannzillaPanelFrameCleanupV297() {
         build: BUILD,
         panelVisible: result?.panelVisible ?? null,
         hiddenPanelFrameRemoved: Boolean(result && (!result.panelVisible ? result.aside?.style?.display === 'none' || !result.aside : true)),
-        hiddenPanelWidthReservationRemoved: Boolean(result && (!result.panelVisible ? rect && Math.abs(rect.left) <= 1 && Math.abs(window.innerWidth - rect.right) <= 1 : true)),
-        viewportPinnedToBrowserEdge: Boolean(rect && Math.abs(window.innerWidth - rect.right) <= 1),
-        verticalScrollbarAtExtremeRight: true,
-        wheelAreaUsesFullWidthWhenPanelHidden: true,
+        hiddenPanelWidthReservationRemoved: Boolean(result && (!result.panelVisible ? rect && Math.abs(rect.left) <= 1 && rect.right >= window.innerWidth : true)),
+        viewportExpandedBeyondRightEdgePx: result && !result.panelVisible && rect ? Math.round(rect.right - window.innerWidth) : 0,
+        scrollbarMovedOutsideVisiblePage: Boolean(result && !result.panelVisible && rect && rect.right >= window.innerWidth + HIDDEN_SCROLLBAR_OVERSCAN_PX - 1),
+        wheelAreaUsesFullVisibleWidthWhenPanelHidden: true,
+        hiddenScrollbarOverscanPx: HIDDEN_SCROLLBAR_OVERSCAN_PX,
       };
     };
 
@@ -146,9 +151,8 @@ export default function GannzillaPanelFrameCleanupV297() {
       window.removeEventListener('resize', sync);
       document.removeEventListener('fullscreenchange', sync);
       window.removeEventListener('gannzilla:layout-panel-visibility-change', sync);
-      window.removeEventListener('gannzilla:page-scrollbar-edge-sync', sync);
-      delete window.GANNZILLA_PANEL_FRAME_CLEANUP_V297;
-      delete window.__auditGannzillaPanelFrameCleanupV297;
+      delete window.GANNZILLA_PANEL_FRAME_CLEANUP_V298;
+      delete window.__auditGannzillaPanelFrameCleanupV298;
     };
   }, []);
 
