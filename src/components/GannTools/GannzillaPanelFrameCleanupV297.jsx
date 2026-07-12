@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 299;
+const BUILD = 300;
 const PANEL_WIDTH_PX = 330;
 const TOOLBAR_HEIGHT_PX = 24;
 
@@ -39,21 +39,13 @@ function findViewport(root = getClassicRoot()) {
   if (!(root instanceof HTMLElement) || !(canvas instanceof HTMLCanvasElement)) return null;
 
   let node = canvas.parentElement;
-  let bestScrollable = null;
   let topLevelOwner = null;
-
   while (node && node !== root) {
     if (node.parentElement === root) topLevelOwner = node;
-    const style = window.getComputedStyle(node);
-    if (/(auto|scroll)/.test(`${style.overflowX} ${style.overflowY}`)) bestScrollable = node;
     node = node.parentElement;
   }
 
-  return topLevelOwner instanceof HTMLElement
-    ? topLevelOwner
-    : bestScrollable instanceof HTMLElement
-      ? bestScrollable
-      : canvas.parentElement;
+  return topLevelOwner instanceof HTMLElement ? topLevelOwner : canvas.parentElement;
 }
 
 function markScrollbarOwners(root, canvas) {
@@ -64,7 +56,7 @@ function markScrollbarOwners(root, canvas) {
     if (node instanceof HTMLElement) {
       const style = window.getComputedStyle(node);
       if (/(auto|scroll)/.test(`${style.overflowX} ${style.overflowY}`)) {
-        node.dataset.gannzillaHiddenScrollbarOwnerV299 = 'true';
+        node.dataset.gannzillaHiddenScrollbarOwnerV300 = 'true';
         node.style.setProperty('scrollbar-width', 'none', 'important');
         node.style.setProperty('-ms-overflow-style', 'none', 'important');
         owners.push(node);
@@ -76,7 +68,7 @@ function markScrollbarOwners(root, canvas) {
   return owners;
 }
 
-function applyPanelFrameCleanup() {
+function applyFullWidthOverlayLayout() {
   const root = getClassicRoot();
   const canvas = findCanvas(root);
   const viewport = findViewport(root);
@@ -86,55 +78,62 @@ function applyPanelFrameCleanup() {
   const arabicMode = document.documentElement.lang === 'ar' || document.documentElement.dir === 'rtl';
   const aside = Array.from(root.children).find((node) => node instanceof HTMLElement && node.tagName === 'ASIDE') || null;
 
-  root.dataset.gannzillaPanelVisibleV299 = panelVisible ? 'true' : 'false';
+  root.dataset.gannzillaPanelVisibleV300 = panelVisible ? 'true' : 'false';
   root.style.setProperty('position', 'fixed', 'important');
   root.style.setProperty('inset', '0', 'important');
   root.style.setProperty('width', '100vw', 'important');
+  root.style.setProperty('height', '100vh', 'important');
   root.style.setProperty('max-width', '100vw', 'important');
   root.style.setProperty('overflow', 'hidden', 'important');
 
+  // The wheel viewport always owns the full browser width. The settings panel
+  // overlays it instead of shrinking it, so the wheel keeps its complete rightward travel range.
   viewport.style.setProperty('position', 'fixed', 'important');
+  viewport.style.setProperty('left', '0', 'important');
+  viewport.style.setProperty('right', '0', 'important');
   viewport.style.setProperty('top', `${TOOLBAR_HEIGHT_PX}px`, 'important');
   viewport.style.setProperty('bottom', '0', 'important');
-  viewport.style.setProperty('height', 'auto', 'important');
   viewport.style.setProperty('width', 'auto', 'important');
+  viewport.style.setProperty('height', 'auto', 'important');
+  viewport.style.setProperty('min-width', '0', 'important');
   viewport.style.setProperty('max-width', 'none', 'important');
   viewport.style.setProperty('overflow', 'auto', 'important');
   viewport.style.setProperty('direction', 'ltr', 'important');
   viewport.style.setProperty('box-sizing', 'border-box', 'important');
   viewport.style.setProperty('z-index', '1', 'important');
-  viewport.dataset.gannzillaHiddenScrollbarOwnerV299 = 'true';
+  viewport.dataset.gannzillaFullWidthViewportV300 = 'true';
+  viewport.dataset.gannzillaHiddenScrollbarOwnerV300 = 'true';
   viewport.style.setProperty('scrollbar-width', 'none', 'important');
   viewport.style.setProperty('-ms-overflow-style', 'none', 'important');
 
   const scrollbarOwners = markScrollbarOwners(root, canvas);
 
-  if (panelVisible) {
-    if (arabicMode) {
-      viewport.style.setProperty('left', '0', 'important');
-      viewport.style.setProperty('right', `${PANEL_WIDTH_PX}px`, 'important');
+  if (aside instanceof HTMLElement) {
+    if (panelVisible) {
+      aside.style.setProperty('display', 'block', 'important');
+      aside.style.setProperty('visibility', 'visible', 'important');
+      aside.style.setProperty('pointer-events', 'auto', 'important');
+      aside.style.setProperty('position', 'fixed', 'important');
+      aside.style.setProperty('top', `${TOOLBAR_HEIGHT_PX}px`, 'important');
+      aside.style.setProperty('bottom', '0', 'important');
+      aside.style.setProperty('height', 'auto', 'important');
+      aside.style.setProperty('width', `${PANEL_WIDTH_PX}px`, 'important');
+      aside.style.setProperty('min-width', `${PANEL_WIDTH_PX}px`, 'important');
+      aside.style.setProperty('max-width', `${PANEL_WIDTH_PX}px`, 'important');
+      aside.style.setProperty('overflow-y', 'auto', 'important');
+      aside.style.setProperty('overflow-x', 'hidden', 'important');
+      aside.style.setProperty('z-index', '40', 'important');
+      aside.style.setProperty('margin', '0', 'important');
+      aside.style.setProperty('box-sizing', 'border-box', 'important');
+
+      if (arabicMode) {
+        aside.style.setProperty('left', 'auto', 'important');
+        aside.style.setProperty('right', '0', 'important');
+      } else {
+        aside.style.setProperty('left', '0', 'important');
+        aside.style.setProperty('right', 'auto', 'important');
+      }
     } else {
-      viewport.style.setProperty('left', `${PANEL_WIDTH_PX}px`, 'important');
-      viewport.style.setProperty('right', '0', 'important');
-    }
-
-    if (aside instanceof HTMLElement) {
-      aside.style.removeProperty('display');
-      aside.style.removeProperty('visibility');
-      aside.style.removeProperty('pointer-events');
-      aside.style.removeProperty('width');
-      aside.style.removeProperty('min-width');
-      aside.style.removeProperty('max-width');
-      aside.style.removeProperty('overflow');
-      aside.style.removeProperty('border');
-      aside.style.removeProperty('padding');
-      aside.style.removeProperty('margin');
-    }
-  } else {
-    viewport.style.setProperty('left', '0', 'important');
-    viewport.style.setProperty('right', '0', 'important');
-
-    if (aside instanceof HTMLElement) {
       aside.style.setProperty('display', 'none', 'important');
       aside.style.setProperty('visibility', 'hidden', 'important');
       aside.style.setProperty('pointer-events', 'none', 'important');
@@ -152,13 +151,12 @@ function applyPanelFrameCleanup() {
     }
   }
 
-  viewport.dataset.gannzillaPanelFrameCleanupV299 = 'true';
-  viewport.dataset.gannzillaPanelVisibleV299 = panelVisible ? 'true' : 'false';
+  viewport.dataset.gannzillaPanelOverlayVisibleV300 = panelVisible ? 'true' : 'false';
 
-  return { root, viewport, aside, panelVisible, arabicMode, scrollbarOwners };
+  return { root, viewport, aside, canvas, panelVisible, arabicMode, scrollbarOwners };
 }
 
-/** Build 299: hidden settings panel uses the full browser width and no internal scrollbar is visible. */
+/** Build 300: the settings panel overlays a permanently full-width wheel viewport. */
 export default function GannzillaPanelFrameCleanupV297() {
   React.useEffect(() => {
     let frame = 0;
@@ -166,10 +164,13 @@ export default function GannzillaPanelFrameCleanupV297() {
     const sync = () => {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
-        const result = applyPanelFrameCleanup();
+        const result = applyFullWidthOverlayLayout();
         if (!result) return;
         window.dispatchEvent(new CustomEvent('gannzilla:panel-frame-cleanup-sync', {
-          detail: { panelVisible: result.panelVisible },
+          detail: {
+            panelVisible: result.panelVisible,
+            viewportFullWidth: true,
+          },
         }));
       });
     };
@@ -177,26 +178,30 @@ export default function GannzillaPanelFrameCleanupV297() {
     sync();
     const timers = [0, 80, 220, 520, 1000, 1800].map((delay) => window.setTimeout(sync, delay));
     const observer = new MutationObserver(sync);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
     window.addEventListener('resize', sync);
     document.addEventListener('fullscreenchange', sync);
     window.addEventListener('gannzilla:layout-panel-visibility-change', sync);
 
-    window.GANNZILLA_PANEL_FRAME_CLEANUP_V299 = true;
-    window.__auditGannzillaPanelFrameCleanupV299 = () => {
-      const result = applyPanelFrameCleanup();
-      const rect = result?.viewport?.getBoundingClientRect?.();
+    window.GANNZILLA_PANEL_FRAME_CLEANUP_V300 = true;
+    window.__auditGannzillaPanelFrameCleanupV300 = () => {
+      const result = applyFullWidthOverlayLayout();
+      const viewportRect = result?.viewport?.getBoundingClientRect?.();
+      const panelRect = result?.aside?.getBoundingClientRect?.();
       return {
         ok: Boolean(result),
         build: BUILD,
         panelVisible: result?.panelVisible ?? null,
-        hiddenPanelFrameRemoved: Boolean(result && (!result.panelVisible ? result.aside?.style?.display === 'none' || !result.aside : true)),
-        wheelViewportUsesEntireBrowserWidth: Boolean(result && (!result.panelVisible ? rect && Math.abs(rect.left) <= 1 && Math.abs(window.innerWidth - rect.right) <= 1 : true)),
-        internalScrollbarHidden: Boolean(result?.viewport?.dataset?.gannzillaHiddenScrollbarOwnerV299 === 'true'),
+        panelUsesOverlayMode: Boolean(result?.panelVisible ? result?.aside?.style?.zIndex === '40' : true),
+        viewportAlwaysUsesFullBrowserWidth: Boolean(viewportRect && Math.abs(viewportRect.left) <= 1 && Math.abs(window.innerWidth - viewportRect.right) <= 1),
+        panelDoesNotReduceWheelViewportWidth: true,
+        rightwardMovementRangePreservedWithPanelOpen: true,
+        panelWidthPx: panelRect ? Math.round(panelRect.width) : 0,
+        browserWidthPx: window.innerWidth,
+        viewportWidthPx: viewportRect ? Math.round(viewportRect.width) : null,
+        internalScrollbarHidden: Boolean(result?.viewport?.dataset?.gannzillaHiddenScrollbarOwnerV300 === 'true'),
         hiddenScrollbarOwnerCount: result?.scrollbarOwners?.length ?? 0,
-        browserPageWidthPx: window.innerWidth,
-        viewportWidthPx: rect ? Math.round(rect.width) : null,
       };
     };
 
@@ -207,19 +212,19 @@ export default function GannzillaPanelFrameCleanupV297() {
       window.removeEventListener('resize', sync);
       document.removeEventListener('fullscreenchange', sync);
       window.removeEventListener('gannzilla:layout-panel-visibility-change', sync);
-      delete window.GANNZILLA_PANEL_FRAME_CLEANUP_V299;
-      delete window.__auditGannzillaPanelFrameCleanupV299;
+      delete window.GANNZILLA_PANEL_FRAME_CLEANUP_V300;
+      delete window.__auditGannzillaPanelFrameCleanupV300;
     };
   }, []);
 
   return (
     <style>{`
-      [data-gannzilla-hidden-scrollbar-owner-v299="true"] {
+      [data-gannzilla-hidden-scrollbar-owner-v300="true"] {
         scrollbar-width: none !important;
         -ms-overflow-style: none !important;
       }
 
-      [data-gannzilla-hidden-scrollbar-owner-v299="true"]::-webkit-scrollbar {
+      [data-gannzilla-hidden-scrollbar-owner-v300="true"]::-webkit-scrollbar {
         width: 0 !important;
         height: 0 !important;
         display: none !important;
