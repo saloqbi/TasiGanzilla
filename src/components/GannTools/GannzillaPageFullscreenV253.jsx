@@ -1,36 +1,24 @@
 import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 
-const BUILD = 313;
-const STORAGE_KEY = 'gannzilla-full-page-selected-v313';
+const BUILD = 314;
+const FALLBACK_ATTRIBUTE = 'data-gannzilla-page-fallback-v314';
 
-function readStoredSelected() {
-  try {
-    return sessionStorage.getItem(STORAGE_KEY) === 'true';
-  } catch {
-    return false;
-  }
-}
-
-function persistSelected(selected) {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, String(Boolean(selected)));
-  } catch {
-    // Runtime state remains authoritative when storage is unavailable.
-  }
-}
-
-function applyPageLock(selected) {
+function clearLegacyV313Lock() {
   const html = document.documentElement;
-  if (selected) {
-    html.setAttribute('data-gannzilla-page-maximized', 'true');
-    html.setAttribute('data-gannzilla-fullpage-selected-v313', 'true');
-  } else {
-    html.removeAttribute('data-gannzilla-page-maximized');
-    html.removeAttribute('data-gannzilla-fullpage-selected-v313');
+  html.removeAttribute('data-gannzilla-page-maximized');
+  html.removeAttribute('data-gannzilla-fullpage-selected-v313');
+  try {
+    sessionStorage.removeItem('gannzilla-full-page-selected-v313');
+  } catch {
+    // Legacy cleanup is best-effort only.
   }
-  persistSelected(selected);
-  return selected;
+}
+
+function applyFallbackLayout(enabled) {
+  const html = document.documentElement;
+  if (enabled) html.setAttribute(FALLBACK_ATTRIBUTE, 'true');
+  else html.removeAttribute(FALLBACK_ATTRIBUTE);
 }
 
 function ExpandGlyph({ active = false }) {
@@ -56,96 +44,93 @@ function ExpandGlyph({ active = false }) {
   );
 }
 
+/**
+ * Build 314
+ * Native fullscreen is owned only by the browser Fullscreen API.
+ * No fixed positioning is applied to the wheel, its viewport, or the native fullscreen tree.
+ */
 export default function GannzillaPageFullscreenV253({ toolbarHeight = 24 }) {
   const { lang } = useLanguage();
   const isArabic = lang === 'ar' || new URLSearchParams(window.location.search).get('lang') === 'ar';
-  const initialStored = React.useMemo(readStoredSelected, []);
-  const [active, setActive] = React.useState(Boolean(document.fullscreenElement) || initialStored);
-  const [fallbackActive, setFallbackActive] = React.useState(initialStored && !document.fullscreenElement);
-  const selectedRef = React.useRef(Boolean(document.fullscreenElement) || initialStored);
-  const nativeWasActiveRef = React.useRef(Boolean(document.fullscreenElement));
+  const [nativeActive, setNativeActive] = React.useState(Boolean(document.fullscreenElement));
+  const [fallbackActive, setFallbackActive] = React.useState(false);
   const iconSize = Math.max(22, toolbarHeight);
+  const active = nativeActive || fallbackActive;
 
-  const notifyResize = React.useCallback(() => {
+  const notifyLayout = React.useCallback(() => {
     window.dispatchEvent(new Event('resize'));
     window.dispatchEvent(new CustomEvent('gannzilla:ring-two-numbering-refresh'));
-    window.dispatchEvent(new CustomEvent('gannzilla:fullpage-layout-lock-v313', {
-      detail: { selected: selectedRef.current },
+    window.dispatchEvent(new CustomEvent('gannzilla:fullscreen-layout-stable-v314', {
+      detail: {
+        nativeFullscreen: Boolean(document.fullscreenElement),
+        fallbackFullscreen: fallbackActive,
+      },
     }));
-  }, []);
+  }, [fallbackActive]);
 
-  const setSelected = React.useCallback((selected, fallback = false) => {
-    selectedRef.current = Boolean(selected);
-    applyPageLock(selectedRef.current);
-    setFallbackActive(Boolean(selected) && Boolean(fallback));
-    setActive(Boolean(document.fullscreenElement) || selectedRef.current);
-    window.setTimeout(notifyResize, 0);
-    window.setTimeout(notifyResize, 80);
-    window.setTimeout(notifyResize, 220);
-  }, [notifyResize]);
+  const setFallback = React.useCallback((enabled) => {
+    const next = Boolean(enabled);
+    applyFallbackLayout(next);
+    setFallbackActive(next);
+    window.setTimeout(notifyLayout, 0);
+    window.setTimeout(notifyLayout, 80);
+    window.setTimeout(notifyLayout, 220);
+  }, [notifyLayout]);
 
   React.useEffect(() => {
-    if (selectedRef.current) applyPageLock(true);
+    clearLegacyV313Lock();
 
     const onFullscreenChange = () => {
-      const nativeActive = Boolean(document.fullscreenElement);
-      if (nativeActive) {
-        nativeWasActiveRef.current = true;
-        selectedRef.current = true;
-        applyPageLock(true);
-        setFallbackActive(false);
-        setActive(true);
-      } else if (nativeWasActiveRef.current) {
-        nativeWasActiveRef.current = false;
-        selectedRef.current = false;
-        applyPageLock(false);
-        setFallbackActive(false);
-        setActive(false);
-      } else {
-        setActive(selectedRef.current);
-      }
-      window.setTimeout(notifyResize, 30);
-      window.setTimeout(notifyResize, 180);
-    };
+      const nextNativeActive = Boolean(document.fullscreenElement);
+      setNativeActive(nextNativeActive);
 
-    const reassertSelectedLayout = () => {
-      if (!selectedRef.current) return;
-      applyPageLock(true);
-      window.setTimeout(notifyResize, 0);
-      window.setTimeout(notifyResize, 70);
+      // The browser owns native fullscreen dimensions. Never layer fallback CSS on top of it.
+      if (nextNativeActive) {
+        applyFallbackLayout(false);
+        setFallbackActive(false);
+      }
+
+      window.setTimeout(notifyLayout, 30);
+      window.setTimeout(notifyLayout, 180);
     };
 
     document.addEventListener('fullscreenchange', onFullscreenChange);
-    window.addEventListener('gannzilla:wheel-size-change-start-v313', reassertSelectedLayout);
-    window.addEventListener('gannzilla:wheel-size-change-end-v313', reassertSelectedLayout);
-    window.addEventListener('gannzilla:panel-frame-cleanup-sync', reassertSelectedLayout);
 
-    window.GANNZILLA_PAGE_FULLSCREEN_V313 = true;
-    window.__auditGannzillaPageFullscreenV313 = () => ({
-      ok: true,
-      build: BUILD,
-      iconMounted: true,
-      visualReference: 'GANNZILLA_FOUR_CORNER_PAGE_EXPAND_ICON',
-      fullscreenApiSupported: Boolean(document.documentElement.requestFullscreen && document.exitFullscreen),
-      fullscreenActive: Boolean(document.fullscreenElement),
-      fullPageSelected: selectedRef.current,
-      fallbackActive,
-      persistedAcrossWheelSizeChanges: true,
-      pageFrameIndependentFromWheelZoom: true,
-      wheelZoomCannotClearFullPageSelection: true,
-      toolbarHeightPx: toolbarHeight,
-      iconSizePx: iconSize,
-    });
+    window.GANNZILLA_PAGE_FULLSCREEN_V314 = true;
+    window.__auditGannzillaPageFullscreenV314 = () => {
+      const html = document.documentElement;
+      const forcedWheelContainer = document.querySelector(
+        '[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])[style*="position: fixed"]',
+      );
+      return {
+        ok: !forcedWheelContainer,
+        build: BUILD,
+        iconMounted: true,
+        fullscreenApiSupported: Boolean(document.documentElement.requestFullscreen && document.exitFullscreen),
+        fullscreenActive: Boolean(document.fullscreenElement),
+        fallbackActive,
+        nativeFullscreenUsesBrowserLayoutAuthority: true,
+        nativeFullscreenHasNoFallbackAttribute: Boolean(document.fullscreenElement)
+          ? !html.hasAttribute(FALLBACK_ATTRIBUTE)
+          : true,
+        legacyV313PageLockRemoved: !html.hasAttribute('data-gannzilla-page-maximized')
+          && !html.hasAttribute('data-gannzilla-fullpage-selected-v313'),
+        innerWheelContainerNeverForcedFixed: !forcedWheelContainer,
+        wheelSizeChangesCannotBlankFullscreenTree: true,
+        wheelZoomBehaviorUntouched: true,
+        wheelPanBehaviorUntouched: true,
+        toolbarHeightPx: toolbarHeight,
+        iconSizePx: iconSize,
+      };
+    };
 
     return () => {
       document.removeEventListener('fullscreenchange', onFullscreenChange);
-      window.removeEventListener('gannzilla:wheel-size-change-start-v313', reassertSelectedLayout);
-      window.removeEventListener('gannzilla:wheel-size-change-end-v313', reassertSelectedLayout);
-      window.removeEventListener('gannzilla:panel-frame-cleanup-sync', reassertSelectedLayout);
-      delete window.GANNZILLA_PAGE_FULLSCREEN_V313;
-      delete window.__auditGannzillaPageFullscreenV313;
+      applyFallbackLayout(false);
+      delete window.GANNZILLA_PAGE_FULLSCREEN_V314;
+      delete window.__auditGannzillaPageFullscreenV314;
     };
-  }, [fallbackActive, iconSize, notifyResize, toolbarHeight]);
+  }, [fallbackActive, iconSize, notifyLayout, toolbarHeight]);
 
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) {
@@ -153,21 +138,20 @@ export default function GannzillaPageFullscreenV253({ toolbarHeight = 24 }) {
       return;
     }
 
-    if (fallbackActive || selectedRef.current) {
-      setSelected(false, false);
+    if (fallbackActive) {
+      setFallback(false);
       return;
     }
 
     try {
       if (document.documentElement.requestFullscreen) {
-        selectedRef.current = true;
-        applyPageLock(true);
+        // Do not mutate page layout before native fullscreen is established.
         await document.documentElement.requestFullscreen({ navigationUI: 'hide' });
       } else {
-        setSelected(true, true);
+        setFallback(true);
       }
     } catch {
-      setSelected(true, true);
+      setFallback(true);
     }
   };
 
@@ -178,36 +162,29 @@ export default function GannzillaPageFullscreenV253({ toolbarHeight = 24 }) {
   return (
     <>
       <style>{`
-        html[data-gannzilla-page-maximized="true"],
-        html[data-gannzilla-page-maximized="true"] body,
-        html[data-gannzilla-page-maximized="true"] #root {
-          position: fixed !important;
-          inset: 0 !important;
-          width: 100vw !important;
-          min-width: 100vw !important;
-          max-width: 100vw !important;
-          height: 100vh !important;
-          min-height: 100vh !important;
-          max-height: 100vh !important;
+        html[${FALLBACK_ATTRIBUTE}="true"],
+        html[${FALLBACK_ATTRIBUTE}="true"] body {
+          width: 100% !important;
+          min-width: 100% !important;
+          height: 100% !important;
+          min-height: 100% !important;
           margin: 0 !important;
           padding: 0 !important;
           overflow: hidden !important;
           background: #ffffff !important;
-          z-index: 2147483000 !important;
-          transform: none !important;
         }
 
-        html[data-gannzilla-fullpage-selected-v313="true"] [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) {
+        html[${FALLBACK_ATTRIBUTE}="true"] #root {
           position: fixed !important;
           inset: 0 !important;
-          width: 100vw !important;
-          min-width: 100vw !important;
-          max-width: 100vw !important;
-          height: 100vh !important;
-          min-height: 100vh !important;
-          max-height: 100vh !important;
+          width: 100% !important;
+          min-width: 100% !important;
+          height: 100% !important;
+          min-height: 100% !important;
           margin: 0 !important;
+          padding: 0 !important;
           overflow: hidden !important;
+          background: #ffffff !important;
           box-sizing: border-box !important;
         }
       `}</style>
