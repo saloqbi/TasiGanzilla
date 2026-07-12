@@ -1,8 +1,8 @@
 import React from 'react';
 import GannzillaWheelZoomV256 from './GannzillaWheelZoomV256';
 
-const BUILD = 289;
-const STORAGE_KEY = 'gannzilla-chart-visible-v289';
+const BUILD = 291;
+const STORAGE_KEY = 'gannzilla-chart-visible-v291';
 
 function readVisible() {
   try {
@@ -22,7 +22,7 @@ function findWheelStage() {
   const canvas = canvases[0]?.canvas || null;
   if (!canvas) return null;
   const stage = canvas.parentElement || canvas;
-  stage.setAttribute('data-gannzilla-chart-stage-v289', 'true');
+  stage.setAttribute('data-gannzilla-chart-stage-v291', 'true');
   return stage;
 }
 
@@ -33,7 +33,7 @@ function applyVisible(visible) {
   stage.style.setProperty('opacity', visible ? '1' : '0', 'important');
   stage.style.setProperty('pointer-events', visible ? 'auto' : 'none', 'important');
   stage.style.setProperty('transition', 'opacity 120ms ease-out', 'important');
-  stage.dataset.gannzillaChartVisibleV289 = visible ? 'true' : 'false';
+  stage.dataset.gannzillaChartVisibleV291 = visible ? 'true' : 'false';
   return true;
 }
 
@@ -43,20 +43,21 @@ function EyeGlyph({ visible }) {
       <path
         d="M1.7 10s3.1-5.1 8.3-5.1 8.3 5.1 8.3 5.1-3.1 5.1-8.3 5.1S1.7 10 1.7 10Z"
         fill="#ffffff"
-        stroke="#1f628f"
-        strokeWidth="1.45"
+        stroke="#145f91"
+        strokeWidth="1.6"
         strokeLinejoin="round"
       />
-      <circle cx="10" cy="10" r="2.65" fill={visible ? '#2477ad' : '#ffffff'} stroke="#1f628f" strokeWidth="1.1" />
-      {!visible && <path d="M3 3 17 17" stroke="#c9342e" strokeWidth="2" strokeLinecap="round" />}
+      <circle cx="10" cy="10" r="2.8" fill={visible ? '#1976b3' : '#ffffff'} stroke="#145f91" strokeWidth="1.1" />
+      {!visible && <path d="M3 3 17 17" stroke="#d12f28" strokeWidth="2.1" strokeLinecap="round" />}
     </svg>
   );
 }
 
-/** Build 289: visible eye is physically integrated immediately left of the wheel-movement button. */
+/** Build 291: large high-contrast chart visibility control immediately left of wheel movement. */
 export default function GannzillaWheelZoomV289({ toolbarHeight = 24 }) {
   const [visible, setVisible] = React.useState(readVisible);
   const size = Math.max(22, toolbarHeight);
+  const buttonWidth = Math.max(74, size * 3);
 
   React.useEffect(() => {
     const sync = () => applyVisible(visible);
@@ -66,13 +67,16 @@ export default function GannzillaWheelZoomV289({ toolbarHeight = 24 }) {
     document.addEventListener('fullscreenchange', sync);
     window.addEventListener('gannzilla:ring-two-numbering-refresh', sync);
 
-    window.GANNZILLA_WHEEL_ZOOM_V289 = true;
-    window.__auditGannzillaWheelZoomV289 = () => ({
+    window.GANNZILLA_WHEEL_ZOOM_V291 = true;
+    window.__auditGannzillaWheelZoomV291 = () => ({
       ok: Boolean(findWheelStage()),
       build: BUILD,
-      eyeButtonMounted: Boolean(document.querySelector('[data-gannzilla-chart-visibility-toggle-v289="true"]')),
+      eyeButtonMounted: Boolean(document.querySelector('[data-gannzilla-chart-visibility-toggle-v291="true"]')),
       eyePhysicallyIntegratedWithWheelControls: true,
       eyeImmediatelyLeftOfMovementButton: true,
+      eyeButtonWidthPx: buttonWidth,
+      eyeButtonHighContrast: true,
+      eyeButtonArabicLabelVisible: true,
       chartVisible: visible,
       settingsPanelPreserved: true,
       toolbarPreserved: true,
@@ -83,10 +87,10 @@ export default function GannzillaWheelZoomV289({ toolbarHeight = 24 }) {
       window.removeEventListener('resize', sync);
       document.removeEventListener('fullscreenchange', sync);
       window.removeEventListener('gannzilla:ring-two-numbering-refresh', sync);
-      delete window.GANNZILLA_WHEEL_ZOOM_V289;
-      delete window.__auditGannzillaWheelZoomV289;
+      delete window.GANNZILLA_WHEEL_ZOOM_V291;
+      delete window.__auditGannzillaWheelZoomV291;
     };
-  }, [visible]);
+  }, [buttonWidth, visible]);
 
   const toggle = () => {
     const next = !visible;
@@ -101,7 +105,7 @@ export default function GannzillaWheelZoomV289({ toolbarHeight = 24 }) {
 
   return (
     <div
-      data-gannzilla-wheel-zoom-v289="true"
+      data-gannzilla-wheel-zoom-v291="true"
       style={{
         height: toolbarHeight,
         display: 'flex',
@@ -115,36 +119,45 @@ export default function GannzillaWheelZoomV289({ toolbarHeight = 24 }) {
     >
       <button
         type="button"
-        data-gannzilla-chart-visibility-toggle-v289="true"
+        data-gannzilla-chart-visibility-toggle-v291="true"
         aria-label={visible ? 'إخفاء المخطط' : 'إظهار المخطط'}
         title={visible ? 'إخفاء المخطط' : 'إظهار المخطط'}
         aria-pressed={!visible}
         onClick={toggle}
         style={{
-          width: size,
+          width: buttonWidth,
           height: size,
-          minWidth: size,
+          minWidth: buttonWidth,
           minHeight: size,
-          maxWidth: size,
+          maxWidth: buttonWidth,
           maxHeight: size,
-          flex: `0 0 ${size}px`,
+          flex: `0 0 ${buttonWidth}px`,
           margin: 0,
-          padding: 0,
-          border: 0,
-          borderLeft: '1px solid #c7c7c7',
-          borderRight: '1px solid #c7c7c7',
+          padding: '0 6px',
+          border: '1px solid #2b74aa',
+          borderTop: 0,
+          borderBottom: 0,
           borderRadius: 0,
-          background: visible ? '#f8f8f8' : '#dceaf5',
-          display: 'grid',
-          placeItems: 'center',
+          background: visible ? '#fff4b8' : '#dceaf5',
+          color: '#0d4f79',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 4,
           boxSizing: 'border-box',
           cursor: 'pointer',
           pointerEvents: 'auto',
           position: 'relative',
           zIndex: 2147483647,
+          fontFamily: 'Tahoma, Arial, sans-serif',
+          fontSize: 11,
+          fontWeight: 800,
+          lineHeight: 1,
+          whiteSpace: 'nowrap',
         }}
       >
         <EyeGlyph visible={visible} />
+        <span>{visible ? 'إخفاء' : 'إظهار'}</span>
       </button>
       <GannzillaWheelZoomV256 toolbarHeight={toolbarHeight} />
     </div>
