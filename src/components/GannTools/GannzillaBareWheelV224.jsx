@@ -10,13 +10,13 @@ import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 306: visible custom page-edge rails and toolbar arrows share wheel navigation authority. */
+/** Build 307: visible page rails plus mouse-wheel/touchpad and keyboard page navigation. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V306 = true;
-    window.__auditGannzillaBareWheelV306 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V307 = true;
+    window.__auditGannzillaBareWheelV307 = () => ({
       ok: true,
-      build: 306,
+      build: 307,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -35,11 +35,17 @@ export default function GannzillaBareWheelV224() {
       horizontalRailAtBottom: true,
       verticalRailControlsUpDown: true,
       horizontalRailControlsLeftRight: true,
+      mouseWheelControlsVerticalPageMovement: true,
+      touchpadControlsVerticalPageMovement: true,
+      keyboardPageUpPageDownEnabled: true,
+      keyboardArrowUpArrowDownEnabled: true,
+      homeEndNavigationEnabled: true,
+      settingsPanelKeepsIndependentScroll: true,
       railArrowButtonsEnabled: true,
       railThumbDraggingEnabled: true,
       panelFrameCleanupMounted: true,
       fullReadablePanelWidthGuardMounted: true,
-      movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN_WITH_VISIBLE_PAGE_RAILS',
+      movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN_WITH_PAGE_SCROLL_INPUTS',
       permittedRightHiddenWheelFraction: 0.25,
       rightMovementQuarterLimitPreserved: true,
       leftMovementUnrestricted: true,
@@ -96,8 +102,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V306;
-      delete window.__auditGannzillaBareWheelV306;
+      delete window.GANNZILLA_BARE_WHEEL_V307;
+      delete window.__auditGannzillaBareWheelV307;
     };
   }, []);
 
