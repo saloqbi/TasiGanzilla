@@ -66,6 +66,7 @@ export default function GannzillaPanelFixedLeftV315() {
     window.__auditGannzillaPanelFixedLeftV315 = () => {
       const result = applyFixedLeftGeometry();
       const rect = result?.panel?.getBoundingClientRect?.();
+      const computedDirection = result?.panel ? window.getComputedStyle(result.panel).direction : null;
       const visible = result?.panel
         ? window.getComputedStyle(result.panel).display !== 'none'
         : false;
@@ -75,8 +76,8 @@ export default function GannzillaPanelFixedLeftV315() {
         fixedSide: 'left',
         panelPinnedLeftWhenVisible: Boolean(!visible || (rect && Math.abs(rect.left) <= 1)),
         arabicMode: result?.arabicMode ?? null,
-        arabicContentRemainsRtl: Boolean(!result?.arabicMode || window.getComputedStyle(result.panel).direction === 'rtl'),
-        englishContentRemainsLtr: Boolean(result?.arabicMode || window.getComputedStyle(result.panel).direction === 'ltr'),
+        arabicContentRemainsRtl: Boolean(!result || !result.arabicMode || computedDirection === 'rtl'),
+        englishContentRemainsLtr: Boolean(!result || result.arabicMode || computedDirection === 'ltr'),
         languageSwitchCannotMovePanel: true,
         wheelViewportGeometryUntouched: true,
         wheelMovementUntouched: true,
