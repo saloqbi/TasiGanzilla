@@ -4,16 +4,17 @@ import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaWheelViewportGuardV294 from './GannzillaWheelViewportGuardV294';
+import GannzillaPageScrollbarEdgeV296 from './GannzillaPageScrollbarEdgeV296';
 
 const TOOLBAR_HEIGHT = 24;
 
-/** Build 295: wheel movement stops at the page edges without disappearing. */
+/** Build 296: wheel movement is bounded and the scrollbars stay on the page edges. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V295 = true;
-    window.__auditGannzillaBareWheelV295 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V296 = true;
+    window.__auditGannzillaBareWheelV296 = () => ({
       ok: true,
-      build: 295,
+      build: 296,
       leftDrawingPaletteMounted: false,
       rightDrawingPaletteMounted: false,
       drawingOverlayMounted: false,
@@ -26,7 +27,11 @@ export default function GannzillaBareWheelV224() {
       layoutPanelEyeOnlyTogglesSettingsPanel: true,
       wheelVisibilityEyeOnlyTogglesWheel: true,
       pageEdgeStopGuardMounted: true,
+      pageScrollbarEdgeAuthorityMounted: true,
       movementAuthority: 'BOUNDED_VIEWPORT_SCROLL',
+      scrollbarAuthority: 'FULL_PAGE_EDGE_VIEWPORT',
+      verticalScrollbarAtFarRightWhenPanelHidden: true,
+      horizontalScrollbarAtPageBottom: true,
       wheelMovementStopsAtPageEdges: true,
       wheelCannotDisappearOutsidePage: true,
       rightEdgeStopEnabled: true,
@@ -73,8 +78,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V295;
-      delete window.__auditGannzillaBareWheelV295;
+      delete window.GANNZILLA_BARE_WHEEL_V296;
+      delete window.__auditGannzillaBareWheelV296;
     };
   }, []);
 
@@ -124,6 +129,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaTopToolbarV231 />
       <GannzillaWheelViewportGuardV294 />
       <GannzillaArabicLocalizationV248 />
+      <GannzillaPageScrollbarEdgeV296 />
     </>
   );
 }
