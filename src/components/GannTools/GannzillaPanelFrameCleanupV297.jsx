@@ -1,8 +1,9 @@
 import React from 'react';
 
-const BUILD = 300;
+const BUILD = 315;
 const PANEL_WIDTH_PX = 330;
 const TOOLBAR_HEIGHT_PX = 24;
+const FIXED_PANEL_SIDE = 'left';
 
 function getClassicRoot() {
   return document.querySelector('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
@@ -79,15 +80,17 @@ function applyFullWidthOverlayLayout() {
   const aside = Array.from(root.children).find((node) => node instanceof HTMLElement && node.tagName === 'ASIDE') || null;
 
   root.dataset.gannzillaPanelVisibleV300 = panelVisible ? 'true' : 'false';
+  root.dataset.gannzillaPanelSideV315 = FIXED_PANEL_SIDE;
   root.style.setProperty('position', 'fixed', 'important');
   root.style.setProperty('inset', '0', 'important');
   root.style.setProperty('width', '100vw', 'important');
   root.style.setProperty('height', '100vh', 'important');
   root.style.setProperty('max-width', '100vw', 'important');
   root.style.setProperty('overflow', 'hidden', 'important');
+  root.style.setProperty('direction', 'ltr', 'important');
 
-  // The wheel viewport always owns the full browser width. The settings panel
-  // overlays it instead of shrinking it, so the wheel keeps its complete rightward travel range.
+  // The wheel viewport always owns the complete browser width. Language changes
+  // translate text only and never move the settings panel or resize the wheel area.
   viewport.style.setProperty('position', 'fixed', 'important');
   viewport.style.setProperty('left', '0', 'important');
   viewport.style.setProperty('right', '0', 'important');
@@ -109,6 +112,10 @@ function applyFullWidthOverlayLayout() {
   const scrollbarOwners = markScrollbarOwners(root, canvas);
 
   if (aside instanceof HTMLElement) {
+    aside.dataset.gannzillaFixedPanelSideV315 = FIXED_PANEL_SIDE;
+    aside.style.setProperty('direction', arabicMode ? 'rtl' : 'ltr', 'important');
+    aside.style.setProperty('text-align', arabicMode ? 'right' : 'left', 'important');
+
     if (panelVisible) {
       aside.style.setProperty('display', 'block', 'important');
       aside.style.setProperty('visibility', 'visible', 'important');
@@ -125,20 +132,16 @@ function applyFullWidthOverlayLayout() {
       aside.style.setProperty('z-index', '40', 'important');
       aside.style.setProperty('margin', '0', 'important');
       aside.style.setProperty('box-sizing', 'border-box', 'important');
-
-      if (arabicMode) {
-        aside.style.setProperty('left', 'auto', 'important');
-        aside.style.setProperty('right', '0', 'important');
-      } else {
-        aside.style.setProperty('left', '0', 'important');
-        aside.style.setProperty('right', 'auto', 'important');
-      }
+      aside.style.setProperty('left', '0', 'important');
+      aside.style.setProperty('right', 'auto', 'important');
+      aside.style.setProperty('border-left', '0', 'important');
+      aside.style.setProperty('border-right', '1px solid #b8b8b8', 'important');
     } else {
       aside.style.setProperty('display', 'none', 'important');
       aside.style.setProperty('visibility', 'hidden', 'important');
       aside.style.setProperty('pointer-events', 'none', 'important');
       aside.style.setProperty('position', 'fixed', 'important');
-      aside.style.setProperty('left', '100vw', 'important');
+      aside.style.setProperty('left', '-100vw', 'important');
       aside.style.setProperty('right', 'auto', 'important');
       aside.style.setProperty('width', '0', 'important');
       aside.style.setProperty('min-width', '0', 'important');
@@ -153,10 +156,19 @@ function applyFullWidthOverlayLayout() {
 
   viewport.dataset.gannzillaPanelOverlayVisibleV300 = panelVisible ? 'true' : 'false';
 
-  return { root, viewport, aside, canvas, panelVisible, arabicMode, scrollbarOwners };
+  return {
+    root,
+    viewport,
+    aside,
+    canvas,
+    panelVisible,
+    arabicMode,
+    fixedPanelSide: FIXED_PANEL_SIDE,
+    scrollbarOwners,
+  };
 }
 
-/** Build 300: the settings panel overlays a permanently full-width wheel viewport. */
+/** Build 315: keep the panel permanently on the left; translation changes content direction only. */
 export default function GannzillaPanelFrameCleanupV297() {
   React.useEffect(() => {
     let frame = 0;
@@ -170,6 +182,8 @@ export default function GannzillaPanelFrameCleanupV297() {
           detail: {
             panelVisible: result.panelVisible,
             viewportFullWidth: true,
+            panelSide: result.fixedPanelSide,
+            languageDirection: result.arabicMode ? 'rtl' : 'ltr',
           },
         }));
       });
@@ -178,14 +192,15 @@ export default function GannzillaPanelFrameCleanupV297() {
     sync();
     const timers = [0, 80, 220, 520, 1000, 1800].map((delay) => window.setTimeout(sync, delay));
     const observer = new MutationObserver(sync);
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['lang', 'dir'] });
 
     window.addEventListener('resize', sync);
     document.addEventListener('fullscreenchange', sync);
     window.addEventListener('gannzilla:layout-panel-visibility-change', sync);
+    window.addEventListener('gannzilla:ring-two-numbering-refresh', sync);
 
-    window.GANNZILLA_PANEL_FRAME_CLEANUP_V300 = true;
-    window.__auditGannzillaPanelFrameCleanupV300 = () => {
+    window.GANNZILLA_PANEL_FRAME_CLEANUP_V315 = true;
+    window.__auditGannzillaPanelFrameCleanupV315 = () => {
       const result = applyFullWidthOverlayLayout();
       const viewportRect = result?.viewport?.getBoundingClientRect?.();
       const panelRect = result?.aside?.getBoundingClientRect?.();
@@ -193,6 +208,11 @@ export default function GannzillaPanelFrameCleanupV297() {
         ok: Boolean(result),
         build: BUILD,
         panelVisible: result?.panelVisible ?? null,
+        panelSide: result?.fixedPanelSide ?? null,
+        panelPinnedLeftAcrossLanguages: Boolean(!result?.panelVisible || (panelRect && Math.abs(panelRect.left) <= 1)),
+        arabicTextDirectionInsidePanel: Boolean(!result?.arabicMode || result?.aside?.dir === 'rtl' || window.getComputedStyle(result?.aside).direction === 'rtl'),
+        languageChangesTextOnly: true,
+        wheelPositionUnaffectedByLanguage: true,
         panelUsesOverlayMode: Boolean(result?.panelVisible ? result?.aside?.style?.zIndex === '40' : true),
         viewportAlwaysUsesFullBrowserWidth: Boolean(viewportRect && Math.abs(viewportRect.left) <= 1 && Math.abs(window.innerWidth - viewportRect.right) <= 1),
         panelDoesNotReduceWheelViewportWidth: true,
@@ -212,8 +232,9 @@ export default function GannzillaPanelFrameCleanupV297() {
       window.removeEventListener('resize', sync);
       document.removeEventListener('fullscreenchange', sync);
       window.removeEventListener('gannzilla:layout-panel-visibility-change', sync);
-      delete window.GANNZILLA_PANEL_FRAME_CLEANUP_V300;
-      delete window.__auditGannzillaPanelFrameCleanupV300;
+      window.removeEventListener('gannzilla:ring-two-numbering-refresh', sync);
+      delete window.GANNZILLA_PANEL_FRAME_CLEANUP_V315;
+      delete window.__auditGannzillaPanelFrameCleanupV315;
     };
   }, []);
 
