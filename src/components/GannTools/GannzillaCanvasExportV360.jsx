@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 364;
+const BUILD = 365;
 
 function visibleIntersectionArea(rect) {
   const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
@@ -47,7 +47,7 @@ function findCurrentWheelCanvas() {
   const all = Array.from(document.querySelectorAll('canvas'));
   const canonical = all.find(isCanonicalUpdatedWheelCanvas);
   if (canonical) {
-    canonical.dataset.gannzillaExportAuthority = 'CURRENT_UPDATED_WHEEL_V364';
+    canonical.dataset.gannzillaExportAuthority = 'CURRENT_UPDATED_WHEEL_V365';
     return canonical;
   }
 
@@ -59,7 +59,7 @@ function findCurrentWheelCanvas() {
     }))
     .sort((a, b) => b.area - a.area)[0]?.canvas || null;
 
-  if (fallback) fallback.dataset.gannzillaExportAuthority = 'VISIBLE_FALLBACK_V364';
+  if (fallback) fallback.dataset.gannzillaExportAuthority = 'VISIBLE_FALLBACK_V365';
   return fallback;
 }
 
@@ -75,32 +75,23 @@ function buildExportCanvas(source) {
   return canvas;
 }
 
+function canvasToBlob(canvas) {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error('PNG_BLOB_UNAVAILABLE'));
+    }, 'image/png', 1);
+  });
+}
+
 function makeFilename() {
   const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  return `gann-circle-v364-current-${timestamp}.png`;
+  return `gann-circle-v365-current-${timestamp}.png`;
 }
 
-function prepareNativeAnchor(anchor) {
-  const source = findCurrentWheelCanvas();
-  if (!source || !anchor) return { ok: false, reason: 'CURRENT_WHEEL_NOT_FOUND' };
-
-  const exportCanvas = buildExportCanvas(source);
-  const dataUrl = exportCanvas.toDataURL('image/png', 1);
-  const filename = makeFilename();
-
-  anchor.href = dataUrl;
-  anchor.download = filename;
-  anchor.dataset.ready = 'true';
-  anchor.dataset.filename = filename;
-  anchor.dataset.exportAuthority = source.dataset.gannzillaExportAuthority || 'UNKNOWN';
-
-  return { ok: true, dataUrl, filename };
-}
-
-async function copyDataUrlToClipboard(dataUrl) {
+async function copyBlobToClipboard(blob) {
   if (!navigator.clipboard?.write || typeof window.ClipboardItem !== 'function') return false;
   try {
-    const blob = await (await fetch(dataUrl)).blob();
     await navigator.clipboard.write([
       new window.ClipboardItem({ 'image/png': blob }),
     ]);
@@ -112,31 +103,11 @@ async function copyDataUrlToClipboard(dataUrl) {
 
 export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
   const [notice, setNotice] = React.useState('');
-  const anchorRef = React.useRef(null);
+  const [prepared, setPrepared] = React.useState(null);
   const preparedRef = React.useRef(null);
+  const preparingRef = React.useRef(false);
   const noticeTimerRef = React.useRef(0);
-
-  React.useEffect(() => {
-    window.GANNZILLA_CANVAS_EXPORT_V364 = true;
-    window.__auditGannzillaCanvasExportV364 = () => {
-      const selected = findCurrentWheelCanvas();
-      return {
-        ok: Boolean(selected),
-        build: BUILD,
-        exportAuthority: selected?.dataset?.gannzillaExportAuthority || null,
-        nativeAnchorDownload: true,
-        pointerDownPreparation: true,
-        clickDefaultDownloadPreserved: true,
-        explicitPngLabel: true,
-        currentWheelPreferred: true,
-      };
-    };
-    return () => {
-      window.clearTimeout(noticeTimerRef.current);
-      delete window.GANNZILLA_CANVAS_EXPORT_V364;
-      delete window.__auditGannzillaCanvasExportV364;
-    };
-  }, []);
+  const refreshTimerRef = React.useRef(0);
 
   const showNotice = React.useCallback((message) => {
     window.clearTimeout(noticeTimerRef.current);
@@ -144,87 +115,135 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
     noticeTimerRef.current = window.setTimeout(() => setNotice(''), 4200);
   }, []);
 
-  const prepare = React.useCallback((anchor) => {
+  const prepareDownload = React.useCallback(async (silent = false) => {
+    if (preparingRef.current) return preparedRef.current;
+    preparingRef.current = true;
+
     try {
-      const result = prepareNativeAnchor(anchor);
-      preparedRef.current = result.ok ? result : null;
-      if (!result.ok) showNotice('تعذر العثور على العجلة الحالية');
-      return result;
+      const source = findCurrentWheelCanvas();
+      if (!source) {
+        if (!silent) showNotice('تعذر العثور على العجلة الحالية');
+        return null;
+      }
+
+      const exportCanvas = buildExportCanvas(source);
+      const blob = await canvasToBlob(exportCanvas);
+      const next = {
+        blob,
+        url: URL.createObjectURL(blob),
+        filename: makeFilename(),
+        authority: source.dataset.gannzillaExportAuthority || 'UNKNOWN',
+        preparedAt: Date.now(),
+      };
+
+      const previous = preparedRef.current;
+      preparedRef.current = next;
+      setPrepared(next);
+      if (previous?.url) window.setTimeout(() => URL.revokeObjectURL(previous.url), 1500);
+      return next;
     } catch (_) {
-      preparedRef.current = null;
-      showNotice('تعذر تجهيز صورة العجلة');
-      return { ok: false };
+      if (!silent) showNotice('تعذر تجهيز صورة PNG للعجلة الحالية');
+      return null;
+    } finally {
+      preparingRef.current = false;
     }
   }, [showNotice]);
 
-  const handlePointerDown = React.useCallback((event) => {
-    prepare(event.currentTarget);
-  }, [prepare]);
+  React.useEffect(() => {
+    window.GANNZILLA_CANVAS_EXPORT_V365 = true;
+    window.__auditGannzillaCanvasExportV365 = () => ({
+      ok: Boolean(preparedRef.current?.url),
+      build: BUILD,
+      downloadReady: Boolean(preparedRef.current?.url),
+      exportAuthority: preparedRef.current?.authority || null,
+      nativeBlobAnchor: true,
+      hrefPreparedBeforeClick: true,
+      filename: preparedRef.current?.filename || null,
+      currentWheelPreferred: true,
+    });
+
+    const schedule = (delay) => window.setTimeout(() => prepareDownload(true), delay);
+    const timers = [schedule(0), schedule(350), schedule(1200)];
+
+    const refreshAfterChange = () => {
+      window.clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = window.setTimeout(() => prepareDownload(true), 180);
+    };
+
+    window.addEventListener('resize', refreshAfterChange);
+    window.addEventListener('gannzilla:ring-two-numbering-refresh', refreshAfterChange);
+    window.addEventListener('gannzilla:canonical-property-change-v326', refreshAfterChange);
+    document.addEventListener('change', refreshAfterChange, true);
+
+    return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
+      window.clearTimeout(refreshTimerRef.current);
+      window.clearTimeout(noticeTimerRef.current);
+      window.removeEventListener('resize', refreshAfterChange);
+      window.removeEventListener('gannzilla:ring-two-numbering-refresh', refreshAfterChange);
+      window.removeEventListener('gannzilla:canonical-property-change-v326', refreshAfterChange);
+      document.removeEventListener('change', refreshAfterChange, true);
+      if (preparedRef.current?.url) URL.revokeObjectURL(preparedRef.current.url);
+      delete window.GANNZILLA_CANVAS_EXPORT_V365;
+      delete window.__auditGannzillaCanvasExportV365;
+    };
+  }, [prepareDownload]);
+
+  const handlePointerEnter = React.useCallback(() => {
+    const current = preparedRef.current;
+    if (!current || Date.now() - current.preparedAt > 3000) prepareDownload(true);
+  }, [prepareDownload]);
 
   const handleClick = React.useCallback((event) => {
-    const anchor = event.currentTarget;
-    let result = preparedRef.current;
-
-    if (!result?.ok || anchor.dataset.ready !== 'true') {
-      result = prepare(anchor);
-    }
-
-    if (!result?.ok) {
+    const current = preparedRef.current;
+    if (!current?.url) {
       event.preventDefault();
+      showNotice('جاري تجهيز الصورة، اضغط زر PNG مرة أخرى بعد لحظة');
+      prepareDownload(false);
       return;
     }
 
-    // Do not prevent the default action: the browser performs a real native download.
-    showNotice(`بدأ تنزيل العجلة الحالية: ${result.filename}`);
+    showNotice(`بدأ تنزيل العجلة الحالية: ${current.filename}`);
     window.setTimeout(async () => {
-      const copied = await copyDataUrlToClipboard(result.dataUrl);
-      if (copied) showNotice(`تم تنزيل ونسخ العجلة الحالية: ${result.filename}`);
-      anchor.removeAttribute('href');
-      anchor.removeAttribute('download');
-      anchor.dataset.ready = 'false';
-      preparedRef.current = null;
+      const copied = await copyBlobToClipboard(current.blob);
+      if (copied) showNotice(`تم تنزيل ونسخ العجلة الحالية: ${current.filename}`);
+      prepareDownload(true);
     }, 0);
-  }, [prepare, showNotice]);
-
-  const handleKeyDown = React.useCallback((event) => {
-    if (event.key === 'Enter' || event.key === ' ') prepare(event.currentTarget);
-  }, [prepare]);
+  }, [prepareDownload, showNotice]);
 
   return (
     <>
       <a
-        ref={anchorRef}
-        href="#"
+        href={prepared?.url || undefined}
+        download={prepared?.filename || undefined}
         role="button"
         data-gannzilla-canvas-export-v360="true"
-        data-gannzilla-canvas-export-v364="true"
+        data-gannzilla-canvas-export-v365="true"
         aria-label="تنزيل ونسخ صورة العجلة الحالية PNG"
-        title="تنزيل صورة العجلة الحالية PNG"
-        onPointerDown={handlePointerDown}
-        onMouseDown={handlePointerDown}
-        onTouchStart={handlePointerDown}
-        onKeyDown={handleKeyDown}
+        title={prepared ? 'تنزيل صورة العجلة الحالية PNG' : 'جاري تجهيز صورة PNG'}
+        onPointerEnter={handlePointerEnter}
+        onFocus={handlePointerEnter}
         onClick={handleClick}
         style={{
-          width: 54,
+          width: 62,
           height: toolbarHeight,
-          minWidth: 54,
+          minWidth: 62,
           minHeight: toolbarHeight,
-          maxWidth: 54,
+          maxWidth: 62,
           maxHeight: toolbarHeight,
-          flex: '0 0 54px',
+          flex: '0 0 62px',
           margin: 0,
           padding: '0 5px',
           border: 0,
           borderRight: '1px solid #c7c7c7',
           borderRadius: 0,
-          background: '#eef7ff',
-          color: '#155a9c',
+          background: prepared ? '#e6f4ff' : '#fff4d6',
+          color: prepared ? '#0b5f9e' : '#7a5a00',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: 3,
-          cursor: 'pointer',
+          gap: 4,
+          cursor: prepared ? 'pointer' : 'wait',
           boxSizing: 'border-box',
           pointerEvents: 'auto',
           position: 'relative',
@@ -243,7 +262,7 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
           <path d="M7.5 10.5 12 15l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="2" />
           <path d="M5 19h14" fill="none" stroke="currentColor" strokeWidth="2" />
         </svg>
-        <span>PNG</span>
+        <span>{prepared ? 'PNG' : 'تجهيز'}</span>
       </a>
 
       {notice ? (
