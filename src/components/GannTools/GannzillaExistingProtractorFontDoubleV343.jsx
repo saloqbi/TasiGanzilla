@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV355';
+const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV356';
 const MAJOR_ANGLE_PATTERN = /^(0|30|60|90|120|150|180|210|240|270|300|330)°$/;
 const FONT_FAMILY = 'Segoe UI, Arial, Helvetica, sans-serif';
 const WHEEL_NUMBER_COLORS = Object.freeze({
@@ -8,9 +8,10 @@ const WHEEL_NUMBER_COLORS = Object.freeze({
   blue: '#1457d9',
   black: '#111111',
 });
+const FIVE_DEGREE_COLOR = '#777b80';
 
 const renderEpochByCanvas = new WeakMap();
-const supplementalEpochByCanvas = new WeakMap();
+const supplementalSignatureByCanvas = new WeakMap();
 let scheduleSupplementalAngleDraw = null;
 
 function clamp(value, min, max) {
@@ -69,19 +70,27 @@ function drawUnifiedAngleLabel(ctx, degree, x, y, options = {}) {
   const fontWeight = options.fontWeight ?? 700;
   const degreeScale = options.degreeScale ?? 0.52;
   const color = options.color ?? angleColor(degree);
+  const includeDegreeSymbol = options.includeDegreeSymbol !== false;
   const digits = String(degree);
 
   ctx.fillStyle = color;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
-
   ctx.font = `${fontWeight} ${fontSize}px ${FONT_FAMILY}`;
+
   const digitMetrics = ctx.measureText(digits);
   const digitAdvance = digitMetrics.width;
   const digitLeft = -metricValue(digitMetrics, 'actualBoundingBoxLeft', 0);
   const digitRight = metricValue(digitMetrics, 'actualBoundingBoxRight', digitAdvance);
   const digitAscent = metricValue(digitMetrics, 'actualBoundingBoxAscent', fontSize * 0.75);
   const digitDescent = metricValue(digitMetrics, 'actualBoundingBoxDescent', fontSize * 0.2);
+  const digitBaselineY = (digitAscent - digitDescent) / 2;
+
+  if (!includeDegreeSymbol) {
+    const visualCenterShift = -((digitLeft + digitRight) / 2);
+    ctx.fillText(digits, x + visualCenterShift, y + digitBaselineY);
+    return;
+  }
 
   const degreeFontSize = Math.max(10, fontSize * degreeScale);
   ctx.font = `${fontWeight} ${degreeFontSize}px ${FONT_FAMILY}`;
@@ -95,7 +104,6 @@ function drawUnifiedAngleLabel(ctx, degree, x, y, options = {}) {
   const visualLeft = Math.min(digitLeft, degreeOrigin - degreeLeftMetric);
   const visualRight = Math.max(digitRight, degreeOrigin + degreeRightMetric);
   const visualCenterShift = -((visualLeft + visualRight) / 2);
-  const digitBaselineY = (digitAscent - digitDescent) / 2;
 
   ctx.font = `${fontWeight} ${fontSize}px ${FONT_FAMILY}`;
   ctx.fillText(digits, x + visualCenterShift, y + digitBaselineY);
@@ -108,16 +116,15 @@ function drawUnifiedAngleLabel(ctx, degree, x, y, options = {}) {
   );
 }
 
-function drawSupplementalTenDegreeAngles() {
+function drawSupplementalFiveDegreeAngles() {
+  const showTenDegreeAngles = boolParam('showTenDegreeAngles', false);
+  const showFiveDegreeAngles = boolParam('showFiveDegreeAngles', false);
   const enabled = boolParam('showProtractor', true)
-    && boolParam('showTenDegreeAngles', false);
+    && (showTenDegreeAngles || showFiveDegreeAngles);
   if (!enabled) return false;
 
   const canvas = findWheelCanvas();
   if (!canvas) return false;
-
-  const epoch = renderEpochByCanvas.get(canvas) || 0;
-  if (supplementalEpochByCanvas.get(canvas) === epoch) return true;
 
   const dpr = clamp(window.devicePixelRatio || 1, 1, 2);
   const coordinateWidth = canvas.width / dpr;
@@ -131,30 +138,63 @@ function drawSupplementalTenDegreeAngles() {
   const fontSize = numberParam('gannzillaProtractorFontSize', 20, 16, 28);
   const fontWeight = Math.round(numberParam('gannzillaProtractorFontWeight', 700, 500, 900));
   const degreeScale = numberParam('gannzillaProtractorDegreeScale', 0.52, 0.42, 0.68);
+  const fiveFontSize = numberParam('gannzillaFiveDegreeFontSize', 14, 10, 18);
+  const fiveFontWeight = Math.round(numberParam('gannzillaFiveDegreeFontWeight', 500, 400, 700));
+  const fiveRadialOffset = numberParam('gannzillaFiveDegreeRadialOffset', 0, -10, 10);
   const labelRadius = innerRadius + (levels * ringWidth) + 18 + 34 + 22 + radialGap;
   const cx = coordinateWidth / 2;
   const cy = coordinateHeight / 2;
   const ctx = canvas.getContext('2d');
   if (!ctx) return false;
 
+  const epoch = renderEpochByCanvas.get(canvas) || 0;
+  const signature = [
+    epoch,
+    showTenDegreeAngles,
+    showFiveDegreeAngles,
+    fontSize,
+    fontWeight,
+    degreeScale,
+    fiveFontSize,
+    fiveFontWeight,
+    fiveRadialOffset,
+    labelRadius,
+  ].join('|');
+  if (supplementalSignatureByCanvas.get(canvas) === signature) return true;
+
   ctx.save();
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  for (let degree = 10; degree < 360; degree += 10) {
+  for (let degree = 5; degree < 360; degree += 5) {
     if (degree % 30 === 0) continue;
-    const point = polar(cx, cy, labelRadius, degree);
+
+    if (degree % 10 === 0) {
+      if (!showTenDegreeAngles) continue;
+      const point = polar(cx, cy, labelRadius, degree);
+      drawUnifiedAngleLabel(ctx, degree, point.x, point.y, {
+        fontSize,
+        fontWeight,
+        degreeScale,
+        color: angleColor(degree),
+        includeDegreeSymbol: true,
+      });
+      continue;
+    }
+
+    if (!showFiveDegreeAngles) continue;
+    const point = polar(cx, cy, labelRadius + fiveRadialOffset, degree);
     drawUnifiedAngleLabel(ctx, degree, point.x, point.y, {
-      fontSize,
-      fontWeight,
-      degreeScale,
-      color: angleColor(degree),
+      fontSize: fiveFontSize,
+      fontWeight: fiveFontWeight,
+      color: FIVE_DEGREE_COLOR,
+      includeDegreeSymbol: false,
     });
   }
 
   ctx.restore();
-  supplementalEpochByCanvas.set(canvas, epoch);
+  supplementalSignatureByCanvas.set(canvas, signature);
   return true;
 }
 
@@ -228,6 +268,7 @@ function installProtractorTextPatch() {
       fontWeight,
       degreeScale,
       color: angleColor(degree),
+      includeDegreeSymbol: true,
     });
 
     this.restore();
@@ -266,7 +307,7 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
 
     const draw = () => {
       frame = 0;
-      if (!disposed) drawSupplementalTenDegreeAngles();
+      if (!disposed) drawSupplementalFiveDegreeAngles();
     };
 
     const schedule = (delay = 0) => {
@@ -294,18 +335,21 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
     window.addEventListener('gannzilla:ring-two-numbering-refresh', scheduleAfterChange);
     window.addEventListener('gannzilla:canonical-property-change-v326', scheduleAfterChange);
 
-    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V355 = true;
-    window.__auditGannzillaExistingProtractorFontDoubleV355 = () => ({
+    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V356 = true;
+    window.__auditGannzillaExistingProtractorFontDoubleV356 = () => ({
       ok: Boolean(window[PATCH_KEY]),
-      build: 355,
-      allAnglesIncludeDegreeSymbol: true,
-      sharedRendererForMajorAndSupplemental: true,
-      sharedFontFamily: FONT_FAMILY,
-      sharedFontPx: numberParam('gannzillaProtractorFontSize', 20, 16, 28),
-      sharedFontWeight: numberParam('gannzillaProtractorFontWeight', 700, 500, 900),
-      supplementalOverdrawPreventedByRenderEpoch: true,
+      build: 356,
+      majorAnglesEveryThirtyDegrees: true,
+      coloredAnglesEveryTenDegrees: boolParam('showTenDegreeAngles', false),
+      grayMinorAnglesEveryFiveDegrees: boolParam('showFiveDegreeAngles', false),
+      fiveDegreeAngles: Array.from({ length: 36 }, (_, index) => (index * 10) + 5),
+      fiveDegreeFontPx: numberParam('gannzillaFiveDegreeFontSize', 14, 10, 18),
+      fiveDegreeFontWeight: numberParam('gannzillaFiveDegreeFontWeight', 500, 400, 700),
+      fiveDegreeColor: FIVE_DEGREE_COLOR,
+      fiveDegreeLabelsIncludeDegreeSymbol: false,
+      exactVisualCentering: true,
+      supplementalOverdrawPrevented: true,
       exactWheelPalette: WHEEL_NUMBER_COLORS,
-      colorRule: '147_RED_258_BLUE_369_BLACK',
       wheelGeometryChanged: false,
     });
 
@@ -320,8 +364,8 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
       window.removeEventListener('gannzilla:canonical-property-change-v326', scheduleAfterChange);
       scheduleSupplementalAngleDraw = null;
       uninstall();
-      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V355;
-      delete window.__auditGannzillaExistingProtractorFontDoubleV355;
+      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V356;
+      delete window.__auditGannzillaExistingProtractorFontDoubleV356;
     };
   }, []);
 
