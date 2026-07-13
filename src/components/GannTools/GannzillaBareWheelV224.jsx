@@ -14,24 +14,13 @@ import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPan
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
 import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopPlacementV312';
-import GannzillaReferenceReplicaV358 from './GannzillaReferenceReplicaV358';
 
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 358: optional high-fidelity reference replica keeps the established wheel available unchanged. */
+/** Build 344: existing major protractor labels render cleanly at 24px without overlay shading. */
 export default function GannzillaBareWheelV224() {
-  const referenceReplica = typeof window !== 'undefined'
-    && new URLSearchParams(window.location.search).get('gannzillaReferenceReplica') === 'true';
-
   React.useEffect(() => {
-    if (referenceReplica) {
-      window.GANNZILLA_REFERENCE_REPLICA_ROUTE_V358 = true;
-      return () => {
-        delete window.GANNZILLA_REFERENCE_REPLICA_ROUTE_V358;
-      };
-    }
-
     window.GANNZILLA_BARE_WHEEL_V326 = true;
     window.GANNZILLA_BARE_WHEEL_V327 = true;
     window.GANNZILLA_BARE_WHEEL_V328 = true;
@@ -122,11 +111,7 @@ export default function GannzillaBareWheelV224() {
       delete window.__auditGannzillaBareWheelV343;
       delete window.__auditGannzillaBareWheelV344;
     };
-  }, [referenceReplica]);
-
-  if (referenceReplica) {
-    return <GannzillaReferenceReplicaV358 />;
-  }
+  }, []);
 
   return (
     <>
