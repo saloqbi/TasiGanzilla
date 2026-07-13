@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 363;
+const BUILD = 364;
 
 function visibleIntersectionArea(rect) {
   const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
@@ -47,7 +47,7 @@ function findCurrentWheelCanvas() {
   const all = Array.from(document.querySelectorAll('canvas'));
   const canonical = all.find(isCanonicalUpdatedWheelCanvas);
   if (canonical) {
-    canonical.dataset.gannzillaExportAuthority = 'CURRENT_UPDATED_WHEEL_V363';
+    canonical.dataset.gannzillaExportAuthority = 'CURRENT_UPDATED_WHEEL_V364';
     return canonical;
   }
 
@@ -59,7 +59,7 @@ function findCurrentWheelCanvas() {
     }))
     .sort((a, b) => b.area - a.area)[0]?.canvas || null;
 
-  if (fallback) fallback.dataset.gannzillaExportAuthority = 'VISIBLE_FALLBACK_V363';
+  if (fallback) fallback.dataset.gannzillaExportAuthority = 'VISIBLE_FALLBACK_V364';
   return fallback;
 }
 
@@ -77,21 +77,24 @@ function buildExportCanvas(source) {
 
 function makeFilename() {
   const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  return `gann-circle-v363-current-${timestamp}.png`;
+  return `gann-circle-v364-current-${timestamp}.png`;
 }
 
-function downloadImmediately(canvas, filename) {
-  const dataUrl = canvas.toDataURL('image/png', 1);
-  const anchor = document.createElement('a');
+function prepareNativeAnchor(anchor) {
+  const source = findCurrentWheelCanvas();
+  if (!source || !anchor) return { ok: false, reason: 'CURRENT_WHEEL_NOT_FOUND' };
+
+  const exportCanvas = buildExportCanvas(source);
+  const dataUrl = exportCanvas.toDataURL('image/png', 1);
+  const filename = makeFilename();
+
   anchor.href = dataUrl;
   anchor.download = filename;
-  anchor.rel = 'noopener';
-  anchor.style.position = 'fixed';
-  anchor.style.left = '-10000px';
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  return dataUrl;
+  anchor.dataset.ready = 'true';
+  anchor.dataset.filename = filename;
+  anchor.dataset.exportAuthority = source.dataset.gannzillaExportAuthority || 'UNKNOWN';
+
+  return { ok: true, dataUrl, filename };
 }
 
 async function copyDataUrlToClipboard(dataUrl) {
@@ -109,27 +112,29 @@ async function copyDataUrlToClipboard(dataUrl) {
 
 export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
   const [notice, setNotice] = React.useState('');
-  const [busy, setBusy] = React.useState(false);
+  const anchorRef = React.useRef(null);
+  const preparedRef = React.useRef(null);
   const noticeTimerRef = React.useRef(0);
 
   React.useEffect(() => {
-    window.GANNZILLA_CANVAS_EXPORT_V363 = true;
-    window.__auditGannzillaCanvasExportV363 = () => {
+    window.GANNZILLA_CANVAS_EXPORT_V364 = true;
+    window.__auditGannzillaCanvasExportV364 = () => {
       const selected = findCurrentWheelCanvas();
       return {
         ok: Boolean(selected),
         build: BUILD,
         exportAuthority: selected?.dataset?.gannzillaExportAuthority || null,
-        synchronousDownloadActivation: true,
-        asyncDelayBeforeDownload: false,
+        nativeAnchorDownload: true,
+        pointerDownPreparation: true,
+        clickDefaultDownloadPreserved: true,
+        explicitPngLabel: true,
         currentWheelPreferred: true,
-        clipboardCopyAfterDownload: true,
       };
     };
     return () => {
       window.clearTimeout(noticeTimerRef.current);
-      delete window.GANNZILLA_CANVAS_EXPORT_V363;
-      delete window.__auditGannzillaCanvasExportV363;
+      delete window.GANNZILLA_CANVAS_EXPORT_V364;
+      delete window.__auditGannzillaCanvasExportV364;
     };
   }, []);
 
@@ -139,76 +144,107 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
     noticeTimerRef.current = window.setTimeout(() => setNotice(''), 4200);
   }, []);
 
-  const exportWheel = React.useCallback(async (event) => {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-    if (busy) return;
+  const prepare = React.useCallback((anchor) => {
+    try {
+      const result = prepareNativeAnchor(anchor);
+      preparedRef.current = result.ok ? result : null;
+      if (!result.ok) showNotice('تعذر العثور على العجلة الحالية');
+      return result;
+    } catch (_) {
+      preparedRef.current = null;
+      showNotice('تعذر تجهيز صورة العجلة');
+      return { ok: false };
+    }
+  }, [showNotice]);
 
-    const source = findCurrentWheelCanvas();
-    if (!source) {
-      showNotice('تعذر العثور على العجلة الحالية');
+  const handlePointerDown = React.useCallback((event) => {
+    prepare(event.currentTarget);
+  }, [prepare]);
+
+  const handleClick = React.useCallback((event) => {
+    const anchor = event.currentTarget;
+    let result = preparedRef.current;
+
+    if (!result?.ok || anchor.dataset.ready !== 'true') {
+      result = prepare(anchor);
+    }
+
+    if (!result?.ok) {
+      event.preventDefault();
       return;
     }
 
-    setBusy(true);
-    try {
-      const exportCanvas = buildExportCanvas(source);
-      const filename = makeFilename();
+    // Do not prevent the default action: the browser performs a real native download.
+    showNotice(`بدأ تنزيل العجلة الحالية: ${result.filename}`);
+    window.setTimeout(async () => {
+      const copied = await copyDataUrlToClipboard(result.dataUrl);
+      if (copied) showNotice(`تم تنزيل ونسخ العجلة الحالية: ${result.filename}`);
+      anchor.removeAttribute('href');
+      anchor.removeAttribute('download');
+      anchor.dataset.ready = 'false';
+      preparedRef.current = null;
+    }, 0);
+  }, [prepare, showNotice]);
 
-      // Important: the download click occurs synchronously inside the user's click.
-      const dataUrl = downloadImmediately(exportCanvas, filename);
-      showNotice(`بدأ تنزيل العجلة الحالية: ${filename}`);
-
-      const copied = await copyDataUrlToClipboard(dataUrl);
-      if (copied) showNotice(`تم تنزيل ونسخ العجلة الحالية: ${filename}`);
-    } catch (_) {
-      showNotice('تعذر تنزيل صورة العجلة الحالية');
-    } finally {
-      setBusy(false);
-    }
-  }, [busy, showNotice]);
+  const handleKeyDown = React.useCallback((event) => {
+    if (event.key === 'Enter' || event.key === ' ') prepare(event.currentTarget);
+  }, [prepare]);
 
   return (
     <>
-      <button
-        type="button"
-        data-gannzilla-canvas-export-v363="true"
-        aria-label="تنزيل ونسخ صورة العجلة الحالية"
-        title="تنزيل ونسخ العجلة الحالية PNG"
-        onClick={exportWheel}
-        disabled={busy}
+      <a
+        ref={anchorRef}
+        href="#"
+        role="button"
+        data-gannzilla-canvas-export-v360="true"
+        data-gannzilla-canvas-export-v364="true"
+        aria-label="تنزيل ونسخ صورة العجلة الحالية PNG"
+        title="تنزيل صورة العجلة الحالية PNG"
+        onPointerDown={handlePointerDown}
+        onMouseDown={handlePointerDown}
+        onTouchStart={handlePointerDown}
+        onKeyDown={handleKeyDown}
+        onClick={handleClick}
         style={{
-          width: toolbarHeight,
+          width: 54,
           height: toolbarHeight,
-          minWidth: toolbarHeight,
+          minWidth: 54,
           minHeight: toolbarHeight,
-          maxWidth: toolbarHeight,
+          maxWidth: 54,
           maxHeight: toolbarHeight,
-          flex: `0 0 ${toolbarHeight}px`,
+          flex: '0 0 54px',
           margin: 0,
-          padding: 0,
+          padding: '0 5px',
           border: 0,
           borderRight: '1px solid #c7c7c7',
           borderRadius: 0,
-          background: busy ? '#dceaf5' : 'transparent',
-          color: '#2469b2',
-          display: 'grid',
-          placeItems: 'center',
-          cursor: busy ? 'wait' : 'pointer',
+          background: '#eef7ff',
+          color: '#155a9c',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 3,
+          cursor: 'pointer',
           boxSizing: 'border-box',
           pointerEvents: 'auto',
           position: 'relative',
           zIndex: 2147483647,
           touchAction: 'manipulation',
-          opacity: busy ? 0.7 : 1,
+          textDecoration: 'none',
+          fontFamily: 'Segoe UI, Arial, sans-serif',
+          fontSize: 10,
+          fontWeight: 800,
+          lineHeight: 1,
+          userSelect: 'none',
         }}
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 3v11" fill="none" stroke="currentColor" strokeWidth="2" />
           <path d="M7.5 10.5 12 15l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="2" />
           <path d="M5 19h14" fill="none" stroke="currentColor" strokeWidth="2" />
         </svg>
-      </button>
+        <span>PNG</span>
+      </a>
 
       {notice ? (
         <div
