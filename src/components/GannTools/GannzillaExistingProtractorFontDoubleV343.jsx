@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV348';
+const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV349';
 const MAJOR_ANGLE_PATTERN = /^(0|30|60|90|120|150|180|210|240|270|300|330)°$/;
 
 function clamp(value, min, max) {
@@ -59,7 +59,6 @@ function installProtractorTextPatch() {
     const fontWeight = Math.round(numberParam('gannzillaProtractorFontWeight', 700, 500, 900));
     const horizontal = boolParam('protractorLabelsHorizontal', true);
     const radialGap = numberParam('gannzillaProtractorRadialGap', 0, -12, 12);
-    const tangentialCorrection = numberParam('gannzillaProtractorTangentialCorrection', 14, 0, 24);
     const textColor = '#454545';
     const family = 'Segoe UI, Arial, Helvetica, sans-serif';
 
@@ -67,25 +66,24 @@ function installProtractorTextPatch() {
 
     if (horizontal && typeof this.getTransform === 'function') {
       const matrix = this.getTransform();
-      let px = matrix.a * x + matrix.c * y + matrix.e;
-      let py = matrix.b * x + matrix.d * y + matrix.f;
+      const px = matrix.a * x + matrix.c * y + matrix.e;
+      const py = matrix.b * x + matrix.d * y + matrix.f;
       const scale = Math.hypot(matrix.a, matrix.b) || 1;
 
-      if (radialGap !== 0) {
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
-        const dx = px - centerX;
-        const dy = py - centerY;
-        const length = Math.hypot(dx, dy) || 1;
-        const gapInDevicePixels = radialGap * scale;
-        px += (dx / length) * gapInDevicePixels;
-        py += (dy / length) * gapInDevicePixels;
-      }
-
+      const centerX = this.canvas.width / 2;
+      const centerY = this.canvas.height / 2;
       const radians = (degree * Math.PI) / 180;
-      px -= Math.sin(radians) * tangentialCorrection * scale;
+      const radialX = Math.sin(radians);
+      const radialY = -Math.cos(radians);
 
-      this.setTransform(scale, 0, 0, scale, px, py);
+      const dx = px - centerX;
+      const dy = py - centerY;
+      const projectedRadius = (dx * radialX) + (dy * radialY);
+      const targetRadius = projectedRadius + (radialGap * scale);
+      const targetX = centerX + (radialX * targetRadius);
+      const targetY = centerY + (radialY * targetRadius);
+
+      this.setTransform(scale, 0, 0, scale, targetX, targetY);
       x = 0;
       y = 0;
     }
@@ -123,18 +121,20 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
   React.useLayoutEffect(() => {
     const uninstall = installProtractorTextPatch();
 
-    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V348 = true;
-    window.__auditGannzillaExistingProtractorFontDoubleV348 = () => ({
+    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V349 = true;
+    window.__auditGannzillaExistingProtractorFontDoubleV349 = () => ({
       ok: Boolean(window[PATCH_KEY]),
-      build: 348,
+      build: 349,
       existingAnglesOnly: true,
       angleStep: 30,
       fontPx: numberParam('gannzillaProtractorFontSize', 20, 16, 28),
       horizontal: boolParam('protractorLabelsHorizontal', true),
       radialGapPx: numberParam('gannzillaProtractorRadialGap', 0, -12, 12),
-      tangentialCorrectionPx: numberParam('gannzillaProtractorTangentialCorrection', 14, 0, 24),
-      symmetricInwardCorrection: true,
-      zeroAndOneEightyUnshifted: true,
+      exactRadialAxisProjection: true,
+      arbitraryTangentialCorrectionRemoved: true,
+      centeredOnRedTickAxis: true,
+      textAlign: 'center',
+      textBaseline: 'middle',
       backgroundOverlay: false,
       addedAngles: false,
       wheelGeometryChanged: false,
@@ -143,8 +143,8 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
 
     return () => {
       uninstall();
-      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V348;
-      delete window.__auditGannzillaExistingProtractorFontDoubleV348;
+      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V349;
+      delete window.__auditGannzillaExistingProtractorFontDoubleV349;
     };
   }, []);
 
