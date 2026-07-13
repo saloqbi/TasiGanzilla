@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 335;
+const BUILD = 338;
 const TWO_PI = Math.PI * 2;
 const PANEL_STORAGE_KEY = 'tasi-gannzilla-canonical-panel-v326';
 const runtimeOverrides = new Map();
@@ -162,7 +162,7 @@ function findWheelCanvas() {
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
 }
 
-function redrawWheelNumberingV334() {
+function redrawWheelNumberingV338() {
   const canvas = findWheelCanvas();
   if (!canvas) return false;
 
@@ -171,16 +171,27 @@ function redrawWheelNumberingV334() {
   const coordinateHeight = canvas.height / dpr;
   if (!Number.isFinite(coordinateWidth) || coordinateWidth <= 0 || coordinateHeight <= 0) return false;
 
-  const numericRingCount = Math.round(canonicalNumber('layout.size', numberParam('levels', 10, 1, 12), 1, 12));
+  const northLastCell = boolParam('northLastCell', false);
+  const numericRingCount = northLastCell
+    ? Math.round(numberParam('levels', 10, 1, 12))
+    : Math.round(canonicalNumber('layout.size', numberParam('levels', 10, 1, 12), 1, 12));
   const totalRingCount = numericRingCount + 1;
-  const divisions = Math.round(canonicalNumber('layout.view', numberParam('divisions', 36, 3, 360), 3, 360));
-  const startValue = canonicalNumber('price.value', numberParam('startValue', 79680, -1000000000, 1000000000), -1000000000, 1000000000);
-  const increment = canonicalNumber('price.increment', numberParam('increment', 1, -1000000, 1000000), -1000000, 1000000);
+  const divisions = northLastCell
+    ? Math.round(numberParam('divisions', 36, 3, 360))
+    : Math.round(canonicalNumber('layout.view', numberParam('divisions', 36, 3, 360), 3, 360));
+  const startValue = northLastCell
+    ? numberParam('startValue', 79680, -1000000000, 1000000000)
+    : canonicalNumber('price.value', numberParam('startValue', 79680, -1000000000, 1000000000), -1000000000, 1000000000);
+  const increment = northLastCell
+    ? numberParam('increment', 1, -1000000, 1000000)
+    : canonicalNumber('price.increment', numberParam('increment', 1, -1000000, 1000000), -1000000, 1000000);
   const innerRadius = numberParam('gannzillaInnerRadius', 170, 80, 500);
   const configuredRingWidth = numberParam('gannzillaRingWidth', 60, 30, 150);
   const fontSize = numberParam('gannzillaFontSize', 13, 8, 30);
   const fontWeight = Math.round(numberParam('gannzillaFontWeight', 700, 500, 900));
-  const clockwise = canonicalBoolean('layout.clockwise', boolParam('clockwise', true));
+  const clockwise = northLastCell
+    ? boolParam('clockwise', true)
+    : canonicalBoolean('layout.clockwise', boolParam('clockwise', true));
   const layoutVisible = canonicalBoolean('layout.visible', true);
 
   if (!layoutVisible) return true;
@@ -189,9 +200,9 @@ function redrawWheelNumberingV334() {
   const ringWidth = availableWheelWidth / totalRingCount;
   const direction = clockwise ? 1 : -1;
   const sector = 360 / divisions;
-  // Keep the number sequence unchanged, but place the final cell of every ring
-  // exactly on the north/0° axis. With 36 divisions this aligns 36..360 at 0°.
-  const northCenterOffset = direction * (sector / 2);
+  const northCenterOffset = northLastCell
+    ? direction * (sector / 2)
+    : -direction * (sector / 2);
   const cx = coordinateWidth / 2;
   const cy = coordinateHeight / 2;
   const ctx = canvas.getContext('2d');
@@ -249,7 +260,7 @@ export default function GannzillaRingTwoNumberingV223() {
 
     const draw = () => {
       frame = 0;
-      if (!disposed) redrawWheelNumberingV334();
+      if (!disposed) redrawWheelNumberingV338();
     };
 
     const schedule = (delay = 0) => {
@@ -298,44 +309,39 @@ export default function GannzillaRingTwoNumberingV223() {
     window.GANNZILLA_RING_INDEX_V332 = true;
     window.GANNZILLA_RING_INDEX_V333 = true;
     window.GANNZILLA_RING_INDEX_V334 = true;
-    window.__auditGannzillaRingIndexV334 = () => ({
+    window.GANNZILLA_RING_INDEX_V338 = true;
+    window.__auditGannzillaRingIndexV338 = () => ({
       ok: Boolean(findWheelCanvas()),
       build: BUILD,
       ring1Mode: 'DYNAMIC_VALUE_MODULO_DIVISIONS',
-      startValue: canonicalNumber('price.value', numberParam('startValue', 79680, -1000000000, 1000000000), -1000000000, 1000000000),
-      increment: canonicalNumber('price.increment', numberParam('increment', 1, -1000000, 1000000), -1000000, 1000000),
-      ring1FirstCell: ringIndexForCell(
-        canonicalNumber('price.value', numberParam('startValue', 79680, -1000000000, 1000000000), -1000000000, 1000000000),
-        canonicalNumber('price.increment', numberParam('increment', 1, -1000000, 1000000), -1000000, 1000000),
-        0,
-        Math.round(canonicalNumber('layout.view', numberParam('divisions', 36, 3, 360), 3, 360)),
-      ),
-      firstCellCenterAxis: 'ONE_SECTOR_FROM_NORTH',
-      sectorCentering: 'LAST_CELL_CENTERED_ON_NORTH',
-      examples: { start1: 1, start3600: 36 },
+      northLastCell: boolParam('northLastCell', false),
+      startValue: boolParam('northLastCell', false)
+        ? numberParam('startValue', 79680, -1000000000, 1000000000)
+        : canonicalNumber('price.value', numberParam('startValue', 79680, -1000000000, 1000000000), -1000000000, 1000000000),
+      increment: boolParam('northLastCell', false)
+        ? numberParam('increment', 1, -1000000, 1000000)
+        : canonicalNumber('price.increment', numberParam('increment', 1, -1000000, 1000000), -1000000, 1000000),
+      firstCellCenterAxis: boolParam('northLastCell', false)
+        ? 'FINAL_CELL_AT_NORTH_0_DEGREES'
+        : 'FIRST_CELL_AT_NORTH_0_DEGREES',
+      northVisualColumnExample: boolParam('northLastCell', false)
+        ? '36,72,108...360'
+        : '1,37,73...325',
+      sectorCentering: 'HALF_CELL_OFFSET_APPLIED',
       digitSystem: shouldUseArabicDigits() ? 'ARABIC_INDIC_٠١٢٣٤٥٦٧٨٩' : 'LATIN_0123456789',
       gateColors: { red: '1/4/7', blue: '2/5/8', black: '3/6/9' },
       ringPalette: RING_PALETTE,
       allNumericRingsGateColored: true,
-      numericRingCount: Math.round(canonicalNumber('layout.size', numberParam('levels', 10, 1, 12), 1, 12)),
-      firstNumericRing: 2,
-      clockwise: canonicalBoolean('layout.clockwise', boolParam('clockwise', true)),
-      clockwiseAuthority: 'CANONICAL_PANEL_RUNTIME_STATE',
-      counterClockwiseShortArcWedges: true,
-      numbersRemainVisibleCounterClockwise: true,
-      layoutSizeAuthority: 'CANONICAL_PANEL_RUNTIME_STATE',
-      layoutViewAuthority: 'CANONICAL_PANEL_RUNTIME_STATE',
-      priceValueAuthority: 'CANONICAL_PANEL_RUNTIME_STATE',
-      priceIncrementAuthority: 'CANONICAL_PANEL_RUNTIME_STATE',
       protractorIndependent: true,
       continuousInterval: false,
       bodyMutationObserver: false,
     });
-    window.__auditGannzillaRingIndexV333 = window.__auditGannzillaRingIndexV334;
-    window.__auditGannzillaRingIndexV332 = window.__auditGannzillaRingIndexV334;
-    window.__auditGannzillaRingIndexV331 = window.__auditGannzillaRingIndexV334;
-    window.__auditGannzillaRingIndexV330 = window.__auditGannzillaRingIndexV334;
-    window.__auditGannzillaRingIndexV248 = window.__auditGannzillaRingIndexV334;
+    window.__auditGannzillaRingIndexV334 = window.__auditGannzillaRingIndexV338;
+    window.__auditGannzillaRingIndexV333 = window.__auditGannzillaRingIndexV338;
+    window.__auditGannzillaRingIndexV332 = window.__auditGannzillaRingIndexV338;
+    window.__auditGannzillaRingIndexV331 = window.__auditGannzillaRingIndexV338;
+    window.__auditGannzillaRingIndexV330 = window.__auditGannzillaRingIndexV338;
+    window.__auditGannzillaRingIndexV248 = window.__auditGannzillaRingIndexV338;
 
     return () => {
       disposed = true;
@@ -354,12 +360,14 @@ export default function GannzillaRingTwoNumberingV223() {
       delete window.GANNZILLA_RING_INDEX_V332;
       delete window.GANNZILLA_RING_INDEX_V333;
       delete window.GANNZILLA_RING_INDEX_V334;
+      delete window.GANNZILLA_RING_INDEX_V338;
       delete window.__auditGannzillaRingIndexV248;
       delete window.__auditGannzillaRingIndexV330;
       delete window.__auditGannzillaRingIndexV331;
       delete window.__auditGannzillaRingIndexV332;
       delete window.__auditGannzillaRingIndexV333;
       delete window.__auditGannzillaRingIndexV334;
+      delete window.__auditGannzillaRingIndexV338;
     };
   }, []);
 
