@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 334;
+const BUILD = 335;
 const TWO_PI = Math.PI * 2;
 const PANEL_STORAGE_KEY = 'tasi-gannzilla-canonical-panel-v326';
 const runtimeOverrides = new Map();
@@ -189,9 +189,9 @@ function redrawWheelNumberingV334() {
   const ringWidth = availableWheelWidth / totalRingCount;
   const direction = clockwise ? 1 : -1;
   const sector = 360 / divisions;
-  // Gannzilla-style centering: the first value's cell center sits exactly on the
-  // north/90° axis. The cell spans half a division on each side of that axis.
-  const northCenterOffset = -direction * (sector / 2);
+  // Keep the number sequence unchanged, but place the final cell of every ring
+  // exactly on the north/0° axis. With 36 divisions this aligns 36..360 at 0°.
+  const northCenterOffset = direction * (sector / 2);
   const cx = coordinateWidth / 2;
   const cy = coordinateHeight / 2;
   const ctx = canvas.getContext('2d');
@@ -310,8 +310,8 @@ export default function GannzillaRingTwoNumberingV223() {
         0,
         Math.round(canonicalNumber('layout.view', numberParam('divisions', 36, 3, 360), 3, 360)),
       ),
-      firstCellCenterAxis: 'NORTH_90_DEGREES',
-      sectorCentering: 'HALF_CELL_OFFSET_APPLIED',
+      firstCellCenterAxis: 'ONE_SECTOR_FROM_NORTH',
+      sectorCentering: 'LAST_CELL_CENTERED_ON_NORTH',
       examples: { start1: 1, start3600: 36 },
       digitSystem: shouldUseArabicDigits() ? 'ARABIC_INDIC_٠١٢٣٤٥٦٧٨٩' : 'LATIN_0123456789',
       gateColors: { red: '1/4/7', blue: '2/5/8', black: '3/6/9' },
