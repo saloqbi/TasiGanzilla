@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV350';
+const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV351';
 const MAJOR_ANGLE_PATTERN = /^(0|30|60|90|120|150|180|210|240|270|300|330)°$/;
 
 function clamp(value, min, max) {
@@ -59,9 +59,9 @@ function installProtractorTextPatch() {
     const fontSize = numberParam('gannzillaProtractorFontSize', 20, 16, 28);
     const fontWeight = Math.round(numberParam('gannzillaProtractorFontWeight', 700, 500, 900));
     const horizontal = boolParam('protractorLabelsHorizontal', true);
-    const radialGap = numberParam('gannzillaProtractorRadialGap', 8, 0, 24);
-    const degreeScale = numberParam('gannzillaProtractorDegreeScale', 0.56, 0.42, 0.72);
-    const textColor = '#454545';
+    const radialGap = numberParam('gannzillaProtractorRadialGap', 4, 0, 18);
+    const degreeScale = numberParam('gannzillaProtractorDegreeScale', 0.52, 0.42, 0.68);
+    const textColor = '#41464d';
     const family = 'Segoe UI, Arial, Helvetica, sans-serif';
 
     this.save();
@@ -72,18 +72,13 @@ function installProtractorTextPatch() {
       const py = matrix.b * x + matrix.d * y + matrix.f;
       const scale = Math.hypot(matrix.a, matrix.b) || 1;
 
-      const centerX = this.canvas.width / 2;
-      const centerY = this.canvas.height / 2;
+      // Preserve the renderer's native anchor, then move only along the
+      // exact radial axis for this degree. This remains correct while panning.
       const radians = (degree * Math.PI) / 180;
       const radialX = Math.sin(radians);
       const radialY = -Math.cos(radians);
-
-      const dx = px - centerX;
-      const dy = py - centerY;
-      const projectedRadius = (dx * radialX) + (dy * radialY);
-      const targetRadius = projectedRadius + (radialGap * scale);
-      const targetX = centerX + (radialX * targetRadius);
-      const targetY = centerY + (radialY * targetRadius);
+      const targetX = px + (radialX * radialGap * scale);
+      const targetY = py + (radialY * radialGap * scale);
 
       this.setTransform(scale, 0, 0, scale, targetX, targetY);
       x = 0;
@@ -100,7 +95,7 @@ function installProtractorTextPatch() {
     this.font = `${fontWeight} ${degreeFontSize}px ${family}`;
     const degreeWidth = this.measureText('°').width;
 
-    const gap = Math.max(1.5, fontSize * 0.07);
+    const gap = Math.max(1.25, fontSize * 0.055);
     const totalWidth = digitWidth + gap + degreeWidth;
     const startX = x - (totalWidth / 2);
 
@@ -110,7 +105,7 @@ function installProtractorTextPatch() {
 
     this.font = `${fontWeight} ${degreeFontSize}px ${family}`;
     this.textAlign = 'left';
-    nativeFillText.call(this, '°', startX + digitWidth + gap, y - (fontSize * 0.27));
+    nativeFillText.call(this, '°', startX + digitWidth + gap, y - (fontSize * 0.25));
 
     this.restore();
     return undefined;
@@ -139,19 +134,19 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
   React.useLayoutEffect(() => {
     const uninstall = installProtractorTextPatch();
 
-    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V350 = true;
-    window.__auditGannzillaExistingProtractorFontDoubleV350 = () => ({
+    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V351 = true;
+    window.__auditGannzillaExistingProtractorFontDoubleV351 = () => ({
       ok: Boolean(window[PATCH_KEY]),
-      build: 350,
+      build: 351,
       existingAnglesOnly: true,
       scannedAngles: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330],
       fontPx: numberParam('gannzillaProtractorFontSize', 20, 16, 28),
-      degreeScale: numberParam('gannzillaProtractorDegreeScale', 0.56, 0.42, 0.72),
-      radialGapPx: numberParam('gannzillaProtractorRadialGap', 8, 0, 24),
+      degreeScale: numberParam('gannzillaProtractorDegreeScale', 0.52, 0.42, 0.68),
+      radialGapPx: numberParam('gannzillaProtractorRadialGap', 4, 0, 18),
       horizontal: boolParam('protractorLabelsHorizontal', true),
-      exactRadialAxisProjection: true,
+      nativeAnchorPreserved: true,
+      panInvariantRadialOffset: true,
       compositeLabelMeasuredCenter: true,
-      equalGapFromOuterWheel: true,
       centeredOnRedTickAxis: true,
       backgroundOverlay: false,
       addedAngles: false,
@@ -161,8 +156,8 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
 
     return () => {
       uninstall();
-      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V350;
-      delete window.__auditGannzillaExistingProtractorFontDoubleV350;
+      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V351;
+      delete window.__auditGannzillaExistingProtractorFontDoubleV351;
     };
   }, []);
 
