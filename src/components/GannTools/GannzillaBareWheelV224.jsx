@@ -2,6 +2,7 @@ import React from 'react';
 import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaExistingProtractorFontDoubleV343 from './GannzillaExistingProtractorFontDoubleV343';
+import GannzillaHideCalendarLabelsV359 from './GannzillaHideCalendarLabelsV359';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
@@ -18,7 +19,7 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 344: existing major protractor labels render cleanly at 24px without overlay shading. */
+/** Build 359: calendar text can be hidden while preserving the established wheel and outer frame. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
@@ -43,7 +44,7 @@ export default function GannzillaBareWheelV224() {
       const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
       return {
         ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
-        build: 344,
+        build: 359,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
         chartToolbarDirectHostMount: true,
@@ -189,6 +190,7 @@ export default function GannzillaBareWheelV224() {
       />
 
       <GannzillaExistingProtractorFontDoubleV343 />
+      <GannzillaHideCalendarLabelsV359 />
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaTopToolbarV231 />
