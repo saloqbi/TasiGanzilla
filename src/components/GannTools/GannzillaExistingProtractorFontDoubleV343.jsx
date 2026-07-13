@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV345';
+const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV346';
 const MAJOR_ANGLE_PATTERN = /^(0|30|60|90|120|150|180|210|240|270|300|330)°$/;
 
 function clamp(value, min, max) {
@@ -55,11 +55,12 @@ function installProtractorTextPatch() {
     }
 
     const digits = match[1];
-    const fontSize = numberParam('gannzillaProtractorFontSize', 24, 16, 32);
+    const fontSize = numberParam('gannzillaProtractorFontSize', 22, 16, 32);
     const fontWeight = Math.round(numberParam('gannzillaProtractorFontWeight', 700, 500, 900));
     const horizontal = boolParam('protractorLabelsHorizontal', true);
-    const degreeScale = numberParam('gannzillaProtractorDegreeScale', 0.56, 0.42, 0.72);
+    const degreeScale = numberParam('gannzillaProtractorDegreeScale', 0.54, 0.42, 0.72);
     const opticalShift = numberParam('gannzillaProtractorOpticalShift', 0, -8, 8);
+    const radialGap = numberParam('gannzillaProtractorRadialGap', 18, 0, 40);
     const textColor = '#454545';
     const family = 'Segoe UI, Arial, Helvetica, sans-serif';
 
@@ -67,9 +68,20 @@ function installProtractorTextPatch() {
 
     if (horizontal && typeof this.getTransform === 'function') {
       const matrix = this.getTransform();
-      const px = matrix.a * x + matrix.c * y + matrix.e;
-      const py = matrix.b * x + matrix.d * y + matrix.f;
+      let px = matrix.a * x + matrix.c * y + matrix.e;
+      let py = matrix.b * x + matrix.d * y + matrix.f;
       const scale = Math.hypot(matrix.a, matrix.b) || 1;
+
+      const centerX = this.canvas.width / 2;
+      const centerY = this.canvas.height / 2;
+      const dx = px - centerX;
+      const dy = py - centerY;
+      const length = Math.hypot(dx, dy) || 1;
+      const gapInDevicePixels = radialGap * scale;
+
+      px += (dx / length) * gapInDevicePixels;
+      py += (dy / length) * gapInDevicePixels;
+
       this.setTransform(scale, 0, 0, scale, px, py);
       x = 0;
       y = 0;
@@ -129,34 +141,28 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
   React.useLayoutEffect(() => {
     const uninstall = installProtractorTextPatch();
 
-    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V344 = true;
-    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V345 = true;
-    window.__auditGannzillaExistingProtractorFontDoubleV345 = () => ({
+    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V346 = true;
+    window.__auditGannzillaExistingProtractorFontDoubleV346 = () => ({
       ok: Boolean(window[PATCH_KEY]),
-      build: 345,
+      build: 346,
       existingAnglesOnly: true,
       angleStep: 30,
-      oldFontPx: 12,
-      newFontPx: numberParam('gannzillaProtractorFontSize', 24, 16, 32),
-      scale: numberParam('gannzillaProtractorFontSize', 24, 16, 32) / 12,
+      fontPx: numberParam('gannzillaProtractorFontSize', 22, 16, 32),
       horizontal: boolParam('protractorLabelsHorizontal', true),
-      geometricallyCentered: true,
-      degreeMarkSuperscripted: true,
-      variableWidthBalanced: true,
-      opticalShiftPx: numberParam('gannzillaProtractorOpticalShift', 0, -8, 8),
+      degreeScale: numberParam('gannzillaProtractorDegreeScale', 0.54, 0.42, 0.72),
+      radialGapPx: numberParam('gannzillaProtractorRadialGap', 18, 0, 40),
+      centeredByMeasuredTextWidth: true,
+      equalRadialDistanceFromWheel: true,
       backgroundOverlay: false,
       addedAngles: false,
       wheelGeometryChanged: false,
       nativeRendererIntercepted: true,
     });
-    window.__auditGannzillaExistingProtractorFontDoubleV344 = window.__auditGannzillaExistingProtractorFontDoubleV345;
 
     return () => {
       uninstall();
-      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V344;
-      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V345;
-      delete window.__auditGannzillaExistingProtractorFontDoubleV344;
-      delete window.__auditGannzillaExistingProtractorFontDoubleV345;
+      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V346;
+      delete window.__auditGannzillaExistingProtractorFontDoubleV346;
     };
   }, []);
 
