@@ -7,17 +7,17 @@ import GannzillaWheelZoomV293 from './GannzillaWheelZoomV293';
 import GannzillaCanvasExportV360 from './GannzillaCanvasExportV360';
 import GannzillaRestoredLayoutEyeV370 from './GannzillaRestoredLayoutEyeV370';
 
-const BUILD = 370;
+const BUILD = 371;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
-const EXPORT_WIDTH = 54;
+const EXPORT_WIDTH = 82;
 
-/** Build 370: restore both eye controls and keep PNG directly left of the restored eye. */
+/** Build 371: match the real PNG overlay width so the restored eye remains fully visible. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V370 = true;
-    window.__auditGannzillaTopToolbarV370 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V371 = true;
+    window.__auditGannzillaTopToolbarV371 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
@@ -29,6 +29,8 @@ export default function GannzillaTopToolbarV231() {
       twoEyeControlsVisible: true,
       pngCopyDownloadControlMounted: true,
       pngDownloadControlWidthPx: EXPORT_WIDTH,
+      pngOverlayWidthMatchedToSlot: true,
+      pngNoLongerCoversRestoredEye: true,
       pngCopyDownloadPlacement: 'IMMEDIATELY_LEFT_OF_RESTORED_LAYOUT_EYE',
       restoredLayoutEyePlacement: 'BETWEEN_PNG_AND_WHEEL_VISIBILITY_EYE',
       wheelVisibilityEyePlacement: 'IMMEDIATELY_RIGHT_OF_RESTORED_LAYOUT_EYE',
@@ -47,8 +49,8 @@ export default function GannzillaTopToolbarV231() {
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V370;
-      delete window.__auditGannzillaTopToolbarV370;
+      delete window.GANNZILLA_TOP_TOOLBAR_V371;
+      delete window.__auditGannzillaTopToolbarV371;
     };
   }, []);
 
