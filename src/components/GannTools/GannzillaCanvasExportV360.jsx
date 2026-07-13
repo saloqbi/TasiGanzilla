@@ -1,12 +1,68 @@
 import React from 'react';
 
-const BUILD = 360;
+const BUILD = 361;
+
+function visibleIntersectionArea(rect) {
+  const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+  const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+  const width = Math.max(0, Math.min(rect.right, viewportWidth) - Math.max(rect.left, 0));
+  const height = Math.max(0, Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0));
+  return width * height;
+}
+
+function stackVisibilityScore(canvas, rect) {
+  const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+  const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+  const points = [
+    [rect.left + rect.width / 2, rect.top + rect.height / 2],
+    [Math.max(rect.left, 0) + Math.min(rect.width * 0.25, 80), Math.max(rect.top, 0) + Math.min(rect.height * 0.25, 80)],
+    [Math.min(rect.right, viewportWidth) - Math.min(rect.width * 0.25, 80), Math.min(rect.bottom, viewportHeight) - Math.min(rect.height * 0.25, 80)],
+  ];
+
+  let best = 0;
+  points.forEach(([rawX, rawY]) => {
+    const x = Math.max(0, Math.min(viewportWidth - 1, rawX));
+    const y = Math.max(0, Math.min(viewportHeight - 1, rawY));
+    const stack = document.elementsFromPoint?.(x, y) || [];
+    const index = stack.indexOf(canvas);
+    if (index >= 0) best = Math.max(best, 1000 - Math.min(index, 999));
+  });
+  return best;
+}
 
 function findPrimaryCanvas() {
-  return Array.from(document.querySelectorAll('canvas'))
-    .map((canvas) => ({ canvas, rect: canvas.getBoundingClientRect() }))
-    .filter(({ canvas, rect }) => canvas.width > 0 && canvas.height > 0 && rect.width > 120 && rect.height > 120)
-    .sort((a, b) => (b.canvas.width * b.canvas.height) - (a.canvas.width * a.canvas.height))[0]?.canvas || null;
+  const candidates = Array.from(document.querySelectorAll('canvas'))
+    .map((canvas) => {
+      const rect = canvas.getBoundingClientRect();
+      const style = window.getComputedStyle(canvas);
+      const visibleArea = visibleIntersectionArea(rect);
+      const stackScore = stackVisibilityScore(canvas, rect);
+      return {
+        canvas,
+        rect,
+        visibleArea,
+        stackScore,
+        cssArea: rect.width * rect.height,
+      };
+    })
+    .filter(({ canvas, rect, visibleArea }) => {
+      const style = window.getComputedStyle(canvas);
+      return canvas.width > 0
+        && canvas.height > 0
+        && rect.width > 120
+        && rect.height > 120
+        && visibleArea > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || 1) > 0;
+    })
+    .sort((a, b) => {
+      if (b.stackScore !== a.stackScore) return b.stackScore - a.stackScore;
+      if (b.visibleArea !== a.visibleArea) return b.visibleArea - a.visibleArea;
+      return b.cssArea - a.cssArea;
+    });
+
+  return candidates[0]?.canvas || null;
 }
 
 function buildExportCanvas(source) {
@@ -62,22 +118,32 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
   const noticeTimerRef = React.useRef(0);
 
   React.useEffect(() => {
-    window.GANNZILLA_CANVAS_EXPORT_V360 = true;
-    window.__auditGannzillaCanvasExportV360 = () => ({
-      ok: true,
-      build: BUILD,
-      primaryCanvasAvailable: Boolean(findPrimaryCanvas()),
-      pngDownloadEnabled: true,
-      clipboardImageCopySupported: Boolean(navigator.clipboard?.write && typeof window.ClipboardItem === 'function'),
-      paintWorkflow: 'DOWNLOAD_PNG_OR_OPEN_PAINT_AND_CTRL_V',
-      wheelOnlyExport: true,
-      whiteBackground: true,
-      sourceResolutionPreserved: true,
-    });
+    window.GANNZILLA_CANVAS_EXPORT_V361 = true;
+    window.__auditGannzillaCanvasExportV361 = () => {
+      const selected = findPrimaryCanvas();
+      const rect = selected?.getBoundingClientRect?.();
+      return {
+        ok: true,
+        build: BUILD,
+        primaryCanvasAvailable: Boolean(selected),
+        selectedCanvasCssWidth: rect ? Math.round(rect.width) : null,
+        selectedCanvasCssHeight: rect ? Math.round(rect.height) : null,
+        selectedCanvasPixelWidth: selected?.width || null,
+        selectedCanvasPixelHeight: selected?.height || null,
+        visibleUpdatedCanvasAuthority: true,
+        hiddenLegacyCanvasRejected: true,
+        pngDownloadEnabled: true,
+        clipboardImageCopySupported: Boolean(navigator.clipboard?.write && typeof window.ClipboardItem === 'function'),
+        paintWorkflow: 'DOWNLOAD_PNG_OR_OPEN_PAINT_AND_CTRL_V',
+        wheelOnlyExport: true,
+        whiteBackground: true,
+        sourceResolutionPreserved: true,
+      };
+    };
     return () => {
       window.clearTimeout(noticeTimerRef.current);
-      delete window.GANNZILLA_CANVAS_EXPORT_V360;
-      delete window.__auditGannzillaCanvasExportV360;
+      delete window.GANNZILLA_CANVAS_EXPORT_V361;
+      delete window.__auditGannzillaCanvasExportV361;
     };
   }, []);
 
@@ -90,7 +156,7 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
   const exportWheel = React.useCallback(async () => {
     const source = findPrimaryCanvas();
     if (!source) {
-      showNotice('تعذر العثور على رسم العجلة');
+      showNotice('تعذر العثور على رسم العجلة المحدث');
       return;
     }
 
@@ -102,10 +168,10 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
       const filename = downloadBlob(blob);
       const copied = await clipboardPromise;
       showNotice(copied
-        ? `تم نسخ الصورة وتنزيلها: ${filename} — افتح الرسام واضغط Ctrl+V`
-        : `تم تنزيل الصورة: ${filename} — افتحها ببرنامج الرسام`);
+        ? `تم نسخ العجلة المحدثة وتنزيلها: ${filename} — افتح الرسام واضغط Ctrl+V`
+        : `تم تنزيل العجلة المحدثة: ${filename} — افتحها ببرنامج الرسام`);
     } catch (_) {
-      showNotice('تعذر إنشاء صورة PNG');
+      showNotice('تعذر إنشاء صورة PNG للعجلة المحدثة');
     }
   }, [showNotice]);
 
@@ -114,8 +180,9 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
       <button
         type="button"
         data-gannzilla-canvas-export-v360="true"
-        aria-label="نسخ وتنزيل صورة العجلة"
-        title="نسخ وتنزيل صورة العجلة PNG"
+        data-gannzilla-canvas-export-v361="true"
+        aria-label="نسخ وتنزيل صورة العجلة المحدثة"
+        title="نسخ وتنزيل صورة العجلة المحدثة PNG"
         onClick={exportWheel}
         style={{
           width: toolbarHeight,
