@@ -1,7 +1,7 @@
 import React from 'react';
 
-const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV344';
-const MAJOR_ANGLE_PATTERN = /^(?:0|30|60|90|120|150|180|210|240|270|300|330)°$/;
+const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV345';
+const MAJOR_ANGLE_PATTERN = /^(0|30|60|90|120|150|180|210|240|270|300|330)°$/;
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -46,19 +46,22 @@ function installProtractorTextPatch() {
 
   const patchedFillText = function patchedFillText(text, x, y, maxWidth) {
     const label = String(text ?? '');
-    const isMajorAngle = MAJOR_ANGLE_PATTERN.test(label);
+    const match = MAJOR_ANGLE_PATTERN.exec(label);
     const enabled = boolParam('showProtractor', true)
       && boolParam('improveExistingProtractorLabels', true);
 
-    if (!enabled || !isMajorAngle) {
+    if (!enabled || !match) {
       return nativeFillText.apply(this, arguments);
     }
 
-    const fontSize = numberParam('gannzillaProtractorFontSize', 24, 12, 32);
+    const digits = match[1];
+    const fontSize = numberParam('gannzillaProtractorFontSize', 24, 16, 32);
     const fontWeight = Math.round(numberParam('gannzillaProtractorFontWeight', 700, 500, 900));
     const horizontal = boolParam('protractorLabelsHorizontal', true);
-    const textColor = '#4a4a4a';
-    const widthLimit = Math.max(72, fontSize * 3.4);
+    const degreeScale = numberParam('gannzillaProtractorDegreeScale', 0.56, 0.42, 0.72);
+    const opticalShift = numberParam('gannzillaProtractorOpticalShift', 0, -8, 8);
+    const textColor = '#454545';
+    const family = 'Segoe UI, Arial, Helvetica, sans-serif';
 
     this.save();
 
@@ -72,11 +75,33 @@ function installProtractorTextPatch() {
       y = 0;
     }
 
-    this.font = `${fontWeight} ${fontSize}px Segoe UI, Arial, Helvetica, sans-serif`;
     this.fillStyle = textColor;
-    this.textAlign = 'center';
     this.textBaseline = 'middle';
-    nativeFillText.call(this, label, x, y, widthLimit);
+
+    this.font = `${fontWeight} ${fontSize}px ${family}`;
+    const digitWidth = this.measureText(digits).width;
+
+    const degreeFontSize = Math.max(10, fontSize * degreeScale);
+    this.font = `${fontWeight} ${degreeFontSize}px ${family}`;
+    const degreeWidth = this.measureText('°').width;
+
+    const gap = Math.max(1.5, fontSize * 0.07);
+    const totalWidth = digitWidth + gap + degreeWidth;
+    const startX = x - (totalWidth / 2) + opticalShift;
+
+    this.font = `${fontWeight} ${fontSize}px ${family}`;
+    this.textAlign = 'left';
+    nativeFillText.call(this, digits, startX, y);
+
+    this.font = `${fontWeight} ${degreeFontSize}px ${family}`;
+    this.textAlign = 'left';
+    nativeFillText.call(
+      this,
+      '°',
+      startX + digitWidth + gap,
+      y - (fontSize * 0.27),
+    );
+
     this.restore();
     return undefined;
   };
@@ -105,25 +130,33 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
     const uninstall = installProtractorTextPatch();
 
     window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V344 = true;
-    window.__auditGannzillaExistingProtractorFontDoubleV344 = () => ({
+    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V345 = true;
+    window.__auditGannzillaExistingProtractorFontDoubleV345 = () => ({
       ok: Boolean(window[PATCH_KEY]),
-      build: 344,
+      build: 345,
       existingAnglesOnly: true,
       angleStep: 30,
       oldFontPx: 12,
-      newFontPx: numberParam('gannzillaProtractorFontSize', 24, 12, 32),
-      scale: numberParam('gannzillaProtractorFontSize', 24, 12, 32) / 12,
+      newFontPx: numberParam('gannzillaProtractorFontSize', 24, 16, 32),
+      scale: numberParam('gannzillaProtractorFontSize', 24, 16, 32) / 12,
       horizontal: boolParam('protractorLabelsHorizontal', true),
+      geometricallyCentered: true,
+      degreeMarkSuperscripted: true,
+      variableWidthBalanced: true,
+      opticalShiftPx: numberParam('gannzillaProtractorOpticalShift', 0, -8, 8),
       backgroundOverlay: false,
       addedAngles: false,
       wheelGeometryChanged: false,
       nativeRendererIntercepted: true,
     });
+    window.__auditGannzillaExistingProtractorFontDoubleV344 = window.__auditGannzillaExistingProtractorFontDoubleV345;
 
     return () => {
       uninstall();
       delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V344;
+      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V345;
       delete window.__auditGannzillaExistingProtractorFontDoubleV344;
+      delete window.__auditGannzillaExistingProtractorFontDoubleV345;
     };
   }, []);
 
