@@ -17,7 +17,7 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 333: the inner 1–36 ring follows the actual cell value dynamically. */
+/** Build 334: first value cell is weighted/centered exactly on the north 90° axis. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
@@ -26,6 +26,7 @@ export default function GannzillaBareWheelV224() {
     window.GANNZILLA_BARE_WHEEL_V329 = true;
     window.GANNZILLA_BARE_WHEEL_V331 = true;
     window.GANNZILLA_BARE_WHEEL_V333 = true;
+    window.GANNZILLA_BARE_WHEEL_V334 = true;
     const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
@@ -39,7 +40,7 @@ export default function GannzillaBareWheelV224() {
       const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
       return {
         ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
-        build: 333,
+        build: 334,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
         chartToolbarDirectHostMount: true,
@@ -57,8 +58,10 @@ export default function GannzillaBareWheelV224() {
         counterClockwiseNumbersRemainVisible: true,
         counterClockwiseShortArcWedges: true,
         innerRingAlignmentMode: 'DYNAMIC_VALUE_MODULO_36',
-        startValue1Alignment: '1_OVER_1_THROUGH_36_OVER_36',
-        startValue3600Alignment: '36_OVER_3600_THEN_1_OVER_3601',
+        firstCellCenterAxis: 'NORTH_90_DEGREES',
+        sectorCentering: 'HALF_CELL_OFFSET_APPLIED',
+        startValue1Alignment: '1_CENTERED_NORTH_THEN_2',
+        startValue3600Alignment: '36_AND_3600_CENTERED_NORTH',
         oldV318PanelMounted: false,
         oldV319BridgeMounted: false,
         oldV320AdapterMounted: false,
@@ -77,6 +80,7 @@ export default function GannzillaBareWheelV224() {
     window.__auditGannzillaBareWheelV329 = audit;
     window.__auditGannzillaBareWheelV331 = audit;
     window.__auditGannzillaBareWheelV333 = audit;
+    window.__auditGannzillaBareWheelV334 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
       delete window.GANNZILLA_BARE_WHEEL_V327;
@@ -84,12 +88,14 @@ export default function GannzillaBareWheelV224() {
       delete window.GANNZILLA_BARE_WHEEL_V329;
       delete window.GANNZILLA_BARE_WHEEL_V331;
       delete window.GANNZILLA_BARE_WHEEL_V333;
+      delete window.GANNZILLA_BARE_WHEEL_V334;
       delete window.__auditGannzillaBareWheelV326;
       delete window.__auditGannzillaBareWheelV327;
       delete window.__auditGannzillaBareWheelV328;
       delete window.__auditGannzillaBareWheelV329;
       delete window.__auditGannzillaBareWheelV331;
       delete window.__auditGannzillaBareWheelV333;
+      delete window.__auditGannzillaBareWheelV334;
     };
   }, []);
 
