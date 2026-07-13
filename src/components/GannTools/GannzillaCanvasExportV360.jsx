@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 361;
+const BUILD = 362;
 
 function visibleIntersectionArea(rect) {
   const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
@@ -8,6 +8,47 @@ function visibleIntersectionArea(rect) {
   const width = Math.max(0, Math.min(rect.right, viewportWidth) - Math.max(rect.left, 0));
   const height = Math.max(0, Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0));
   return width * height;
+}
+
+function isUsableCanvas(canvas) {
+  if (!canvas) return false;
+  const rect = canvas.getBoundingClientRect();
+  const style = window.getComputedStyle(canvas);
+  return canvas.width > 0
+    && canvas.height > 0
+    && rect.width > 120
+    && rect.height > 120
+    && visibleIntersectionArea(rect) > 0
+    && style.display !== 'none'
+    && style.visibility !== 'hidden'
+    && Number(style.opacity || 1) > 0;
+}
+
+function isCanonicalUpdatedWheelCanvas(canvas) {
+  if (!isUsableCanvas(canvas)) return false;
+
+  const inlineStyleMatch = canvas.style.display === 'block'
+    && canvas.style.maxWidth === 'none'
+    && canvas.style.maxHeight === 'none'
+    && (canvas.style.background === 'rgb(255, 255, 255)'
+      || canvas.style.background === '#ffffff'
+      || canvas.style.backgroundColor === 'rgb(255, 255, 255)'
+      || canvas.style.backgroundColor === '#ffffff');
+
+  if (!inlineStyleMatch) return false;
+
+  let ancestor = canvas.parentElement;
+  let hasScrollableWheelViewport = false;
+  for (let depth = 0; ancestor && depth < 5; depth += 1, ancestor = ancestor.parentElement) {
+    const style = window.getComputedStyle(ancestor);
+    if ((style.overflow === 'auto' || style.overflowX === 'auto' || style.overflowY === 'auto')
+      && (style.position === 'absolute' || style.position === 'fixed' || style.position === 'relative')) {
+      hasScrollableWheelViewport = true;
+      break;
+    }
+  }
+
+  return hasScrollableWheelViewport;
 }
 
 function stackVisibilityScore(canvas, rect) {
@@ -31,30 +72,25 @@ function stackVisibilityScore(canvas, rect) {
 }
 
 function findPrimaryCanvas() {
-  const candidates = Array.from(document.querySelectorAll('canvas'))
+  const allCanvases = Array.from(document.querySelectorAll('canvas'));
+
+  const canonical = allCanvases.find(isCanonicalUpdatedWheelCanvas);
+  if (canonical) {
+    canonical.dataset.gannzillaExportAuthority = 'CURRENT_UPDATED_WHEEL_V362';
+    return canonical;
+  }
+
+  const candidates = allCanvases
+    .filter(isUsableCanvas)
     .map((canvas) => {
       const rect = canvas.getBoundingClientRect();
-      const style = window.getComputedStyle(canvas);
-      const visibleArea = visibleIntersectionArea(rect);
-      const stackScore = stackVisibilityScore(canvas, rect);
       return {
         canvas,
         rect,
-        visibleArea,
-        stackScore,
+        visibleArea: visibleIntersectionArea(rect),
+        stackScore: stackVisibilityScore(canvas, rect),
         cssArea: rect.width * rect.height,
       };
-    })
-    .filter(({ canvas, rect, visibleArea }) => {
-      const style = window.getComputedStyle(canvas);
-      return canvas.width > 0
-        && canvas.height > 0
-        && rect.width > 120
-        && rect.height > 120
-        && visibleArea > 0
-        && style.display !== 'none'
-        && style.visibility !== 'hidden'
-        && Number(style.opacity || 1) > 0;
     })
     .sort((a, b) => {
       if (b.stackScore !== a.stackScore) return b.stackScore - a.stackScore;
@@ -62,7 +98,9 @@ function findPrimaryCanvas() {
       return b.cssArea - a.cssArea;
     });
 
-  return candidates[0]?.canvas || null;
+  const fallback = candidates[0]?.canvas || null;
+  if (fallback) fallback.dataset.gannzillaExportAuthority = 'VISIBLE_FALLBACK_V362';
+  return fallback;
 }
 
 function buildExportCanvas(source) {
@@ -88,7 +126,7 @@ function canvasToBlob(canvas) {
 
 function downloadBlob(blob) {
   const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  const filename = `gann-circle-${timestamp}.png`;
+  const filename = `gann-circle-v362-current-${timestamp}.png`;
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
@@ -118,20 +156,22 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
   const noticeTimerRef = React.useRef(0);
 
   React.useEffect(() => {
-    window.GANNZILLA_CANVAS_EXPORT_V361 = true;
-    window.__auditGannzillaCanvasExportV361 = () => {
+    window.GANNZILLA_CANVAS_EXPORT_V362 = true;
+    window.__auditGannzillaCanvasExportV362 = () => {
       const selected = findPrimaryCanvas();
       const rect = selected?.getBoundingClientRect?.();
       return {
-        ok: true,
+        ok: Boolean(selected),
         build: BUILD,
         primaryCanvasAvailable: Boolean(selected),
+        exportAuthority: selected?.dataset?.gannzillaExportAuthority || null,
         selectedCanvasCssWidth: rect ? Math.round(rect.width) : null,
         selectedCanvasCssHeight: rect ? Math.round(rect.height) : null,
         selectedCanvasPixelWidth: selected?.width || null,
         selectedCanvasPixelHeight: selected?.height || null,
-        visibleUpdatedCanvasAuthority: true,
+        canonicalUpdatedWheelSelector: true,
         hiddenLegacyCanvasRejected: true,
+        filenameIncludesV362Current: true,
         pngDownloadEnabled: true,
         clipboardImageCopySupported: Boolean(navigator.clipboard?.write && typeof window.ClipboardItem === 'function'),
         paintWorkflow: 'DOWNLOAD_PNG_OR_OPEN_PAINT_AND_CTRL_V',
@@ -142,15 +182,15 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
     };
     return () => {
       window.clearTimeout(noticeTimerRef.current);
-      delete window.GANNZILLA_CANVAS_EXPORT_V361;
-      delete window.__auditGannzillaCanvasExportV361;
+      delete window.GANNZILLA_CANVAS_EXPORT_V362;
+      delete window.__auditGannzillaCanvasExportV362;
     };
   }, []);
 
   const showNotice = React.useCallback((message) => {
     window.clearTimeout(noticeTimerRef.current);
     setNotice(message);
-    noticeTimerRef.current = window.setTimeout(() => setNotice(''), 3200);
+    noticeTimerRef.current = window.setTimeout(() => setNotice(''), 4200);
   }, []);
 
   const exportWheel = React.useCallback(async () => {
@@ -161,6 +201,7 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
     }
 
     try {
+      await new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
       const exportCanvas = buildExportCanvas(source);
       const blobPromise = canvasToBlob(exportCanvas);
       const clipboardPromise = copyPngToClipboard(blobPromise);
@@ -168,10 +209,10 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
       const filename = downloadBlob(blob);
       const copied = await clipboardPromise;
       showNotice(copied
-        ? `تم نسخ العجلة المحدثة وتنزيلها: ${filename} — افتح الرسام واضغط Ctrl+V`
-        : `تم تنزيل العجلة المحدثة: ${filename} — افتحها ببرنامج الرسام`);
+        ? `تم نسخ العجلة الحالية وتنزيل ملف جديد: ${filename}`
+        : `تم تنزيل العجلة الحالية في ملف جديد: ${filename}`);
     } catch (_) {
-      showNotice('تعذر إنشاء صورة PNG للعجلة المحدثة');
+      showNotice('تعذر إنشاء صورة PNG للعجلة الحالية');
     }
   }, [showNotice]);
 
@@ -181,8 +222,9 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
         type="button"
         data-gannzilla-canvas-export-v360="true"
         data-gannzilla-canvas-export-v361="true"
-        aria-label="نسخ وتنزيل صورة العجلة المحدثة"
-        title="نسخ وتنزيل صورة العجلة المحدثة PNG"
+        data-gannzilla-canvas-export-v362="true"
+        aria-label="نسخ وتنزيل صورة العجلة الحالية"
+        title="نسخ وتنزيل صورة العجلة الحالية PNG"
         onClick={exportWheel}
         style={{
           width: toolbarHeight,
@@ -221,7 +263,7 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
             top: toolbarHeight + 8,
             right: 8,
             zIndex: 2147483647,
-            maxWidth: 'min(520px, calc(100vw - 16px))',
+            maxWidth: 'min(560px, calc(100vw - 16px))',
             padding: '8px 12px',
             border: '1px solid #9fb5c7',
             borderRadius: 4,
