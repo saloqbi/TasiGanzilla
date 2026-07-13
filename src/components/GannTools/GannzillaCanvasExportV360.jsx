@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 362;
+const BUILD = 363;
 
 function visibleIntersectionArea(rect) {
   const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
@@ -29,77 +29,37 @@ function isCanonicalUpdatedWheelCanvas(canvas) {
 
   const inlineStyleMatch = canvas.style.display === 'block'
     && canvas.style.maxWidth === 'none'
-    && canvas.style.maxHeight === 'none'
-    && (canvas.style.background === 'rgb(255, 255, 255)'
-      || canvas.style.background === '#ffffff'
-      || canvas.style.backgroundColor === 'rgb(255, 255, 255)'
-      || canvas.style.backgroundColor === '#ffffff');
-
+    && canvas.style.maxHeight === 'none';
   if (!inlineStyleMatch) return false;
 
   let ancestor = canvas.parentElement;
-  let hasScrollableWheelViewport = false;
-  for (let depth = 0; ancestor && depth < 5; depth += 1, ancestor = ancestor.parentElement) {
+  for (let depth = 0; ancestor && depth < 6; depth += 1, ancestor = ancestor.parentElement) {
     const style = window.getComputedStyle(ancestor);
-    if ((style.overflow === 'auto' || style.overflowX === 'auto' || style.overflowY === 'auto')
-      && (style.position === 'absolute' || style.position === 'fixed' || style.position === 'relative')) {
-      hasScrollableWheelViewport = true;
-      break;
-    }
+    const scrollable = style.overflow === 'auto'
+      || style.overflowX === 'auto'
+      || style.overflowY === 'auto';
+    if (scrollable && ['absolute', 'fixed', 'relative'].includes(style.position)) return true;
   }
-
-  return hasScrollableWheelViewport;
+  return false;
 }
 
-function stackVisibilityScore(canvas, rect) {
-  const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-  const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-  const points = [
-    [rect.left + rect.width / 2, rect.top + rect.height / 2],
-    [Math.max(rect.left, 0) + Math.min(rect.width * 0.25, 80), Math.max(rect.top, 0) + Math.min(rect.height * 0.25, 80)],
-    [Math.min(rect.right, viewportWidth) - Math.min(rect.width * 0.25, 80), Math.min(rect.bottom, viewportHeight) - Math.min(rect.height * 0.25, 80)],
-  ];
-
-  let best = 0;
-  points.forEach(([rawX, rawY]) => {
-    const x = Math.max(0, Math.min(viewportWidth - 1, rawX));
-    const y = Math.max(0, Math.min(viewportHeight - 1, rawY));
-    const stack = document.elementsFromPoint?.(x, y) || [];
-    const index = stack.indexOf(canvas);
-    if (index >= 0) best = Math.max(best, 1000 - Math.min(index, 999));
-  });
-  return best;
-}
-
-function findPrimaryCanvas() {
-  const allCanvases = Array.from(document.querySelectorAll('canvas'));
-
-  const canonical = allCanvases.find(isCanonicalUpdatedWheelCanvas);
+function findCurrentWheelCanvas() {
+  const all = Array.from(document.querySelectorAll('canvas'));
+  const canonical = all.find(isCanonicalUpdatedWheelCanvas);
   if (canonical) {
-    canonical.dataset.gannzillaExportAuthority = 'CURRENT_UPDATED_WHEEL_V362';
+    canonical.dataset.gannzillaExportAuthority = 'CURRENT_UPDATED_WHEEL_V363';
     return canonical;
   }
 
-  const candidates = allCanvases
+  const fallback = all
     .filter(isUsableCanvas)
-    .map((canvas) => {
-      const rect = canvas.getBoundingClientRect();
-      return {
-        canvas,
-        rect,
-        visibleArea: visibleIntersectionArea(rect),
-        stackScore: stackVisibilityScore(canvas, rect),
-        cssArea: rect.width * rect.height,
-      };
-    })
-    .sort((a, b) => {
-      if (b.stackScore !== a.stackScore) return b.stackScore - a.stackScore;
-      if (b.visibleArea !== a.visibleArea) return b.visibleArea - a.visibleArea;
-      return b.cssArea - a.cssArea;
-    });
+    .map((canvas) => ({
+      canvas,
+      area: visibleIntersectionArea(canvas.getBoundingClientRect()),
+    }))
+    .sort((a, b) => b.area - a.area)[0]?.canvas || null;
 
-  const fallback = candidates[0]?.canvas || null;
-  if (fallback) fallback.dataset.gannzillaExportAuthority = 'VISIBLE_FALLBACK_V362';
+  if (fallback) fallback.dataset.gannzillaExportAuthority = 'VISIBLE_FALLBACK_V363';
   return fallback;
 }
 
@@ -115,35 +75,31 @@ function buildExportCanvas(source) {
   return canvas;
 }
 
-function canvasToBlob(canvas) {
-  return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
-      if (blob) resolve(blob);
-      else reject(new Error('PNG_BLOB_UNAVAILABLE'));
-    }, 'image/png', 1);
-  });
+function makeFilename() {
+  const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+  return `gann-circle-v363-current-${timestamp}.png`;
 }
 
-function downloadBlob(blob) {
-  const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  const filename = `gann-circle-v362-current-${timestamp}.png`;
-  const url = URL.createObjectURL(blob);
+function downloadImmediately(canvas, filename) {
+  const dataUrl = canvas.toDataURL('image/png', 1);
   const anchor = document.createElement('a');
-  anchor.href = url;
+  anchor.href = dataUrl;
   anchor.download = filename;
-  anchor.style.display = 'none';
+  anchor.rel = 'noopener';
+  anchor.style.position = 'fixed';
+  anchor.style.left = '-10000px';
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1500);
-  return filename;
+  return dataUrl;
 }
 
-async function copyPngToClipboard(blobPromise) {
+async function copyDataUrlToClipboard(dataUrl) {
   if (!navigator.clipboard?.write || typeof window.ClipboardItem !== 'function') return false;
   try {
+    const blob = await (await fetch(dataUrl)).blob();
     await navigator.clipboard.write([
-      new window.ClipboardItem({ 'image/png': blobPromise }),
+      new window.ClipboardItem({ 'image/png': blob }),
     ]);
     return true;
   } catch (_) {
@@ -153,37 +109,27 @@ async function copyPngToClipboard(blobPromise) {
 
 export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
   const [notice, setNotice] = React.useState('');
+  const [busy, setBusy] = React.useState(false);
   const noticeTimerRef = React.useRef(0);
 
   React.useEffect(() => {
-    window.GANNZILLA_CANVAS_EXPORT_V362 = true;
-    window.__auditGannzillaCanvasExportV362 = () => {
-      const selected = findPrimaryCanvas();
-      const rect = selected?.getBoundingClientRect?.();
+    window.GANNZILLA_CANVAS_EXPORT_V363 = true;
+    window.__auditGannzillaCanvasExportV363 = () => {
+      const selected = findCurrentWheelCanvas();
       return {
         ok: Boolean(selected),
         build: BUILD,
-        primaryCanvasAvailable: Boolean(selected),
         exportAuthority: selected?.dataset?.gannzillaExportAuthority || null,
-        selectedCanvasCssWidth: rect ? Math.round(rect.width) : null,
-        selectedCanvasCssHeight: rect ? Math.round(rect.height) : null,
-        selectedCanvasPixelWidth: selected?.width || null,
-        selectedCanvasPixelHeight: selected?.height || null,
-        canonicalUpdatedWheelSelector: true,
-        hiddenLegacyCanvasRejected: true,
-        filenameIncludesV362Current: true,
-        pngDownloadEnabled: true,
-        clipboardImageCopySupported: Boolean(navigator.clipboard?.write && typeof window.ClipboardItem === 'function'),
-        paintWorkflow: 'DOWNLOAD_PNG_OR_OPEN_PAINT_AND_CTRL_V',
-        wheelOnlyExport: true,
-        whiteBackground: true,
-        sourceResolutionPreserved: true,
+        synchronousDownloadActivation: true,
+        asyncDelayBeforeDownload: false,
+        currentWheelPreferred: true,
+        clipboardCopyAfterDownload: true,
       };
     };
     return () => {
       window.clearTimeout(noticeTimerRef.current);
-      delete window.GANNZILLA_CANVAS_EXPORT_V362;
-      delete window.__auditGannzillaCanvasExportV362;
+      delete window.GANNZILLA_CANVAS_EXPORT_V363;
+      delete window.__auditGannzillaCanvasExportV363;
     };
   }, []);
 
@@ -193,39 +139,44 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
     noticeTimerRef.current = window.setTimeout(() => setNotice(''), 4200);
   }, []);
 
-  const exportWheel = React.useCallback(async () => {
-    const source = findPrimaryCanvas();
+  const exportWheel = React.useCallback(async (event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if (busy) return;
+
+    const source = findCurrentWheelCanvas();
     if (!source) {
-      showNotice('تعذر العثور على رسم العجلة المحدث');
+      showNotice('تعذر العثور على العجلة الحالية');
       return;
     }
 
+    setBusy(true);
     try {
-      await new Promise((resolve) => window.requestAnimationFrame(() => resolve()));
       const exportCanvas = buildExportCanvas(source);
-      const blobPromise = canvasToBlob(exportCanvas);
-      const clipboardPromise = copyPngToClipboard(blobPromise);
-      const blob = await blobPromise;
-      const filename = downloadBlob(blob);
-      const copied = await clipboardPromise;
-      showNotice(copied
-        ? `تم نسخ العجلة الحالية وتنزيل ملف جديد: ${filename}`
-        : `تم تنزيل العجلة الحالية في ملف جديد: ${filename}`);
+      const filename = makeFilename();
+
+      // Important: the download click occurs synchronously inside the user's click.
+      const dataUrl = downloadImmediately(exportCanvas, filename);
+      showNotice(`بدأ تنزيل العجلة الحالية: ${filename}`);
+
+      const copied = await copyDataUrlToClipboard(dataUrl);
+      if (copied) showNotice(`تم تنزيل ونسخ العجلة الحالية: ${filename}`);
     } catch (_) {
-      showNotice('تعذر إنشاء صورة PNG للعجلة الحالية');
+      showNotice('تعذر تنزيل صورة العجلة الحالية');
+    } finally {
+      setBusy(false);
     }
-  }, [showNotice]);
+  }, [busy, showNotice]);
 
   return (
     <>
       <button
         type="button"
-        data-gannzilla-canvas-export-v360="true"
-        data-gannzilla-canvas-export-v361="true"
-        data-gannzilla-canvas-export-v362="true"
-        aria-label="نسخ وتنزيل صورة العجلة الحالية"
-        title="نسخ وتنزيل صورة العجلة الحالية PNG"
+        data-gannzilla-canvas-export-v363="true"
+        aria-label="تنزيل ونسخ صورة العجلة الحالية"
+        title="تنزيل ونسخ العجلة الحالية PNG"
         onClick={exportWheel}
+        disabled={busy}
         style={{
           width: toolbarHeight,
           height: toolbarHeight,
@@ -239,19 +190,23 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
           border: 0,
           borderRight: '1px solid #c7c7c7',
           borderRadius: 0,
-          background: 'transparent',
+          background: busy ? '#dceaf5' : 'transparent',
           color: '#2469b2',
           display: 'grid',
           placeItems: 'center',
-          cursor: 'pointer',
+          cursor: busy ? 'wait' : 'pointer',
           boxSizing: 'border-box',
+          pointerEvents: 'auto',
+          position: 'relative',
+          zIndex: 2147483647,
+          touchAction: 'manipulation',
+          opacity: busy ? 0.7 : 1,
         }}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M8 7V4h11v11h-3" fill="none" stroke="currentColor" strokeWidth="1.8" />
-          <rect x="4" y="8" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8" />
-          <path d="M6.5 17l3-3 2.2 2.2 1.8-1.8 2.5 2.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
-          <circle cx="8" cy="11.5" r="1" fill="currentColor" />
+          <path d="M12 3v11" fill="none" stroke="currentColor" strokeWidth="2" />
+          <path d="M7.5 10.5 12 15l4.5-4.5" fill="none" stroke="currentColor" strokeWidth="2" />
+          <path d="M5 19h14" fill="none" stroke="currentColor" strokeWidth="2" />
         </svg>
       </button>
 
