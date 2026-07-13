@@ -11,6 +11,7 @@ import GannzillaPanelFixedLeftV315 from './GannzillaPanelFixedLeftV315';
 import GannzillaPanelReadableTypographyV316 from './GannzillaPanelReadableTypographyV316';
 import GannzillaCanonicalPropertyPanelV326 from './GannzillaCanonicalPropertyPanelV326';
 import GannzillaChartToolbarV327 from './GannzillaChartToolbarV327';
+import GannzillaChartImageExportV368 from './GannzillaChartImageExportV368';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
 import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
@@ -19,7 +20,7 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 359: calendar text can be hidden while preserving the established wheel and outer frame. */
+/** Build 368: the existing chart toolbar save icon exports the current wheel image. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
@@ -31,10 +32,12 @@ export default function GannzillaBareWheelV224() {
     window.GANNZILLA_BARE_WHEEL_V334 = true;
     window.GANNZILLA_BARE_WHEEL_V343 = true;
     window.GANNZILLA_BARE_WHEEL_V344 = true;
+    window.GANNZILLA_BARE_WHEEL_V368 = true;
     const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
       const chartToolbar = cleanPanel?.querySelector('.gannzilla-chart-toolbar-v328');
+      const chartImageExportButton = chartToolbar?.querySelector('[data-gannzilla-chart-image-export-v368="true"]');
       const horizontalBar = document.querySelector('[data-gannzilla-horizontal-pan-assist-v311="true"]');
       const panelRect = cleanPanel?.getBoundingClientRect?.();
       const barRect = horizontalBar?.getBoundingClientRect?.();
@@ -44,11 +47,12 @@ export default function GannzillaBareWheelV224() {
       const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
       return {
         ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
-        build: 359,
+        build: 368,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
         chartToolbarDirectHostMount: true,
-        chartToolbarFunctions: ['select', 'add', 'delete', 'rename', 'save'],
+        existingChartToolbarImageExportMounted: Boolean(chartImageExportButton),
+        chartToolbarFunctions: ['select', 'add', 'delete', 'rename', 'image-export'],
         chartToolbarShortcuts: ['Insert', 'Delete', 'F2', 'Ctrl+S'],
         horizontalBarMounted: Boolean(horizontalBar),
         horizontalBarClearsPropertyPanel: panelClear,
@@ -92,6 +96,7 @@ export default function GannzillaBareWheelV224() {
     window.__auditGannzillaBareWheelV334 = audit;
     window.__auditGannzillaBareWheelV343 = audit;
     window.__auditGannzillaBareWheelV344 = audit;
+    window.__auditGannzillaBareWheelV368 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
       delete window.GANNZILLA_BARE_WHEEL_V327;
@@ -102,6 +107,7 @@ export default function GannzillaBareWheelV224() {
       delete window.GANNZILLA_BARE_WHEEL_V334;
       delete window.GANNZILLA_BARE_WHEEL_V343;
       delete window.GANNZILLA_BARE_WHEEL_V344;
+      delete window.GANNZILLA_BARE_WHEEL_V368;
       delete window.__auditGannzillaBareWheelV326;
       delete window.__auditGannzillaBareWheelV327;
       delete window.__auditGannzillaBareWheelV328;
@@ -111,6 +117,7 @@ export default function GannzillaBareWheelV224() {
       delete window.__auditGannzillaBareWheelV334;
       delete window.__auditGannzillaBareWheelV343;
       delete window.__auditGannzillaBareWheelV344;
+      delete window.__auditGannzillaBareWheelV368;
     };
   }, []);
 
@@ -201,6 +208,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaPanelReadableTypographyV316 />
       <GannzillaCanonicalPropertyPanelV326 />
       <GannzillaChartToolbarV327 />
+      <GannzillaChartImageExportV368 />
       <GannzillaWheelQuarterHiddenPanV303 />
       <GannzillaPagePanScrollbarsV305 />
       <GannzillaHorizontalPanAssistV308 />
