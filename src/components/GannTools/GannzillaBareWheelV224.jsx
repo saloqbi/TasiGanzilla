@@ -1,6 +1,7 @@
 import React from 'react';
 import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
+import GannzillaExistingProtractorFontDoubleV343 from './GannzillaExistingProtractorFontDoubleV343';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
@@ -17,7 +18,7 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 334: first value cell is weighted/centered exactly on the north 90° axis. */
+/** Build 343: existing protractor angle labels are doubled from 12px to 24px only. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
@@ -27,6 +28,7 @@ export default function GannzillaBareWheelV224() {
     window.GANNZILLA_BARE_WHEEL_V331 = true;
     window.GANNZILLA_BARE_WHEEL_V333 = true;
     window.GANNZILLA_BARE_WHEEL_V334 = true;
+    window.GANNZILLA_BARE_WHEEL_V343 = true;
     const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
@@ -40,7 +42,7 @@ export default function GannzillaBareWheelV224() {
       const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
       return {
         ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
-        build: 334,
+        build: 343,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
         chartToolbarDirectHostMount: true,
@@ -62,6 +64,9 @@ export default function GannzillaBareWheelV224() {
         sectorCentering: 'HALF_CELL_OFFSET_APPLIED',
         startValue1Alignment: '1_CENTERED_NORTH_THEN_2',
         startValue3600Alignment: '36_AND_3600_CENTERED_NORTH',
+        existingProtractorAngleFontPx: 24,
+        existingProtractorAngleFontScale: 2,
+        addedAngles: false,
         oldV318PanelMounted: false,
         oldV319BridgeMounted: false,
         oldV320AdapterMounted: false,
@@ -81,6 +86,7 @@ export default function GannzillaBareWheelV224() {
     window.__auditGannzillaBareWheelV331 = audit;
     window.__auditGannzillaBareWheelV333 = audit;
     window.__auditGannzillaBareWheelV334 = audit;
+    window.__auditGannzillaBareWheelV343 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
       delete window.GANNZILLA_BARE_WHEEL_V327;
@@ -89,6 +95,7 @@ export default function GannzillaBareWheelV224() {
       delete window.GANNZILLA_BARE_WHEEL_V331;
       delete window.GANNZILLA_BARE_WHEEL_V333;
       delete window.GANNZILLA_BARE_WHEEL_V334;
+      delete window.GANNZILLA_BARE_WHEEL_V343;
       delete window.__auditGannzillaBareWheelV326;
       delete window.__auditGannzillaBareWheelV327;
       delete window.__auditGannzillaBareWheelV328;
@@ -96,6 +103,7 @@ export default function GannzillaBareWheelV224() {
       delete window.__auditGannzillaBareWheelV331;
       delete window.__auditGannzillaBareWheelV333;
       delete window.__auditGannzillaBareWheelV334;
+      delete window.__auditGannzillaBareWheelV343;
     };
   }, []);
 
@@ -176,6 +184,7 @@ export default function GannzillaBareWheelV224() {
 
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
+      <GannzillaExistingProtractorFontDoubleV343 />
       <GannzillaTopToolbarV231 />
       <GannzillaArabicLocalizationV248 />
       <GannzillaPanelFrameCleanupV297 />
