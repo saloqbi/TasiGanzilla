@@ -1,6 +1,6 @@
 import React from 'react';
 
-const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV347';
+const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV348';
 const MAJOR_ANGLE_PATTERN = /^(0|30|60|90|120|150|180|210|240|270|300|330)°$/;
 
 function clamp(value, min, max) {
@@ -46,18 +46,20 @@ function installProtractorTextPatch() {
 
   const patchedFillText = function patchedFillText(text, x, y, maxWidth) {
     const label = String(text ?? '');
-    const isMajorAngle = MAJOR_ANGLE_PATTERN.test(label);
+    const match = MAJOR_ANGLE_PATTERN.exec(label);
     const enabled = boolParam('showProtractor', true)
       && boolParam('improveExistingProtractorLabels', true);
 
-    if (!enabled || !isMajorAngle) {
+    if (!enabled || !match) {
       return nativeFillText.apply(this, arguments);
     }
 
+    const degree = Number(match[1]);
     const fontSize = numberParam('gannzillaProtractorFontSize', 20, 16, 28);
     const fontWeight = Math.round(numberParam('gannzillaProtractorFontWeight', 700, 500, 900));
     const horizontal = boolParam('protractorLabelsHorizontal', true);
-    const radialGap = numberParam('gannzillaProtractorRadialGap', 0, -12, 16);
+    const radialGap = numberParam('gannzillaProtractorRadialGap', 0, -12, 12);
+    const tangentialCorrection = numberParam('gannzillaProtractorTangentialCorrection', 14, 0, 24);
     const textColor = '#454545';
     const family = 'Segoe UI, Arial, Helvetica, sans-serif';
 
@@ -80,6 +82,9 @@ function installProtractorTextPatch() {
         py += (dy / length) * gapInDevicePixels;
       }
 
+      const radians = (degree * Math.PI) / 180;
+      px -= Math.sin(radians) * tangentialCorrection * scale;
+
       this.setTransform(scale, 0, 0, scale, px, py);
       x = 0;
       y = 0;
@@ -89,7 +94,7 @@ function installProtractorTextPatch() {
     this.fillStyle = textColor;
     this.textAlign = 'center';
     this.textBaseline = 'middle';
-    nativeFillText.call(this, label, x, y, Math.max(56, fontSize * 3.3));
+    nativeFillText.call(this, label, x, y, Math.max(58, fontSize * 3.4));
 
     this.restore();
     return undefined;
@@ -118,19 +123,18 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
   React.useLayoutEffect(() => {
     const uninstall = installProtractorTextPatch();
 
-    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V347 = true;
-    window.__auditGannzillaExistingProtractorFontDoubleV347 = () => ({
+    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V348 = true;
+    window.__auditGannzillaExistingProtractorFontDoubleV348 = () => ({
       ok: Boolean(window[PATCH_KEY]),
-      build: 347,
+      build: 348,
       existingAnglesOnly: true,
       angleStep: 30,
       fontPx: numberParam('gannzillaProtractorFontSize', 20, 16, 28),
       horizontal: boolParam('protractorLabelsHorizontal', true),
-      radialGapPx: numberParam('gannzillaProtractorRadialGap', 0, -12, 16),
-      nativeAnchorPreserved: true,
-      exactTextCenterAlignment: true,
-      textAlign: 'center',
-      textBaseline: 'middle',
+      radialGapPx: numberParam('gannzillaProtractorRadialGap', 0, -12, 12),
+      tangentialCorrectionPx: numberParam('gannzillaProtractorTangentialCorrection', 14, 0, 24),
+      symmetricInwardCorrection: true,
+      zeroAndOneEightyUnshifted: true,
       backgroundOverlay: false,
       addedAngles: false,
       wheelGeometryChanged: false,
@@ -139,8 +143,8 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
 
     return () => {
       uninstall();
-      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V347;
-      delete window.__auditGannzillaExistingProtractorFontDoubleV347;
+      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V348;
+      delete window.__auditGannzillaExistingProtractorFontDoubleV348;
     };
   }, []);
 
