@@ -1,13 +1,11 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 
-const BUILD = 366;
+const BUILD = 367;
 
-function visibleIntersectionArea(rect) {
-  const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-  const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
-  const width = Math.max(0, Math.min(rect.right, viewportWidth) - Math.max(rect.left, 0));
-  const height = Math.max(0, Math.min(rect.bottom, viewportHeight) - Math.max(rect.top, 0));
+function visibleArea(rect) {
+  const width = Math.max(0, Math.min(rect.right, window.innerWidth) - Math.max(rect.left, 0));
+  const height = Math.max(0, Math.min(rect.bottom, window.innerHeight) - Math.max(rect.top, 0));
   return width * height;
 }
 
@@ -19,94 +17,64 @@ function isUsableCanvas(canvas) {
     && canvas.height > 0
     && rect.width > 120
     && rect.height > 120
-    && visibleIntersectionArea(rect) > 0
+    && visibleArea(rect) > 0
     && style.display !== 'none'
     && style.visibility !== 'hidden'
     && Number(style.opacity || 1) > 0;
 }
 
-function isCurrentWheelCanvas(canvas) {
-  if (!isUsableCanvas(canvas)) return false;
-  if (canvas.closest('aside')) return false;
+function isExactCurrentWheel(canvas) {
+  if (!isUsableCanvas(canvas) || canvas.closest('aside')) return false;
+  if (!(canvas.style.display === 'block' && canvas.style.maxWidth === 'none' && canvas.style.maxHeight === 'none')) return false;
 
-  const exactInlineStyle = canvas.style.display === 'block'
-    && canvas.style.maxWidth === 'none'
-    && canvas.style.maxHeight === 'none';
-  if (!exactInlineStyle) return false;
-
-  const parent = canvas.parentElement;
-  const viewport = parent?.parentElement;
-  if (!parent || !viewport) return false;
-
-  const viewportStyle = window.getComputedStyle(viewport);
-  const isWheelViewport = viewportStyle.overflow === 'auto'
-    || viewportStyle.overflowX === 'auto'
-    || viewportStyle.overflowY === 'auto';
-
-  return isWheelViewport && viewportStyle.position === 'absolute';
+  const viewport = canvas.parentElement?.parentElement;
+  if (!viewport) return false;
+  const style = window.getComputedStyle(viewport);
+  const scrollable = style.overflow === 'auto' || style.overflowX === 'auto' || style.overflowY === 'auto';
+  return scrollable && style.position === 'absolute';
 }
 
 function findCurrentWheelCanvas() {
   const canvases = Array.from(document.querySelectorAll('canvas'));
-  const exact = canvases.find(isCurrentWheelCanvas);
+  const exact = canvases.find(isExactCurrentWheel);
   if (exact) {
-    exact.dataset.gannzillaExportAuthority = 'EXACT_CURRENT_WHEEL_V366';
+    exact.dataset.gannzillaExportAuthority = 'EXACT_CURRENT_WHEEL_V367';
     return exact;
   }
 
   const fallback = canvases
     .filter(isUsableCanvas)
     .filter((canvas) => !canvas.closest('aside'))
-    .map((canvas) => ({
-      canvas,
-      area: visibleIntersectionArea(canvas.getBoundingClientRect()),
-    }))
+    .map((canvas) => ({ canvas, area: visibleArea(canvas.getBoundingClientRect()) }))
     .sort((a, b) => b.area - a.area)[0]?.canvas || null;
 
-  if (fallback) fallback.dataset.gannzillaExportAuthority = 'VISIBLE_NON_PANEL_FALLBACK_V366';
+  if (fallback) fallback.dataset.gannzillaExportAuthority = 'VISIBLE_NON_PANEL_FALLBACK_V367';
   return fallback;
 }
 
-function buildExportCanvas(source) {
-  const exportCanvas = document.createElement('canvas');
-  exportCanvas.width = source.width;
-  exportCanvas.height = source.height;
-  const context = exportCanvas.getContext('2d', { alpha: false });
-  if (!context) throw new Error('EXPORT_CONTEXT_UNAVAILABLE');
-  context.fillStyle = '#ffffff';
-  context.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-  context.drawImage(source, 0, 0);
-  return exportCanvas;
+function makeFilename() {
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
+  return `gann-circle-v367-current-${stamp}.png`;
 }
 
-function canvasToBlob(canvas) {
+function canvasToBlob(source) {
   return new Promise((resolve, reject) => {
-    canvas.toBlob((blob) => {
+    const output = document.createElement('canvas');
+    output.width = source.width;
+    output.height = source.height;
+    const context = output.getContext('2d', { alpha: false });
+    if (!context) {
+      reject(new Error('EXPORT_CONTEXT_UNAVAILABLE'));
+      return;
+    }
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, output.width, output.height);
+    context.drawImage(source, 0, 0);
+    output.toBlob((blob) => {
       if (blob) resolve(blob);
       else reject(new Error('PNG_BLOB_UNAVAILABLE'));
     }, 'image/png', 1);
   });
-}
-
-function makeFilename() {
-  const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
-  return `gann-circle-v366-current-${timestamp}.png`;
-}
-
-async function writeWithNativePicker(blob, filename) {
-  if (typeof window.showSaveFilePicker !== 'function') return false;
-
-  const handle = await window.showSaveFilePicker({
-    suggestedName: filename,
-    types: [{
-      description: 'PNG Image',
-      accept: { 'image/png': ['.png'] },
-    }],
-  });
-  const writable = await handle.createWritable();
-  await writable.write(blob);
-  await writable.close();
-  return true;
 }
 
 function fallbackDownload(blob, filename) {
@@ -116,19 +84,16 @@ function fallbackDownload(blob, filename) {
   anchor.download = filename;
   anchor.style.position = 'fixed';
   anchor.style.left = '-10000px';
-  anchor.style.top = '-10000px';
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-async function copyBlobToClipboard(blob) {
+async function copyBlob(blob) {
   if (!navigator.clipboard?.write || typeof window.ClipboardItem !== 'function') return false;
   try {
-    await navigator.clipboard.write([
-      new window.ClipboardItem({ 'image/png': blob }),
-    ]);
+    await navigator.clipboard.write([new window.ClipboardItem({ 'image/png': blob })]);
     return true;
   } catch (_) {
     return false;
@@ -137,9 +102,10 @@ async function copyBlobToClipboard(blob) {
 
 export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
   const slotRef = React.useRef(null);
+  const busyRef = React.useRef(false);
   const [slotRect, setSlotRect] = React.useState(null);
-  const [notice, setNotice] = React.useState('');
   const [busy, setBusy] = React.useState(false);
+  const [notice, setNotice] = React.useState('');
   const noticeTimerRef = React.useRef(0);
 
   const showNotice = React.useCallback((message) => {
@@ -149,87 +115,55 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
   }, []);
 
   React.useLayoutEffect(() => {
-    const updatePosition = () => {
+    const update = () => {
       const rect = slotRef.current?.getBoundingClientRect?.();
       if (!rect) return;
       setSlotRect({
         left: Math.round(rect.left),
         top: Math.round(rect.top),
-        width: Math.max(72, Math.round(rect.width)),
+        width: Math.max(82, Math.round(rect.width)),
         height: Math.max(toolbarHeight, Math.round(rect.height)),
       });
     };
 
-    updatePosition();
-    const observer = typeof ResizeObserver === 'function'
-      ? new ResizeObserver(updatePosition)
-      : null;
+    update();
+    const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(update) : null;
     if (observer && slotRef.current) observer.observe(slotRef.current);
-
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
-    const timer = window.setTimeout(updatePosition, 250);
+    const timer = window.setTimeout(update, 250);
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
 
     return () => {
       observer?.disconnect();
       window.clearTimeout(timer);
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
     };
   }, [toolbarHeight]);
 
-  React.useEffect(() => {
-    window.GANNZILLA_CANVAS_EXPORT_V366 = true;
-    window.__auditGannzillaCanvasExportV366 = () => {
-      const selected = findCurrentWheelCanvas();
-      return {
-        ok: Boolean(selected && slotRect),
-        build: BUILD,
-        exportAuthority: selected?.dataset?.gannzillaExportAuthority || null,
-        portalButtonMounted: Boolean(slotRect),
-        escapesToolbarStackingContext: true,
-        nativeFilePickerSupported: typeof window.showSaveFilePicker === 'function',
-        directUserGestureSaveDialog: true,
-        fallbackBlobDownload: true,
-        currentWheelExactSelector: true,
-      };
-    };
-
-    return () => {
-      window.clearTimeout(noticeTimerRef.current);
-      delete window.GANNZILLA_CANVAS_EXPORT_V366;
-      delete window.__auditGannzillaCanvasExportV366;
-    };
-  }, [slotRect]);
-
-  const handleSave = React.useCallback(async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (busy) return;
-
+  const saveCurrentWheel = React.useCallback(async () => {
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
+
     const filename = makeFilename();
+    let pickerPromise = null;
 
     try {
-      let pickerHandlePromise = null;
       if (typeof window.showSaveFilePicker === 'function') {
-        pickerHandlePromise = window.showSaveFilePicker({
+        pickerPromise = window.showSaveFilePicker({
           suggestedName: filename,
-          types: [{
-            description: 'PNG Image',
-            accept: { 'image/png': ['.png'] },
-          }],
+          types: [{ description: 'PNG Image', accept: { 'image/png': ['.png'] } }],
         });
       }
 
       const source = findCurrentWheelCanvas();
       if (!source) throw new Error('CURRENT_WHEEL_NOT_FOUND');
-      const exportCanvas = buildExportCanvas(source);
-      const blob = await canvasToBlob(exportCanvas);
+      const blob = await canvasToBlob(source);
 
-      if (pickerHandlePromise) {
+      if (pickerPromise) {
         try {
-          const handle = await pickerHandlePromise;
+          const handle = await pickerPromise;
           const writable = await handle.createWritable();
           await writable.write(blob);
           await writable.close();
@@ -244,25 +178,74 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
         fallbackDownload(blob, filename);
       }
 
-      const copied = await copyBlobToClipboard(blob);
+      const copied = await copyBlob(blob);
       showNotice(copied
         ? `تم حفظ ونسخ العجلة الحالية: ${filename}`
         : `تم حفظ العجلة الحالية: ${filename}`);
     } catch (error) {
       showNotice(`تعذر حفظ الصورة: ${error?.message || 'UNKNOWN_ERROR'}`);
     } finally {
+      busyRef.current = false;
       setBusy(false);
     }
-  }, [busy, showNotice]);
+  }, [showNotice]);
 
-  const portalButton = slotRect && typeof document !== 'undefined'
+  React.useEffect(() => {
+    if (!slotRect) return undefined;
+
+    const captureClick = (event) => {
+      const x = event.clientX;
+      const y = event.clientY;
+      const inside = x >= slotRect.left
+        && x <= slotRect.left + slotRect.width
+        && y >= slotRect.top
+        && y <= slotRect.top + slotRect.height;
+
+      const explicitTarget = event.target?.closest?.('[data-gannzilla-export-button-v367="true"]');
+      if (!inside && !explicitTarget) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation?.();
+      saveCurrentWheel();
+    };
+
+    const shortcut = (event) => {
+      if (event.ctrlKey && event.shiftKey && String(event.key).toLowerCase() === 's') {
+        event.preventDefault();
+        saveCurrentWheel();
+      }
+    };
+
+    document.addEventListener('click', captureClick, true);
+    window.addEventListener('keydown', shortcut, true);
+
+    window.GANNZILLA_CANVAS_EXPORT_V367 = true;
+    window.__auditGannzillaCanvasExportV367 = () => ({
+      ok: Boolean(findCurrentWheelCanvas() && slotRect),
+      build: BUILD,
+      capturePhaseClickAuthority: true,
+      overlayProofCoordinateHitTest: true,
+      directUserGestureSaveDialog: true,
+      keyboardFallback: 'CTRL_SHIFT_S',
+      exportAuthority: findCurrentWheelCanvas()?.dataset?.gannzillaExportAuthority || null,
+    });
+
+    return () => {
+      document.removeEventListener('click', captureClick, true);
+      window.removeEventListener('keydown', shortcut, true);
+      delete window.GANNZILLA_CANVAS_EXPORT_V367;
+      delete window.__auditGannzillaCanvasExportV367;
+    };
+  }, [slotRect, saveCurrentWheel]);
+
+  const button = slotRect && typeof document !== 'undefined'
     ? createPortal(
       <button
         type="button"
-        data-gannzilla-canvas-export-v366="true"
+        data-gannzilla-export-button-v367="true"
         aria-label="حفظ صورة العجلة الحالية PNG"
         title="حفظ صورة العجلة الحالية PNG"
-        onClick={handleSave}
         disabled={busy}
         style={{
           position: 'fixed',
@@ -274,10 +257,10 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
           margin: 0,
           padding: '0 7px',
           border: 0,
-          borderRight: '1px solid #9eb9cc',
           borderLeft: '1px solid #9eb9cc',
+          borderRight: '1px solid #9eb9cc',
           borderRadius: 0,
-          background: busy ? '#d8e9f5' : '#e6f4ff',
+          background: busy ? '#d8e9f5' : '#dff2ff',
           color: '#075f9e',
           display: 'flex',
           alignItems: 'center',
@@ -291,7 +274,7 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
           fontWeight: 800,
           lineHeight: 1,
           userSelect: 'none',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.95)',
         }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
@@ -309,22 +292,23 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
     <>
       <span
         ref={slotRef}
-        data-gannzilla-export-slot-v366="true"
+        data-gannzilla-canvas-export-v360="true"
+        data-gannzilla-export-slot-v367="true"
         aria-hidden="true"
         style={{
-          width: 72,
+          width: 82,
           height: toolbarHeight,
-          minWidth: 72,
+          minWidth: 82,
           minHeight: toolbarHeight,
-          maxWidth: 72,
+          maxWidth: 82,
           maxHeight: toolbarHeight,
-          flex: '0 0 72px',
+          flex: '0 0 82px',
           display: 'block',
           pointerEvents: 'none',
         }}
       />
-      {portalButton}
-      {notice ? createPortal(
+      {button}
+      {notice && typeof document !== 'undefined' ? createPortal(
         <div
           role="status"
           style={{
@@ -332,7 +316,7 @@ export default function GannzillaCanvasExportV360({ toolbarHeight = 24 }) {
             top: toolbarHeight + 8,
             right: 8,
             zIndex: 2147483647,
-            maxWidth: 'min(600px, calc(100vw - 16px))',
+            maxWidth: 'min(620px, calc(100vw - 16px))',
             padding: '8px 12px',
             border: '1px solid #9fb5c7',
             borderRadius: 4,
