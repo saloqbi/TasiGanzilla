@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 333;
+const BUILD = 334;
 const TWO_PI = Math.PI * 2;
 const PANEL_STORAGE_KEY = 'tasi-gannzilla-canonical-panel-v326';
 const runtimeOverrides = new Map();
@@ -162,7 +162,7 @@ function findWheelCanvas() {
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
 }
 
-function redrawWheelNumberingV333() {
+function redrawWheelNumberingV334() {
   const canvas = findWheelCanvas();
   if (!canvas) return false;
 
@@ -189,6 +189,9 @@ function redrawWheelNumberingV333() {
   const ringWidth = availableWheelWidth / totalRingCount;
   const direction = clockwise ? 1 : -1;
   const sector = 360 / divisions;
+  // Gannzilla-style centering: the first value's cell center sits exactly on the
+  // north/90° axis. The cell spans half a division on each side of that axis.
+  const northCenterOffset = -direction * (sector / 2);
   const cx = coordinateWidth / 2;
   const cy = coordinateHeight / 2;
   const ctx = canvas.getContext('2d');
@@ -211,9 +214,9 @@ function redrawWheelNumberingV333() {
     const maxWidth = arcWidth * 0.78;
 
     for (let index = 0; index < divisions; index += 1) {
-      const startDegrees = direction * index * sector;
-      const endDegrees = direction * (index + 1) * sector;
-      const centerDegrees = direction * (index + 0.5) * sector;
+      const startDegrees = northCenterOffset + direction * index * sector;
+      const endDegrees = northCenterOffset + direction * (index + 1) * sector;
+      const centerDegrees = northCenterOffset + direction * (index + 0.5) * sector;
 
       wedge(ctx, cx, cy, inner, outer, startDegrees, endDegrees);
       ctx.fillStyle = fill;
@@ -246,7 +249,7 @@ export default function GannzillaRingTwoNumberingV223() {
 
     const draw = () => {
       frame = 0;
-      if (!disposed) redrawWheelNumberingV333();
+      if (!disposed) redrawWheelNumberingV334();
     };
 
     const schedule = (delay = 0) => {
@@ -294,7 +297,8 @@ export default function GannzillaRingTwoNumberingV223() {
     window.GANNZILLA_RING_INDEX_V331 = true;
     window.GANNZILLA_RING_INDEX_V332 = true;
     window.GANNZILLA_RING_INDEX_V333 = true;
-    window.__auditGannzillaRingIndexV333 = () => ({
+    window.GANNZILLA_RING_INDEX_V334 = true;
+    window.__auditGannzillaRingIndexV334 = () => ({
       ok: Boolean(findWheelCanvas()),
       build: BUILD,
       ring1Mode: 'DYNAMIC_VALUE_MODULO_DIVISIONS',
@@ -306,6 +310,8 @@ export default function GannzillaRingTwoNumberingV223() {
         0,
         Math.round(canonicalNumber('layout.view', numberParam('divisions', 36, 3, 360), 3, 360)),
       ),
+      firstCellCenterAxis: 'NORTH_90_DEGREES',
+      sectorCentering: 'HALF_CELL_OFFSET_APPLIED',
       examples: { start1: 1, start3600: 36 },
       digitSystem: shouldUseArabicDigits() ? 'ARABIC_INDIC_٠١٢٣٤٥٦٧٨٩' : 'LATIN_0123456789',
       gateColors: { red: '1/4/7', blue: '2/5/8', black: '3/6/9' },
@@ -325,10 +331,11 @@ export default function GannzillaRingTwoNumberingV223() {
       continuousInterval: false,
       bodyMutationObserver: false,
     });
-    window.__auditGannzillaRingIndexV332 = window.__auditGannzillaRingIndexV333;
-    window.__auditGannzillaRingIndexV331 = window.__auditGannzillaRingIndexV333;
-    window.__auditGannzillaRingIndexV330 = window.__auditGannzillaRingIndexV333;
-    window.__auditGannzillaRingIndexV248 = window.__auditGannzillaRingIndexV333;
+    window.__auditGannzillaRingIndexV333 = window.__auditGannzillaRingIndexV334;
+    window.__auditGannzillaRingIndexV332 = window.__auditGannzillaRingIndexV334;
+    window.__auditGannzillaRingIndexV331 = window.__auditGannzillaRingIndexV334;
+    window.__auditGannzillaRingIndexV330 = window.__auditGannzillaRingIndexV334;
+    window.__auditGannzillaRingIndexV248 = window.__auditGannzillaRingIndexV334;
 
     return () => {
       disposed = true;
@@ -346,11 +353,13 @@ export default function GannzillaRingTwoNumberingV223() {
       delete window.GANNZILLA_RING_INDEX_V331;
       delete window.GANNZILLA_RING_INDEX_V332;
       delete window.GANNZILLA_RING_INDEX_V333;
+      delete window.GANNZILLA_RING_INDEX_V334;
       delete window.__auditGannzillaRingIndexV248;
       delete window.__auditGannzillaRingIndexV330;
       delete window.__auditGannzillaRingIndexV331;
       delete window.__auditGannzillaRingIndexV332;
       delete window.__auditGannzillaRingIndexV333;
+      delete window.__auditGannzillaRingIndexV334;
     };
   }, []);
 
