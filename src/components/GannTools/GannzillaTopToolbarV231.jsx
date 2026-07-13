@@ -4,17 +4,18 @@ import GannzillaLanguageToggleV237 from './GannzillaLanguageToggleV237';
 import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 import GannzillaWheelZoomV293 from './GannzillaWheelZoomV293';
+import GannzillaCanvasExportV360 from './GannzillaCanvasExportV360';
 
-const BUILD = 298;
+const BUILD = 360;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 
-/** Build 298: dual visibility controls with full-width wheel viewport when the panel is hidden. */
+/** Build 360: one-click PNG copy/download control preserves the existing wheel toolbar. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V298 = true;
-    window.__auditGannzillaTopToolbarV298 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V360 = true;
+    window.__auditGannzillaTopToolbarV360 = () => ({
       ok: true,
       build: BUILD,
       heightPx: TOOLBAR_HEIGHT,
@@ -35,6 +36,8 @@ export default function GannzillaTopToolbarV231() {
       wheelMovementIntegratedWithZoom: true,
       wheelMovementDirections: ['LEFT', 'UP', 'CENTER', 'DOWN', 'RIGHT'],
       wheelZoomControlMounted: true,
+      pngCopyDownloadControlMounted: true,
+      pngCopyDownloadPlacement: 'BETWEEN_ZOOM_AND_PAGE_MAXIMIZE',
       pageMaximizeControlSizePx: TOOLBAR_HEIGHT,
       connectionControlSizePx: TOOLBAR_HEIGHT,
       languageControlHeightPx: TOOLBAR_HEIGHT,
@@ -43,12 +46,12 @@ export default function GannzillaTopToolbarV231() {
       controlsMatchToolbarHeight: true,
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
-      controlVisualOrderLeftToRight: 'LAYOUT_PANEL_EYE_WHEEL_VISIBILITY_EYE_WHEEL_MOVE_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
+      controlVisualOrderLeftToRight: 'LAYOUT_PANEL_EYE_WHEEL_VISIBILITY_EYE_WHEEL_MOVE_ZOOM_EXPORT_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V298;
-      delete window.__auditGannzillaTopToolbarV298;
+      delete window.GANNZILLA_TOP_TOOLBAR_V360;
+      delete window.__auditGannzillaTopToolbarV360;
     };
   }, []);
 
@@ -81,17 +84,20 @@ export default function GannzillaTopToolbarV231() {
       <style>{`
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] { direction:ltr !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-v298="true"] { order:0 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:1 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:2 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] { order:3 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] { order:4 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-canvas-export-v360="true"] { order:1 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:2 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:3 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] { order:4 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] { order:5 !important; }
 
         [data-gannzilla-toolbar="true"] [data-gannzilla-layout-eye-v298="true"]:hover,
         [data-gannzilla-toolbar="true"] [data-gannzilla-chart-visibility-toggle-v291="true"]:hover,
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-canvas-export-v360="true"]:hover,
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"]:hover,
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"]:hover,
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"]:hover { background:#dceaf5 !important; }
 
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-canvas-export-v360="true"],
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"],
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"],
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] {
@@ -138,6 +144,7 @@ export default function GannzillaTopToolbarV231() {
         }}
       >
         <GannzillaWheelZoomV293 toolbarHeight={TOOLBAR_HEIGHT} />
+        <GannzillaCanvasExportV360 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaPageFullscreenV253 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaLanguageToggleV237 />
