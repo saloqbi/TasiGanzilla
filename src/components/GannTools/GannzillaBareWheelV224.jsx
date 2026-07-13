@@ -18,7 +18,7 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 343: existing protractor angle labels are doubled from 12px to 24px only. */
+/** Build 344: existing major protractor labels render cleanly at 24px without overlay shading. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
@@ -29,6 +29,7 @@ export default function GannzillaBareWheelV224() {
     window.GANNZILLA_BARE_WHEEL_V333 = true;
     window.GANNZILLA_BARE_WHEEL_V334 = true;
     window.GANNZILLA_BARE_WHEEL_V343 = true;
+    window.GANNZILLA_BARE_WHEEL_V344 = true;
     const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
@@ -42,7 +43,7 @@ export default function GannzillaBareWheelV224() {
       const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
       return {
         ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
-        build: 343,
+        build: 344,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
         chartToolbarDirectHostMount: true,
@@ -66,6 +67,8 @@ export default function GannzillaBareWheelV224() {
         startValue3600Alignment: '36_AND_3600_CENTERED_NORTH',
         existingProtractorAngleFontPx: 24,
         existingProtractorAngleFontScale: 2,
+        existingProtractorLabelsHorizontal: true,
+        protractorBackgroundOverlay: false,
         addedAngles: false,
         oldV318PanelMounted: false,
         oldV319BridgeMounted: false,
@@ -87,6 +90,7 @@ export default function GannzillaBareWheelV224() {
     window.__auditGannzillaBareWheelV333 = audit;
     window.__auditGannzillaBareWheelV334 = audit;
     window.__auditGannzillaBareWheelV343 = audit;
+    window.__auditGannzillaBareWheelV344 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
       delete window.GANNZILLA_BARE_WHEEL_V327;
@@ -96,6 +100,7 @@ export default function GannzillaBareWheelV224() {
       delete window.GANNZILLA_BARE_WHEEL_V333;
       delete window.GANNZILLA_BARE_WHEEL_V334;
       delete window.GANNZILLA_BARE_WHEEL_V343;
+      delete window.GANNZILLA_BARE_WHEEL_V344;
       delete window.__auditGannzillaBareWheelV326;
       delete window.__auditGannzillaBareWheelV327;
       delete window.__auditGannzillaBareWheelV328;
@@ -104,6 +109,7 @@ export default function GannzillaBareWheelV224() {
       delete window.__auditGannzillaBareWheelV333;
       delete window.__auditGannzillaBareWheelV334;
       delete window.__auditGannzillaBareWheelV343;
+      delete window.__auditGannzillaBareWheelV344;
     };
   }, []);
 
@@ -182,9 +188,9 @@ export default function GannzillaBareWheelV224() {
         aria-label="Gannzilla canonical property panel"
       />
 
+      <GannzillaExistingProtractorFontDoubleV343 />
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
-      <GannzillaExistingProtractorFontDoubleV343 />
       <GannzillaTopToolbarV231 />
       <GannzillaArabicLocalizationV248 />
       <GannzillaPanelFrameCleanupV297 />
