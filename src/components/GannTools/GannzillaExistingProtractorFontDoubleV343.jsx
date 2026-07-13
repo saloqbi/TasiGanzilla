@@ -1,7 +1,9 @@
 import React from 'react';
 
-const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV356';
+const PATCH_KEY = '__gannzillaExistingProtractorTextPatchV357';
 const MAJOR_ANGLE_PATTERN = /^(0|30|60|90|120|150|180|210|240|270|300|330)°$/;
+const ENGLISH_CALENDAR_LABEL_PATTERN = /^\s*(?:\d{1,2}\s+)?(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s*$/i;
+const ARABIC_CALENDAR_LABEL_PATTERN = /^\s*(?:[٠-٩0-9]{1,2}\s+)?(?:يناير|فبراير|مارس|أبريل|مايو|يونيو|يوليو|أغسطس|سبتمبر|أكتوبر|نوفمبر|ديسمبر)\s*$/;
 const FONT_FAMILY = 'Segoe UI, Arial, Helvetica, sans-serif';
 const WHEEL_NUMBER_COLORS = Object.freeze({
   red: '#a10f1f',
@@ -63,6 +65,17 @@ function findWheelCanvas() {
     .map((canvas) => ({ canvas, rect: canvas.getBoundingClientRect() }))
     .filter(({ rect }) => rect.width > 250 && rect.height > 250)
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
+}
+
+function isCalendarLabel(label) {
+  return ENGLISH_CALENDAR_LABEL_PATTERN.test(label)
+    || ARABIC_CALENDAR_LABEL_PATTERN.test(label);
+}
+
+function scaleCanvasFont(font, factor) {
+  const source = String(font || '');
+  if (!source) return source;
+  return source.replace(/(\d+(?:\.\d+)?)px/i, (_, size) => `${Number(size) * factor}px`);
 }
 
 function drawUnifiedAngleLabel(ctx, degree, x, y, options = {}) {
@@ -226,6 +239,21 @@ function installProtractorTextPatch() {
 
   const patchedFillText = function patchedFillText(text, x, y, maxWidth) {
     const label = String(text ?? '');
+
+    if (boolParam('enlargeCalendarLabels', false) && isCalendarLabel(label)) {
+      const calendarScale = numberParam('gannzillaCalendarLabelScale', 2, 1, 3);
+      this.save();
+      this.font = scaleCanvasFont(this.font, calendarScale);
+      let result;
+      if (Number.isFinite(Number(maxWidth))) {
+        result = nativeFillText.call(this, text, x, y, Number(maxWidth) * calendarScale);
+      } else {
+        result = nativeFillText.call(this, text, x, y);
+      }
+      this.restore();
+      return result;
+    }
+
     const match = MAJOR_ANGLE_PATTERN.exec(label);
     const enabled = boolParam('showProtractor', true)
       && boolParam('improveExistingProtractorLabels', true);
@@ -335,18 +363,19 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
     window.addEventListener('gannzilla:ring-two-numbering-refresh', scheduleAfterChange);
     window.addEventListener('gannzilla:canonical-property-change-v326', scheduleAfterChange);
 
-    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V356 = true;
-    window.__auditGannzillaExistingProtractorFontDoubleV356 = () => ({
+    window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V357 = true;
+    window.__auditGannzillaExistingProtractorFontDoubleV357 = () => ({
       ok: Boolean(window[PATCH_KEY]),
-      build: 356,
+      build: 357,
       majorAnglesEveryThirtyDegrees: true,
       coloredAnglesEveryTenDegrees: boolParam('showTenDegreeAngles', false),
       grayMinorAnglesEveryFiveDegrees: boolParam('showFiveDegreeAngles', false),
-      fiveDegreeAngles: Array.from({ length: 36 }, (_, index) => (index * 10) + 5),
       fiveDegreeFontPx: numberParam('gannzillaFiveDegreeFontSize', 14, 10, 18),
-      fiveDegreeFontWeight: numberParam('gannzillaFiveDegreeFontWeight', 500, 400, 700),
-      fiveDegreeColor: FIVE_DEGREE_COLOR,
-      fiveDegreeLabelsIncludeDegreeSymbol: false,
+      calendarLabelsEnlarged: boolParam('enlargeCalendarLabels', false),
+      calendarLabelScale: numberParam('gannzillaCalendarLabelScale', 2, 1, 3),
+      calendarLabelsOnly: true,
+      angleFontSizesUnchanged: true,
+      arabicAndEnglishCalendarLabelsSupported: true,
       exactVisualCentering: true,
       supplementalOverdrawPrevented: true,
       exactWheelPalette: WHEEL_NUMBER_COLORS,
@@ -364,8 +393,8 @@ export default function GannzillaExistingProtractorFontDoubleV343() {
       window.removeEventListener('gannzilla:canonical-property-change-v326', scheduleAfterChange);
       scheduleSupplementalAngleDraw = null;
       uninstall();
-      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V356;
-      delete window.__auditGannzillaExistingProtractorFontDoubleV356;
+      delete window.GANNZILLA_EXISTING_PROTRACTOR_FONT_DOUBLE_V357;
+      delete window.__auditGannzillaExistingProtractorFontDoubleV357;
     };
   }, []);
 
