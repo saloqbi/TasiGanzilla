@@ -6,8 +6,9 @@ import HomeEnhanced from './pages/HomeEnhanced';
 import TestPage from './pages/TestPage';
 import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArabicAiWheelSystemV1';
 import GannzillaBareWheelV224 from './components/GannTools/GannzillaBareWheelV224';
+import GannzillaMovableRedGreenProtractorFrameV390 from './components/GannTools/GannzillaMovableRedGreenProtractorFrameV390';
 
-// Build 248: comprehensive Arabic interface and Arabic wheel digits.
+// Build 390: extended movable red/green protractor radius support.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -18,11 +19,14 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="248">
+        <div data-gannzilla-build="390">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
-            <GannzillaBareWheelV224 />
+            <>
+              <GannzillaBareWheelV224 />
+              <GannzillaMovableRedGreenProtractorFrameV390 />
+            </>
           ) : isTestMode ? (
             <TestPage />
           ) : isEnhancedMode ? (
