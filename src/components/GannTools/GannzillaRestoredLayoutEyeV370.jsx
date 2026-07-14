@@ -1,40 +1,61 @@
 import React from 'react';
 
-const BUILD = 370;
+const BUILD = 372;
+const PANEL_ID = 'gannzilla-clean-property-panel-v325';
+const STORAGE_KEY = 'gannzilla-layout-panel-visible-v372';
+const DEFAULT_PANEL_WIDTH = 'clamp(360px, 32vw, 520px)';
 
-function getClassicRoot() {
-  return document.querySelector('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
+function getPanel() {
+  return document.getElementById(PANEL_ID);
 }
 
-function findLayoutPanel() {
-  const root = getClassicRoot();
-  if (!(root instanceof HTMLElement)) return null;
-  return Array.from(root.children).find((node) => node instanceof HTMLElement && node.tagName === 'ASIDE') || null;
-}
-
-function findNativePanelToggle() {
-  const root = getClassicRoot();
-  if (!(root instanceof HTMLElement)) return null;
-
-  const directButtons = Array.from(root.children)
-    .filter((node) => node instanceof HTMLButtonElement);
-
-  return directButtons.find((button) => {
-    const text = String(button.textContent || '').trim();
-    return /^(Hide|Show|إخفاء|إظهار)$/i.test(text);
-  }) || directButtons[0] || null;
+function readStoredVisible() {
+  try {
+    const value = localStorage.getItem(STORAGE_KEY);
+    return value === null ? true : value === 'true';
+  } catch (_) {
+    return true;
+  }
 }
 
 function readPanelVisible() {
-  const toggle = findNativePanelToggle();
-  const text = String(toggle?.textContent || '').trim();
-  if (/^(Show|إظهار)$/i.test(text)) return false;
-  if (/^(Hide|إخفاء)$/i.test(text)) return true;
-
-  const panel = findLayoutPanel();
-  if (!(panel instanceof HTMLElement)) return false;
+  const panel = getPanel();
+  if (!(panel instanceof HTMLElement)) return readStoredVisible();
+  if (panel.dataset.gannzillaLayoutPanelVisibleV372 === 'false') return false;
+  if (panel.dataset.gannzillaLayoutPanelVisibleV372 === 'true') return true;
   const style = window.getComputedStyle(panel);
-  return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+  return style.display !== 'none'
+    && style.visibility !== 'hidden'
+    && style.opacity !== '0'
+    && Number(style.width.replace('px', '') || 1) > 0;
+}
+
+function applyPanelVisible(visible) {
+  const panel = getPanel();
+  if (!(panel instanceof HTMLElement)) return false;
+
+  panel.dataset.gannzillaLayoutPanelVisibleV372 = visible ? 'true' : 'false';
+  panel.style.setProperty('display', visible ? 'block' : 'none', 'important');
+  panel.style.setProperty('visibility', visible ? 'visible' : 'hidden', 'important');
+  panel.style.setProperty('opacity', visible ? '1' : '0', 'important');
+  panel.style.setProperty('pointer-events', visible ? 'auto' : 'none', 'important');
+
+  document.documentElement.style.setProperty(
+    '--gannzilla-property-panel-width',
+    visible ? DEFAULT_PANEL_WIDTH : '0px',
+  );
+
+  try {
+    localStorage.setItem(STORAGE_KEY, String(visible));
+  } catch (_) {
+    // Runtime state remains authoritative when storage is unavailable.
+  }
+
+  window.dispatchEvent(new CustomEvent('gannzilla:layout-panel-visibility-change', {
+    detail: { visible, owner: 'RESTORED_LAYOUT_EYE_V372' },
+  }));
+  window.dispatchEvent(new Event('resize'));
+  return true;
 }
 
 function EyeGlyph({ visible }) {
@@ -55,59 +76,59 @@ function EyeGlyph({ visible }) {
 }
 
 export default function GannzillaRestoredLayoutEyeV370({ toolbarHeight = 24 }) {
-  const [visible, setVisible] = React.useState(() => readPanelVisible());
+  const [visible, setVisible] = React.useState(true);
   const size = Math.max(22, toolbarHeight);
 
-  const sync = React.useCallback(() => setVisible(readPanelVisible()), []);
+  React.useLayoutEffect(() => {
+    let cancelled = false;
+    let timer = 0;
 
-  React.useEffect(() => {
-    const timers = [0, 80, 220, 520, 1000].map((delay) => window.setTimeout(sync, delay));
-    const observer = new MutationObserver(sync);
-    observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true });
-    window.addEventListener('resize', sync);
-    document.addEventListener('fullscreenchange', sync);
+    const initialise = () => {
+      if (cancelled) return;
+      const panel = getPanel();
+      if (!(panel instanceof HTMLElement)) {
+        timer = window.setTimeout(initialise, 50);
+        return;
+      }
+      const initial = readStoredVisible();
+      applyPanelVisible(initial);
+      setVisible(initial);
+    };
 
-    window.GANNZILLA_RESTORED_LAYOUT_EYE_V370 = true;
-    window.__auditGannzillaRestoredLayoutEyeV370 = () => ({
-      ok: Boolean(findNativePanelToggle()),
+    initialise();
+
+    window.GANNZILLA_RESTORED_LAYOUT_EYE_V372 = true;
+    window.__auditGannzillaRestoredLayoutEyeV372 = () => ({
+      ok: Boolean(getPanel()),
       build: BUILD,
       visible: readPanelVisible(),
       mounted: Boolean(document.querySelector('[data-gannzilla-restored-layout-eye-v370="true"]')),
+      directCleanPanelAuthority: true,
+      planningToolsHideShowFunctional: true,
+      panelId: PANEL_ID,
       placement: 'IMMEDIATELY_RIGHT_OF_PNG_AND_LEFT_OF_WHEEL_VISIBILITY_EYE',
     });
 
     return () => {
-      timers.forEach(window.clearTimeout);
-      observer.disconnect();
-      window.removeEventListener('resize', sync);
-      document.removeEventListener('fullscreenchange', sync);
-      delete window.GANNZILLA_RESTORED_LAYOUT_EYE_V370;
-      delete window.__auditGannzillaRestoredLayoutEyeV370;
+      cancelled = true;
+      window.clearTimeout(timer);
+      delete window.GANNZILLA_RESTORED_LAYOUT_EYE_V372;
+      delete window.__auditGannzillaRestoredLayoutEyeV372;
     };
-  }, [sync]);
+  }, []);
 
-  const togglePanel = () => {
-    const nativeToggle = findNativePanelToggle();
-    if (!(nativeToggle instanceof HTMLButtonElement)) return;
-    nativeToggle.click();
-
-    const resync = () => {
-      const nextVisible = readPanelVisible();
-      setVisible(nextVisible);
-      window.dispatchEvent(new CustomEvent('gannzilla:layout-panel-visibility-change', {
-        detail: { visible: nextVisible },
-      }));
-    };
-
-    [0, 90, 260, 520].forEach((delay) => window.setTimeout(resync, delay));
-  };
+  const togglePanel = React.useCallback(() => {
+    const next = !readPanelVisible();
+    if (applyPanelVisible(next)) setVisible(next);
+  }, []);
 
   return (
     <button
       type="button"
       data-gannzilla-restored-layout-eye-v370="true"
-      aria-label={visible ? 'إخفاء لوحة التخطيط' : 'إظهار لوحة التخطيط'}
-      title={visible ? 'إخفاء لوحة التخطيط' : 'إظهار لوحة التخطيط'}
+      data-gannzilla-restored-layout-eye-v372="true"
+      aria-label={visible ? 'إخفاء أدوات التخطيط' : 'إظهار أدوات التخطيط'}
+      title={visible ? 'إخفاء أدوات التخطيط' : 'إظهار أدوات التخطيط'}
       aria-pressed={!visible}
       onClick={togglePanel}
       style={{
