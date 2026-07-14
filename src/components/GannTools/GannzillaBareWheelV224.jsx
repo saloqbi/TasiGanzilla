@@ -2,7 +2,6 @@ import React from 'react';
 import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaExistingProtractorFontDoubleV343 from './GannzillaExistingProtractorFontDoubleV343';
-import GannzillaExpandedProtractorDiameterV376 from './GannzillaExpandedProtractorDiameterV376';
 import GannzillaHideCalendarLabelsV359 from './GannzillaHideCalendarLabelsV359';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
@@ -21,7 +20,7 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 376: preserve the current wheel and enlarge only the outer angle-ring diameter. */
+/** Build 368: the existing chart toolbar save icon exports the current wheel image. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
@@ -34,7 +33,6 @@ export default function GannzillaBareWheelV224() {
     window.GANNZILLA_BARE_WHEEL_V343 = true;
     window.GANNZILLA_BARE_WHEEL_V344 = true;
     window.GANNZILLA_BARE_WHEEL_V368 = true;
-    window.GANNZILLA_BARE_WHEEL_V376 = true;
     const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
@@ -47,10 +45,9 @@ export default function GannzillaBareWheelV224() {
         .filter((aside) => aside.id !== CLEAN_PANEL_ID)
         .filter((aside) => getComputedStyle(aside).display !== 'none');
       const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
-      const expandedCanvas = document.querySelector('canvas[data-gannzilla-expanded-protractor-v376="true"]');
       return {
         ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
-        build: 376,
+        build: 368,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
         chartToolbarDirectHostMount: true,
@@ -76,9 +73,7 @@ export default function GannzillaBareWheelV224() {
         existingProtractorAngleFontPx: 24,
         existingProtractorAngleFontScale: 2,
         existingProtractorLabelsHorizontal: true,
-        expandedOuterAngleRingMounted: Boolean(expandedCanvas),
-        expandedOuterAngleRingWidthPx: expandedCanvas?.dataset?.gannzillaProtractorOuterWidth || null,
-        protractorBackgroundOverlay: true,
+        protractorBackgroundOverlay: false,
         addedAngles: false,
         oldV318PanelMounted: false,
         oldV319BridgeMounted: false,
@@ -102,7 +97,6 @@ export default function GannzillaBareWheelV224() {
     window.__auditGannzillaBareWheelV343 = audit;
     window.__auditGannzillaBareWheelV344 = audit;
     window.__auditGannzillaBareWheelV368 = audit;
-    window.__auditGannzillaBareWheelV376 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
       delete window.GANNZILLA_BARE_WHEEL_V327;
@@ -114,7 +108,6 @@ export default function GannzillaBareWheelV224() {
       delete window.GANNZILLA_BARE_WHEEL_V343;
       delete window.GANNZILLA_BARE_WHEEL_V344;
       delete window.GANNZILLA_BARE_WHEEL_V368;
-      delete window.GANNZILLA_BARE_WHEEL_V376;
       delete window.__auditGannzillaBareWheelV326;
       delete window.__auditGannzillaBareWheelV327;
       delete window.__auditGannzillaBareWheelV328;
@@ -125,7 +118,6 @@ export default function GannzillaBareWheelV224() {
       delete window.__auditGannzillaBareWheelV343;
       delete window.__auditGannzillaBareWheelV344;
       delete window.__auditGannzillaBareWheelV368;
-      delete window.__auditGannzillaBareWheelV376;
     };
   }, []);
 
@@ -208,7 +200,6 @@ export default function GannzillaBareWheelV224() {
       <GannzillaHideCalendarLabelsV359 />
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
-      <GannzillaExpandedProtractorDiameterV376 />
       <GannzillaTopToolbarV231 />
       <GannzillaArabicLocalizationV248 />
       <GannzillaPanelFrameCleanupV297 />
