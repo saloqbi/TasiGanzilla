@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 390;
+const BUILD = 391;
 const TWO_PI = Math.PI * 2;
 const FONT_FAMILY = 'Segoe UI, Tahoma, Arial, sans-serif';
 const COLORS = Object.freeze({ red: '#a10f1f', blue: '#1457d9', black: '#111111', minor: '#74797e' });
@@ -112,12 +112,33 @@ function clearOverlayBand(ctx, geometry) {
 function drawHorizontalLabel(ctx, text, point, fontSize, fontWeight, color) {
   ctx.save();
   ctx.font = `${fontWeight} ${fontSize}px ${FONT_FAMILY}`;
-  ctx.fillStyle = color;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.direction = 'ltr';
+
+  if (boolParam('gannzillaAngleLabelHalo', true)) {
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = numberParam('gannzillaAngleLabelHaloWidth', Math.max(5, fontSize * 0.28), 2, 16);
+    ctx.lineJoin = 'round';
+    ctx.miterLimit = 2;
+    ctx.strokeText(text, point.x, point.y);
+  }
+
+  ctx.fillStyle = color;
   ctx.fillText(text, point.x, point.y);
   ctx.restore();
+}
+
+function drawRadialSegment(ctx, geometry, physicalDegree, startRadius, endRadius, color, lineWidth) {
+  if (!(endRadius > startRadius)) return;
+  const p1 = polar(geometry.cx, geometry.cy, startRadius, physicalDegree);
+  const p2 = polar(geometry.cx, geometry.cy, endRadius, physicalDegree);
+  ctx.beginPath();
+  ctx.moveTo(p1.x, p1.y);
+  ctx.lineTo(p2.x, p2.y);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.stroke();
 }
 
 function drawFrame(canvas, angle) {
@@ -139,6 +160,8 @@ function drawFrame(canvas, angle) {
   const fiveFontWeight = Math.round(numberParam('gannzillaFiveDegreeFontWeight', 500, 400, 800));
   const labelRatio = numberParam('gannzillaMovableFrameLabelRatio', 0.36, 0.18, 0.82);
   const labelRadius = geometry.frameInner + (geometry.frameBandWidth * labelRatio);
+  const labelGap = numberParam('gannzillaAngleLineGap', Math.max(16, tenFontSize * 0.72), 8, 40);
+  const splitRedLines = boolParam('gannzillaSplitRedLinesAroundLabels', true);
 
   ctx.save();
   ctx.setTransform(geometry.dpr, 0, 0, geometry.dpr, 0, 0);
@@ -166,15 +189,31 @@ function drawFrame(canvas, angle) {
       : majorTen
         ? geometry.frameOuter + 3
         : geometry.frameInner + (geometry.frameBandWidth * 0.22);
-    const p1 = polar(geometry.cx, geometry.cy, tickInner, physicalDegree);
-    const p2 = polar(geometry.cx, geometry.cy, tickOuter, physicalDegree);
+    const color = majorTen ? innerColor : '#aeb2b5';
+    const lineWidth = majorThirty ? 1.9 : majorTen ? 1.3 : 0.75;
 
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.strokeStyle = majorTen ? innerColor : '#aeb2b5';
-    ctx.lineWidth = majorThirty ? 1.9 : majorTen ? 1.3 : 0.75;
-    ctx.stroke();
+    if (majorTen && splitRedLines) {
+      drawRadialSegment(
+        ctx,
+        geometry,
+        physicalDegree,
+        tickInner,
+        Math.max(tickInner, labelRadius - labelGap),
+        color,
+        lineWidth,
+      );
+      drawRadialSegment(
+        ctx,
+        geometry,
+        physicalDegree,
+        Math.min(tickOuter, labelRadius + labelGap),
+        tickOuter,
+        color,
+        lineWidth,
+      );
+    } else {
+      drawRadialSegment(ctx, geometry, physicalDegree, tickInner, tickOuter, color, lineWidth);
+    }
 
     const point = polar(geometry.cx, geometry.cy, labelRadius, physicalDegree);
     if (majorTen) {
@@ -198,6 +237,7 @@ function drawFrame(canvas, angle) {
   canvas.dataset.gannzillaMovableRedGreenFrameV390 = 'true';
   canvas.dataset.gannzillaMovableFrameAngle = shortestSignedDegrees(rotation).toFixed(2);
   canvas.dataset.gannzillaMovableFrameBandWidth = geometry.frameBandWidth.toFixed(2);
+  canvas.dataset.gannzillaAngleLabelProtectionV391 = 'true';
   window.__gannzillaMovableFrameAngleV390 = shortestSignedDegrees(rotation);
   return true;
 }
@@ -328,6 +368,9 @@ export default function GannzillaMovableRedGreenProtractorFrameV390() {
       requestedBandWidth: numberParam('gannzillaMovableFrameBandWidth', 144, 28, 260),
       maxBandWidth: 260,
       currentAngle: shortestSignedDegrees(angle),
+      splitRedLinesAroundLabels: boolParam('gannzillaSplitRedLinesAroundLabels', true),
+      whiteLabelHalo: boolParam('gannzillaAngleLabelHalo', true),
+      labelLineGapPx: numberParam('gannzillaAngleLineGap', 20, 8, 40),
     });
 
     return () => {
