@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 385;
+const BUILD = 386;
 const FONT_FAMILY = 'Tahoma, Segoe UI, Arial, sans-serif';
 const DAYS = ['الجمعة', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
 const ZODIAC = [
@@ -17,7 +17,7 @@ const ZODIAC = [
   { sign: 'الدلو', element: 'هواء' },
   { sign: 'الحوت', element: 'ماء' },
 ];
-const COLORS = Object.freeze({ red: '#981624', blue: '#2855aa', black: '#111111' });
+const COLORS = Object.freeze({ red: '#9d1422', blue: '#2454ad', black: '#111111' });
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -78,10 +78,10 @@ function findWheelCanvas() {
 }
 
 function labelForCell(index) {
-  if (index === 35) return 'ماء الحوت';
+  if (index === 35) return 'ماءالحوت';
   if (index % 2 === 0) return DAYS[(index / 2) % DAYS.length];
   const zodiac = ZODIAC[((index - 1) / 2) % ZODIAC.length];
-  return `${zodiac.element} ${zodiac.sign}`;
+  return `${zodiac.element}${zodiac.sign}`;
 }
 
 function pairColor(index) {
@@ -92,26 +92,27 @@ function pairColor(index) {
   return COLORS.black;
 }
 
-function measuredBounds(ctx, text, size, weight) {
+function measureInk(ctx, text, size, weight) {
   ctx.font = `${weight} ${size}px ${FONT_FAMILY}`;
-  const m = ctx.measureText(text);
-  const width = Number.isFinite(m.actualBoundingBoxLeft) && Number.isFinite(m.actualBoundingBoxRight)
-    ? m.actualBoundingBoxLeft + m.actualBoundingBoxRight
-    : m.width;
-  const height = Number.isFinite(m.actualBoundingBoxAscent) && Number.isFinite(m.actualBoundingBoxDescent)
-    ? m.actualBoundingBoxAscent + m.actualBoundingBoxDescent
-    : size;
-  return { width: Math.max(width, m.width), height: Math.max(height, size * 0.88) };
+  const metrics = ctx.measureText(text);
+  const left = Number.isFinite(metrics.actualBoundingBoxLeft) ? metrics.actualBoundingBoxLeft : 0;
+  const right = Number.isFinite(metrics.actualBoundingBoxRight) ? metrics.actualBoundingBoxRight : metrics.width;
+  const ascent = Number.isFinite(metrics.actualBoundingBoxAscent) ? metrics.actualBoundingBoxAscent : size * 0.76;
+  const descent = Number.isFinite(metrics.actualBoundingBoxDescent) ? metrics.actualBoundingBoxDescent : size * 0.18;
+  return {
+    width: Math.max(metrics.width, left + right) + 1.5,
+    height: Math.max(size * 0.86, ascent + descent),
+  };
 }
 
-function fitFont(ctx, text, desired, minimum, safeWidth, safeHeight, weight) {
-  let size = Math.min(desired, safeHeight * 0.92);
-  while (size > minimum) {
-    const bounds = measuredBounds(ctx, text, size, weight);
+function fitFont(ctx, text, desired, safeWidth, safeHeight, weight) {
+  let size = Math.min(desired, safeHeight * 0.96);
+  while (size > 7) {
+    const bounds = measureInk(ctx, text, size, weight);
     if (bounds.width <= safeWidth && bounds.height <= safeHeight) return size;
     size -= 0.25;
   }
-  return minimum;
+  return 7;
 }
 
 function drawLabel({
@@ -120,7 +121,6 @@ function drawLabel({
   point,
   rotation,
   desiredSize,
-  minimumSize,
   weight,
   color,
   safeWidth,
@@ -133,7 +133,7 @@ function drawLabel({
   ctx.translate(point.x, point.y);
   ctx.rotate(normalizeTextRotation(rotation));
 
-  const size = fitFont(ctx, text, desiredSize, minimumSize, safeWidth, safeHeight, weight);
+  const size = fitFont(ctx, text, desiredSize, safeWidth, safeHeight, weight);
   ctx.font = `${weight} ${size}px ${FONT_FAMILY}`;
   ctx.fillStyle = color;
   ctx.textAlign = 'center';
@@ -158,14 +158,13 @@ function drawBand() {
   const innerRadius = numberParam('gannzillaInnerRadius', 170, 80, 500);
   const ringWidth = numberParam('gannzillaRingWidth', 60, 30, 150);
   const bandGap = 18;
-  const bandWidth = numberParam('gannzillaWeekdayZodiacBandWidth', 56, 50, 64);
-  const desiredSize = numberParam('gannzillaWeekdayZodiacFontSize', 18, 14, 22);
-  const minimumSize = numberParam('gannzillaWeekdayZodiacMinFontSize', 10, 8, 15);
+  const bandWidth = numberParam('gannzillaWeekdayZodiacBandWidth', 36, 32, 42);
+  const desiredSize = numberParam('gannzillaWeekdayZodiacFontSize', 14.5, 11, 18);
   const weight = Math.round(numberParam('gannzillaWeekdayZodiacFontWeight', 700, 500, 900));
-  const tilt = numberParam('gannzillaWeekdayZodiacTilt', 0.4, -2, 2);
-  const angularPadding = numberParam('gannzillaWeekdayZodiacAngularPadding', 2.25, 1.8, 2.8);
-  const radialPadding = numberParam('gannzillaWeekdayZodiacRadialPadding', 8, 6, 11);
-  const sidePaddingPx = numberParam('gannzillaWeekdayZodiacSidePaddingPx', 14, 10, 18);
+  const tilt = numberParam('gannzillaWeekdayZodiacTilt', 0, -1.2, 1.2);
+  const angularPadding = numberParam('gannzillaWeekdayZodiacAngularPadding', 0.85, 0.55, 1.35);
+  const radialPadding = numberParam('gannzillaWeekdayZodiacRadialPadding', 3.5, 2, 6);
+  const sidePaddingPx = numberParam('gannzillaWeekdayZodiacSidePaddingPx', 4.5, 2, 8);
 
   const wheelRadius = innerRadius + (levels * ringWidth);
   const inner = wheelRadius + bandGap;
@@ -183,19 +182,17 @@ function drawBand() {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  // Clear, fill and visually separate every 10-degree label cell.
   for (let index = 0; index < 36; index += 1) {
     wedge(ctx, cx, cy, inner, outer, index * 10, (index + 1) * 10);
-    ctx.fillStyle = index % 2 === 0 ? '#ffffff' : '#fbfaf6';
+    ctx.fillStyle = '#ffffff';
     ctx.fill();
   }
 
   const safeSpan = 10 - (angularPadding * 2);
   const safeChordWidth = 2 * safeInner * Math.sin((safeSpan * Math.PI / 180) / 2);
-  const safeWidth = Math.max(18, safeChordWidth - (sidePaddingPx * 2));
-  const safeHeight = Math.max(13, (safeOuter - safeInner) - 4);
+  const safeWidth = Math.max(16, safeChordWidth - (sidePaddingPx * 2));
+  const safeHeight = Math.max(12, safeOuter - safeInner);
 
-  // Text first, then redraw all borders over the text so no glyph can visually cover a frame line.
   for (let index = 0; index < 36; index += 1) {
     const start = index * 10;
     const center = start + 5;
@@ -206,7 +203,6 @@ function drawBand() {
       point,
       rotation: center + tilt,
       desiredSize,
-      minimumSize,
       weight,
       color: pairColor(index),
       safeWidth,
@@ -223,9 +219,8 @@ function drawBand() {
     });
   }
 
-  // Strong, continuous box frame for every cell.
-  ctx.strokeStyle = '#8f9699';
-  ctx.lineWidth = 1.45;
+  ctx.strokeStyle = '#b7b9ba';
+  ctx.lineWidth = 0.85;
   [inner, outer].forEach((radius) => {
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
@@ -235,18 +230,18 @@ function drawBand() {
   for (let index = 0; index < 36; index += 1) {
     const degree = index * 10;
     const major = index % 3 === 0;
-    const p1 = polar(cx, cy, major ? inner - 2 : inner, degree);
-    const p2 = polar(cx, cy, major ? outer + 4 : outer, degree);
+    const p1 = polar(cx, cy, inner, degree);
+    const p2 = polar(cx, cy, outer, degree);
     ctx.beginPath();
     ctx.moveTo(p1.x, p1.y);
     ctx.lineTo(p2.x, p2.y);
-    ctx.strokeStyle = major ? '#ca3f45' : '#8f9699';
-    ctx.lineWidth = major ? 1.65 : 1.15;
+    ctx.strokeStyle = major ? '#d24a4e' : '#c6c7c8';
+    ctx.lineWidth = major ? 1.05 : 0.72;
     ctx.stroke();
   }
 
   ctx.restore();
-  canvas.dataset.gannzillaWeekdayZodiacBandV385 = 'true';
+  canvas.dataset.gannzillaWeekdayZodiacBandV386 = 'true';
   canvas.dataset.gannzillaWeekdayZodiacSafeWidth = String(Math.round(safeWidth));
   return true;
 }
@@ -273,17 +268,16 @@ export default function GannzillaWeekdayZodiacBandV380() {
     window.addEventListener('gannzilla:ring-two-numbering-refresh', refresh);
     window.addEventListener('gannzilla:canonical-property-change-v326', refresh);
 
-    window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V385 = true;
-    window.__auditGannzillaWeekdayZodiacBandV385 = () => ({
-      ok: Boolean(findWheelCanvas()?.dataset?.gannzillaWeekdayZodiacBandV385 === 'true'),
+    window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V386 = true;
+    window.__auditGannzillaWeekdayZodiacBandV386 = () => ({
+      ok: Boolean(findWheelCanvas()?.dataset?.gannzillaWeekdayZodiacBandV386 === 'true'),
       build: BUILD,
       oneLabelPerCell: true,
-      textDrawnBeforeBorders: true,
-      bordersRedrawnOnTop: true,
-      italicGlyphStyleRemoved: true,
-      tangentRotationPreserved: true,
-      strictVisibleContainment: true,
-      referenceTopSequence: ['ماء الحوت', 'الجمعة', 'نار الحمل', 'الأحد', 'تراب الثور', 'الاثنين'],
+      compactOriginalBandRestored: true,
+      hardClipPerTenDegreeCell: true,
+      exactInkFit: true,
+      centeredInsideCell: true,
+      referenceTopSequence: ['ماءالحوت', 'الجمعة', 'نارالحمل', 'الأحد', 'ترابالثور', 'الاثنين'],
     });
 
     return () => {
@@ -294,8 +288,8 @@ export default function GannzillaWeekdayZodiacBandV380() {
       window.removeEventListener('resize', refresh);
       window.removeEventListener('gannzilla:ring-two-numbering-refresh', refresh);
       window.removeEventListener('gannzilla:canonical-property-change-v326', refresh);
-      delete window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V385;
-      delete window.__auditGannzillaWeekdayZodiacBandV385;
+      delete window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V386;
+      delete window.__auditGannzillaWeekdayZodiacBandV386;
     };
   }, []);
 
