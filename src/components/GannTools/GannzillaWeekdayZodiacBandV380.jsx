@@ -1,6 +1,6 @@
 import React from 'react';
 
-const BUILD = 386;
+const BUILD = 387;
 const FONT_FAMILY = 'Tahoma, Segoe UI, Arial, sans-serif';
 const DAYS = ['الجمعة', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
 const ZODIAC = [
@@ -17,7 +17,7 @@ const ZODIAC = [
   { sign: 'الدلو', element: 'هواء' },
   { sign: 'الحوت', element: 'ماء' },
 ];
-const COLORS = Object.freeze({ red: '#9d1422', blue: '#2454ad', black: '#111111' });
+const COLORS = Object.freeze({ red: '#981624', blue: '#2855aa', black: '#111111' });
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -74,14 +74,14 @@ function findWheelCanvas() {
     .filter((canvas) => !canvas.closest('aside'))
     .map((canvas) => ({ canvas, rect: canvas.getBoundingClientRect() }))
     .filter(({ canvas, rect }) => canvas.width > 0 && canvas.height > 0 && rect.width > 250 && rect.height > 250)
-    .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
+    .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0] || null;
 }
 
 function labelForCell(index) {
-  if (index === 35) return 'ماءالحوت';
+  if (index === 35) return 'ماء الحوت';
   if (index % 2 === 0) return DAYS[(index / 2) % DAYS.length];
   const zodiac = ZODIAC[((index - 1) / 2) % ZODIAC.length];
-  return `${zodiac.element}${zodiac.sign}`;
+  return `${zodiac.element} ${zodiac.sign}`;
 }
 
 function pairColor(index) {
@@ -95,18 +95,20 @@ function pairColor(index) {
 function measureInk(ctx, text, size, weight) {
   ctx.font = `${weight} ${size}px ${FONT_FAMILY}`;
   const metrics = ctx.measureText(text);
-  const left = Number.isFinite(metrics.actualBoundingBoxLeft) ? metrics.actualBoundingBoxLeft : 0;
-  const right = Number.isFinite(metrics.actualBoundingBoxRight) ? metrics.actualBoundingBoxRight : metrics.width;
-  const ascent = Number.isFinite(metrics.actualBoundingBoxAscent) ? metrics.actualBoundingBoxAscent : size * 0.76;
-  const descent = Number.isFinite(metrics.actualBoundingBoxDescent) ? metrics.actualBoundingBoxDescent : size * 0.18;
+  const width = Number.isFinite(metrics.actualBoundingBoxLeft) && Number.isFinite(metrics.actualBoundingBoxRight)
+    ? metrics.actualBoundingBoxLeft + metrics.actualBoundingBoxRight
+    : metrics.width;
+  const height = Number.isFinite(metrics.actualBoundingBoxAscent) && Number.isFinite(metrics.actualBoundingBoxDescent)
+    ? metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent
+    : size;
   return {
-    width: Math.max(metrics.width, left + right) + 1.5,
-    height: Math.max(size * 0.86, ascent + descent),
+    width: Math.max(metrics.width, width) + (size * 0.08),
+    height: Math.max(height, size * 0.86),
   };
 }
 
 function fitFont(ctx, text, desired, safeWidth, safeHeight, weight) {
-  let size = Math.min(desired, safeHeight * 0.96);
+  let size = Math.min(desired, safeHeight * 0.94);
   while (size > 7) {
     const bounds = measureInk(ctx, text, size, weight);
     if (bounds.width <= safeWidth && bounds.height <= safeHeight) return size;
@@ -115,18 +117,7 @@ function fitFont(ctx, text, desired, safeWidth, safeHeight, weight) {
   return 7;
 }
 
-function drawLabel({
-  ctx,
-  text,
-  point,
-  rotation,
-  desiredSize,
-  weight,
-  color,
-  safeWidth,
-  safeHeight,
-  clip,
-}) {
+function drawLabel({ ctx, text, point, rotation, desiredSize, weight, color, safeWidth, safeHeight, clip }) {
   ctx.save();
   clip();
   ctx.clip();
@@ -146,25 +137,36 @@ function drawLabel({
 function drawBand() {
   if (!boolParam('showProtractor', true) || !boolParam('showWeekdayZodiacBand', true)) return false;
 
-  const canvas = findWheelCanvas();
-  if (!canvas) return false;
+  const found = findWheelCanvas();
+  if (!found) return false;
+  const { canvas, rect } = found;
 
   const dpr = clamp(window.devicePixelRatio || 1, 1, 2);
-  const width = canvas.width / dpr;
-  const height = canvas.height / dpr;
-  if (!Number.isFinite(width) || !Number.isFinite(height)) return false;
+  const logicalWidth = canvas.width / dpr;
+  const logicalHeight = canvas.height / dpr;
+  if (!Number.isFinite(logicalWidth) || !Number.isFinite(logicalHeight) || rect.width <= 0) return false;
+
+  // The wheel canvas is displayed smaller than its backing resolution. Compensate so
+  // the text is the requested visible size on screen, not a tiny backing-canvas size.
+  const displayScale = clamp(logicalWidth / rect.width, 0.75, 4);
 
   const levels = Math.round(numberParam('levels', 10, 1, 12));
   const innerRadius = numberParam('gannzillaInnerRadius', 170, 80, 500);
   const ringWidth = numberParam('gannzillaRingWidth', 60, 30, 150);
   const bandGap = 18;
-  const bandWidth = numberParam('gannzillaWeekdayZodiacBandWidth', 36, 32, 42);
-  const desiredSize = numberParam('gannzillaWeekdayZodiacFontSize', 14.5, 11, 18);
+
+  const visibleBandWidth = numberParam('gannzillaWeekdayZodiacBandWidth', 34, 28, 42);
+  const visibleFontSize = numberParam('gannzillaWeekdayZodiacFontSize', 17, 13, 21);
   const weight = Math.round(numberParam('gannzillaWeekdayZodiacFontWeight', 700, 500, 900));
   const tilt = numberParam('gannzillaWeekdayZodiacTilt', 0, -1.2, 1.2);
-  const angularPadding = numberParam('gannzillaWeekdayZodiacAngularPadding', 0.85, 0.55, 1.35);
-  const radialPadding = numberParam('gannzillaWeekdayZodiacRadialPadding', 3.5, 2, 6);
-  const sidePaddingPx = numberParam('gannzillaWeekdayZodiacSidePaddingPx', 4.5, 2, 8);
+  const angularPadding = numberParam('gannzillaWeekdayZodiacAngularPadding', 0.75, 0.45, 1.25);
+  const visibleRadialPadding = numberParam('gannzillaWeekdayZodiacRadialPadding', 3, 2, 6);
+  const visibleSidePadding = numberParam('gannzillaWeekdayZodiacSidePaddingPx', 5, 2, 9);
+
+  const bandWidth = visibleBandWidth * displayScale;
+  const desiredSize = visibleFontSize * displayScale;
+  const radialPadding = visibleRadialPadding * displayScale;
+  const sidePadding = visibleSidePadding * displayScale;
 
   const wheelRadius = innerRadius + (levels * ringWidth);
   const inner = wheelRadius + bandGap;
@@ -172,8 +174,8 @@ function drawBand() {
   const safeInner = inner + radialPadding;
   const safeOuter = outer - radialPadding;
   const labelRadius = (safeInner + safeOuter) / 2;
-  const cx = width / 2;
-  const cy = height / 2;
+  const cx = logicalWidth / 2;
+  const cy = logicalHeight / 2;
   const ctx = canvas.getContext('2d');
   if (!ctx || safeOuter <= safeInner) return false;
 
@@ -190,8 +192,8 @@ function drawBand() {
 
   const safeSpan = 10 - (angularPadding * 2);
   const safeChordWidth = 2 * safeInner * Math.sin((safeSpan * Math.PI / 180) / 2);
-  const safeWidth = Math.max(16, safeChordWidth - (sidePaddingPx * 2));
-  const safeHeight = Math.max(12, safeOuter - safeInner);
+  const safeWidth = Math.max(16 * displayScale, safeChordWidth - (sidePadding * 2));
+  const safeHeight = Math.max(12 * displayScale, safeOuter - safeInner);
 
   for (let index = 0; index < 36; index += 1) {
     const start = index * 10;
@@ -219,8 +221,9 @@ function drawBand() {
     });
   }
 
+  // Draw the frame last so every phrase is visibly enclosed by its own cell.
   ctx.strokeStyle = '#b7b9ba';
-  ctx.lineWidth = 0.85;
+  ctx.lineWidth = Math.max(0.85, displayScale * 0.55);
   [inner, outer].forEach((radius) => {
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
@@ -236,13 +239,15 @@ function drawBand() {
     ctx.moveTo(p1.x, p1.y);
     ctx.lineTo(p2.x, p2.y);
     ctx.strokeStyle = major ? '#d24a4e' : '#c6c7c8';
-    ctx.lineWidth = major ? 1.05 : 0.72;
+    ctx.lineWidth = major ? Math.max(1.05, displayScale * 0.7) : Math.max(0.72, displayScale * 0.42);
     ctx.stroke();
   }
 
   ctx.restore();
-  canvas.dataset.gannzillaWeekdayZodiacBandV386 = 'true';
-  canvas.dataset.gannzillaWeekdayZodiacSafeWidth = String(Math.round(safeWidth));
+  canvas.dataset.gannzillaWeekdayZodiacBandV380 = 'true';
+  canvas.dataset.gannzillaWeekdayZodiacBandV387 = 'true';
+  canvas.dataset.gannzillaWeekdayZodiacDisplayScale = displayScale.toFixed(3);
+  canvas.dataset.gannzillaWeekdayZodiacVisibleFontPx = String(visibleFontSize);
   return true;
 }
 
@@ -268,17 +273,21 @@ export default function GannzillaWeekdayZodiacBandV380() {
     window.addEventListener('gannzilla:ring-two-numbering-refresh', refresh);
     window.addEventListener('gannzilla:canonical-property-change-v326', refresh);
 
-    window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V386 = true;
-    window.__auditGannzillaWeekdayZodiacBandV386 = () => ({
-      ok: Boolean(findWheelCanvas()?.dataset?.gannzillaWeekdayZodiacBandV386 === 'true'),
-      build: BUILD,
-      oneLabelPerCell: true,
-      compactOriginalBandRestored: true,
-      hardClipPerTenDegreeCell: true,
-      exactInkFit: true,
-      centeredInsideCell: true,
-      referenceTopSequence: ['ماءالحوت', 'الجمعة', 'نارالحمل', 'الأحد', 'ترابالثور', 'الاثنين'],
-    });
+    window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V387 = true;
+    window.__auditGannzillaWeekdayZodiacBandV387 = () => {
+      const found = findWheelCanvas();
+      const canvas = found?.canvas;
+      return {
+        ok: Boolean(canvas?.dataset?.gannzillaWeekdayZodiacBandV387 === 'true'),
+        build: BUILD,
+        oneLabelPerCell: true,
+        visibleScaleCompensation: true,
+        strictCellClip: true,
+        bordersRedrawnAboveText: true,
+        displayedFontPx: numberParam('gannzillaWeekdayZodiacFontSize', 17, 13, 21),
+        referenceTopSequence: ['ماء الحوت', 'الجمعة', 'نار الحمل', 'الأحد', 'تراب الثور', 'الاثنين'],
+      };
+    };
 
     return () => {
       disposed = true;
@@ -288,8 +297,8 @@ export default function GannzillaWeekdayZodiacBandV380() {
       window.removeEventListener('resize', refresh);
       window.removeEventListener('gannzilla:ring-two-numbering-refresh', refresh);
       window.removeEventListener('gannzilla:canonical-property-change-v326', refresh);
-      delete window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V386;
-      delete window.__auditGannzillaWeekdayZodiacBandV386;
+      delete window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V387;
+      delete window.__auditGannzillaWeekdayZodiacBandV387;
     };
   }, []);
 
