@@ -5,6 +5,7 @@ import GannzillaExistingProtractorFontDoubleV343 from './GannzillaExistingProtra
 import GannzillaWeekdayZodiacBandV380 from './GannzillaWeekdayZodiacBandV380';
 import GannzillaHideCalendarLabelsV359 from './GannzillaHideCalendarLabelsV359';
 import GannzillaHideEmptyProtractorBandV388 from './GannzillaHideEmptyProtractorBandV388';
+import GannzillaMovableRedGreenProtractorFrameV389 from './GannzillaMovableRedGreenProtractorFrameV389';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
@@ -22,7 +23,7 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 388: preserve angle labels while optionally hiding the empty native protractor band frame. */
+/** Build 389: add a draggable Gannzilla-style red/green protractor frame. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
@@ -37,6 +38,7 @@ export default function GannzillaBareWheelV224() {
     window.GANNZILLA_BARE_WHEEL_V368 = true;
     window.GANNZILLA_BARE_WHEEL_V380 = true;
     window.GANNZILLA_BARE_WHEEL_V388 = true;
+    window.GANNZILLA_BARE_WHEEL_V389 = true;
     const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
@@ -44,6 +46,7 @@ export default function GannzillaBareWheelV224() {
       const chartImageExportButton = chartToolbar?.querySelector('[data-gannzilla-chart-image-export-v368="true"]');
       const horizontalBar = document.querySelector('[data-gannzilla-horizontal-pan-assist-v311="true"]');
       const weekdayZodiacCanvas = document.querySelector('canvas[data-gannzilla-weekday-zodiac-band-v380="true"]');
+      const movableFrameCanvas = document.querySelector('canvas[data-gannzilla-movable-red-green-frame-v389="true"]');
       const panelRect = cleanPanel?.getBoundingClientRect?.();
       const barRect = horizontalBar?.getBoundingClientRect?.();
       const visibleLegacyAsides = Array.from(document.querySelectorAll('aside'))
@@ -52,7 +55,7 @@ export default function GannzillaBareWheelV224() {
       const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
       return {
         ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
-        build: 388,
+        build: 389,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
         chartToolbarDirectHostMount: true,
@@ -86,6 +89,10 @@ export default function GannzillaBareWheelV224() {
         addedAngles: false,
         emptyProtractorBandCanBeHidden: true,
         emptyProtractorBandParameter: 'hideEmptyProtractorBand=true',
+        movableRedGreenFrameMounted: Boolean(movableFrameCanvas),
+        movableRedGreenFrameParameter: 'showMovableGannzillaFrame=true',
+        movableFrameDragAuthority: 'RED_ZERO_HANDLE_AND_FULL_BAND',
+        allProtractorAnglesMoveTogether: true,
         oldV318PanelMounted: false,
         oldV319BridgeMounted: false,
         oldV320AdapterMounted: false,
@@ -110,6 +117,7 @@ export default function GannzillaBareWheelV224() {
     window.__auditGannzillaBareWheelV368 = audit;
     window.__auditGannzillaBareWheelV380 = audit;
     window.__auditGannzillaBareWheelV388 = audit;
+    window.__auditGannzillaBareWheelV389 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
       delete window.GANNZILLA_BARE_WHEEL_V327;
@@ -123,6 +131,7 @@ export default function GannzillaBareWheelV224() {
       delete window.GANNZILLA_BARE_WHEEL_V368;
       delete window.GANNZILLA_BARE_WHEEL_V380;
       delete window.GANNZILLA_BARE_WHEEL_V388;
+      delete window.GANNZILLA_BARE_WHEEL_V389;
       delete window.__auditGannzillaBareWheelV326;
       delete window.__auditGannzillaBareWheelV327;
       delete window.__auditGannzillaBareWheelV328;
@@ -135,6 +144,7 @@ export default function GannzillaBareWheelV224() {
       delete window.__auditGannzillaBareWheelV368;
       delete window.__auditGannzillaBareWheelV380;
       delete window.__auditGannzillaBareWheelV388;
+      delete window.__auditGannzillaBareWheelV389;
     };
   }, []);
 
@@ -232,6 +242,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaPagePanScrollbarsV305 />
       <GannzillaHorizontalPanAssistV308 />
       <GannzillaHorizontalPanTopPlacementV312 />
+      <GannzillaMovableRedGreenProtractorFrameV389 />
     </>
   );
 }
