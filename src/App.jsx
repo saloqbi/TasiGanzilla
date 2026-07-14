@@ -8,7 +8,7 @@ import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArab
 import GannzillaBareWheelV224 from './components/GannTools/GannzillaBareWheelV224';
 import GannzillaMovableRedGreenProtractorFrameV390 from './components/GannTools/GannzillaMovableRedGreenProtractorFrameV390';
 
-// Build 390: extended movable red/green protractor radius support.
+// Build 391: protect angle labels by splitting red ticks and adding a clean white halo.
 const App = () => {
   const search = window.location.search;
   const isTestMode = search.includes('test=true');
@@ -19,7 +19,7 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="390">
+        <div data-gannzilla-build="391">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
