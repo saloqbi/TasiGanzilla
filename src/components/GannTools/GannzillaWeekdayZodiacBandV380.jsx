@@ -1,8 +1,8 @@
 import React from 'react';
 
-const BUILD = 380;
+const BUILD = 381;
 const FONT_FAMILY = 'Tahoma, Segoe UI, Arial, sans-serif';
-const DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+const DAYS = ['الجمعة', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
 const ZODIAC = [
   { sign: 'الحمل', element: 'نار' },
   { sign: 'الثور', element: 'تراب' },
@@ -17,7 +17,7 @@ const ZODIAC = [
   { sign: 'الدلو', element: 'هواء' },
   { sign: 'الحوت', element: 'ماء' },
 ];
-const CELL_COLORS = ['#a10f1f', '#1457d9', '#111111'];
+const PAIR_COLORS = Object.freeze({ red: '#9f1724', blue: '#315ab6', black: '#151515' });
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -60,6 +60,15 @@ function wedge(ctx, cx, cy, innerRadius, outerRadius, startDegrees, endDegrees) 
   ctx.closePath();
 }
 
+function normalizeTextRotation(degrees) {
+  let radians = (degrees * Math.PI) / 180;
+  while (radians > Math.PI) radians -= Math.PI * 2;
+  while (radians < -Math.PI) radians += Math.PI * 2;
+  if (radians > Math.PI / 2) radians -= Math.PI;
+  if (radians < -Math.PI / 2) radians += Math.PI;
+  return radians;
+}
+
 function findWheelCanvas() {
   return Array.from(document.querySelectorAll('canvas'))
     .filter((canvas) => !canvas.closest('aside'))
@@ -68,14 +77,33 @@ function findWheelCanvas() {
     .sort((a, b) => (b.rect.width * b.rect.height) - (a.rect.width * a.rect.height))[0]?.canvas || null;
 }
 
-function drawText(ctx, text, x, y, fontSize, fontWeight, color) {
+function pairColor(index) {
+  if (index === 35 || index === 0) return PAIR_COLORS.black;
+  const pair = Math.floor((index + 1) / 2) % 3;
+  if (pair === 1) return PAIR_COLORS.red;
+  if (pair === 2) return PAIR_COLORS.blue;
+  return PAIR_COLORS.black;
+}
+
+function labelForCell(index) {
+  if (index === 35) return 'ماء الحوت';
+  if (index % 2 === 0) return DAYS[(index / 2) % DAYS.length];
+  const zodiac = ZODIAC[((index - 1) / 2) % ZODIAC.length];
+  return `${zodiac.element} ${zodiac.sign}`;
+}
+
+function drawTiltedText(ctx, text, x, y, rotationDegrees, fontSize, fontWeight, color, maxWidth) {
   ctx.save();
-  ctx.font = `${fontWeight} ${fontSize}px ${FONT_FAMILY}`;
+  ctx.translate(x, y);
+  ctx.rotate(normalizeTextRotation(rotationDegrees));
+  ctx.font = `italic ${fontWeight} ${fontSize}px ${FONT_FAMILY}`;
   ctx.fillStyle = color;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.direction = 'rtl';
-  ctx.fillText(text, x, y);
+  ctx.shadowColor = 'rgba(255,255,255,.75)';
+  ctx.shadowBlur = 1.2;
+  ctx.fillText(text, 0, 0, maxWidth);
   ctx.restore();
 }
 
@@ -95,13 +123,13 @@ function drawWeekdayZodiacBand() {
   const ringWidth = numberParam('gannzillaRingWidth', 60, 30, 150);
   const bandGap = 18;
   const bandWidth = 34;
-  const signFontSize = numberParam('gannzillaZodiacFontSize', 10.5, 8, 15);
-  const dayFontSize = numberParam('gannzillaWeekdayFontSize', 10.5, 8, 15);
+  const fontSize = numberParam('gannzillaWeekdayZodiacFontSize', 17, 12, 22);
+  const fontWeight = Math.round(numberParam('gannzillaWeekdayZodiacFontWeight', 700, 500, 900));
+  const italicTilt = numberParam('gannzillaWeekdayZodiacTilt', 5, -12, 12);
   const wheelRadius = innerRadius + (levels * ringWidth);
   const inner = wheelRadius + bandGap;
   const outer = inner + bandWidth;
-  const signRadius = inner + 9.5;
-  const dayRadius = inner + 24.5;
+  const labelRadius = inner + (bandWidth * 0.52);
   const cx = width / 2;
   const cy = height / 2;
   const ctx = canvas.getContext('2d');
@@ -114,11 +142,11 @@ function drawWeekdayZodiacBand() {
 
   for (let index = 0; index < 36; index += 1) {
     wedge(ctx, cx, cy, inner, outer, index * 10, (index + 1) * 10);
-    ctx.fillStyle = index % 2 === 0 ? '#fffefa' : '#faf9f4';
+    ctx.fillStyle = index % 2 === 0 ? '#fffefb' : '#faf8f2';
     ctx.fill();
   }
 
-  ctx.strokeStyle = '#c7c7c7';
+  ctx.strokeStyle = '#c4c4c4';
   ctx.lineWidth = 1;
   [inner, outer].forEach((radius) => {
     ctx.beginPath();
@@ -126,31 +154,38 @@ function drawWeekdayZodiacBand() {
     ctx.stroke();
   });
 
+  const arcWidth = (Math.PI * 2 * labelRadius) / 36;
+  const maxTextWidth = Math.max(42, arcWidth * 0.88);
+
   for (let index = 0; index < 36; index += 1) {
     const boundaryDegree = index * 10;
     const major = index % 3 === 0;
     const p1 = polar(cx, cy, major ? inner - 2 : inner, boundaryDegree);
-    const p2 = polar(cx, cy, major ? outer + 5 : outer, boundaryDegree);
+    const p2 = polar(cx, cy, major ? outer + 4 : outer, boundaryDegree);
     ctx.beginPath();
     ctx.moveTo(p1.x, p1.y);
     ctx.lineTo(p2.x, p2.y);
-    ctx.strokeStyle = major ? '#d84a4a' : '#c9c9c9';
-    ctx.lineWidth = major ? 1.2 : 0.75;
+    ctx.strokeStyle = major ? '#d64848' : '#c8c8c8';
+    ctx.lineWidth = major ? 1.15 : 0.72;
     ctx.stroke();
 
     const centerDegree = boundaryDegree + 5;
-    const zodiac = ZODIAC[index % ZODIAC.length];
-    const day = DAYS[index % DAYS.length];
-    const color = CELL_COLORS[index % CELL_COLORS.length];
-    const signPoint = polar(cx, cy, signRadius, centerDegree);
-    const dayPoint = polar(cx, cy, dayRadius, centerDegree);
-
-    drawText(ctx, `${zodiac.element} ${zodiac.sign}`, signPoint.x, signPoint.y, signFontSize, 800, color);
-    drawText(ctx, day, dayPoint.x, dayPoint.y, dayFontSize, 700, color);
+    const point = polar(cx, cy, labelRadius, centerDegree);
+    drawTiltedText(
+      ctx,
+      labelForCell(index),
+      point.x,
+      point.y,
+      centerDegree + italicTilt,
+      fontSize,
+      fontWeight,
+      pairColor(index),
+      maxTextWidth,
+    );
   }
 
   ctx.restore();
-  canvas.dataset.gannzillaWeekdayZodiacBandV380 = 'true';
+  canvas.dataset.gannzillaWeekdayZodiacBandV381 = 'true';
   return true;
 }
 
@@ -178,17 +213,18 @@ export default function GannzillaWeekdayZodiacBandV380() {
     window.addEventListener('gannzilla:ring-two-numbering-refresh', refresh);
     window.addEventListener('gannzilla:canonical-property-change-v326', refresh);
 
-    window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V380 = true;
-    window.__auditGannzillaWeekdayZodiacBandV380 = () => ({
-      ok: Boolean(findWheelCanvas()?.dataset?.gannzillaWeekdayZodiacBandV380 === 'true'),
+    window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V381 = true;
+    window.__auditGannzillaWeekdayZodiacBandV381 = () => ({
+      ok: Boolean(findWheelCanvas()?.dataset?.gannzillaWeekdayZodiacBandV381 === 'true'),
       build: BUILD,
       sectors: 36,
-      zodiacCycle: 12,
-      weekdayCycle: 6,
-      saturdayIntentionallyOmittedToMatchReference: true,
-      firstSector: { degreeRange: '0-10', day: 'الأحد', label: 'نار الحمل' },
-      lastSector: { degreeRange: '350-360', day: 'الجمعة', label: 'ماء الحوت' },
-      horizontalArabicLabels: true,
+      oneLabelPerCell: true,
+      alternatingDayAndZodiac: true,
+      italicFont: true,
+      tangentialRotation: true,
+      tiltDegrees: numberParam('gannzillaWeekdayZodiacTilt', 5, -12, 12),
+      fontSizePx: numberParam('gannzillaWeekdayZodiacFontSize', 17, 12, 22),
+      referenceTopSequence: ['ماء الحوت', 'الجمعة', 'نار الحمل', 'الأحد', 'تراب الثور', 'الاثنين'],
       wheelGeometryChanged: false,
     });
 
@@ -200,8 +236,8 @@ export default function GannzillaWeekdayZodiacBandV380() {
       window.removeEventListener('resize', refresh);
       window.removeEventListener('gannzilla:ring-two-numbering-refresh', refresh);
       window.removeEventListener('gannzilla:canonical-property-change-v326', refresh);
-      delete window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V380;
-      delete window.__auditGannzillaWeekdayZodiacBandV380;
+      delete window.GANNZILLA_WEEKDAY_ZODIAC_BAND_V381;
+      delete window.__auditGannzillaWeekdayZodiacBandV381;
     };
   }, []);
 
