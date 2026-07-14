@@ -4,6 +4,7 @@ import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaExistingProtractorFontDoubleV343 from './GannzillaExistingProtractorFontDoubleV343';
 import GannzillaWeekdayZodiacBandV380 from './GannzillaWeekdayZodiacBandV380';
 import GannzillaHideCalendarLabelsV359 from './GannzillaHideCalendarLabelsV359';
+import GannzillaHideEmptyProtractorBandV388 from './GannzillaHideEmptyProtractorBandV388';
 import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
@@ -21,7 +22,7 @@ import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopP
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 380: add the six-day work cycle and zodiac labels inside the existing angle band. */
+/** Build 388: preserve angle labels while optionally hiding the empty native protractor band frame. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
@@ -35,6 +36,7 @@ export default function GannzillaBareWheelV224() {
     window.GANNZILLA_BARE_WHEEL_V344 = true;
     window.GANNZILLA_BARE_WHEEL_V368 = true;
     window.GANNZILLA_BARE_WHEEL_V380 = true;
+    window.GANNZILLA_BARE_WHEEL_V388 = true;
     const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
@@ -50,7 +52,7 @@ export default function GannzillaBareWheelV224() {
       const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
       return {
         ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
-        build: 380,
+        build: 388,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
         chartToolbarDirectHostMount: true,
@@ -82,6 +84,8 @@ export default function GannzillaBareWheelV224() {
         existingProtractorLabelsHorizontal: true,
         protractorBackgroundOverlay: false,
         addedAngles: false,
+        emptyProtractorBandCanBeHidden: true,
+        emptyProtractorBandParameter: 'hideEmptyProtractorBand=true',
         oldV318PanelMounted: false,
         oldV319BridgeMounted: false,
         oldV320AdapterMounted: false,
@@ -105,6 +109,7 @@ export default function GannzillaBareWheelV224() {
     window.__auditGannzillaBareWheelV344 = audit;
     window.__auditGannzillaBareWheelV368 = audit;
     window.__auditGannzillaBareWheelV380 = audit;
+    window.__auditGannzillaBareWheelV388 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
       delete window.GANNZILLA_BARE_WHEEL_V327;
@@ -117,6 +122,7 @@ export default function GannzillaBareWheelV224() {
       delete window.GANNZILLA_BARE_WHEEL_V344;
       delete window.GANNZILLA_BARE_WHEEL_V368;
       delete window.GANNZILLA_BARE_WHEEL_V380;
+      delete window.GANNZILLA_BARE_WHEEL_V388;
       delete window.__auditGannzillaBareWheelV326;
       delete window.__auditGannzillaBareWheelV327;
       delete window.__auditGannzillaBareWheelV328;
@@ -128,6 +134,7 @@ export default function GannzillaBareWheelV224() {
       delete window.__auditGannzillaBareWheelV344;
       delete window.__auditGannzillaBareWheelV368;
       delete window.__auditGannzillaBareWheelV380;
+      delete window.__auditGannzillaBareWheelV388;
     };
   }, []);
 
@@ -208,6 +215,7 @@ export default function GannzillaBareWheelV224() {
 
       <GannzillaExistingProtractorFontDoubleV343 />
       <GannzillaHideCalendarLabelsV359 />
+      <GannzillaHideEmptyProtractorBandV388 />
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaWeekdayZodiacBandV380 />
