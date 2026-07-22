@@ -22,8 +22,22 @@ import GannzillaEventStormGuardV383 from './GannzillaEventStormGuardV383';
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
 
-/** Build 383: preserve the v382 visuals while preventing redundant synthetic-event storms. */
+function urlBool(name, fallback) {
+  try {
+    const query = new URLSearchParams(window.location.search || '');
+    if (!query.has(name)) return fallback;
+    const value = String(query.get(name) || '').toLowerCase();
+    return value === 'true' || value === '1' || value === 'yes' || value === 'on';
+  } catch (_) {
+    return fallback;
+  }
+}
+
+/** Build 385: hard-disable angle and weekday/zodiac overlays when URL flags are false. */
 export default function GannzillaBareWheelV224() {
+  const showProtractorOverlay = urlBool('showProtractor', true);
+  const showWeekdayZodiacOverlay = showProtractorOverlay && urlBool('showWeekdayZodiacBand', true);
+
   React.useEffect(() => {
     window.GANNZILLA_BARE_WHEEL_V326 = true;
     window.GANNZILLA_BARE_WHEEL_V327 = true;
@@ -37,6 +51,7 @@ export default function GannzillaBareWheelV224() {
     window.GANNZILLA_BARE_WHEEL_V368 = true;
     window.GANNZILLA_BARE_WHEEL_V380 = true;
     window.GANNZILLA_BARE_WHEEL_V383 = true;
+    window.GANNZILLA_BARE_WHEEL_V385 = true;
     const audit = () => {
       const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
       const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
@@ -52,7 +67,7 @@ export default function GannzillaBareWheelV224() {
       const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
       return {
         ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
-        build: 383,
+        build: 385,
         canonicalPanelMounted: Boolean(canonicalPanel),
         chartToolbarMounted: Boolean(chartToolbar),
         chartToolbarDirectHostMount: true,
@@ -67,6 +82,8 @@ export default function GannzillaBareWheelV224() {
         chartToolbarPointerEvents: chartToolbar ? getComputedStyle(chartToolbar).pointerEvents : null,
         visibleLegacyPanelCount: visibleLegacyAsides.length,
         singleVisiblePanelAuthority: true,
+        showProtractorOverlay,
+        showWeekdayZodiacOverlay,
         weekdayZodiacBandMounted: Boolean(weekdayZodiacCanvas),
         weekdayCycle: 6,
         zodiacCycle: 12,
@@ -111,6 +128,7 @@ export default function GannzillaBareWheelV224() {
     window.__auditGannzillaBareWheelV368 = audit;
     window.__auditGannzillaBareWheelV380 = audit;
     window.__auditGannzillaBareWheelV383 = audit;
+    window.__auditGannzillaBareWheelV385 = audit;
     return () => {
       delete window.GANNZILLA_BARE_WHEEL_V326;
       delete window.GANNZILLA_BARE_WHEEL_V327;
@@ -124,6 +142,7 @@ export default function GannzillaBareWheelV224() {
       delete window.GANNZILLA_BARE_WHEEL_V368;
       delete window.GANNZILLA_BARE_WHEEL_V380;
       delete window.GANNZILLA_BARE_WHEEL_V383;
+      delete window.GANNZILLA_BARE_WHEEL_V385;
       delete window.__auditGannzillaBareWheelV326;
       delete window.__auditGannzillaBareWheelV327;
       delete window.__auditGannzillaBareWheelV328;
@@ -136,8 +155,9 @@ export default function GannzillaBareWheelV224() {
       delete window.__auditGannzillaBareWheelV368;
       delete window.__auditGannzillaBareWheelV380;
       delete window.__auditGannzillaBareWheelV383;
+      delete window.__auditGannzillaBareWheelV385;
     };
-  }, []);
+  }, [showProtractorOverlay, showWeekdayZodiacOverlay]);
 
   return (
     <>
@@ -215,11 +235,11 @@ export default function GannzillaBareWheelV224() {
       />
 
       <GannzillaEventStormGuardV383 />
-      <GannzillaExistingProtractorFontDoubleV343 />
+      {showProtractorOverlay && <GannzillaExistingProtractorFontDoubleV343 />}
       <GannzillaHideCalendarLabelsV359 />
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
-      <GannzillaWeekdayZodiacBandV380 />
+      {showWeekdayZodiacOverlay && <GannzillaWeekdayZodiacBandV380 />}
       <GannzillaTopToolbarV231 />
       <GannzillaArabicLocalizationV248 />
       <GannzillaPanelFrameCleanupV297 />
