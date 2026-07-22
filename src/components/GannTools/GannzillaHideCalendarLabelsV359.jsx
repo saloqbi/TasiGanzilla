@@ -1,9 +1,11 @@
 import React from 'react';
 
-const PATCH_KEY = '__gannzillaHideCalendarLabelsV386';
+const PATCH_KEY = '__gannzillaHideCalendarLabelsV389';
 const ENGLISH_MONTH_PATTERN = /\b(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/i;
 const ARABIC_MONTH_PATTERN = /(?:يناير|فبراير|مارس|أبريل|مايو|يونيو|يوليو|أغسطس|سبتمبر|أكتوبر|نوفمبر|ديسمبر)/;
-const ANGLE_PATTERN = /^\s*(?:0|[1-9]\d?|[12]\d\d|3[0-5]\d|360)°?\s*$/;
+// Only labels that explicitly include the degree symbol are angle labels.
+// Bare numeric labels belong to the wheel and must never be hidden.
+const ANGLE_PATTERN = /^\s*(?:0|[1-9]\d?|[12]\d\d|3[0-5]\d|360)°\s*$/;
 
 function queryParams() {
   try {
@@ -72,7 +74,7 @@ function eraseEverythingOutsideMainWheel() {
   ctx.fill('evenodd');
   ctx.restore();
 
-  canvas.dataset.gannzillaOuterFramesHiddenV386 = 'true';
+  canvas.dataset.gannzillaOuterFramesHiddenV389 = 'true';
   canvas.dataset.gannzillaVisibleOuterRadius = String(wheelRadius);
   return true;
 }
@@ -158,12 +160,12 @@ export default function GannzillaHideCalendarLabelsV359() {
     window.addEventListener('gannzilla:canonical-property-change-v326', scheduleBurst);
     window.addEventListener('gannzilla:ring-two-numbering-refresh', scheduleBurst);
 
-    window.GANNZILLA_HIDE_CALENDAR_LABELS_V386 = true;
-    window.__auditGannzillaHideCalendarLabelsV386 = () => {
+    window.GANNZILLA_HIDE_CALENDAR_LABELS_V389 = true;
+    window.__auditGannzillaHideCalendarLabelsV389 = () => {
       const canvas = findWheelCanvas();
       return {
-        ok: Boolean(window[PATCH_KEY]) && (!shouldHardHideOuterFrames() || canvas?.dataset?.gannzillaOuterFramesHiddenV386 === 'true'),
-        build: 386,
+        ok: Boolean(window[PATCH_KEY]) && (!shouldHardHideOuterFrames() || canvas?.dataset?.gannzillaOuterFramesHiddenV389 === 'true'),
+        build: 389,
         hideCalendarLabels: boolParam('hideCalendarLabels', false),
         hardHideOuterFrames: shouldHardHideOuterFrames(),
         showProtractor: boolParam('showProtractor', true),
@@ -171,6 +173,8 @@ export default function GannzillaHideCalendarLabelsV359() {
         showChronometer: boolParam('showChronometer', false),
         outerFramesErasedAfterCanvasRender: true,
         mainWheelPreserved: true,
+        bareWheelNumbersPreserved: true,
+        angleLabelsRequireDegreeSymbol: true,
       };
     };
 
@@ -184,8 +188,8 @@ export default function GannzillaHideCalendarLabelsV359() {
       window.removeEventListener('gannzilla:canonical-property-change-v326', scheduleBurst);
       window.removeEventListener('gannzilla:ring-two-numbering-refresh', scheduleBurst);
       uninstall();
-      delete window.GANNZILLA_HIDE_CALENDAR_LABELS_V386;
-      delete window.__auditGannzillaHideCalendarLabelsV386;
+      delete window.GANNZILLA_HIDE_CALENDAR_LABELS_V389;
+      delete window.__auditGannzillaHideCalendarLabelsV389;
     };
   }, []);
 
