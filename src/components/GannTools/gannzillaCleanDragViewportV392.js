@@ -1,5 +1,5 @@
-const STYLE_ID = 'gannzilla-clean-drag-viewport-v392';
-const STATE_KEY = '__gannzillaCleanDragViewportV392';
+const STYLE_ID = 'gannzilla-clean-drag-viewport-v393';
+const STATE_KEY = '__gannzillaCleanDragViewportV393';
 
 function boolParam(name, fallback = false) {
   try {
@@ -55,7 +55,33 @@ function installStyle() {
       pointer-events: none !important;
     }
 
-    canvas[data-gannzilla-clean-drag-v392="true"] {
+    [data-gannzilla-toolbar="true"] {
+      display: flex !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+      height: 24px !important;
+      min-height: 24px !important;
+      max-height: 24px !important;
+      overflow: visible !important;
+    }
+
+    [data-gannzilla-toolbar="true"] [data-gannzilla-control-strip="true"] {
+      display: flex !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+    }
+
+    [data-gannzilla-duplicate-toolbar-v393="true"] {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      height: 0 !important;
+      min-height: 0 !important;
+      max-height: 0 !important;
+      overflow: hidden !important;
+    }
+
+    canvas[data-gannzilla-clean-drag-v393="true"] {
       cursor: grab !important;
       touch-action: none !important;
       user-select: none !important;
@@ -63,11 +89,36 @@ function installStyle() {
       transform-origin: center center !important;
     }
 
-    canvas[data-gannzilla-clean-drag-v392="true"][data-dragging="true"] {
+    canvas[data-gannzilla-clean-drag-v393="true"][data-dragging="true"] {
       cursor: grabbing !important;
     }
   `;
   document.head.appendChild(style);
+}
+
+function hideDuplicateToolbars() {
+  const canonicalToolbar = document.querySelector('[data-gannzilla-toolbar="true"]');
+  if (!canonicalToolbar) return;
+
+  Array.from(document.body.querySelectorAll('*')).forEach((element) => {
+    if (element === canonicalToolbar || canonicalToolbar.contains(element)) return;
+    if (element.closest?.('aside')) return;
+    if (element.dataset?.gannzillaDuplicateToolbarV393 === 'true') return;
+
+    const style = window.getComputedStyle(element);
+    if (style.position !== 'fixed' && style.position !== 'absolute') return;
+
+    const rect = element.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+
+    const nearTop = rect.top >= 0 && rect.top <= 48;
+    const toolbarShape = rect.width >= 280 && rect.height >= 18 && rect.height <= 42;
+    const hasControls = Boolean(element.querySelector('button, input, select, [role="button"]'));
+
+    if (nearTop && toolbarShape && hasControls) {
+      element.dataset.gannzillaDuplicateToolbarV393 = 'true';
+    }
+  });
 }
 
 function hideAuxiliaryBars(canvas) {
@@ -77,6 +128,7 @@ function hideAuxiliaryBars(canvas) {
   Array.from(document.body.querySelectorAll('*')).forEach((element) => {
     if (element === canvas || element.contains(canvas) || canvas.contains?.(element)) return;
     if (element.closest?.('aside')) return;
+    if (element.closest?.('[data-gannzilla-toolbar="true"]')) return;
 
     const style = window.getComputedStyle(element);
     if (style.position !== 'fixed' && style.position !== 'absolute') return;
@@ -84,11 +136,16 @@ function hideAuxiliaryBars(canvas) {
     const rect = element.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
 
-    const bottomBar = rect.top >= viewportHeight - 48 && rect.width >= Math.max(300, viewportWidth * 0.35) && rect.height <= 48;
-    const rightBar = rect.left >= viewportWidth - 110 && rect.width <= 110 && rect.height >= 80 && rect.top >= 24;
+    const bottomBar = rect.top >= viewportHeight - 48
+      && rect.width >= Math.max(300, viewportWidth * 0.35)
+      && rect.height <= 48;
+    const rightBar = rect.left >= viewportWidth - 110
+      && rect.width <= 110
+      && rect.height >= 80
+      && rect.top >= 48;
 
     if (bottomBar || rightBar) {
-      element.dataset.gannzillaHiddenAuxBarV392 = 'true';
+      element.dataset.gannzillaHiddenAuxBarV393 = 'true';
       element.style.setProperty('display', 'none', 'important');
       element.style.setProperty('visibility', 'hidden', 'important');
       element.style.setProperty('pointer-events', 'none', 'important');
@@ -106,7 +163,7 @@ function prepareViewport(canvas) {
       node.style.setProperty('overflow', 'hidden', 'important');
       node.style.setProperty('scrollbar-width', 'none', 'important');
       node.style.setProperty('-ms-overflow-style', 'none', 'important');
-      node.dataset.gannzillaCleanViewportV392 = 'true';
+      node.dataset.gannzillaCleanViewportV393 = 'true';
     }
     node = node.parentElement;
     depth += 1;
@@ -114,8 +171,8 @@ function prepareViewport(canvas) {
 }
 
 function bindDrag(canvas) {
-  if (canvas.dataset.gannzillaCleanDragV392 === 'true') return;
-  canvas.dataset.gannzillaCleanDragV392 = 'true';
+  if (canvas.dataset.gannzillaCleanDragV393 === 'true') return;
+  canvas.dataset.gannzillaCleanDragV393 = 'true';
 
   let offsetX = 0;
   let offsetY = 0;
@@ -166,12 +223,13 @@ function bindDrag(canvas) {
 function applyCleanDragView() {
   if (!enabled()) return false;
   installStyle();
+  hideDuplicateToolbars();
   const canvas = findMainWheelCanvas();
   if (!canvas) return false;
   prepareViewport(canvas);
   hideAuxiliaryBars(canvas);
   bindDrag(canvas);
-  window.GANNZILLA_CLEAN_DRAG_VIEWPORT_V392 = true;
+  window.GANNZILLA_CLEAN_DRAG_VIEWPORT_V393 = true;
   return true;
 }
 
