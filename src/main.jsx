@@ -6,6 +6,7 @@ import './components/GannTools/gannzillaCleanDragViewportV392';
 import './components/GannTools/gannzillaRemoveSideShapeBarV401';
 import './components/GannTools/gannzillaClipOuterFramesV406';
 import './components/GannTools/gannzillaUprightSymmetricAllNumbersV412';
+import './components/GannTools/gannzillaBlankFirstAddedRingV414';
 import './components/GannTools/gannzillaKeyboardMouseControlV413';
 import './styles/globals.css';
 
