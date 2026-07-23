@@ -1,9 +1,6 @@
 import React from 'react';
 import GannzillaClassicBaseNoLegacyChromeV403 from './GannzillaClassicBaseNoLegacyChromeV403';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
-import GannzillaExistingProtractorFontDoubleV343 from './GannzillaExistingProtractorFontDoubleV343';
-import GannzillaWeekdayZodiacBandV380 from './GannzillaWeekdayZodiacBandV380';
-import GannzillaHideCalendarLabelsV359 from './GannzillaHideCalendarLabelsV359';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
@@ -15,45 +12,111 @@ import GannzillaChartImageExportV368 from './GannzillaChartImageExportV368';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaEventStormGuardV383 from './GannzillaEventStormGuardV383';
 
+const BUILD = 405;
 const TOOLBAR_HEIGHT = 24;
 const CLEAN_PANEL_ID = 'gannzilla-clean-property-panel-v325';
+const OUTER_BAND_PARAMS = [
+  'showProtractor',
+  'showWeekdayZodiacBand',
+  'showChronometer',
+  'showCosmogram',
+];
+const OUTER_SECTION_PATTERN = /\b(?:Protractor|Chronometer|Cosmogram)\b|المنقلة|الكرونومتر|المؤقت|الكوزموغرام|الخريطة الفلكية/i;
 
-function urlBool(name, fallback) {
+function forceOuterBandsOffInUrl() {
+  if (typeof window === 'undefined') return true;
+
   try {
-    const query = new URLSearchParams(window.location.search || '');
-    if (!query.has(name)) return fallback;
-    const value = String(query.get(name) || '').toLowerCase();
-    return value === 'true' || value === '1' || value === 'yes' || value === 'on';
+    const url = new URL(window.location.href);
+    let changed = false;
+
+    OUTER_BAND_PARAMS.forEach((name) => {
+      if (url.searchParams.get(name) !== 'false') {
+        url.searchParams.set(name, 'false');
+        changed = true;
+      }
+    });
+
+    if (changed) {
+      window.history.replaceState(
+        window.history.state,
+        '',
+        `${url.pathname}${url.search}${url.hash}`,
+      );
+    }
   } catch (_) {
-    return fallback;
+    // The active base still omits all outer overlay components below.
   }
+
+  return true;
 }
 
-/** Build 403: remove the legacy top icon toolbar, Hide button and custom pan scrollbars from the active base wheel. */
-export default function GannzillaBareWheelV224() {
-  const showProtractorOverlay = urlBool('showProtractor', true);
-  const showWeekdayZodiacOverlay = showProtractorOverlay && urlBool('showWeekdayZodiacBand', true);
+function hideOuterBandControls() {
+  if (typeof document === 'undefined') return 0;
+  let hidden = 0;
 
-  React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V403 = true;
-    window.__auditGannzillaBareWheelV403 = () => ({
-      ok: true,
-      build: 403,
-      legacyTopToolbarRemoved: !Array.from(document.querySelectorAll('[data-gannzilla-core-legacy-toolbar-removed-v403="true"]')).some(
-        (node) => window.getComputedStyle(node).display !== 'none',
-      ),
-      legacyHideButtonRemoved: !Array.from(document.querySelectorAll('[data-gannzilla-core-hide-button-removed-v403="true"]')).some(
-        (node) => window.getComputedStyle(node).display !== 'none',
-      ),
-      pageVerticalRailRemoved: !document.querySelector('[data-gannzilla-page-vertical-rail-v306="true"]'),
-      pageHorizontalRailRemoved: !document.querySelector('[data-gannzilla-page-horizontal-rail-v306="true"]'),
-      topHorizontalPanAssistRemoved: !document.querySelector('[data-gannzilla-horizontal-pan-assist-v311="true"]'),
-      wheelPanAuthorityPreserved: true,
+  Array.from(document.querySelectorAll('aside div')).forEach((section) => {
+    if (!(section instanceof HTMLElement)) return;
+    const header = section.firstElementChild;
+    if (!(header instanceof HTMLElement)) return;
+
+    const headerText = String(header.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!OUTER_SECTION_PATTERN.test(headerText)) return;
+    if (!section.querySelector('input, select, button')) return;
+
+    section.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+      if (input instanceof HTMLInputElement && input.checked) input.click();
+    });
+
+    section.dataset.gannzillaOuterBandControlRemovedV405 = 'true';
+    section.style.setProperty('display', 'none', 'important');
+    section.style.setProperty('visibility', 'hidden', 'important');
+    section.style.setProperty('pointer-events', 'none', 'important');
+    hidden += 1;
+  });
+
+  return hidden;
+}
+
+/** Build 405: permanently remove the outer date, weekday, zodiac and angle bands from the base display. */
+export default function GannzillaBareWheelV224() {
+  React.useState(() => forceOuterBandsOffInUrl());
+
+  React.useLayoutEffect(() => {
+    let disposed = false;
+
+    const enforce = () => {
+      if (disposed) return;
+      forceOuterBandsOffInUrl();
+      window.__gannzillaOuterBandControlsHiddenCountV405 = hideOuterBandControls();
+    };
+
+    enforce();
+    const timers = [0, 30, 80, 160, 320, 700, 1400, 2600]
+      .map((delay) => window.setTimeout(enforce, delay));
+    const observer = new MutationObserver(enforce);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    window.addEventListener('resize', enforce);
+
+    window.GANNZILLA_BARE_WHEEL_V405 = true;
+    window.__auditGannzillaBareWheelV405 = () => ({
+      ok: OUTER_BAND_PARAMS.every((name) => new URLSearchParams(window.location.search).get(name) === 'false'),
+      build: BUILD,
+      protractorOverlayMounted: false,
+      weekdayZodiacOverlayMounted: false,
+      calendarOverlayMounted: false,
+      outerBandControlsHidden: window.__gannzillaOuterBandControlsHiddenCountV405 || 0,
+      baseWheelPreserved: true,
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V403;
-      delete window.__auditGannzillaBareWheelV403;
+      disposed = true;
+      timers.forEach(window.clearTimeout);
+      observer.disconnect();
+      window.removeEventListener('resize', enforce);
+      delete window.GANNZILLA_BARE_WHEEL_V405;
+      delete window.__auditGannzillaBareWheelV405;
+      delete window.__gannzillaOuterBandControlsHiddenCountV405;
     };
   }, []);
 
@@ -116,6 +179,12 @@ export default function GannzillaBareWheelV224() {
           overflow: hidden !important;
           opacity: 0 !important;
         }
+
+        [data-gannzilla-outer-band-control-removed-v405="true"] {
+          display: none !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
       `}</style>
 
       <aside
@@ -125,11 +194,8 @@ export default function GannzillaBareWheelV224() {
       />
 
       <GannzillaEventStormGuardV383 />
-      {showProtractorOverlay && <GannzillaExistingProtractorFontDoubleV343 />}
-      <GannzillaHideCalendarLabelsV359 />
       <GannzillaClassicBaseNoLegacyChromeV403 />
       <GannzillaRingTwoNumberingV223 />
-      {showWeekdayZodiacOverlay && <GannzillaWeekdayZodiacBandV380 />}
       <GannzillaArabicLocalizationV248 />
       <GannzillaPanelFrameCleanupV297 />
       <GannzillaPanelFullWidthV302 />
