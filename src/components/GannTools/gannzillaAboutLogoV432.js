@@ -1,4 +1,4 @@
-const BUILD = 432;
+const BUILD = 433;
 const STATE_KEY = '__gannzillaAboutLogoV432';
 const PANEL_ID = 'gannzilla-pixel-perfect-reference-panel-v421';
 const BUTTON_ID = 'gannzilla-about-info-button-v432';
@@ -42,24 +42,31 @@ function loadLogoDataUri() {
 }
 
 function installStyle() {
-  if (document.getElementById(STYLE_ID)) return;
-  const style = document.createElement('style');
-  style.id = STYLE_ID;
+  let style = document.getElementById(STYLE_ID);
+  if (!style) {
+    style = document.createElement('style');
+    style.id = STYLE_ID;
+    document.head.appendChild(style);
+  }
+
   style.textContent = `
-    #${PANEL_ID} .gz421-preset-bar {
-      grid-template-columns: 24px minmax(0, 1fr) 30px 30px 30px 48px 34px !important;
+    html body #${PANEL_ID}.gz421-panel .gz421-preset-bar {
+      grid-template-columns: 21px minmax(0, 1fr) 27px 27px 27px 48px 36px !important;
       gap: 3px !important;
       align-items: center !important;
+      overflow: visible !important;
+      padding-right: 5px !important;
     }
 
-    #${BUTTON_ID} {
+    html body #${PANEL_ID}.gz421-panel .gz421-preset-bar #${BUTTON_ID} {
+      grid-column: 7 !important;
       width: 28px !important;
       min-width: 28px !important;
       max-width: 28px !important;
       height: 28px !important;
       min-height: 28px !important;
       max-height: 28px !important;
-      margin: 0 !important;
+      margin: 0 auto !important;
       padding: 0 !important;
       border: 1px solid #3779b7 !important;
       border-radius: 50% !important;
@@ -73,9 +80,12 @@ function installStyle() {
       cursor: pointer !important;
       visibility: visible !important;
       opacity: 1 !important;
+      pointer-events: auto !important;
+      overflow: visible !important;
+      transform: none !important;
     }
 
-    #${BUTTON_ID}:hover {
+    html body #${PANEL_ID}.gz421-panel .gz421-preset-bar #${BUTTON_ID}:hover {
       background: linear-gradient(#ffffff, #96cbf4) !important;
       border-color: #1d649f !important;
     }
@@ -190,7 +200,6 @@ function installStyle() {
       cursor: pointer !important;
     }
   `;
-  document.head.appendChild(style);
 }
 
 function closeModal() {
@@ -274,10 +283,18 @@ function mountButton() {
     button.title = 'حول البرنامج';
     button.setAttribute('aria-label', 'حول البرنامج');
     button.addEventListener('click', openModal);
-    bar.appendChild(button);
   }
 
+  if (button.parentElement !== bar) bar.appendChild(button);
+  button.hidden = false;
+  button.removeAttribute('aria-hidden');
+  button.style.setProperty('display', 'inline-flex', 'important');
+  button.style.setProperty('visibility', 'visible', 'important');
+  button.style.setProperty('opacity', '1', 'important');
+  button.style.setProperty('pointer-events', 'auto', 'important');
+
   panel.dataset.gannzillaAboutLogoV432 = 'true';
+  panel.dataset.gannzillaAboutLogoVisibilityFixV433 = 'true';
   return true;
 }
 
@@ -286,28 +303,47 @@ function install() {
   if (!boolParam('showAboutLogo', true) || window[STATE_KEY]) return;
 
   installStyle();
-  const mount = () => { installStyle(); mountButton(); };
+  let frame = 0;
+  const mount = () => {
+    window.cancelAnimationFrame(frame);
+    frame = window.requestAnimationFrame(() => {
+      installStyle();
+      mountButton();
+    });
+  };
+
   mount();
-  [30, 90, 220, 600, 1400, 2800].forEach((delay) => window.setTimeout(mount, delay));
+  [20, 60, 140, 320, 700, 1400, 2800, 5000].forEach((delay) => window.setTimeout(mount, delay));
+  const observer = new MutationObserver(mount);
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  window.addEventListener('resize', mount);
 
   const onKeyDown = (event) => { if (event.key === 'Escape') closeModal(); };
   document.addEventListener('keydown', onKeyDown);
 
   window.GANNZILLA_ABOUT_LOGO_V432 = true;
+  window.GANNZILLA_ABOUT_LOGO_VISIBILITY_FIX_V433 = true;
+  window.__openGannzillaAboutLogoV432 = openModal;
   window.__auditGannzillaAboutLogoV432 = () => {
     const panel = document.getElementById(PANEL_ID);
+    const button = document.getElementById(BUTTON_ID);
+    const rect = button?.getBoundingClientRect();
+    const style = button ? window.getComputedStyle(button) : null;
     return {
-      ok: Boolean(document.getElementById(BUTTON_ID) && panel?.dataset?.gannzillaAboutLogoV432 === 'true'),
+      ok: Boolean(button && panel?.dataset?.gannzillaAboutLogoV432 === 'true' && rect?.width > 0 && rect?.height > 0),
       build: BUILD,
       enabled: boolParam('showAboutLogo', true),
-      informationIconVisible: Boolean(document.getElementById(BUTTON_ID)),
+      informationIconVisible: Boolean(button && style?.display !== 'none' && style?.visibility !== 'hidden' && Number(style?.opacity || 0) > 0),
+      iconWidthPx: rect ? Math.round(rect.width) : null,
+      iconHeightPx: rect ? Math.round(rect.height) : null,
       modalUsesProvidedLogo: true,
       existingPanelControlsPreserved: true,
-      lightweightMount: true,
+      presetBarSevenColumns: true,
+      copyButtonSelectorConflictRemoved: true,
     };
   };
 
-  window[STATE_KEY] = { onKeyDown };
+  window[STATE_KEY] = { onKeyDown, observer };
 }
 
 install();
