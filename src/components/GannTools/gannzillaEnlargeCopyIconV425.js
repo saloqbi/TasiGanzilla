@@ -1,4 +1,4 @@
-const BUILD = 425;
+const BUILD = 433;
 const STYLE_ID = 'gannzilla-enlarge-copy-icon-v425';
 const STATE_KEY = '__gannzillaEnlargeCopyIconV425';
 const PANEL_ID = 'gannzilla-pixel-perfect-reference-panel-v421';
@@ -49,12 +49,12 @@ function installStyle() {
 
   style.textContent = `
     html body #${PANEL_ID}.gz421-panel .gz421-preset-bar {
-      grid-template-columns: 21px minmax(0, 1fr) 27px 27px 27px ${columnSize}px !important;
+      grid-template-columns: 21px minmax(0, 1fr) 27px 27px 27px ${columnSize}px 36px !important;
       align-items: center !important;
+      overflow: visible !important;
     }
 
-    html body #${PANEL_ID}.gz421-panel .gz421-preset-bar button:nth-of-type(4),
-    html body #${PANEL_ID}.gz421-panel .gz421-preset-bar button:last-of-type {
+    html body #${PANEL_ID}.gz421-panel .gz421-preset-bar button[data-gannzilla-copy-icon-enlarged-v425="true"] {
       width: ${buttonSize}px !important;
       min-width: ${buttonSize}px !important;
       max-width: ${buttonSize}px !important;
@@ -114,6 +114,7 @@ function install() {
   window.__auditGannzillaEnlargeCopyIconV425 = () => {
     const panel = document.getElementById(PANEL_ID);
     const button = panel?.querySelector('[data-gannzilla-copy-icon-enlarged-v425="true"]');
+    const aboutButton = document.getElementById('gannzilla-about-info-button-v432');
     const { iconSize, buttonSize } = settings();
     return {
       ok: Boolean(button),
@@ -124,6 +125,8 @@ function install() {
       actualFontSizePx: button ? parseFloat(window.getComputedStyle(button).fontSize) : null,
       actualButtonWidthPx: button ? Math.round(button.getBoundingClientRect().width) : null,
       otherToolbarButtonsPreserved: true,
+      aboutIconColumnReserved: true,
+      aboutIconVisible: aboutButton ? window.getComputedStyle(aboutButton).visibility !== 'hidden' : null,
     };
   };
 
