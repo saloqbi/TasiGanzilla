@@ -1,6 +1,7 @@
 import React from 'react';
 import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
+import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaExistingProtractorFontDoubleV343 from './GannzillaExistingProtractorFontDoubleV343';
 import GannzillaWeekdayZodiacBandV380 from './GannzillaWeekdayZodiacBandV380';
 import GannzillaHideCalendarLabelsV359 from './GannzillaHideCalendarLabelsV359';
@@ -32,15 +33,68 @@ function urlBool(name, fallback) {
   }
 }
 
-/** Build 398: use the single native toolbar from the core wheel; remove duplicate overlay toolbar. */
+function suppressLegacyCoreToolbar() {
+  const restoredToolbar = document.querySelector('[data-gannzilla-toolbar="true"]');
+  let hiddenCount = 0;
+
+  Array.from(document.querySelectorAll('div')).forEach((node) => {
+    if (!(node instanceof HTMLElement)) return;
+    if (node === restoredToolbar || restoredToolbar?.contains(node) || node.closest('[data-gannzilla-toolbar="true"]')) return;
+
+    const style = window.getComputedStyle(node);
+    const rect = node.getBoundingClientRect();
+    if (style.position !== 'fixed') return;
+    if (Math.abs(Number.parseFloat(style.top) || 0) > 1) return;
+    if (rect.height < 20 || rect.height > 34) return;
+    if (rect.width < Math.max(600, window.innerWidth * 0.72)) return;
+
+    const buttons = node.querySelectorAll('button').length;
+    const hasPercent = Array.from(node.querySelectorAll('span')).some((span) => /^\d{1,3}%$/.test(String(span.textContent || '').trim()));
+    const text = String(node.textContent || '');
+    const looksLikeLegacyToolbar = buttons >= 4 && (hasPercent || text.includes('Gannzilla Pro') || text.includes('Clockwise'));
+    if (!looksLikeLegacyToolbar) return;
+
+    node.dataset.gannzillaLegacyCoreToolbarHiddenV400 = 'true';
+    node.style.setProperty('display', 'none', 'important');
+    node.style.setProperty('visibility', 'hidden', 'important');
+    node.style.setProperty('pointer-events', 'none', 'important');
+    hiddenCount += 1;
+  });
+
+  return hiddenCount;
+}
+
+/** Build 400: remove the legacy icon strip and mount the restored toolbar shown in the reference. */
 export default function GannzillaBareWheelV224() {
   const showProtractorOverlay = urlBool('showProtractor', true);
   const showWeekdayZodiacOverlay = showProtractorOverlay && urlBool('showWeekdayZodiacBand', true);
 
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V398 = true;
+    const apply = () => {
+      window.__gannzillaLegacyCoreToolbarHiddenCountV400 = suppressLegacyCoreToolbar();
+    };
+
+    const timers = [0, 40, 120, 260, 600, 1200].map((delay) => window.setTimeout(apply, delay));
+    const observer = new MutationObserver(apply);
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    window.addEventListener('resize', apply);
+
+    window.GANNZILLA_BARE_WHEEL_V400 = true;
+    window.__auditGannzillaBareWheelV400 = () => ({
+      ok: Boolean(document.querySelector('[data-gannzilla-toolbar="true"]')),
+      build: 400,
+      restoredToolbarMounted: Boolean(document.querySelector('[data-gannzilla-toolbar="true"]')),
+      legacyToolbarHiddenCount: window.__gannzillaLegacyCoreToolbarHiddenCountV400 || 0,
+      referenceIconSetEnabled: true,
+    });
+
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V398;
+      timers.forEach(window.clearTimeout);
+      observer.disconnect();
+      window.removeEventListener('resize', apply);
+      delete window.GANNZILLA_BARE_WHEEL_V400;
+      delete window.__auditGannzillaBareWheelV400;
+      delete window.__gannzillaLegacyCoreToolbarHiddenCountV400;
     };
   }, []);
 
@@ -103,6 +157,12 @@ export default function GannzillaBareWheelV224() {
           overflow: hidden !important;
           opacity: 0 !important;
         }
+
+        [data-gannzilla-legacy-core-toolbar-hidden-v400="true"] {
+          display: none !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
       `}</style>
 
       <aside
@@ -115,6 +175,7 @@ export default function GannzillaBareWheelV224() {
       {showProtractorOverlay && <GannzillaExistingProtractorFontDoubleV343 />}
       <GannzillaHideCalendarLabelsV359 />
       <GannzillaClassicFullOptionsV94 />
+      <GannzillaTopToolbarV231 />
       <GannzillaRingTwoNumberingV223 />
       {showWeekdayZodiacOverlay && <GannzillaWeekdayZodiacBandV380 />}
       <GannzillaArabicLocalizationV248 />
