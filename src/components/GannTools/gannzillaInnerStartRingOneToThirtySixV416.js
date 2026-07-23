@@ -3,7 +3,7 @@ const PATCH_KEY = '__gannzillaInnerStartRingOneToThirtySixV416';
 const PANEL_STORAGE_KEY = 'tasi-gannzilla-canonical-panel-v326';
 const TWO_PI = Math.PI * 2;
 const DIVISIONS = 36;
-const LIGHT_FILL = '#f7f5f0';
+const LIGHT_FILL = '#d8d4cc';
 const STROKE = '#c9c4b8';
 
 const ARABIC_DIGITS = Object.freeze({
