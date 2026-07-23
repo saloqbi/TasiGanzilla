@@ -1,5 +1,5 @@
 import React from 'react';
-import GannzillaClassicFullOptionsV94 from './GannzillaClassicFullOptionsV94';
+import GannzillaClassicBaseNoLegacyChromeV403 from './GannzillaClassicBaseNoLegacyChromeV403';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaExistingProtractorFontDoubleV343 from './GannzillaExistingProtractorFontDoubleV343';
 import GannzillaWeekdayZodiacBandV380 from './GannzillaWeekdayZodiacBandV380';
@@ -29,16 +29,22 @@ function urlBool(name, fallback) {
   }
 }
 
-/** Build 402: remove the custom horizontal and vertical pan scrollbars from the active base wheel. */
+/** Build 403: remove the legacy top icon toolbar, Hide button and custom pan scrollbars from the active base wheel. */
 export default function GannzillaBareWheelV224() {
   const showProtractorOverlay = urlBool('showProtractor', true);
   const showWeekdayZodiacOverlay = showProtractorOverlay && urlBool('showWeekdayZodiacBand', true);
 
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V402 = true;
-    window.__auditGannzillaBareWheelV402 = () => ({
+    window.GANNZILLA_BARE_WHEEL_V403 = true;
+    window.__auditGannzillaBareWheelV403 = () => ({
       ok: true,
-      build: 402,
+      build: 403,
+      legacyTopToolbarRemoved: !Array.from(document.querySelectorAll('[data-gannzilla-core-legacy-toolbar-removed-v403="true"]')).some(
+        (node) => window.getComputedStyle(node).display !== 'none',
+      ),
+      legacyHideButtonRemoved: !Array.from(document.querySelectorAll('[data-gannzilla-core-hide-button-removed-v403="true"]')).some(
+        (node) => window.getComputedStyle(node).display !== 'none',
+      ),
       pageVerticalRailRemoved: !document.querySelector('[data-gannzilla-page-vertical-rail-v306="true"]'),
       pageHorizontalRailRemoved: !document.querySelector('[data-gannzilla-page-horizontal-rail-v306="true"]'),
       topHorizontalPanAssistRemoved: !document.querySelector('[data-gannzilla-horizontal-pan-assist-v311="true"]'),
@@ -46,8 +52,8 @@ export default function GannzillaBareWheelV224() {
     });
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V402;
-      delete window.__auditGannzillaBareWheelV402;
+      delete window.GANNZILLA_BARE_WHEEL_V403;
+      delete window.__auditGannzillaBareWheelV403;
     };
   }, []);
 
@@ -121,7 +127,7 @@ export default function GannzillaBareWheelV224() {
       <GannzillaEventStormGuardV383 />
       {showProtractorOverlay && <GannzillaExistingProtractorFontDoubleV343 />}
       <GannzillaHideCalendarLabelsV359 />
-      <GannzillaClassicFullOptionsV94 />
+      <GannzillaClassicBaseNoLegacyChromeV403 />
       <GannzillaRingTwoNumberingV223 />
       {showWeekdayZodiacOverlay && <GannzillaWeekdayZodiacBandV380 />}
       <GannzillaArabicLocalizationV248 />
