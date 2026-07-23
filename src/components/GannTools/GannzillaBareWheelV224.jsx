@@ -4,7 +4,6 @@ import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaExistingProtractorFontDoubleV343 from './GannzillaExistingProtractorFontDoubleV343';
 import GannzillaWeekdayZodiacBandV380 from './GannzillaWeekdayZodiacBandV380';
 import GannzillaHideCalendarLabelsV359 from './GannzillaHideCalendarLabelsV359';
-import GannzillaTopToolbarV231 from './GannzillaTopToolbarV231';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPanelFrameCleanupV297 from './GannzillaPanelFrameCleanupV297';
 import GannzillaPanelFullWidthV302 from './GannzillaPanelFullWidthV302';
@@ -33,131 +32,17 @@ function urlBool(name, fallback) {
   }
 }
 
-/** Build 385: hard-disable angle and weekday/zodiac overlays when URL flags are false. */
+/** Build 398: use the single native toolbar from the core wheel; remove duplicate overlay toolbar. */
 export default function GannzillaBareWheelV224() {
   const showProtractorOverlay = urlBool('showProtractor', true);
   const showWeekdayZodiacOverlay = showProtractorOverlay && urlBool('showWeekdayZodiacBand', true);
 
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V326 = true;
-    window.GANNZILLA_BARE_WHEEL_V327 = true;
-    window.GANNZILLA_BARE_WHEEL_V328 = true;
-    window.GANNZILLA_BARE_WHEEL_V329 = true;
-    window.GANNZILLA_BARE_WHEEL_V331 = true;
-    window.GANNZILLA_BARE_WHEEL_V333 = true;
-    window.GANNZILLA_BARE_WHEEL_V334 = true;
-    window.GANNZILLA_BARE_WHEEL_V343 = true;
-    window.GANNZILLA_BARE_WHEEL_V344 = true;
-    window.GANNZILLA_BARE_WHEEL_V368 = true;
-    window.GANNZILLA_BARE_WHEEL_V380 = true;
-    window.GANNZILLA_BARE_WHEEL_V383 = true;
-    window.GANNZILLA_BARE_WHEEL_V385 = true;
-    const audit = () => {
-      const cleanPanel = document.getElementById(CLEAN_PANEL_ID);
-      const canonicalPanel = cleanPanel?.querySelector('.gannzilla-canonical-property-panel-v326');
-      const chartToolbar = cleanPanel?.querySelector('.gannzilla-chart-toolbar-v328');
-      const chartImageExportButton = chartToolbar?.querySelector('[data-gannzilla-chart-image-export-v368="true"]');
-      const horizontalBar = document.querySelector('[data-gannzilla-horizontal-pan-assist-v311="true"]');
-      const weekdayZodiacCanvas = document.querySelector('canvas[data-gannzilla-weekday-zodiac-band-v382="true"]');
-      const panelRect = cleanPanel?.getBoundingClientRect?.();
-      const barRect = horizontalBar?.getBoundingClientRect?.();
-      const visibleLegacyAsides = Array.from(document.querySelectorAll('aside'))
-        .filter((aside) => aside.id !== CLEAN_PANEL_ID)
-        .filter((aside) => getComputedStyle(aside).display !== 'none');
-      const panelClear = Boolean(!panelRect || !barRect || barRect.left >= panelRect.right);
-      return {
-        ok: Boolean(cleanPanel && canonicalPanel && chartToolbar && panelClear && visibleLegacyAsides.length === 0),
-        build: 385,
-        canonicalPanelMounted: Boolean(canonicalPanel),
-        chartToolbarMounted: Boolean(chartToolbar),
-        chartToolbarDirectHostMount: true,
-        existingChartToolbarImageExportMounted: Boolean(chartImageExportButton),
-        chartToolbarFunctions: ['select', 'add', 'delete', 'rename', 'image-export'],
-        chartToolbarShortcuts: ['Insert', 'Delete', 'F2', 'Ctrl+S'],
-        horizontalBarMounted: Boolean(horizontalBar),
-        horizontalBarClearsPropertyPanel: panelClear,
-        panelRightPx: panelRect ? Math.round(panelRect.right) : null,
-        horizontalBarLeftPx: barRect ? Math.round(barRect.left) : null,
-        panelPointerEvents: cleanPanel ? getComputedStyle(cleanPanel).pointerEvents : null,
-        chartToolbarPointerEvents: chartToolbar ? getComputedStyle(chartToolbar).pointerEvents : null,
-        visibleLegacyPanelCount: visibleLegacyAsides.length,
-        singleVisiblePanelAuthority: true,
-        showProtractorOverlay,
-        showWeekdayZodiacOverlay,
-        weekdayZodiacBandMounted: Boolean(weekdayZodiacCanvas),
-        weekdayCycle: 6,
-        zodiacCycle: 12,
-        referenceSequencePreserved: 'PISCES_FRIDAY -> ARIES_SUNDAY -> TAURUS_MONDAY',
-        clockwiseAndCounterClockwiseSupported: true,
-        counterClockwiseNumbersRemainVisible: true,
-        counterClockwiseShortArcWedges: true,
-        innerRingAlignmentMode: 'DYNAMIC_VALUE_MODULO_36',
-        firstCellCenterAxis: 'NORTH_90_DEGREES',
-        sectorCentering: 'HALF_CELL_OFFSET_APPLIED',
-        startValue1Alignment: '1_CENTERED_NORTH_THEN_2',
-        startValue3600Alignment: '36_AND_3600_CENTERED_NORTH',
-        existingProtractorAngleFontPx: 24,
-        existingProtractorAngleFontScale: 2,
-        existingProtractorLabelsHorizontal: true,
-        protractorBackgroundOverlay: false,
-        addedAngles: false,
-        visualReferencePreserved: 'V382',
-        eventStormGuardMounted: window.GANNZILLA_EVENT_STORM_GUARD_V383 === true,
-        pointerEventsBlockedByGuard: false,
-        oldV318PanelMounted: false,
-        oldV319BridgeMounted: false,
-        oldV320AdapterMounted: false,
-        wheelRendererPreserved: true,
-        wheelZoomPreserved: true,
-        wheelPanPreserved: true,
-        nativeFullscreenPreserved: true,
-        settingsPanelFixedSide: 'left',
-        topHorizontalScrollbarPreserved: true,
-        verticalScrollbarPreserved: true,
-      };
-    };
-    window.__auditGannzillaBareWheelV326 = audit;
-    window.__auditGannzillaBareWheelV327 = audit;
-    window.__auditGannzillaBareWheelV328 = audit;
-    window.__auditGannzillaBareWheelV329 = audit;
-    window.__auditGannzillaBareWheelV331 = audit;
-    window.__auditGannzillaBareWheelV333 = audit;
-    window.__auditGannzillaBareWheelV334 = audit;
-    window.__auditGannzillaBareWheelV343 = audit;
-    window.__auditGannzillaBareWheelV344 = audit;
-    window.__auditGannzillaBareWheelV368 = audit;
-    window.__auditGannzillaBareWheelV380 = audit;
-    window.__auditGannzillaBareWheelV383 = audit;
-    window.__auditGannzillaBareWheelV385 = audit;
+    window.GANNZILLA_BARE_WHEEL_V398 = true;
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V326;
-      delete window.GANNZILLA_BARE_WHEEL_V327;
-      delete window.GANNZILLA_BARE_WHEEL_V328;
-      delete window.GANNZILLA_BARE_WHEEL_V329;
-      delete window.GANNZILLA_BARE_WHEEL_V331;
-      delete window.GANNZILLA_BARE_WHEEL_V333;
-      delete window.GANNZILLA_BARE_WHEEL_V334;
-      delete window.GANNZILLA_BARE_WHEEL_V343;
-      delete window.GANNZILLA_BARE_WHEEL_V344;
-      delete window.GANNZILLA_BARE_WHEEL_V368;
-      delete window.GANNZILLA_BARE_WHEEL_V380;
-      delete window.GANNZILLA_BARE_WHEEL_V383;
-      delete window.GANNZILLA_BARE_WHEEL_V385;
-      delete window.__auditGannzillaBareWheelV326;
-      delete window.__auditGannzillaBareWheelV327;
-      delete window.__auditGannzillaBareWheelV328;
-      delete window.__auditGannzillaBareWheelV329;
-      delete window.__auditGannzillaBareWheelV331;
-      delete window.__auditGannzillaBareWheelV333;
-      delete window.__auditGannzillaBareWheelV334;
-      delete window.__auditGannzillaBareWheelV343;
-      delete window.__auditGannzillaBareWheelV344;
-      delete window.__auditGannzillaBareWheelV368;
-      delete window.__auditGannzillaBareWheelV380;
-      delete window.__auditGannzillaBareWheelV383;
-      delete window.__auditGannzillaBareWheelV385;
+      delete window.GANNZILLA_BARE_WHEEL_V398;
     };
-  }, [showProtractorOverlay, showWeekdayZodiacOverlay]);
+  }, []);
 
   return (
     <>
@@ -177,14 +62,6 @@ export default function GannzillaBareWheelV224() {
           padding: 0 !important;
           overflow: hidden !important;
           background: #ffffff !important;
-        }
-
-        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > div:first-of-type,
-        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > div:nth-of-type(2),
-        [data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"]) > button {
-          display: none !important;
-          visibility: hidden !important;
-          pointer-events: none !important;
         }
 
         #${CLEAN_PANEL_ID} {
@@ -240,7 +117,6 @@ export default function GannzillaBareWheelV224() {
       <GannzillaClassicFullOptionsV94 />
       <GannzillaRingTwoNumberingV223 />
       {showWeekdayZodiacOverlay && <GannzillaWeekdayZodiacBandV380 />}
-      <GannzillaTopToolbarV231 />
       <GannzillaArabicLocalizationV248 />
       <GannzillaPanelFrameCleanupV297 />
       <GannzillaPanelFullWidthV302 />
