@@ -15,6 +15,7 @@ import './components/GannTools/gannzillaEnlargeCopyIconV425';
 import './components/GannTools/gannzillaPngWindowsAssociationV428';
 import './components/GannTools/gannzillaAboutLogoV432';
 import './components/GannTools/gannzillaBilingualPanelSelectorV434';
+import './components/GannTools/gannzillaLanguageControlV435';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
