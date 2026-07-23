@@ -12,7 +12,7 @@ import './components/GannTools/gannzillaHideNativeWheelScrollbarsV417';
 import './components/GannTools/gannzillaReferencePanelExtraLargeV423';
 import './components/GannTools/gannzillaRemovePanelBrandV424';
 import './components/GannTools/gannzillaEnlargeCopyIconV425';
-import './components/GannTools/gannzillaCopyWheelToPaintV426';
+import './components/GannTools/gannzillaDirectOpenPaintV427';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
