@@ -9,7 +9,7 @@ import './components/GannTools/gannzillaRepeatFirstRingOneToNineV415';
 import './components/GannTools/gannzillaInnerStartRingOneToThirtySixV416';
 import './components/GannTools/gannzillaKeyboardMouseControlV413';
 import './components/GannTools/gannzillaHideNativeWheelScrollbarsV417';
-import './components/GannTools/gannzillaReferencePanelLTRWideV422';
+import './components/GannTools/gannzillaReferencePanelExtraLargeV423';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
