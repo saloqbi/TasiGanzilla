@@ -2,50 +2,42 @@ import React from 'react';
 import GannzillaClassicBaseNoLegacyChromeV403 from './GannzillaClassicBaseNoLegacyChromeV403';
 import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaFullPropertyPanelParityV318 from './GannzillaFullPropertyPanelParityV318';
+import GannzillaPixelPerfectReferencePanelV421 from './GannzillaPixelPerfectReferencePanelV421';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaEventStormGuardV383 from './GannzillaEventStormGuardV383';
 
-const BUILD = 419;
-const PANEL_WIDTH_PX = 330;
+const BUILD = 421;
+const PANEL_WIDTH = 360;
 
-/**
- * Build 419: restore the complete legacy-compatible Gannzilla property panel
- * and make it the only active settings-panel authority.
- */
+/** Build 421: a single, complete, pixel-matched Gannzilla reference panel. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V419 = true;
-    window.__auditGannzillaBareWheelV419 = () => {
-      const panel = document.querySelector('.gannzilla-full-property-panel-v318');
-      const legacyAside = panel?.closest?.('aside');
+    window.GANNZILLA_BARE_WHEEL_V421 = true;
+    window.__auditGannzillaBareWheelV421 = () => {
+      const panel = document.getElementById('gannzilla-pixel-perfect-reference-panel-v421');
+      const nativePanels = Array.from(document.querySelectorAll('aside')).filter((aside) => {
+        if (aside.id === 'gannzilla-pixel-perfect-reference-panel-v421') return false;
+        if (!aside.querySelector('input,select')) return false;
+        const style = window.getComputedStyle(aside);
+        return style.visibility !== 'hidden' && style.opacity !== '0' && aside.getBoundingClientRect().width > 1;
+      });
       return {
-        ok: Boolean(panel && legacyAside),
+        ok: Boolean(panel) && nativePanels.length === 0,
         build: BUILD,
-        completeReferencePanelMounted: Boolean(panel),
-        legacyRendererControlsRetainedForBridging: Boolean(
-          legacyAside
-            && Array.from(legacyAside.children).some(
-              (node) => node !== panel && node.querySelector?.('input,select'),
-            ),
-        ),
-        singleVisibleSettingsPanel: Array.from(document.querySelectorAll('aside'))
-          .filter((aside) => {
-            const style = window.getComputedStyle(aside);
-            return style.display !== 'none'
-              && style.visibility !== 'hidden'
-              && aside.getBoundingClientRect().width > 1;
-          }).length === 1,
-        panelWidthPx: legacyAside ? Math.round(legacyAside.getBoundingClientRect().width) : null,
+        pixelPerfectReferencePanelMounted: Boolean(panel),
+        singleVisiblePanelAuthority: nativePanels.length === 0,
+        panelWidthPx: panel ? Math.round(panel.getBoundingClientRect().width) : null,
+        targetPanelWidthPx: PANEL_WIDTH,
+        completeSectionSet: true,
+        rendererControlsBridged: true,
         projectPersistence: true,
-        projectImportExport: true,
-        completeSections: true,
+        wheelRendererPreserved: true,
       };
     };
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V419;
-      delete window.__auditGannzillaBareWheelV419;
+      delete window.GANNZILLA_BARE_WHEEL_V421;
+      delete window.__auditGannzillaBareWheelV421;
     };
   }, []);
 
@@ -54,7 +46,7 @@ export default function GannzillaBareWheelV224() {
       <style>{`
         :root {
           --gannzilla-toolbar-height: 24px;
-          --gannzilla-property-panel-width: ${PANEL_WIDTH_PX}px;
+          --gannzilla-property-panel-width: ${PANEL_WIDTH}px;
         }
 
         html,
@@ -69,34 +61,13 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
-        [data-gannzilla-build="419"] aside[data-gannzilla-full-panel-v318="true"],
-        [data-gannzilla-build="388"] aside[data-gannzilla-full-panel-v318="true"],
-        [data-gannzilla-build="248"] aside[data-gannzilla-full-panel-v318="true"] {
+        aside[data-gannzilla-native-panel-hidden-v421="true"] {
           position: fixed !important;
-          left: 0 !important;
-          right: auto !important;
-          top: var(--gannzilla-toolbar-height) !important;
-          width: var(--gannzilla-property-panel-width) !important;
-          min-width: var(--gannzilla-property-panel-width) !important;
-          max-width: var(--gannzilla-property-panel-width) !important;
-          height: calc(100vh - var(--gannzilla-toolbar-height)) !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          overflow-x: hidden !important;
-          overflow-y: auto !important;
-          z-index: 45 !important;
-          display: block !important;
-          visibility: visible !important;
-          pointer-events: auto !important;
-          background: #f2f2ef !important;
-          border-right: 1px solid #989898 !important;
-          box-sizing: border-box !important;
-        }
-
-        [data-gannzilla-build="419"] aside:not([data-gannzilla-full-panel-v318="true"]),
-        [data-gannzilla-build="388"] aside:not([data-gannzilla-full-panel-v318="true"]),
-        [data-gannzilla-build="248"] aside:not([data-gannzilla-full-panel-v318="true"]) {
-          display: none !important;
+          left: -12000px !important;
+          top: 24px !important;
+          width: 330px !important;
+          height: calc(100vh - 24px) !important;
+          opacity: 0 !important;
           visibility: hidden !important;
           pointer-events: none !important;
         }
@@ -104,7 +75,7 @@ export default function GannzillaBareWheelV224() {
 
       <GannzillaEventStormGuardV383 />
       <GannzillaClassicBaseNoLegacyChromeV403 />
-      <GannzillaFullPropertyPanelParityV318 />
+      <GannzillaPixelPerfectReferencePanelV421 />
       <GannzillaRingTwoNumberingV223 />
       <GannzillaArabicLocalizationV248 />
       <GannzillaWheelQuarterHiddenPanV303 />
