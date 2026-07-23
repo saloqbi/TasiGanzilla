@@ -7,6 +7,7 @@ import './components/GannTools/gannzillaRemoveSideShapeBarV401';
 import './components/GannTools/gannzillaClipOuterFramesV406';
 import './components/GannTools/gannzillaUprightSymmetricAllNumbersV412';
 import './components/GannTools/gannzillaRepeatFirstRingOneToNineV415';
+import './components/GannTools/gannzillaInnerStartRingOneToThirtySixV416';
 import './components/GannTools/gannzillaKeyboardMouseControlV413';
 import './styles/globals.css';
 
