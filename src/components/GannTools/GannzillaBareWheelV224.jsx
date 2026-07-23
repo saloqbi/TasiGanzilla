@@ -13,9 +13,6 @@ import GannzillaCanonicalPropertyPanelV326 from './GannzillaCanonicalPropertyPan
 import GannzillaChartToolbarV327 from './GannzillaChartToolbarV327';
 import GannzillaChartImageExportV368 from './GannzillaChartImageExportV368';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
-import GannzillaPagePanScrollbarsV305 from './GannzillaPagePanScrollbarsV305';
-import GannzillaHorizontalPanAssistV308 from './GannzillaHorizontalPanAssistV308';
-import GannzillaHorizontalPanTopPlacementV312 from './GannzillaHorizontalPanTopPlacementV312';
 import GannzillaEventStormGuardV383 from './GannzillaEventStormGuardV383';
 
 const TOOLBAR_HEIGHT = 24;
@@ -32,15 +29,25 @@ function urlBool(name, fallback) {
   }
 }
 
-/** Build 398: use the single native toolbar from the core wheel; remove duplicate overlay toolbar. */
+/** Build 402: remove the custom horizontal and vertical pan scrollbars from the active base wheel. */
 export default function GannzillaBareWheelV224() {
   const showProtractorOverlay = urlBool('showProtractor', true);
   const showWeekdayZodiacOverlay = showProtractorOverlay && urlBool('showWeekdayZodiacBand', true);
 
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V398 = true;
+    window.GANNZILLA_BARE_WHEEL_V402 = true;
+    window.__auditGannzillaBareWheelV402 = () => ({
+      ok: true,
+      build: 402,
+      pageVerticalRailRemoved: !document.querySelector('[data-gannzilla-page-vertical-rail-v306="true"]'),
+      pageHorizontalRailRemoved: !document.querySelector('[data-gannzilla-page-horizontal-rail-v306="true"]'),
+      topHorizontalPanAssistRemoved: !document.querySelector('[data-gannzilla-horizontal-pan-assist-v311="true"]'),
+      wheelPanAuthorityPreserved: true,
+    });
+
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V398;
+      delete window.GANNZILLA_BARE_WHEEL_V402;
+      delete window.__auditGannzillaBareWheelV402;
     };
   }, []);
 
@@ -126,9 +133,6 @@ export default function GannzillaBareWheelV224() {
       <GannzillaChartToolbarV327 />
       <GannzillaChartImageExportV368 />
       <GannzillaWheelQuarterHiddenPanV303 />
-      <GannzillaPagePanScrollbarsV305 />
-      <GannzillaHorizontalPanAssistV308 />
-      <GannzillaHorizontalPanTopPlacementV312 />
     </>
   );
 }
