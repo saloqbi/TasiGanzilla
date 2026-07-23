@@ -4,6 +4,7 @@ import App from './App';
 import './components/GannTools/gannzillaBrightWheelLinesV390';
 import './components/GannTools/gannzillaCleanDragViewportV392';
 import './components/GannTools/gannzillaRemoveSideShapeBarV401';
+import './components/GannTools/gannzillaClipOuterFramesV406';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
