@@ -19,6 +19,12 @@ function safeJson(value, fallback = {}) {
   }
 }
 
+function queryBoolean(query, name) {
+  if (!query.has(name)) return undefined;
+  const value = String(query.get(name) || '').toLowerCase();
+  return value === 'true' || value === '1' || value === 'yes' || value === 'on';
+}
+
 function applyForcedWheelQuery() {
   try {
     const query = new URLSearchParams(window.location.search || '');
@@ -33,6 +39,9 @@ function applyForcedWheelQuery() {
     const safeDivisions = Number.isFinite(divisions) ? divisions : 36;
     const safeStartValue = Number.isFinite(startValue) ? startValue : 1;
     const safeIncrement = Number.isFinite(increment) ? increment : 1;
+    const showProtractor = queryBoolean(query, 'showProtractor');
+    const showChronometer = queryBoolean(query, 'showChronometer');
+    const showCosmogram = queryBoolean(query, 'showCosmogram');
 
     const canonical = safeJson(window.localStorage.getItem(PANEL_STORAGE_KEY), {});
     const nextCanonical = {
@@ -48,6 +57,15 @@ function applyForcedWheelQuery() {
         value: safeStartValue,
         increment: safeIncrement,
       },
+      ...(showProtractor === undefined ? {} : {
+        protractor: { ...(canonical.protractor || {}), visible: showProtractor },
+      }),
+      ...(showChronometer === undefined ? {} : {
+        chronometer: { ...(canonical.chronometer || {}), visible: showChronometer },
+      }),
+      ...(showCosmogram === undefined ? {} : {
+        cosmogram: { ...(canonical.cosmogram || {}), visible: showCosmogram },
+      }),
     };
     window.localStorage.setItem(PANEL_STORAGE_KEY, JSON.stringify(nextCanonical));
     window.__gannzillaCanonicalPanelStateV326 = nextCanonical;
@@ -66,6 +84,15 @@ function applyForcedWheelQuery() {
           increment: safeIncrement,
         },
       },
+      ...(showProtractor === undefined ? {} : {
+        protractor: { ...(project.protractor || {}), visible: showProtractor },
+      }),
+      ...(showChronometer === undefined ? {} : {
+        chronometer: { ...(project.chronometer || {}), visible: showChronometer },
+      }),
+      ...(showCosmogram === undefined ? {} : {
+        cosmogram: { ...(project.cosmogram || {}), visible: showCosmogram },
+      }),
     };
     window.localStorage.setItem(FULL_PROJECT_STORAGE_KEY, JSON.stringify(nextProject));
     window.__gannzillaProjectV318 = nextProject;
