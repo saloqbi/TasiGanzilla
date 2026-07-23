@@ -13,6 +13,7 @@ import './components/GannTools/gannzillaReferencePanelExtraLargeV423';
 import './components/GannTools/gannzillaRemovePanelBrandV424';
 import './components/GannTools/gannzillaEnlargeCopyIconV425';
 import './components/GannTools/gannzillaPngWindowsAssociationV428';
+import './components/GannTools/gannzillaAboutLogoV432';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
