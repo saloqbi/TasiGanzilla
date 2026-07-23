@@ -8,6 +8,16 @@ import GannzillaArabicAiWheelSystemV1 from './components/GannTools/GannzillaArab
 import GannzillaBareWheelV224 from './components/GannTools/GannzillaBareWheelV224';
 
 const PANEL_STORAGE_KEY = 'tasi-gannzilla-canonical-panel-v326';
+const FULL_PROJECT_STORAGE_KEY = 'tasi-gannzilla-project-v318';
+
+function safeJson(value, fallback = {}) {
+  try {
+    const parsed = JSON.parse(value || 'null');
+    return parsed && typeof parsed === 'object' ? parsed : fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
 
 function applyForcedWheelQuery() {
   try {
@@ -19,30 +29,52 @@ function applyForcedWheelQuery() {
     const startValue = Number(query.get('startValue') || 1);
     const increment = Number(query.get('increment') || 1);
 
-    const saved = JSON.parse(window.localStorage.getItem(PANEL_STORAGE_KEY) || '{}');
-    const next = {
-      ...saved,
+    const safeLevels = Number.isFinite(levels) ? levels : 10;
+    const safeDivisions = Number.isFinite(divisions) ? divisions : 36;
+    const safeStartValue = Number.isFinite(startValue) ? startValue : 1;
+    const safeIncrement = Number.isFinite(increment) ? increment : 1;
+
+    const canonical = safeJson(window.localStorage.getItem(PANEL_STORAGE_KEY), {});
+    const nextCanonical = {
+      ...canonical,
       layout: {
-        ...(saved.layout || {}),
+        ...(canonical.layout || {}),
         visible: true,
-        size: Number.isFinite(levels) ? levels : 10,
-        view: Number.isFinite(divisions) ? divisions : 36,
+        size: safeLevels,
+        view: safeDivisions,
       },
       price: {
-        ...(saved.price || {}),
-        value: Number.isFinite(startValue) ? startValue : 1,
-        increment: Number.isFinite(increment) ? increment : 1,
+        ...(canonical.price || {}),
+        value: safeStartValue,
+        increment: safeIncrement,
       },
     };
+    window.localStorage.setItem(PANEL_STORAGE_KEY, JSON.stringify(nextCanonical));
+    window.__gannzillaCanonicalPanelStateV326 = nextCanonical;
 
-    window.localStorage.setItem(PANEL_STORAGE_KEY, JSON.stringify(next));
-    window.__gannzillaCanonicalPanelStateV326 = next;
+    const project = safeJson(window.localStorage.getItem(FULL_PROJECT_STORAGE_KEY), {});
+    const nextProject = {
+      ...project,
+      layout: {
+        ...(project.layout || {}),
+        visible: true,
+        size: safeLevels,
+        view: `Circle of ${safeDivisions}`,
+        price: {
+          ...(project.layout?.price || {}),
+          value: safeStartValue,
+          increment: safeIncrement,
+        },
+      },
+    };
+    window.localStorage.setItem(FULL_PROJECT_STORAGE_KEY, JSON.stringify(nextProject));
+    window.__gannzillaProjectV318 = nextProject;
   } catch (_) {
-    // Fail safely and allow the wheel to render with its normal state.
+    // Fail safely and allow the wheel to render with its persisted state.
   }
 }
 
-// Build 388: URL-forced numbering without using the legacy northLastCell path.
+// Build 419: the restored complete property-panel is the active panel authority.
 const App = () => {
   applyForcedWheelQuery();
 
@@ -55,7 +87,7 @@ const App = () => {
   return (
     <ToolProvider>
       <LanguageProvider>
-        <div data-gannzilla-build="388">
+        <div data-gannzilla-build="419">
           {isArabicAiWheelMode ? (
             <GannzillaArabicAiWheelSystemV1 />
           ) : isGannzillaProWheelMode ? (
