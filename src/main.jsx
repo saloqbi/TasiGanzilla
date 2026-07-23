@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './components/GannTools/gannzillaBrightWheelLinesV390';
 import './components/GannTools/gannzillaCleanDragViewportV392';
+import './components/GannTools/gannzillaToolbarRestoreV394';
 import './components/GannTools/gannzillaSingleToolbarLayoutV399';
 import './styles/globals.css';
 
