@@ -1,11 +1,11 @@
-const BUILD = 445;
+const BUILD = 446;
 const ZOOM_STRIP_ID = 'gannzilla-zoom-fullscreen-strip-v443';
 const OLD_CONTROL_ID = 'gannzilla-wheel-move-control-v444';
 const CONTROL_ID = 'gannzilla-wheel-move-control-v445';
 const TRIGGER_ID = 'gannzilla-wheel-move-trigger-v445';
 const PAD_ID = 'gannzilla-wheel-move-pad-v445';
 const STYLE_ID = 'gannzilla-wheel-move-style-v445';
-const STATE_KEY = '__gannzillaWheelMoveControlV445';
+const STATE_KEY = '__gannzillaWheelMoveControlV446';
 const PAN_STORAGE_KEY = 'gannzilla-wheel-asymmetric-open-pan-v305';
 
 function params() {
@@ -36,6 +36,12 @@ function language() {
 }
 
 function findWheelCanvas() {
+  const preferred = document.querySelector([
+    'canvas[data-gannzilla-keyboard-mouse-control-v413="true"]',
+    'canvas[data-gannzilla-native-wheel-scrollbars-hidden-v417="true"]',
+  ].join(','));
+  if (preferred instanceof HTMLCanvasElement && !preferred.closest?.('aside')) return preferred;
+
   return Array.from(document.querySelectorAll('canvas'))
     .filter((canvas) => {
       if (!(canvas instanceof HTMLCanvasElement) || canvas.closest?.('aside')) return false;
@@ -67,8 +73,8 @@ function readOffset() {
 function persistOffset(offset) {
   try {
     localStorage.setItem(PAN_STORAGE_KEY, JSON.stringify({
-      x: Math.round(offset.x),
-      y: Math.round(offset.y),
+      x: Math.round(Number(offset.x) || 0),
+      y: Math.round(Number(offset.y) || 0),
     }));
   } catch (_) {
     // Runtime movement remains available when storage is blocked.
@@ -78,41 +84,90 @@ function persistOffset(offset) {
 let movementCount = 0;
 let lastMovement = null;
 
-function applyOffset(offset, source = 'move-pad') {
+function applyDirectOffset(offset, source = 'move-pad') {
   const next = {
     x: Number.isFinite(Number(offset?.x)) ? Number(offset.x) : 0,
     y: Number.isFinite(Number(offset?.y)) ? Number(offset.y) : 0,
   };
 
   persistOffset(next);
-  const canvas = findWheelCanvas();
-  if (!(canvas instanceof HTMLCanvasElement)) return false;
 
-  canvas.style.setProperty(
-    'transform',
-    `translate3d(${Math.round(next.x)}px, ${Math.round(next.y)}px, 0)`,
-    'important',
-  );
-  canvas.style.setProperty('transform-origin', 'center center', 'important');
-  canvas.style.setProperty('will-change', 'transform', 'important');
-  canvas.dataset.gannzillaPanX = String(Math.round(next.x));
-  canvas.dataset.gannzillaPanY = String(Math.round(next.y));
-  canvas.dataset.gannzillaWheelMoveV445 = 'true';
+  const applyToCanvas = () => {
+    const canvas = findWheelCanvas();
+    if (!(canvas instanceof HTMLCanvasElement)) return false;
+    canvas.style.setProperty(
+      'transform',
+      `translate3d(${Math.round(next.x)}px, ${Math.round(next.y)}px, 0)`,
+      'important',
+    );
+    canvas.style.setProperty('transform-origin', 'center center', 'important');
+    canvas.style.setProperty('will-change', 'transform', 'important');
+    canvas.dataset.gannzillaPanX = String(Math.round(next.x));
+    canvas.dataset.gannzillaPanY = String(Math.round(next.y));
+    canvas.dataset.gannzillaWheelMoveV446 = 'true';
+    return true;
+  };
 
-  movementCount += 1;
-  lastMovement = { source, x: Math.round(next.x), y: Math.round(next.y), at: Date.now() };
+  const applied = applyToCanvas();
 
-  // Keep keyboard, mouse-drag and any legacy pan authority synchronized.
+  // Synchronize both movement systems already used by keyboard, mouse and legacy pan.
+  window.dispatchEvent(new CustomEvent('gannzilla:page-scrollbar-pan-v305', {
+    detail: { ...next, source, build: BUILD },
+  }));
   window.dispatchEvent(new CustomEvent('gannzilla:wheel-pan-offset-v305', {
     detail: { ...next, source, build: BUILD },
   }));
-  window.dispatchEvent(new CustomEvent('gannzilla:wheel-move-v445', {
+  window.dispatchEvent(new CustomEvent('gannzilla:wheel-move-v446', {
     detail: { ...next, source, build: BUILD },
   }));
-  return true;
+
+  // Re-apply after the active renderer has processed its synchronous listeners.
+  window.requestAnimationFrame(applyToCanvas);
+  window.setTimeout(applyToCanvas, 40);
+  window.setTimeout(applyToCanvas, 140);
+
+  movementCount += 1;
+  lastMovement = { source, x: Math.round(next.x), y: Math.round(next.y), at: Date.now() };
+  return applied;
+}
+
+function invokeKeyboardAuthority(direction) {
+  const key = {
+    left: 'ArrowLeft',
+    right: 'ArrowRight',
+    up: 'ArrowUp',
+    down: 'ArrowDown',
+  }[direction];
+  if (!key || typeof KeyboardEvent !== 'function') return false;
+
+  try {
+    const event = new KeyboardEvent('keydown', {
+      key,
+      code: key,
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+    });
+    window.dispatchEvent(event);
+    return event.defaultPrevented;
+  } catch (_) {
+    return false;
+  }
 }
 
 function moveWheel(direction, source = 'click') {
+  if (direction !== 'center' && invokeKeyboardAuthority(direction)) {
+    const offset = readOffset();
+    movementCount += 1;
+    lastMovement = {
+      source: `${source}:keyboard:${direction}`,
+      x: Math.round(offset.x),
+      y: Math.round(offset.y),
+      at: Date.now(),
+    };
+    return true;
+  }
+
   const current = readOffset();
   const step = Math.round(numberParam('wheelMoveStep', 48, 8, 240));
   const next = {
@@ -122,8 +177,9 @@ function moveWheel(direction, source = 'click') {
     down: { x: current.x, y: current.y + step },
     center: { x: 0, y: 0 },
   }[direction];
+
   if (!next) return false;
-  return applyOffset(next, `${source}:${direction}`);
+  return applyDirectOffset(next, `${source}:${direction}`);
 }
 
 function triggerMarkup() {
@@ -289,7 +345,7 @@ function attachMovement(element, direction) {
 
   element.tabIndex = 0;
   element.setAttribute('role', 'button');
-  element.dataset.gannzillaV445Direction = direction;
+  element.dataset.gannzillaV446Direction = direction;
 
   element.addEventListener('pointerdown', (event) => {
     if (event.button != null && event.button !== 0) return;
@@ -336,6 +392,8 @@ function padButton(direction, className, markup, title) {
 
 function createControl() {
   document.getElementById(OLD_CONTROL_ID)?.remove();
+  document.getElementById(CONTROL_ID)?.remove();
+
   const ar = language() === 'ar';
   const control = document.createElement('div');
   control.id = CONTROL_ID;
@@ -459,15 +517,15 @@ function install() {
   window.addEventListener('scroll', refresh, true);
   document.addEventListener('fullscreenchange', refresh);
 
-  window.GANNZILLA_WHEEL_MOVE_CONTROL_V445 = true;
-  window.__auditGannzillaWheelMoveControlV445 = () => {
+  window.GANNZILLA_WHEEL_MOVE_CONTROL_V446 = true;
+  window.__moveGannzillaWheelV446 = (direction) => moveWheel(direction, 'api');
+  window.__auditGannzillaWheelMoveControlV446 = () => {
     const node = document.getElementById(CONTROL_ID);
     const trigger = document.getElementById(TRIGGER_ID);
     const zoom = document.getElementById(ZOOM_STRIP_ID);
     const canvas = findWheelCanvas();
     const rect = node?.getBoundingClientRect();
     const zoomRect = zoom?.getBoundingClientRect();
-    const offset = readOffset();
     return {
       ok: Boolean(node && trigger && canvas && rect?.width > 0 && rect?.height > 0),
       build: BUILD,
@@ -475,10 +533,10 @@ function install() {
       fixedLeftOfZoomStrip: Boolean(rect && zoomRect && rect.right <= zoomRect.left + 4),
       popupDirectionPad: true,
       movementDirections: ['up', 'left', 'center', 'right', 'down'],
-      directCanvasMovementAuthority: true,
-      legacyV305CaptureConflictRemoved: true,
-      keyboardAndMouseMovementSynchronized: true,
-      currentOffset: offset,
+      keyboardAuthorityFallback: true,
+      directCanvasFallback: true,
+      synchronizedPanEvents: true,
+      currentOffset: readOffset(),
       movementCount,
       lastMovement,
     };
