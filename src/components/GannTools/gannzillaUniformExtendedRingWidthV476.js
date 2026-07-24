@@ -1,9 +1,10 @@
-const BUILD = 476;
-const STATE_KEY = '__gannzillaUniformExtendedRingWidthV476';
+const BUILD = 477;
+const STATE_KEY = '__gannzillaUniformExtendedRingWidthV477';
 const PANEL_STORAGE_KEY = 'tasi-gannzilla-canonical-panel-v326';
 const DRAWING_OVERLAY_ID = 'gannzilla-top-center-drawing-overlay-v471';
 const THEME_OVERLAY_ID = 'gannzilla-wheel-line-theme-overlay-v473';
 const TWO_PI = Math.PI * 2;
+const FIRST_EXTENDED_NUMERIC_RING_INDEX = 10;
 
 function params() {
   try { return new URLSearchParams(window.location.search || ''); }
@@ -111,16 +112,24 @@ function numberColor(value) {
   return '#111111';
 }
 
-function drawText(ctx, value, x, y, degrees, fontSize, maxWidth, weight) {
+function drawText(ctx, value, x, y, degrees, fontSize, maxWidth, weight, forceScreenUpright = false) {
   ctx.save();
   ctx.translate(Math.round(x) + 0.5, Math.round(y) + 0.5);
-  ctx.rotate(normalizeRotation(degrees));
+  if (!forceScreenUpright) ctx.rotate(normalizeRotation(degrees));
   ctx.font = `${weight} ${fontSize}px Tahoma, Arial, sans-serif`;
   ctx.fillStyle = numberColor(value);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(String(value), 0, 0, Math.max(8, maxWidth));
   ctx.restore();
+}
+
+function ringFill(ring, numericRingIndex) {
+  if (ring === 1) return '#f7f5f0';
+  // Ring 11 and every later extension must keep the same light visual weight
+  // requested for the reference ring, rather than introducing a new dark band.
+  if (numericRingIndex >= FIRST_EXTENDED_NUMERIC_RING_INDEX) return '#f7f5f0';
+  return numericRingIndex % 2 === 0 ? '#d8d4cc' : '#f7f5f0';
 }
 
 let drawCount = 0;
@@ -181,8 +190,9 @@ function drawUniformWheel(source = 'refresh') {
     const outer = inner + cfg.ringWidth;
     const mid = (inner + outer) / 2;
     const numericRingIndex = ring - 2;
-    const fill = ring === 1 ? '#f7f5f0' : (numericRingIndex % 2 === 0 ? '#d8d4cc' : '#f7f5f0');
+    const fill = ringFill(ring, numericRingIndex);
     const maxWidth = (TWO_PI * mid / cfg.divisions) * 0.78;
+    const extendedRing = numericRingIndex >= FIRST_EXTENDED_NUMERIC_RING_INDEX;
 
     for (let index = 0; index < cfg.divisions; index += 1) {
       const startDegrees = northOffset + direction * index * sector;
@@ -199,18 +209,39 @@ function drawUniformWheel(source = 'refresh') {
       const value = ring === 1
         ? ((cfg.startValue + index * cfg.increment - 1) % cfg.divisions + cfg.divisions) % cfg.divisions + 1
         : cfg.startValue + (numericRingIndex * cfg.divisions + index) * cfg.increment;
-      drawText(ctx, Number.isInteger(value) ? value : Number(value.toFixed(4)), point.x, point.y, centerDegrees, ring === 1 ? Math.max(11, cfg.fontSize) : cfg.fontSize, maxWidth, ring === 1 ? 800 : cfg.fontWeight);
+      drawText(
+        ctx,
+        Number.isInteger(value) ? value : Number(value.toFixed(4)),
+        point.x,
+        point.y,
+        centerDegrees,
+        ring === 1 ? Math.max(11, cfg.fontSize) : cfg.fontSize,
+        maxWidth,
+        ring === 1 ? 800 : cfg.fontWeight,
+        extendedRing,
+      );
     }
   }
 
   ctx.restore();
-  canvas.dataset.gannzillaUniformExtendedRingWidthV476 = 'true';
+  canvas.dataset.gannzillaUniformExtendedRingWidthV477 = 'true';
   canvas.dataset.gannzillaUniformRingWidthPx = String(cfg.ringWidth);
   canvas.dataset.gannzillaUniformRingCount = String(totalRingCount);
+  canvas.dataset.gannzillaExtendedRingTextUpright = 'true';
+  canvas.dataset.gannzillaExtendedRingFill = 'light';
   drawCount += 1;
-  lastDraw = { source, levels: cfg.levels, totalRingCount, ringWidth: cfg.ringWidth, requiredRadius, at: Date.now() };
-  window.dispatchEvent(new CustomEvent('gannzilla:uniform-ring-width-v476', { detail: { ...lastDraw, build: BUILD } }));
-  window.dispatchEvent(new CustomEvent('gannzilla:wheel-pan-offset-v305', { detail: { source: 'uniform-ring-width-v476', build: BUILD } }));
+  lastDraw = {
+    source,
+    levels: cfg.levels,
+    totalRingCount,
+    ringWidth: cfg.ringWidth,
+    requiredRadius,
+    extendedTextMatchesRing10: true,
+    extendedFillLight: true,
+    at: Date.now(),
+  };
+  window.dispatchEvent(new CustomEvent('gannzilla:uniform-ring-width-v477', { detail: { ...lastDraw, build: BUILD } }));
+  window.dispatchEvent(new CustomEvent('gannzilla:wheel-pan-offset-v305', { detail: { source: 'uniform-ring-width-v477', build: BUILD } }));
   return true;
 }
 
@@ -230,11 +261,13 @@ function install() {
   window.addEventListener('resize', onChange);
   window.addEventListener('gannzilla:canonical-property-change-v326', onChange);
   window.addEventListener('gannzilla:ring-two-numbering-refresh', onChange);
-  window.GANNZILLA_UNIFORM_EXTENDED_RING_WIDTH_V476 = true;
-  window.__auditGannzillaUniformExtendedRingWidthV476 = () => ({
-    ok: findWheel()?.dataset?.gannzillaUniformExtendedRingWidthV476 === 'true',
+  window.GANNZILLA_UNIFORM_EXTENDED_RING_WIDTH_V477 = true;
+  window.__auditGannzillaUniformExtendedRingWidthV477 = () => ({
+    ok: findWheel()?.dataset?.gannzillaUniformExtendedRingWidthV477 === 'true',
     build: BUILD,
     ring10EqualsRing11: true,
+    ring11TextMatchesRing10: true,
+    ring11FillMatchesLightReference: true,
     allExtendedRingsUseSameWidth: true,
     radialSpokesAligned: true,
     maxSupportedLevels: 36,
