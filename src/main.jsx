@@ -21,7 +21,6 @@ import './components/GannTools/gannzillaUnifiedWheelToolsV453';
 import './components/GannTools/gannzillaPanelVisibilityEyeV457';
 import './components/GannTools/gannzillaShapesMenuV460';
 import './components/GannTools/gannzillaShapesMenuEnlargeV461';
-import './components/GannTools/gannzillaChartDrawingToolbarV466';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
