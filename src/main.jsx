@@ -25,6 +25,7 @@ import './components/GannTools/gannzillaTopCenterDrawingToolbarV471';
 import './components/GannTools/gannzillaTopCenterDrawingInputFixV472';
 import './components/GannTools/gannzillaWheelLineThemeToggleV474';
 import './components/GannTools/gannzillaSingleWheelCanvasGuardV475';
+import './components/GannTools/gannzillaUniformExtendedRingWidthV476';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
