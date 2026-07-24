@@ -18,7 +18,7 @@ import './components/GannTools/gannzillaBilingualPanelSelectorV434';
 import './components/GannTools/gannzillaRightLanguageControlV438';
 import './components/GannTools/gannzillaConnectionSettingsV439';
 import './components/GannTools/gannzillaUnifiedWheelToolsV453';
-import './components/GannTools/gannzillaPanelChartEyeV455';
+import './components/GannTools/gannzillaUnifiedSecondChartEyeV456';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
