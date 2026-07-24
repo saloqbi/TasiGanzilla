@@ -18,7 +18,7 @@ import './components/GannTools/gannzillaBilingualPanelSelectorV434';
 import './components/GannTools/gannzillaRightLanguageControlV438';
 import './components/GannTools/gannzillaConnectionSettingsV439';
 import './components/GannTools/gannzillaZoomFullscreenStripV443';
-import './components/GannTools/gannzillaWheelMoveControlV445';
+import './components/GannTools/gannzillaWheelMoveInlineV447';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
