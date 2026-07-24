@@ -20,6 +20,7 @@ import './components/GannTools/gannzillaConnectionSettingsV439';
 import './components/GannTools/gannzillaZoomFullscreenStripV443';
 import './components/GannTools/gannzillaWheelMoveInlineV447';
 import './components/GannTools/gannzillaWheelVisibilityInlineV448';
+import './components/GannTools/gannzillaWheelVisibilityGuardV449';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
