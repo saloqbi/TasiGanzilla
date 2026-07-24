@@ -23,6 +23,7 @@ import './components/GannTools/gannzillaShapesMenuV460';
 import './components/GannTools/gannzillaShapesMenuEnlargeV461';
 import './components/GannTools/gannzillaCompactDrawingToolsV463';
 import './components/GannTools/gannzillaCompactDrawingToolsFixV464';
+import './components/GannTools/gannzillaWheelDrawingVisibilityLinkV465';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
