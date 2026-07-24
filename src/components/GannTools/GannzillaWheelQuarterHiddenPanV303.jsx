@@ -1,11 +1,33 @@
 import React from 'react';
 
-const BUILD = 305;
-const TOOLBAR_HEIGHT_PX = 24;
+const BUILD = 469;
+const DEFAULT_VIEWPORT_TOP_PX = 24;
+const CHART_TOOLBAR_ID = 'gannzilla-chart-drawing-toolbar-v466';
 const HIDDEN_FRACTION = 0.25;
 const MOVE_STEP_PX = 48;
 const HOLD_STEP_PX = 12;
 const PAN_STORAGE_KEY = 'gannzilla-wheel-asymmetric-open-pan-v305';
+
+function params() {
+  try {
+    return new URLSearchParams(window.location.search || '');
+  } catch (_) {
+    return new URLSearchParams();
+  }
+}
+
+function boolParam(name, fallback = false) {
+  const query = params();
+  if (!query.has(name)) return fallback;
+  const value = String(query.get(name) || '').toLowerCase();
+  return value === 'true' || value === '1' || value === 'yes' || value === 'on';
+}
+
+function numberParam(name, fallback, min, max) {
+  const value = Number(params().get(name));
+  if (!Number.isFinite(value)) return fallback;
+  return Math.max(min, Math.min(max, value));
+}
 
 function getClassicRoot() {
   return document.querySelector('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
@@ -17,7 +39,7 @@ function findWheelElements() {
 
   const canvases = Array.from(root.querySelectorAll('canvas'))
     .map((canvas) => ({ canvas, area: canvas.offsetWidth * canvas.offsetHeight }))
-    .filter(({ area }) => area > 250 * 250)
+    .filter(({ canvas, area }) => canvas instanceof HTMLCanvasElement && !canvas.closest('aside') && area > 250 * 250)
     .sort((a, b) => b.area - a.area);
 
   const canvas = canvases[0]?.canvas || null;
@@ -39,11 +61,12 @@ function findWheelElements() {
 function readStoredOffset() {
   try {
     const value = JSON.parse(localStorage.getItem(PAN_STORAGE_KEY) || '{}');
+    const resetVertical = boolParam('resetChartPanY', false);
     return {
       x: Number.isFinite(Number(value.x)) ? Number(value.x) : 0,
-      y: Number.isFinite(Number(value.y)) ? Number(value.y) : 0,
+      y: resetVertical ? 0 : (Number.isFinite(Number(value.y)) ? Number(value.y) : 0),
     };
-  } catch {
+  } catch (_) {
     return { x: 0, y: 0 };
   }
 }
@@ -54,7 +77,7 @@ function persistOffset(offset) {
       x: Math.round(offset.x),
       y: Math.round(offset.y),
     }));
-  } catch {
+  } catch (_) {
     // Runtime state remains authoritative when storage is unavailable.
   }
 }
@@ -76,13 +99,44 @@ function panelSide(panel) {
   return rect.left <= window.innerWidth / 2 ? 'left' : 'right';
 }
 
+function chartWorkspace() {
+  const enabled = boolParam('showChartDrawingToolbar', false)
+    && boolParam('lowerChartBelowToolbar', true);
+  const toolbar = enabled ? document.getElementById(CHART_TOOLBAR_ID) : null;
+
+  if (!(toolbar instanceof HTMLElement)) {
+    return { active: false, top: DEFAULT_VIEWPORT_TOP_PX, toolbar: null, gap: 0 };
+  }
+
+  const style = window.getComputedStyle(toolbar);
+  const rect = toolbar.getBoundingClientRect();
+  const visible = style.display !== 'none'
+    && style.visibility !== 'hidden'
+    && Number(style.opacity || 1) !== 0
+    && rect.width > 2
+    && rect.height > 2;
+
+  if (!visible) {
+    return { active: false, top: DEFAULT_VIEWPORT_TOP_PX, toolbar, gap: 0 };
+  }
+
+  const gap = Math.round(numberParam('chartDrawingContentGap', 6, 0, 24));
+  return {
+    active: true,
+    top: Math.max(DEFAULT_VIEWPORT_TOP_PX, Math.round(rect.bottom + gap)),
+    toolbar,
+    gap,
+  };
+}
+
 function configureFullPageGeometry(elements) {
   const { viewport, stage, canvas } = elements;
+  const workspace = chartWorkspace();
 
   viewport.style.setProperty('position', 'fixed', 'important');
   viewport.style.setProperty('left', '0', 'important');
   viewport.style.setProperty('right', '0', 'important');
-  viewport.style.setProperty('top', `${TOOLBAR_HEIGHT_PX}px`, 'important');
+  viewport.style.setProperty('top', `${workspace.top}px`, 'important');
   viewport.style.setProperty('bottom', '0', 'important');
   viewport.style.setProperty('width', 'auto', 'important');
   viewport.style.setProperty('height', 'auto', 'important');
@@ -91,6 +145,7 @@ function configureFullPageGeometry(elements) {
   viewport.style.setProperty('overflow', 'hidden', 'important');
   viewport.style.setProperty('direction', 'ltr', 'important');
   viewport.style.setProperty('box-sizing', 'border-box', 'important');
+  viewport.style.setProperty('padding', '0', 'important');
   viewport.scrollLeft = 0;
   viewport.scrollTop = 0;
 
@@ -106,7 +161,9 @@ function configureFullPageGeometry(elements) {
   stage.style.setProperty('padding', '0', 'important');
   stage.style.setProperty('margin', '0', 'important');
   stage.style.setProperty('display', 'grid', 'important');
-  stage.style.setProperty('place-items', 'center', 'important');
+  stage.style.setProperty('place-items', workspace.active ? 'start center' : 'center', 'important');
+  stage.style.setProperty('align-content', workspace.active ? 'start' : 'center', 'important');
+  stage.style.setProperty('justify-content', 'center', 'important');
   stage.style.setProperty('overflow', 'hidden', 'important');
   stage.style.setProperty('transform', 'none', 'important');
   stage.style.setProperty('box-sizing', 'border-box', 'important');
@@ -118,6 +175,11 @@ function configureFullPageGeometry(elements) {
   canvas.style.setProperty('transition', 'none', 'important');
   canvas.style.setProperty('will-change', 'transform', 'important');
   canvas.style.setProperty('transform-origin', 'center center', 'important');
+  canvas.style.setProperty('align-self', workspace.active ? 'start' : 'center', 'important');
+  canvas.style.setProperty('justify-self', 'center', 'important');
+
+  viewport.dataset.gannzillaWorkspaceTopV469 = String(workspace.top);
+  viewport.dataset.gannzillaChartToolbarActiveV469 = workspace.active ? 'true' : 'false';
 
   const viewportWidth = Math.max(1, viewport.clientWidth);
   const viewportHeight = Math.max(1, viewport.clientHeight);
@@ -125,8 +187,8 @@ function configureFullPageGeometry(elements) {
   const canvasWidth = Math.max(1, canvas.offsetWidth || canvasRect.width);
   const canvasHeight = Math.max(1, canvas.offsetHeight || canvasRect.height);
 
-  // Keep only the user's approved rightward limit: up to 25% of the wheel may
-  // pass beyond the right edge. Left, up and down remain open movement.
+  // Keep only the approved rightward limit: up to 25% of the wheel may pass
+  // beyond the right edge. Left, up and down remain open movement.
   const maxRightOffsetX = Math.max(
     0,
     viewportWidth / 2 - canvasWidth * (0.5 - HIDDEN_FRACTION),
@@ -138,6 +200,9 @@ function configureFullPageGeometry(elements) {
     canvasWidth,
     canvasHeight,
     maxRightOffsetX,
+    workspaceTop: workspace.top,
+    chartToolbarActive: workspace.active,
+    chartToolbarGap: workspace.gap,
   };
 }
 
@@ -166,13 +231,13 @@ function applyOffset(offset) {
   persistOffset(adjusted);
 
   window.dispatchEvent(new CustomEvent('gannzilla:wheel-pan-offset-v305', {
-    detail: adjusted,
+    detail: { ...adjusted, workspaceTop: geometry.workspaceTop, build: BUILD },
   }));
 
   return { ...elements, ...geometry, offset: adjusted };
 }
 
-/** Build 305: arrow controls and page-edge scrollbars share one wheel movement authority. */
+/** Build 469: the chart toolbar is the authoritative top boundary for the wheel viewport. */
 export default function GannzillaWheelQuarterHiddenPanV303() {
   const offsetRef = React.useRef(readStoredOffset());
   const repeatDelayRef = React.useRef(0);
@@ -183,6 +248,8 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
   React.useEffect(() => {
     let frame = 0;
     let resizeObserver = null;
+    let toolbarResizeObserver = null;
+    let observedToolbar = null;
 
     const stopHold = () => {
       if (repeatDelayRef.current) window.clearTimeout(repeatDelayRef.current);
@@ -222,7 +289,9 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
       previousPanelVisibleRef.current = visible;
 
       if (justOpened && side !== 'none') {
-        const x = side === 'left' ? current.maxRightOffsetX : -current.canvasWidth * HIDDEN_FRACTION;
+        const x = side === 'left'
+          ? current.maxRightOffsetX
+          : -current.canvasWidth * HIDDEN_FRACTION;
         return commit({ x, y: offsetRef.current.y });
       }
 
@@ -233,11 +302,24 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
         const result = dockForPanel();
-        if (!result || resizeObserver || typeof ResizeObserver === 'undefined') return;
-        resizeObserver = new ResizeObserver(sync);
-        resizeObserver.observe(result.viewport);
-        resizeObserver.observe(result.canvas);
-        if (result.panel) resizeObserver.observe(result.panel);
+        if (!result) return;
+
+        if (!resizeObserver && typeof ResizeObserver !== 'undefined') {
+          resizeObserver = new ResizeObserver(sync);
+          resizeObserver.observe(result.viewport);
+          resizeObserver.observe(result.canvas);
+          if (result.panel) resizeObserver.observe(result.panel);
+        }
+
+        const toolbar = document.getElementById(CHART_TOOLBAR_ID);
+        if (toolbar instanceof HTMLElement
+          && toolbar !== observedToolbar
+          && typeof ResizeObserver !== 'undefined') {
+          toolbarResizeObserver?.disconnect();
+          observedToolbar = toolbar;
+          toolbarResizeObserver = new ResizeObserver(sync);
+          toolbarResizeObserver.observe(toolbar);
+        }
       });
     };
 
@@ -296,7 +378,8 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
     };
 
     sync();
-    const timers = [0, 80, 220, 520, 1000, 1800].map((delay) => window.setTimeout(sync, delay));
+    const timers = [0, 80, 220, 520, 1000, 1800, 3200]
+      .map((delay) => window.setTimeout(sync, delay));
     const bodyObserver = new MutationObserver(sync);
     bodyObserver.observe(document.body, { childList: true, subtree: true });
 
@@ -311,33 +394,32 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
     window.addEventListener('gannzilla:panel-frame-cleanup-sync', sync);
     window.addEventListener('gannzilla:panel-width-v302-sync', sync);
     window.addEventListener('gannzilla:page-scrollbar-pan-v305', onPageScrollbarPan);
+    window.addEventListener('gannzilla:chart-drawing-viewport-offset-v468', sync);
 
-    window.GANNZILLA_WHEEL_ASYMMETRIC_OPEN_PAN_V305 = true;
-    window.__auditGannzillaWheelAsymmetricOpenPanV305 = () => {
+    window.GANNZILLA_WHEEL_ASYMMETRIC_OPEN_PAN_V469 = true;
+    window.__auditGannzillaWheelAsymmetricOpenPanV469 = () => {
       const result = commit(offsetRef.current);
       const rect = result?.canvas?.getBoundingClientRect?.();
+      const toolbarRect = document.getElementById(CHART_TOOLBAR_ID)?.getBoundingClientRect?.();
       return {
-        ok: Boolean(result),
+        ok: Boolean(result)
+          && (!result.chartToolbarActive
+            || !toolbarRect
+            || rect.top >= toolbarRect.bottom + result.chartToolbarGap - 2),
         build: BUILD,
-        movementAuthority: 'RIGHT_QUARTER_LIMIT_LEFT_VERTICAL_OPEN_WITH_PAGE_SCROLLBARS',
+        movementAuthority: 'CHART_TOOLBAR_TOP_BOUNDARY_WITH_OPEN_PAN',
+        chartToolbarActive: result?.chartToolbarActive ?? false,
+        workspaceTop: result?.workspaceTop ?? DEFAULT_VIEWPORT_TOP_PX,
+        chartToolbarBottom: toolbarRect ? Math.round(toolbarRect.bottom) : null,
+        currentCanvasTop: rect ? Math.round(rect.top) : null,
         rightMovementQuarterLimitPreserved: true,
         permittedRightHiddenFraction: HIDDEN_FRACTION,
         leftMovementUnrestricted: true,
         upwardMovementUnrestricted: true,
         downwardMovementUnrestricted: true,
-        pageVerticalScrollbarConnected: true,
-        pageHorizontalScrollbarConnected: true,
-        arrowAndScrollbarOffsetsSynchronized: true,
         panelAutoDockEnabled: true,
         panelSide: panelSide(result?.panel),
         panelVisible: panelIsVisible(result?.panel),
-        viewportUsesFullBrowserWidth: Boolean(result && Math.abs(result.viewportWidth - window.innerWidth) <= 1),
-        currentCanvasLeft: rect ? Math.round(rect.left) : null,
-        currentCanvasRight: rect ? Math.round(rect.right) : null,
-        browserRight: window.innerWidth,
-        maximumRightOffsetX: result?.maxRightOffsetX ?? null,
-        minimumLeftOffsetX: null,
-        verticalLimit: null,
         currentOffset: result?.offset || null,
       };
     };
@@ -348,6 +430,7 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
       window.cancelAnimationFrame(frame);
       bodyObserver.disconnect();
       resizeObserver?.disconnect();
+      toolbarResizeObserver?.disconnect();
       window.removeEventListener('pointerdown', onPointerDownCapture, true);
       window.removeEventListener('pointerup', onPointerEndCapture, true);
       window.removeEventListener('pointercancel', onPointerEndCapture, true);
@@ -359,8 +442,9 @@ export default function GannzillaWheelQuarterHiddenPanV303() {
       window.removeEventListener('gannzilla:panel-frame-cleanup-sync', sync);
       window.removeEventListener('gannzilla:panel-width-v302-sync', sync);
       window.removeEventListener('gannzilla:page-scrollbar-pan-v305', onPageScrollbarPan);
-      delete window.GANNZILLA_WHEEL_ASYMMETRIC_OPEN_PAN_V305;
-      delete window.__auditGannzillaWheelAsymmetricOpenPanV305;
+      window.removeEventListener('gannzilla:chart-drawing-viewport-offset-v468', sync);
+      delete window.GANNZILLA_WHEEL_ASYMMETRIC_OPEN_PAN_V469;
+      delete window.__auditGannzillaWheelAsymmetricOpenPanV469;
     };
   }, []);
 
