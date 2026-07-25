@@ -1,19 +1,18 @@
 import React from 'react';
 import GannzillaClassicBaseNoLegacyChromeV403 from './GannzillaClassicBaseNoLegacyChromeV403';
-import GannzillaRingTwoNumberingV223 from './GannzillaRingTwoNumberingV223';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
 import GannzillaPixelPerfectReferencePanelV421 from './GannzillaPixelPerfectReferencePanelV421';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaEventStormGuardV383 from './GannzillaEventStormGuardV383';
 
-const BUILD = 421;
+const BUILD = 489;
 const PANEL_WIDTH = 360;
 
-/** Build 421: a single, complete, pixel-matched Gannzilla reference panel. */
+/** Build 489: one panel authority and one final wheel-geometry authority. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V421 = true;
-    window.__auditGannzillaBareWheelV421 = () => {
+    window.GANNZILLA_BARE_WHEEL_V489 = true;
+    window.__auditGannzillaBareWheelV489 = () => {
       const panel = document.getElementById('gannzilla-pixel-perfect-reference-panel-v421');
       const nativePanels = Array.from(document.querySelectorAll('aside')).filter((aside) => {
         if (aside.id === 'gannzilla-pixel-perfect-reference-panel-v421') return false;
@@ -31,13 +30,14 @@ export default function GannzillaBareWheelV224() {
         completeSectionSet: true,
         rendererControlsBridged: true,
         projectPersistence: true,
-        wheelRendererPreserved: true,
+        legacyRingNumberingAuthorityRetired: true,
+        exactGeometricWeightAuthority: 'gannzillaExactGeometricWeightV489',
       };
     };
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V421;
-      delete window.__auditGannzillaBareWheelV421;
+      delete window.GANNZILLA_BARE_WHEEL_V489;
+      delete window.__auditGannzillaBareWheelV489;
     };
   }, []);
 
@@ -76,7 +76,6 @@ export default function GannzillaBareWheelV224() {
       <GannzillaEventStormGuardV383 />
       <GannzillaClassicBaseNoLegacyChromeV403 />
       <GannzillaPixelPerfectReferencePanelV421 />
-      <GannzillaRingTwoNumberingV223 />
       <GannzillaArabicLocalizationV248 />
       <GannzillaWheelQuarterHiddenPanV303 />
     </>
