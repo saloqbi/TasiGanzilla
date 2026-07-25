@@ -18,7 +18,7 @@ import './components/GannTools/gannzillaPanelVisibilityEyeV457';
 import './components/GannTools/gannzillaSingleWheelCanvasGuardV475';
 import './components/GannTools/gannzillaCleanWheelOnlyV495';
 import './components/GannTools/gannzillaClockwiseDirectionBridgeV483';
-import './components/GannTools/gannzillaFinalWheelAuthorityV498';
+import './components/GannTools/gannzillaFinalWheelAuthorityV499';
 import './components/GannTools/gannzillaReference80ZoomCalibrationV496';
 import './styles/globals.css';
 
