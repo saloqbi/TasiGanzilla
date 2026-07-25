@@ -5,14 +5,14 @@ import GannzillaPixelPerfectReferencePanelV421 from './GannzillaPixelPerfectRefe
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaEventStormGuardV383 from './GannzillaEventStormGuardV383';
 
-const BUILD = 489;
+const BUILD = 490;
 const PANEL_WIDTH = 360;
 
-/** Build 489: one panel authority and one final wheel-geometry authority. */
+/** Build 490: one panel authority and one final wheel geometry/number authority. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V489 = true;
-    window.__auditGannzillaBareWheelV489 = () => {
+    window.GANNZILLA_BARE_WHEEL_V490 = true;
+    window.__auditGannzillaBareWheelV490 = () => {
       const panel = document.getElementById('gannzilla-pixel-perfect-reference-panel-v421');
       const nativePanels = Array.from(document.querySelectorAll('aside')).filter((aside) => {
         if (aside.id === 'gannzilla-pixel-perfect-reference-panel-v421') return false;
@@ -31,13 +31,13 @@ export default function GannzillaBareWheelV224() {
         rendererControlsBridged: true,
         projectPersistence: true,
         legacyRingNumberingAuthorityRetired: true,
-        exactGeometricWeightAuthority: 'gannzillaExactGeometricWeightV489',
+        finalWheelAuthority: 'gannzillaFinalWheelAuthorityV490',
       };
     };
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V489;
-      delete window.__auditGannzillaBareWheelV489;
+      delete window.GANNZILLA_BARE_WHEEL_V490;
+      delete window.__auditGannzillaBareWheelV490;
     };
   }, []);
 
