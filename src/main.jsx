@@ -32,6 +32,7 @@ import './components/GannTools/gannzillaUnlimitedRingThemeBridgeV481';
 import './components/GannTools/gannzillaAllToolsRuntimeV482';
 import './components/GannTools/gannzillaClockwiseDirectionBridgeV483';
 import './components/GannTools/gannzillaCanonicalWheelGeometryV486';
+import './components/GannTools/gannzillaNumberClarityV487';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
