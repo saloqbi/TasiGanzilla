@@ -13,13 +13,12 @@ import './components/GannTools/gannzillaAboutLogoV432';
 import './components/GannTools/gannzillaBilingualPanelSelectorV434';
 import './components/GannTools/gannzillaRightLanguageControlV438';
 import './components/GannTools/gannzillaConnectionSettingsV439';
-import './components/GannTools/gannzillaUnifiedWheelToolsV453';
+import './components/GannTools/gannzillaNativeDprWheelToolsV504';
 import './components/GannTools/gannzillaPanelVisibilityEyeV457';
 import './components/GannTools/gannzillaSingleWheelCanvasGuardV475';
 import './components/GannTools/gannzillaCleanWheelOnlyV495';
 import './components/GannTools/gannzillaClockwiseDirectionBridgeV483';
-import './components/GannTools/gannzillaFinalWheelAuthorityV503';
-import './components/GannTools/gannzillaPaintCrispZoomCalibrationV503';
+import './components/GannTools/gannzillaFinalWheelAuthorityV504';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
