@@ -28,6 +28,7 @@ import './components/GannTools/gannzillaSingleWheelCanvasGuardV475';
 import './components/GannTools/gannzillaUniformExtendedRingWidthV476';
 import './components/GannTools/gannzillaUnlimitedRingLayersV478';
 import './components/GannTools/gannzillaUnlimitedRingPaletteV479';
+import './components/GannTools/gannzillaUnlimitedRingThemeBridgeV481';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
