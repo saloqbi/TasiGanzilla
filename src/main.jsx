@@ -1,12 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import './components/GannTools/gannzillaBrightWheelLinesV390';
 import './components/GannTools/gannzillaCleanDragViewportV392';
 import './components/GannTools/gannzillaRemoveSideShapeBarV401';
-import './components/GannTools/gannzillaUprightSymmetricAllNumbersV412';
-import './components/GannTools/gannzillaRepeatFirstRingOneToNineV415';
-import './components/GannTools/gannzillaInnerStartRingOneToThirtySixV416';
 import './components/GannTools/gannzillaKeyboardMouseControlV459';
 import './components/GannTools/gannzillaHideNativeWheelScrollbarsV417';
 import './components/GannTools/gannzillaReferencePanelExtraLargeV423';
@@ -23,15 +19,10 @@ import './components/GannTools/gannzillaShapesMenuV460';
 import './components/GannTools/gannzillaShapesMenuEnlargeV461';
 import './components/GannTools/gannzillaTopCenterDrawingToolbarV471';
 import './components/GannTools/gannzillaTopCenterDrawingInputFixV472';
-import './components/GannTools/gannzillaWheelLineThemeToggleV474';
 import './components/GannTools/gannzillaSingleWheelCanvasGuardV475';
-import './components/GannTools/gannzillaUniformExtendedRingWidthV476';
-import './components/GannTools/gannzillaUnlimitedRingLayersV478';
-import './components/GannTools/gannzillaUnlimitedRingPaletteV479';
-import './components/GannTools/gannzillaUnlimitedRingThemeBridgeV481';
 import './components/GannTools/gannzillaAllToolsRuntimeV482';
 import './components/GannTools/gannzillaClockwiseDirectionBridgeV483';
-import './components/GannTools/gannzillaExactGeometricWeightV489';
+import './components/GannTools/gannzillaFinalWheelAuthorityV490';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
