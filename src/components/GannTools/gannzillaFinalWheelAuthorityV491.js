@@ -1,4 +1,4 @@
-const BUILD = 491;
+const BUILD = 497;
 const STATE_KEY = '__gannzillaFinalWheelAuthorityV491';
 const PANEL_KEY = 'tasi-gannzilla-canonical-panel-v326';
 const DRAWING_OVERLAY_ID = 'gannzilla-top-center-drawing-overlay-v471';
@@ -153,7 +153,9 @@ function draw(source = 'refresh') {
   const cfg = settings();
   if (!(canvas instanceof HTMLCanvasElement) || !cfg.visible) return false;
 
-  const totalRingCount = cfg.levels + 1;
+  // Ring 1 keeps 1..36, ring 2 remains visually unchanged but has no numbers,
+  // and all requested numeric levels begin from ring 3.
+  const totalRingCount = cfg.levels + 2;
   const adjustedInnerRadius = Math.max(20, cfg.originalInnerRadius - cfg.ringWidth);
   const maximumOuterRadius = (MAX_SAFE_CANVAS_LOGICAL_SIZE - 240) / 2;
   const requestedOuterRadius = adjustedInnerRadius + totalRingCount * cfg.ringWidth;
@@ -206,8 +208,8 @@ function draw(source = 'refresh') {
     const inner = adjustedInnerRadius + (ring - 1) * effectiveRingWidth;
     const outer = inner + effectiveRingWidth;
     const mid = (inner + outer) / 2;
-    const numericRingIndex = ring - 2;
-    const fill = ring === 1 ? LIGHT_FILL : (numericRingIndex % 2 === 0 ? SHADED_FILL : LIGHT_FILL);
+    const paletteIndex = ring - 2;
+    const fill = ring === 1 ? LIGHT_FILL : (paletteIndex % 2 === 0 ? SHADED_FILL : LIGHT_FILL);
     const maxWidth = (TWO_PI * mid / cfg.divisions) * 0.96;
 
     for (let index = 0; index < cfg.divisions; index += 1) {
@@ -221,8 +223,12 @@ function draw(source = 'refresh') {
       ctx.lineWidth = 0.9;
       ctx.stroke();
 
+      // Ring 2 deliberately has no numeric label. No other ring behavior changes.
+      if (ring === 2) continue;
+
       const point = polar(cx, cy, mid, centerDegrees);
       const radialOffset = (index + 1) % cfg.divisions;
+      const numericRingIndex = ring - 3;
       const value = ring === 1
         ? index + 1
         : cfg.startValue + (numericRingIndex * cfg.divisions + radialOffset) * cfg.increment;
@@ -242,6 +248,7 @@ function draw(source = 'refresh') {
   const northSpoke = Array.from({ length: cfg.levels }, (_, ringIndex) =>
     cfg.startValue + ringIndex * cfg.divisions * cfg.increment);
   canvas.dataset.gannzillaFinalWheelAuthorityV491 = 'true';
+  canvas.dataset.gannzillaAuthorityBuild = String(BUILD);
   canvas.dataset.gannzillaEffectiveRingWidth = String(effectiveRingWidth);
   canvas.dataset.gannzillaAdjustedInnerRadius = String(adjustedInnerRadius);
   canvas.dataset.gannzillaTotalVisibleRingCount = String(totalRingCount);
@@ -249,6 +256,8 @@ function draw(source = 'refresh') {
   canvas.dataset.gannzillaBaseRingEast = String(Math.round(cfg.divisions / 4));
   canvas.dataset.gannzillaBaseRingSouth = String(Math.round(cfg.divisions / 2));
   canvas.dataset.gannzillaBaseRingWest = String(Math.round(cfg.divisions * 3 / 4));
+  canvas.dataset.gannzillaSecondRingBlank = 'true';
+  canvas.dataset.gannzillaStartValueRing = '3';
   canvas.dataset.gannzillaNorthSpokeValues = northSpoke.join(',');
   canvas.dataset.gannzillaNumberFontSize = String(cfg.numberFontSize);
   canvas.dataset.gannzillaMinimumAppliedFontSize = String(minimumAppliedFontSize);
@@ -262,6 +271,7 @@ function draw(source = 'refresh') {
     minimumAppliedFontSize, numberWeight: cfg.numberWeight,
     northCell: cfg.divisions, eastCell: Math.round(cfg.divisions / 4),
     southCell: Math.round(cfg.divisions / 2), westCell: Math.round(cfg.divisions * 3 / 4),
+    secondRingBlank: true, startValueRing: 3,
     northSpoke, safetyScaled, at: Date.now(),
   };
 
@@ -285,6 +295,8 @@ function persistFlags() {
     url.searchParams.set('northLastCell', 'true');
     url.searchParams.set('canonicalCardinalGeometry', 'true');
     url.searchParams.set('northSpokeStartsAtStartValue', 'true');
+    url.searchParams.set('startValueRing', '3');
+    url.searchParams.set('secondRingNumbers', 'false');
     url.searchParams.set('exactRingWidth', 'true');
     url.searchParams.set('preserveOuterRadius', 'true');
     url.searchParams.set('gannzillaNumberFontSize', url.searchParams.get('gannzillaNumberFontSize') || '16');
@@ -320,6 +332,7 @@ function install() {
     setTimeout(() => schedule(`boot-${delay}`, [0, 120, 420]), delay));
 
   window.GANNZILLA_FINAL_WHEEL_AUTHORITY_V491 = true;
+  window.GANNZILLA_START_VALUE_RING_3_V497 = true;
   window.__auditGannzillaFinalWheelAuthorityV491 = () => {
     const canvas = findWheel();
     const cfg = settings();
@@ -328,12 +341,17 @@ function install() {
     return {
       ok: canvas instanceof HTMLCanvasElement
         && canvas.dataset.gannzillaFinalWheelAuthorityV491 === 'true'
+        && canvas.dataset.gannzillaAuthorityBuild === String(BUILD)
+        && canvas.dataset.gannzillaSecondRingBlank === 'true'
+        && canvas.dataset.gannzillaStartValueRing === '3'
         && canvas.dataset.gannzillaNorthSpokeValues === expectedNorth.join(',')
         && Number(canvas.dataset.gannzillaEffectiveRingWidth) === cfg.ringWidth
         && Number(canvas.dataset.gannzillaMinimumAppliedFontSize) >= 12.5,
       build: BUILD,
       soleWheelNumberAuthority: true,
       canonicalCardinals: { north12: 36, east3: 9, south6: 18, west9: 27 },
+      secondRingBlank: true,
+      startValueRing: 3,
       northSpokeValues: expectedNorth,
       northSpokeStartsAtStartValue: true,
       exactRingWidth: Number(canvas?.dataset?.gannzillaEffectiveRingWidth) === cfg.ringWidth,
