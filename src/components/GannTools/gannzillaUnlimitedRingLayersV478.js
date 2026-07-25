@@ -1,5 +1,5 @@
-const BUILD = 478;
-const STATE_KEY = '__gannzillaUnlimitedRingLayersV478';
+const BUILD = 480;
+const STATE_KEY = '__gannzillaUnlimitedRingLayersV480';
 const PANEL_ID = 'gannzilla-pixel-perfect-reference-panel-v421';
 const PANEL_STORAGE_KEY = 'tasi-gannzilla-canonical-panel-v326';
 const DRAWING_OVERLAY_ID = 'gannzilla-top-center-drawing-overlay-v471';
@@ -8,6 +8,9 @@ const TWO_PI = Math.PI * 2;
 const MAX_SAFE_CANVAS_LOGICAL_SIZE = 15000;
 const MIN_LAYER_COUNT = 1;
 const MAX_ACCEPTED_LAYER_COUNT = 9999;
+const LIGHT_FILL = '#f7f5f0';
+const DARK_FILL = '#d8d4cc';
+const GRID_STROKE = '#111111';
 
 function params() {
   try { return new URLSearchParams(window.location.search || ''); }
@@ -58,13 +61,15 @@ function persistLayerCount(levels, source = 'input') {
     url.searchParams.set('levels', String(safe));
     url.searchParams.set('unlimitedRingLayers', 'true');
     url.searchParams.set('uniformExtendedRingWidth', 'false');
+    url.searchParams.set('allRingBordersBlack', 'true');
+    url.searchParams.set('strictAlternatingRingPalette', 'true');
     url.searchParams.set('v', String(BUILD));
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
   } catch (_) { /* URL persistence is optional */ }
   window.dispatchEvent(new CustomEvent('gannzilla:canonical-property-change-v326', {
     detail: { path: 'layout.size', value: safe, source, build: BUILD },
   }));
-  window.dispatchEvent(new CustomEvent('gannzilla:unlimited-ring-layers-v478', {
+  window.dispatchEvent(new CustomEvent('gannzilla:unlimited-ring-layers-v480', {
     detail: { levels: safe, source, build: BUILD },
   }));
   return safe;
@@ -88,7 +93,7 @@ function patchSizeInput() {
   input.removeAttribute('max');
   input.min = String(MIN_LAYER_COUNT);
   input.step = '1';
-  input.dataset.gannzillaUnlimitedLayersV478 = 'true';
+  input.dataset.gannzillaUnlimitedLayersV480 = 'true';
   input.title = 'عدد الطبقات مفتوح — أدخل أي عدد صحيح موجب';
   if (boundSizeInput !== input) {
     if (boundSizeInput && sizeInputHandler) {
@@ -243,8 +248,8 @@ function drawUnlimitedWheel(source = 'refresh') {
   ctx.arc(cx, cy, cfg.innerRadius, 0, TWO_PI);
   ctx.fillStyle = '#ffffff';
   ctx.fill();
-  ctx.strokeStyle = '#c9c4b8';
-  ctx.lineWidth = 0.82;
+  ctx.strokeStyle = GRID_STROKE;
+  ctx.lineWidth = 0.9;
   ctx.stroke();
 
   const scaledFontSize = Math.max(3, Math.min(cfg.fontSize, effectiveRingWidth * 0.46));
@@ -253,8 +258,7 @@ function drawUnlimitedWheel(source = 'refresh') {
     const outer = inner + effectiveRingWidth;
     const mid = (inner + outer) / 2;
     const numericRingIndex = ring - 2;
-    const extended = numericRingIndex >= 10;
-    const fill = ring === 1 || extended || numericRingIndex % 2 !== 0 ? '#f7f5f0' : '#d8d4cc';
+    const fill = ring === 1 ? LIGHT_FILL : (numericRingIndex % 2 === 0 ? DARK_FILL : LIGHT_FILL);
     const maxWidth = (TWO_PI * mid / cfg.divisions) * 0.78;
 
     for (let index = 0; index < cfg.divisions; index += 1) {
@@ -264,8 +268,8 @@ function drawUnlimitedWheel(source = 'refresh') {
       wedge(ctx, cx, cy, inner, outer, startDegrees, endDegrees);
       ctx.fillStyle = fill;
       ctx.fill();
-      ctx.strokeStyle = '#c9c4b8';
-      ctx.lineWidth = 0.82;
+      ctx.strokeStyle = GRID_STROKE;
+      ctx.lineWidth = 0.9;
       ctx.stroke();
 
       const point = polar(cx, cy, mid, centerDegrees);
@@ -278,9 +282,11 @@ function drawUnlimitedWheel(source = 'refresh') {
   }
 
   ctx.restore();
-  canvas.dataset.gannzillaUnlimitedRingLayersV478 = 'true';
+  canvas.dataset.gannzillaUnlimitedRingLayersV480 = 'true';
   canvas.dataset.gannzillaUnlimitedLayerCount = String(cfg.levels);
   canvas.dataset.gannzillaEffectiveRingWidth = String(effectiveRingWidth);
+  canvas.dataset.gannzillaAlternatingPalette = 'strict';
+  canvas.dataset.gannzillaAllBordersBlack = 'true';
   drawCount += 1;
   lastDraw = {
     source,
@@ -290,10 +296,12 @@ function drawUnlimitedWheel(source = 'refresh') {
     effectiveRingWidth,
     canvasLogicalSize: logicalSize,
     dynamicallyScaledForSafety: effectiveRingWidth < cfg.configuredRingWidth,
+    strictAlternatingPalette: true,
+    allBordersBlack: true,
     at: Date.now(),
   };
   window.dispatchEvent(new CustomEvent('gannzilla:wheel-pan-offset-v305', {
-    detail: { source: 'unlimited-ring-layers-v478', build: BUILD },
+    detail: { source: 'unlimited-ring-layers-v480', build: BUILD },
   }));
   return true;
 }
@@ -319,14 +327,16 @@ function install() {
   document.addEventListener('change', onChange, true);
   window.addEventListener('resize', onChange);
   window.addEventListener('gannzilla:canonical-property-change-v326', onChange);
-  window.GANNZILLA_UNLIMITED_RING_LAYERS_V478 = true;
-  window.__auditGannzillaUnlimitedRingLayersV478 = () => ({
-    ok: findWheel()?.dataset?.gannzillaUnlimitedRingLayersV478 === 'true' && findSizeInput()?.dataset?.gannzillaUnlimitedLayersV478 === 'true',
+  window.GANNZILLA_UNLIMITED_RING_LAYERS_V480 = true;
+  window.__auditGannzillaUnlimitedRingLayersV480 = () => ({
+    ok: findWheel()?.dataset?.gannzillaUnlimitedRingLayersV480 === 'true' && findSizeInput()?.dataset?.gannzillaUnlimitedLayersV480 === 'true',
     build: BUILD,
     htmlMaxRemoved: !findSizeInput()?.hasAttribute('max'),
     acceptedLayerRange: `1-${MAX_ACCEPTED_LAYER_COUNT}`,
     equalRingWidthAcrossAllLayers: true,
     adaptiveSafetyScaling: true,
+    strictAlternatingPalette: true,
+    allBordersBlack: true,
     drawCount,
     lastDraw,
   });
