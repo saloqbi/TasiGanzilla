@@ -22,7 +22,7 @@ import './components/GannTools/gannzillaTopCenterDrawingInputFixV472';
 import './components/GannTools/gannzillaSingleWheelCanvasGuardV475';
 import './components/GannTools/gannzillaAllToolsRuntimeV482';
 import './components/GannTools/gannzillaClockwiseDirectionBridgeV483';
-import './components/GannTools/gannzillaFinalWheelAuthorityV490';
+import './components/GannTools/gannzillaFinalWheelAuthorityV491';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
