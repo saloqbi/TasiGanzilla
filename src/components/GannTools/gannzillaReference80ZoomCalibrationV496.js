@@ -1,4 +1,4 @@
-const BUILD = 496;
+const BUILD = 497;
 const STATE_KEY = '__gannzillaReference80ZoomCalibrationV496';
 
 function params() {
