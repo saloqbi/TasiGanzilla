@@ -19,7 +19,7 @@ import './components/GannTools/gannzillaSingleWheelCanvasGuardV475';
 import './components/GannTools/gannzillaCleanWheelOnlyV495';
 import './components/GannTools/gannzillaClockwiseDirectionBridgeV483';
 import './components/GannTools/gannzillaFinalWheelAuthorityV506';
-import './components/GannTools/gannzillaUniformComfortCellGeometryV507';
+import './components/GannTools/gannzillaCenterCellComfortV508';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
