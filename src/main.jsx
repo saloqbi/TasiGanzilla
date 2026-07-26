@@ -20,6 +20,7 @@ import './components/GannTools/gannzillaWheelColorToggleV511';
 import './components/GannTools/gannzillaSingleWheelCanvasGuardV475';
 import './components/GannTools/gannzillaClockwiseDirectionBridgeV483';
 import './components/GannTools/gannzillaFinalWheelAuthorityV506';
+import './components/GannTools/gannzillaEmptyOuterRingV518';
 import './components/GannTools/gannzillaCenterCellComfortV508';
 import './components/GannTools/gannzillaStablePanWheelV510';
 import './components/GannTools/gannzillaUnifiedPaintPreviewZoomV515';
