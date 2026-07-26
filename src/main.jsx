@@ -13,7 +13,7 @@ import './components/GannTools/gannzillaAboutLogoV432';
 import './components/GannTools/gannzillaBilingualPanelSelectorV434';
 import './components/GannTools/gannzillaRightLanguageControlV438';
 import './components/GannTools/gannzillaConnectionSettingsV439';
-import './components/GannTools/gannzillaNativeDprWheelToolsV504';
+import './components/GannTools/gannzillaNativeDprWheelToolsV509';
 import './components/GannTools/gannzillaPanelVisibilityEyeV457';
 import './components/GannTools/gannzillaSingleWheelCanvasGuardV475';
 import './components/GannTools/gannzillaCleanWheelOnlyV495';
