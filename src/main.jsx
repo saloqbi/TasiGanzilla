@@ -22,8 +22,7 @@ import './components/GannTools/gannzillaClockwiseDirectionBridgeV483';
 import './components/GannTools/gannzillaFinalWheelAuthorityV506';
 import './components/GannTools/gannzillaCenterCellComfortV508';
 import './components/GannTools/gannzillaStablePanWheelV510';
-import './components/GannTools/gannzillaFixedPaintPreviewV512';
-import './components/GannTools/gannzillaPaintZoomAuthorityV514';
+import './components/GannTools/gannzillaUnifiedPaintPreviewZoomV515';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
