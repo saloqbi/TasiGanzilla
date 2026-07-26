@@ -24,6 +24,7 @@ import './components/GannTools/gannzillaCenterCellComfortV508';
 import './components/GannTools/gannzillaStablePanWheelV510';
 import './components/GannTools/gannzillaUnifiedPaintPreviewZoomV515';
 import './components/GannTools/gannzillaCompactZoomSelectV516';
+import './components/GannTools/gannzillaCompactToolbarSpacingV517';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
