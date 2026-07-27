@@ -78,7 +78,6 @@ function drawStrongEmbossedBand(ctx, cx, cy, radius, width, options = {}) {
     cx, cy, Math.max(1, radius - half),
     cx, cy, radius + half,
   );
-
   gradient.addColorStop(0, BRONZE_DEEPEST);
   gradient.addColorStop(0.08, '#57200c');
   gradient.addColorStop(0.20, BRONZE_DARK);
@@ -96,7 +95,6 @@ function drawStrongEmbossedBand(ctx, cx, cy, radius, width, options = {}) {
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = shadowOffset;
   }
-
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, TWO_PI);
   ctx.strokeStyle = gradient;
@@ -129,71 +127,109 @@ function drawStrongEmbossedBand(ctx, cx, cy, radius, width, options = {}) {
   ctx.stroke();
 }
 
-function drawSpecularShine(ctx, cx, cy, radius, width, strength) {
-  const start = (202 * Math.PI) / 180;
-  const end = (338 * Math.PI) / 180;
-  const shineRadius = radius + width * 0.34;
-  const glowGradient = ctx.createLinearGradient(cx - radius, cy, cx + radius, cy);
-  glowGradient.addColorStop(0, 'rgba(255,255,255,0)');
-  glowGradient.addColorStop(0.16, `rgba(255,226,202,${0.28 * strength})`);
-  glowGradient.addColorStop(0.38, `rgba(255,248,238,${0.82 * strength})`);
-  glowGradient.addColorStop(0.58, `rgba(255,255,255,${0.98 * strength})`);
-  glowGradient.addColorStop(0.78, `rgba(255,224,195,${0.62 * strength})`);
-  glowGradient.addColorStop(1, 'rgba(255,255,255,0)');
-
+function drawArcLayer(ctx, cx, cy, radius, start, end, lineWidth, blur, colorStops) {
+  const gradient = ctx.createLinearGradient(cx - radius, cy, cx + radius, cy);
+  colorStops.forEach(([offset, color]) => gradient.addColorStop(offset, color));
   ctx.save();
-  ctx.globalCompositeOperation = 'screen';
+  ctx.globalCompositeOperation = 'lighter';
   ctx.lineCap = 'round';
-  ctx.shadowColor = `rgba(255, 232, 211, ${0.92 * strength})`;
-  ctx.shadowBlur = width * 0.72;
+  ctx.shadowColor = colorStops[Math.floor(colorStops.length / 2)]?.[1] || 'rgba(255,255,255,1)';
+  ctx.shadowBlur = blur;
   ctx.beginPath();
-  ctx.arc(cx, cy, shineRadius, start, end);
-  ctx.strokeStyle = glowGradient;
-  ctx.lineWidth = Math.max(3, width * 0.23);
-  ctx.stroke();
-
-  ctx.shadowBlur = width * 0.28;
-  ctx.beginPath();
-  ctx.arc(cx, cy, shineRadius + width * 0.02, start + 0.04, end - 0.04);
-  ctx.strokeStyle = `rgba(255, 255, 248, ${0.92 * strength})`;
-  ctx.lineWidth = Math.max(1.2, width * 0.075);
+  ctx.arc(cx, cy, radius, start, end);
+  ctx.strokeStyle = gradient;
+  ctx.lineWidth = lineWidth;
   ctx.stroke();
   ctx.restore();
 }
 
-function drawSparkle(ctx, x, y, size, strength) {
-  ctx.save();
-  ctx.globalCompositeOperation = 'screen';
+function drawSpecularShine(ctx, cx, cy, radius, width, options = {}) {
+  const strength = Math.max(0, Math.min(1, Number(options.strength) || 1));
+  const startDegrees = Number(options.startDegrees) || 195;
+  const endDegrees = Number(options.endDegrees) || 345;
+  const glowWidth = Math.max(1, Number(options.glowWidth) || 24);
+  const glowBlur = Math.max(0, Number(options.glowBlur) || 30);
+  const glowOpacity = Math.max(0, Math.min(1, Number(options.glowOpacity) || 0.52));
+  const bandWidth = Math.max(1, Number(options.bandWidth) || 10);
+  const bandBlur = Math.max(0, Number(options.bandBlur) || 14);
+  const bandOpacity = Math.max(0, Math.min(1, Number(options.bandOpacity) || 0.96));
+  const coreWidth = Math.max(0.5, Number(options.coreWidth) || 3.5);
+  const coreBlur = Math.max(0, Number(options.coreBlur) || 4);
+  const coreOpacity = Math.max(0, Math.min(1, Number(options.coreOpacity) || 1));
+  const start = (startDegrees * Math.PI) / 180;
+  const end = (endDegrees * Math.PI) / 180;
+  const shineRadius = radius + width * 0.18;
 
-  const glow = ctx.createRadialGradient(x, y, 0, x, y, size);
-  glow.addColorStop(0, `rgba(255,255,255,${0.98 * strength})`);
-  glow.addColorStop(0.18, `rgba(255,244,222,${0.84 * strength})`);
-  glow.addColorStop(0.48, `rgba(255,190,132,${0.34 * strength})`);
-  glow.addColorStop(1, 'rgba(255,190,132,0)');
+  drawArcLayer(ctx, cx, cy, shineRadius, start, end, glowWidth, glowBlur, [
+    [0, 'rgba(255,255,255,0)'],
+    [0.10, `rgba(255,176,105,${0.22 * glowOpacity * strength})`],
+    [0.28, `rgba(255,218,176,${0.64 * glowOpacity * strength})`],
+    [0.52, `rgba(255,250,235,${glowOpacity * strength})`],
+    [0.74, `rgba(255,214,164,${0.72 * glowOpacity * strength})`],
+    [0.92, `rgba(255,173,99,${0.28 * glowOpacity * strength})`],
+    [1, 'rgba(255,255,255,0)'],
+  ]);
+
+  drawArcLayer(ctx, cx, cy, shineRadius, start + 0.025, end - 0.025, bandWidth, bandBlur, [
+    [0, 'rgba(255,255,255,0)'],
+    [0.08, `rgba(255,233,211,${0.34 * bandOpacity * strength})`],
+    [0.25, `rgba(255,248,235,${0.82 * bandOpacity * strength})`],
+    [0.48, `rgba(255,255,255,${bandOpacity * strength})`],
+    [0.70, `rgba(255,253,245,${0.94 * bandOpacity * strength})`],
+    [0.90, `rgba(255,222,190,${0.44 * bandOpacity * strength})`],
+    [1, 'rgba(255,255,255,0)'],
+  ]);
+
+  drawArcLayer(ctx, cx, cy, shineRadius + width * 0.015, start + 0.06, end - 0.06, coreWidth, coreBlur, [
+    [0, 'rgba(255,255,255,0)'],
+    [0.12, `rgba(255,255,250,${0.52 * coreOpacity * strength})`],
+    [0.34, `rgba(255,255,255,${0.94 * coreOpacity * strength})`],
+    [0.56, `rgba(255,255,255,${coreOpacity * strength})`],
+    [0.78, `rgba(255,255,252,${0.92 * coreOpacity * strength})`],
+    [0.94, `rgba(255,247,233,${0.38 * coreOpacity * strength})`],
+    [1, 'rgba(255,255,255,0)'],
+  ]);
+}
+
+function drawSparkle(ctx, x, y, size, strength) {
+  const glowRadius = size * 0.94;
+  const rayLength = size * 1.10;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, glowRadius);
+  glow.addColorStop(0, `rgba(255,255,255,${strength})`);
+  glow.addColorStop(0.10, `rgba(255,253,244,${0.96 * strength})`);
+  glow.addColorStop(0.30, `rgba(255,225,188,${0.74 * strength})`);
+  glow.addColorStop(0.62, `rgba(255,164,93,${0.30 * strength})`);
+  glow.addColorStop(1, 'rgba(255,164,93,0)');
   ctx.beginPath();
-  ctx.arc(x, y, size, 0, TWO_PI);
+  ctx.arc(x, y, glowRadius, 0, TWO_PI);
   ctx.fillStyle = glow;
   ctx.fill();
 
   ctx.translate(x, y);
-  ctx.strokeStyle = `rgba(255,255,255,${0.96 * strength})`;
+  ctx.strokeStyle = `rgba(255,255,255,${strength})`;
   ctx.lineCap = 'round';
-  ctx.shadowColor = `rgba(255,230,196,${0.88 * strength})`;
-  ctx.shadowBlur = size * 0.36;
+  ctx.shadowColor = `rgba(255,232,202,${0.96 * strength})`;
+  ctx.shadowBlur = size * 0.58;
 
-  [[-size, 0, size, 0], [0, -size, 0, size],
-   [-size * 0.56, -size * 0.56, size * 0.56, size * 0.56],
-   [-size * 0.56, size * 0.56, size * 0.56, -size * 0.56]].forEach((line, index) => {
+  [
+    [-rayLength, 0, rayLength, 0, 0.085],
+    [0, -rayLength, 0, rayLength, 0.085],
+    [-rayLength * 0.70, -rayLength * 0.70, rayLength * 0.70, rayLength * 0.70, 0.050],
+    [-rayLength * 0.70, rayLength * 0.70, rayLength * 0.70, -rayLength * 0.70, 0.050],
+  ].forEach((line) => {
     ctx.beginPath();
     ctx.moveTo(line[0], line[1]);
     ctx.lineTo(line[2], line[3]);
-    ctx.lineWidth = index < 2 ? Math.max(1.1, size * 0.075) : Math.max(0.75, size * 0.045);
+    ctx.lineWidth = Math.max(1, size * line[4]);
     ctx.stroke();
   });
 
   ctx.beginPath();
-  ctx.arc(0, 0, Math.max(1.6, size * 0.13), 0, TWO_PI);
-  ctx.fillStyle = '#fffdf5';
+  ctx.arc(0, 0, Math.max(2.4, size * 0.16), 0, TWO_PI);
+  ctx.fillStyle = '#ffffff';
   ctx.fill();
   ctx.restore();
 }
@@ -215,9 +251,20 @@ function persistFlags() {
     url.searchParams.set('gannzillaAngleEmboss', 'true');
     url.searchParams.set('gannzillaAngleHighlightStrength', '1');
     url.searchParams.set('gannzillaAngleSpecularShine', 'true');
+    url.searchParams.set('gannzillaAngleShineStart', '195');
+    url.searchParams.set('gannzillaAngleShineEnd', '345');
+    url.searchParams.set('gannzillaAngleShineGlowWidth', '24');
+    url.searchParams.set('gannzillaAngleShineGlowBlur', '30');
+    url.searchParams.set('gannzillaAngleShineGlowOpacity', '0.52');
+    url.searchParams.set('gannzillaAngleShineBandWidth', '10');
+    url.searchParams.set('gannzillaAngleShineBandBlur', '14');
+    url.searchParams.set('gannzillaAngleShineBandOpacity', '0.96');
+    url.searchParams.set('gannzillaAngleShineCoreWidth', '3.5');
+    url.searchParams.set('gannzillaAngleShineCoreBlur', '4');
+    url.searchParams.set('gannzillaAngleShineCoreOpacity', '1');
     url.searchParams.set('gannzillaAngleSparkle', 'true');
     url.searchParams.set('gannzillaAngleSparkleAngle', '34');
-    url.searchParams.set('gannzillaAngleSparkleSize', '18');
+    url.searchParams.set('gannzillaAngleSparkleSize', '32');
     url.searchParams.set('v', String(BUILD));
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
   } catch (_) {
@@ -264,8 +311,19 @@ function drawOuterMetallicBand(source = 'apply') {
   const shadowSpread = numberParam('gannzillaAngleOuterShadowSpread', 16, 0, 36) * appliedZoom;
   const shadowOffset = numberParam('gannzillaAngleOuterShadowOffset', 2, -12, 12) * appliedZoom;
   const highlightStrength = numberParam('gannzillaAngleHighlightStrength', 1, 0, 1);
+  const shineStart = numberParam('gannzillaAngleShineStart', 195, 120, 260);
+  const shineEnd = numberParam('gannzillaAngleShineEnd', 345, 280, 420);
+  const shineGlowWidth = numberParam('gannzillaAngleShineGlowWidth', 24, 4, 42) * appliedZoom;
+  const shineGlowBlur = numberParam('gannzillaAngleShineGlowBlur', 30, 0, 50) * appliedZoom;
+  const shineGlowOpacity = numberParam('gannzillaAngleShineGlowOpacity', 0.52, 0, 1);
+  const shineBandWidth = numberParam('gannzillaAngleShineBandWidth', 10, 2, 24) * appliedZoom;
+  const shineBandBlur = numberParam('gannzillaAngleShineBandBlur', 14, 0, 30) * appliedZoom;
+  const shineBandOpacity = numberParam('gannzillaAngleShineBandOpacity', 0.96, 0, 1);
+  const shineCoreWidth = numberParam('gannzillaAngleShineCoreWidth', 3.5, 0.5, 10) * appliedZoom;
+  const shineCoreBlur = numberParam('gannzillaAngleShineCoreBlur', 4, 0, 16) * appliedZoom;
+  const shineCoreOpacity = numberParam('gannzillaAngleShineCoreOpacity', 1, 0, 1);
   const sparkleAngle = numberParam('gannzillaAngleSparkleAngle', 34, -180, 180);
-  const sparkleSize = numberParam('gannzillaAngleSparkleSize', 18, 6, 36) * appliedZoom;
+  const sparkleSize = numberParam('gannzillaAngleSparkleSize', 32, 8, 48) * appliedZoom;
 
   const cx = expandedCssSize / 2;
   const cy = expandedCssSize / 2;
@@ -278,27 +336,13 @@ function drawOuterMetallicBand(source = 'apply') {
   const innerBandRadius = originalInnerRadius - Math.max(0, (innerFrameWidth - baseFrameWidth) / 2);
 
   const renderKey = [
-    canvas.width,
-    canvas.height,
-    baseCssSize,
-    expandedCssSize,
-    ringWidth,
-    ringScale,
-    innerFrameCssWidth,
-    outerFrameCssWidth,
-    realShadow,
-    emboss,
-    specularShine,
-    sparkle,
-    shadowBlur,
-    shadowOpacity,
-    shadowSpread,
-    shadowOffset,
-    highlightStrength,
-    sparkleAngle,
-    sparkleSize,
-    appliedZoom,
-    parentRedrawGeneration,
+    canvas.width, canvas.height, baseCssSize, expandedCssSize, ringWidth, ringScale,
+    innerFrameCssWidth, outerFrameCssWidth, realShadow, emboss, specularShine, sparkle,
+    shadowBlur, shadowOpacity, shadowSpread, shadowOffset, highlightStrength,
+    shineStart, shineEnd, shineGlowWidth, shineGlowBlur, shineGlowOpacity,
+    shineBandWidth, shineBandBlur, shineBandOpacity,
+    shineCoreWidth, shineCoreBlur, shineCoreOpacity,
+    sparkleAngle, sparkleSize, appliedZoom, parentRedrawGeneration,
   ].join(':');
 
   if (canvas.dataset.gannzillaOuterMetallicBandRenderKeyV536 === renderKey) return true;
@@ -340,11 +384,24 @@ function drawOuterMetallicBand(source = 'apply') {
   });
 
   if (specularShine) {
-    drawSpecularShine(ctx, cx, cy, outerBandRadius, outerFrameWidth, highlightStrength);
+    drawSpecularShine(ctx, cx, cy, outerBandRadius, outerFrameWidth, {
+      strength: highlightStrength,
+      startDegrees: shineStart,
+      endDegrees: shineEnd,
+      glowWidth: shineGlowWidth,
+      glowBlur: shineGlowBlur,
+      glowOpacity: shineGlowOpacity,
+      bandWidth: shineBandWidth,
+      bandBlur: shineBandBlur,
+      bandOpacity: shineBandOpacity,
+      coreWidth: shineCoreWidth,
+      coreBlur: shineCoreBlur,
+      coreOpacity: shineCoreOpacity,
+    });
   }
 
   if (sparkle) {
-    const sparklePoint = polar(cx, cy, outerBandRadius + outerFrameWidth * 0.34, sparkleAngle);
+    const sparklePoint = polar(cx, cy, outerBandRadius + outerFrameWidth * 0.22, sparkleAngle);
     drawSparkle(ctx, sparklePoint.x, sparklePoint.y, sparkleSize, highlightStrength);
   }
   ctx.restore();
@@ -362,6 +419,9 @@ function drawOuterMetallicBand(source = 'apply') {
   canvas.dataset.gannzillaAngleOuterShadowSpreadV536 = String(shadowSpread / appliedZoom);
   canvas.dataset.gannzillaAngleEmbossV536 = String(emboss);
   canvas.dataset.gannzillaAngleSpecularShineV536 = String(specularShine);
+  canvas.dataset.gannzillaAngleShineGlowWidthV536 = String(shineGlowWidth / appliedZoom);
+  canvas.dataset.gannzillaAngleShineBandWidthV536 = String(shineBandWidth / appliedZoom);
+  canvas.dataset.gannzillaAngleShineCoreWidthV536 = String(shineCoreWidth / appliedZoom);
   canvas.dataset.gannzillaAngleSparkleV536 = String(sparkle);
   canvas.dataset.gannzillaAngleSparkleAngleV536 = String(sparkleAngle);
   canvas.dataset.gannzillaAngleSparkleSizeV536 = String(sparkleSize / appliedZoom);
@@ -384,6 +444,9 @@ function drawOuterMetallicBand(source = 'apply') {
     emboss,
     highlightStrength,
     specularShine,
+    shineGlowWidth: shineGlowWidth / appliedZoom,
+    shineBandWidth: shineBandWidth / appliedZoom,
+    shineCoreWidth: shineCoreWidth / appliedZoom,
     sparkle,
     sparkleAngle,
     sparkleSize: sparkleSize / appliedZoom,
@@ -440,7 +503,11 @@ function install() {
         && canvas.dataset.gannzillaAngleOuterShadowV536 === 'true'
         && canvas.dataset.gannzillaAngleEmbossV536 === 'true'
         && canvas.dataset.gannzillaAngleSpecularShineV536 === 'true'
-        && canvas.dataset.gannzillaAngleSparkleV536 === 'true',
+        && Number(canvas.dataset.gannzillaAngleShineGlowWidthV536) === 24
+        && Number(canvas.dataset.gannzillaAngleShineBandWidthV536) === 10
+        && Number(canvas.dataset.gannzillaAngleShineCoreWidthV536) === 3.5
+        && canvas.dataset.gannzillaAngleSparkleV536 === 'true'
+        && Number(canvas.dataset.gannzillaAngleSparkleSizeV536) === 32,
       build: BUILD,
       innerFrameStrokeWidth: Number(canvas?.dataset?.gannzillaAngleInnerFrameStrokeWidthV536 || 0),
       outerFrameStrokeWidth: Number(canvas?.dataset?.gannzillaAngleOuterFrameStrokeWidthV536 || 0),
@@ -452,6 +519,9 @@ function install() {
       shadowSpread: Number(canvas?.dataset?.gannzillaAngleOuterShadowSpreadV536 || 0),
       emboss: canvas?.dataset?.gannzillaAngleEmbossV536 === 'true',
       specularShine: canvas?.dataset?.gannzillaAngleSpecularShineV536 === 'true',
+      shineGlowWidth: Number(canvas?.dataset?.gannzillaAngleShineGlowWidthV536 || 0),
+      shineBandWidth: Number(canvas?.dataset?.gannzillaAngleShineBandWidthV536 || 0),
+      shineCoreWidth: Number(canvas?.dataset?.gannzillaAngleShineCoreWidthV536 || 0),
       sparkle: canvas?.dataset?.gannzillaAngleSparkleV536 === 'true',
       sparkleAngle: Number(canvas?.dataset?.gannzillaAngleSparkleAngleV536 || 0),
       sparkleSize: Number(canvas?.dataset?.gannzillaAngleSparkleSizeV536 || 0),
