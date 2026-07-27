@@ -24,6 +24,7 @@ import './components/GannTools/gannzillaEmptyOuterRingV518';
 import './components/GannTools/gannzillaZodiacOuterRingV522';
 import './components/GannTools/gannzillaWeekdaysOuterRingV523';
 import './components/GannTools/gannzillaMetallicAngleOuterRingV531';
+import './components/GannTools/gannzillaOuterMetallicBandV536';
 import './components/GannTools/gannzillaCenterCellComfortV508';
 import './components/GannTools/gannzillaStablePanWheelV510';
 import './components/GannTools/gannzillaUnifiedPaintPreviewZoomV515';
