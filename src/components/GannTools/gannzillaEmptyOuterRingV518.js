@@ -68,14 +68,15 @@ let applyCount = 0;
 let lastApply = null;
 let frame = 0;
 
-function applyEmptyOuterRing(source = 'apply') {
+function applyEmptyOuterRing(source = 'apply', force = false) {
   const canvas = findWheel();
   if (!(canvas instanceof HTMLCanvasElement) || !boolParam('emptyOuterRing', true)) return false;
 
   const currentCssSize = Number(canvas.dataset.gannzillaCanvasCssSize || 0);
   const currentPixelSize = Number(canvas.dataset.gannzillaCanvasPixelSize || 0);
   const storedExpandedCssSize = Number(canvas.dataset.gannzillaEmptyOuterRingExpandedCssSizeV518 || 0);
-  if (currentCssSize > 0 && storedExpandedCssSize > 0 && Math.abs(currentCssSize - storedExpandedCssSize) < 0.5) {
+  if (!force && currentCssSize > 0 && storedExpandedCssSize > 0
+      && Math.abs(currentCssSize - storedExpandedCssSize) < 0.5) {
     return true;
   }
   if (!(currentCssSize > 0) || !(currentPixelSize > 0) || canvas.width < 1 || canvas.height < 1) return false;
@@ -172,6 +173,7 @@ function applyEmptyOuterRing(source = 'apply') {
     expandedPixelSize,
     blank: true,
     numbersChanged: false,
+    forced: force,
     at: Date.now(),
   };
 
@@ -179,9 +181,9 @@ function applyEmptyOuterRing(source = 'apply') {
   return true;
 }
 
-function schedule(source = 'schedule') {
+function schedule(source = 'schedule', force = false) {
   cancelAnimationFrame(frame);
-  frame = requestAnimationFrame(() => applyEmptyOuterRing(source));
+  frame = requestAnimationFrame(() => applyEmptyOuterRing(source, force));
 }
 
 function persistFlags() {
@@ -204,7 +206,7 @@ function install() {
     || window[STATE_KEY]) return;
 
   persistFlags();
-  const onWheelDraw = () => schedule('final-wheel-v506');
+  const onWheelDraw = () => schedule('final-wheel-v506', true);
   window.addEventListener('gannzilla:final-wheel-authority-v506', onWheelDraw, false);
   window.addEventListener('gannzilla:native-dpr-zoom-v504', () => schedule('native-zoom'), false);
   window.addEventListener('resize', () => schedule('resize'), false);
