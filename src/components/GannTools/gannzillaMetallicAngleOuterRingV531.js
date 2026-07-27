@@ -96,18 +96,10 @@ function persistFlags() {
     url.searchParams.set('angleCardinalSpokes', 'false');
     url.searchParams.set('gannzillaAngleRingScale', '2');
     url.searchParams.set('gannzillaAngleMetallicBands', 'true');
-    if (!url.searchParams.has('gannzillaAngleFrameStrokeWidth')) {
-      url.searchParams.set('gannzillaAngleFrameStrokeWidth', '5.6');
-    }
-    if (!url.searchParams.has('gannzillaAngleMajorFontSize')) {
-      url.searchParams.set('gannzillaAngleMajorFontSize', '30');
-    }
-    if (!url.searchParams.has('gannzillaAngleMinorFontSize')) {
-      url.searchParams.set('gannzillaAngleMinorFontSize', '17');
-    }
-    if (!url.searchParams.has('gannzillaAngleCardinalFontSize')) {
-      url.searchParams.set('gannzillaAngleCardinalFontSize', '42');
-    }
+    url.searchParams.set('gannzillaAngleFrameStrokeWidth', '5.6');
+    url.searchParams.set('gannzillaAngleMajorFontSize', '40');
+    url.searchParams.set('gannzillaAngleMinorFontSize', '26');
+    url.searchParams.set('gannzillaAngleCardinalFontSize', '56');
     url.searchParams.set('v', String(BUILD));
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
   } catch (_) {
@@ -144,9 +136,9 @@ function drawMetallicAngleOuterRing(source = 'apply', force = false) {
 
   const ringScale = numberParam('gannzillaAngleRingScale', 2, 1.7, 2);
   const bandWidth = numberParam('gannzillaAngleFrameStrokeWidth', 5.6, 3, 12) * appliedZoom;
-  const majorFont = numberParam('gannzillaAngleMajorFontSize', 30, 20, 42);
-  const minorFont = numberParam('gannzillaAngleMinorFontSize', 17, 11, 28);
-  const cardinalFont = numberParam('gannzillaAngleCardinalFontSize', 42, 28, 56);
+  const majorFont = numberParam('gannzillaAngleMajorFontSize', 40, 20, 42);
+  const minorFont = numberParam('gannzillaAngleMinorFontSize', 26, 11, 28);
+  const cardinalFont = numberParam('gannzillaAngleCardinalFontSize', 56, 28, 56);
   const renderKey = [
     canvas.width,
     canvas.height,
@@ -185,7 +177,7 @@ function drawMetallicAngleOuterRing(source = 'apply', force = false) {
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
 
-  // One wide angle frame with two equal metallic copper borders.
+  // Preserve the approved geometry: only the angle-label typography is enlarged.
   fillAnnulus(ctx, cx, cy, inner, outer);
   drawMetallicBand(ctx, cx, cy, inner, bandWidth);
   drawMetallicBand(ctx, cx, cy, outer, bandWidth);
@@ -212,7 +204,7 @@ function drawMetallicAngleOuterRing(source = 'apply', force = false) {
     ctx.stroke();
   }
 
-  // Larger labels matching the visual reference; no extra guide circle and no center spokes.
+  // Major 10-degree labels, minor 5-degree labels and four cardinals.
   for (let angle = 0; angle < 360; angle += 5) {
     const displayAngle = angle === 0 ? 360 : angle;
     const cardinal = angle % 90 === 0;
@@ -241,6 +233,9 @@ function drawMetallicAngleOuterRing(source = 'apply', force = false) {
   canvas.dataset.gannzillaAngleCardinalSpokesV531 = 'false';
   canvas.dataset.gannzillaAngleBandWidthV531 = String(bandWidth / appliedZoom);
   canvas.dataset.gannzillaAngleGuideCircleV531 = 'false';
+  canvas.dataset.gannzillaAngleMajorFontSizeV531 = String(majorFont);
+  canvas.dataset.gannzillaAngleMinorFontSizeV531 = String(minorFont);
+  canvas.dataset.gannzillaAngleCardinalFontSizeV531 = String(cardinalFont);
   canvas.dataset.gannzillaAuthorityBuild = String(BUILD);
 
   applyCount += 1;
@@ -257,6 +252,7 @@ function drawMetallicAngleOuterRing(source = 'apply', force = false) {
     majorFont,
     minorFont,
     cardinalFont,
+    geometryChanged: false,
     at: Date.now(),
   };
 
@@ -308,7 +304,10 @@ function install() {
         && Number(canvas.dataset.gannzillaAngleFrameCountV531) === 1
         && Number(canvas.dataset.gannzillaAngleTickCountV531) === 360
         && canvas.dataset.gannzillaAngleCardinalSpokesV531 === 'false'
-        && canvas.dataset.gannzillaAngleGuideCircleV531 === 'false',
+        && canvas.dataset.gannzillaAngleGuideCircleV531 === 'false'
+        && Number(canvas.dataset.gannzillaAngleMajorFontSizeV531) === 40
+        && Number(canvas.dataset.gannzillaAngleMinorFontSizeV531) === 26
+        && Number(canvas.dataset.gannzillaAngleCardinalFontSizeV531) === 56,
       build: BUILD,
       frameCount: Number(canvas?.dataset?.gannzillaAngleFrameCountV531 || 0),
       tickCount: Number(canvas?.dataset?.gannzillaAngleTickCountV531 || 0),
@@ -316,6 +315,9 @@ function install() {
       cardinalSpokes: canvas?.dataset?.gannzillaAngleCardinalSpokesV531 === 'true',
       guideCircle: canvas?.dataset?.gannzillaAngleGuideCircleV531 === 'true',
       bandWidth: Number(canvas?.dataset?.gannzillaAngleBandWidthV531 || 0),
+      majorFont: Number(canvas?.dataset?.gannzillaAngleMajorFontSizeV531 || 0),
+      minorFont: Number(canvas?.dataset?.gannzillaAngleMinorFontSizeV531 || 0),
+      cardinalFont: Number(canvas?.dataset?.gannzillaAngleCardinalFontSizeV531 || 0),
       applyCount,
       lastApply,
     };
