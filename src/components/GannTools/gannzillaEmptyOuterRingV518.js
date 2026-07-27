@@ -80,10 +80,7 @@ function applyEmptyOuterRing(source = 'apply', force = false) {
     && storedExpandedCssSize > 0
     && Math.abs(currentCssSize - storedExpandedCssSize) < 0.5;
 
-  // Never expand an already-expanded canvas again. This keeps redraws idempotent
-  // and prevents nested copies of the complete wheel.
   if (alreadyExpanded) return true;
-
   if (!(currentCssSize > 0) || !(currentPixelSize > 0) || canvas.width < 1 || canvas.height < 1) return false;
 
   const dpr = Math.max(1, Number(canvas.dataset.gannzillaNativeDpr) || Number(window.devicePixelRatio) || 1);
@@ -91,7 +88,7 @@ function applyEmptyOuterRing(source = 'apply', force = false) {
   const divisions = Math.round(numberParam('divisions', 36, 3, 360));
   const clockwise = boolParam('clockwise', true);
   const ringWidth = ringWidthFromCanvas(canvas, appliedZoom);
-  const emptyRingCount = Math.round(numberParam('emptyOuterRingCount', 1, 1, 4));
+  const emptyRingCount = Math.round(numberParam('emptyOuterRingCount', 1, 1, 5));
   const extension = ringWidth * emptyRingCount;
   const expandedCssSize = Math.ceil(currentCssSize + extension * 2);
   const expandedPixelSize = Math.round(expandedCssSize * dpr);
@@ -238,6 +235,7 @@ function install() {
       lastApply,
       existingNumbersChanged: false,
       idempotentExpansion: true,
+      maxOuterRingCount: 5,
     };
   };
 
