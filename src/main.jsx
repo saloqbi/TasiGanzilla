@@ -22,6 +22,7 @@ import './components/GannTools/gannzillaClockwiseDirectionBridgeV483';
 import './components/GannTools/gannzillaFinalWheelAuthorityV506';
 import './components/GannTools/gannzillaEmptyOuterRingV518';
 import './components/GannTools/gannzillaZodiacOuterRingV519';
+import './components/GannTools/gannzillaZodiacPreviewBridgeV520';
 import './components/GannTools/gannzillaCenterCellComfortV508';
 import './components/GannTools/gannzillaStablePanWheelV510';
 import './components/GannTools/gannzillaUnifiedPaintPreviewZoomV515';
