@@ -124,7 +124,7 @@ function drawZodiacOuterRing(source = 'apply', force = false) {
   const inner = Math.max(1, (baseCssSize - margin * 2) / 2);
   const outer = inner + ringWidth;
   const labelRadius = inner + ringWidth * 0.52;
-  const fontSize = numberParam('gannzillaZodiacFontSize', 13, 7, 24) * appliedZoom;
+  const fontSize = numberParam('gannzillaZodiacFontSize', 22, 7, 24) * appliedZoom;
 
   ctx.save();
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
