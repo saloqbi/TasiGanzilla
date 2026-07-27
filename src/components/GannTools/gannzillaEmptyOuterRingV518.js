@@ -75,10 +75,15 @@ function applyEmptyOuterRing(source = 'apply', force = false) {
   const currentCssSize = Number(canvas.dataset.gannzillaCanvasCssSize || 0);
   const currentPixelSize = Number(canvas.dataset.gannzillaCanvasPixelSize || 0);
   const storedExpandedCssSize = Number(canvas.dataset.gannzillaEmptyOuterRingExpandedCssSizeV518 || 0);
-  if (!force && currentCssSize > 0 && storedExpandedCssSize > 0
-      && Math.abs(currentCssSize - storedExpandedCssSize) < 0.5) {
-    return true;
-  }
+  const alreadyExpanded = canvas.dataset.gannzillaEmptyOuterRingV518 === 'true'
+    && currentCssSize > 0
+    && storedExpandedCssSize > 0
+    && Math.abs(currentCssSize - storedExpandedCssSize) < 0.5;
+
+  // Never expand an already-expanded canvas again. This keeps redraws idempotent
+  // and prevents nested copies of the complete wheel.
+  if (alreadyExpanded) return true;
+
   if (!(currentCssSize > 0) || !(currentPixelSize > 0) || canvas.width < 1 || canvas.height < 1) return false;
 
   const dpr = Math.max(1, Number(canvas.dataset.gannzillaNativeDpr) || Number(window.devicePixelRatio) || 1);
@@ -221,7 +226,7 @@ function install() {
       ok: canvas instanceof HTMLCanvasElement
         && canvas.dataset.gannzillaEmptyOuterRingV518 === 'true'
         && canvas.dataset.gannzillaEmptyOuterRingBlankV518 === 'true'
-        && Number(canvas.dataset.gannzillaEmptyOuterRingCountV518) === 1,
+        && Number(canvas.dataset.gannzillaEmptyOuterRingCountV518) >= 1,
       build: BUILD,
       blank: canvas?.dataset?.gannzillaEmptyOuterRingBlankV518 === 'true',
       emptyRingCount: Number(canvas?.dataset?.gannzillaEmptyOuterRingCountV518 || 0),
@@ -232,6 +237,7 @@ function install() {
       applyCount,
       lastApply,
       existingNumbersChanged: false,
+      idempotentExpansion: true,
     };
   };
 
