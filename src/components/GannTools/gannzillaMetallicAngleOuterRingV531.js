@@ -97,9 +97,9 @@ function persistFlags() {
     url.searchParams.set('gannzillaAngleRingScale', '2');
     url.searchParams.set('gannzillaAngleMetallicBands', 'true');
     url.searchParams.set('gannzillaAngleFrameStrokeWidth', '5.6');
-    url.searchParams.set('gannzillaAngleMajorFontSize', '46');
-    url.searchParams.set('gannzillaAngleMinorFontSize', '30');
-    url.searchParams.set('gannzillaAngleCardinalFontSize', '64');
+    url.searchParams.set('gannzillaAngleMajorFontSize', '48');
+    url.searchParams.set('gannzillaAngleMinorFontSize', '42');
+    url.searchParams.set('gannzillaAngleCardinalFontSize', '68');
     url.searchParams.set('v', String(BUILD));
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
   } catch (_) {
@@ -136,9 +136,9 @@ function drawMetallicAngleOuterRing(source = 'apply', force = false) {
 
   const ringScale = numberParam('gannzillaAngleRingScale', 2, 1.7, 2);
   const bandWidth = numberParam('gannzillaAngleFrameStrokeWidth', 5.6, 3, 12) * appliedZoom;
-  const majorFont = numberParam('gannzillaAngleMajorFontSize', 46, 20, 48);
-  const minorFont = numberParam('gannzillaAngleMinorFontSize', 30, 11, 32);
-  const cardinalFont = numberParam('gannzillaAngleCardinalFontSize', 64, 28, 68);
+  const majorFont = numberParam('gannzillaAngleMajorFontSize', 48, 20, 48);
+  const minorFont = numberParam('gannzillaAngleMinorFontSize', 42, 11, 44);
+  const cardinalFont = numberParam('gannzillaAngleCardinalFontSize', 68, 28, 68);
   const renderKey = [
     canvas.width,
     canvas.height,
@@ -305,9 +305,9 @@ function install() {
         && Number(canvas.dataset.gannzillaAngleTickCountV531) === 360
         && canvas.dataset.gannzillaAngleCardinalSpokesV531 === 'false'
         && canvas.dataset.gannzillaAngleGuideCircleV531 === 'false'
-        && Number(canvas.dataset.gannzillaAngleMajorFontSizeV531) === 46
-        && Number(canvas.dataset.gannzillaAngleMinorFontSizeV531) === 30
-        && Number(canvas.dataset.gannzillaAngleCardinalFontSizeV531) === 64,
+        && Number(canvas.dataset.gannzillaAngleMajorFontSizeV531) === 48
+        && Number(canvas.dataset.gannzillaAngleMinorFontSizeV531) === 42
+        && Number(canvas.dataset.gannzillaAngleCardinalFontSizeV531) === 68,
       build: BUILD,
       frameCount: Number(canvas?.dataset?.gannzillaAngleFrameCountV531 || 0),
       tickCount: Number(canvas?.dataset?.gannzillaAngleTickCountV531 || 0),
