@@ -1,0 +1,11 @@
+{
+  "build": 520,
+  "status": "ZODIAC_PREVIEW_CONNECTED",
+  "cells": 36,
+  "labels": 36,
+  "first": { "number": 1, "text": "نار الحمل", "color": "red" },
+  "last": { "number": 36, "text": "ماء الحوت", "color": "black" },
+  "colorCounts": { "red": 12, "blue": 12, "black": 12 },
+  "paintZoomPercent": 100,
+  "paintStageSize": 1280
+}
