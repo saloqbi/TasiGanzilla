@@ -75,12 +75,16 @@ function applyEmptyOuterRing(source = 'apply', force = false) {
   const currentCssSize = Number(canvas.dataset.gannzillaCanvasCssSize || 0);
   const currentPixelSize = Number(canvas.dataset.gannzillaCanvasPixelSize || 0);
   const storedExpandedCssSize = Number(canvas.dataset.gannzillaEmptyOuterRingExpandedCssSizeV518 || 0);
+  const storedRingCount = Number(canvas.dataset.gannzillaEmptyOuterRingCountV518 || 0);
+  const requestedRingCount = Math.round(numberParam('emptyOuterRingCount', 1, 1, 6));
   const alreadyExpanded = canvas.dataset.gannzillaEmptyOuterRingV518 === 'true'
     && currentCssSize > 0
     && storedExpandedCssSize > 0
+    && storedRingCount === requestedRingCount
     && Math.abs(currentCssSize - storedExpandedCssSize) < 0.5;
 
   if (alreadyExpanded) return true;
+  if (canvas.dataset.gannzillaEmptyOuterRingV518 === 'true') return false;
   if (!(currentCssSize > 0) || !(currentPixelSize > 0) || canvas.width < 1 || canvas.height < 1) return false;
 
   const dpr = Math.max(1, Number(canvas.dataset.gannzillaNativeDpr) || Number(window.devicePixelRatio) || 1);
@@ -88,7 +92,7 @@ function applyEmptyOuterRing(source = 'apply', force = false) {
   const divisions = Math.round(numberParam('divisions', 36, 3, 360));
   const clockwise = boolParam('clockwise', true);
   const ringWidth = ringWidthFromCanvas(canvas, appliedZoom);
-  const emptyRingCount = Math.round(numberParam('emptyOuterRingCount', 1, 1, 5));
+  const emptyRingCount = requestedRingCount;
   const extension = ringWidth * emptyRingCount;
   const expandedCssSize = Math.ceil(currentCssSize + extension * 2);
   const expandedPixelSize = Math.round(expandedCssSize * dpr);
@@ -191,8 +195,10 @@ function schedule(source = 'schedule', force = false) {
 function persistFlags() {
   try {
     const url = new URL(window.location.href);
+    const independentTimeRing = boolParam('timeRing', false)
+      && boolParam('gannzillaIndependentTimeRing', true);
     url.searchParams.set('emptyOuterRing', 'true');
-    url.searchParams.set('emptyOuterRingCount', '1');
+    url.searchParams.set('emptyOuterRingCount', independentTimeRing ? '6' : '1');
     url.searchParams.set('emptyOuterRingNumbers', 'false');
     url.searchParams.set('v', String(BUILD));
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
@@ -235,7 +241,7 @@ function install() {
       lastApply,
       existingNumbersChanged: false,
       idempotentExpansion: true,
-      maxOuterRingCount: 5,
+      maxOuterRingCount: 6,
     };
   };
 
