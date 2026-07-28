@@ -33,6 +33,7 @@ import './components/GannTools/gannzillaUnifiedPaintPreviewZoomV515';
 import './components/GannTools/gannzillaWeekdaysPreviewBridgeV524';
 import './components/GannTools/gannzillaMetallicAnglePreviewBridgeV532';
 import './components/GannTools/gannzillaSingleVisibleWheelAuthorityV535';
+import './components/GannTools/gannzillaTimeRingFinalRepaintV546';
 import './components/GannTools/gannzillaCompactZoomSelectV516';
 import './components/GannTools/gannzillaCompactToolbarSpacingV517';
 import './styles/globals.css';
