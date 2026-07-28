@@ -51,6 +51,7 @@ import './components/GannTools/gannzillaTasiTimeTrackerPlainClockV561';
 import './components/GannTools/gannzillaTasiTimeTrackerLineCleanupV562';
 import './components/GannTools/gannzillaTasiTimeTrackerDigitalRootV563';
 import './components/GannTools/gannzillaTasiTimeTrackerDigitalRootVisibleV564';
+import './components/GannTools/gannzillaTasiTimeTrackerDigitalRootScaleV565';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
