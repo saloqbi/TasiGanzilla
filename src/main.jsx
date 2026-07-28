@@ -23,6 +23,7 @@ import './components/GannTools/gannzillaFinalWheelAuthorityV506';
 import './components/GannTools/gannzillaEmptyOuterRingV518';
 import './components/GannTools/gannzillaZodiacOuterRingV522';
 import './components/GannTools/gannzillaWeekdaysOuterRingV523';
+import './components/GannTools/gannzillaTimeRingOverlayV542';
 import './components/GannTools/gannzillaMetallicAngleOuterRingV531';
 import './components/GannTools/gannzillaCleanOuterFrameV540';
 import './components/GannTools/gannzillaCopperTopCorrectionV541';
