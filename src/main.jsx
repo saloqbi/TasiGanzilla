@@ -47,6 +47,7 @@ import './components/GannTools/gannzillaTasiTimeTrackerMetricFrameV556';
 import './components/GannTools/gannzillaTasiTimeTrackerClockIdentityV558';
 import './components/GannTools/gannzillaTasiTimeTrackerClockDisplayV559';
 import './components/GannTools/gannzillaTasiTimeTrackerClockNumeralsV560';
+import './components/GannTools/gannzillaTasiTimeTrackerPlainClockV561';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
