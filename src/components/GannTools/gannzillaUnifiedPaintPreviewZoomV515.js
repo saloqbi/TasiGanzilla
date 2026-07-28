@@ -1,4 +1,4 @@
-const BUILD = 515;
+const BUILD = 545;
 const STATE_KEY = '__gannzillaUnifiedPaintPreviewZoomV515';
 const PREVIEW_ID = 'gannzilla-fixed-paint-preview-v512';
 const ZOOM_IN_ID = 'gannzilla-unified-zoom-in-v509';
@@ -20,6 +20,17 @@ function params() {
 function wheelMode() {
   const query = params();
   return query.get('gannzillaPro') === 'true' || query.get('wheelPro') === 'true';
+}
+
+function boolParam(name, fallback = false) {
+  const query = params();
+  if (!query.has(name)) return fallback;
+  return ['true', '1', 'yes', 'on'].includes(String(query.get(name) || '').toLowerCase());
+}
+
+function liveCanvasMode() {
+  return boolParam('timeRing', false)
+    && boolParam('gannzillaIndependentTimeRing', true);
 }
 
 function numberParam(name, fallback, min, max) {
@@ -56,6 +67,8 @@ function initialPercent() {
 
 function findSourceCanvas() {
   const preferred = document.querySelector([
+    'canvas[data-gannzilla-independent-time-ring-v543="true"]',
+    'canvas[data-gannzilla-empty-outer-ring-v518="true"]',
     'canvas[data-gannzilla-final-wheel-authority-v506="true"]',
     'canvas[data-gannzilla-final-wheel-authority-v491="true"]',
     'canvas[data-gannzilla-keyboard-mouse-control-v459="true"]',
@@ -98,11 +111,28 @@ function panTransform(offset = readPanOffset()) {
   return `translate3d(${Math.round(offset.x)}px, ${Math.round(offset.y)}px, 0)`;
 }
 
+function hideOrRemovePreview() {
+  const preview = document.getElementById(PREVIEW_ID);
+  if (preview instanceof HTMLImageElement) {
+    preview.hidden = true;
+    preview.setAttribute('aria-hidden', 'true');
+    setStyle(preview, 'display', 'none');
+    setStyle(preview, 'visibility', 'hidden');
+    setStyle(preview, 'opacity', '0');
+    setStyle(preview, 'pointer-events', 'none');
+    preview.remove();
+  }
+  if (objectUrl) {
+    URL.revokeObjectURL(objectUrl);
+    objectUrl = '';
+  }
+}
+
 function persist() {
   try { localStorage.setItem(ZOOM_STORAGE_KEY, String(currentPercent)); } catch (_) { /* runtime only */ }
   try {
     const url = new URL(window.location.href);
-    url.searchParams.set('paintPreview', 'true');
+    url.searchParams.set('paintPreview', liveCanvasMode() ? 'false' : 'true');
     url.searchParams.set('paintZoomAuthority', 'true');
     url.searchParams.set('paintZoomPercent', String(currentPercent));
     url.searchParams.set('paintZoomMin', String(settings().min));
@@ -110,6 +140,10 @@ function persist() {
     url.searchParams.set('paintZoomStep', String(settings().step));
     url.searchParams.set('paintStageSize', String(settings().stageSize));
     url.searchParams.set('gannzillaZoom', '1.00');
+    if (liveCanvasMode()) {
+      url.searchParams.set('liveCanvasDisplay', 'true');
+      url.searchParams.set('gannzillaTimeRingPresentationMode', 'live-canvas');
+    }
     url.searchParams.set('v', String(BUILD));
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
   } catch (_) {
@@ -117,9 +151,32 @@ function persist() {
   }
 }
 
-function ensurePreview(source) {
+function prepareStage(source) {
   const stage = source?.parentElement;
   if (!(source instanceof HTMLCanvasElement) || !(stage instanceof HTMLElement)) return null;
+
+  setStyle(stage, 'position', 'relative');
+  setStyle(stage, 'display', 'grid');
+  setStyle(stage, 'place-items', 'center');
+  setStyle(stage, 'overflow', 'visible');
+
+  setStyle(source, 'grid-area', '1 / 1');
+  setStyle(source, 'place-self', 'center');
+  setStyle(source, 'margin', '0');
+  setStyle(source, 'padding', '0');
+  setStyle(source, 'border', '0');
+  return stage;
+}
+
+function ensurePreview(source) {
+  if (liveCanvasMode()) {
+    hideOrRemovePreview();
+    prepareStage(source);
+    return null;
+  }
+
+  const stage = prepareStage(source);
+  if (!(stage instanceof HTMLElement)) return null;
 
   let preview = document.getElementById(PREVIEW_ID);
   if (!(preview instanceof HTMLImageElement)) {
@@ -134,13 +191,6 @@ function ensurePreview(source) {
     stage.appendChild(preview);
   }
 
-  setStyle(stage, 'position', 'relative');
-  setStyle(stage, 'display', 'grid');
-  setStyle(stage, 'place-items', 'center');
-  setStyle(stage, 'overflow', 'visible');
-
-  setStyle(source, 'grid-area', '1 / 1');
-  setStyle(source, 'place-self', 'center');
   setStyle(source, 'z-index', '1');
 
   setStyle(preview, 'grid-area', '1 / 1');
@@ -156,6 +206,8 @@ function ensurePreview(source) {
   setStyle(preview, 'pointer-events', 'none');
   setStyle(preview, 'user-select', 'none');
   setStyle(preview, 'z-index', '2');
+  preview.hidden = false;
+  preview.removeAttribute('aria-hidden');
   return preview;
 }
 
@@ -177,14 +229,19 @@ let applying = false;
 function applyGeometry(offset = readPanOffset()) {
   const source = findSourceCanvas();
   if (!(source instanceof HTMLCanvasElement)) return false;
-  const preview = ensurePreview(source);
-  if (!(preview instanceof HTMLImageElement)) return false;
 
   const size = displaySize();
   const exact = `${size}px`;
   const transform = panTransform(offset);
+  const live = liveCanvasMode();
+  const preview = live ? null : ensurePreview(source);
+  if (!live && !(preview instanceof HTMLImageElement)) return false;
+
+  prepareStage(source);
   applying = true;
-  [source, preview].forEach((element) => {
+
+  const elements = live ? [source] : [source, preview];
+  elements.forEach((element) => {
     setStyle(element, 'width', exact);
     setStyle(element, 'height', exact);
     setStyle(element, 'min-width', exact);
@@ -197,17 +254,32 @@ function applyGeometry(offset = readPanOffset()) {
     setStyle(element, 'will-change', 'transform');
   });
 
-  const sourceStyle = getComputedStyle(source);
-  const visible = sourceStyle.display !== 'none' && sourceStyle.visibility !== 'hidden';
-  setStyle(source, 'opacity', '0');
-  setStyle(source, 'visibility', visible ? 'visible' : 'hidden');
-  setStyle(preview, 'visibility', visible ? 'visible' : 'hidden');
-  setStyle(preview, 'opacity', visible ? '1' : '0');
-  setStyle(preview, 'pointer-events', 'none');
+  if (live) {
+    hideOrRemovePreview();
+    source.hidden = false;
+    source.removeAttribute('aria-hidden');
+    setStyle(source, 'display', 'block');
+    setStyle(source, 'visibility', 'visible');
+    setStyle(source, 'opacity', '1');
+    setStyle(source, 'pointer-events', 'auto');
+    setStyle(source, 'z-index', '3');
+    source.dataset.gannzillaTimeRingPresentationModeV545 = 'live-canvas';
+    source.dataset.gannzillaPresentationGeometryFixedV545 = 'true';
+    source.dataset.gannzillaPaintDisplaySizeV515 = String(size);
+  } else {
+    const sourceStyle = getComputedStyle(source);
+    const visible = sourceStyle.display !== 'none' && sourceStyle.visibility !== 'hidden';
+    setStyle(source, 'opacity', '0');
+    setStyle(source, 'visibility', visible ? 'visible' : 'hidden');
+    setStyle(preview, 'visibility', visible ? 'visible' : 'hidden');
+    setStyle(preview, 'opacity', visible ? '1' : '0');
+    setStyle(preview, 'pointer-events', 'none');
+    preview.dataset.gannzillaPaintZoomPercentV515 = String(currentPercent);
+    preview.dataset.gannzillaPaintDisplaySizeV515 = String(size);
+  }
+
   source.dataset.gannzillaRequestedZoom = '1';
   source.dataset.gannzillaPaintZoomPercentV515 = String(currentPercent);
-  preview.dataset.gannzillaPaintZoomPercentV515 = String(currentPercent);
-  preview.dataset.gannzillaPaintDisplaySizeV515 = String(size);
   applying = false;
   updateSelect();
   return true;
@@ -233,6 +305,23 @@ function createBitmap(source, size, token) {
 async function renderPreview(reason = 'render') {
   const source = findSourceCanvas();
   if (!(source instanceof HTMLCanvasElement) || source.width < 1 || source.height < 1) return false;
+
+  if (liveCanvasMode()) {
+    renderToken += 1;
+    hideOrRemovePreview();
+    applyGeometry();
+    renderCount += 1;
+    lastRender = {
+      reason,
+      mode: 'live-canvas',
+      percent: currentPercent,
+      displaySize: displaySize(),
+      sourcePixels: `${source.width}x${source.height}`,
+      at: Date.now(),
+    };
+    return true;
+  }
+
   const preview = ensurePreview(source);
   if (!(preview instanceof HTMLImageElement)) return false;
   const size = displaySize();
@@ -258,6 +347,7 @@ async function renderPreview(reason = 'render') {
   renderCount += 1;
   lastRender = {
     reason,
+    mode: 'preview-image',
     percent: currentPercent,
     displaySize: size,
     bitmapSize: result.bitmapSize,
@@ -317,6 +407,7 @@ function applyPercent(value, source) {
     source,
     percent: currentPercent,
     displaySize: displaySize(),
+    presentationMode: liveCanvasMode() ? 'live-canvas' : 'preview-image',
     at: Date.now(),
   };
   window.dispatchEvent(new CustomEvent('gannzilla:paint-zoom-v515', {
@@ -416,7 +507,7 @@ function installSourceObserver() {
   sourceObserver = new MutationObserver(() => {
     if (!applying) requestAnimationFrame(() => applyGeometry());
   });
-  sourceObserver.observe(source, { attributes: true, attributeFilter: ['style', 'hidden'] });
+  sourceObserver.observe(source, { attributes: true, attributeFilter: ['style', 'hidden', 'width', 'height'] });
 }
 
 function scheduleBindings() {
@@ -446,10 +537,18 @@ function install() {
   window.addEventListener('pointerdown', globalPointerFallback, true);
   window.addEventListener('gannzilla:page-scrollbar-pan-v305', onPan, false);
   window.addEventListener('gannzilla:wheel-pan-offset-v305', onPan, false);
-  window.addEventListener('gannzilla:final-wheel-authority-v506', () => {
-    applyGeometry();
-    scheduleRender('source-redraw-v515', 35);
-  }, false);
+
+  [
+    'gannzilla:final-wheel-authority-v506',
+    'gannzilla:empty-outer-ring-v518',
+    'gannzilla:independent-time-ring-v543',
+  ].forEach((eventName) => {
+    window.addEventListener(eventName, () => {
+      applyGeometry();
+      scheduleRender(`${eventName}-v515`, 35);
+    }, false);
+  });
+
   window.addEventListener('resize', () => applyGeometry(), false);
   document.addEventListener('fullscreenchange', () => applyGeometry(), false);
 
@@ -458,7 +557,7 @@ function install() {
   installSourceObserver();
   installBindingObserver();
   scheduleRender('install-v515', 40);
-  [60, 160, 360, 800, 1600, 3200, 6400].forEach((delay) => setTimeout(() => {
+  [60, 160, 360, 800, 1600, 3200, 6400, 10600, 13600].forEach((delay) => setTimeout(() => {
     bindControls();
     applyGeometry();
     installSourceObserver();
@@ -473,21 +572,36 @@ function install() {
     const zoomOut = document.getElementById(ZOOM_OUT_ID);
     const select = document.getElementById(ZOOM_SELECT_ID);
     const expected = displaySize();
-    const actual = preview?.getBoundingClientRect().width || 0;
+    const live = liveCanvasMode();
+    const actual = live
+      ? source?.getBoundingClientRect().width || 0
+      : preview?.getBoundingClientRect().width || 0;
+    const previewHidden = !(preview instanceof HTMLImageElement)
+      || preview.style.display === 'none'
+      || preview.style.visibility === 'hidden'
+      || Number(preview.style.opacity || 0) < 0.01;
+
     return {
       ok: source instanceof HTMLCanvasElement
-        && preview instanceof HTMLImageElement
         && zoomIn?.dataset?.gannzillaUnifiedPaintPreviewZoomV515 === 'true'
         && zoomOut?.dataset?.gannzillaUnifiedPaintPreviewZoomV515 === 'true'
         && select?.dataset?.gannzillaUnifiedPaintPreviewZoomV515 === 'true'
-        && Math.abs(actual - expected) < 1,
+        && Math.abs(actual - expected) < 1
+        && (!live || (
+          previewHidden
+          && source.dataset.gannzillaTimeRingPresentationModeV545 === 'live-canvas'
+          && source.dataset.gannzillaPresentationGeometryFixedV545 === 'true'
+          && Number(getComputedStyle(source).opacity) > 0.99
+        )),
       build: BUILD,
+      presentationMode: live ? 'live-canvas' : 'preview-image',
       currentPercent,
       minPercent: settings().min,
       maxPercent: settings().max,
       stepPercent: settings().step,
       expectedDisplaySize: expected,
       actualDisplaySize: actual,
+      previewHidden,
       zoomInDirectBound: zoomIn?.dataset?.gannzillaUnifiedPaintPreviewZoomV515 === 'true',
       zoomOutDirectBound: zoomOut?.dataset?.gannzillaUnifiedPaintPreviewZoomV515 === 'true',
       actionCount,
