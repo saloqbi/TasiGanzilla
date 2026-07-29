@@ -1,10 +1,12 @@
-const BUILD = 616;
-const STATE_KEY = '__gannzillaCenterClockAngleMatchTimeSizeV616';
+const BUILD = 617;
+const STATE_KEY = '__gannzillaCenterClockAngleStableSizeV617';
 const ANGLE_ROW_ID = 'gannzilla-center-clock-angle-row-v614';
 const TIME_ROW_ID = 'gannzilla-center-clock-time-row-v614';
 
 let frame = 0;
-let timer = 0;
+let observer = null;
+let observedAngle = null;
+let observedTime = null;
 let applyCount = 0;
 let lastApply = null;
 
@@ -16,6 +18,27 @@ function setImportant(element, property, value) {
   return true;
 }
 
+function attachObserver(angleRow, timeRow) {
+  if (typeof MutationObserver !== 'function'
+      || !(angleRow instanceof HTMLDivElement)
+      || !(timeRow instanceof HTMLDivElement)) return false;
+
+  if (observer && observedAngle === angleRow && observedTime === timeRow) return true;
+
+  observer?.disconnect();
+  observedAngle = angleRow;
+  observedTime = timeRow;
+  observer = new MutationObserver((records) => {
+    if (records.some((record) => record.attributeName === 'style')) {
+      // Run in the mutation microtask, before the browser paints the next frame.
+      apply('style-mutation');
+    }
+  });
+  observer.observe(angleRow, { attributes: true, attributeFilter: ['style'] });
+  observer.observe(timeRow, { attributes: true, attributeFilter: ['style'] });
+  return true;
+}
+
 function apply(source = 'apply') {
   frame = 0;
 
@@ -23,18 +46,24 @@ function apply(source = 'apply') {
   const timeRow = document.getElementById(TIME_ROW_ID);
   if (!(angleRow instanceof HTMLDivElement) || !(timeRow instanceof HTMLDivElement)) return false;
 
+  attachObserver(angleRow, timeRow);
+
   const timeFontSize = getComputedStyle(timeRow).fontSize;
   if (!timeFontSize) return false;
 
-  setImportant(angleRow, 'font-size', timeFontSize);
+  const changed = setImportant(angleRow, 'font-size', timeFontSize);
+  const angleFontSize = getComputedStyle(angleRow).fontSize;
 
   applyCount += 1;
   lastApply = {
     source,
     build: BUILD,
-    angleFontSize: getComputedStyle(angleRow).fontSize,
+    changed,
+    angleFontSize,
     timeFontSize,
-    equal: getComputedStyle(angleRow).fontSize === timeFontSize,
+    equal: angleFontSize === timeFontSize,
+    eventDriven: true,
+    repeatingTimer: false,
     otherLayoutChanged: false,
     at: Date.now(),
   };
@@ -55,11 +84,17 @@ function install() {
     window.setTimeout(() => schedule(`boot-${delay}`), delay);
   });
 
+  [
+    'gannzilla:native-dpr-zoom-v504',
+    'gannzilla:final-wheel-authority-v506',
+    'gannzilla:empty-outer-ring-v518',
+    'gannzilla:wheel-input-v459',
+    'gannzilla:page-scrollbar-pan-v305',
+  ].forEach((name) => window.addEventListener(name, () => schedule(name), false));
   window.addEventListener('resize', () => schedule('window-resize'), false);
-  timer = window.setInterval(() => apply('persistent-size-match'), 120);
 
-  window.GANNZILLA_CENTER_CLOCK_ANGLE_MATCH_TIME_SIZE_V616 = true;
-  window.__auditGannzillaCenterClockAngleMatchTimeSizeV616 = () => {
+  window.GANNZILLA_CENTER_CLOCK_ANGLE_STABLE_SIZE_V617 = true;
+  window.__auditGannzillaCenterClockAngleStableSizeV617 = () => {
     const angleRow = document.getElementById(ANGLE_ROW_ID);
     const timeRow = document.getElementById(TIME_ROW_ID);
     const angleFontSize = angleRow instanceof HTMLElement ? getComputedStyle(angleRow).fontSize : null;
@@ -71,13 +106,15 @@ function install() {
       build: BUILD,
       angleFontSize,
       timeFontSize,
-      timerActive: Boolean(timer),
+      eventDriven: true,
+      repeatingTimer: false,
+      observerActive: Boolean(observer),
       applyCount,
       lastApply,
     };
   };
 
-  window[STATE_KEY] = { apply, schedule, timer };
+  window[STATE_KEY] = { apply, schedule };
   schedule('install');
 }
 
