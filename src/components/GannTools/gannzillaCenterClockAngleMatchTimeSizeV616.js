@@ -1,5 +1,5 @@
-const BUILD = 619;
-const STATE_KEY = '__gannzillaCenterClockTimeAtDividerV619';
+const BUILD = 620;
+const STATE_KEY = '__gannzillaCenterClockTimeTouchesDividerV620';
 const DISPLAY_ID = 'gannzilla-center-clock-display-v614';
 const ANGLE_ROW_ID = 'gannzilla-center-clock-angle-row-v614';
 const TIME_ROW_ID = 'gannzilla-center-clock-time-row-v614';
@@ -66,10 +66,9 @@ function apply(source = 'apply') {
   const angleChanged = setImportant(angleRow, 'font-size', fontSize);
   const timeChanged = setImportant(timeRow, 'font-size', fontSize);
 
-  // Place the visual bottom of the time row immediately above the 50% divider.
-  // Using the rendered row height keeps the gap stable at every zoom level.
+  // Place the visual bottom of the time row exactly on the 50% divider.
   const renderedHeight = timeRow.getBoundingClientRect().height || targetSize;
-  const dividerGap = Math.max(1, diameter * 0.006);
+  const dividerGap = 0;
   const targetCenterPx = (diameter * 0.5) - (renderedHeight * 0.5) - dividerGap;
   const timeTopValue = `${targetCenterPx.toFixed(3)}px`;
   const timeTopChanged = setImportant(timeRow, 'top', timeTopValue);
@@ -89,7 +88,7 @@ function apply(source = 'apply') {
     angleChanged,
     timeChanged,
     timeTopChanged,
-    timeBottomAtDivider: true,
+    timeTouchesDivider: true,
     anglePositionChanged: false,
     dateChanged: false,
     frameChanged: false,
@@ -124,8 +123,8 @@ function install() {
   ].forEach((name) => window.addEventListener(name, () => schedule(name), false));
   window.addEventListener('resize', () => schedule('window-resize'), false);
 
-  window.GANNZILLA_CENTER_CLOCK_TIME_AT_DIVIDER_V619 = true;
-  window.__auditGannzillaCenterClockTimeAtDividerV619 = () => {
+  window.GANNZILLA_CENTER_CLOCK_TIME_TOUCHES_DIVIDER_V620 = true;
+  window.__auditGannzillaCenterClockTimeTouchesDividerV620 = () => {
     const display = document.getElementById(DISPLAY_ID);
     const angleRow = document.getElementById(ANGLE_ROW_ID);
     const timeRow = document.getElementById(TIME_ROW_ID);
@@ -140,7 +139,7 @@ function install() {
       angleFontSize,
       timeFontSize,
       timeTop: timeRow instanceof HTMLElement ? getComputedStyle(timeRow).top : null,
-      timeBottomAtDivider: true,
+      timeTouchesDivider: true,
       eventDriven: true,
       repeatingTimer: false,
       observerActive: Boolean(observer),
