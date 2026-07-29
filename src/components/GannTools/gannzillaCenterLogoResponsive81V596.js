@@ -7,7 +7,7 @@ const STATE_KEY = '__gannzillaCenterLogoResponsive81V596';
 const IMAGE_ID = 'gannzilla-center-logo-responsive-81-v596';
 const STYLE_ID = 'gannzilla-center-logo-responsive-81-style-v596';
 const STAGE_DATASET_KEY = 'gannzillaCenterLogoResponsive81V596';
-const LOGO_SCALE = 0.81;
+const LOGO_SCALE = 0.99;
 const IMAGE_DATA_URL = `data:image/webp;base64,${brandPart0}${brandPart1}${brandPart2}`;
 
 function params() {
