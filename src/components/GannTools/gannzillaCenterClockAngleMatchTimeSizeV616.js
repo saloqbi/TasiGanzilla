@@ -1,5 +1,5 @@
-const BUILD = 618;
-const STATE_KEY = '__gannzillaCenterClockCompactStableRowsV618';
+const BUILD = 619;
+const STATE_KEY = '__gannzillaCenterClockTimeAtDividerV619';
 const DISPLAY_ID = 'gannzilla-center-clock-display-v614';
 const ANGLE_ROW_ID = 'gannzilla-center-clock-angle-row-v614';
 const TIME_ROW_ID = 'gannzilla-center-clock-time-row-v614';
@@ -35,7 +35,7 @@ function attachObserver(angleRow, timeRow) {
   observedTime = timeRow;
   observer = new MutationObserver((records) => {
     if (records.some((record) => record.attributeName === 'style')) {
-      // Correct the owner update in the same microtask, before browser paint.
+      // Correct owner updates in the same microtask, before browser paint.
       apply('style-mutation');
     }
   });
@@ -59,13 +59,20 @@ function apply(source = 'apply') {
   const diameter = display.getBoundingClientRect().width || 0;
   if (!(diameter > 0)) return false;
 
-  // One compact, stable size for both rows. Only the time row moves slightly down.
+  // Preserve the compact equal font size used by the approved layout.
   const targetSize = clamp(diameter * 0.115, 17, 32);
   const fontSize = `${targetSize.toFixed(3)}px`;
 
   const angleChanged = setImportant(angleRow, 'font-size', fontSize);
   const timeChanged = setImportant(timeRow, 'font-size', fontSize);
-  const timeTopChanged = setImportant(timeRow, 'top', '44%');
+
+  // Place the visual bottom of the time row immediately above the 50% divider.
+  // Using the rendered row height keeps the gap stable at every zoom level.
+  const renderedHeight = timeRow.getBoundingClientRect().height || targetSize;
+  const dividerGap = Math.max(1, diameter * 0.006);
+  const targetCenterPx = (diameter * 0.5) - (renderedHeight * 0.5) - dividerGap;
+  const timeTopValue = `${targetCenterPx.toFixed(3)}px`;
+  const timeTopChanged = setImportant(timeRow, 'top', timeTopValue);
 
   applyCount += 1;
   lastApply = {
@@ -73,12 +80,16 @@ function apply(source = 'apply') {
     build: BUILD,
     diameter,
     targetFontSize: fontSize,
+    renderedHeight,
+    dividerGap,
+    targetCenterPx,
     angleFontSize: getComputedStyle(angleRow).fontSize,
     timeFontSize: getComputedStyle(timeRow).fontSize,
     timeTop: getComputedStyle(timeRow).top,
     angleChanged,
     timeChanged,
     timeTopChanged,
+    timeBottomAtDivider: true,
     anglePositionChanged: false,
     dateChanged: false,
     frameChanged: false,
@@ -113,8 +124,8 @@ function install() {
   ].forEach((name) => window.addEventListener(name, () => schedule(name), false));
   window.addEventListener('resize', () => schedule('window-resize'), false);
 
-  window.GANNZILLA_CENTER_CLOCK_COMPACT_STABLE_ROWS_V618 = true;
-  window.__auditGannzillaCenterClockCompactStableRowsV618 = () => {
+  window.GANNZILLA_CENTER_CLOCK_TIME_AT_DIVIDER_V619 = true;
+  window.__auditGannzillaCenterClockTimeAtDividerV619 = () => {
     const display = document.getElementById(DISPLAY_ID);
     const angleRow = document.getElementById(ANGLE_ROW_ID);
     const timeRow = document.getElementById(TIME_ROW_ID);
@@ -129,6 +140,7 @@ function install() {
       angleFontSize,
       timeFontSize,
       timeTop: timeRow instanceof HTMLElement ? getComputedStyle(timeRow).top : null,
+      timeBottomAtDivider: true,
       eventDriven: true,
       repeatingTimer: false,
       observerActive: Boolean(observer),
