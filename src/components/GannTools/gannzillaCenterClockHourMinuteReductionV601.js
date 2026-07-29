@@ -1,15 +1,16 @@
-const BUILD = 602;
-const STATE_KEY = '__gannzillaCenterClockDateReductionV602';
+const BUILD = 603;
+const STATE_KEY = '__gannzillaCenterClockDateReductionV603';
 const CLOCK_ID = 'gannzilla-center-digital-clock-v599';
-const DISPLAY_ID = 'gannzilla-center-clock-date-reduction-v602';
-const DATE_ID = 'gannzilla-center-clock-date-line-v602';
-const TIME_ID = 'gannzilla-center-clock-time-line-v602';
-const STYLE_ID = 'gannzilla-center-clock-date-reduction-style-v602';
+const DISPLAY_ID = 'gannzilla-center-clock-date-reduction-v603';
+const DATE_ID = 'gannzilla-center-clock-date-line-v603';
+const TIME_ID = 'gannzilla-center-clock-time-line-v603';
+const STYLE_ID = 'gannzilla-center-clock-date-reduction-style-v603';
 
 let frame = 0;
 let timer = 0;
 let observer = null;
 let observedClock = null;
+let measureCanvas = null;
 let applyCount = 0;
 let lastApply = null;
 
@@ -37,8 +38,15 @@ function enabled() {
 }
 
 function removeLegacyDisplay() {
-  document.getElementById('gannzilla-center-clock-hour-minute-reduction-v601')?.remove();
-  document.getElementById('gannzilla-center-clock-hour-minute-reduction-style-v601')?.remove();
+  [
+    'gannzilla-center-clock-hour-minute-reduction-v601',
+    'gannzilla-center-clock-date-reduction-v602',
+  ].forEach((id) => document.getElementById(id)?.remove());
+
+  [
+    'gannzilla-center-clock-hour-minute-reduction-style-v601',
+    'gannzilla-center-clock-date-reduction-style-v602',
+  ].forEach((id) => document.getElementById(id)?.remove());
 }
 
 function ensureStyle() {
@@ -59,7 +67,7 @@ function ensureStyle() {
       position: absolute !important;
       z-index: 81 !important;
       margin: 0 !important;
-      padding: 0 5% !important;
+      padding: 0 2.5% !important;
       box-sizing: border-box !important;
       border: 0 !important;
       border-radius: 50% !important;
@@ -97,7 +105,7 @@ function ensureStyle() {
       letter-spacing: 0 !important;
       text-align: center !important;
       white-space: nowrap !important;
-      overflow: hidden !important;
+      overflow: visible !important;
     }
   `;
 }
@@ -148,7 +156,7 @@ function ensureDisplay(clock) {
   if (!(display instanceof HTMLDivElement)) {
     display = document.createElement('div');
     display.id = DISPLAY_ID;
-    display.dataset.gannzillaCenterClockDateReductionV602 = 'true';
+    display.dataset.gannzillaCenterClockDateReductionV603 = 'true';
     display.setAttribute('aria-hidden', 'true');
 
     const dateLine = document.createElement('div');
@@ -172,6 +180,36 @@ function clockIsVisible(clock) {
     && Number(style.opacity || 0) > 0;
 }
 
+function textWidth(element, fontSize) {
+  if (!(element instanceof HTMLElement)) return 0;
+  if (!(measureCanvas instanceof HTMLCanvasElement)) measureCanvas = document.createElement('canvas');
+  const context = measureCanvas.getContext('2d');
+  if (!context) return 0;
+
+  const computed = getComputedStyle(element);
+  context.font = `${computed.fontWeight || '700'} ${fontSize}px ${computed.fontFamily || 'monospace'}`;
+  return context.measureText(element.textContent || '').width;
+}
+
+function fitLine(element, diameter, preferredRatio, availableRatio) {
+  if (!(element instanceof HTMLElement) || !(diameter > 0)) {
+    return { fontSize: 0, measuredWidth: 0, availableWidth: 0 };
+  }
+
+  const preferredSize = Math.max(7, diameter * preferredRatio);
+  const availableWidth = Math.max(20, diameter * availableRatio);
+  let fontSize = preferredSize;
+  let measuredWidth = textWidth(element, fontSize);
+
+  if (measuredWidth > availableWidth && measuredWidth > 0) {
+    fontSize = Math.max(7, fontSize * (availableWidth / measuredWidth) * 0.97);
+    measuredWidth = textWidth(element, fontSize);
+  }
+
+  setImportant(element, 'font-size', `${fontSize.toFixed(3)}px`);
+  return { fontSize, measuredWidth, availableWidth };
+}
+
 function sync(source = 'sync') {
   frame = 0;
   if (!enabled()) return false;
@@ -193,23 +231,26 @@ function sync(source = 'sync') {
     if (value) setImportant(display, property, value);
   });
 
+  const current = currentDisplay();
+  if (dateLine.textContent !== current.dateText) dateLine.textContent = current.dateText;
+  if (timeLine.textContent !== current.timeText) timeLine.textContent = current.timeText;
+
   const diameter = Number.parseFloat(clock.style.getPropertyValue('width'))
     || clock.getBoundingClientRect().width
     || 0;
+
+  let dateFit = { fontSize: 0, measuredWidth: 0, availableWidth: 0 };
+  let timeFit = { fontSize: 0, measuredWidth: 0, availableWidth: 0 };
   if (diameter > 0) {
-    setImportant(display, 'gap', `${Math.max(3, diameter * 0.028).toFixed(3)}px`);
-    setImportant(dateLine, 'font-size', `${Math.max(15, diameter * 0.072).toFixed(3)}px`);
-    setImportant(timeLine, 'font-size', `${Math.max(20, diameter * 0.108).toFixed(3)}px`);
+    setImportant(display, 'gap', `${Math.max(2, diameter * 0.018).toFixed(3)}px`);
+    dateFit = fitLine(dateLine, diameter, 0.060, 0.82);
+    timeFit = fitLine(timeLine, diameter, 0.086, 0.86);
   }
 
   const visible = clockIsVisible(clock);
   setImportant(display, 'display', visible ? 'flex' : 'none');
   setImportant(display, 'visibility', visible ? 'visible' : 'hidden');
   setImportant(display, 'opacity', visible ? '1' : '0');
-
-  const current = currentDisplay();
-  if (dateLine.textContent !== current.dateText) dateLine.textContent = current.dateText;
-  if (timeLine.textContent !== current.timeText) timeLine.textContent = current.timeText;
 
   attachObserver(clock);
   applyCount += 1;
@@ -227,6 +268,8 @@ function sync(source = 'sync') {
     second: current.second,
     reduction: current.reduction,
     sum: current.hour + current.minute,
+    dateFit,
+    timeFit,
     at: Date.now(),
   };
   return true;
@@ -275,8 +318,8 @@ function install() {
 
   timer = window.setInterval(() => schedule('clock-tick'), 200);
 
-  window.GANNZILLA_CENTER_CLOCK_DATE_REDUCTION_V602 = true;
-  window.__auditGannzillaCenterClockDateReductionV602 = () => {
+  window.GANNZILLA_CENTER_CLOCK_DATE_REDUCTION_V603 = true;
+  window.__auditGannzillaCenterClockDateReductionV603 = () => {
     const clock = document.getElementById(CLOCK_ID);
     const display = document.getElementById(DISPLAY_ID);
     const dateLine = document.getElementById(DATE_ID);
@@ -308,7 +351,7 @@ function install() {
     };
   };
 
-  window[STATE_KEY] = { schedule, sync, digitalRoot };
+  window[STATE_KEY] = { schedule, sync, digitalRoot, fitLine };
   schedule('install');
 }
 
