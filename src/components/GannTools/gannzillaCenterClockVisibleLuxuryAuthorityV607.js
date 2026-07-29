@@ -1,5 +1,5 @@
-const BUILD = 607;
-const STATE_KEY = '__gannzillaCenterClockVisibleLuxuryAuthorityV607';
+const BUILD = 608;
+const STATE_KEY = '__gannzillaCenterClockStableVerticalLayoutV608';
 const CLOCK_ID = 'gannzilla-center-digital-clock-v599';
 const DISPLAY_ID = 'gannzilla-center-clock-date-angle-time-v604';
 const CONTENT_ID = 'gannzilla-center-clock-upper-content-v604';
@@ -40,6 +40,10 @@ function apply(source = 'apply') {
       || !(time instanceof HTMLDivElement)
       || !(divider instanceof HTMLDivElement)) return false;
 
+  const diameter = display.getBoundingClientRect().width
+    || clock.getBoundingClientRect().width
+    || 0;
+
   // Preserve the existing circle diameter and position. Draw only inward.
   setImportant(clock, 'background', '#DDBD8A');
   setImportant(display, 'background', '#DDBD8A');
@@ -56,11 +60,11 @@ function apply(source = 'apply') {
     'inset 0 0 16px rgba(68, 37, 23, 0.18)',
   ].join(', '));
 
-  // Keep all three rows inside the upper half and add visible breathing room.
-  setImportant(content, 'top', '3%');
+  // Lower the complete information group while preserving the empty lower half.
+  setImportant(content, 'top', '5.5%');
   setImportant(content, 'left', '10%');
   setImportant(content, 'width', '80%');
-  setImportant(content, 'height', '43.5%');
+  setImportant(content, 'height', '41.5%');
   setImportant(content, 'display', 'flex');
   setImportant(content, 'flex-direction', 'column');
   setImportant(content, 'align-items', 'center');
@@ -75,16 +79,22 @@ function apply(source = 'apply') {
     setImportant(element, 'line-height', '1');
     setImportant(element, 'text-shadow', '0 1px 0 rgba(255,255,255,0.58), 0 1px 1px rgba(63,32,18,0.18)');
     setImportant(element, 'transform-origin', 'center center');
+    setImportant(element, 'will-change', 'transform');
   });
 
-  // Enlarge visually without changing the clock calculation or circle geometry.
-  setImportant(date, 'transform', 'scale(1.18)');
-  setImportant(angle, 'transform', 'scale(1.34)');
-  setImportant(time, 'transform', 'scale(1.30)');
+  // Diameter-relative offsets keep the three rows stable at every wheel zoom.
+  const dateOffset = Math.max(3, diameter * 0.013);
+  const angleOffset = Math.max(5, diameter * 0.025);
+  const timeOffset = Math.max(10, diameter * 0.060);
+
+  setImportant(date, 'transform', `translate3d(0, ${dateOffset.toFixed(3)}px, 0) scale(1.18)`);
+  setImportant(angle, 'transform', `translate3d(0, ${angleOffset.toFixed(3)}px, 0) scale(1.34)`);
+  setImportant(time, 'transform', `translate3d(0, ${timeOffset.toFixed(3)}px, 0) scale(1.30)`);
   setImportant(date, 'letter-spacing', '0.035em');
   setImportant(angle, 'letter-spacing', '0.018em');
   setImportant(time, 'letter-spacing', '0.012em');
 
+  // Keep the centre divider unchanged and leave a visible safety gap above it.
   setImportant(divider, 'left', '6%');
   setImportant(divider, 'top', '50%');
   setImportant(divider, 'width', '88%');
@@ -96,12 +106,20 @@ function apply(source = 'apply') {
   lastApply = {
     source,
     build: BUILD,
+    diameter,
     inwardOnlyFrame: true,
     outsideProtrusion: false,
     circleGeometryChanged: false,
     clockLogicChanged: false,
     lowerHalfEmpty: true,
+    dividerAtPercent: 50,
     textScales: { date: 1.18, angle: 1.34, time: 1.30 },
+    textOffsetsPx: {
+      date: dateOffset,
+      angle: angleOffset,
+      time: timeOffset,
+    },
+    zoomStableOffsets: true,
     at: Date.now(),
   };
   return true;
@@ -132,8 +150,8 @@ function install() {
 
   interval = window.setInterval(() => apply('persistent-authority'), 120);
 
-  window.GANNZILLA_CENTER_CLOCK_VISIBLE_LUXURY_AUTHORITY_V607 = true;
-  window.__auditGannzillaCenterClockVisibleLuxuryAuthorityV607 = () => ({
+  window.GANNZILLA_CENTER_CLOCK_STABLE_VERTICAL_LAYOUT_V608 = true;
+  window.__auditGannzillaCenterClockStableVerticalLayoutV608 = () => ({
     ok: document.getElementById(DISPLAY_ID) instanceof HTMLDivElement
       && document.getElementById(DATE_ID) instanceof HTMLDivElement
       && document.getElementById(ANGLE_ID) instanceof HTMLDivElement
@@ -143,6 +161,7 @@ function install() {
     outsideProtrusion: false,
     circleGeometryChanged: false,
     clockLogicChanged: false,
+    zoomStableOffsets: true,
     intervalActive: Boolean(interval),
     applyCount,
     lastApply,
