@@ -1,8 +1,10 @@
-const BUILD = 601;
-const STATE_KEY = '__gannzillaCenterClockHourMinuteReductionV601';
+const BUILD = 602;
+const STATE_KEY = '__gannzillaCenterClockDateReductionV602';
 const CLOCK_ID = 'gannzilla-center-digital-clock-v599';
-const DISPLAY_ID = 'gannzilla-center-clock-hour-minute-reduction-v601';
-const STYLE_ID = 'gannzilla-center-clock-hour-minute-reduction-style-v601';
+const DISPLAY_ID = 'gannzilla-center-clock-date-reduction-v602';
+const DATE_ID = 'gannzilla-center-clock-date-line-v602';
+const TIME_ID = 'gannzilla-center-clock-time-line-v602';
+const STYLE_ID = 'gannzilla-center-clock-date-reduction-style-v602';
 
 let frame = 0;
 let timer = 0;
@@ -28,7 +30,15 @@ function enabled() {
   const reductionEnabled = !['false', '0', 'off', 'no'].includes(
     String(query.get('centerClockHourMinuteReduction') || 'true').toLowerCase(),
   );
-  return wheelMode && logoEnabled && toggleEnabled && reductionEnabled;
+  const dateEnabled = !['false', '0', 'off', 'no'].includes(
+    String(query.get('centerClockDate') || 'true').toLowerCase(),
+  );
+  return wheelMode && logoEnabled && toggleEnabled && reductionEnabled && dateEnabled;
+}
+
+function removeLegacyDisplay() {
+  document.getElementById('gannzilla-center-clock-hour-minute-reduction-v601')?.remove();
+  document.getElementById('gannzilla-center-clock-hour-minute-reduction-style-v601')?.remove();
 }
 
 function ensureStyle() {
@@ -49,7 +59,7 @@ function ensureStyle() {
       position: absolute !important;
       z-index: 81 !important;
       margin: 0 !important;
-      padding: 0 4% !important;
+      padding: 0 5% !important;
       box-sizing: border-box !important;
       border: 0 !important;
       border-radius: 50% !important;
@@ -58,10 +68,10 @@ function ensureStyle() {
       font-family: "Courier New", Consolas, monospace !important;
       font-variant-numeric: tabular-nums !important;
       font-weight: 700 !important;
-      line-height: 1 !important;
-      letter-spacing: 0 !important;
       direction: ltr !important;
       text-align: center !important;
+      display: flex !important;
+      flex-direction: column !important;
       align-items: center !important;
       justify-content: center !important;
       white-space: nowrap !important;
@@ -72,6 +82,22 @@ function ensureStyle() {
       transform-origin: center center !important;
       transition: none !important;
       animation: none !important;
+    }
+
+    #${DATE_ID}, #${TIME_ID} {
+      display: block !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      color: #f6d88a !important;
+      font-family: inherit !important;
+      font-variant-numeric: tabular-nums !important;
+      font-weight: 700 !important;
+      line-height: 1 !important;
+      letter-spacing: 0 !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
     }
   `;
 }
@@ -94,12 +120,19 @@ function digitalRoot(value) {
 
 function currentDisplay() {
   const now = new Date();
+  const day = now.getDate();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
   const hour = now.getHours();
   const minute = now.getMinutes();
   const second = now.getSeconds();
   const reduction = digitalRoot(hour + minute);
   return {
-    text: `${pad(hour)}:${pad(minute)}:${pad(second)} = ${reduction}`,
+    dateText: `${pad(day)} - ${pad(month)} - ${year}`,
+    timeText: `${pad(hour)}:${pad(minute)}:${pad(second)} = ${reduction}`,
+    day,
+    month,
+    year,
     hour,
     minute,
     second,
@@ -115,8 +148,16 @@ function ensureDisplay(clock) {
   if (!(display instanceof HTMLDivElement)) {
     display = document.createElement('div');
     display.id = DISPLAY_ID;
-    display.dataset.gannzillaCenterClockHourMinuteReductionV601 = 'true';
+    display.dataset.gannzillaCenterClockDateReductionV602 = 'true';
     display.setAttribute('aria-hidden', 'true');
+
+    const dateLine = document.createElement('div');
+    dateLine.id = DATE_ID;
+
+    const timeLine = document.createElement('div');
+    timeLine.id = TIME_ID;
+
+    display.append(dateLine, timeLine);
   }
 
   if (display.parentElement !== stage) stage.appendChild(display);
@@ -135,12 +176,17 @@ function sync(source = 'sync') {
   frame = 0;
   if (!enabled()) return false;
 
+  removeLegacyDisplay();
   ensureStyle();
   const clock = document.getElementById(CLOCK_ID);
   if (!(clock instanceof HTMLDivElement)) return false;
 
   const display = ensureDisplay(clock);
-  if (!(display instanceof HTMLDivElement)) return false;
+  const dateLine = document.getElementById(DATE_ID);
+  const timeLine = document.getElementById(TIME_ID);
+  if (!(display instanceof HTMLDivElement)
+      || !(dateLine instanceof HTMLDivElement)
+      || !(timeLine instanceof HTMLDivElement)) return false;
 
   ['left', 'top', 'width', 'height'].forEach((property) => {
     const value = clock.style.getPropertyValue(property);
@@ -151,7 +197,9 @@ function sync(source = 'sync') {
     || clock.getBoundingClientRect().width
     || 0;
   if (diameter > 0) {
-    setImportant(display, 'font-size', `${Math.max(20, diameter * 0.115).toFixed(3)}px`);
+    setImportant(display, 'gap', `${Math.max(3, diameter * 0.028).toFixed(3)}px`);
+    setImportant(dateLine, 'font-size', `${Math.max(15, diameter * 0.072).toFixed(3)}px`);
+    setImportant(timeLine, 'font-size', `${Math.max(20, diameter * 0.108).toFixed(3)}px`);
   }
 
   const visible = clockIsVisible(clock);
@@ -160,7 +208,8 @@ function sync(source = 'sync') {
   setImportant(display, 'opacity', visible ? '1' : '0');
 
   const current = currentDisplay();
-  if (display.textContent !== current.text) display.textContent = current.text;
+  if (dateLine.textContent !== current.dateText) dateLine.textContent = current.dateText;
+  if (timeLine.textContent !== current.timeText) timeLine.textContent = current.timeText;
 
   attachObserver(clock);
   applyCount += 1;
@@ -168,7 +217,11 @@ function sync(source = 'sync') {
     source,
     visible,
     diameter,
-    text: current.text,
+    dateText: current.dateText,
+    timeText: current.timeText,
+    day: current.day,
+    month: current.month,
+    year: current.year,
     hour: current.hour,
     minute: current.minute,
     second: current.second,
@@ -203,6 +256,7 @@ function install() {
       || !enabled()
       || window[STATE_KEY]) return;
 
+  removeLegacyDisplay();
   ensureStyle();
 
   [
@@ -221,27 +275,33 @@ function install() {
 
   timer = window.setInterval(() => schedule('clock-tick'), 200);
 
-  window.GANNZILLA_CENTER_CLOCK_HOUR_MINUTE_REDUCTION_V601 = true;
-  window.__auditGannzillaCenterClockHourMinuteReductionV601 = () => {
+  window.GANNZILLA_CENTER_CLOCK_DATE_REDUCTION_V602 = true;
+  window.__auditGannzillaCenterClockDateReductionV602 = () => {
     const clock = document.getElementById(CLOCK_ID);
     const display = document.getElementById(DISPLAY_ID);
+    const dateLine = document.getElementById(DATE_ID);
+    const timeLine = document.getElementById(TIME_ID);
     const clockRect = clock?.getBoundingClientRect();
     const displayRect = display?.getBoundingClientRect();
     const current = currentDisplay();
     return {
       ok: clock instanceof HTMLDivElement
         && display instanceof HTMLDivElement
+        && dateLine instanceof HTMLDivElement
+        && timeLine instanceof HTMLDivElement
         && display.parentElement === clock.parentElement
         && Math.abs(Number(clockRect?.width || 0) - Number(displayRect?.width || 0)) < 0.5
-        && display.textContent === current.text,
+        && dateLine.textContent === current.dateText
+        && timeLine.textContent === current.timeText,
       build: BUILD,
       formula: 'digitalRoot(hour + minute)',
+      dateText: current.dateText,
+      timeText: current.timeText,
       hour: current.hour,
       minute: current.minute,
       second: current.second,
       sum: current.hour + current.minute,
       reduction: current.reduction,
-      text: current.text,
       applyCount,
       lastApply,
       timerActive: Boolean(timer),
