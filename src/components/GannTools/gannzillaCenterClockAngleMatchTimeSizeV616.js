@@ -1,5 +1,5 @@
-const BUILD = 622;
-const STATE_KEY = '__gannzillaCenterClockAngleOnePercentLowerV622';
+const BUILD = 623;
+const STATE_KEY = '__gannzillaCenterClockStableVerticalPositionsV623';
 const DISPLAY_ID = 'gannzilla-center-clock-display-v614';
 const ANGLE_ROW_ID = 'gannzilla-center-clock-angle-row-v614';
 const TIME_ROW_ID = 'gannzilla-center-clock-time-row-v614';
@@ -59,22 +59,19 @@ function apply(source = 'apply') {
   const diameter = display.getBoundingClientRect().width || 0;
   if (!(diameter > 0)) return false;
 
-  // Preserve the compact equal font size used by the approved layout.
+  // Preserve the approved compact equal font size for both rows.
   const targetSize = clamp(diameter * 0.115, 17, 32);
   const fontSize = `${targetSize.toFixed(3)}px`;
 
   const angleChanged = setImportant(angleRow, 'font-size', fontSize);
   const timeChanged = setImportant(timeRow, 'font-size', fontSize);
 
-  // Lower only the angle row by one percentage point: 29% -> 30%.
-  const angleTopValue = '30%';
+  // Visual positions approved from the current rendered clock:
+  // angle lowered one percentage point (30% -> 31%),
+  // time restored below the centre divider at 46%.
+  const angleTopValue = '31%';
+  const timeTopValue = '46%';
   const angleTopChanged = setImportant(angleRow, 'top', angleTopValue);
-
-  // Keep the time row one percent of the diameter below the divider.
-  const renderedHeight = timeRow.getBoundingClientRect().height || targetSize;
-  const dividerOffset = diameter * 0.01;
-  const targetCenterPx = (diameter * 0.5) - (renderedHeight * 0.5) + dividerOffset;
-  const timeTopValue = `${targetCenterPx.toFixed(3)}px`;
   const timeTopChanged = setImportant(timeRow, 'top', timeTopValue);
 
   applyCount += 1;
@@ -84,18 +81,15 @@ function apply(source = 'apply') {
     diameter,
     targetFontSize: fontSize,
     angleTop: getComputedStyle(angleRow).top,
-    renderedHeight,
-    dividerOffset,
-    targetCenterPx,
+    timeTop: getComputedStyle(timeRow).top,
     angleFontSize: getComputedStyle(angleRow).fontSize,
     timeFontSize: getComputedStyle(timeRow).fontSize,
-    timeTop: getComputedStyle(timeRow).top,
     angleChanged,
     angleTopChanged,
     timeChanged,
     timeTopChanged,
     angleOnePercentLower: true,
-    timeOnePercentBelowDivider: true,
+    timeRestoredBelowDivider: true,
     dateChanged: false,
     frameChanged: false,
     dividerChanged: false,
@@ -129,28 +123,27 @@ function install() {
   ].forEach((name) => window.addEventListener(name, () => schedule(name), false));
   window.addEventListener('resize', () => schedule('window-resize'), false);
 
-  window.GANNZILLA_CENTER_CLOCK_ANGLE_ONE_PERCENT_LOWER_V622 = true;
-  window.__auditGannzillaCenterClockAngleOnePercentLowerV622 = () => {
+  window.GANNZILLA_CENTER_CLOCK_STABLE_VERTICAL_POSITIONS_V623 = true;
+  window.__auditGannzillaCenterClockStableVerticalPositionsV623 = () => {
     const display = document.getElementById(DISPLAY_ID);
     const angleRow = document.getElementById(ANGLE_ROW_ID);
     const timeRow = document.getElementById(TIME_ROW_ID);
     const angleFontSize = angleRow instanceof HTMLElement ? getComputedStyle(angleRow).fontSize : null;
     const timeFontSize = timeRow instanceof HTMLElement ? getComputedStyle(timeRow).fontSize : null;
-    const angleTop = angleRow instanceof HTMLElement ? getComputedStyle(angleRow).top : null;
     return {
       ok: display instanceof HTMLDivElement
         && angleRow instanceof HTMLDivElement
         && timeRow instanceof HTMLDivElement
         && angleFontSize === timeFontSize
-        && angleRow.style.getPropertyValue('top') === '30%',
+        && getComputedStyle(angleRow).top === '31%'
+        && getComputedStyle(timeRow).top === '46%',
       build: BUILD,
       angleFontSize,
       timeFontSize,
-      angleTop,
-      angleTopInline: angleRow instanceof HTMLElement ? angleRow.style.getPropertyValue('top') : null,
-      angleOnePercentLower: true,
+      angleTop: angleRow instanceof HTMLElement ? getComputedStyle(angleRow).top : null,
       timeTop: timeRow instanceof HTMLElement ? getComputedStyle(timeRow).top : null,
-      timeOnePercentBelowDivider: true,
+      angleOnePercentLower: true,
+      timeRestoredBelowDivider: true,
       eventDriven: true,
       repeatingTimer: false,
       observerActive: Boolean(observer),
