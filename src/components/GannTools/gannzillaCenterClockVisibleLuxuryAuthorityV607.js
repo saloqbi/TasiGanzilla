@@ -1,5 +1,5 @@
-const BUILD = 608;
-const STATE_KEY = '__gannzillaCenterClockStableVerticalLayoutV608';
+const BUILD = 609;
+const STATE_KEY = '__gannzillaCenterClockRegularReadableLayoutV609';
 const CLOCK_ID = 'gannzilla-center-digital-clock-v599';
 const DISPLAY_ID = 'gannzilla-center-clock-date-angle-time-v604';
 const CONTENT_ID = 'gannzilla-center-clock-upper-content-v604';
@@ -60,41 +60,52 @@ function apply(source = 'apply') {
     'inset 0 0 16px rgba(68, 37, 23, 0.18)',
   ].join(', '));
 
-  // Lower the complete information group while preserving the empty lower half.
-  setImportant(content, 'top', '5.5%');
-  setImportant(content, 'left', '10%');
-  setImportant(content, 'width', '80%');
-  setImportant(content, 'height', '41.5%');
-  setImportant(content, 'display', 'flex');
-  setImportant(content, 'flex-direction', 'column');
-  setImportant(content, 'align-items', 'center');
-  setImportant(content, 'justify-content', 'space-evenly');
-  setImportant(content, 'gap', '0');
+  // Use explicit row positions instead of flex scaling for stable, regular spacing.
+  setImportant(content, 'position', 'absolute');
+  setImportant(content, 'top', '4.5%');
+  setImportant(content, 'left', '9%');
+  setImportant(content, 'width', '82%');
+  setImportant(content, 'height', '42%');
+  setImportant(content, 'display', 'block');
   setImportant(content, 'font-family', 'Georgia, "Times New Roman", serif');
+  setImportant(content, 'overflow', 'visible');
 
   [date, angle, time].forEach((element) => {
+    setImportant(element, 'position', 'absolute');
+    setImportant(element, 'left', '0');
+    setImportant(element, 'width', '100%');
+    setImportant(element, 'margin', '0');
+    setImportant(element, 'padding', '0');
     setImportant(element, 'font-family', 'Georgia, "Times New Roman", serif');
     setImportant(element, 'font-weight', '700');
     setImportant(element, 'color', '#342116');
     setImportant(element, 'line-height', '1');
+    setImportant(element, 'text-align', 'center');
+    setImportant(element, 'white-space', 'nowrap');
     setImportant(element, 'text-shadow', '0 1px 0 rgba(255,255,255,0.58), 0 1px 1px rgba(63,32,18,0.18)');
+    setImportant(element, 'transform', 'translate3d(0, -50%, 0)');
     setImportant(element, 'transform-origin', 'center center');
-    setImportant(element, 'will-change', 'transform');
+    setImportant(element, 'will-change', 'top, font-size');
   });
 
-  // Diameter-relative offsets keep the three rows stable at every wheel zoom.
-  const dateOffset = Math.max(3, diameter * 0.013);
-  const angleOffset = Math.max(5, diameter * 0.025);
-  const timeOffset = Math.max(10, diameter * 0.060);
+  // Clear hierarchy: slightly larger date, lower angle, and clock safely above the divider.
+  const dateSize = Math.max(10, diameter * 0.064);
+  const angleSize = Math.max(14, diameter * 0.086);
+  const timeSize = Math.max(15, diameter * 0.088);
 
-  setImportant(date, 'transform', `translate3d(0, ${dateOffset.toFixed(3)}px, 0) scale(1.18)`);
-  setImportant(angle, 'transform', `translate3d(0, ${angleOffset.toFixed(3)}px, 0) scale(1.34)`);
-  setImportant(time, 'transform', `translate3d(0, ${timeOffset.toFixed(3)}px, 0) scale(1.30)`);
-  setImportant(date, 'letter-spacing', '0.035em');
+  setImportant(date, 'top', '12%');
+  setImportant(angle, 'top', '48%');
+  setImportant(time, 'top', '82%');
+
+  setImportant(date, 'font-size', `${dateSize.toFixed(3)}px`);
+  setImportant(angle, 'font-size', `${angleSize.toFixed(3)}px`);
+  setImportant(time, 'font-size', `${timeSize.toFixed(3)}px`);
+
+  setImportant(date, 'letter-spacing', '0.040em');
   setImportant(angle, 'letter-spacing', '0.018em');
   setImportant(time, 'letter-spacing', '0.012em');
 
-  // Keep the centre divider unchanged and leave a visible safety gap above it.
+  // Keep the centre divider unchanged and leave the lower half empty.
   setImportant(divider, 'left', '6%');
   setImportant(divider, 'top', '50%');
   setImportant(divider, 'width', '88%');
@@ -113,13 +124,11 @@ function apply(source = 'apply') {
     clockLogicChanged: false,
     lowerHalfEmpty: true,
     dividerAtPercent: 50,
-    textScales: { date: 1.18, angle: 1.34, time: 1.30 },
-    textOffsetsPx: {
-      date: dateOffset,
-      angle: angleOffset,
-      time: timeOffset,
-    },
-    zoomStableOffsets: true,
+    rowTopPercent: { date: 12, angle: 48, time: 82 },
+    fontSizePx: { date: dateSize, angle: angleSize, time: timeSize },
+    dateEnlarged: true,
+    angleLowered: true,
+    regularAbsoluteLayout: true,
     at: Date.now(),
   };
   return true;
@@ -150,8 +159,8 @@ function install() {
 
   interval = window.setInterval(() => apply('persistent-authority'), 120);
 
-  window.GANNZILLA_CENTER_CLOCK_STABLE_VERTICAL_LAYOUT_V608 = true;
-  window.__auditGannzillaCenterClockStableVerticalLayoutV608 = () => ({
+  window.GANNZILLA_CENTER_CLOCK_REGULAR_READABLE_LAYOUT_V609 = true;
+  window.__auditGannzillaCenterClockRegularReadableLayoutV609 = () => ({
     ok: document.getElementById(DISPLAY_ID) instanceof HTMLDivElement
       && document.getElementById(DATE_ID) instanceof HTMLDivElement
       && document.getElementById(ANGLE_ID) instanceof HTMLDivElement
@@ -161,7 +170,9 @@ function install() {
     outsideProtrusion: false,
     circleGeometryChanged: false,
     clockLogicChanged: false,
-    zoomStableOffsets: true,
+    dateEnlarged: true,
+    angleLowered: true,
+    regularAbsoluteLayout: true,
     intervalActive: Boolean(interval),
     applyCount,
     lastApply,
