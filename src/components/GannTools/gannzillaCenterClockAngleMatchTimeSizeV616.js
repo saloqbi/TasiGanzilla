@@ -1,5 +1,6 @@
-const BUILD = 617;
-const STATE_KEY = '__gannzillaCenterClockAngleStableSizeV617';
+const BUILD = 618;
+const STATE_KEY = '__gannzillaCenterClockCompactStableRowsV618';
+const DISPLAY_ID = 'gannzilla-center-clock-display-v614';
 const ANGLE_ROW_ID = 'gannzilla-center-clock-angle-row-v614';
 const TIME_ROW_ID = 'gannzilla-center-clock-time-row-v614';
 
@@ -9,6 +10,10 @@ let observedAngle = null;
 let observedTime = null;
 let applyCount = 0;
 let lastApply = null;
+
+function clamp(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value));
+}
 
 function setImportant(element, property, value) {
   if (!(element instanceof HTMLElement)) return false;
@@ -30,7 +35,7 @@ function attachObserver(angleRow, timeRow) {
   observedTime = timeRow;
   observer = new MutationObserver((records) => {
     if (records.some((record) => record.attributeName === 'style')) {
-      // Run in the mutation microtask, before the browser paints the next frame.
+      // Correct the owner update in the same microtask, before browser paint.
       apply('style-mutation');
     }
   });
@@ -42,29 +47,44 @@ function attachObserver(angleRow, timeRow) {
 function apply(source = 'apply') {
   frame = 0;
 
+  const display = document.getElementById(DISPLAY_ID);
   const angleRow = document.getElementById(ANGLE_ROW_ID);
   const timeRow = document.getElementById(TIME_ROW_ID);
-  if (!(angleRow instanceof HTMLDivElement) || !(timeRow instanceof HTMLDivElement)) return false;
+  if (!(display instanceof HTMLDivElement)
+      || !(angleRow instanceof HTMLDivElement)
+      || !(timeRow instanceof HTMLDivElement)) return false;
 
   attachObserver(angleRow, timeRow);
 
-  const timeFontSize = getComputedStyle(timeRow).fontSize;
-  if (!timeFontSize) return false;
+  const diameter = display.getBoundingClientRect().width || 0;
+  if (!(diameter > 0)) return false;
 
-  const changed = setImportant(angleRow, 'font-size', timeFontSize);
-  const angleFontSize = getComputedStyle(angleRow).fontSize;
+  // One compact, stable size for both rows. Only the time row moves slightly down.
+  const targetSize = clamp(diameter * 0.115, 17, 32);
+  const fontSize = `${targetSize.toFixed(3)}px`;
+
+  const angleChanged = setImportant(angleRow, 'font-size', fontSize);
+  const timeChanged = setImportant(timeRow, 'font-size', fontSize);
+  const timeTopChanged = setImportant(timeRow, 'top', '44%');
 
   applyCount += 1;
   lastApply = {
     source,
     build: BUILD,
-    changed,
-    angleFontSize,
-    timeFontSize,
-    equal: angleFontSize === timeFontSize,
+    diameter,
+    targetFontSize: fontSize,
+    angleFontSize: getComputedStyle(angleRow).fontSize,
+    timeFontSize: getComputedStyle(timeRow).fontSize,
+    timeTop: getComputedStyle(timeRow).top,
+    angleChanged,
+    timeChanged,
+    timeTopChanged,
+    anglePositionChanged: false,
+    dateChanged: false,
+    frameChanged: false,
+    dividerChanged: false,
     eventDriven: true,
     repeatingTimer: false,
-    otherLayoutChanged: false,
     at: Date.now(),
   };
   return true;
@@ -93,19 +113,22 @@ function install() {
   ].forEach((name) => window.addEventListener(name, () => schedule(name), false));
   window.addEventListener('resize', () => schedule('window-resize'), false);
 
-  window.GANNZILLA_CENTER_CLOCK_ANGLE_STABLE_SIZE_V617 = true;
-  window.__auditGannzillaCenterClockAngleStableSizeV617 = () => {
+  window.GANNZILLA_CENTER_CLOCK_COMPACT_STABLE_ROWS_V618 = true;
+  window.__auditGannzillaCenterClockCompactStableRowsV618 = () => {
+    const display = document.getElementById(DISPLAY_ID);
     const angleRow = document.getElementById(ANGLE_ROW_ID);
     const timeRow = document.getElementById(TIME_ROW_ID);
     const angleFontSize = angleRow instanceof HTMLElement ? getComputedStyle(angleRow).fontSize : null;
     const timeFontSize = timeRow instanceof HTMLElement ? getComputedStyle(timeRow).fontSize : null;
     return {
-      ok: angleRow instanceof HTMLDivElement
+      ok: display instanceof HTMLDivElement
+        && angleRow instanceof HTMLDivElement
         && timeRow instanceof HTMLDivElement
         && angleFontSize === timeFontSize,
       build: BUILD,
       angleFontSize,
       timeFontSize,
+      timeTop: timeRow instanceof HTMLElement ? getComputedStyle(timeRow).top : null,
       eventDriven: true,
       repeatingTimer: false,
       observerActive: Boolean(observer),
