@@ -1,5 +1,5 @@
-const BUILD = 620;
-const STATE_KEY = '__gannzillaCenterClockTimeTouchesDividerV620';
+const BUILD = 621;
+const STATE_KEY = '__gannzillaCenterClockTimeOnePercentBelowDividerV621';
 const DISPLAY_ID = 'gannzilla-center-clock-display-v614';
 const ANGLE_ROW_ID = 'gannzilla-center-clock-angle-row-v614';
 const TIME_ROW_ID = 'gannzilla-center-clock-time-row-v614';
@@ -66,10 +66,10 @@ function apply(source = 'apply') {
   const angleChanged = setImportant(angleRow, 'font-size', fontSize);
   const timeChanged = setImportant(timeRow, 'font-size', fontSize);
 
-  // Place the visual bottom of the time row exactly on the 50% divider.
+  // Place the visual bottom of the time row 1% of the diameter below the divider.
   const renderedHeight = timeRow.getBoundingClientRect().height || targetSize;
-  const dividerGap = 0;
-  const targetCenterPx = (diameter * 0.5) - (renderedHeight * 0.5) - dividerGap;
+  const dividerOffset = diameter * 0.01;
+  const targetCenterPx = (diameter * 0.5) - (renderedHeight * 0.5) + dividerOffset;
   const timeTopValue = `${targetCenterPx.toFixed(3)}px`;
   const timeTopChanged = setImportant(timeRow, 'top', timeTopValue);
 
@@ -80,7 +80,7 @@ function apply(source = 'apply') {
     diameter,
     targetFontSize: fontSize,
     renderedHeight,
-    dividerGap,
+    dividerOffset,
     targetCenterPx,
     angleFontSize: getComputedStyle(angleRow).fontSize,
     timeFontSize: getComputedStyle(timeRow).fontSize,
@@ -88,7 +88,7 @@ function apply(source = 'apply') {
     angleChanged,
     timeChanged,
     timeTopChanged,
-    timeTouchesDivider: true,
+    timeOnePercentBelowDivider: true,
     anglePositionChanged: false,
     dateChanged: false,
     frameChanged: false,
@@ -123,8 +123,8 @@ function install() {
   ].forEach((name) => window.addEventListener(name, () => schedule(name), false));
   window.addEventListener('resize', () => schedule('window-resize'), false);
 
-  window.GANNZILLA_CENTER_CLOCK_TIME_TOUCHES_DIVIDER_V620 = true;
-  window.__auditGannzillaCenterClockTimeTouchesDividerV620 = () => {
+  window.GANNZILLA_CENTER_CLOCK_TIME_ONE_PERCENT_BELOW_DIVIDER_V621 = true;
+  window.__auditGannzillaCenterClockTimeOnePercentBelowDividerV621 = () => {
     const display = document.getElementById(DISPLAY_ID);
     const angleRow = document.getElementById(ANGLE_ROW_ID);
     const timeRow = document.getElementById(TIME_ROW_ID);
@@ -139,7 +139,7 @@ function install() {
       angleFontSize,
       timeFontSize,
       timeTop: timeRow instanceof HTMLElement ? getComputedStyle(timeRow).top : null,
-      timeTouchesDivider: true,
+      timeOnePercentBelowDivider: true,
       eventDriven: true,
       repeatingTimer: false,
       observerActive: Boolean(observer),
