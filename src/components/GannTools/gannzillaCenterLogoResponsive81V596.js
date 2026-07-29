@@ -2,12 +2,12 @@ import brandPart0 from './gannzillaBrandImageV247Part0';
 import brandPart1 from './gannzillaBrandImageV247Part1';
 import brandPart2 from './gannzillaBrandImageV247Part2';
 
-const BUILD = 596;
-const STATE_KEY = '__gannzillaCenterLogoResponsive81V596';
-const IMAGE_ID = 'gannzilla-center-logo-responsive-81-v596';
-const STYLE_ID = 'gannzilla-center-logo-responsive-81-style-v596';
-const STAGE_DATASET_KEY = 'gannzillaCenterLogoResponsive81V596';
-const LOGO_SCALE = 0.99;
+const BUILD = 597;
+const STATE_KEY = '__gannzillaCenterLogoFixedV597';
+const IMAGE_ID = 'gannzilla-center-logo-fixed-v597';
+const STYLE_ID = 'gannzilla-center-logo-fixed-style-v597';
+const STAGE_DATASET_KEY = 'gannzillaCenterLogoFixedV597';
+const DEFAULT_FIXED_DIAMETER = 361.47;
 const IMAGE_DATA_URL = `data:image/webp;base64,${brandPart0}${brandPart1}${brandPart2}`;
 
 function params() {
@@ -22,6 +22,13 @@ function enabled() {
     String(query.get('centerLogo') || 'true').toLowerCase(),
   );
   return wheelMode && logoEnabled;
+}
+
+function fixedDiameter() {
+  const requested = Number(params().get('centerLogoFixedDiameter'));
+  return Number.isFinite(requested) && requested >= 50
+    ? requested
+    : DEFAULT_FIXED_DIAMETER;
 }
 
 function findWheel() {
@@ -57,6 +64,7 @@ function removeLegacyLogoNodes() {
     'gannzilla-center-logo-fixed-71-v592',
     'gannzilla-center-logo-responsive-71-v593',
     'gannzilla-center-logo-responsive-78-v594',
+    'gannzilla-center-logo-responsive-81-v596',
   ].forEach((id) => document.getElementById(id)?.remove());
 
   [
@@ -70,6 +78,7 @@ function removeLegacyLogoNodes() {
     'gannzilla-center-logo-fixed-71-style-v592',
     'gannzilla-center-logo-responsive-71-style-v593',
     'gannzilla-center-logo-responsive-78-style-v594',
+    'gannzilla-center-logo-responsive-81-style-v596',
   ].forEach((id) => document.getElementById(id)?.remove());
 }
 
@@ -82,7 +91,7 @@ function ensureStyle() {
   }
 
   style.textContent = `
-    [data-gannzilla-center-logo-responsive81-v596="true"] {
+    [data-gannzilla-center-logo-fixed-v597="true"] {
       position: relative !important;
     }
 
@@ -106,7 +115,7 @@ function ensureStyle() {
       animation: none !important;
       transform: translate3d(-50%, -50%, 0) !important;
       transform-origin: center center !important;
-      will-change: left, top, width, height !important;
+      will-change: left, top !important;
     }
   `;
 }
@@ -127,7 +136,7 @@ function ensureImage(stage) {
     image.addEventListener('error', () => {
       image.style.setProperty('visibility', 'hidden', 'important');
       image.style.setProperty('opacity', '0', 'important');
-      image.dataset.gannzillaCenterLogoImageErrorV596 = 'true';
+      image.dataset.gannzillaCenterLogoImageErrorV597 = 'true';
     }, { once: true });
   }
 
@@ -138,6 +147,17 @@ function ensureImage(stage) {
 let frame = 0;
 let applyCount = 0;
 let lastApply = null;
+
+function schedule(source = 'schedule') {
+  cancelAnimationFrame(frame);
+  frame = requestAnimationFrame(() => apply(source));
+}
+
+function ensureStageScrollTracking(stage) {
+  if (stage.dataset.gannzillaCenterLogoScrollTrackingV597 === 'true') return;
+  stage.dataset.gannzillaCenterLogoScrollTrackingV597 = 'true';
+  stage.addEventListener('scroll', () => schedule('stage-scroll'), { passive: true });
+}
 
 function apply(source = 'apply') {
   frame = 0;
@@ -151,6 +171,8 @@ function apply(source = 'apply') {
   if (!(canvas instanceof HTMLCanvasElement) || !(stage instanceof HTMLElement)) return false;
 
   stage.dataset[STAGE_DATASET_KEY] = 'true';
+  ensureStageScrollTracking(stage);
+
   const image = ensureImage(stage);
   const imageReady = image.complete && image.naturalWidth > 0 && image.naturalHeight > 0;
   if (!imageReady) {
@@ -159,26 +181,17 @@ function apply(source = 'apply') {
     return false;
   }
 
-  const canvasRect = canvas.getBoundingClientRect();
   const stageRect = stage.getBoundingClientRect();
-  const dpr = Math.max(1, Number(canvas.dataset.gannzillaNativeDpr) || window.devicePixelRatio || 1);
-  const logicalSize = Number(canvas.dataset.gannzillaEmptyOuterRingExpandedCssSizeV518)
-    || Number(canvas.dataset.gannzillaCanvasCssSize)
-    || canvas.width / dpr;
-  const viewportScale = logicalSize > 0 ? canvasRect.width / logicalSize : 1;
-  const emptyCenterRadius = Number(canvas.dataset.gannzillaExpandedCenterRadius)
-    || Number(params().get('expandedCenterRadius'))
-    || Math.max(
-      20,
-      (Number(params().get('gannzillaInnerRadius')) || 279.32)
-        - (Number(params().get('gannzillaRingWidth')) || 96.76),
-    );
+  const canvasRect = canvas.getBoundingClientRect();
+  const hasStageViewport = stage.clientWidth > 0 && stage.clientHeight > 0;
 
-  const centerX = canvasRect.left - stageRect.left + stage.scrollLeft + canvasRect.width / 2;
-  const centerY = canvasRect.top - stageRect.top + stage.scrollTop + canvasRect.height / 2;
-  const emptyRadiusOnScreen = emptyCenterRadius * viewportScale;
-  const logoRadius = Math.max(28, emptyRadiusOnScreen * LOGO_SCALE);
-  const diameter = logoRadius * 2;
+  const centerX = hasStageViewport
+    ? stage.scrollLeft + stage.clientWidth / 2
+    : canvasRect.left - stageRect.left + stage.scrollLeft + canvasRect.width / 2;
+  const centerY = hasStageViewport
+    ? stage.scrollTop + stage.clientHeight / 2
+    : canvasRect.top - stageRect.top + stage.scrollTop + canvasRect.height / 2;
+  const diameter = fixedDiameter();
 
   image.style.setProperty('left', `${centerX.toFixed(3)}px`, 'important');
   image.style.setProperty('top', `${centerY.toFixed(3)}px`, 'important');
@@ -187,14 +200,12 @@ function apply(source = 'apply') {
   image.style.setProperty('visibility', 'visible', 'important');
   image.style.setProperty('opacity', '1', 'important');
 
-  image.dataset.gannzillaCenterLogoResponsive81V596 = 'true';
-  image.dataset.gannzillaCenterLogoBuildV596 = String(BUILD);
-  image.dataset.gannzillaCenterLogoScaleV596 = String(LOGO_SCALE);
-  image.dataset.gannzillaCenterLogoViewportScaleV596 = viewportScale.toFixed(6);
-  image.dataset.gannzillaCenterLogoEmptyRadiusV596 = emptyRadiusOnScreen.toFixed(3);
-  image.dataset.gannzillaCenterLogoDiameterV596 = diameter.toFixed(3);
-  image.dataset.gannzillaCenterLogoInteractiveV596 = 'false';
-  image.dataset.gannzillaCenterLogoPanAddedV596 = 'false';
+  image.dataset.gannzillaCenterLogoFixedV597 = 'true';
+  image.dataset.gannzillaCenterLogoBuildV597 = String(BUILD);
+  image.dataset.gannzillaCenterLogoDiameterV597 = diameter.toFixed(3);
+  image.dataset.gannzillaCenterLogoZoomLinkedV597 = 'false';
+  image.dataset.gannzillaCenterLogoPanLinkedV597 = 'false';
+  image.dataset.gannzillaCenterLogoViewportFixedV597 = 'true';
 
   applyCount += 1;
   lastApply = {
@@ -202,22 +213,16 @@ function apply(source = 'apply') {
     build: BUILD,
     centerX,
     centerY,
-    logicalSize,
-    viewportScale,
-    emptyCenterRadius,
-    emptyRadiusOnScreen,
-    logoRadius,
     diameter,
-    scale: LOGO_SCALE,
-    panAdded: false,
+    stageClientWidth: stage.clientWidth,
+    stageClientHeight: stage.clientHeight,
+    stageScrollLeft: stage.scrollLeft,
+    stageScrollTop: stage.scrollTop,
+    zoomLinked: false,
+    panLinked: false,
     at: Date.now(),
   };
   return true;
-}
-
-function schedule(source = 'schedule') {
-  cancelAnimationFrame(frame);
-  frame = requestAnimationFrame(() => apply(source));
 }
 
 function install() {
@@ -244,30 +249,45 @@ function install() {
     window.setTimeout(() => schedule(`boot-${delay}`), delay);
   });
 
-  window.GANNZILLA_CENTER_LOGO_RESPONSIVE_81_V596 = true;
-  window.__auditGannzillaCenterLogoResponsive81V596 = () => {
+  window.GANNZILLA_CENTER_LOGO_FIXED_V597 = true;
+  window.__auditGannzillaCenterLogoFixedV597 = () => {
     const image = document.getElementById(IMAGE_ID);
     const canvas = findWheel();
+    const stage = canvas?.parentElement;
     const imageRect = image?.getBoundingClientRect();
-    const emptyRadius = Number(image?.dataset.gannzillaCenterLogoEmptyRadiusV596 || 0);
-    const logoDiameter = Number(image?.dataset.gannzillaCenterLogoDiameterV596 || 0);
+    const stageRect = stage?.getBoundingClientRect();
+    const diameter = Number(image?.dataset.gannzillaCenterLogoDiameterV597 || 0);
+    const renderedCenterX = Number(imageRect?.left || 0) + Number(imageRect?.width || 0) / 2;
+    const renderedCenterY = Number(imageRect?.top || 0) + Number(imageRect?.height || 0) / 2;
+    const expectedCenterX = Number(stageRect?.left || 0) + Number(stage?.clientWidth || 0) / 2;
+    const expectedCenterY = Number(stageRect?.top || 0) + Number(stage?.clientHeight || 0) / 2;
+    const centerError = Math.hypot(
+      renderedCenterX - expectedCenterX,
+      renderedCenterY - expectedCenterY,
+    );
+    const sizeError = Math.abs(Number(imageRect?.width || 0) - diameter);
+
     return {
       ok: image instanceof HTMLImageElement
         && canvas instanceof HTMLCanvasElement
-        && image.parentElement === canvas.parentElement
+        && stage instanceof HTMLElement
+        && image.parentElement === stage
         && image.complete
         && image.naturalWidth > 0
-        && image.dataset.gannzillaCenterLogoResponsive81V596 === 'true'
-        && image.dataset.gannzillaCenterLogoScaleV596 === String(LOGO_SCALE)
-        && image.dataset.gannzillaCenterLogoPanAddedV596 === 'false'
-        && logoDiameter > 50
-        && logoDiameter < emptyRadius * 2,
+        && image.dataset.gannzillaCenterLogoFixedV597 === 'true'
+        && image.dataset.gannzillaCenterLogoZoomLinkedV597 === 'false'
+        && image.dataset.gannzillaCenterLogoPanLinkedV597 === 'false'
+        && diameter >= 50
+        && centerError <= 1.5
+        && sizeError <= 1.5,
       build: BUILD,
-      scale: LOGO_SCALE,
-      panAdded: false,
+      diameter,
       renderedWidth: Number(imageRect?.width || 0),
-      diameter: logoDiameter,
-      emptyRadius,
+      renderedHeight: Number(imageRect?.height || 0),
+      centerError,
+      sizeError,
+      zoomLinked: false,
+      panLinked: false,
       applyCount,
       lastApply,
     };
