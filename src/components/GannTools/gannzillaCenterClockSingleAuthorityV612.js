@@ -1,19 +1,18 @@
-const BUILD = 613;
-const STATE_KEY = '__gannzillaCenterClockApprovedLuxuryV613';
+const BUILD = 614;
+const STATE_KEY = '__gannzillaCenterClockApprovedUpperHalfV614';
 const CLOCK_ID = 'gannzilla-center-digital-clock-v599';
 const TRACKER_ID = 'gannzilla-tasi-time-tracker-v547';
-const DISPLAY_ID = 'gannzilla-center-clock-display-v613';
-const UPPER_ID = 'gannzilla-center-clock-upper-v613';
-const DATE_ID = 'gannzilla-center-clock-date-v613';
-const DATE_RULE_ID = 'gannzilla-center-clock-date-rule-v613';
-const ANGLE_ROW_ID = 'gannzilla-center-clock-angle-row-v613';
-const ANGLE_VALUE_ID = 'gannzilla-center-clock-angle-value-v613';
-const ANGLE_ROOT_ID = 'gannzilla-center-clock-angle-root-v613';
-const TIME_ROW_ID = 'gannzilla-center-clock-time-row-v613';
-const TIME_VALUE_ID = 'gannzilla-center-clock-time-value-v613';
-const TIME_ROOT_ID = 'gannzilla-center-clock-time-root-v613';
-const DIVIDER_ID = 'gannzilla-center-clock-divider-v613';
-const STYLE_ID = 'gannzilla-center-clock-style-v613';
+const DISPLAY_ID = 'gannzilla-center-clock-display-v614';
+const DATE_ID = 'gannzilla-center-clock-date-v614';
+const DATE_RULE_ID = 'gannzilla-center-clock-date-rule-v614';
+const ANGLE_ROW_ID = 'gannzilla-center-clock-angle-row-v614';
+const ANGLE_VALUE_ID = 'gannzilla-center-clock-angle-value-v614';
+const ANGLE_ROOT_ID = 'gannzilla-center-clock-angle-root-v614';
+const TIME_ROW_ID = 'gannzilla-center-clock-time-row-v614';
+const TIME_VALUE_ID = 'gannzilla-center-clock-time-value-v614';
+const TIME_ROOT_ID = 'gannzilla-center-clock-time-root-v614';
+const DIVIDER_ID = 'gannzilla-center-clock-divider-v614';
+const STYLE_ID = 'gannzilla-center-clock-style-v614';
 const LUXURY_FONT = 'Cambria, Georgia, "Times New Roman", serif';
 
 let frame = 0;
@@ -48,6 +47,10 @@ function setImportant(element, property, value) {
   return true;
 }
 
+function clamp(value, minimum, maximum) {
+  return Math.min(maximum, Math.max(minimum, value));
+}
+
 function removeLegacyPresentation() {
   [
     'gannzilla-center-clock-hour-minute-reduction-v601',
@@ -55,6 +58,7 @@ function removeLegacyPresentation() {
     'gannzilla-center-clock-date-reduction-v603',
     'gannzilla-center-clock-date-angle-time-v604',
     'gannzilla-center-clock-display-v612',
+    'gannzilla-center-clock-display-v613',
   ].forEach((id) => document.getElementById(id)?.remove());
 
   [
@@ -64,6 +68,7 @@ function removeLegacyPresentation() {
     'gannzilla-center-clock-date-angle-time-style-v604',
     'gannzilla-center-clock-beige-theme-style-v605',
     'gannzilla-center-clock-style-v612',
+    'gannzilla-center-clock-style-v613',
   ].forEach((id) => document.getElementById(id)?.remove());
 }
 
@@ -92,8 +97,8 @@ function ensureStyle() {
       border-radius: 50% !important;
       clip-path: circle(50% at 50% 50%) !important;
       background:
-        radial-gradient(circle at 50% 14%, rgba(255, 243, 207, 0.42), transparent 38%),
-        linear-gradient(180deg, #e6c48e 0%, #ddb982 54%, #d8b47c 100%) !important;
+        radial-gradient(circle at 50% 12%, rgba(255, 244, 213, 0.48), transparent 37%),
+        linear-gradient(180deg, #e8c992 0%, #dfbd84 52%, #d8b178 100%) !important;
       overflow: hidden !important;
       pointer-events: none !important;
       user-select: none !important;
@@ -102,42 +107,22 @@ function ensureStyle() {
       transition: none !important;
       animation: none !important;
       box-shadow:
-        inset 0 0 0 2px #3c2316,
-        inset 0 0 0 5px #8d552d,
-        inset 0 0 0 8px #d3a35e,
-        inset 0 0 0 10px #f2d69f,
-        inset 0 0 0 13px #754222,
-        inset 0 0 16px rgba(57, 31, 18, 0.22) !important;
-    }
-
-    #${UPPER_ID} {
-      position: absolute !important;
-      top: 4.8% !important;
-      left: 7.5% !important;
-      width: 85% !important;
-      height: 41.5% !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      box-sizing: border-box !important;
-      display: block !important;
-      overflow: visible !important;
-      pointer-events: none !important;
-      direction: ltr !important;
-      unicode-bidi: isolate !important;
-      color: #2f1d14 !important;
-      font-family: ${LUXURY_FONT} !important;
-      font-variant-numeric: tabular-nums lining-nums !important;
-      font-feature-settings: "tnum" 1, "lnum" 1 !important;
+        inset 0 0 0 2px #382015,
+        inset 0 0 0 5px #8b512b,
+        inset 0 0 0 8px #c9954f,
+        inset 0 0 0 10px #f1d49b,
+        inset 0 0 0 13px #70401f,
+        inset 0 0 18px rgba(55, 29, 16, 0.24) !important;
     }
 
     #${DATE_ID} {
       position: absolute !important;
-      left: 0 !important;
-      top: 9% !important;
-      width: 100% !important;
+      left: 9% !important;
+      top: 10.5% !important;
+      width: 82% !important;
       margin: 0 !important;
       padding: 0 !important;
-      color: #2f1d14 !important;
+      color: #2b1a11 !important;
       font-family: ${LUXURY_FONT} !important;
       font-weight: 600 !important;
       font-variant-numeric: tabular-nums lining-nums !important;
@@ -147,19 +132,19 @@ function ensureStyle() {
       text-align: center !important;
       white-space: nowrap !important;
       transform: translate3d(0, -50%, 0) !important;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.58) !important;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.62) !important;
     }
 
     #${DATE_RULE_ID} {
       position: absolute !important;
       left: 26% !important;
-      top: 25% !important;
+      top: 19% !important;
       width: 48% !important;
       height: 1px !important;
       margin: 0 !important;
       padding: 0 !important;
       background: linear-gradient(90deg, transparent, #9b6a34 18%, #9b6a34 82%, transparent) !important;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.34) !important;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.36) !important;
     }
 
     #${DATE_RULE_ID}::after {
@@ -167,41 +152,48 @@ function ensureStyle() {
       position: absolute !important;
       left: 50% !important;
       top: 50% !important;
-      color: #9b6a34 !important;
-      font-size: 0.58em !important;
+      color: #96642f !important;
+      font-size: 8px !important;
       line-height: 1 !important;
       transform: translate(-50%, -50%) rotate(45deg) !important;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.42) !important;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.46) !important;
     }
 
     #${ANGLE_ROW_ID}, #${TIME_ROW_ID} {
       position: absolute !important;
-      left: 7% !important;
-      width: 86% !important;
+      left: 50% !important;
       margin: 0 !important;
       padding: 0 !important;
       box-sizing: border-box !important;
       display: grid !important;
-      grid-template-columns: minmax(0, 1fr) 0.58em 0.78em !important;
-      column-gap: 0.16em !important;
       align-items: baseline !important;
-      color: #28180f !important;
+      justify-content: center !important;
+      color: #24150d !important;
       font-family: ${LUXURY_FONT} !important;
       font-weight: 600 !important;
       font-variant-numeric: tabular-nums lining-nums !important;
       font-feature-settings: "tnum" 1, "lnum" 1 !important;
       line-height: 1 !important;
       white-space: nowrap !important;
-      transform: translate3d(0, -50%, 0) !important;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.62), 0 1px 1px rgba(47,25,14,0.14) !important;
+      transform: translate3d(-50%, -50%, 0) !important;
+      transform-origin: center center !important;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.64), 0 1px 1px rgba(45,23,13,0.16) !important;
     }
 
-    #${ANGLE_ROW_ID} { top: 51% !important; }
-    #${TIME_ROW_ID} { top: 83% !important; }
+    #${ANGLE_ROW_ID} {
+      top: 29% !important;
+      grid-template-columns: 5.2ch 0.78em 1.2ch !important;
+      column-gap: 0.12em !important;
+    }
+
+    #${TIME_ROW_ID} {
+      top: 41.5% !important;
+      grid-template-columns: 8.7ch 0.78em 1.2ch !important;
+      column-gap: 0.12em !important;
+    }
 
     #${ANGLE_VALUE_ID}, #${TIME_VALUE_ID} {
       display: block !important;
-      min-width: 0 !important;
       text-align: right !important;
       overflow: visible !important;
     }
@@ -220,8 +212,8 @@ function ensureStyle() {
       margin: 0 !important;
       padding: 0 !important;
       border: 0 !important;
-      background: linear-gradient(90deg, transparent, #7d4d28 5%, #7d4d28 95%, transparent) !important;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.40) !important;
+      background: linear-gradient(90deg, transparent, #754722 5%, #754722 95%, transparent) !important;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.42) !important;
       transform: translateY(-50%) !important;
       pointer-events: none !important;
     }
@@ -231,12 +223,12 @@ function ensureStyle() {
       position: absolute !important;
       left: 50% !important;
       top: 50% !important;
-      color: #7d4d28 !important;
-      font-size: 0.65em !important;
+      color: #754722 !important;
+      font-size: 10px !important;
       line-height: 1 !important;
       transform: translate(-50%, -50%) !important;
       background: #ddb982 !important;
-      padding: 0 0.28em !important;
+      padding: 0 4px !important;
     }
   `;
 }
@@ -293,11 +285,8 @@ function ensureDisplay(clock) {
   if (!(display instanceof HTMLDivElement)) {
     display = document.createElement('div');
     display.id = DISPLAY_ID;
-    display.dataset.gannzillaCenterClockApprovedLuxuryV613 = 'true';
+    display.dataset.gannzillaCenterClockApprovedUpperHalfV614 = 'true';
     display.setAttribute('aria-hidden', 'true');
-
-    const upper = document.createElement('div');
-    upper.id = UPPER_ID;
 
     const date = document.createElement('div');
     date.id = DATE_ID;
@@ -328,8 +317,7 @@ function ensureDisplay(clock) {
     const divider = document.createElement('div');
     divider.id = DIVIDER_ID;
 
-    upper.append(date, dateRule, angleRow, timeRow);
-    display.append(upper, divider);
+    display.append(date, dateRule, angleRow, timeRow, divider);
   }
 
   if (display.parentElement !== stage) stage.appendChild(display);
@@ -342,6 +330,16 @@ function clockIsVisible(clock) {
   return style.display !== 'none'
     && style.visibility !== 'hidden'
     && Number(style.opacity || 0) > 0;
+}
+
+function attachObserver(clock) {
+  if (typeof MutationObserver !== 'function' || !(clock instanceof HTMLDivElement)) return false;
+  if (clock === observedClock && observer) return true;
+  observer?.disconnect();
+  observedClock = clock;
+  observer = new MutationObserver(() => schedule('clock-style-change'));
+  observer.observe(clock, { attributes: true, attributeFilter: ['style'] });
+  return true;
 }
 
 function sync(source = 'sync') {
@@ -388,11 +386,13 @@ function sync(source = 'sync') {
     || clock.getBoundingClientRect().width
     || 0;
 
-  if (diameter > 0) {
-    setImportant(date, 'font-size', `${Math.max(10, diameter * 0.058).toFixed(3)}px`);
-    setImportant(angleRow, 'font-size', `${Math.max(17, diameter * 0.105).toFixed(3)}px`);
-    setImportant(timeRow, 'font-size', `${Math.max(16, diameter * 0.094).toFixed(3)}px`);
-  }
+  const dateSize = clamp(diameter * 0.085, 12, 22);
+  const angleSize = clamp(diameter * 0.145, 22, 40);
+  const timeSize = clamp(diameter * 0.130, 20, 36);
+
+  setImportant(date, 'font-size', `${dateSize.toFixed(3)}px`);
+  setImportant(angleRow, 'font-size', `${angleSize.toFixed(3)}px`);
+  setImportant(timeRow, 'font-size', `${timeSize.toFixed(3)}px`);
 
   const visible = clockIsVisible(clock);
   setImportant(display, 'display', visible ? 'block' : 'none');
@@ -405,10 +405,13 @@ function sync(source = 'sync') {
     source,
     build: BUILD,
     diameter,
+    dateSize,
+    angleSize,
+    timeSize,
     upperHalfOnly: true,
     lowerHalfEmpty: true,
-    fixedGridRows: true,
-    approvedImageLayout: true,
+    fixedColumns: true,
+    autoShrinkDisabled: true,
     angle: current.angle,
     angleReduction: current.angleReduction,
     timeFormula: `${current.hourReduction} + ${current.minuteReduction} = ${current.timeReduction}`,
@@ -420,16 +423,6 @@ function sync(source = 'sync') {
 function schedule(source = 'schedule') {
   cancelAnimationFrame(frame);
   frame = requestAnimationFrame(() => sync(source));
-}
-
-function attachObserver(clock) {
-  if (typeof MutationObserver !== 'function' || !(clock instanceof HTMLDivElement)) return false;
-  if (clock === observedClock && observer) return true;
-  observer?.disconnect();
-  observedClock = clock;
-  observer = new MutationObserver(() => schedule('clock-style-change'));
-  observer.observe(clock, { attributes: true, attributeFilter: ['style'] });
-  return true;
 }
 
 function install() {
@@ -456,17 +449,17 @@ function install() {
 
   timer = window.setInterval(() => schedule('clock-tick'), 250);
 
-  window.GANNZILLA_CENTER_CLOCK_APPROVED_LUXURY_V613 = true;
-  window.__auditGannzillaCenterClockApprovedLuxuryV613 = () => ({
+  window.GANNZILLA_CENTER_CLOCK_APPROVED_UPPER_HALF_V614 = true;
+  window.__auditGannzillaCenterClockApprovedUpperHalfV614 = () => ({
     ok: document.getElementById(DISPLAY_ID) instanceof HTMLDivElement
       && document.getElementById(DATE_ID) instanceof HTMLDivElement
       && document.getElementById(ANGLE_ROW_ID) instanceof HTMLDivElement
       && document.getElementById(TIME_ROW_ID) instanceof HTMLDivElement,
     build: BUILD,
-    approvedImageLayout: true,
     upperHalfOnly: true,
     lowerHalfEmpty: true,
-    fixedGridRows: true,
+    fixedColumns: true,
+    autoShrinkDisabled: true,
     timerActive: Boolean(timer),
     applyCount,
     lastApply,
