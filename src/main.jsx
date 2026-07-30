@@ -70,13 +70,8 @@ import './components/GannTools/gannzillaCenterLogoDigitalClockToggleV599';
 import './components/GannTools/gannzillaCenterLogoClockClickBridgeV600';
 import './components/GannTools/gannzillaCenterClockSingleAuthorityV612';
 import './components/GannTools/gannzillaCenterClockDateAtRemovedRuleV615';
-import './components/GannTools/gannzillaCenterClockAngleMatchTimeSizeV616';
 import './components/GannTools/gannzillaCenterClockLower12HourV624';
-import './components/GannTools/gannzillaCenterClockLowerFixedLayoutV630';
-import './components/GannTools/gannzillaCenterClockReferenceLayoutV653';
-import './components/GannTools/gannzillaCenterClockComfortLayoutV654';
-import './components/GannTools/gannzillaCenterClockThinInnerFrameV655';
-import './components/GannTools/gannzillaCenterClockDividerClearanceV656';
+import './components/GannTools/gannzillaCenterClockUnifiedGeometryV657';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
