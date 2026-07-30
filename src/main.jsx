@@ -80,6 +80,7 @@ import './components/GannTools/gannzillaAngleMinorSilverShineV664';
 import './components/GannTools/gannzillaAngleTickHierarchyBlackSilverV665';
 import './components/GannTools/gannzillaAngleTickContrastBlackSilverV666';
 import './components/GannTools/gannzillaPanelMirrorZincOuterSilverV667';
+import './components/GannTools/gannzillaOuterEmptyRingMirrorSilverV668';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
