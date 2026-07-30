@@ -1,0 +1,1 @@
+The latest user screenshot supersedes the previous PASS conclusion. The defect remains. The robot must treat the centerline as authoritative and identify the centered white overlay owner before any patch proposal.
