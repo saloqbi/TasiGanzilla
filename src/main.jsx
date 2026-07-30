@@ -73,6 +73,7 @@ import './components/GannTools/gannzillaCenterClockDateAtRemovedRuleV615';
 import './components/GannTools/gannzillaCenterClockLower12HourV624';
 import './components/GannTools/gannzillaCenterClockUnifiedGeometryV657';
 import './components/GannTools/gannzillaInnerNumberRingsCreamV658';
+import './components/GannTools/gannzillaOuterLabelRingsCreamV659';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
