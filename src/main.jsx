@@ -74,6 +74,7 @@ import './components/GannTools/gannzillaCenterClockAngleMatchTimeSizeV616';
 import './components/GannTools/gannzillaCenterClockLower12HourV624';
 import './components/GannTools/gannzillaCenterClockLowerFixedLayoutV630';
 import './components/GannTools/gannzillaCenterClockReferenceLayoutV653';
+import './components/GannTools/gannzillaCenterClockComfortLayoutV654';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
