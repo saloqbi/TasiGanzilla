@@ -27,6 +27,7 @@ import './components/GannTools/gannzillaMetallicAngleOuterRingV531';
 import './components/GannTools/gannzillaCleanOuterFrameV540';
 import './components/GannTools/gannzillaCopperTopCorrectionV541';
 import './components/GannTools/gannzillaCenterCellComfortV508';
+import './components/GannTools/gannzillaWheelPanUrlResetV631';
 import './components/GannTools/gannzillaStablePanWheelV510';
 import './components/GannTools/gannzillaUnifiedPaintPreviewZoomV515';
 import './components/GannTools/gannzillaWeekdaysPreviewBridgeV524';
