@@ -67,6 +67,7 @@ import './components/GannTools/gannzillaCenterLogoClockClickBridgeV600';
 import './components/GannTools/gannzillaCenterClockSingleAuthorityV612';
 import './components/GannTools/gannzillaCenterClockDateAtRemovedRuleV615';
 import './components/GannTools/gannzillaCenterClockAngleMatchTimeSizeV616';
+import './components/GannTools/gannzillaCenterClockLower12HourV624';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
