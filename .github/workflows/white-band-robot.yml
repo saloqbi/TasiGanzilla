@@ -1,0 +1,59 @@
+name: White Band Browser Robot
+
+on:
+  push:
+    branches:
+      - robot/white-band-diagnostic-v1
+    paths:
+      - .github/workflows/white-band-robot.yml
+      - scripts/diagnose-white-band.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TARGET_URL: >-
+        https://tasi-ganzilla.vercel.app/?gannzillaPro=true&forceUrlNumbers=true&levels=10&divisions=36&startValue=3600&increment=1&clockwise=true&gannzillaZoom=1.00&uniformCellGeometry=true&uniformCellScale=1.18&uniformCellBaseRingWidth=82&uniformCellBaseInnerRadius=245&centerCellOnlyAdjustment=true&centerCellScale=1.12&gannzillaRingWidth=96.75999999999999&gannzillaInnerRadius=279.32000000000005&anchorRingScale=1&adaptiveCellGeometry=true&outerCyclesAfterAnchor=10&secondRingNumbers=true&secondRingMode=digitalRoot&allCellsWhite=true&gannzillaNumberFontFamily=Arial&gannzillaNumberFontSize=28&gannzillaNumberWeight=700&paintPreview=true&paintStageSize=1280&paintZoomAuthority=true&paintZoomPercent=75&compactZoomSelect=true&compactToolbarSpacing=true&focusedCompactInterface=true&compactIconTrial=true&removeIconShadow=true&thinTopBoundary=true&wheelCopperEdgeAtToolbar=true&panelVisible=true&resetVerticalPan=true&emptyOuterRing=true&emptyOuterRingCount=5&zodiacOuterRing=true&weekdaysOuterRing=true&angleOuterRing=true&gannzillaAngleMetallicBands=true&gannzillaAngleOuterFrameStrokeWidth=40&gannzillaAngleOuterFrameOutwardOnly=true&gannzillaAngleCleanFrame=true&gannzillaAngleCopperTopCorrection=true&singleVisibleWheelAuthority=true&liveCanvasDisplay=true&lang=en&v=649&cacheBust=white-band-robot-v1
+
+    steps:
+      - name: Checkout diagnostic branch
+        uses: actions/checkout@v4
+        with:
+          ref: robot/white-band-diagnostic-v1
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install browser robot
+        run: |
+          npm install --no-save playwright pngjs
+          npx playwright install --with-deps chromium
+
+      - name: Inspect live page
+        run: node scripts/diagnose-white-band.mjs
+
+      - name: Commit robot evidence
+        run: |
+          git config user.name "white-band-robot"
+          git config user.email "white-band-robot@users.noreply.github.com"
+          git add diagnostics/white-band-robot
+          if git diff --cached --quiet; then
+            echo "No diagnostic changes"
+          else
+            git commit -m "Robot diagnostic result for top white band [skip ci]"
+            git push origin HEAD:robot/white-band-diagnostic-v1
+          fi
+
+      - name: Upload evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: white-band-robot-evidence
+          path: diagnostics/white-band-robot
