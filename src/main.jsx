@@ -30,6 +30,7 @@ import './components/GannTools/gannzillaCenterCellComfortV508';
 import './components/GannTools/gannzillaWheelPanUrlResetV631';
 import './components/GannTools/gannzillaStablePanWheelV510';
 import './components/GannTools/gannzillaUnifiedPaintPreviewZoomV515';
+import './components/GannTools/gannzillaPaintPreviewVisibilityFailSafeV632';
 import './components/GannTools/gannzillaWeekdaysPreviewBridgeV524';
 import './components/GannTools/gannzillaMetallicAnglePreviewBridgeV532';
 import './components/GannTools/gannzillaSingleVisibleWheelAuthorityV535';
