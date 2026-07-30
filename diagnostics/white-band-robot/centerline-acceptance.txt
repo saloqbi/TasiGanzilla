@@ -1,0 +1,1 @@
+CENTERLINE_ACCEPTANCE=The copper outer frame must be visible at x=50% immediately below the toolbar clip line. Side visibility at x=25% or x=75% is insufficient.
