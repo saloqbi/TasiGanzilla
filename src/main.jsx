@@ -5,6 +5,7 @@ import './components/GannTools/gannzillaCleanDragViewportV392';
 import './components/GannTools/gannzillaRemoveSideShapeBarV401';
 import './components/GannTools/gannzillaKeyboardMouseControlV459';
 import './components/GannTools/gannzillaHideNativeWheelScrollbarsV417';
+import './components/GannTools/gannzillaCompactInterfaceV633';
 import './components/GannTools/gannzillaReferencePanelExtraLargeV423';
 import './components/GannTools/gannzillaRemovePanelBrandV424';
 import './components/GannTools/gannzillaEnlargeCopyIconV425';
