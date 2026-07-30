@@ -77,6 +77,7 @@ import './components/GannTools/gannzillaOuterLabelRingsCreamV659';
 import './components/GannTools/gannzillaAngleInnerFrameVisibleClockPaletteV662';
 import './components/GannTools/gannzillaAngleLabelBandClockPaletteV663';
 import './components/GannTools/gannzillaAngleMinorSilverShineV664';
+import './components/GannTools/gannzillaAngleTickHierarchyBlackSilverV665';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
