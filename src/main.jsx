@@ -83,6 +83,7 @@ import './components/GannTools/gannzillaPanelMirrorZincOuterSilverV667';
 import './components/GannTools/gannzillaOuterEmptyRingMirrorSilverV668';
 import './components/GannTools/gannzillaPanelExactMirrorSilverV669';
 import './components/GannTools/gannzillaToolbarIconMirrorFramesV670';
+import './components/GannTools/gannzillaToolbarIconMirrorFramesV671';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
