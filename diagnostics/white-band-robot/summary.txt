@@ -1,0 +1,6 @@
+HTTP status: 200
+Boundary bottom: 25
+First material row: 26
+First copper row: 27
+Inferred gap: 2px
+The copper edge is aligned to the toolbar boundary within tolerance.
