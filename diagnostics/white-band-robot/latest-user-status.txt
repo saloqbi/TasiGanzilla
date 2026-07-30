@@ -1,0 +1,4 @@
+STATUS=STILL_REPRODUCED
+USER_MESSAGE=Same problem unfortunately.
+CLASSIFICATION=CENTERED_OPAQUE_OVERLAY_MASKING_WHEEL_TOP
+NEXT_ACTION=Rerun browser robot with centerline elementsFromPoint diagnostics and no additional Y-offset patches.
