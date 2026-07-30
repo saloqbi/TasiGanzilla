@@ -1,0 +1,9 @@
+USER_BROWSER_REPRODUCTION=FAILED_TO_RESOLVE
+TIME_LOCAL=2026-07-30T14:16+03:00
+SCREENSHOT_SIZE=1008x369
+OBSERVATION=The same defect persists in the user's Chrome session after V651.
+IMPORTANT_CORRECTION=This is not a simple full-width white band. The screenshot shows a centered opaque white rectangular overlay masking the top-center of the wheel while the copper ring remains visible on the left and right sides.
+APPROXIMATE_GEOMETRY=Toolbar bottom/clip line around y=112. Central white mask spans roughly x=328..746 and continues down over the wheel top. Copper arc is visible at the sides starting around y=139, but the center section is covered.
+PREVIOUS_ROBOT_FALSE_PASS=The earlier robot measured the first non-white pixel anywhere across the row, so side copper pixels caused a false PASS even though the center was still masked.
+NEXT_DIAGNOSTIC_REQUIRED=Probe elementFromPoint and elementsFromPoint at x=50% for y=112..190; record tag/id/class/z-index/background/position/pointer-events and ancestor chain. Compare center x=50% against quarter positions x=25% and x=75%. Acceptance must require visible copper at the centerline, not merely anywhere on the row.
+DO_NOT_APPLY_MORE_Y_OFFSETS=Further wheel/stage vertical offsets are not justified until the center overlay owner is identified.
