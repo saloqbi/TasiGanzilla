@@ -1,6 +1,6 @@
 {
-  "startedAt": "2026-07-30T11:01:57.923Z",
-  "completedAt": "2026-07-30T11:02:09.810Z",
+  "startedAt": "2026-07-30T11:04:03.843Z",
+  "completedAt": "2026-07-30T11:04:16.061Z",
   "httpStatus": 200,
   "title": "كوكبة الأرقام السحرية",
   "diagnosis": {
@@ -11,7 +11,7 @@
     "statement": "The copper edge is aligned to the toolbar boundary within tolerance."
   },
   "dom": {
-    "href": "https://tasi-ganzilla.vercel.app/?gannzillaPro=true&forceUrlNumbers=true&levels=10&divisions=36&startValue=3600&increment=1&clockwise=true&gannzillaZoom=1.00&uniformCellGeometry=true&uniformCellScale=1.18&uniformCellBaseRingWidth=82&uniformCellBaseInnerRadius=245&centerCellOnlyAdjustment=true&centerCellScale=1.12&gannzillaRingWidth=96.75999999999999&gannzillaInnerRadius=279.32000000000005&anchorRingScale=1&adaptiveCellGeometry=true&outerCyclesAfterAnchor=10&secondRingNumbers=true&secondRingMode=digitalRoot&allCellsWhite=true&gannzillaNumberFontFamily=Arial&gannzillaNumberFontSize=28&gannzillaNumberWeight=700&paintPreview=true&paintStageSize=1280&paintZoomAuthority=true&paintZoomPercent=75&compactZoomSelect=true&compactToolbarSpacing=true&focusedCompactInterface=true&compactIconTrial=true&removeIconShadow=true&thinTopBoundary=true&wheelCopperEdgeAtToolbar=true&panelVisible=true&resetVerticalPan=true&emptyOuterRing=true&emptyOuterRingCount=5&zodiacOuterRing=true&weekdaysOuterRing=true&angleOuterRing=true&gannzillaAngleMetallicBands=true&gannzillaAngleOuterFrameStrokeWidth=40&gannzillaAngleOuterFrameOutwardOnly=true&gannzillaAngleCleanFrame=true&gannzillaAngleCopperTopCorrection=true&singleVisibleWheelAuthority=true&liveCanvasDisplay=true&lang=en&v=510&cacheBust=white-band-robot-v1&fullPanelExtraLarge=false&fullPanelWidth=400&fullPanelFontSize=13&fullPanelRowHeight=24&compactToolbarWidth=214&rightLanguageWidth=108&nativeDprRendering=true&cssScaleDisabled=true&compactIconLayout=true&northLastCell=true&canonicalCardinalGeometry=true&anchorValueAtNorth=true&anchorValueRing=3&outwardOnlyExpansion=true&referenceDigitCount=4&cellFill=%23ffffff&alternatingRingShading=false&blueNumberColor=%23003f9e&unifiedNumberFontSize=true&gridStroke=%23b5b5b5&gridLineWidth=0.55&textPixelSnapping=true&exactRadiusMidpoint=true&gannzillaReferenceZoomCalibration=1&emptyOuterRingNumbers=false&weekdaySequence=1-36&gannzillaWeekdayFontSize=32&angleFrameCount=1&angleCardinalSpokes=false&gannzillaAngleRingScale=2&gannzillaAngleFrameStrokeWidth=5.6&gannzillaAngleMajorFontSize=48&gannzillaAngleMinorFontSize=42&gannzillaAngleCardinalFontSize=68&gannzillaAngleInnerFrameStrokeWidth=10&gannzillaAngleOuterShadowSpread=22&gannzillaAngleOuterShadowOpacity=0.48&gannzillaAngleCleanSparkleSize=44&gannzillaAngleSparkleAngle=34&gannzillaAngleWhiteTopOverlay=false&originalCenterRadius=163&expandedCenterRadius=182.56000000000003&outerCellSizesPreserved=true&mouseWheelPanSpeed=3.4&mouseWheelMinStep=56&mouseWheelMaxStep=720&stablePanAuthority=true&panTransformAllowed=true&wheelPanRafBatch=true&paintZoomMin=10&paintZoomMax=100&paintZoomStep=5&compactZoomSelectWidth=46",
+    "href": "https://tasi-ganzilla.vercel.app/?gannzillaPro=true&forceUrlNumbers=true&levels=10&divisions=36&startValue=3600&increment=1&clockwise=true&gannzillaZoom=1.00&uniformCellGeometry=true&uniformCellScale=1.18&uniformCellBaseRingWidth=82&uniformCellBaseInnerRadius=245&centerCellOnlyAdjustment=true&centerCellScale=1.12&gannzillaRingWidth=96.75999999999999&gannzillaInnerRadius=279.32000000000005&anchorRingScale=1&adaptiveCellGeometry=true&outerCyclesAfterAnchor=10&secondRingNumbers=true&secondRingMode=digitalRoot&allCellsWhite=true&gannzillaNumberFontFamily=Arial&gannzillaNumberFontSize=28&gannzillaNumberWeight=700&paintPreview=true&paintStageSize=1280&paintZoomAuthority=true&paintZoomPercent=75&compactZoomSelect=true&compactToolbarSpacing=true&focusedCompactInterface=true&compactIconTrial=true&removeIconShadow=true&thinTopBoundary=true&removeWheelTopBand=true&wheelTopBandPx=28&wheelCopperEdgeAtToolbar=false&panelVisible=true&resetVerticalPan=true&emptyOuterRing=true&emptyOuterRingCount=5&zodiacOuterRing=true&weekdaysOuterRing=true&angleOuterRing=true&gannzillaAngleMetallicBands=true&gannzillaAngleOuterFrameStrokeWidth=40&gannzillaAngleOuterFrameOutwardOnly=true&gannzillaAngleCleanFrame=true&gannzillaAngleCopperTopCorrection=true&singleVisibleWheelAuthority=true&liveCanvasDisplay=true&lang=en&v=510&cacheBust=white-band-robot-v2&fullPanelExtraLarge=false&fullPanelWidth=400&fullPanelFontSize=13&fullPanelRowHeight=24&compactToolbarWidth=214&rightLanguageWidth=108&nativeDprRendering=true&cssScaleDisabled=true&compactIconLayout=true&northLastCell=true&canonicalCardinalGeometry=true&anchorValueAtNorth=true&anchorValueRing=3&outwardOnlyExpansion=true&referenceDigitCount=4&cellFill=%23ffffff&alternatingRingShading=false&blueNumberColor=%23003f9e&unifiedNumberFontSize=true&gridStroke=%23b5b5b5&gridLineWidth=0.55&textPixelSnapping=true&exactRadiusMidpoint=true&gannzillaReferenceZoomCalibration=1&emptyOuterRingNumbers=false&weekdaySequence=1-36&gannzillaWeekdayFontSize=32&angleFrameCount=1&angleCardinalSpokes=false&gannzillaAngleRingScale=2&gannzillaAngleFrameStrokeWidth=5.6&gannzillaAngleMajorFontSize=48&gannzillaAngleMinorFontSize=42&gannzillaAngleCardinalFontSize=68&gannzillaAngleInnerFrameStrokeWidth=10&gannzillaAngleOuterShadowSpread=22&gannzillaAngleOuterShadowOpacity=0.48&gannzillaAngleCleanSparkleSize=44&gannzillaAngleSparkleAngle=34&gannzillaAngleWhiteTopOverlay=false&originalCenterRadius=163&expandedCenterRadius=182.56000000000003&outerCellSizesPreserved=true&mouseWheelPanSpeed=3.4&mouseWheelMinStep=56&mouseWheelMaxStep=720&stablePanAuthority=true&panTransformAllowed=true&wheelPanRafBatch=true&paintZoomMin=10&paintZoomMax=100&paintZoomStep=5&compactZoomSelectWidth=46",
     "viewport": {
       "width": 1196,
       "height": 720,
@@ -137,6 +137,147 @@
     "visibleCanvases": [
       {
         "tag": "canvas",
+        "id": null,
+        "className": "",
+        "rect": {
+          "x": 118,
+          "y": -64,
+          "top": -64,
+          "left": 118,
+          "right": 1078,
+          "bottom": 896,
+          "width": 960,
+          "height": 960
+        },
+        "style": {
+          "position": "static",
+          "display": "block",
+          "visibility": "visible",
+          "opacity": "1",
+          "overflow": "clip",
+          "overflowX": "clip",
+          "overflowY": "clip",
+          "backgroundColor": "rgb(255, 255, 255)",
+          "borderTop": "0px none rgb(255, 215, 0)",
+          "borderBottom": "0px none rgb(255, 215, 0)",
+          "boxShadow": "none",
+          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "translate": "none",
+          "zIndex": "3",
+          "alignItems": "normal",
+          "justifyItems": "normal",
+          "placeItems": "normal",
+          "paddingTop": "0px",
+          "marginTop": "0px"
+        },
+        "dataset": {
+          "gannzillaRequestedZoom": "1",
+          "gannzillaPaintZoomPercentV515": "75",
+          "gannzillaKeyboardMouseControlV459": "true",
+          "gannzillaCssScaleDisabled": "true",
+          "gannzillaFinalWheelAuthorityV506": "true",
+          "gannzillaFinalWheelAuthorityV491": "true",
+          "gannzillaAuthorityBuild": "541",
+          "gannzillaNativeDpr": "1",
+          "gannzillaAppliedZoom": "1",
+          "gannzillaCanvasCssSize": "4029",
+          "gannzillaCanvasPixelSize": "4029",
+          "gannzillaTextPixelSnapping": "device-pixel-grid",
+          "gannzillaRadiusMidpointMode": "exact-ring-midpoint",
+          "gannzillaSecondRingBlank": "false",
+          "gannzillaSecondRingMode": "digital-root-1-9",
+          "gannzillaSecondRingNorth": "9",
+          "gannzillaAnchorValueRing": "3",
+          "gannzillaAnchorRingScale": "1",
+          "gannzillaAnchorRingWidth": "96.75999999999999",
+          "gannzillaAdaptiveCellGeometry": "true",
+          "gannzillaAdaptiveExpandedRingCount": "0",
+          "gannzillaAdaptiveExpandedRings": "",
+          "gannzillaRingWidths": "96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76",
+          "gannzillaReferenceDigitCount": "4",
+          "gannzillaOutwardOnlyExpansion": "true",
+          "gannzillaAnchorValue": "3600",
+          "gannzillaNorthSpokeValues": "3600,3636,3672,3708,3744,3780,3816,3852,3888,3924,3960",
+          "gannzillaExpectedFinalNorth": "3960",
+          "gannzillaCellFill": "#ffffff",
+          "gannzillaAllCellsWhite": "true",
+          "gannzillaAlternatingRingShading": "false",
+          "gannzillaBlueNumberColor": "#003f9e",
+          "gannzillaNumberFontFamily": "Arial",
+          "gannzillaNumberFontSize": "28",
+          "gannzillaNumberWeight": "700",
+          "gannzillaUnifiedNumberFontSize": "true",
+          "gannzillaGridStroke": "#b5b5b5",
+          "gannzillaGridLineWidth": "0.55",
+          "gannzillaCenterCellComfortV508": "true",
+          "gannzillaCenterCellOnlyAdjustment": "true",
+          "gannzillaCenterCellScale": "1.12",
+          "gannzillaOriginalCenterRadius": "163",
+          "gannzillaExpandedCenterRadius": "182.56000000000003",
+          "gannzillaOuterCellSizesPreserved": "true",
+          "gannzillaUniformAppliedRingWidth": "96.75999999999999",
+          "gannzillaAppliedInnerRadius": "279.32000000000005",
+          "gannzillaAdaptiveLongNumberExpansion": "true",
+          "gannzillaStablePanWheelV510": "true",
+          "gannzillaPanTransformAllowed": "true",
+          "gannzillaPresentationRepairObserverDisabled": "true",
+          "gannzillaMouseWheelPanSpeed": "3.4",
+          "gannzillaMouseWheelMinStep": "56",
+          "gannzillaMouseWheelMaxStep": "720",
+          "gannzillaEmptyOuterRingV518": "true",
+          "gannzillaEmptyOuterRingCountV518": "5",
+          "gannzillaEmptyOuterRingBlankV518": "true",
+          "gannzillaEmptyOuterRingWidthV518": "96.76",
+          "gannzillaEmptyOuterRingBaseCssSizeV518": "3061",
+          "gannzillaEmptyOuterRingExpandedCssSizeV518": "4029",
+          "gannzillaEmptyOuterRingDivisionsV518": "36",
+          "gannzillaZodiacOuterRingV522": "true",
+          "gannzillaZodiacRenderKeyV522": "4029:4029:3061:4029:96.76:true",
+          "gannzillaZodiacCellCountV522": "36",
+          "gannzillaZodiacLabelCountV522": "36",
+          "gannzillaZodiacFirstV522": "1:نار الحمل:red",
+          "gannzillaZodiacLastV522": "36:ماء الحوت:black",
+          "gannzillaZodiacColorCountsV522": "red:12,blue:12,black:12",
+          "gannzillaWeekdaysOuterRingV523": "true",
+          "gannzillaWeekdayRenderKeyV523": "4029:4029:3061:4029:96.76:true:32",
+          "gannzillaWeekdayCellCountV523": "36",
+          "gannzillaWeekdayLabelCountV523": "36",
+          "gannzillaWeekdayFirstV523": "1:الأحد:red",
+          "gannzillaWeekdayLastV523": "36:الجمعة:black",
+          "gannzillaWeekdayColorCountsV523": "red:12,blue:12,black:12",
+          "gannzillaWeekdayFontSizeV523": "32",
+          "gannzillaSingleVisibleWheelAuthorityV535": "true",
+          "gannzillaMetallicAngleOuterRingV531": "true",
+          "gannzillaMetallicAngleRenderKeyV531": "4029:4029:3061:4029:96.76:2:5.6:48:42:68",
+          "gannzillaAngleFrameCountV531": "1",
+          "gannzillaAngleTickCountV531": "360",
+          "gannzillaAngleCardinalsV531": "360,90,180,270",
+          "gannzillaAngleCardinalSpokesV531": "false",
+          "gannzillaAngleBandWidthV531": "5.6",
+          "gannzillaAngleGuideCircleV531": "false",
+          "gannzillaAngleMajorFontSizeV531": "48",
+          "gannzillaAngleMinorFontSizeV531": "42",
+          "gannzillaAngleCardinalFontSizeV531": "68",
+          "gannzillaNativeWheelScrollbarsHiddenV417": "true",
+          "gannzillaCleanOuterFrameV540": "true",
+          "gannzillaCleanOuterFrameRenderKeyV540": "4029:4029:3061:4029:96.76:2:5:5.6:10:40:22:0.48:44:34:1:56",
+          "gannzillaCleanOuterFrameWidthV540": "40",
+          "gannzillaCleanInnerFrameWidthV540": "10",
+          "gannzillaCleanOuterFrameOutwardOnlyV540": "true",
+          "gannzillaCleanOuterFrameInnerEdgeV540": "1824.74",
+          "gannzillaCleanOuterFrameOuterEdgeV540": "1864.74",
+          "gannzillaCleanOuterPaddingV540": "149.76",
+          "gannzillaCleanTopShineV540": "true",
+          "gannzillaCleanSparkleV540": "true",
+          "gannzillaCleanSparkleSizeV540": "44",
+          "gannzillaCopperTopCorrectionV541": "true",
+          "gannzillaCopperTopCorrectionRenderKeyV541": "4029:4029:3061:4029:96.76:2:5.6:40:1:7",
+          "gannzillaWhiteTopOverlayV541": "false",
+          "gannzillaUpperFrameColorV541": "copper"
+        }
+      },
+      {
+        "tag": "canvas",
         "id": "gannzilla-top-center-drawing-overlay-v471",
         "className": "",
         "rect": {
@@ -200,7 +341,7 @@
           "position": "static",
           "display": "block",
           "visibility": "visible",
-          "opacity": "0",
+          "opacity": "1",
           "overflow": "clip",
           "overflowX": "clip",
           "overflowY": "clip",
@@ -210,7 +351,7 @@
           "boxShadow": "none",
           "transform": "matrix(1, 0, 0, 1, 0, 0)",
           "translate": "none",
-          "zIndex": "1",
+          "zIndex": "3",
           "alignItems": "normal",
           "justifyItems": "normal",
           "placeItems": "normal",
@@ -218,13 +359,14 @@
           "marginTop": "0px"
         },
         "dataset": {
+          "gannzillaRequestedZoom": "1",
+          "gannzillaPaintZoomPercentV515": "75",
           "gannzillaKeyboardMouseControlV459": "true",
           "gannzillaCssScaleDisabled": "true",
           "gannzillaFinalWheelAuthorityV506": "true",
           "gannzillaFinalWheelAuthorityV491": "true",
           "gannzillaAuthorityBuild": "541",
           "gannzillaNativeDpr": "1",
-          "gannzillaRequestedZoom": "1",
           "gannzillaAppliedZoom": "1",
           "gannzillaCanvasCssSize": "4029",
           "gannzillaCanvasPixelSize": "4029",
@@ -264,7 +406,6 @@
           "gannzillaUniformAppliedRingWidth": "96.75999999999999",
           "gannzillaAppliedInnerRadius": "279.32000000000005",
           "gannzillaAdaptiveLongNumberExpansion": "true",
-          "gannzillaPaintZoomPercentV515": "75",
           "gannzillaStablePanWheelV510": "true",
           "gannzillaPanTransformAllowed": "true",
           "gannzillaPresentationRepairObserverDisabled": "true",
@@ -294,7 +435,6 @@
           "gannzillaWeekdayColorCountsV523": "red:12,blue:12,black:12",
           "gannzillaWeekdayFontSizeV523": "32",
           "gannzillaSingleVisibleWheelAuthorityV535": "true",
-          "gannzillaNativeWheelScrollbarsHiddenV417": "true",
           "gannzillaMetallicAngleOuterRingV531": "true",
           "gannzillaMetallicAngleRenderKeyV531": "4029:4029:3061:4029:96.76:2:5.6:48:42:68",
           "gannzillaAngleFrameCountV531": "1",
@@ -306,8 +446,9 @@
           "gannzillaAngleMajorFontSizeV531": "48",
           "gannzillaAngleMinorFontSizeV531": "42",
           "gannzillaAngleCardinalFontSizeV531": "68",
+          "gannzillaNativeWheelScrollbarsHiddenV417": "true",
           "gannzillaCleanOuterFrameV540": "true",
-          "gannzillaCleanOuterFrameRenderKeyV540": "4029:4029:3061:4029:96.76:2:5:5.6:10:40:22:0.48:44:34:1:59",
+          "gannzillaCleanOuterFrameRenderKeyV540": "4029:4029:3061:4029:96.76:2:5:5.6:10:40:22:0.48:44:34:1:56",
           "gannzillaCleanOuterFrameWidthV540": "40",
           "gannzillaCleanInnerFrameWidthV540": "10",
           "gannzillaCleanOuterFrameOutwardOnlyV540": "true",
@@ -375,20 +516,20 @@
         "id": "gannzilla-fixed-paint-preview-v512",
         "className": "",
         "rect": {
-          "x": 118,
-          "y": -64,
-          "top": -64,
-          "left": 118,
-          "right": 1078,
-          "bottom": 896,
-          "width": 960,
-          "height": 960
+          "x": 0,
+          "y": 0,
+          "top": 0,
+          "left": 0,
+          "right": 0,
+          "bottom": 0,
+          "width": 0,
+          "height": 0
         },
         "style": {
           "position": "static",
-          "display": "block",
-          "visibility": "visible",
-          "opacity": "1",
+          "display": "none",
+          "visibility": "hidden",
+          "opacity": "0",
           "overflow": "clip",
           "overflowX": "clip",
           "overflowY": "clip",
@@ -396,9 +537,9 @@
           "borderTop": "0px none rgb(255, 215, 0)",
           "borderBottom": "0px none rgb(255, 215, 0)",
           "boxShadow": "none",
-          "transform": "matrix(1, 0, 0, 1, 0, 0)",
+          "transform": "none",
           "translate": "none",
-          "zIndex": "2",
+          "zIndex": "1",
           "alignItems": "normal",
           "justifyItems": "normal",
           "placeItems": "normal",
@@ -503,8 +644,8 @@
         }
       },
       {
-        "tag": "img",
-        "id": "gannzilla-fixed-paint-preview-v512",
+        "tag": "canvas",
+        "id": null,
         "className": "",
         "rect": {
           "x": 118,
@@ -530,7 +671,7 @@
           "boxShadow": "none",
           "transform": "matrix(1, 0, 0, 1, 0, 0)",
           "translate": "none",
-          "zIndex": "2",
+          "zIndex": "3",
           "alignItems": "normal",
           "justifyItems": "normal",
           "placeItems": "normal",
@@ -538,11 +679,109 @@
           "marginTop": "0px"
         },
         "dataset": {
-          "gannzillaUnifiedPaintPreviewZoomV515": "true",
+          "gannzillaRequestedZoom": "1",
           "gannzillaPaintZoomPercentV515": "75",
-          "gannzillaPaintDisplaySizeV515": "960",
-          "gannzillaPreviewSuppressedV535": "true",
-          "gannzillaPaintBitmapPixelSizeV515": "960x960"
+          "gannzillaKeyboardMouseControlV459": "true",
+          "gannzillaCssScaleDisabled": "true",
+          "gannzillaFinalWheelAuthorityV506": "true",
+          "gannzillaFinalWheelAuthorityV491": "true",
+          "gannzillaAuthorityBuild": "541",
+          "gannzillaNativeDpr": "1",
+          "gannzillaAppliedZoom": "1",
+          "gannzillaCanvasCssSize": "4029",
+          "gannzillaCanvasPixelSize": "4029",
+          "gannzillaTextPixelSnapping": "device-pixel-grid",
+          "gannzillaRadiusMidpointMode": "exact-ring-midpoint",
+          "gannzillaSecondRingBlank": "false",
+          "gannzillaSecondRingMode": "digital-root-1-9",
+          "gannzillaSecondRingNorth": "9",
+          "gannzillaAnchorValueRing": "3",
+          "gannzillaAnchorRingScale": "1",
+          "gannzillaAnchorRingWidth": "96.75999999999999",
+          "gannzillaAdaptiveCellGeometry": "true",
+          "gannzillaAdaptiveExpandedRingCount": "0",
+          "gannzillaAdaptiveExpandedRings": "",
+          "gannzillaRingWidths": "96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76,96.76",
+          "gannzillaReferenceDigitCount": "4",
+          "gannzillaOutwardOnlyExpansion": "true",
+          "gannzillaAnchorValue": "3600",
+          "gannzillaNorthSpokeValues": "3600,3636,3672,3708,3744,3780,3816,3852,3888,3924,3960",
+          "gannzillaExpectedFinalNorth": "3960",
+          "gannzillaCellFill": "#ffffff",
+          "gannzillaAllCellsWhite": "true",
+          "gannzillaAlternatingRingShading": "false",
+          "gannzillaBlueNumberColor": "#003f9e",
+          "gannzillaNumberFontFamily": "Arial",
+          "gannzillaNumberFontSize": "28",
+          "gannzillaNumberWeight": "700",
+          "gannzillaUnifiedNumberFontSize": "true",
+          "gannzillaGridStroke": "#b5b5b5",
+          "gannzillaGridLineWidth": "0.55",
+          "gannzillaCenterCellComfortV508": "true",
+          "gannzillaCenterCellOnlyAdjustment": "true",
+          "gannzillaCenterCellScale": "1.12",
+          "gannzillaOriginalCenterRadius": "163",
+          "gannzillaExpandedCenterRadius": "182.56000000000003",
+          "gannzillaOuterCellSizesPreserved": "true",
+          "gannzillaUniformAppliedRingWidth": "96.75999999999999",
+          "gannzillaAppliedInnerRadius": "279.32000000000005",
+          "gannzillaAdaptiveLongNumberExpansion": "true",
+          "gannzillaStablePanWheelV510": "true",
+          "gannzillaPanTransformAllowed": "true",
+          "gannzillaPresentationRepairObserverDisabled": "true",
+          "gannzillaMouseWheelPanSpeed": "3.4",
+          "gannzillaMouseWheelMinStep": "56",
+          "gannzillaMouseWheelMaxStep": "720",
+          "gannzillaEmptyOuterRingV518": "true",
+          "gannzillaEmptyOuterRingCountV518": "5",
+          "gannzillaEmptyOuterRingBlankV518": "true",
+          "gannzillaEmptyOuterRingWidthV518": "96.76",
+          "gannzillaEmptyOuterRingBaseCssSizeV518": "3061",
+          "gannzillaEmptyOuterRingExpandedCssSizeV518": "4029",
+          "gannzillaEmptyOuterRingDivisionsV518": "36",
+          "gannzillaZodiacOuterRingV522": "true",
+          "gannzillaZodiacRenderKeyV522": "4029:4029:3061:4029:96.76:true",
+          "gannzillaZodiacCellCountV522": "36",
+          "gannzillaZodiacLabelCountV522": "36",
+          "gannzillaZodiacFirstV522": "1:نار الحمل:red",
+          "gannzillaZodiacLastV522": "36:ماء الحوت:black",
+          "gannzillaZodiacColorCountsV522": "red:12,blue:12,black:12",
+          "gannzillaWeekdaysOuterRingV523": "true",
+          "gannzillaWeekdayRenderKeyV523": "4029:4029:3061:4029:96.76:true:32",
+          "gannzillaWeekdayCellCountV523": "36",
+          "gannzillaWeekdayLabelCountV523": "36",
+          "gannzillaWeekdayFirstV523": "1:الأحد:red",
+          "gannzillaWeekdayLastV523": "36:الجمعة:black",
+          "gannzillaWeekdayColorCountsV523": "red:12,blue:12,black:12",
+          "gannzillaWeekdayFontSizeV523": "32",
+          "gannzillaSingleVisibleWheelAuthorityV535": "true",
+          "gannzillaMetallicAngleOuterRingV531": "true",
+          "gannzillaMetallicAngleRenderKeyV531": "4029:4029:3061:4029:96.76:2:5.6:48:42:68",
+          "gannzillaAngleFrameCountV531": "1",
+          "gannzillaAngleTickCountV531": "360",
+          "gannzillaAngleCardinalsV531": "360,90,180,270",
+          "gannzillaAngleCardinalSpokesV531": "false",
+          "gannzillaAngleBandWidthV531": "5.6",
+          "gannzillaAngleGuideCircleV531": "false",
+          "gannzillaAngleMajorFontSizeV531": "48",
+          "gannzillaAngleMinorFontSizeV531": "42",
+          "gannzillaAngleCardinalFontSizeV531": "68",
+          "gannzillaNativeWheelScrollbarsHiddenV417": "true",
+          "gannzillaCleanOuterFrameV540": "true",
+          "gannzillaCleanOuterFrameRenderKeyV540": "4029:4029:3061:4029:96.76:2:5:5.6:10:40:22:0.48:44:34:1:56",
+          "gannzillaCleanOuterFrameWidthV540": "40",
+          "gannzillaCleanInnerFrameWidthV540": "10",
+          "gannzillaCleanOuterFrameOutwardOnlyV540": "true",
+          "gannzillaCleanOuterFrameInnerEdgeV540": "1824.74",
+          "gannzillaCleanOuterFrameOuterEdgeV540": "1864.74",
+          "gannzillaCleanOuterPaddingV540": "149.76",
+          "gannzillaCleanTopShineV540": "true",
+          "gannzillaCleanSparkleV540": "true",
+          "gannzillaCleanSparkleSizeV540": "44",
+          "gannzillaCopperTopCorrectionV541": "true",
+          "gannzillaCopperTopCorrectionRenderKeyV541": "4029:4029:3061:4029:96.76:2:5.6:40:1:7",
+          "gannzillaWhiteTopOverlayV541": "false",
+          "gannzillaUpperFrameColorV541": "copper"
         }
       },
       {
@@ -8720,11 +8959,11 @@
         "controlSize": 22,
         "boundaryTop": 24,
         "boundaryHeight": 1,
-        "applyCount": 70,
+        "applyCount": 68,
         "timerActive": true,
         "observerActive": true,
         "lastApply": {
-          "source": "boundary-watch",
+          "source": "dom-change",
           "build": 642,
           "controlsAligned": 5,
           "controlTop": 2,
@@ -8733,24 +8972,24 @@
           "boundaryHeight": 1,
           "wheelChanged": false,
           "panelChanged": false,
-          "at": 1785409329258
+          "at": 1785409455492
         }
       },
       "__auditGannzillaWheelCopperEdgeAuthorityV649": null,
       "__auditGannzillaSingleVisibleWheelAuthorityV535": {
-        "ok": false,
+        "ok": true,
         "build": 535,
-        "sourceVisible": false,
-        "previewSuppressed": false,
-        "visibleWheelCanvasCount": 0,
-        "applyCount": 77,
+        "sourceVisible": true,
+        "previewSuppressed": true,
+        "visibleWheelCanvasCount": 1,
+        "applyCount": 52,
         "hiddenCanvasCount": 0,
         "lastApply": {
           "source": "style-mutation",
           "build": 535,
           "previewSuppressed": true,
           "hiddenDuplicateCanvases": 0,
-          "at": 1785409329644
+          "at": 1785409455829
         }
       },
       "__auditGannzillaFixedPaintPreviewV512": null
@@ -8774,8 +9013,8 @@
     {
       "y": 2,
       "samples": 455,
-      "nonWhiteRatio": 0.34505494505494505,
-      "darkRatio": 0.33406593406593404,
+      "nonWhiteRatio": 0.35824175824175825,
+      "darkRatio": 0.34725274725274724,
       "copperRatio": 0
     },
     {
@@ -8816,113 +9055,113 @@
     {
       "y": 8,
       "samples": 455,
-      "nonWhiteRatio": 0.3274725274725275,
-      "darkRatio": 0.0945054945054945,
-      "copperRatio": 0.008791208791208791
+      "nonWhiteRatio": 0.34065934065934067,
+      "darkRatio": 0.0967032967032967,
+      "copperRatio": 0.01098901098901099
     },
     {
       "y": 9,
       "samples": 455,
-      "nonWhiteRatio": 0.34945054945054943,
+      "nonWhiteRatio": 0.3626373626373626,
       "darkRatio": 0.13626373626373625,
       "copperRatio": 0.02197802197802198
     },
     {
       "y": 10,
       "samples": 455,
-      "nonWhiteRatio": 0.367032967032967,
-      "darkRatio": 0.13626373626373625,
-      "copperRatio": 0.03076923076923077
+      "nonWhiteRatio": 0.3802197802197802,
+      "darkRatio": 0.14065934065934066,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 11,
       "samples": 455,
-      "nonWhiteRatio": 0.367032967032967,
-      "darkRatio": 0.13626373626373625,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.3802197802197802,
+      "darkRatio": 0.13846153846153847,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 12,
       "samples": 455,
-      "nonWhiteRatio": 0.3648351648351648,
-      "darkRatio": 0.14945054945054945,
-      "copperRatio": 0.013186813186813187
+      "nonWhiteRatio": 0.378021978021978,
+      "darkRatio": 0.15604395604395604,
+      "copperRatio": 0.01978021978021978
     },
     {
       "y": 13,
       "samples": 455,
-      "nonWhiteRatio": 0.36923076923076925,
-      "darkRatio": 0.15384615384615385,
-      "copperRatio": 0.013186813186813187
+      "nonWhiteRatio": 0.3824175824175824,
+      "darkRatio": 0.15824175824175823,
+      "copperRatio": 0.017582417582417582
     },
     {
       "y": 14,
       "samples": 455,
-      "nonWhiteRatio": 0.37142857142857144,
-      "darkRatio": 0.14505494505494507,
-      "copperRatio": 0.03296703296703297
+      "nonWhiteRatio": 0.38461538461538464,
+      "darkRatio": 0.15164835164835164,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 15,
       "samples": 455,
-      "nonWhiteRatio": 0.36923076923076925,
-      "darkRatio": 0.12967032967032968,
-      "copperRatio": 0.02197802197802198
+      "nonWhiteRatio": 0.3824175824175824,
+      "darkRatio": 0.13406593406593406,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 16,
       "samples": 455,
-      "nonWhiteRatio": 0.3802197802197802,
-      "darkRatio": 0.10989010989010989,
-      "copperRatio": 0.015384615384615385
+      "nonWhiteRatio": 0.3934065934065934,
+      "darkRatio": 0.11428571428571428,
+      "copperRatio": 0.017582417582417582
     },
     {
       "y": 17,
       "samples": 455,
-      "nonWhiteRatio": 0.37362637362637363,
-      "darkRatio": 0.0967032967032967,
+      "nonWhiteRatio": 0.3868131868131868,
+      "darkRatio": 0.0989010989010989,
       "copperRatio": 0.006593406593406593
     },
     {
       "y": 18,
       "samples": 455,
-      "nonWhiteRatio": 0.36923076923076925,
-      "darkRatio": 0.05714285714285714,
+      "nonWhiteRatio": 0.3824175824175824,
+      "darkRatio": 0.05934065934065934,
       "copperRatio": 0.008791208791208791
     },
     {
       "y": 19,
       "samples": 455,
-      "nonWhiteRatio": 0.37142857142857144,
+      "nonWhiteRatio": 0.38461538461538464,
       "darkRatio": 0.05054945054945055,
       "copperRatio": 0.004395604395604396
     },
     {
       "y": 20,
       "samples": 455,
-      "nonWhiteRatio": 0.3978021978021978,
+      "nonWhiteRatio": 0.41098901098901097,
       "darkRatio": 0.035164835164835165,
       "copperRatio": 0.004395604395604396
     },
     {
       "y": 21,
       "samples": 455,
-      "nonWhiteRatio": 0.4351648351648352,
+      "nonWhiteRatio": 0.44835164835164837,
       "darkRatio": 0.08131868131868132,
       "copperRatio": 0.004395604395604396
     },
     {
       "y": 22,
       "samples": 455,
-      "nonWhiteRatio": 0.4725274725274725,
-      "darkRatio": 0.12087912087912088,
+      "nonWhiteRatio": 0.47692307692307695,
+      "darkRatio": 0.11428571428571428,
       "copperRatio": 0.008791208791208791
     },
     {
       "y": 23,
       "samples": 455,
-      "nonWhiteRatio": 0.5230769230769231,
-      "darkRatio": 0.4351648351648352,
+      "nonWhiteRatio": 0.5274725274725275,
+      "darkRatio": 0.43956043956043955,
       "copperRatio": 0.004395604395604396
     },
     {
@@ -9153,8 +9392,8 @@
       "y": 56,
       "samples": 455,
       "nonWhiteRatio": 0.7054945054945055,
-      "darkRatio": 0.17582417582417584,
-      "copperRatio": 0.046153846153846156
+      "darkRatio": 0.17802197802197803,
+      "copperRatio": 0.04835164835164835
     },
     {
       "y": 57,
@@ -9167,106 +9406,106 @@
       "y": 58,
       "samples": 455,
       "nonWhiteRatio": 0.7032967032967034,
-      "darkRatio": 0.07472527472527472,
-      "copperRatio": 0.05054945054945055
+      "darkRatio": 0.07692307692307693,
+      "copperRatio": 0.054945054945054944
     },
     {
       "y": 59,
       "samples": 455,
       "nonWhiteRatio": 0.7032967032967034,
       "darkRatio": 0.07692307692307693,
-      "copperRatio": 0.046153846153846156
+      "copperRatio": 0.04835164835164835
     },
     {
       "y": 60,
       "samples": 455,
       "nonWhiteRatio": 0.24835164835164836,
-      "darkRatio": 0.07912087912087912,
+      "darkRatio": 0.08131868131868132,
       "copperRatio": 0.04835164835164835
     },
     {
       "y": 61,
       "samples": 455,
       "nonWhiteRatio": 0.24175824175824176,
-      "darkRatio": 0.09010989010989011,
-      "copperRatio": 0.046153846153846156
+      "darkRatio": 0.09230769230769231,
+      "copperRatio": 0.04835164835164835
     },
     {
       "y": 62,
       "samples": 455,
-      "nonWhiteRatio": 0.23296703296703297,
+      "nonWhiteRatio": 0.23516483516483516,
       "darkRatio": 0.07692307692307693,
-      "copperRatio": 0.04835164835164835
+      "copperRatio": 0.05054945054945055
     },
     {
       "y": 63,
       "samples": 455,
-      "nonWhiteRatio": 0.22637362637362637,
-      "darkRatio": 0.06593406593406594,
+      "nonWhiteRatio": 0.22857142857142856,
+      "darkRatio": 0.06813186813186813,
       "copperRatio": 0.04395604395604396
     },
     {
       "y": 64,
       "samples": 455,
-      "nonWhiteRatio": 0.2087912087912088,
-      "darkRatio": 0.05714285714285714,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.210989010989011,
+      "darkRatio": 0.06153846153846154,
+      "copperRatio": 0.041758241758241756
     },
     {
       "y": 65,
       "samples": 455,
       "nonWhiteRatio": 0.2175824175824176,
       "darkRatio": 0.06373626373626373,
-      "copperRatio": 0.03736263736263736
+      "copperRatio": 0.041758241758241756
     },
     {
       "y": 66,
       "samples": 455,
-      "nonWhiteRatio": 0.210989010989011,
-      "darkRatio": 0.05934065934065934,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.21318681318681318,
+      "darkRatio": 0.06153846153846154,
+      "copperRatio": 0.04395604395604396
     },
     {
       "y": 67,
       "samples": 455,
       "nonWhiteRatio": 0.210989010989011,
-      "darkRatio": 0.05054945054945055,
-      "copperRatio": 0.035164835164835165
+      "darkRatio": 0.054945054945054944,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 68,
       "samples": 455,
       "nonWhiteRatio": 0.2,
-      "darkRatio": 0.04835164835164835,
+      "darkRatio": 0.05054945054945055,
       "copperRatio": 0.035164835164835165
     },
     {
       "y": 69,
       "samples": 455,
-      "nonWhiteRatio": 0.2021978021978022,
-      "darkRatio": 0.04835164835164835,
+      "nonWhiteRatio": 0.2043956043956044,
+      "darkRatio": 0.05054945054945055,
       "copperRatio": 0.03736263736263736
     },
     {
       "y": 70,
       "samples": 455,
-      "nonWhiteRatio": 0.2,
-      "darkRatio": 0.03956043956043956,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.2021978021978022,
+      "darkRatio": 0.041758241758241756,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 71,
       "samples": 455,
-      "nonWhiteRatio": 0.1978021978021978,
+      "nonWhiteRatio": 0.2021978021978022,
       "darkRatio": 0.03736263736263736,
       "copperRatio": 0.035164835164835165
     },
     {
       "y": 72,
       "samples": 455,
-      "nonWhiteRatio": 0.2021978021978022,
-      "darkRatio": 0.035164835164835165,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.2043956043956044,
+      "darkRatio": 0.03956043956043956,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 73,
@@ -9278,826 +9517,826 @@
     {
       "y": 74,
       "samples": 455,
-      "nonWhiteRatio": 0.210989010989011,
-      "darkRatio": 0.041758241758241756,
+      "nonWhiteRatio": 0.21318681318681318,
+      "darkRatio": 0.04395604395604396,
       "copperRatio": 0.03296703296703297
     },
     {
       "y": 75,
       "samples": 455,
       "nonWhiteRatio": 0.2043956043956044,
-      "darkRatio": 0.03956043956043956,
-      "copperRatio": 0.035164835164835165
+      "darkRatio": 0.041758241758241756,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 76,
       "samples": 455,
-      "nonWhiteRatio": 0.20659340659340658,
+      "nonWhiteRatio": 0.2087912087912088,
       "darkRatio": 0.03956043956043956,
       "copperRatio": 0.035164835164835165
     },
     {
       "y": 77,
       "samples": 455,
-      "nonWhiteRatio": 0.2087912087912088,
-      "darkRatio": 0.18681318681318682,
-      "copperRatio": 0.03296703296703297
+      "nonWhiteRatio": 0.210989010989011,
+      "darkRatio": 0.189010989010989,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 78,
       "samples": 455,
-      "nonWhiteRatio": 0.21318681318681318,
-      "darkRatio": 0.035164835164835165,
+      "nonWhiteRatio": 0.2153846153846154,
+      "darkRatio": 0.03736263736263736,
       "copperRatio": 0.035164835164835165
     },
     {
       "y": 79,
       "samples": 455,
-      "nonWhiteRatio": 0.2043956043956044,
-      "darkRatio": 0.03956043956043956,
+      "nonWhiteRatio": 0.20659340659340658,
+      "darkRatio": 0.04395604395604396,
       "copperRatio": 0.03296703296703297
     },
     {
       "y": 80,
       "samples": 455,
       "nonWhiteRatio": 0.2043956043956044,
-      "darkRatio": 0.03956043956043956,
-      "copperRatio": 0.03296703296703297
+      "darkRatio": 0.04395604395604396,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 81,
       "samples": 455,
-      "nonWhiteRatio": 0.22637362637362637,
-      "darkRatio": 0.05274725274725275,
+      "nonWhiteRatio": 0.22857142857142856,
+      "darkRatio": 0.054945054945054944,
       "copperRatio": 0.03956043956043956
     },
     {
       "y": 82,
       "samples": 455,
       "nonWhiteRatio": 0.22417582417582418,
-      "darkRatio": 0.05274725274725275,
-      "copperRatio": 0.02857142857142857
+      "darkRatio": 0.05714285714285714,
+      "copperRatio": 0.03076923076923077
     },
     {
       "y": 83,
       "samples": 455,
-      "nonWhiteRatio": 0.22197802197802197,
-      "darkRatio": 0.05274725274725275,
-      "copperRatio": 0.03076923076923077
+      "nonWhiteRatio": 0.22417582417582418,
+      "darkRatio": 0.054945054945054944,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 84,
       "samples": 455,
-      "nonWhiteRatio": 0.22637362637362637,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.22857142857142856,
+      "darkRatio": 0.05714285714285714,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 85,
       "samples": 455,
-      "nonWhiteRatio": 0.23296703296703297,
-      "darkRatio": 0.06153846153846154,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.23076923076923078,
+      "darkRatio": 0.06373626373626373,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 86,
       "samples": 455,
-      "nonWhiteRatio": 0.24615384615384617,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.22857142857142856,
+      "darkRatio": 0.05714285714285714,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 87,
       "samples": 455,
-      "nonWhiteRatio": 0.27692307692307694,
-      "darkRatio": 0.07032967032967033,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.25054945054945055,
+      "darkRatio": 0.07252747252747253,
+      "copperRatio": 0.041758241758241756
     },
     {
       "y": 88,
       "samples": 455,
-      "nonWhiteRatio": 0.25054945054945055,
-      "darkRatio": 0.07032967032967033,
+      "nonWhiteRatio": 0.24615384615384617,
+      "darkRatio": 0.07472527472527472,
       "copperRatio": 0.035164835164835165
     },
     {
       "y": 89,
       "samples": 455,
-      "nonWhiteRatio": 0.2549450549450549,
-      "darkRatio": 0.07032967032967033,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.24835164835164836,
+      "darkRatio": 0.07472527472527472,
+      "copperRatio": 0.041758241758241756
     },
     {
       "y": 90,
       "samples": 455,
-      "nonWhiteRatio": 0.23736263736263735,
-      "darkRatio": 0.06593406593406594,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.23956043956043957,
+      "darkRatio": 0.07472527472527472,
+      "copperRatio": 0.04395604395604396
     },
     {
       "y": 91,
       "samples": 455,
-      "nonWhiteRatio": 0.21318681318681318,
-      "darkRatio": 0.03736263736263736,
-      "copperRatio": 0.024175824175824177
+      "nonWhiteRatio": 0.2021978021978022,
+      "darkRatio": 0.03956043956043956,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 92,
       "samples": 455,
-      "nonWhiteRatio": 0.2087912087912088,
+      "nonWhiteRatio": 0.2,
       "darkRatio": 0.03296703296703297,
       "copperRatio": 0.024175824175824177
     },
     {
       "y": 93,
       "samples": 455,
-      "nonWhiteRatio": 0.210989010989011,
-      "darkRatio": 0.03076923076923077,
-      "copperRatio": 0.026373626373626374
+      "nonWhiteRatio": 0.2021978021978022,
+      "darkRatio": 0.03736263736263736,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 94,
       "samples": 455,
-      "nonWhiteRatio": 0.2175824175824176,
-      "darkRatio": 0.04395604395604396,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.1978021978021978,
+      "darkRatio": 0.03296703296703297,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 95,
       "samples": 455,
-      "nonWhiteRatio": 0.24175824175824176,
-      "darkRatio": 0.06813186813186813,
-      "copperRatio": 0.06373626373626373
+      "nonWhiteRatio": 0.1934065934065934,
+      "darkRatio": 0.03076923076923077,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 96,
       "samples": 455,
-      "nonWhiteRatio": 0.26373626373626374,
-      "darkRatio": 0.08351648351648351,
-      "copperRatio": 0.08351648351648351
+      "nonWhiteRatio": 0.20659340659340658,
+      "darkRatio": 0.02857142857142857,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 97,
       "samples": 455,
-      "nonWhiteRatio": 0.2857142857142857,
-      "darkRatio": 0.07472527472527472,
-      "copperRatio": 0.0967032967032967
+      "nonWhiteRatio": 0.2153846153846154,
+      "darkRatio": 0.03956043956043956,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 98,
       "samples": 455,
-      "nonWhiteRatio": 0.2835164835164835,
-      "darkRatio": 0.06373626373626373,
-      "copperRatio": 0.05934065934065934
+      "nonWhiteRatio": 0.210989010989011,
+      "darkRatio": 0.035164835164835165,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 99,
       "samples": 455,
-      "nonWhiteRatio": 0.25934065934065936,
-      "darkRatio": 0.06593406593406594,
-      "copperRatio": 0.054945054945054944
+      "nonWhiteRatio": 0.21318681318681318,
+      "darkRatio": 0.03956043956043956,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 100,
       "samples": 455,
-      "nonWhiteRatio": 0.24615384615384617,
-      "darkRatio": 0.05934065934065934,
-      "copperRatio": 0.05054945054945055
+      "nonWhiteRatio": 0.2087912087912088,
+      "darkRatio": 0.035164835164835165,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 101,
       "samples": 455,
-      "nonWhiteRatio": 0.26153846153846155,
-      "darkRatio": 0.06373626373626373,
-      "copperRatio": 0.05054945054945055
+      "nonWhiteRatio": 0.23516483516483516,
+      "darkRatio": 0.046153846153846156,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 102,
       "samples": 455,
-      "nonWhiteRatio": 0.2549450549450549,
-      "darkRatio": 0.06593406593406594,
-      "copperRatio": 0.06153846153846154
+      "nonWhiteRatio": 0.23296703296703297,
+      "darkRatio": 0.05714285714285714,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 103,
       "samples": 455,
-      "nonWhiteRatio": 0.25274725274725274,
-      "darkRatio": 0.06813186813186813,
-      "copperRatio": 0.05714285714285714
+      "nonWhiteRatio": 0.23296703296703297,
+      "darkRatio": 0.05714285714285714,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 104,
       "samples": 455,
-      "nonWhiteRatio": 0.24835164835164836,
-      "darkRatio": 0.05934065934065934,
-      "copperRatio": 0.05274725274725275
+      "nonWhiteRatio": 0.23076923076923078,
+      "darkRatio": 0.05274725274725275,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 105,
       "samples": 455,
-      "nonWhiteRatio": 0.24835164835164836,
-      "darkRatio": 0.06593406593406594,
-      "copperRatio": 0.05934065934065934
+      "nonWhiteRatio": 0.24615384615384617,
+      "darkRatio": 0.07472527472527472,
+      "copperRatio": 0.04395604395604396
     },
     {
       "y": 106,
       "samples": 455,
-      "nonWhiteRatio": 0.22857142857142856,
-      "darkRatio": 0.04395604395604396,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.20659340659340658,
+      "darkRatio": 0.03736263736263736,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 107,
       "samples": 455,
-      "nonWhiteRatio": 0.22637362637362637,
+      "nonWhiteRatio": 0.21318681318681318,
       "darkRatio": 0.046153846153846156,
-      "copperRatio": 0.04395604395604396
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 108,
       "samples": 455,
-      "nonWhiteRatio": 0.22857142857142856,
-      "darkRatio": 0.04835164835164835,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.2153846153846154,
+      "darkRatio": 0.03956043956043956,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 109,
       "samples": 455,
-      "nonWhiteRatio": 0.23076923076923078,
-      "darkRatio": 0.046153846153846156,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.2175824175824176,
+      "darkRatio": 0.04395604395604396,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 110,
       "samples": 455,
-      "nonWhiteRatio": 0.23516483516483516,
-      "darkRatio": 0.06153846153846154,
-      "copperRatio": 0.04395604395604396
+      "nonWhiteRatio": 0.22417582417582418,
+      "darkRatio": 0.05714285714285714,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 111,
       "samples": 455,
-      "nonWhiteRatio": 0.22637362637362637,
+      "nonWhiteRatio": 0.2153846153846154,
       "darkRatio": 0.05054945054945055,
-      "copperRatio": 0.03736263736263736
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 112,
       "samples": 455,
-      "nonWhiteRatio": 0.23076923076923078,
-      "darkRatio": 0.05274725274725275,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.21978021978021978,
+      "darkRatio": 0.04395604395604396,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 113,
       "samples": 455,
-      "nonWhiteRatio": 0.23736263736263735,
-      "darkRatio": 0.05274725274725275,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.22637362637362637,
+      "darkRatio": 0.05054945054945055,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 114,
       "samples": 455,
-      "nonWhiteRatio": 0.21318681318681318,
-      "darkRatio": 0.03956043956043956,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.1956043956043956,
+      "darkRatio": 0.02857142857142857,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 115,
       "samples": 455,
-      "nonWhiteRatio": 0.2153846153846154,
-      "darkRatio": 0.03956043956043956,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.1956043956043956,
+      "darkRatio": 0.03076923076923077,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 116,
       "samples": 455,
-      "nonWhiteRatio": 0.23076923076923078,
-      "darkRatio": 0.05714285714285714,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.1934065934065934,
+      "darkRatio": 0.02857142857142857,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 117,
       "samples": 455,
-      "nonWhiteRatio": 0.23516483516483516,
-      "darkRatio": 0.06153846153846154,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.18681318681318682,
+      "darkRatio": 0.026373626373626374,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 118,
       "samples": 455,
-      "nonWhiteRatio": 0.24175824175824176,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.2043956043956044,
+      "darkRatio": 0.026373626373626374,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 119,
       "samples": 455,
-      "nonWhiteRatio": 0.23736263736263735,
-      "darkRatio": 0.05934065934065934,
-      "copperRatio": 0.046153846153846156
+      "nonWhiteRatio": 0.22197802197802197,
+      "darkRatio": 0.03296703296703297,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 120,
       "samples": 455,
-      "nonWhiteRatio": 0.22857142857142856,
-      "darkRatio": 0.06153846153846154,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.2021978021978022,
+      "darkRatio": 0.035164835164835165,
+      "copperRatio": 0.03076923076923077
     },
     {
       "y": 121,
       "samples": 455,
-      "nonWhiteRatio": 0.22857142857142856,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.2,
+      "darkRatio": 0.03076923076923077,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 122,
       "samples": 455,
-      "nonWhiteRatio": 0.23076923076923078,
-      "darkRatio": 0.05714285714285714,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.2021978021978022,
+      "darkRatio": 0.03076923076923077,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 123,
       "samples": 455,
-      "nonWhiteRatio": 0.24395604395604395,
-      "darkRatio": 0.05934065934065934,
-      "copperRatio": 0.04835164835164835
+      "nonWhiteRatio": 0.22637362637362637,
+      "darkRatio": 0.046153846153846156,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 124,
       "samples": 455,
-      "nonWhiteRatio": 0.26153846153846155,
-      "darkRatio": 0.08571428571428572,
-      "copperRatio": 0.05274725274725275
+      "nonWhiteRatio": 0.22197802197802197,
+      "darkRatio": 0.04835164835164835,
+      "copperRatio": 0.04395604395604396
     },
     {
       "y": 125,
       "samples": 455,
-      "nonWhiteRatio": 0.2681318681318681,
-      "darkRatio": 0.08571428571428572,
-      "copperRatio": 0.046153846153846156
+      "nonWhiteRatio": 0.22417582417582418,
+      "darkRatio": 0.046153846153846156,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 126,
       "samples": 455,
-      "nonWhiteRatio": 0.2703296703296703,
-      "darkRatio": 0.0945054945054945,
-      "copperRatio": 0.05274725274725275
+      "nonWhiteRatio": 0.24395604395604395,
+      "darkRatio": 0.07692307692307693,
+      "copperRatio": 0.04395604395604396
     },
     {
       "y": 127,
       "samples": 455,
-      "nonWhiteRatio": 0.2813186813186813,
-      "darkRatio": 0.10329670329670329,
-      "copperRatio": 0.07692307692307693
+      "nonWhiteRatio": 0.25934065934065936,
+      "darkRatio": 0.08351648351648351,
+      "copperRatio": 0.05714285714285714
     },
     {
       "y": 128,
       "samples": 455,
-      "nonWhiteRatio": 0.2835164835164835,
-      "darkRatio": 0.22197802197802197,
-      "copperRatio": 0.07472527472527472
+      "nonWhiteRatio": 0.25054945054945055,
+      "darkRatio": 0.2,
+      "copperRatio": 0.041758241758241756
     },
     {
       "y": 129,
       "samples": 455,
-      "nonWhiteRatio": 0.15384615384615385,
-      "darkRatio": 0.09010989010989011,
-      "copperRatio": 0.06153846153846154
+      "nonWhiteRatio": 0.12967032967032968,
+      "darkRatio": 0.07912087912087912,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 130,
       "samples": 455,
-      "nonWhiteRatio": 0.16263736263736264,
-      "darkRatio": 0.0989010989010989,
-      "copperRatio": 0.07032967032967033
+      "nonWhiteRatio": 0.12967032967032968,
+      "darkRatio": 0.06813186813186813,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 131,
       "samples": 455,
-      "nonWhiteRatio": 0.12747252747252746,
-      "darkRatio": 0.07472527472527472,
-      "copperRatio": 0.06153846153846154
+      "nonWhiteRatio": 0.0989010989010989,
+      "darkRatio": 0.05714285714285714,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 132,
       "samples": 455,
-      "nonWhiteRatio": 0.11208791208791209,
-      "darkRatio": 0.05934065934065934,
-      "copperRatio": 0.05054945054945055
+      "nonWhiteRatio": 0.10989010989010989,
+      "darkRatio": 0.06153846153846154,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 133,
       "samples": 455,
-      "nonWhiteRatio": 0.11208791208791209,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.05714285714285714
+      "nonWhiteRatio": 0.1054945054945055,
+      "darkRatio": 0.04835164835164835,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 134,
       "samples": 455,
       "nonWhiteRatio": 0.1054945054945055,
       "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.05714285714285714
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 135,
       "samples": 455,
-      "nonWhiteRatio": 0.0967032967032967,
-      "darkRatio": 0.03956043956043956,
+      "nonWhiteRatio": 0.10329670329670329,
+      "darkRatio": 0.05934065934065934,
       "copperRatio": 0.03956043956043956
     },
     {
       "y": 136,
       "samples": 455,
-      "nonWhiteRatio": 0.08791208791208792,
-      "darkRatio": 0.03956043956043956,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.09230769230769231,
+      "darkRatio": 0.04835164835164835,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 137,
       "samples": 455,
-      "nonWhiteRatio": 0.07912087912087912,
-      "darkRatio": 0.041758241758241756,
-      "copperRatio": 0.03296703296703297
+      "nonWhiteRatio": 0.07472527472527472,
+      "darkRatio": 0.03736263736263736,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 138,
       "samples": 455,
-      "nonWhiteRatio": 0.09230769230769231,
-      "darkRatio": 0.035164835164835165,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.07912087912087912,
+      "darkRatio": 0.02857142857142857,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 139,
       "samples": 455,
-      "nonWhiteRatio": 0.0967032967032967,
-      "darkRatio": 0.04395604395604396,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.07692307692307693,
+      "darkRatio": 0.03076923076923077,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 140,
       "samples": 455,
-      "nonWhiteRatio": 0.09230769230769231,
-      "darkRatio": 0.03736263736263736,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.07032967032967033,
+      "darkRatio": 0.026373626373626374,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 141,
       "samples": 455,
-      "nonWhiteRatio": 0.1054945054945055,
-      "darkRatio": 0.04835164835164835,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.07472527472527472,
+      "darkRatio": 0.03076923076923077,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 142,
       "samples": 455,
-      "nonWhiteRatio": 0.17362637362637362,
-      "darkRatio": 0.10329670329670329,
-      "copperRatio": 0.0945054945054945
+      "nonWhiteRatio": 0.0989010989010989,
+      "darkRatio": 0.03076923076923077,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 143,
       "samples": 455,
-      "nonWhiteRatio": 0.18461538461538463,
-      "darkRatio": 0.12747252747252746,
-      "copperRatio": 0.12307692307692308
+      "nonWhiteRatio": 0.07912087912087912,
+      "darkRatio": 0.02857142857142857,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 144,
       "samples": 455,
-      "nonWhiteRatio": 0.2153846153846154,
-      "darkRatio": 0.16483516483516483,
-      "copperRatio": 0.15164835164835164
+      "nonWhiteRatio": 0.09010989010989011,
+      "darkRatio": 0.035164835164835165,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 145,
       "samples": 455,
-      "nonWhiteRatio": 0.18681318681318682,
-      "darkRatio": 0.13186813186813187,
-      "copperRatio": 0.1054945054945055
+      "nonWhiteRatio": 0.11208791208791209,
+      "darkRatio": 0.05274725274725275,
+      "copperRatio": 0.041758241758241756
     },
     {
       "y": 146,
       "samples": 455,
-      "nonWhiteRatio": 0.1978021978021978,
-      "darkRatio": 0.13186813186813187,
-      "copperRatio": 0.09010989010989011
+      "nonWhiteRatio": 0.12967032967032968,
+      "darkRatio": 0.07252747252747253,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 147,
       "samples": 455,
-      "nonWhiteRatio": 0.3032967032967033,
-      "darkRatio": 0.24395604395604395,
-      "copperRatio": 0.08131868131868132
+      "nonWhiteRatio": 0.24835164835164836,
+      "darkRatio": 0.1956043956043956,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 148,
       "samples": 455,
-      "nonWhiteRatio": 0.3098901098901099,
-      "darkRatio": 0.12087912087912088,
-      "copperRatio": 0.07692307692307693
+      "nonWhiteRatio": 0.26373626373626374,
+      "darkRatio": 0.07912087912087912,
+      "copperRatio": 0.041758241758241756
     },
     {
       "y": 149,
       "samples": 455,
-      "nonWhiteRatio": 0.2967032967032967,
-      "darkRatio": 0.11428571428571428,
-      "copperRatio": 0.06593406593406594
+      "nonWhiteRatio": 0.25054945054945055,
+      "darkRatio": 0.06813186813186813,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 150,
       "samples": 455,
-      "nonWhiteRatio": 0.2879120879120879,
-      "darkRatio": 0.1010989010989011,
-      "copperRatio": 0.06373626373626373
+      "nonWhiteRatio": 0.23736263736263735,
+      "darkRatio": 0.05714285714285714,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 151,
       "samples": 455,
-      "nonWhiteRatio": 0.2549450549450549,
-      "darkRatio": 0.07252747252747253,
-      "copperRatio": 0.06153846153846154
+      "nonWhiteRatio": 0.21318681318681318,
+      "darkRatio": 0.046153846153846156,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 152,
       "samples": 455,
-      "nonWhiteRatio": 0.2571428571428571,
-      "darkRatio": 0.1978021978021978,
-      "copperRatio": 0.06373626373626373
+      "nonWhiteRatio": 0.2153846153846154,
+      "darkRatio": 0.16263736263736264,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 153,
       "samples": 455,
-      "nonWhiteRatio": 0.11868131868131868,
-      "darkRatio": 0.06813186813186813,
-      "copperRatio": 0.05714285714285714
+      "nonWhiteRatio": 0.09010989010989011,
+      "darkRatio": 0.03956043956043956,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 154,
       "samples": 455,
-      "nonWhiteRatio": 0.12087912087912088,
-      "darkRatio": 0.06593406593406594,
-      "copperRatio": 0.05714285714285714
+      "nonWhiteRatio": 0.0967032967032967,
+      "darkRatio": 0.04395604395604396,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 155,
       "samples": 455,
-      "nonWhiteRatio": 0.14065934065934066,
-      "darkRatio": 0.07912087912087912,
-      "copperRatio": 0.07032967032967033
+      "nonWhiteRatio": 0.12747252747252746,
+      "darkRatio": 0.06593406593406594,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 156,
       "samples": 455,
-      "nonWhiteRatio": 0.12967032967032968,
-      "darkRatio": 0.07032967032967033,
-      "copperRatio": 0.06373626373626373
+      "nonWhiteRatio": 0.10329670329670329,
+      "darkRatio": 0.05054945054945055,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 157,
       "samples": 455,
-      "nonWhiteRatio": 0.12967032967032968,
-      "darkRatio": 0.06813186813186813,
-      "copperRatio": 0.05934065934065934
+      "nonWhiteRatio": 0.1010989010989011,
+      "darkRatio": 0.04395604395604396,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 158,
       "samples": 455,
-      "nonWhiteRatio": 0.12087912087912088,
-      "darkRatio": 0.06593406593406594,
-      "copperRatio": 0.05934065934065934
+      "nonWhiteRatio": 0.10329670329670329,
+      "darkRatio": 0.054945054945054944,
+      "copperRatio": 0.03076923076923077
     },
     {
       "y": 159,
       "samples": 455,
-      "nonWhiteRatio": 0.12747252747252746,
-      "darkRatio": 0.06593406593406594,
-      "copperRatio": 0.054945054945054944
+      "nonWhiteRatio": 0.0945054945054945,
+      "darkRatio": 0.04395604395604396,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 160,
       "samples": 455,
-      "nonWhiteRatio": 0.12527472527472527,
-      "darkRatio": 0.07032967032967033,
-      "copperRatio": 0.05714285714285714
+      "nonWhiteRatio": 0.0967032967032967,
+      "darkRatio": 0.046153846153846156,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 161,
       "samples": 455,
-      "nonWhiteRatio": 0.12967032967032968,
-      "darkRatio": 0.07692307692307693,
-      "copperRatio": 0.05934065934065934
+      "nonWhiteRatio": 0.0989010989010989,
+      "darkRatio": 0.05054945054945055,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 162,
       "samples": 455,
-      "nonWhiteRatio": 0.12307692307692308,
-      "darkRatio": 0.06593406593406594,
-      "copperRatio": 0.04835164835164835
+      "nonWhiteRatio": 0.09230769230769231,
+      "darkRatio": 0.041758241758241756,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 163,
       "samples": 455,
-      "nonWhiteRatio": 0.12747252747252746,
-      "darkRatio": 0.06813186813186813,
-      "copperRatio": 0.06153846153846154
+      "nonWhiteRatio": 0.0945054945054945,
+      "darkRatio": 0.046153846153846156,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 164,
       "samples": 455,
-      "nonWhiteRatio": 0.1076923076923077,
-      "darkRatio": 0.04835164835164835,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.08131868131868132,
+      "darkRatio": 0.03296703296703297,
+      "copperRatio": 0.01978021978021978
     },
     {
       "y": 165,
       "samples": 455,
-      "nonWhiteRatio": 0.12967032967032968,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.05274725274725275
+      "nonWhiteRatio": 0.0989010989010989,
+      "darkRatio": 0.02857142857142857,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 166,
       "samples": 455,
-      "nonWhiteRatio": 0.13186813186813187,
-      "darkRatio": 0.07472527472527472,
-      "copperRatio": 0.04395604395604396
+      "nonWhiteRatio": 0.11208791208791209,
+      "darkRatio": 0.05714285714285714,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 167,
       "samples": 455,
-      "nonWhiteRatio": 0.12967032967032968,
-      "darkRatio": 0.07472527472527472,
-      "copperRatio": 0.04835164835164835
+      "nonWhiteRatio": 0.12087912087912088,
+      "darkRatio": 0.06813186813186813,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 168,
       "samples": 455,
-      "nonWhiteRatio": 0.15824175824175823,
-      "darkRatio": 0.09010989010989011,
-      "copperRatio": 0.054945054945054944
+      "nonWhiteRatio": 0.14285714285714285,
+      "darkRatio": 0.07692307692307693,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 169,
       "samples": 455,
-      "nonWhiteRatio": 0.13626373626373625,
-      "darkRatio": 0.07252747252747253,
-      "copperRatio": 0.04395604395604396
+      "nonWhiteRatio": 0.12527472527472527,
+      "darkRatio": 0.06813186813186813,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 170,
       "samples": 455,
       "nonWhiteRatio": 0.14505494505494507,
       "darkRatio": 0.07472527472527472,
-      "copperRatio": 0.046153846153846156
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 171,
       "samples": 455,
-      "nonWhiteRatio": 0.23076923076923078,
-      "darkRatio": 0.17362637362637362,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.1956043956043956,
+      "darkRatio": 0.14725274725274726,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 172,
       "samples": 455,
-      "nonWhiteRatio": 0.22637362637362637,
-      "darkRatio": 0.05054945054945055,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.1956043956043956,
+      "darkRatio": 0.03296703296703297,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 173,
       "samples": 455,
-      "nonWhiteRatio": 0.22637362637362637,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.1956043956043956,
+      "darkRatio": 0.03296703296703297,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 174,
       "samples": 455,
-      "nonWhiteRatio": 0.23956043956043957,
-      "darkRatio": 0.06153846153846154,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.210989010989011,
+      "darkRatio": 0.03736263736263736,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 175,
       "samples": 455,
-      "nonWhiteRatio": 0.23736263736263735,
-      "darkRatio": 0.06153846153846154,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.2043956043956044,
+      "darkRatio": 0.03736263736263736,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 176,
       "samples": 455,
-      "nonWhiteRatio": 0.24175824175824176,
-      "darkRatio": 0.17582417582417584,
-      "copperRatio": 0.03296703296703297
+      "nonWhiteRatio": 0.210989010989011,
+      "darkRatio": 0.15604395604395604,
+      "copperRatio": 0.01978021978021978
     },
     {
       "y": 177,
       "samples": 455,
-      "nonWhiteRatio": 0.15604395604395604,
-      "darkRatio": 0.0967032967032967,
-      "copperRatio": 0.054945054945054944
+      "nonWhiteRatio": 0.11648351648351649,
+      "darkRatio": 0.06593406593406594,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 178,
       "samples": 455,
-      "nonWhiteRatio": 0.14285714285714285,
-      "darkRatio": 0.08791208791208792,
-      "copperRatio": 0.05934065934065934
+      "nonWhiteRatio": 0.12307692307692308,
+      "darkRatio": 0.07032967032967033,
+      "copperRatio": 0.046153846153846156
     },
     {
       "y": 179,
       "samples": 455,
-      "nonWhiteRatio": 0.14505494505494507,
-      "darkRatio": 0.08131868131868132,
-      "copperRatio": 0.05714285714285714
+      "nonWhiteRatio": 0.12527472527472527,
+      "darkRatio": 0.06593406593406594,
+      "copperRatio": 0.04395604395604396
     },
     {
       "y": 180,
       "samples": 455,
-      "nonWhiteRatio": 0.15604395604395604,
-      "darkRatio": 0.0989010989010989,
-      "copperRatio": 0.06373626373626373
+      "nonWhiteRatio": 0.11868131868131868,
+      "darkRatio": 0.07472527472527472,
+      "copperRatio": 0.04835164835164835
     },
     {
       "y": 181,
       "samples": 455,
-      "nonWhiteRatio": 0.16483516483516483,
-      "darkRatio": 0.09230769230769231,
-      "copperRatio": 0.05274725274725275
+      "nonWhiteRatio": 0.12967032967032968,
+      "darkRatio": 0.06813186813186813,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 182,
       "samples": 455,
-      "nonWhiteRatio": 0.1054945054945055,
-      "darkRatio": 0.05054945054945055,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.08571428571428572,
+      "darkRatio": 0.03736263736263736,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 183,
       "samples": 455,
-      "nonWhiteRatio": 0.11428571428571428,
-      "darkRatio": 0.05934065934065934,
-      "copperRatio": 0.046153846153846156
+      "nonWhiteRatio": 0.09010989010989011,
+      "darkRatio": 0.046153846153846156,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 184,
       "samples": 455,
-      "nonWhiteRatio": 0.11208791208791209,
-      "darkRatio": 0.05934065934065934,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.09010989010989011,
+      "darkRatio": 0.041758241758241756,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 185,
       "samples": 455,
-      "nonWhiteRatio": 0.1054945054945055,
-      "darkRatio": 0.04835164835164835,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.08571428571428572,
+      "darkRatio": 0.03736263736263736,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 186,
       "samples": 455,
-      "nonWhiteRatio": 0.12307692307692308,
-      "darkRatio": 0.07032967032967033,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.11648351648351649,
+      "darkRatio": 0.06593406593406594,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 187,
       "samples": 455,
-      "nonWhiteRatio": 0.10329670329670329,
-      "darkRatio": 0.05714285714285714,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.0967032967032967,
+      "darkRatio": 0.05274725274725275,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 188,
       "samples": 455,
-      "nonWhiteRatio": 0.14505494505494507,
-      "darkRatio": 0.06373626373626373,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.15164835164835164,
+      "darkRatio": 0.07692307692307693,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 189,
       "samples": 455,
-      "nonWhiteRatio": 0.12747252747252746,
-      "darkRatio": 0.05274725274725275,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.14285714285714285,
+      "darkRatio": 0.06153846153846154,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 190,
       "samples": 455,
-      "nonWhiteRatio": 0.12527472527472527,
+      "nonWhiteRatio": 0.12307692307692308,
       "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.03736263736263736
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 191,
       "samples": 455,
-      "nonWhiteRatio": 0.11648351648351649,
+      "nonWhiteRatio": 0.10989010989010989,
       "darkRatio": 0.05054945054945055,
       "copperRatio": 0.035164835164835165
     },
@@ -10105,477 +10344,477 @@
       "y": 192,
       "samples": 455,
       "nonWhiteRatio": 0.1054945054945055,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.035164835164835165
+      "darkRatio": 0.05274725274725275,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 193,
       "samples": 455,
-      "nonWhiteRatio": 0.1010989010989011,
-      "darkRatio": 0.03956043956043956,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.07912087912087912,
+      "darkRatio": 0.026373626373626374,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 194,
       "samples": 455,
-      "nonWhiteRatio": 0.12967032967032968,
-      "darkRatio": 0.05714285714285714,
-      "copperRatio": 0.04395604395604396
+      "nonWhiteRatio": 0.1010989010989011,
+      "darkRatio": 0.04395604395604396,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 195,
       "samples": 455,
-      "nonWhiteRatio": 0.23296703296703297,
-      "darkRatio": 0.18021978021978022,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.2153846153846154,
+      "darkRatio": 0.16263736263736264,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 196,
       "samples": 455,
-      "nonWhiteRatio": 0.24175824175824176,
-      "darkRatio": 0.06373626373626373,
-      "copperRatio": 0.05054945054945055
+      "nonWhiteRatio": 0.22197802197802197,
+      "darkRatio": 0.046153846153846156,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 197,
       "samples": 455,
-      "nonWhiteRatio": 0.24395604395604395,
-      "darkRatio": 0.06593406593406594,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.22637362637362637,
+      "darkRatio": 0.054945054945054944,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 198,
       "samples": 455,
-      "nonWhiteRatio": 0.24175824175824176,
-      "darkRatio": 0.2153846153846154,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.22637362637362637,
+      "darkRatio": 0.2,
+      "copperRatio": 0.03076923076923077
     },
     {
       "y": 199,
       "samples": 455,
-      "nonWhiteRatio": 0.22857142857142856,
-      "darkRatio": 0.2,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.2021978021978022,
+      "darkRatio": 0.18021978021978022,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 200,
       "samples": 455,
-      "nonWhiteRatio": 0.27692307692307694,
-      "darkRatio": 0.09010989010989011,
-      "copperRatio": 0.05054945054945055
+      "nonWhiteRatio": 0.24615384615384617,
+      "darkRatio": 0.06593406593406594,
+      "copperRatio": 0.03076923076923077
     },
     {
       "y": 201,
       "samples": 455,
-      "nonWhiteRatio": 0.26373626373626374,
-      "darkRatio": 0.07692307692307693,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.23956043956043957,
+      "darkRatio": 0.05934065934065934,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 202,
       "samples": 455,
-      "nonWhiteRatio": 0.25934065934065936,
-      "darkRatio": 0.07032967032967033,
-      "copperRatio": 0.04835164835164835
+      "nonWhiteRatio": 0.22417582417582418,
+      "darkRatio": 0.04835164835164835,
+      "copperRatio": 0.03076923076923077
     },
     {
       "y": 203,
       "samples": 455,
-      "nonWhiteRatio": 0.26153846153846155,
-      "darkRatio": 0.07472527472527472,
-      "copperRatio": 0.05274725274725275
+      "nonWhiteRatio": 0.23296703296703297,
+      "darkRatio": 0.05054945054945055,
+      "copperRatio": 0.03076923076923077
     },
     {
       "y": 204,
       "samples": 455,
-      "nonWhiteRatio": 0.25934065934065936,
-      "darkRatio": 0.07472527472527472,
-      "copperRatio": 0.046153846153846156
+      "nonWhiteRatio": 0.23076923076923078,
+      "darkRatio": 0.054945054945054944,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 205,
       "samples": 455,
-      "nonWhiteRatio": 0.23296703296703297,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.2043956043956044,
+      "darkRatio": 0.03296703296703297,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 206,
       "samples": 455,
-      "nonWhiteRatio": 0.24175824175824176,
-      "darkRatio": 0.05934065934065934,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.22857142857142856,
+      "darkRatio": 0.054945054945054944,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 207,
       "samples": 455,
-      "nonWhiteRatio": 0.22417582417582418,
-      "darkRatio": 0.04835164835164835,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.2043956043956044,
+      "darkRatio": 0.035164835164835165,
+      "copperRatio": 0.01978021978021978
     },
     {
       "y": 208,
       "samples": 455,
-      "nonWhiteRatio": 0.23516483516483516,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.2153846153846154,
+      "darkRatio": 0.041758241758241756,
+      "copperRatio": 0.01978021978021978
     },
     {
       "y": 209,
       "samples": 455,
-      "nonWhiteRatio": 0.23296703296703297,
-      "darkRatio": 0.06153846153846154,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.22417582417582418,
+      "darkRatio": 0.05054945054945055,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 210,
       "samples": 455,
-      "nonWhiteRatio": 0.2571428571428571,
-      "darkRatio": 0.08791208791208792,
-      "copperRatio": 0.046153846153846156
+      "nonWhiteRatio": 0.24395604395604395,
+      "darkRatio": 0.07692307692307693,
+      "copperRatio": 0.035164835164835165
     },
     {
       "y": 211,
       "samples": 455,
-      "nonWhiteRatio": 0.26373626373626374,
-      "darkRatio": 0.06373626373626373,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.23956043956043957,
+      "darkRatio": 0.041758241758241756,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 212,
       "samples": 455,
-      "nonWhiteRatio": 0.24175824175824176,
-      "darkRatio": 0.07032967032967033,
-      "copperRatio": 0.046153846153846156
+      "nonWhiteRatio": 0.23296703296703297,
+      "darkRatio": 0.06373626373626373,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 213,
       "samples": 455,
-      "nonWhiteRatio": 0.26373626373626374,
-      "darkRatio": 0.08791208791208792,
-      "copperRatio": 0.05054945054945055
+      "nonWhiteRatio": 0.25274725274725274,
+      "darkRatio": 0.07692307692307693,
+      "copperRatio": 0.04395604395604396
     },
     {
       "y": 214,
       "samples": 455,
-      "nonWhiteRatio": 0.25274725274725274,
-      "darkRatio": 0.06813186813186813,
-      "copperRatio": 0.04835164835164835
+      "nonWhiteRatio": 0.24835164835164836,
+      "darkRatio": 0.06373626373626373,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 215,
       "samples": 455,
-      "nonWhiteRatio": 0.25274725274725274,
-      "darkRatio": 0.07252747252747253,
-      "copperRatio": 0.041758241758241756
+      "nonWhiteRatio": 0.24835164835164836,
+      "darkRatio": 0.06153846153846154,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 216,
       "samples": 455,
-      "nonWhiteRatio": 0.24835164835164836,
-      "darkRatio": 0.07252747252747253,
-      "copperRatio": 0.03736263736263736
+      "nonWhiteRatio": 0.23956043956043957,
+      "darkRatio": 0.05934065934065934,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 217,
       "samples": 455,
-      "nonWhiteRatio": 0.24395604395604395,
-      "darkRatio": 0.05714285714285714,
-      "copperRatio": 0.024175824175824177
+      "nonWhiteRatio": 0.2153846153846154,
+      "darkRatio": 0.03956043956043956,
+      "copperRatio": 0.01978021978021978
     },
     {
       "y": 218,
       "samples": 455,
-      "nonWhiteRatio": 0.23076923076923078,
-      "darkRatio": 0.06153846153846154,
-      "copperRatio": 0.03076923076923077
+      "nonWhiteRatio": 0.21318681318681318,
+      "darkRatio": 0.04395604395604396,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 219,
       "samples": 455,
-      "nonWhiteRatio": 0.22637362637362637,
-      "darkRatio": 0.04835164835164835,
-      "copperRatio": 0.03076923076923077
+      "nonWhiteRatio": 0.20659340659340658,
+      "darkRatio": 0.035164835164835165,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 220,
       "samples": 455,
-      "nonWhiteRatio": 0.24175824175824176,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.026373626373626374
+      "nonWhiteRatio": 0.2175824175824176,
+      "darkRatio": 0.03736263736263736,
+      "copperRatio": 0.017582417582417582
     },
     {
       "y": 221,
       "samples": 455,
-      "nonWhiteRatio": 0.22857142857142856,
-      "darkRatio": 0.05054945054945055,
-      "copperRatio": 0.02857142857142857
+      "nonWhiteRatio": 0.2087912087912088,
+      "darkRatio": 0.03296703296703297,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 222,
       "samples": 455,
-      "nonWhiteRatio": 0.22417582417582418,
-      "darkRatio": 0.04835164835164835,
-      "copperRatio": 0.03076923076923077
+      "nonWhiteRatio": 0.2043956043956044,
+      "darkRatio": 0.03296703296703297,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 223,
       "samples": 455,
-      "nonWhiteRatio": 0.2549450549450549,
-      "darkRatio": 0.07912087912087912,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.23956043956043957,
+      "darkRatio": 0.06593406593406594,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 224,
       "samples": 455,
-      "nonWhiteRatio": 0.23076923076923078,
-      "darkRatio": 0.2,
-      "copperRatio": 0.03296703296703297
+      "nonWhiteRatio": 0.21978021978021978,
+      "darkRatio": 0.189010989010989,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 225,
       "samples": 455,
-      "nonWhiteRatio": 0.22637362637362637,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.03296703296703297
+      "nonWhiteRatio": 0.21318681318681318,
+      "darkRatio": 0.041758241758241756,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 226,
       "samples": 455,
-      "nonWhiteRatio": 0.26153846153846155,
-      "darkRatio": 0.08571428571428572,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.25274725274725274,
+      "darkRatio": 0.07472527472527472,
+      "copperRatio": 0.03296703296703297
     },
     {
       "y": 227,
       "samples": 455,
-      "nonWhiteRatio": 0.23076923076923078,
-      "darkRatio": 0.16263736263736264,
-      "copperRatio": 0.026373626373626374
+      "nonWhiteRatio": 0.22417582417582418,
+      "darkRatio": 0.15604395604395604,
+      "copperRatio": 0.01978021978021978
     },
     {
       "y": 228,
       "samples": 455,
-      "nonWhiteRatio": 0.10329670329670329,
-      "darkRatio": 0.046153846153846156,
-      "copperRatio": 0.02197802197802198
+      "nonWhiteRatio": 0.0989010989010989,
+      "darkRatio": 0.041758241758241756,
+      "copperRatio": 0.017582417582417582
     },
     {
       "y": 229,
       "samples": 455,
-      "nonWhiteRatio": 0.0989010989010989,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.024175824175824177
+      "nonWhiteRatio": 0.0945054945054945,
+      "darkRatio": 0.04835164835164835,
+      "copperRatio": 0.01978021978021978
     },
     {
       "y": 230,
       "samples": 455,
-      "nonWhiteRatio": 0.12307692307692308,
-      "darkRatio": 0.07692307692307693,
+      "nonWhiteRatio": 0.13406593406593406,
+      "darkRatio": 0.08571428571428572,
       "copperRatio": 0.035164835164835165
     },
     {
       "y": 231,
       "samples": 455,
-      "nonWhiteRatio": 0.1076923076923077,
-      "darkRatio": 0.05054945054945055,
-      "copperRatio": 0.02857142857142857
+      "nonWhiteRatio": 0.11648351648351649,
+      "darkRatio": 0.05714285714285714,
+      "copperRatio": 0.026373626373626374
     },
     {
       "y": 232,
       "samples": 455,
-      "nonWhiteRatio": 0.12307692307692308,
-      "darkRatio": 0.07032967032967033,
-      "copperRatio": 0.04395604395604396
+      "nonWhiteRatio": 0.12747252747252746,
+      "darkRatio": 0.07692307692307693,
+      "copperRatio": 0.03956043956043956
     },
     {
       "y": 233,
       "samples": 455,
-      "nonWhiteRatio": 0.11208791208791209,
-      "darkRatio": 0.06373626373626373,
-      "copperRatio": 0.03956043956043956
+      "nonWhiteRatio": 0.12527472527472527,
+      "darkRatio": 0.07032967032967033,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 234,
       "samples": 455,
-      "nonWhiteRatio": 0.14065934065934066,
-      "darkRatio": 0.05274725274725275,
-      "copperRatio": 0.035164835164835165
+      "nonWhiteRatio": 0.14505494505494507,
+      "darkRatio": 0.05934065934065934,
+      "copperRatio": 0.03736263736263736
     },
     {
       "y": 235,
       "samples": 455,
       "nonWhiteRatio": 0.11428571428571428,
-      "darkRatio": 0.054945054945054944,
-      "copperRatio": 0.03076923076923077
+      "darkRatio": 0.05274725274725275,
+      "copperRatio": 0.02857142857142857
     },
     {
       "y": 236,
       "samples": 455,
       "nonWhiteRatio": 0.08131868131868132,
-      "darkRatio": 0.035164835164835165,
-      "copperRatio": 0.024175824175824177
+      "darkRatio": 0.03296703296703297,
+      "copperRatio": 0.02197802197802198
     },
     {
       "y": 237,
       "samples": 455,
-      "nonWhiteRatio": 0.08571428571428572,
-      "darkRatio": 0.03076923076923077,
-      "copperRatio": 0.02197802197802198
+      "nonWhiteRatio": 0.08351648351648351,
+      "darkRatio": 0.02857142857142857,
+      "copperRatio": 0.01978021978021978
     },
     {
       "y": 238,
       "samples": 455,
-      "nonWhiteRatio": 0.08791208791208792,
-      "darkRatio": 0.03076923076923077,
+      "nonWhiteRatio": 0.08131868131868132,
+      "darkRatio": 0.02857142857142857,
       "copperRatio": 0.01978021978021978
     },
     {
       "y": 239,
       "samples": 455,
-      "nonWhiteRatio": 0.08791208791208792,
-      "darkRatio": 0.035164835164835165,
-      "copperRatio": 0.02857142857142857
+      "nonWhiteRatio": 0.08351648351648351,
+      "darkRatio": 0.02857142857142857,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 240,
       "samples": 455,
-      "nonWhiteRatio": 0.1010989010989011,
-      "darkRatio": 0.03956043956043956,
-      "copperRatio": 0.03076923076923077
-    },
-    {
-      "y": 241,
-      "samples": 455,
-      "nonWhiteRatio": 0.09230769230769231,
-      "darkRatio": 0.03956043956043956,
-      "copperRatio": 0.03076923076923077
-    },
-    {
-      "y": 242,
-      "samples": 455,
-      "nonWhiteRatio": 0.08131868131868132,
-      "darkRatio": 0.03076923076923077,
-      "copperRatio": 0.024175824175824177
-    },
-    {
-      "y": 243,
-      "samples": 455,
       "nonWhiteRatio": 0.0945054945054945,
-      "darkRatio": 0.04835164835164835,
-      "copperRatio": 0.02857142857142857
-    },
-    {
-      "y": 244,
-      "samples": 455,
-      "nonWhiteRatio": 0.0989010989010989,
-      "darkRatio": 0.05274725274725275,
-      "copperRatio": 0.03736263736263736
-    },
-    {
-      "y": 245,
-      "samples": 455,
-      "nonWhiteRatio": 0.11868131868131868,
-      "darkRatio": 0.05274725274725275,
-      "copperRatio": 0.03736263736263736
-    },
-    {
-      "y": 246,
-      "samples": 455,
-      "nonWhiteRatio": 0.2813186813186813,
-      "darkRatio": 0.21318681318681318,
-      "copperRatio": 0.04395604395604396
-    },
-    {
-      "y": 247,
-      "samples": 455,
-      "nonWhiteRatio": 0.26153846153846155,
-      "darkRatio": 0.08351648351648351,
-      "copperRatio": 0.04395604395604396
-    },
-    {
-      "y": 248,
-      "samples": 455,
-      "nonWhiteRatio": 0.2879120879120879,
-      "darkRatio": 0.1076923076923077,
-      "copperRatio": 0.04835164835164835
-    },
-    {
-      "y": 249,
-      "samples": 455,
-      "nonWhiteRatio": 0.3010989010989011,
-      "darkRatio": 0.1010989010989011,
-      "copperRatio": 0.05714285714285714
-    },
-    {
-      "y": 250,
-      "samples": 455,
-      "nonWhiteRatio": 0.2549450549450549,
-      "darkRatio": 0.08351648351648351,
-      "copperRatio": 0.03956043956043956
-    },
-    {
-      "y": 251,
-      "samples": 455,
-      "nonWhiteRatio": 0.23076923076923078,
-      "darkRatio": 0.17362637362637362,
-      "copperRatio": 0.035164835164835165
-    },
-    {
-      "y": 252,
-      "samples": 455,
-      "nonWhiteRatio": 0.09010989010989011,
       "darkRatio": 0.035164835164835165,
       "copperRatio": 0.02857142857142857
     },
     {
-      "y": 253,
+      "y": 241,
       "samples": 455,
-      "nonWhiteRatio": 0.1010989010989011,
-      "darkRatio": 0.04835164835164835,
+      "nonWhiteRatio": 0.09010989010989011,
+      "darkRatio": 0.03296703296703297,
+      "copperRatio": 0.024175824175824177
+    },
+    {
+      "y": 242,
+      "samples": 455,
+      "nonWhiteRatio": 0.07472527472527472,
+      "darkRatio": 0.026373626373626374,
+      "copperRatio": 0.01978021978021978
+    },
+    {
+      "y": 243,
+      "samples": 455,
+      "nonWhiteRatio": 0.08571428571428572,
+      "darkRatio": 0.041758241758241756,
+      "copperRatio": 0.02197802197802198
+    },
+    {
+      "y": 244,
+      "samples": 455,
+      "nonWhiteRatio": 0.09010989010989011,
+      "darkRatio": 0.046153846153846156,
+      "copperRatio": 0.03296703296703297
+    },
+    {
+      "y": 245,
+      "samples": 455,
+      "nonWhiteRatio": 0.11648351648351649,
+      "darkRatio": 0.05054945054945055,
+      "copperRatio": 0.03296703296703297
+    },
+    {
+      "y": 246,
+      "samples": 455,
+      "nonWhiteRatio": 0.2725274725274725,
+      "darkRatio": 0.210989010989011,
+      "copperRatio": 0.03736263736263736
+    },
+    {
+      "y": 247,
+      "samples": 455,
+      "nonWhiteRatio": 0.25054945054945055,
+      "darkRatio": 0.07472527472527472,
+      "copperRatio": 0.03296703296703297
+    },
+    {
+      "y": 248,
+      "samples": 455,
+      "nonWhiteRatio": 0.2813186813186813,
+      "darkRatio": 0.10329670329670329,
+      "copperRatio": 0.046153846153846156
+    },
+    {
+      "y": 249,
+      "samples": 455,
+      "nonWhiteRatio": 0.2923076923076923,
+      "darkRatio": 0.09230769230769231,
+      "copperRatio": 0.04835164835164835
+    },
+    {
+      "y": 250,
+      "samples": 455,
+      "nonWhiteRatio": 0.24835164835164836,
+      "darkRatio": 0.07252747252747253,
       "copperRatio": 0.035164835164835165
     },
     {
-      "y": 254,
+      "y": 251,
       "samples": 455,
-      "nonWhiteRatio": 0.0989010989010989,
+      "nonWhiteRatio": 0.22197802197802197,
+      "darkRatio": 0.16703296703296702,
+      "copperRatio": 0.02857142857142857
+    },
+    {
+      "y": 252,
+      "samples": 455,
+      "nonWhiteRatio": 0.08131868131868132,
+      "darkRatio": 0.026373626373626374,
+      "copperRatio": 0.01978021978021978
+    },
+    {
+      "y": 253,
+      "samples": 455,
+      "nonWhiteRatio": 0.0945054945054945,
       "darkRatio": 0.046153846153846156,
       "copperRatio": 0.03076923076923077
     },
     {
+      "y": 254,
+      "samples": 455,
+      "nonWhiteRatio": 0.09010989010989011,
+      "darkRatio": 0.04395604395604396,
+      "copperRatio": 0.026373626373626374
+    },
+    {
       "y": 255,
       "samples": 455,
-      "nonWhiteRatio": 0.0967032967032967,
-      "darkRatio": 0.041758241758241756,
-      "copperRatio": 0.03076923076923077
+      "nonWhiteRatio": 0.09230769230769231,
+      "darkRatio": 0.035164835164835165,
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 256,
       "samples": 455,
       "nonWhiteRatio": 0.1076923076923077,
       "darkRatio": 0.04395604395604396,
-      "copperRatio": 0.026373626373626374
+      "copperRatio": 0.024175824175824177
     },
     {
       "y": 257,
       "samples": 455,
-      "nonWhiteRatio": 0.12307692307692308,
-      "darkRatio": 0.05274725274725275,
-      "copperRatio": 0.03296703296703297
+      "nonWhiteRatio": 0.12087912087912088,
+      "darkRatio": 0.05054945054945055,
+      "copperRatio": 0.03076923076923077
     },
     {
       "y": 258,
       "samples": 455,
-      "nonWhiteRatio": 0.08791208791208792,
-      "darkRatio": 0.035164835164835165,
-      "copperRatio": 0.02197802197802198
+      "nonWhiteRatio": 0.08131868131868132,
+      "darkRatio": 0.02857142857142857,
+      "copperRatio": 0.01978021978021978
     },
     {
       "y": 259,
       "samples": 455,
-      "nonWhiteRatio": 0.10989010989010989,
-      "darkRatio": 0.04835164835164835,
-      "copperRatio": 0.01978021978021978
+      "nonWhiteRatio": 0.11208791208791209,
+      "darkRatio": 0.05054945054945055,
+      "copperRatio": 0.026373626373626374
     }
   ],
   "consoleMessages": []
