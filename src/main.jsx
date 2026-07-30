@@ -38,6 +38,7 @@ import './components/GannTools/gannzillaCompactZoomSelectV516';
 import './components/GannTools/gannzillaCompactToolbarSpacingV517';
 import './components/GannTools/gannzillaCompactIconTrialV640';
 import './components/GannTools/gannzillaTopIconShadowRemovalV641';
+import './components/GannTools/gannzillaThinTopBoundaryV642';
 import './components/GannTools/gannzillaTasiTimeTrackerV547';
 import './components/GannTools/gannzillaTasiTimeTrackerGridFixV548';
 import './components/GannTools/gannzillaTasiTimeTrackerLuxuryStyleV549';
