@@ -25,9 +25,14 @@ function queryBoolean(query, name) {
   return value === 'true' || value === '1' || value === 'yes' || value === 'on';
 }
 
+function getEffectiveSearch() {
+  if (typeof window === 'undefined') return '';
+  return window.__gannzillaV672CanonicalSearch || window.location.search || '';
+}
+
 function applyForcedWheelQuery() {
   try {
-    const query = new URLSearchParams(window.location.search || '');
+    const query = new URLSearchParams(getEffectiveSearch());
     if (query.get('forceUrlNumbers') !== 'true') return;
 
     const levels = Number(query.get('levels') || 10);
@@ -105,7 +110,7 @@ function applyForcedWheelQuery() {
 const App = () => {
   applyForcedWheelQuery();
 
-  const search = window.location.search;
+  const search = getEffectiveSearch();
   const isTestMode = search.includes('test=true');
   const isArabicAiWheelMode = search.includes('gannzillaArabicAI=true') || search.includes('aiWheel=true');
   const isGannzillaProWheelMode = search.includes('gannzillaPro=true') || search.includes('wheelPro=true');
