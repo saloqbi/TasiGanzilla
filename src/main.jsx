@@ -88,6 +88,7 @@ import './components/GannTools/gannzillaToolbarIconFramesRestoreV673';
 import './components/GannTools/gannzillaShortLinkWheelGeometryBridgeV679';
 import './components/GannTools/gannzillaWheelChampagneChromeOverlayV675';
 import './components/GannTools/gannzillaReferenceGlossShineV676';
+import './components/GannTools/gannzillaWheelIvoryChampagneFinalAuthorityV682';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
