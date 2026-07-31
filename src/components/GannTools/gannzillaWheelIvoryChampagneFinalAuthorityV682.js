@@ -1,10 +1,10 @@
-const BUILD = 686;
-const STATE_KEY = '__gannzillaWheelFourIndexedGoldRaysV686';
+const BUILD = 687;
+const STATE_KEY = '__gannzillaWheelFourIndexedGoldRaysV687';
 const FINAL_EVENT = 'gannzilla:final-wheel-authority-v506';
 
 let applyCount = 0;
 let pendingFrame = 0;
-let pendingTimer = 0;
+let pendingTimers = [];
 let lastApply = null;
 
 function effectiveSearch() {
@@ -123,6 +123,11 @@ function draw(source = 'draw') {
   const indices = indexedCardinalSpokes(divisions);
   if (indices.length !== 4) return false;
 
+  const boundaryDegrees = Array.from(
+    { length: divisions },
+    (_, index) => northOffset + direction * index * sector,
+  );
+
   const cx = cssSize / 2;
   const cy = cssSize / 2;
   const ctx = wheel.getContext('2d');
@@ -138,8 +143,8 @@ function draw(source = 'draw') {
   ctx.shadowBlur = 0;
   ctx.shadowColor = 'transparent';
 
-  const resolvedDegrees = indices.map((index) => {
-    const degrees = northOffset + direction * index * sector;
+  const resolvedDegrees = indices.map((spokeIndex) => {
+    const degrees = boundaryDegrees[spokeIndex];
     drawGoldRay(
       ctx,
       polar(cx, cy, innerRadius, degrees),
@@ -150,12 +155,13 @@ function draw(source = 'draw') {
 
   ctx.restore();
 
-  wheel.dataset.gannzillaWheelFourIndexedGoldRaysV686 = 'true';
-  wheel.dataset.gannzillaWheelCardinalIndicesV686 = indices.join(',');
-  wheel.dataset.gannzillaWheelResolvedDegreesV686 = resolvedDegrees.join(',');
-  wheel.dataset.gannzillaWheelFourIndexedGoldRayCountV686 = '4';
-  wheel.dataset.gannzillaWheelGeometryChangedV686 = 'false';
-  wheel.dataset.gannzillaWheelNumberLayoutChangedV686 = 'false';
+  wheel.dataset.gannzillaWheelFourIndexedGoldRaysV687 = 'true';
+  wheel.dataset.gannzillaWheelCardinalIndicesV687 = indices.join(',');
+  wheel.dataset.gannzillaWheelResolvedDegreesV687 = resolvedDegrees.join(',');
+  wheel.dataset.gannzillaWheelFourIndexedGoldRayCountV687 = '4';
+  wheel.dataset.gannzillaWheelLateFinalPassV687 = source.includes('late') ? 'true' : 'false';
+  wheel.dataset.gannzillaWheelGeometryChangedV687 = 'false';
+  wheel.dataset.gannzillaWheelNumberLayoutChangedV687 = 'false';
 
   applyCount += 1;
   lastApply = {
@@ -165,6 +171,7 @@ function draw(source = 'draw') {
     indices,
     resolvedDegrees,
     cardinalRayCount: 4,
+    lateFinalPass: source.includes('late'),
     innerRadius,
     outerRadius,
     geometryChanged: false,
@@ -174,12 +181,20 @@ function draw(source = 'draw') {
   return true;
 }
 
-function schedule(source = 'schedule', delay = 90) {
-  window.clearTimeout(pendingTimer);
-  pendingTimer = window.setTimeout(() => {
-    if (pendingFrame) cancelAnimationFrame(pendingFrame);
-    pendingFrame = requestAnimationFrame(() => draw(source));
-  }, delay);
+function clearScheduledDraws() {
+  pendingTimers.forEach((timer) => window.clearTimeout(timer));
+  pendingTimers = [];
+  if (pendingFrame) cancelAnimationFrame(pendingFrame);
+  pendingFrame = 0;
+}
+
+function schedule(source = 'schedule', delays = [70, 260]) {
+  clearScheduledDraws();
+  pendingTimers = delays.map((delay, passIndex) => window.setTimeout(() => {
+    pendingFrame = requestAnimationFrame(() => {
+      draw(passIndex === delays.length - 1 ? `${source}-late` : source);
+    });
+  }, delay));
 }
 
 function install() {
@@ -187,27 +202,26 @@ function install() {
     || typeof document === 'undefined'
     || window[STATE_KEY]) return;
 
-  window.addEventListener(FINAL_EVENT, () => schedule(FINAL_EVENT, 90), false);
-  window.addEventListener('gannzilla:native-dpr-zoom-v504', () => schedule('zoom', 60), false);
-  window.addEventListener('resize', () => schedule('resize', 60), false);
+  window.addEventListener(FINAL_EVENT, () => schedule(FINAL_EVENT, [70, 260]), false);
+  window.addEventListener('gannzilla:native-dpr-zoom-v504', () => schedule('zoom', [50, 210]), false);
+  window.addEventListener('resize', () => schedule('resize', [50, 210]), false);
 
-  [0, 300, 1100].forEach((delay) => {
-    window.setTimeout(() => schedule(`boot-${delay}`, 0), delay);
-  });
+  window.setTimeout(() => schedule('boot', [0, 320, 1200]), 0);
 
-  window.GANNZILLA_WHEEL_FOUR_INDEXED_GOLD_RAYS_V686 = true;
-  window.__auditGannzillaWheelFourIndexedGoldRaysV686 = () => {
+  window.GANNZILLA_WHEEL_FOUR_INDEXED_GOLD_RAYS_V687 = true;
+  window.__auditGannzillaWheelFourIndexedGoldRaysV687 = () => {
     const wheel = findWheel();
     return {
       ok: wheel instanceof HTMLCanvasElement
-        && wheel.dataset.gannzillaWheelFourIndexedGoldRaysV686 === 'true'
-        && wheel.dataset.gannzillaWheelCardinalIndicesV686 === '0,9,18,27'
-        && Number(wheel.dataset.gannzillaWheelFourIndexedGoldRayCountV686) === 4,
+        && wheel.dataset.gannzillaWheelFourIndexedGoldRaysV687 === 'true'
+        && wheel.dataset.gannzillaWheelCardinalIndicesV687 === '0,9,18,27'
+        && Number(wheel.dataset.gannzillaWheelFourIndexedGoldRayCountV687) === 4,
       build: BUILD,
       enabled: enabled(),
       wheelFound: wheel instanceof HTMLCanvasElement,
-      cardinalIndices: wheel?.dataset?.gannzillaWheelCardinalIndicesV686 || '',
-      resolvedDegrees: wheel?.dataset?.gannzillaWheelResolvedDegreesV686 || '',
+      cardinalIndices: wheel?.dataset?.gannzillaWheelCardinalIndicesV687 || '',
+      resolvedDegrees: wheel?.dataset?.gannzillaWheelResolvedDegreesV687 || '',
+      lateFinalPass: wheel?.dataset?.gannzillaWheelLateFinalPassV687 === 'true',
       applyCount,
       observerActive: false,
       recurringTimerActive: false,
@@ -217,8 +231,8 @@ function install() {
     };
   };
 
-  window[STATE_KEY] = { draw, schedule };
-  schedule('install', 0);
+  window[STATE_KEY] = { draw, schedule, clearScheduledDraws };
+  schedule('install', [0, 320, 1200]);
 }
 
 install();
