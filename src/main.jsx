@@ -84,6 +84,7 @@ import './components/GannTools/gannzillaOuterEmptyRingMirrorSilverV668';
 import './components/GannTools/gannzillaPanelExactMirrorSilverV669';
 import './components/GannTools/gannzillaToolbarFullMirrorStripV672';
 import './components/GannTools/gannzillaToolbarIconFramesRestoreV673';
+import './components/GannTools/gannzillaShortLinkWheelGeometryBridgeV679';
 import './components/GannTools/gannzillaWheelChampagneChromeOverlayV675';
 import './components/GannTools/gannzillaReferenceGlossShineV676';
 import './styles/globals.css';
