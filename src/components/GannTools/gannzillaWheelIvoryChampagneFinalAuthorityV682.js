@@ -1,5 +1,5 @@
-const BUILD = 684;
-const STATE_KEY = '__gannzillaWheelIvoryChampagneFinalAuthorityV684';
+const BUILD = 685;
+const STATE_KEY = '__gannzillaWheelFourCardinalGoldRaysV685';
 const FINAL_EVENT = 'gannzilla:final-wheel-authority-v506';
 const TWO_PI = Math.PI * 2;
 
@@ -31,7 +31,7 @@ function enabled() {
   const query = params();
   const wheelMode = query.get('gannzillaPro') === 'true' || query.get('wheelPro') === 'true';
   return wheelMode && (window.location.pathname === '/v672.html'
-    || booleanParam('wheelIvoryChampagneFinal', false));
+    || booleanParam('wheelFourCardinalGoldRays', false));
 }
 
 function targetCanvas(canvas) {
@@ -62,8 +62,37 @@ function polar(cx, cy, radius, degrees) {
   };
 }
 
-function layeredLine(ctx, from, to, layers) {
-  layers.forEach(({ color, width }) => {
+function digitalRoot(value) {
+  const integer = Math.abs(Math.trunc(Number(value) || 0));
+  return integer === 0 ? 0 : 1 + ((integer - 1) % 9);
+}
+
+function numberColor(value) {
+  const root = digitalRoot(value);
+  if (root === 1 || root === 4 || root === 7) return '#a51d2d';
+  if (root === 2 || root === 5 || root === 8) return '#003f9e';
+  return '#111111';
+}
+
+function valueForCell(ring, index, divisions, anchorValue, increment) {
+  if (ring === 1) return index + 1;
+  if (ring === 2) return digitalRoot(index + 1);
+  return anchorValue
+    + ((ring - 3) * divisions + (index + 1) - divisions) * increment;
+}
+
+function displayValue(value) {
+  return Number.isInteger(value) ? value : Number(value.toFixed(4));
+}
+
+function layeredLine(ctx, from, to) {
+  [
+    { color: '#5d3200', width: 4.60 },
+    { color: '#a96708', width: 3.30 },
+    { color: '#d99b25', width: 2.15 },
+    { color: '#ffd978', width: 0.92 },
+    { color: '#fff7df', width: 0.28 },
+  ].forEach(({ color, width }) => {
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
     ctx.lineTo(to.x, to.y);
@@ -73,14 +102,53 @@ function layeredLine(ctx, from, to, layers) {
   });
 }
 
-function layeredCircle(ctx, cx, cy, radius, layers) {
-  layers.forEach(({ color, width }) => {
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, TWO_PI);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = width;
-    ctx.stroke();
+function redrawNumbers(ctx, geometry) {
+  const {
+    cx,
+    cy,
+    divisions,
+    direction,
+    sector,
+    northOffset,
+    boundaries,
+    ringWidths,
+    anchorValue,
+    increment,
+    appliedZoom,
+    fontFamily,
+    fontWeight,
+    fontSize,
+  } = geometry;
+
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  ctx.miterLimit = 2;
+
+  ringWidths.forEach((width, ringIndex) => {
+    const ring = ringIndex + 1;
+    const midRadius = boundaries[ringIndex] + width / 2;
+    const size = Math.max(10, fontSize * appliedZoom);
+    ctx.font = `${fontWeight} ${size}px ${fontFamily}`;
+
+    for (let index = 0; index < divisions; index += 1) {
+      const centerDegrees = northOffset + direction * (index + 0.5) * sector;
+      const point = polar(cx, cy, midRadius, centerDegrees);
+      const rawValue = valueForCell(ring, index, divisions, anchorValue, increment);
+      const shownValue = displayValue(rawValue);
+      const text = String(shownValue);
+
+      // Keep every number visually above the four rays without changing its position.
+      ctx.strokeStyle = '#fffaf0';
+      ctx.lineWidth = Math.max(1.4, 2.2 * appliedZoom);
+      ctx.strokeText(text, point.x, point.y);
+      ctx.fillStyle = numberColor(shownValue);
+      ctx.fillText(text, point.x, point.y);
+    }
   });
+
+  ctx.restore();
 }
 
 function draw(source = 'draw') {
@@ -120,6 +188,12 @@ function draw(source = 'draw') {
   const ctx = wheel.getContext('2d');
   if (!ctx) return false;
 
+  const anchorValue = numberParam('startValue', 3600);
+  const increment = numberParam('increment', 1);
+  const fontFamily = wheel.dataset.gannzillaNumberFontFamily || 'Arial';
+  const fontWeight = Number(wheel.dataset.gannzillaNumberWeight) || 700;
+  const fontSize = Number(wheel.dataset.gannzillaNumberFontSize) || 28;
+
   ctx.save();
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.globalCompositeOperation = 'source-over';
@@ -130,67 +204,41 @@ function draw(source = 'draw') {
   ctx.shadowBlur = 0;
   ctx.shadowColor = 'transparent';
 
-  boundaries.forEach((radius, index) => {
-    const edge = index === 0 || index === boundaries.length - 1;
-    layeredCircle(ctx, cx, cy, radius, edge ? [
-      { color: '#704000', width: 3.10 },
-      { color: '#c88418', width: 1.95 },
-      { color: '#ffe3a0', width: 0.54 },
-    ] : [
-      { color: '#a8782b', width: 1.46 },
-      { color: '#d9b45f', width: 0.84 },
-      { color: '#fff0c9', width: 0.26 },
-    ]);
-  });
-
-  const cardinalStep = divisions % 4 === 0 ? divisions / 4 : 0;
-  let emphasizedBoundaryCount = 0;
-
-  for (let index = 0; index < divisions; index += 1) {
-    const degrees = northOffset + direction * index * sector;
-    const existingCardinalBoundary = cardinalStep > 0 && index % cardinalStep === 0;
-
+  // Exactly four complete cardinal rays: 360/0, 90, 180 and 270 degrees.
+  [0, 90, 180, 270].forEach((degrees) => {
     layeredLine(
       ctx,
       polar(cx, cy, innerRadius, degrees),
       polar(cx, cy, outerRadius, degrees),
-      existingCardinalBoundary ? [
-        { color: '#613500', width: 3.35 },
-        { color: '#b8730c', width: 2.08 },
-        { color: '#ffd77b', width: 0.64 },
-        { color: '#fff7df', width: 0.22 },
-      ] : [
-        { color: '#a8782b', width: 1.34 },
-        { color: '#d9b45f', width: 0.76 },
-        { color: '#fff0c9', width: 0.23 },
-      ],
     );
+  });
 
-    if (existingCardinalBoundary) emphasizedBoundaryCount += 1;
-  }
-
-  layeredCircle(ctx, cx, cy, Math.max(2, innerRadius - 2.2), [
-    { color: '#4f2a00', width: 5.30 },
-    { color: '#a96808', width: 3.70 },
-    { color: '#e5ad38', width: 2.20 },
-    { color: '#ffe7a9', width: 0.72 },
-  ]);
-  layeredCircle(ctx, cx, cy, outerRadius + 2.4, [
-    { color: '#26343c', width: 6.20 },
-    { color: '#8999a2', width: 4.50 },
-    { color: '#d7e0e5', width: 3.10 },
-    { color: '#ffffff', width: 0.96 },
-  ]);
+  // Restore all numbers above the rays so no gold line cuts through the text.
+  redrawNumbers(ctx, {
+    cx,
+    cy,
+    divisions,
+    direction,
+    sector,
+    northOffset,
+    boundaries,
+    ringWidths,
+    anchorValue,
+    increment,
+    appliedZoom,
+    fontFamily,
+    fontWeight,
+    fontSize,
+  });
 
   ctx.restore();
 
-  wheel.dataset.gannzillaWheelIvoryChampagneFinalV684 = 'true';
-  wheel.dataset.gannzillaWheelRingCountV684 = String(boundaries.length);
-  wheel.dataset.gannzillaWheelSpokeCountV684 = String(divisions);
-  wheel.dataset.gannzillaWheelEmphasizedBoundaryCountV684 = String(emphasizedBoundaryCount);
-  wheel.dataset.gannzillaWheelExactCardinalOverlayRemovedV684 = 'true';
-  wheel.dataset.gannzillaWheelGeometryChangedV684 = 'false';
-  wheel.dataset.gannzillaWheelNumberLayoutChangedV684 = 'false';
+  wheel.dataset.gannzillaWheelFourCardinalGoldRaysV685 = 'true';
+  wheel.dataset.gannzillaWheelFourCardinalGoldRayCountV685 = '4';
+  wheel.dataset.gannzillaWheelCardinalAnglesV685 = '0,90,180,270';
+  wheel.dataset.gannzillaWheelNumbersRedrawnAboveRaysV685 = 'true';
+  wheel.dataset.gannzillaWheelGeometryChangedV685 = 'false';
+  wheel.dataset.gannzillaWheelNumberPositionsChangedV685 = 'false';
 
   applyCount += 1;
   lastApply = {
@@ -199,13 +247,13 @@ function draw(source = 'draw') {
     cssSize,
     dpr,
     divisions,
-    ringBoundaryCount: boundaries.length,
-    emphasizedBoundaryCount,
-    exactCardinalOverlayRemoved: true,
+    cardinalAngles: [0, 90, 180, 270],
+    cardinalRayCount: 4,
+    numbersRedrawnAboveRays: true,
     innerRadius,
     outerRadius,
     geometryChanged: false,
-    numberLayoutChanged: false,
+    numberPositionsChanged: false,
     at: Date.now(),
   };
   return true;
@@ -229,15 +277,15 @@ function install() {
     window.setTimeout(() => schedule(`boot-${delay}`), delay);
   });
 
-  window.GANNZILLA_WHEEL_IVORY_CHAMPAGNE_FINAL_AUTHORITY_V684 = true;
-  window.__auditGannzillaWheelIvoryChampagneFinalAuthorityV684 = () => {
+  window.GANNZILLA_WHEEL_FOUR_CARDINAL_GOLD_RAYS_V685 = true;
+  window.__auditGannzillaWheelFourCardinalGoldRaysV685 = () => {
     const wheel = findWheel();
     return {
       ok: wheel instanceof HTMLCanvasElement
-        && wheel.dataset.gannzillaWheelIvoryChampagneFinalV684 === 'true'
-        && Number(wheel.dataset.gannzillaWheelRingCountV684) > 1
-        && Number(wheel.dataset.gannzillaWheelSpokeCountV684) >= 4
-        && wheel.dataset.gannzillaWheelExactCardinalOverlayRemovedV684 === 'true',
+        && wheel.dataset.gannzillaWheelFourCardinalGoldRaysV685 === 'true'
+        && Number(wheel.dataset.gannzillaWheelFourCardinalGoldRayCountV685) === 4
+        && wheel.dataset.gannzillaWheelCardinalAnglesV685 === '0,90,180,270'
+        && wheel.dataset.gannzillaWheelNumbersRedrawnAboveRaysV685 === 'true',
       build: BUILD,
       enabled: enabled(),
       wheelFound: wheel instanceof HTMLCanvasElement,
@@ -246,7 +294,7 @@ function install() {
       recurringTimerActive: false,
       pendingFrame: Boolean(pendingFrame),
       geometryChanged: false,
-      numberLayoutChanged: false,
+      numberPositionsChanged: false,
       lastApply,
     };
   };
