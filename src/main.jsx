@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './components/GannTools/gannzillaCleanDragViewportV392';
 import './components/GannTools/gannzillaRemoveSideShapeBarV401';
-import './components/GannTools/gannzillaLightweightManualDragV683';
+import './components/GannTools/gannzillaUnifiedLightPanV684';
 import './components/GannTools/gannzillaKeyboardMouseControlV459';
 import './components/GannTools/gannzillaHideNativeWheelScrollbarsV417';
 import './components/GannTools/gannzillaFocusedCompactInterfaceV635';
