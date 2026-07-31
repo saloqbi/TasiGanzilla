@@ -1,5 +1,5 @@
-const BUILD = 683;
-const STATE_KEY = '__gannzillaWheelIvoryChampagneFinalAuthorityV683';
+const BUILD = 684;
+const STATE_KEY = '__gannzillaWheelIvoryChampagneFinalAuthorityV684';
 const FINAL_EVENT = 'gannzilla:final-wheel-authority-v506';
 const TWO_PI = Math.PI * 2;
 
@@ -133,43 +133,41 @@ function draw(source = 'draw') {
   boundaries.forEach((radius, index) => {
     const edge = index === 0 || index === boundaries.length - 1;
     layeredCircle(ctx, cx, cy, radius, edge ? [
-      { color: '#744300', width: 2.80 },
-      { color: '#c78318', width: 1.72 },
-      { color: '#ffe3a0', width: 0.48 },
+      { color: '#704000', width: 3.10 },
+      { color: '#c88418', width: 1.95 },
+      { color: '#ffe3a0', width: 0.54 },
     ] : [
-      { color: '#b88a39', width: 1.05 },
-      { color: '#e3c27b', width: 0.64 },
-      { color: '#fff3d4', width: 0.22 },
+      { color: '#a8782b', width: 1.46 },
+      { color: '#d9b45f', width: 0.84 },
+      { color: '#fff0c9', width: 0.26 },
     ]);
   });
 
+  const cardinalStep = divisions % 4 === 0 ? divisions / 4 : 0;
+  let emphasizedBoundaryCount = 0;
+
   for (let index = 0; index < divisions; index += 1) {
     const degrees = northOffset + direction * index * sector;
-    layeredLine(
-      ctx,
-      polar(cx, cy, innerRadius, degrees),
-      polar(cx, cy, outerRadius, degrees),
-      [
-        { color: '#b88a39', width: 1.02 },
-        { color: '#e3c27b', width: 0.62 },
-        { color: '#fff3d4', width: 0.20 },
-      ],
-    );
-  }
+    const existingCardinalBoundary = cardinalStep > 0 && index % cardinalStep === 0;
 
-  [0, 90, 180, 270].forEach((degrees) => {
     layeredLine(
       ctx,
       polar(cx, cy, innerRadius, degrees),
       polar(cx, cy, outerRadius, degrees),
-      [
-        { color: '#613500', width: 4.20 },
-        { color: '#b8730c', width: 2.72 },
-        { color: '#ffd77b', width: 0.88 },
-        { color: '#fff7df', width: 0.26 },
+      existingCardinalBoundary ? [
+        { color: '#613500', width: 3.35 },
+        { color: '#b8730c', width: 2.08 },
+        { color: '#ffd77b', width: 0.64 },
+        { color: '#fff7df', width: 0.22 },
+      ] : [
+        { color: '#a8782b', width: 1.34 },
+        { color: '#d9b45f', width: 0.76 },
+        { color: '#fff0c9', width: 0.23 },
       ],
     );
-  });
+
+    if (existingCardinalBoundary) emphasizedBoundaryCount += 1;
+  }
 
   layeredCircle(ctx, cx, cy, Math.max(2, innerRadius - 2.2), [
     { color: '#4f2a00', width: 5.30 },
@@ -186,12 +184,13 @@ function draw(source = 'draw') {
 
   ctx.restore();
 
-  wheel.dataset.gannzillaWheelIvoryChampagneFinalV683 = 'true';
-  wheel.dataset.gannzillaWheelRingCountV683 = String(boundaries.length);
-  wheel.dataset.gannzillaWheelSpokeCountV683 = String(divisions);
-  wheel.dataset.gannzillaWheelCardinalCountV683 = '4';
-  wheel.dataset.gannzillaWheelGeometryChangedV683 = 'false';
-  wheel.dataset.gannzillaWheelNumberLayoutChangedV683 = 'false';
+  wheel.dataset.gannzillaWheelIvoryChampagneFinalV684 = 'true';
+  wheel.dataset.gannzillaWheelRingCountV684 = String(boundaries.length);
+  wheel.dataset.gannzillaWheelSpokeCountV684 = String(divisions);
+  wheel.dataset.gannzillaWheelEmphasizedBoundaryCountV684 = String(emphasizedBoundaryCount);
+  wheel.dataset.gannzillaWheelExactCardinalOverlayRemovedV684 = 'true';
+  wheel.dataset.gannzillaWheelGeometryChangedV684 = 'false';
+  wheel.dataset.gannzillaWheelNumberLayoutChangedV684 = 'false';
 
   applyCount += 1;
   lastApply = {
@@ -201,7 +200,8 @@ function draw(source = 'draw') {
     dpr,
     divisions,
     ringBoundaryCount: boundaries.length,
-    cardinalCount: 4,
+    emphasizedBoundaryCount,
+    exactCardinalOverlayRemoved: true,
     innerRadius,
     outerRadius,
     geometryChanged: false,
@@ -229,15 +229,15 @@ function install() {
     window.setTimeout(() => schedule(`boot-${delay}`), delay);
   });
 
-  window.GANNZILLA_WHEEL_IVORY_CHAMPAGNE_FINAL_AUTHORITY_V683 = true;
-  window.__auditGannzillaWheelIvoryChampagneFinalAuthorityV683 = () => {
+  window.GANNZILLA_WHEEL_IVORY_CHAMPAGNE_FINAL_AUTHORITY_V684 = true;
+  window.__auditGannzillaWheelIvoryChampagneFinalAuthorityV684 = () => {
     const wheel = findWheel();
     return {
       ok: wheel instanceof HTMLCanvasElement
-        && wheel.dataset.gannzillaWheelIvoryChampagneFinalV683 === 'true'
-        && Number(wheel.dataset.gannzillaWheelRingCountV683) > 1
-        && Number(wheel.dataset.gannzillaWheelSpokeCountV683) >= 4
-        && Number(wheel.dataset.gannzillaWheelCardinalCountV683) === 4,
+        && wheel.dataset.gannzillaWheelIvoryChampagneFinalV684 === 'true'
+        && Number(wheel.dataset.gannzillaWheelRingCountV684) > 1
+        && Number(wheel.dataset.gannzillaWheelSpokeCountV684) >= 4
+        && wheel.dataset.gannzillaWheelExactCardinalOverlayRemovedV684 === 'true',
       build: BUILD,
       enabled: enabled(),
       wheelFound: wheel instanceof HTMLCanvasElement,
