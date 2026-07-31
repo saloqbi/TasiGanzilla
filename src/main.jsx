@@ -21,6 +21,7 @@ import './components/GannTools/gannzillaTopCenterDrawingToolbarV471';
 import './components/GannTools/gannzillaWheelColorToggleV511';
 import './components/GannTools/gannzillaSingleWheelCanvasGuardV475';
 import './components/GannTools/gannzillaClockwiseDirectionBridgeV483';
+import './components/GannTools/gannzillaNativeWheelIvoryChampagneV680';
 import './components/GannTools/gannzillaFinalWheelAuthorityV506';
 import './components/GannTools/gannzillaEmptyOuterRingV518';
 import './components/GannTools/gannzillaZodiacOuterRingV522';
