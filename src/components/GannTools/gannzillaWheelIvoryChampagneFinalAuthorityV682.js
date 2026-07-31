@@ -1,5 +1,5 @@
-const BUILD = 687;
-const STATE_KEY = '__gannzillaWheelFourIndexedGoldRaysV687';
+const BUILD = 688;
+const STATE_KEY = '__gannzillaWheelCardinalOutlineOnlyV688';
 const FINAL_EVENT = 'gannzilla:final-wheel-authority-v506';
 
 let applyCount = 0;
@@ -32,7 +32,7 @@ function enabled() {
   const wheelMode = query.get('gannzillaPro') === 'true' || query.get('wheelPro') === 'true';
   return wheelMode && (
     window.location.pathname === '/v672.html'
-    || booleanParam('wheelFourIndexedGoldRays', false)
+    || booleanParam('wheelCardinalOutlineOnly', false)
   );
 }
 
@@ -64,13 +64,13 @@ function polar(cx, cy, radius, degrees) {
   };
 }
 
-function drawGoldRay(ctx, from, to) {
+function drawGoldEdge(ctx, from, to) {
   [
-    { color: '#5d3200', width: 4.60 },
-    { color: '#a96708', width: 3.30 },
-    { color: '#d99b25', width: 2.15 },
-    { color: '#ffd978', width: 0.92 },
-    { color: '#fff7df', width: 0.28 },
+    { color: '#4f2900', width: 6.20 },
+    { color: '#8f5105', width: 4.65 },
+    { color: '#c98517', width: 3.15 },
+    { color: '#f0bd55', width: 1.60 },
+    { color: '#ffe6a8', width: 0.62 },
   ].forEach(({ color, width }) => {
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
@@ -81,13 +81,14 @@ function drawGoldRay(ctx, from, to) {
   });
 }
 
-function indexedCardinalSpokes(divisions) {
-  if (divisions === 36) return [0, 9, 18, 27];
-  if (divisions % 4 === 0) {
-    const step = divisions / 4;
-    return [0, step, step * 2, step * 3];
-  }
-  return [];
+function cardinalOutlineFrames(divisions) {
+  if (divisions < 4 || divisions % 4 !== 0) return [];
+  const halfSector = 180 / divisions;
+  return [0, 90, 180, 270].map((centerDegrees) => ({
+    centerDegrees,
+    leadingEdgeDegrees: centerDegrees - halfSector,
+    trailingEdgeDegrees: centerDegrees + halfSector,
+  }));
 }
 
 function draw(source = 'draw') {
@@ -105,10 +106,6 @@ function draw(source = 'draw') {
   const appliedZoom = Number(wheel.dataset.gannzillaAppliedZoom)
     || numberParam('gannzillaZoom', 1);
   const divisions = Math.max(4, Math.round(numberParam('divisions', 36)));
-  const clockwise = booleanParam('clockwise', true);
-  const direction = clockwise ? 1 : -1;
-  const sector = 360 / divisions;
-  const northOffset = direction * sector / 2;
 
   const innerRadiusSetting = numberParam('gannzillaInnerRadius', 279.32);
   const ringWidthSetting = numberParam('gannzillaRingWidth', 96.76);
@@ -120,13 +117,8 @@ function draw(source = 'draw') {
   if (!ringWidths.length) return false;
 
   const outerRadius = ringWidths.reduce((sum, width) => sum + width, innerRadius);
-  const indices = indexedCardinalSpokes(divisions);
-  if (indices.length !== 4) return false;
-
-  const boundaryDegrees = Array.from(
-    { length: divisions },
-    (_, index) => northOffset + direction * index * sector,
-  );
+  const frames = cardinalOutlineFrames(divisions);
+  if (frames.length !== 4) return false;
 
   const cx = cssSize / 2;
   const cy = cssSize / 2;
@@ -143,34 +135,46 @@ function draw(source = 'draw') {
   ctx.shadowBlur = 0;
   ctx.shadowColor = 'transparent';
 
-  const resolvedDegrees = indices.map((spokeIndex) => {
-    const degrees = boundaryDegrees[spokeIndex];
-    drawGoldRay(
+  frames.forEach(({ leadingEdgeDegrees, trailingEdgeDegrees }) => {
+    drawGoldEdge(
       ctx,
-      polar(cx, cy, innerRadius, degrees),
-      polar(cx, cy, outerRadius, degrees),
+      polar(cx, cy, innerRadius, leadingEdgeDegrees),
+      polar(cx, cy, outerRadius, leadingEdgeDegrees),
     );
-    return degrees;
+    drawGoldEdge(
+      ctx,
+      polar(cx, cy, innerRadius, trailingEdgeDegrees),
+      polar(cx, cy, outerRadius, trailingEdgeDegrees),
+    );
   });
 
   ctx.restore();
 
-  wheel.dataset.gannzillaWheelFourIndexedGoldRaysV687 = 'true';
-  wheel.dataset.gannzillaWheelCardinalIndicesV687 = indices.join(',');
-  wheel.dataset.gannzillaWheelResolvedDegreesV687 = resolvedDegrees.join(',');
-  wheel.dataset.gannzillaWheelFourIndexedGoldRayCountV687 = '4';
-  wheel.dataset.gannzillaWheelLateFinalPassV687 = source.includes('late') ? 'true' : 'false';
-  wheel.dataset.gannzillaWheelGeometryChangedV687 = 'false';
-  wheel.dataset.gannzillaWheelNumberLayoutChangedV687 = 'false';
+  const edgeDegrees = frames.flatMap(({ leadingEdgeDegrees, trailingEdgeDegrees }) => [
+    leadingEdgeDegrees,
+    trailingEdgeDegrees,
+  ]);
+
+  wheel.dataset.gannzillaWheelCardinalOutlineOnlyV688 = 'true';
+  wheel.dataset.gannzillaWheelCardinalCentersV688 = '0,90,180,270';
+  wheel.dataset.gannzillaWheelCardinalOutlineEdgeDegreesV688 = edgeDegrees.join(',');
+  wheel.dataset.gannzillaWheelCardinalOutlineFrameCountV688 = '4';
+  wheel.dataset.gannzillaWheelCardinalRadialEdgeCountV688 = '8';
+  wheel.dataset.gannzillaWheelCardinalInteriorFillV688 = 'none';
+  wheel.dataset.gannzillaWheelLateFinalPassV688 = source.includes('late') ? 'true' : 'false';
+  wheel.dataset.gannzillaWheelGeometryChangedV688 = 'false';
+  wheel.dataset.gannzillaWheelNumberLayoutChangedV688 = 'false';
 
   applyCount += 1;
   lastApply = {
     source,
     build: BUILD,
     divisions,
-    indices,
-    resolvedDegrees,
-    cardinalRayCount: 4,
+    cardinalCenters: [0, 90, 180, 270],
+    edgeDegrees,
+    outlineFrameCount: 4,
+    radialEdgeCount: 8,
+    interiorFill: 'none',
     lateFinalPass: source.includes('late'),
     innerRadius,
     outerRadius,
@@ -208,20 +212,25 @@ function install() {
 
   window.setTimeout(() => schedule('boot', [0, 320, 1200]), 0);
 
-  window.GANNZILLA_WHEEL_FOUR_INDEXED_GOLD_RAYS_V687 = true;
-  window.__auditGannzillaWheelFourIndexedGoldRaysV687 = () => {
+  window.GANNZILLA_WHEEL_CARDINAL_OUTLINE_ONLY_V688 = true;
+  window.__auditGannzillaWheelCardinalOutlineOnlyV688 = () => {
     const wheel = findWheel();
     return {
       ok: wheel instanceof HTMLCanvasElement
-        && wheel.dataset.gannzillaWheelFourIndexedGoldRaysV687 === 'true'
-        && wheel.dataset.gannzillaWheelCardinalIndicesV687 === '0,9,18,27'
-        && Number(wheel.dataset.gannzillaWheelFourIndexedGoldRayCountV687) === 4,
+        && wheel.dataset.gannzillaWheelCardinalOutlineOnlyV688 === 'true'
+        && wheel.dataset.gannzillaWheelCardinalCentersV688 === '0,90,180,270'
+        && Number(wheel.dataset.gannzillaWheelCardinalOutlineFrameCountV688) === 4
+        && Number(wheel.dataset.gannzillaWheelCardinalRadialEdgeCountV688) === 8
+        && wheel.dataset.gannzillaWheelCardinalInteriorFillV688 === 'none',
       build: BUILD,
       enabled: enabled(),
       wheelFound: wheel instanceof HTMLCanvasElement,
-      cardinalIndices: wheel?.dataset?.gannzillaWheelCardinalIndicesV687 || '',
-      resolvedDegrees: wheel?.dataset?.gannzillaWheelResolvedDegreesV687 || '',
-      lateFinalPass: wheel?.dataset?.gannzillaWheelLateFinalPassV687 === 'true',
+      cardinalCenters: wheel?.dataset?.gannzillaWheelCardinalCentersV688 || '',
+      edgeDegrees: wheel?.dataset?.gannzillaWheelCardinalOutlineEdgeDegreesV688 || '',
+      outlineFrameCount: Number(wheel?.dataset?.gannzillaWheelCardinalOutlineFrameCountV688 || 0),
+      radialEdgeCount: Number(wheel?.dataset?.gannzillaWheelCardinalRadialEdgeCountV688 || 0),
+      interiorFill: wheel?.dataset?.gannzillaWheelCardinalInteriorFillV688 || '',
+      lateFinalPass: wheel?.dataset?.gannzillaWheelLateFinalPassV688 === 'true',
       applyCount,
       observerActive: false,
       recurringTimerActive: false,
