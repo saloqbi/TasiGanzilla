@@ -46,10 +46,10 @@
       vector-effect: non-scaling-stroke;
     }
     .copper-ray-shadow {
-      stroke: #5C4032;
+      stroke: #6A4A3A;
       stroke-width: 5.2;
       stroke-linecap: round;
-      opacity: .92;
+      opacity: .86;
       vector-effect: non-scaling-stroke;
     }
     .copper-ray-metal {
@@ -62,7 +62,7 @@
       stroke: url(#roseCopperHighlight);
       stroke-width: 1.05;
       stroke-linecap: round;
-      opacity: .98;
+      opacity: .99;
       vector-effect: non-scaling-stroke;
     }
     .frame-shadow {
@@ -88,13 +88,13 @@
     .special-cell-fill {
       fill: url(#roseCopperCell);
       stroke: none;
-      opacity: .38;
+      opacity: .48;
     }
     .copper-arc-shadow {
       fill: none;
-      stroke: #5C4032;
+      stroke: #6A4A3A;
       stroke-width: 6.2;
-      opacity: .90;
+      opacity: .84;
       vector-effect: non-scaling-stroke;
     }
     .copper-arc-metal {
@@ -107,7 +107,7 @@
       fill: none;
       stroke: url(#roseCopperHighlight);
       stroke-width: 1.15;
-      opacity: .98;
+      opacity: .99;
       vector-effect: non-scaling-stroke;
     }
     .number-text {
@@ -163,27 +163,28 @@
 
       <linearGradient id="roseCopperCell" x1="0%" y1="0%" x2="100%" y2="0%">
         <stop offset="0%" stop-color="#8C6247" />
-        <stop offset="18%" stop-color="#B98B68" />
-        <stop offset="42%" stop-color="#E6D1C2" />
-        <stop offset="58%" stop-color="#D7C3B3" />
-        <stop offset="82%" stop-color="#B98B68" />
-        <stop offset="100%" stop-color="#5C4032" />
+        <stop offset="14%" stop-color="#C2A086" />
+        <stop offset="36%" stop-color="#F0DED2" />
+        <stop offset="50%" stop-color="#FFF8F3" />
+        <stop offset="64%" stop-color="#E6D1C2" />
+        <stop offset="84%" stop-color="#B98B68" />
+        <stop offset="100%" stop-color="#6A4938" />
       </linearGradient>
 
       <linearGradient id="roseCopperStroke" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="#5C4032" />
-        <stop offset="18%" stop-color="#8C6247" />
-        <stop offset="38%" stop-color="#B98B68" />
-        <stop offset="50%" stop-color="#E6D1C2" />
+        <stop offset="16%" stop-color="#8C6247" />
+        <stop offset="34%" stop-color="#C2A086" />
+        <stop offset="50%" stop-color="#F4E4DB" />
         <stop offset="66%" stop-color="#D7C3B3" />
         <stop offset="84%" stop-color="#B98B68" />
         <stop offset="100%" stop-color="#5C4032" />
       </linearGradient>
 
       <linearGradient id="roseCopperHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#E6D1C2" />
-        <stop offset="45%" stop-color="#D7C3B3" />
-        <stop offset="100%" stop-color="#8C6247" />
+        <stop offset="0%" stop-color="#FFFDFC" />
+        <stop offset="42%" stop-color="#F1E2D9" />
+        <stop offset="100%" stop-color="#B98B68" />
       </linearGradient>
     </defs>
 
@@ -385,14 +386,14 @@
         document.documentElement.dataset.logoReady = 'false';
       });
 
-      window.__auditKawkabatLogoWheelV10 = function () {
+      window.__auditKawkabatLogoWheelV11 = function () {
         return {
           ok: divisions.children.length === 36 && numbersRingOne.children.length === 36 && numbersRingTwo.children.length === 36,
-          build: 10,
+          build: 11,
           name: 'كود أول عجلة اللوجو بتنظيم',
           baseFrameColor: 'glossy-blue-steel',
-          specialColor: 'exact-satin-rose-bronze',
-          specialPalette: ['#E6D1C2', '#D7C3B3', '#B98B68', '#8C6247', '#5C4032'],
+          specialColor: 'satin-rose-bronze-high-contrast',
+          specialPalette: ['#FFF8F3', '#F0DED2', '#E6D1C2', '#C2A086', '#B98B68', '#8C6247', '#5C4032'],
           highlightedPairs: ['36/9', '9/9', '18/9', '27/9'],
           highlightedCellCount: 8,
           copperBoundaryRayCount: 8,
