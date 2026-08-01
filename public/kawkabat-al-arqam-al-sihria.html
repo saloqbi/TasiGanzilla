@@ -65,6 +65,25 @@
       opacity: .96;
       vector-effect: non-scaling-stroke;
     }
+    .number-text {
+      font-family: Arial, Tahoma, sans-serif;
+      font-weight: 800;
+      text-anchor: middle;
+      dominant-baseline: central;
+      direction: ltr;
+      unicode-bidi: bidi-override;
+      paint-order: stroke fill;
+      stroke: #E7CB84;
+      stroke-width: 1.05;
+      stroke-opacity: .72;
+      vector-effect: non-scaling-stroke;
+      filter: drop-shadow(0 1px 0 rgba(255,255,255,.82));
+    }
+    .ring-one-number { font-size: 28px; }
+    .ring-two-number { font-size: 29px; }
+    .number-red { fill: #B21F2D; }
+    .number-blue { fill: #174B98; }
+    .number-black { fill: #17191B; }
     #logoImage {
       opacity: 0;
       transition: opacity .18s linear;
@@ -113,15 +132,18 @@
     <circle class="frame-metal" cx="500" cy="500" r="180" />
     <circle class="frame-highlight" cx="500" cy="500" r="174" />
 
-    <!-- إطار الأرقام الأول -->
+    <!-- الإطار الثاني: الأرقام 1 إلى 36 -->
     <circle class="frame-shadow" cx="500" cy="500" r="290" />
     <circle class="frame-metal" cx="500" cy="500" r="290" />
     <circle class="frame-highlight" cx="500" cy="500" r="284" />
 
-    <!-- إطار الأرقام الثاني -->
+    <!-- الإطار الثالث: الاختزال الرقمي 1 إلى 9 -->
     <circle class="frame-shadow" cx="500" cy="500" r="400" />
     <circle class="frame-metal" cx="500" cy="500" r="400" />
     <circle class="frame-highlight" cx="500" cy="500" r="394" />
+
+    <g id="numbersRingOne" aria-label="تسلسل الأرقام من 1 إلى 36"></g>
+    <g id="numbersRingTwo" aria-label="تسلسل الاختزال الرقمي من 1 إلى 9"></g>
   </svg>
 
   <script>
@@ -130,12 +152,17 @@
 
       var SVG_NS = 'http://www.w3.org/2000/svg';
       var XLINK_NS = 'http://www.w3.org/1999/xlink';
-      var group = document.getElementById('divisions');
+      var divisions = document.getElementById('divisions');
+      var numbersRingOne = document.getElementById('numbersRingOne');
+      var numbersRingTwo = document.getElementById('numbersRingTwo');
       var logoImage = document.getElementById('logoImage');
       var cx = 500;
       var cy = 500;
       var innerRadius = 180;
+      var middleRadius = 290;
       var outerRadius = 400;
+      var ringOneTextRadius = (innerRadius + middleRadius) / 2;
+      var ringTwoTextRadius = (middleRadius + outerRadius) / 2;
 
       function appendRayLine(rayGroup, className, x1, y1, x2, y2) {
         var line = document.createElementNS(SVG_NS, 'line');
@@ -147,19 +174,41 @@
         rayGroup.appendChild(line);
       }
 
+      function numberColorClass(value) {
+        var remainder = value % 3;
+        if (remainder === 1) return 'number-red';
+        if (remainder === 2) return 'number-blue';
+        return 'number-black';
+      }
+
+      function appendNumber(group, value, angle, radius, ringClass) {
+        var text = document.createElementNS(SVG_NS, 'text');
+        text.setAttribute('x', String(cx + Math.cos(angle) * radius));
+        text.setAttribute('y', String(cy + Math.sin(angle) * radius));
+        text.setAttribute('class', 'number-text ' + ringClass + ' ' + numberColorClass(value));
+        text.textContent = String(value);
+        group.appendChild(text);
+      }
+
       for (var i = 0; i < 36; i += 1) {
-        var angle = ((i * 10) - 90) * Math.PI / 180;
-        var x1 = cx + Math.cos(angle) * innerRadius;
-        var y1 = cy + Math.sin(angle) * innerRadius;
-        var x2 = cx + Math.cos(angle) * outerRadius;
-        var y2 = cy + Math.sin(angle) * outerRadius;
+        var boundaryAngle = ((i * 10) - 90) * Math.PI / 180;
+        var centerAngle = ((i * 10) - 85) * Math.PI / 180;
+        var x1 = cx + Math.cos(boundaryAngle) * innerRadius;
+        var y1 = cy + Math.sin(boundaryAngle) * innerRadius;
+        var x2 = cx + Math.cos(boundaryAngle) * outerRadius;
+        var y2 = cy + Math.sin(boundaryAngle) * outerRadius;
         var rayGroup = document.createElementNS(SVG_NS, 'g');
         rayGroup.setAttribute('class', 'ray');
         rayGroup.setAttribute('data-ray-index', String(i));
         appendRayLine(rayGroup, 'ray-shadow', x1, y1, x2, y2);
         appendRayLine(rayGroup, 'ray-metal', x1, y1, x2, y2);
         appendRayLine(rayGroup, 'ray-highlight', x1, y1, x2, y2);
-        group.appendChild(rayGroup);
+        divisions.appendChild(rayGroup);
+
+        var fullValue = i + 1;
+        var digitalRootValue = (i % 9) + 1;
+        appendNumber(numbersRingOne, fullValue, centerAngle, ringOneTextRadius, 'ring-one-number');
+        appendNumber(numbersRingTwo, digitalRootValue, centerAngle, ringTwoTextRadius, 'ring-two-number');
       }
 
       var chunkBase = 'https://raw.githubusercontent.com/saloqbi/TasiGanzilla/main/public/kawkabat-logo-v1/chunk-';
@@ -183,20 +232,22 @@
         document.documentElement.dataset.logoReady = 'false';
       });
 
-      window.__auditKawkabatLogoWheelV3 = function () {
+      window.__auditKawkabatLogoWheelV4 = function () {
         return {
-          ok: group.children.length === 36,
-          build: 3,
+          ok: divisions.children.length === 36 && numbersRingOne.children.length === 36 && numbersRingTwo.children.length === 36,
+          build: 4,
           name: 'كود أول عجلة اللوجو بتنظيم',
           metallicColor: 'glossy-blue-steel',
-          rayCount: group.children.length,
+          approvedNumberColors: ['royal-red', 'royal-blue', 'charcoal-black', 'light-gold-accent'],
+          rayCount: divisions.children.length,
           rayLayers: 3,
-          rayVisibilityEnhanced: true,
+          ringTwoSequence: '1-36-clockwise',
+          ringThreeSequence: '1-9-digital-root-repeated-clockwise',
+          ringTwoNumberCount: numbersRingOne.children.length,
+          ringThreeNumberCount: numbersRingTwo.children.length,
           logoFrameRadius: 180,
           logoImageDiameter: 358,
           logoClippedToFrame: true,
-          numberRingOneCells: 36,
-          numberRingTwoCells: 36,
           background: '#F7F1E3',
           logoReady: document.documentElement.dataset.logoReady === 'true'
         };
