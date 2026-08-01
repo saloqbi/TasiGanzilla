@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — العجلة الثامنة</title>
+  <title>كوكبة الأرقام السحرية — العجلة التاسعة</title>
   <style>
     :root { background:#F7F1E3; }
     * { box-sizing:border-box; }
@@ -39,7 +39,7 @@
   </style>
 </head>
 <body>
-  <svg id="wheel" viewBox="0 0 4400 2400" role="img" aria-label="ثماني عجلات؛ أول عجلتين بالأرقام وست عجلات خارجية فارغة">
+  <svg id="wheel" viewBox="0 0 4400 2400" role="img" aria-label="تسع عجلات؛ أول عجلتين بالأرقام وسبع عجلات خارجية فارغة">
     <defs>
       <clipPath id="logoClip"><circle cx="2200" cy="1200" r="179" /></clipPath>
       <linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -72,8 +72,8 @@
       var NS='http://www.w3.org/2000/svg';
       var XLINK='http://www.w3.org/1999/xlink';
       var cx=2200, cy=1200;
-      var r0=180, r1=290, r2=400, r3=510, r4=620, r5=730, r6=840, r7=950, r8=1060;
-      var radii=[r0,r1,r2,r3,r4,r5,r6,r7,r8];
+      var r0=180, r1=290, r2=400, r3=510, r4=620, r5=730, r6=840, r7=950, r8=1060, r9=1170;
+      var radii=[r0,r1,r2,r3,r4,r5,r6,r7,r8,r9];
       var textR1=(r0+r1)/2;
       var textR2=(r1+r2)/2;
       var cardinal=[0,9,18,27];
@@ -105,12 +105,13 @@
         path(specialFills,'special-fill',sector(r5,r6,start,end));
         path(specialFills,'special-fill',sector(r6,r7,start,end));
         path(specialFills,'special-fill',sector(r7,r8,start,end));
+        path(specialFills,'special-fill',sector(r8,r9,start,end));
         radii.forEach(function(r){addSpecialArc(r,start,end);});
       });
       radii.forEach(addFrame);
       for(var i=0;i<36;i+=1){
         var deg=i*10-95;
-        var p1=polar(r0,deg),p2=polar(r8,deg);
+        var p1=polar(r0,deg),p2=polar(r9,deg);
         var special=Boolean(specialBoundary[i]);
         var g=document.createElementNS(NS,'g');
         g.setAttribute('data-ray-index',i);
@@ -126,7 +127,7 @@
       var base='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/main/public/kawkabat-logo-v1/chunk-';
       Promise.all([0,1,2,3,4].map(function(i){return fetch(base+i+'.txt',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('LOGO_CHUNK_HTTP_'+r.status);return r.text();});})).then(function(chunks){var src='data:image/webp;base64,'+chunks.join('').trim();logo.setAttribute('href',src);logo.setAttributeNS(XLINK,'href',src);document.documentElement.dataset.logoReady='true';}).catch(function(){document.documentElement.dataset.logoReady='false';});
       window.addEventListener('load',function(){var left=Math.max(0,(document.documentElement.scrollWidth-window.innerWidth)/2);var top=Math.max(0,(document.documentElement.scrollHeight-window.innerHeight)/2);window.scrollTo(left,top);},{once:true});
-      window.__auditKawkabatEightWheelsV1=function(){return{ok:divisions.children.length===36&&ringOne.children.length===36&&ringTwo.children.length===36,build:19,stageWidth:4400,stageHeight:2400,scrollbarThickness:8,wheelCount:8,thirdWheelEmpty:true,fourthWheelEmpty:true,fifthWheelEmpty:true,sixthWheelEmpty:true,seventhWheelEmpty:true,eighthWheelEmpty:true,eighthWheelCells:36,eighthWheelNumbers:0,radii:radii.slice(),baseColor:'glossy-blue-steel',specialColor:'satin-rose-bronze-high-contrast',highlightedDirections:['12','3','6','9'],logoReady:document.documentElement.dataset.logoReady==='true'};};
+      window.__auditKawkabatNineWheelsV1=function(){return{ok:divisions.children.length===36&&ringOne.children.length===36&&ringTwo.children.length===36,build:20,stageWidth:4400,stageHeight:2400,scrollbarThickness:8,wheelCount:9,thirdWheelEmpty:true,fourthWheelEmpty:true,fifthWheelEmpty:true,sixthWheelEmpty:true,seventhWheelEmpty:true,eighthWheelEmpty:true,ninthWheelEmpty:true,ninthWheelCells:36,ninthWheelNumbers:0,radii:radii.slice(),baseColor:'glossy-blue-steel',specialColor:'satin-rose-bronze-high-contrast',highlightedDirections:['12','3','6','9'],logoReady:document.documentElement.dataset.logoReady==='true'};};
     }());
   </script>
 </body>
