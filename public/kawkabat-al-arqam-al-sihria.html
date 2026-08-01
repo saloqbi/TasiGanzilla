@@ -45,6 +45,26 @@
       opacity: .98;
       vector-effect: non-scaling-stroke;
     }
+    .main-ray-shadow {
+      stroke: #39464F;
+      stroke-width: 9.2;
+      stroke-linecap: round;
+      opacity: .94;
+      vector-effect: non-scaling-stroke;
+    }
+    .main-ray-metal {
+      stroke: url(#silverMainStroke);
+      stroke-width: 6.2;
+      stroke-linecap: round;
+      vector-effect: non-scaling-stroke;
+    }
+    .main-ray-highlight {
+      stroke: url(#silverMainHighlight);
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      opacity: .99;
+      vector-effect: non-scaling-stroke;
+    }
     .frame-shadow {
       fill: none;
       stroke: #263943;
@@ -68,6 +88,7 @@
     .number-text {
       font-family: Arial, Tahoma, sans-serif;
       font-weight: 800;
+      font-variant-numeric: tabular-nums;
       text-anchor: middle;
       dominant-baseline: central;
       direction: ltr;
@@ -81,6 +102,7 @@
     }
     .ring-one-number { font-size: 24px; }
     .ring-two-number { font-size: 29px; }
+    .cardinal-number { font-weight: 900; }
     .number-red { fill: #B21F2D; }
     .number-blue { fill: #174B98; }
     .number-black { fill: #17191B; }
@@ -112,6 +134,22 @@
         <stop offset="0%" stop-color="#F1FBFF" />
         <stop offset="42%" stop-color="#9AD7ED" />
         <stop offset="100%" stop-color="#557685" />
+      </linearGradient>
+
+      <linearGradient id="silverMainStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#4C5962" />
+        <stop offset="15%" stop-color="#9DABB4" />
+        <stop offset="34%" stop-color="#F8FCFE" />
+        <stop offset="50%" stop-color="#CBD6DC" />
+        <stop offset="68%" stop-color="#7E8E98" />
+        <stop offset="86%" stop-color="#EEF5F8" />
+        <stop offset="100%" stop-color="#52606A" />
+      </linearGradient>
+
+      <linearGradient id="silverMainHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FFFFFF" />
+        <stop offset="45%" stop-color="#EAF8FF" />
+        <stop offset="100%" stop-color="#9AAAB3" />
       </linearGradient>
     </defs>
 
@@ -160,15 +198,21 @@
       var outerRadius = 400;
       var ringOneTextRadius = (innerRadius + middleRadius) / 2;
       var ringTwoTextRadius = (middleRadius + outerRadius) / 2;
+      var silverBoundaryIndices = {
+        0: true, 1: true,
+        9: true, 10: true,
+        18: true, 19: true,
+        27: true, 28: true
+      };
 
-      function appendRayLine(rayGroup, className, x1, y1, x2, y2) {
+      function appendLine(group, className, x1, y1, x2, y2) {
         var line = document.createElementNS(SVG_NS, 'line');
         line.setAttribute('x1', String(x1));
         line.setAttribute('y1', String(y1));
         line.setAttribute('x2', String(x2));
         line.setAttribute('y2', String(y2));
         line.setAttribute('class', className);
-        rayGroup.appendChild(line);
+        group.appendChild(line);
       }
 
       function numberColorClass(value) {
@@ -178,34 +222,47 @@
         return 'number-black';
       }
 
-      function appendNumber(group, value, angle, radius, ringClass) {
+      function appendNumber(group, value, angle, radius, ringClass, isCardinal) {
         var text = document.createElementNS(SVG_NS, 'text');
         text.setAttribute('x', String(cx + Math.cos(angle) * radius));
         text.setAttribute('y', String(cy + Math.sin(angle) * radius));
-        text.setAttribute('class', 'number-text ' + ringClass + ' ' + numberColorClass(value));
+        text.setAttribute(
+          'class',
+          'number-text ' + ringClass + ' ' + numberColorClass(value) + (isCardinal ? ' cardinal-number' : '')
+        );
         text.textContent = String(value);
         group.appendChild(text);
       }
 
       for (var i = 0; i < 36; i += 1) {
-        var boundaryAngle = ((i * 10) - 90) * Math.PI / 180;
-        var centerAngle = ((i * 10) - 85) * Math.PI / 180;
+        var boundaryAngle = ((i * 10) - 95) * Math.PI / 180;
+        var centerAngle = ((i * 10) - 90) * Math.PI / 180;
         var x1 = cx + Math.cos(boundaryAngle) * innerRadius;
         var y1 = cy + Math.sin(boundaryAngle) * innerRadius;
         var x2 = cx + Math.cos(boundaryAngle) * outerRadius;
         var y2 = cy + Math.sin(boundaryAngle) * outerRadius;
         var rayGroup = document.createElementNS(SVG_NS, 'g');
-        rayGroup.setAttribute('class', 'ray');
+        var isSilverBoundary = Boolean(silverBoundaryIndices[i]);
+        rayGroup.setAttribute('class', isSilverBoundary ? 'ray main-ray' : 'ray');
         rayGroup.setAttribute('data-ray-index', String(i));
-        appendRayLine(rayGroup, 'ray-shadow', x1, y1, x2, y2);
-        appendRayLine(rayGroup, 'ray-metal', x1, y1, x2, y2);
-        appendRayLine(rayGroup, 'ray-highlight', x1, y1, x2, y2);
+        rayGroup.setAttribute('data-main-silver', String(isSilverBoundary));
+
+        if (isSilverBoundary) {
+          appendLine(rayGroup, 'main-ray-shadow', x1, y1, x2, y2);
+          appendLine(rayGroup, 'main-ray-metal', x1, y1, x2, y2);
+          appendLine(rayGroup, 'main-ray-highlight', x1, y1, x2, y2);
+        } else {
+          appendLine(rayGroup, 'ray-shadow', x1, y1, x2, y2);
+          appendLine(rayGroup, 'ray-metal', x1, y1, x2, y2);
+          appendLine(rayGroup, 'ray-highlight', x1, y1, x2, y2);
+        }
         divisions.appendChild(rayGroup);
 
-        var fullValue = i + 1;
-        var digitalRootValue = (i % 9) + 1;
-        appendNumber(numbersRingOne, fullValue, centerAngle, ringOneTextRadius, 'ring-one-number');
-        appendNumber(numbersRingTwo, digitalRootValue, centerAngle, ringTwoTextRadius, 'ring-two-number');
+        var fullValue = i === 0 ? 36 : i;
+        var digitalRootValue = i % 9 === 0 ? 9 : i % 9;
+        var isCardinalCell = i % 9 === 0;
+        appendNumber(numbersRingOne, fullValue, centerAngle, ringOneTextRadius, 'ring-one-number', isCardinalCell);
+        appendNumber(numbersRingTwo, digitalRootValue, centerAngle, ringTwoTextRadius, 'ring-two-number', isCardinalCell);
       }
 
       var chunkBase = 'https://raw.githubusercontent.com/saloqbi/TasiGanzilla/main/public/kawkabat-logo-v1/chunk-';
@@ -215,7 +272,9 @@
 
       Promise.all(chunkUrls.map(function (url) {
         return fetch(url, { cache: 'no-store' }).then(function (response) {
-          if (!response.ok) throw new Error('LOGO_CHUNK_HTTP_' + response.status);
+          if (!response.ok) {
+            throw new Error('LOGO_CHUNK_HTTP_' + response.status);
+          }
           return response.text();
         });
       })).then(function (chunks) {
@@ -233,18 +292,18 @@
           build: 5,
           name: 'كود أول عجلة اللوجو بتنظيم',
           metallicColor: 'glossy-blue-steel',
-          approvedNumberColors: ['royal-red', 'royal-blue', 'charcoal-black', 'light-gold-accent'],
-          ringOneFontSizePx: 24,
-          ringTwoFontSizePx: 29,
-          rayCount: divisions.children.length,
-          rayLayers: 3,
-          ringTwoSequence: '1-36-clockwise',
-          ringThreeSequence: '1-9-digital-root-repeated-clockwise',
-          ringTwoNumberCount: numbersRingOne.children.length,
-          ringThreeNumberCount: numbersRingTwo.children.length,
-          logoFrameRadius: 180,
-          logoImageDiameter: 358,
-          logoClippedToFrame: true,
+          mainRayColor: 'glossy-silver',
+          mainSilverBoundaryCount: 8,
+          mainSilverWedges: 4,
+          cardinalAlignment: {
+            twelve: '36/9',
+            three: '9/9',
+            six: '18/9',
+            nine: '27/9'
+          },
+          ringOneFontSize: 24,
+          ringTwoFontSize: 29,
+          cardinalFontWeight: 900,
           background: '#F7F1E3',
           logoReady: document.documentElement.dataset.logoReady === 'true'
         };
