@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية</title>
+  <title>كود أول عجلة اللوجو بتنظيم</title>
   <style>
     :root { background: #F7F1E3; }
     * { box-sizing: border-box; }
@@ -41,13 +41,35 @@
       stroke-width: 1;
       vector-effect: non-scaling-stroke;
     }
+    #logoImage {
+      opacity: 0;
+      transition: opacity .18s linear;
+    }
+    html[data-logo-ready="true"] #logoImage { opacity: 1; }
   </style>
 </head>
 <body>
-  <svg id="wheel" viewBox="0 0 1000 1000" role="img" aria-label="إطار شعار فارغ وحلقتان فارغتان مقسمتان إلى 36 خلية">
+  <svg id="wheel" viewBox="0 0 1000 1000" role="img" aria-label="كود أول عجلة اللوجو بتنظيم">
+    <defs>
+      <clipPath id="logoClip">
+        <circle cx="500" cy="500" r="179" />
+      </clipPath>
+    </defs>
+
     <g id="divisions"></g>
 
-    <!-- إطار الشعار الفارغ -->
+    <!-- الشعار يملأ الإطار الأول حتى حد الدائرة -->
+    <image
+      id="logoImage"
+      x="321"
+      y="321"
+      width="358"
+      height="358"
+      preserveAspectRatio="xMidYMid slice"
+      clip-path="url(#logoClip)"
+    />
+
+    <!-- إطار الشعار -->
     <circle class="frame-line" cx="500" cy="500" r="180" />
     <circle class="frame-highlight" cx="500" cy="500" r="174" />
 
@@ -65,7 +87,9 @@
       'use strict';
 
       var SVG_NS = 'http://www.w3.org/2000/svg';
+      var XLINK_NS = 'http://www.w3.org/1999/xlink';
       var group = document.getElementById('divisions');
+      var logoImage = document.getElementById('logoImage');
       var cx = 500;
       var cy = 500;
       var innerRadius = 180;
@@ -82,14 +106,39 @@
         group.appendChild(line);
       }
 
-      window.__auditKawkabatThreeEmptyFramesV1 = function () {
+      var chunkBase = 'https://raw.githubusercontent.com/saloqbi/TasiGanzilla/main/public/kawkabat-logo-v1/chunk-';
+      var chunkUrls = [0, 1, 2, 3, 4].map(function (index) {
+        return chunkBase + index + '.txt';
+      });
+
+      Promise.all(chunkUrls.map(function (url) {
+        return fetch(url, { cache: 'no-store' }).then(function (response) {
+          if (!response.ok) {
+            throw new Error('LOGO_CHUNK_HTTP_' + response.status);
+          }
+          return response.text();
+        });
+      })).then(function (chunks) {
+        var source = 'data:image/webp;base64,' + chunks.join('').trim();
+        logoImage.setAttribute('href', source);
+        logoImage.setAttributeNS(XLINK_NS, 'href', source);
+        document.documentElement.dataset.logoReady = 'true';
+      }).catch(function () {
+        document.documentElement.dataset.logoReady = 'false';
+      });
+
+      window.__auditKawkabatLogoWheelV1 = function () {
         return {
           ok: group.children.length === 36,
-          logoFrameEmpty: true,
+          build: 1,
+          name: 'كود أول عجلة اللوجو بتنظيم',
+          logoFrameRadius: 180,
+          logoImageDiameter: 358,
+          logoClippedToFrame: true,
           numberRingOneCells: 36,
           numberRingTwoCells: 36,
           background: '#F7F1E3',
-          externalDependencies: 0
+          logoReady: document.documentElement.dataset.logoReady === 'true'
         };
       };
     }());
