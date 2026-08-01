@@ -45,6 +45,26 @@
       opacity: .98;
       vector-effect: non-scaling-stroke;
     }
+    .copper-ray-shadow {
+      stroke: #5D2412;
+      stroke-width: 5.2;
+      stroke-linecap: round;
+      opacity: .94;
+      vector-effect: non-scaling-stroke;
+    }
+    .copper-ray-metal {
+      stroke: url(#roseCopperStroke);
+      stroke-width: 3.35;
+      stroke-linecap: round;
+      vector-effect: non-scaling-stroke;
+    }
+    .copper-ray-highlight {
+      stroke: url(#roseCopperHighlight);
+      stroke-width: 1.05;
+      stroke-linecap: round;
+      opacity: .99;
+      vector-effect: non-scaling-stroke;
+    }
     .frame-shadow {
       fill: none;
       stroke: #263943;
@@ -63,6 +83,31 @@
       stroke: url(#blueSteelHighlight);
       stroke-width: 1.5;
       opacity: .96;
+      vector-effect: non-scaling-stroke;
+    }
+    .special-cell-fill {
+      fill: url(#roseCopperCell);
+      stroke: none;
+      opacity: .96;
+    }
+    .copper-arc-shadow {
+      fill: none;
+      stroke: #5D2412;
+      stroke-width: 6.2;
+      opacity: .92;
+      vector-effect: non-scaling-stroke;
+    }
+    .copper-arc-metal {
+      fill: none;
+      stroke: url(#roseCopperStroke);
+      stroke-width: 4.1;
+      vector-effect: non-scaling-stroke;
+    }
+    .copper-arc-highlight {
+      fill: none;
+      stroke: url(#roseCopperHighlight);
+      stroke-width: 1.15;
+      opacity: .99;
       vector-effect: non-scaling-stroke;
     }
     .number-text {
@@ -115,8 +160,34 @@
         <stop offset="42%" stop-color="#9AD7ED" />
         <stop offset="100%" stop-color="#557685" />
       </linearGradient>
+
+      <linearGradient id="roseCopperCell" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#8A3A22" />
+        <stop offset="18%" stop-color="#D37B58" />
+        <stop offset="42%" stop-color="#FFF1E6" />
+        <stop offset="58%" stop-color="#F5B18F" />
+        <stop offset="82%" stop-color="#C96845" />
+        <stop offset="100%" stop-color="#7A2F19" />
+      </linearGradient>
+
+      <linearGradient id="roseCopperStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#5F2411" />
+        <stop offset="18%" stop-color="#A94D2C" />
+        <stop offset="38%" stop-color="#F4A47D" />
+        <stop offset="50%" stop-color="#FFF2E6" />
+        <stop offset="66%" stop-color="#D87955" />
+        <stop offset="84%" stop-color="#F0A17A" />
+        <stop offset="100%" stop-color="#682813" />
+      </linearGradient>
+
+      <linearGradient id="roseCopperHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FFF8F2" />
+        <stop offset="45%" stop-color="#FFD8C1" />
+        <stop offset="100%" stop-color="#B65332" />
+      </linearGradient>
     </defs>
 
+    <g id="specialCellFills"></g>
     <g id="divisions"></g>
 
     <image
@@ -141,6 +212,7 @@
     <circle class="frame-metal" cx="500" cy="500" r="400" />
     <circle class="frame-highlight" cx="500" cy="500" r="394" />
 
+    <g id="specialCellArcs"></g>
     <g id="numbersRingOne" aria-label="تسلسل الأرقام من 1 إلى 36"></g>
     <g id="numbersRingTwo" aria-label="تسلسل الاختزال الرقمي من 1 إلى 9"></g>
   </svg>
@@ -152,6 +224,8 @@
       var SVG_NS = 'http://www.w3.org/2000/svg';
       var XLINK_NS = 'http://www.w3.org/1999/xlink';
       var divisions = document.getElementById('divisions');
+      var specialCellFills = document.getElementById('specialCellFills');
+      var specialCellArcs = document.getElementById('specialCellArcs');
       var numbersRingOne = document.getElementById('numbersRingOne');
       var numbersRingTwo = document.getElementById('numbersRingTwo');
       var logoImage = document.getElementById('logoImage');
@@ -162,6 +236,21 @@
       var outerRadius = 400;
       var ringOneTextRadius = (innerRadius + middleRadius) / 2;
       var ringTwoTextRadius = (middleRadius + outerRadius) / 2;
+      var cardinalCellIndices = [0, 9, 18, 27];
+      var copperBoundaryIndices = {
+        0: true, 1: true,
+        9: true, 10: true,
+        18: true, 19: true,
+        27: true, 28: true
+      };
+
+      function polar(radius, degrees) {
+        var radians = degrees * Math.PI / 180;
+        return {
+          x: cx + Math.cos(radians) * radius,
+          y: cy + Math.sin(radians) * radius
+        };
+      }
 
       function appendLine(group, className, x1, y1, x2, y2) {
         var line = document.createElementNS(SVG_NS, 'line');
@@ -171,6 +260,40 @@
         line.setAttribute('y2', String(y2));
         line.setAttribute('class', className);
         group.appendChild(line);
+      }
+
+      function annularSectorPath(inner, outer, startDeg, endDeg) {
+        var outerStart = polar(outer, startDeg);
+        var outerEnd = polar(outer, endDeg);
+        var innerEnd = polar(inner, endDeg);
+        var innerStart = polar(inner, startDeg);
+        return [
+          'M', outerStart.x, outerStart.y,
+          'A', outer, outer, 0, 0, 1, outerEnd.x, outerEnd.y,
+          'L', innerEnd.x, innerEnd.y,
+          'A', inner, inner, 0, 0, 0, innerStart.x, innerStart.y,
+          'Z'
+        ].join(' ');
+      }
+
+      function arcPath(radius, startDeg, endDeg) {
+        var start = polar(radius, startDeg);
+        var end = polar(radius, endDeg);
+        return ['M', start.x, start.y, 'A', radius, radius, 0, 0, 1, end.x, end.y].join(' ');
+      }
+
+      function appendPath(group, className, d) {
+        var path = document.createElementNS(SVG_NS, 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('class', className);
+        group.appendChild(path);
+      }
+
+      function appendCopperArc(radius, startDeg, endDeg) {
+        var d = arcPath(radius, startDeg, endDeg);
+        appendPath(specialCellArcs, 'copper-arc-shadow', d);
+        appendPath(specialCellArcs, 'copper-arc-metal', d);
+        appendPath(specialCellArcs, 'copper-arc-highlight', d);
       }
 
       function numberColorClass(value) {
@@ -192,6 +315,26 @@
         group.appendChild(text);
       }
 
+      cardinalCellIndices.forEach(function (index) {
+        var startDeg = (index * 10) - 95;
+        var endDeg = (index * 10) - 85;
+
+        appendPath(
+          specialCellFills,
+          'special-cell-fill',
+          annularSectorPath(innerRadius, middleRadius, startDeg, endDeg)
+        );
+        appendPath(
+          specialCellFills,
+          'special-cell-fill',
+          annularSectorPath(middleRadius, outerRadius, startDeg, endDeg)
+        );
+
+        appendCopperArc(innerRadius, startDeg, endDeg);
+        appendCopperArc(middleRadius, startDeg, endDeg);
+        appendCopperArc(outerRadius, startDeg, endDeg);
+      });
+
       for (var i = 0; i < 36; i += 1) {
         var boundaryAngle = ((i * 10) - 95) * Math.PI / 180;
         var centerAngle = ((i * 10) - 90) * Math.PI / 180;
@@ -200,11 +343,20 @@
         var x2 = cx + Math.cos(boundaryAngle) * outerRadius;
         var y2 = cy + Math.sin(boundaryAngle) * outerRadius;
         var rayGroup = document.createElementNS(SVG_NS, 'g');
-        rayGroup.setAttribute('class', 'ray');
+        var isCopperBoundary = Boolean(copperBoundaryIndices[i]);
+        rayGroup.setAttribute('class', isCopperBoundary ? 'ray copper-ray' : 'ray');
         rayGroup.setAttribute('data-ray-index', String(i));
-        appendLine(rayGroup, 'ray-shadow', x1, y1, x2, y2);
-        appendLine(rayGroup, 'ray-metal', x1, y1, x2, y2);
-        appendLine(rayGroup, 'ray-highlight', x1, y1, x2, y2);
+        rayGroup.setAttribute('data-copper-boundary', String(isCopperBoundary));
+
+        if (isCopperBoundary) {
+          appendLine(rayGroup, 'copper-ray-shadow', x1, y1, x2, y2);
+          appendLine(rayGroup, 'copper-ray-metal', x1, y1, x2, y2);
+          appendLine(rayGroup, 'copper-ray-highlight', x1, y1, x2, y2);
+        } else {
+          appendLine(rayGroup, 'ray-shadow', x1, y1, x2, y2);
+          appendLine(rayGroup, 'ray-metal', x1, y1, x2, y2);
+          appendLine(rayGroup, 'ray-highlight', x1, y1, x2, y2);
+        }
         divisions.appendChild(rayGroup);
 
         var fullValue = i === 0 ? 36 : i;
@@ -233,24 +385,20 @@
         document.documentElement.dataset.logoReady = 'false';
       });
 
-      window.__auditKawkabatLogoWheelV7 = function () {
+      window.__auditKawkabatLogoWheelV8 = function () {
         return {
           ok: divisions.children.length === 36 && numbersRingOne.children.length === 36 && numbersRingTwo.children.length === 36,
-          build: 7,
+          build: 8,
           name: 'كود أول عجلة اللوجو بتنظيم',
-          frameColor: 'glossy-blue-steel',
-          rayColor: 'glossy-blue-steel',
-          specialSilverRays: 0,
-          copperElements: 0,
-          cardinalAlignment: {
-            twelve: '36/9',
-            three: '9/9',
-            six: '18/9',
-            nine: '27/9'
-          },
+          baseFrameColor: 'glossy-blue-steel',
+          specialColor: 'glossy-rose-copper',
+          highlightedPairs: ['36/9', '9/9', '18/9', '27/9'],
+          highlightedCellCount: 8,
+          copperBoundaryRayCount: 8,
+          copperArcCount: 36,
+          cell28Highlighted: false,
           ringOneFontSize: 24,
           ringTwoFontSize: 29,
-          cardinalFontWeight: 900,
           background: '#F7F1E3',
           logoReady: document.documentElement.dataset.logoReady === 'true'
         };
