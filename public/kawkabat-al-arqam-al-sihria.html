@@ -3,15 +3,48 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — مساحة عرض موسعة</title>
+  <title>كوكبة الأرقام السحرية — مساحة أفقية موسعة</title>
   <style>
     :root { background:#F7F1E3; }
     * { box-sizing:border-box; }
-    html,body { margin:0; width:100%; height:100%; overflow:auto; background:#F7F1E3; }
-    body { min-width:2400px; min-height:2400px; display:grid; place-items:center; padding:0; }
+    html,body {
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:auto;
+      background:#F7F1E3;
+      scrollbar-width:thin;
+      scrollbar-color:#858585 #F7F1E3;
+    }
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
+      width:8px;
+      height:8px;
+    }
+    html::-webkit-scrollbar-track,
+    body::-webkit-scrollbar-track {
+      background:#F7F1E3;
+    }
+    html::-webkit-scrollbar-thumb,
+    body::-webkit-scrollbar-thumb {
+      background:#858585;
+      border:2px solid #F7F1E3;
+      border-radius:999px;
+    }
+    html::-webkit-scrollbar-corner,
+    body::-webkit-scrollbar-corner {
+      background:#F7F1E3;
+    }
+    body {
+      min-width:4400px;
+      min-height:2400px;
+      display:grid;
+      place-items:center;
+      padding:0;
+    }
     svg {
       display:block;
-      width:2160px;
+      width:3960px;
       height:2160px;
       max-width:none;
       max-height:none;
@@ -56,9 +89,9 @@
   </style>
 </head>
 <body>
-  <svg id="wheel" viewBox="0 0 2400 2400" role="img" aria-label="ثلاث عجلات في مساحة عرض موسعة قابلة للتمرير">
+  <svg id="wheel" viewBox="0 0 4400 2400" role="img" aria-label="ثلاث عجلات في مساحة عرض موسعة شرقًا وغربًا">
     <defs>
-      <clipPath id="logoClip"><circle cx="1200" cy="1200" r="179" /></clipPath>
+      <clipPath id="logoClip"><circle cx="2200" cy="1200" r="179" /></clipPath>
       <linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="#20333D"/>
         <stop offset="18%" stop-color="#6F8793"/>
@@ -101,7 +134,7 @@
     <g id="specialFills"></g>
     <g id="divisions"></g>
 
-    <image id="logoImage" x="1021" y="1021" width="358" height="358"
+    <image id="logoImage" x="2021" y="1021" width="358" height="358"
       preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)" />
 
     <g id="frames"></g>
@@ -116,7 +149,7 @@
 
       var NS = 'http://www.w3.org/2000/svg';
       var XLINK = 'http://www.w3.org/1999/xlink';
-      var cx = 1200, cy = 1200;
+      var cx = 2200, cy = 1200;
       var r0 = 180, r1 = 290, r2 = 400, r3 = 510;
       var radii = [r0, r1, r2, r3];
       var textR1 = (r0 + r1) / 2;
@@ -249,11 +282,15 @@
         window.scrollTo(left, top);
       }, { once:true });
 
-      window.__auditKawkabatExpandedStageV1 = function () {
+      window.__auditKawkabatExpandedStageV2 = function () {
         return {
           ok: divisions.children.length===36 && ringOne.children.length===36 && ringTwo.children.length===36,
-          build:13,
-          stageSize:2400,
+          build:14,
+          stageWidth:4400,
+          stageHeight:2400,
+          horizontalStageExpanded:true,
+          verticalStagePreserved:true,
+          scrollbarThickness:8,
           stageScrollable:true,
           wheelScalePreserved:true,
           wheelCount:3,
