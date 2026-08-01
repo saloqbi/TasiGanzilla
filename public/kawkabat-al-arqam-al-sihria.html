@@ -23,22 +23,31 @@
       display: block;
       width: min(94vw, 900px);
       height: min(94vh, 900px);
+      filter: drop-shadow(0 7px 14px rgba(35, 57, 68, .24));
     }
     .cell-line {
-      stroke: #A87922;
-      stroke-width: 1.45;
+      stroke: url(#blueSteelStroke);
+      stroke-width: 1.65;
       vector-effect: non-scaling-stroke;
     }
-    .frame-line {
+    .frame-shadow {
       fill: none;
-      stroke: #8B621A;
-      stroke-width: 2.4;
+      stroke: #263943;
+      stroke-width: 7.4;
+      opacity: .82;
+      vector-effect: non-scaling-stroke;
+    }
+    .frame-metal {
+      fill: none;
+      stroke: url(#blueSteelStroke);
+      stroke-width: 5.2;
       vector-effect: non-scaling-stroke;
     }
     .frame-highlight {
       fill: none;
-      stroke: #D6AE56;
-      stroke-width: 1;
+      stroke: url(#blueSteelHighlight);
+      stroke-width: 1.5;
+      opacity: .96;
       vector-effect: non-scaling-stroke;
     }
     #logoImage {
@@ -54,11 +63,26 @@
       <clipPath id="logoClip">
         <circle cx="500" cy="500" r="179" />
       </clipPath>
+
+      <linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#20333D" />
+        <stop offset="18%" stop-color="#6F8793" />
+        <stop offset="36%" stop-color="#DDE8EC" />
+        <stop offset="50%" stop-color="#8AA0AA" />
+        <stop offset="68%" stop-color="#4D6875" />
+        <stop offset="84%" stop-color="#B9D4DE" />
+        <stop offset="100%" stop-color="#263B46" />
+      </linearGradient>
+
+      <linearGradient id="blueSteelHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#F1FBFF" />
+        <stop offset="42%" stop-color="#9AD7ED" />
+        <stop offset="100%" stop-color="#557685" />
+      </linearGradient>
     </defs>
 
     <g id="divisions"></g>
 
-    <!-- الشعار يملأ الإطار الأول حتى حد الدائرة -->
     <image
       id="logoImage"
       x="321"
@@ -70,15 +94,18 @@
     />
 
     <!-- إطار الشعار -->
-    <circle class="frame-line" cx="500" cy="500" r="180" />
+    <circle class="frame-shadow" cx="500" cy="500" r="180" />
+    <circle class="frame-metal" cx="500" cy="500" r="180" />
     <circle class="frame-highlight" cx="500" cy="500" r="174" />
 
     <!-- إطار الأرقام الأول -->
-    <circle class="frame-line" cx="500" cy="500" r="290" />
+    <circle class="frame-shadow" cx="500" cy="500" r="290" />
+    <circle class="frame-metal" cx="500" cy="500" r="290" />
     <circle class="frame-highlight" cx="500" cy="500" r="284" />
 
     <!-- إطار الأرقام الثاني -->
-    <circle class="frame-line" cx="500" cy="500" r="400" />
+    <circle class="frame-shadow" cx="500" cy="500" r="400" />
+    <circle class="frame-metal" cx="500" cy="500" r="400" />
     <circle class="frame-highlight" cx="500" cy="500" r="394" />
   </svg>
 
@@ -127,11 +154,12 @@
         document.documentElement.dataset.logoReady = 'false';
       });
 
-      window.__auditKawkabatLogoWheelV1 = function () {
+      window.__auditKawkabatLogoWheelV2 = function () {
         return {
           ok: group.children.length === 36,
-          build: 1,
+          build: 2,
           name: 'كود أول عجلة اللوجو بتنظيم',
+          metallicColor: 'glossy-blue-steel',
           logoFrameRadius: 180,
           logoImageDiameter: 358,
           logoClippedToFrame: true,
