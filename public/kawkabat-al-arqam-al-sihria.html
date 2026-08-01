@@ -79,7 +79,7 @@
       vector-effect: non-scaling-stroke;
       filter: drop-shadow(0 1px 0 rgba(255,255,255,.82));
     }
-    .ring-one-number { font-size: 28px; }
+    .ring-one-number { font-size: 24px; }
     .ring-two-number { font-size: 29px; }
     .number-red { fill: #B21F2D; }
     .number-blue { fill: #174B98; }
@@ -127,17 +127,14 @@
       clip-path="url(#logoClip)"
     />
 
-    <!-- إطار الشعار -->
     <circle class="frame-shadow" cx="500" cy="500" r="180" />
     <circle class="frame-metal" cx="500" cy="500" r="180" />
     <circle class="frame-highlight" cx="500" cy="500" r="174" />
 
-    <!-- الإطار الثاني: الأرقام 1 إلى 36 -->
     <circle class="frame-shadow" cx="500" cy="500" r="290" />
     <circle class="frame-metal" cx="500" cy="500" r="290" />
     <circle class="frame-highlight" cx="500" cy="500" r="284" />
 
-    <!-- الإطار الثالث: الاختزال الرقمي 1 إلى 9 -->
     <circle class="frame-shadow" cx="500" cy="500" r="400" />
     <circle class="frame-metal" cx="500" cy="500" r="400" />
     <circle class="frame-highlight" cx="500" cy="500" r="394" />
@@ -218,9 +215,7 @@
 
       Promise.all(chunkUrls.map(function (url) {
         return fetch(url, { cache: 'no-store' }).then(function (response) {
-          if (!response.ok) {
-            throw new Error('LOGO_CHUNK_HTTP_' + response.status);
-          }
+          if (!response.ok) throw new Error('LOGO_CHUNK_HTTP_' + response.status);
           return response.text();
         });
       })).then(function (chunks) {
@@ -232,13 +227,15 @@
         document.documentElement.dataset.logoReady = 'false';
       });
 
-      window.__auditKawkabatLogoWheelV4 = function () {
+      window.__auditKawkabatLogoWheelV5 = function () {
         return {
           ok: divisions.children.length === 36 && numbersRingOne.children.length === 36 && numbersRingTwo.children.length === 36,
-          build: 4,
+          build: 5,
           name: 'كود أول عجلة اللوجو بتنظيم',
           metallicColor: 'glossy-blue-steel',
           approvedNumberColors: ['royal-red', 'royal-blue', 'charcoal-black', 'light-gold-accent'],
+          ringOneFontSizePx: 24,
+          ringTwoFontSizePx: 29,
           rayCount: divisions.children.length,
           rayLayers: 3,
           ringTwoSequence: '1-36-clockwise',
