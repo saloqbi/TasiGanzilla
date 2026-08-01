@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — العجلة الحادية عشرة</title>
+  <title>كوكبة الأرقام السحرية — العجلة الثانية عشرة</title>
   <style>
     :root { background:#F7F1E3; }
     * { box-sizing:border-box; }
@@ -26,7 +26,7 @@
     html::-webkit-scrollbar-corner,body::-webkit-scrollbar-corner { background:#F7F1E3; }
     body {
       min-width:4400px;
-      min-height:2800px;
+      min-height:3200px;
       display:grid;
       place-items:center;
       padding:0;
@@ -34,7 +34,7 @@
     svg {
       display:block;
       width:3960px;
-      height:2520px;
+      height:2880px;
       max-width:none;
       max-height:none;
       filter:drop-shadow(0 8px 16px rgba(35,57,68,.24));
@@ -78,9 +78,9 @@
   </style>
 </head>
 <body>
-  <svg id="wheel" viewBox="0 0 4400 2800" role="img" aria-label="إحدى عشرة عجلة؛ أول عجلتين بالأرقام وتسع عجلات خارجية فارغة">
+  <svg id="wheel" viewBox="0 0 4400 3200" role="img" aria-label="اثنتا عشرة عجلة؛ أول عجلتين بالأرقام وعشر عجلات خارجية فارغة">
     <defs>
-      <clipPath id="logoClip"><circle cx="2200" cy="1400" r="179" /></clipPath>
+      <clipPath id="logoClip"><circle cx="2200" cy="1600" r="179" /></clipPath>
       <linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="#20333D"/><stop offset="18%" stop-color="#6F8793"/><stop offset="36%" stop-color="#DDE8EC"/><stop offset="50%" stop-color="#8AA0AA"/><stop offset="68%" stop-color="#4D6875"/><stop offset="84%" stop-color="#B9D4DE"/><stop offset="100%" stop-color="#263B46"/>
       </linearGradient>
@@ -100,7 +100,7 @@
 
     <g id="specialFills"></g>
     <g id="divisions"></g>
-    <image id="logoImage" x="2021" y="1221" width="358" height="358" preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)" />
+    <image id="logoImage" x="2021" y="1421" width="358" height="358" preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)" />
     <g id="frames"></g>
     <g id="specialArcs"></g>
     <g id="numbersRingOne"></g>
@@ -110,17 +110,19 @@
   <script>
     (function () {
       'use strict';
-
       var NS='http://www.w3.org/2000/svg';
       var XLINK='http://www.w3.org/1999/xlink';
-      var cx=2200, cy=1400;
+      var cx=2200, cy=1600;
       var radii=[];
-      for (var radiusIndex=0; radiusIndex<=11; radiusIndex+=1) {
+      for (var radiusIndex=0; radiusIndex<=12; radiusIndex+=1) {
         radii.push(180 + (radiusIndex * 110));
       }
-      var r0=radii[0], r1=radii[1], r2=radii[2], r11=radii[11];
-      var textR1=(r0+r1)/2;
-      var textR2=(r1+r2)/2;
+      var innerRadius=radii[0];
+      var secondRadius=radii[1];
+      var thirdRadius=radii[2];
+      var outerRadius=radii[radii.length-1];
+      var textR1=(innerRadius+secondRadius)/2;
+      var textR2=(secondRadius+thirdRadius)/2;
       var cardinal=[0,9,18,27];
       var specialBoundary={0:true,1:true,9:true,10:true,18:true,19:true,27:true,28:true};
       var divisions=document.getElementById('divisions');
@@ -131,68 +133,30 @@
       var ringTwo=document.getElementById('numbersRingTwo');
       var logo=document.getElementById('logoImage');
 
-      function polar(r,deg){
-        var a=deg*Math.PI/180;
-        return {x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};
-      }
-      function line(group,cls,x1,y1,x2,y2){
-        var el=document.createElementNS(NS,'line');
-        el.setAttribute('x1',x1); el.setAttribute('y1',y1);
-        el.setAttribute('x2',x2); el.setAttribute('y2',y2);
-        el.setAttribute('class',cls); group.appendChild(el);
-      }
-      function path(group,cls,d){
-        var el=document.createElementNS(NS,'path');
-        el.setAttribute('d',d); el.setAttribute('class',cls); group.appendChild(el);
-      }
-      function circle(group,cls,r){
-        var el=document.createElementNS(NS,'circle');
-        el.setAttribute('cx',cx); el.setAttribute('cy',cy); el.setAttribute('r',r);
-        el.setAttribute('class',cls); group.appendChild(el);
-      }
-      function sector(inner,outer,start,end){
-        var os=polar(outer,start), oe=polar(outer,end), ie=polar(inner,end), is=polar(inner,start);
-        return ['M',os.x,os.y,'A',outer,outer,0,0,1,oe.x,oe.y,'L',ie.x,ie.y,'A',inner,inner,0,0,0,is.x,is.y,'Z'].join(' ');
-      }
-      function arc(r,start,end){
-        var s=polar(r,start),e=polar(r,end);
-        return ['M',s.x,s.y,'A',r,r,0,0,1,e.x,e.y].join(' ');
-      }
-      function addFrame(r){
-        circle(frames,'frame-shadow',r);
-        circle(frames,'frame-metal',r);
-        circle(frames,'frame-highlight',r-6);
-      }
-      function addSpecialArc(r,start,end){
-        var d=arc(r,start,end);
-        path(specialArcs,'special-arc-shadow',d);
-        path(specialArcs,'special-arc-metal',d);
-        path(specialArcs,'special-arc-highlight',d);
-      }
-      function colorClass(v){
-        var m=v%3;
-        return m===1?'number-red':(m===2?'number-blue':'number-black');
-      }
-      function addNumber(group,value,angle,r,ringClass,isCardinal){
-        var p=polar(r,angle), t=document.createElementNS(NS,'text');
-        t.setAttribute('x',p.x); t.setAttribute('y',p.y);
-        t.setAttribute('class','number-text '+ringClass+' '+colorClass(value)+(isCardinal?' cardinal-number':''));
-        t.textContent=value; group.appendChild(t);
-      }
+      function polar(r,deg){var a=deg*Math.PI/180;return{x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};}
+      function line(group,cls,x1,y1,x2,y2){var el=document.createElementNS(NS,'line');el.setAttribute('x1',x1);el.setAttribute('y1',y1);el.setAttribute('x2',x2);el.setAttribute('y2',y2);el.setAttribute('class',cls);group.appendChild(el);}
+      function path(group,cls,d){var el=document.createElementNS(NS,'path');el.setAttribute('d',d);el.setAttribute('class',cls);group.appendChild(el);}
+      function circle(group,cls,r){var el=document.createElementNS(NS,'circle');el.setAttribute('cx',cx);el.setAttribute('cy',cy);el.setAttribute('r',r);el.setAttribute('class',cls);group.appendChild(el);}
+      function sector(inner,outer,start,end){var os=polar(outer,start),oe=polar(outer,end),ie=polar(inner,end),is=polar(inner,start);return['M',os.x,os.y,'A',outer,outer,0,0,1,oe.x,oe.y,'L',ie.x,ie.y,'A',inner,inner,0,0,0,is.x,is.y,'Z'].join(' ');}
+      function arc(r,start,end){var s=polar(r,start),e=polar(r,end);return['M',s.x,s.y,'A',r,r,0,0,1,e.x,e.y].join(' ');}
+      function addFrame(r){circle(frames,'frame-shadow',r);circle(frames,'frame-metal',r);circle(frames,'frame-highlight',r-6);}
+      function addSpecialArc(r,start,end){var d=arc(r,start,end);path(specialArcs,'special-arc-shadow',d);path(specialArcs,'special-arc-metal',d);path(specialArcs,'special-arc-highlight',d);}
+      function colorClass(v){var m=v%3;return m===1?'number-red':(m===2?'number-blue':'number-black');}
+      function addNumber(group,value,angle,r,ringClass,isCardinal){var p=polar(r,angle),t=document.createElementNS(NS,'text');t.setAttribute('x',p.x);t.setAttribute('y',p.y);t.setAttribute('class','number-text '+ringClass+' '+colorClass(value)+(isCardinal?' cardinal-number':''));t.textContent=value;group.appendChild(t);}
 
       cardinal.forEach(function(i){
-        var start=i*10-95, end=i*10-85;
-        for (var ringIndex=0; ringIndex<radii.length-1; ringIndex+=1) {
+        var start=i*10-95,end=i*10-85;
+        for(var ringIndex=0;ringIndex<radii.length-1;ringIndex+=1){
           path(specialFills,'special-fill',sector(radii[ringIndex],radii[ringIndex+1],start,end));
         }
-        radii.forEach(function(r){ addSpecialArc(r,start,end); });
+        radii.forEach(function(r){addSpecialArc(r,start,end);});
       });
 
       radii.forEach(addFrame);
 
       for(var i=0;i<36;i+=1){
         var deg=i*10-95;
-        var p1=polar(r0,deg), p2=polar(r11,deg);
+        var p1=polar(innerRadius,deg),p2=polar(outerRadius,deg);
         var special=Boolean(specialBoundary[i]);
         var g=document.createElementNS(NS,'g');
         g.setAttribute('data-ray-index',i);
@@ -200,13 +164,12 @@
           line(g,'special-ray-shadow',p1.x,p1.y,p2.x,p2.y);
           line(g,'special-ray-metal',p1.x,p1.y,p2.x,p2.y);
           line(g,'special-ray-highlight',p1.x,p1.y,p2.x,p2.y);
-        } else {
+        }else{
           line(g,'ray-shadow',p1.x,p1.y,p2.x,p2.y);
           line(g,'ray-metal',p1.x,p1.y,p2.x,p2.y);
           line(g,'ray-highlight',p1.x,p1.y,p2.x,p2.y);
         }
         divisions.appendChild(g);
-
         var centerDeg=i*10-90;
         var full=i===0?36:i;
         var root=i%9===0?9:i%9;
@@ -216,46 +179,30 @@
       }
 
       var base='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/main/public/kawkabat-logo-v1/chunk-';
-      Promise.all([0,1,2,3,4].map(function(i){
-        return fetch(base+i+'.txt',{cache:'no-store'}).then(function(r){
-          if(!r.ok) throw new Error('LOGO_CHUNK_HTTP_'+r.status);
-          return r.text();
-        });
-      })).then(function(chunks){
-        var src='data:image/webp;base64,'+chunks.join('').trim();
-        logo.setAttribute('href',src);
-        logo.setAttributeNS(XLINK,'href',src);
-        document.documentElement.dataset.logoReady='true';
-      }).catch(function(){
-        document.documentElement.dataset.logoReady='false';
-      });
+      Promise.all([0,1,2,3,4].map(function(i){return fetch(base+i+'.txt',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('LOGO_CHUNK_HTTP_'+r.status);return r.text();});})).then(function(chunks){var src='data:image/webp;base64,'+chunks.join('').trim();logo.setAttribute('href',src);logo.setAttributeNS(XLINK,'href',src);document.documentElement.dataset.logoReady='true';}).catch(function(){document.documentElement.dataset.logoReady='false';});
 
-      window.addEventListener('load',function(){
-        var left=Math.max(0,(document.documentElement.scrollWidth-window.innerWidth)/2);
-        var top=Math.max(0,(document.documentElement.scrollHeight-window.innerHeight)/2);
-        window.scrollTo(left,top);
-      },{once:true});
+      window.addEventListener('load',function(){var left=Math.max(0,(document.documentElement.scrollWidth-window.innerWidth)/2);var top=Math.max(0,(document.documentElement.scrollHeight-window.innerHeight)/2);window.scrollTo(left,top);},{once:true});
 
-      window.__auditKawkabatElevenWheelsV1=function(){
-        return {
-          ok:divisions.children.length===36 && ringOne.children.length===36 && ringTwo.children.length===36,
-          build:22,
-          stageWidth:4400,
-          stageHeight:2800,
-          scrollbarThickness:8,
-          wheelCount:11,
-          numberedWheelCount:2,
-          emptyOuterWheelCount:9,
-          eleventhWheelEmpty:true,
-          eleventhWheelCells:36,
-          eleventhWheelNumbers:0,
-          radii:radii.slice(),
-          baseColor:'glossy-blue-steel',
-          specialColor:'satin-rose-bronze-high-contrast',
-          highlightedDirections:['12','3','6','9'],
-          logoReady:document.documentElement.dataset.logoReady==='true'
-        };
-      };
+      window.__auditKawkabatTwelveWheelsV1=function(){return{
+        ok:divisions.children.length===36&&ringOne.children.length===36&&ringTwo.children.length===36,
+        build:23,
+        stageWidth:4400,
+        stageHeight:3200,
+        scrollbarThickness:8,
+        wheelCount:12,
+        numberedWheelCount:2,
+        emptyOuterWheelCount:10,
+        twelfthWheelEmpty:true,
+        twelfthWheelCells:36,
+        twelfthWheelNumbers:0,
+        ringWidth:110,
+        outerRadius:outerRadius,
+        radii:radii.slice(),
+        baseColor:'glossy-blue-steel',
+        specialColor:'satin-rose-bronze-high-contrast',
+        highlightedDirections:['12','3','6','9'],
+        logoReady:document.documentElement.dataset.logoReady==='true'
+      };};
     }());
   </script>
 </body>
