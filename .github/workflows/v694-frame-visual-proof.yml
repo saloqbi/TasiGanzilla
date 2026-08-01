@@ -15,11 +15,13 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
-      - name: Show browser
+      - name: Show runtime
         run: |
-          google-chrome --version || chromium --version || chromium-browser --version
+          google-chrome --version
+          node --version
+          npm --version
 
       - name: Wait for production page
         shell: bash
@@ -37,36 +39,100 @@ jobs:
           done
           exit 1
 
-      - name: Capture full visual proof
+      - name: Install browser driver
+        run: npm install --no-save --ignore-scripts puppeteer-core@24.15.0
+
+      - name: Capture and audit production frame
         shell: bash
         run: |
           set -euo pipefail
-          browser="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
-          set +e
-          timeout 75s "$browser" \
-            --headless=new \
-            --no-sandbox \
-            --disable-gpu \
-            --disable-dev-shm-usage \
-            --disable-background-networking \
-            --disable-renderer-backgrounding \
-            --hide-scrollbars \
-            --force-device-scale-factor=1 \
-            --window-size=1920,1800 \
-            --virtual-time-budget=18000 \
-            --run-all-compositor-stages-before-draw \
-            --screenshot=frame-visual-proof.png \
-            'https://tasi-ganzilla.vercel.app/v672.html?v=694-visual-proof-20260801'
-          status=$?
-          set -e
-          echo "Browser exit status: $status"
+          cat > /tmp/capture-frame.mjs <<'EOF'
+          import puppeteer from 'puppeteer-core';
+          import fs from 'node:fs';
+
+          const browser = await puppeteer.launch({
+            executablePath: '/usr/bin/google-chrome',
+            headless: true,
+            args: [
+              '--no-sandbox',
+              '--disable-gpu',
+              '--disable-dev-shm-usage',
+              '--disable-background-networking',
+              '--hide-scrollbars'
+            ]
+          });
+
+          try {
+            const page = await browser.newPage();
+            await page.setViewport({ width: 1920, height: 1800, deviceScaleFactor: 1 });
+            await page.goto(
+              'https://tasi-ganzilla.vercel.app/v672.html?v=694-visual-proof-20260801',
+              { waitUntil: 'domcontentloaded', timeout: 90000 }
+            );
+            await new Promise((resolve) => setTimeout(resolve, 25000));
+
+            const audit = await page.evaluate(() => {
+              const overlay = document.getElementById('gannzilla-exact-reference-frame-v693');
+              const wheel = Array.from(document.querySelectorAll('canvas'))
+                .filter((canvas) => canvas.width > 300 && canvas.height > 300 && !canvas.closest('aside'))
+                .sort((a, b) => {
+                  const ar = a.getBoundingClientRect();
+                  const br = b.getBoundingClientRect();
+                  return (br.width * br.height) - (ar.width * ar.height);
+                })[0] || null;
+              const overlayRect = overlay?.getBoundingClientRect?.() || null;
+              const wheelRect = wheel?.getBoundingClientRect?.() || null;
+              return {
+                href: location.href,
+                title: document.title,
+                hook: typeof window.__auditGannzillaV694DocumentPrototypeFrameHook === 'function'
+                  ? window.__auditGannzillaV694DocumentPrototypeFrameHook()
+                  : null,
+                runtime: typeof window.__auditGannzillaExactReferenceFrameV693 === 'function'
+                  ? window.__auditGannzillaExactReferenceFrameV693()
+                  : null,
+                overlay: overlay ? {
+                  connected: overlay.isConnected,
+                  complete: overlay.complete,
+                  naturalWidth: overlay.naturalWidth,
+                  naturalHeight: overlay.naturalHeight,
+                  display: getComputedStyle(overlay).display,
+                  visibility: getComputedStyle(overlay).visibility,
+                  opacity: getComputedStyle(overlay).opacity,
+                  rect: overlayRect ? {
+                    left: overlayRect.left,
+                    top: overlayRect.top,
+                    width: overlayRect.width,
+                    height: overlayRect.height
+                  } : null
+                } : null,
+                wheel: wheelRect ? {
+                  left: wheelRect.left,
+                  top: wheelRect.top,
+                  width: wheelRect.width,
+                  height: wheelRect.height
+                } : null
+              };
+            });
+
+            fs.writeFileSync('frame-audit.json', JSON.stringify(audit, null, 2));
+            await page.screenshot({ path: 'frame-visual-proof.png', fullPage: false });
+            console.log(JSON.stringify(audit, null, 2));
+          } finally {
+            await browser.close();
+          }
+          EOF
+          node /tmp/capture-frame.mjs
           test -s frame-visual-proof.png
+          test -s frame-audit.json
           file frame-visual-proof.png
 
       - name: Upload visual proof
         uses: actions/upload-artifact@v4
         with:
           name: v694-frame-visual-proof
-          path: frame-visual-proof.png
+          path: |
+            frame-visual-proof.png
+            frame-audit.json
           if-no-files-found: error
           retention-days: 2
