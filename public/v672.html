@@ -14,6 +14,44 @@
 <body style="margin:0;background:#eef3f5;font-family:Arial,sans-serif">
   <div id="loading" style="display:grid;place-items:center;height:100vh;color:#22313a;font-weight:700">جارٍ فتح TASI Gannzilla V672…</div>
   <script>
+    (function () {
+      var pathname = window.location.pathname || '/v672.html';
+      var slash = pathname.lastIndexOf('/');
+      var basePath = pathname.slice(0, slash + 1) || '/';
+      if (basePath === '/') return;
+
+      var canonicalPath = basePath + 'v672.html';
+      var rawReplaceState = window.history.replaceState.bind(window.history);
+      var rawPushState = window.history.pushState.bind(window.history);
+      var rawFetch = window.fetch.bind(window);
+
+      function mapUrl(url) {
+        if (url === undefined || url === null || url === '') return url;
+        try {
+          var parsed = new URL(String(url), window.location.origin);
+          if (parsed.origin === window.location.origin && parsed.pathname === '/v672.html') {
+            return canonicalPath + parsed.search + parsed.hash;
+          }
+        } catch (_) {}
+        return url;
+      }
+
+      window.history.replaceState = function (state, title, url) {
+        return rawReplaceState(state, title, mapUrl(url));
+      };
+      window.history.pushState = function (state, title, url) {
+        return rawPushState(state, title, mapUrl(url));
+      };
+      window.fetch = function (input, init) {
+        if (typeof input === 'string' && input.charAt(0) === '/' && input.charAt(1) !== '/') {
+          input = basePath + input.slice(1);
+        }
+        return rawFetch(input, init);
+      };
+
+      window.__gannzillaStaticBasePath = basePath;
+    }());
+
     window.__gannzillaOrnateFrameDirectV723 = { disabledBy: 'exact-double-thickness-native-frame-v729' };
     window.__gannzillaNativeOrnateFrameV724 = { disabledBy: 'exact-double-thickness-native-frame-v729' };
     window.__gannzillaLargeNativeOrnateFrameV725 = { disabledBy: 'exact-double-thickness-native-frame-v729' };
@@ -21,8 +59,8 @@
     window.__gannzillaBalancedThickNativeFrameLoaderV727 = { disabledBy: 'exact-double-thickness-native-frame-v729' };
     window.__gannzillaReferenceProportionNativeFrameLoaderV728 = { disabledBy: 'exact-double-thickness-native-frame-v729' };
   </script>
-  <script src="/v672-short-lock.js?v=729-exact-double-thickness-frame"></script>
-  <script src="/v672-bootstrap.js?v=729-exact-double-thickness-frame"></script>
-  <script src="/v729-exact-double-thickness-native-frame.js?v=729-exact-double-thickness-frame"></script>
+  <script src="./v672-short-lock.js?v=729-exact-double-thickness-frame"></script>
+  <script src="./v672-bootstrap.js?v=729-exact-double-thickness-frame"></script>
+  <script src="./v729-exact-double-thickness-native-frame.js?v=729-exact-double-thickness-frame"></script>
 </body>
 </html>
