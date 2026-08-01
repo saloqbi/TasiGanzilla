@@ -25,9 +25,24 @@
       height: min(94vh, 900px);
       filter: drop-shadow(0 7px 14px rgba(35, 57, 68, .24));
     }
-    .cell-line {
+    .ray-shadow {
+      stroke: #263943;
+      stroke-width: 4.4;
+      stroke-linecap: round;
+      opacity: .88;
+      vector-effect: non-scaling-stroke;
+    }
+    .ray-metal {
       stroke: url(#blueSteelStroke);
-      stroke-width: 1.65;
+      stroke-width: 2.7;
+      stroke-linecap: round;
+      vector-effect: non-scaling-stroke;
+    }
+    .ray-highlight {
+      stroke: url(#blueSteelHighlight);
+      stroke-width: .85;
+      stroke-linecap: round;
+      opacity: .98;
       vector-effect: non-scaling-stroke;
     }
     .frame-shadow {
@@ -122,15 +137,29 @@
       var innerRadius = 180;
       var outerRadius = 400;
 
+      function appendRayLine(rayGroup, className, x1, y1, x2, y2) {
+        var line = document.createElementNS(SVG_NS, 'line');
+        line.setAttribute('x1', String(x1));
+        line.setAttribute('y1', String(y1));
+        line.setAttribute('x2', String(x2));
+        line.setAttribute('y2', String(y2));
+        line.setAttribute('class', className);
+        rayGroup.appendChild(line);
+      }
+
       for (var i = 0; i < 36; i += 1) {
         var angle = ((i * 10) - 90) * Math.PI / 180;
-        var line = document.createElementNS(SVG_NS, 'line');
-        line.setAttribute('x1', String(cx + Math.cos(angle) * innerRadius));
-        line.setAttribute('y1', String(cy + Math.sin(angle) * innerRadius));
-        line.setAttribute('x2', String(cx + Math.cos(angle) * outerRadius));
-        line.setAttribute('y2', String(cy + Math.sin(angle) * outerRadius));
-        line.setAttribute('class', 'cell-line');
-        group.appendChild(line);
+        var x1 = cx + Math.cos(angle) * innerRadius;
+        var y1 = cy + Math.sin(angle) * innerRadius;
+        var x2 = cx + Math.cos(angle) * outerRadius;
+        var y2 = cy + Math.sin(angle) * outerRadius;
+        var rayGroup = document.createElementNS(SVG_NS, 'g');
+        rayGroup.setAttribute('class', 'ray');
+        rayGroup.setAttribute('data-ray-index', String(i));
+        appendRayLine(rayGroup, 'ray-shadow', x1, y1, x2, y2);
+        appendRayLine(rayGroup, 'ray-metal', x1, y1, x2, y2);
+        appendRayLine(rayGroup, 'ray-highlight', x1, y1, x2, y2);
+        group.appendChild(rayGroup);
       }
 
       var chunkBase = 'https://raw.githubusercontent.com/saloqbi/TasiGanzilla/main/public/kawkabat-logo-v1/chunk-';
@@ -154,12 +183,15 @@
         document.documentElement.dataset.logoReady = 'false';
       });
 
-      window.__auditKawkabatLogoWheelV2 = function () {
+      window.__auditKawkabatLogoWheelV3 = function () {
         return {
           ok: group.children.length === 36,
-          build: 2,
+          build: 3,
           name: 'كود أول عجلة اللوجو بتنظيم',
           metallicColor: 'glossy-blue-steel',
+          rayCount: group.children.length,
+          rayLayers: 3,
+          rayVisibilityEnhanced: true,
           logoFrameRadius: 180,
           logoImageDiameter: 358,
           logoClippedToFrame: true,
