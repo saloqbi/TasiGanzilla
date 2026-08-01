@@ -45,44 +45,24 @@
       opacity: .98;
       vector-effect: non-scaling-stroke;
     }
-    .main-ray-shadow {
-      stroke: #39464F;
-      stroke-width: 9.2;
-      stroke-linecap: round;
-      opacity: .94;
-      vector-effect: non-scaling-stroke;
-    }
-    .main-ray-metal {
-      stroke: url(#silverMainStroke);
-      stroke-width: 6.2;
-      stroke-linecap: round;
-      vector-effect: non-scaling-stroke;
-    }
-    .main-ray-highlight {
-      stroke: url(#silverMainHighlight);
-      stroke-width: 1.9;
-      stroke-linecap: round;
-      opacity: .99;
-      vector-effect: non-scaling-stroke;
-    }
     .frame-shadow {
       fill: none;
-      stroke: #5B260B;
+      stroke: #263943;
       stroke-width: 7.4;
-      opacity: .90;
+      opacity: .82;
       vector-effect: non-scaling-stroke;
     }
     .frame-metal {
       fill: none;
-      stroke: url(#copperFrameStroke);
+      stroke: url(#blueSteelStroke);
       stroke-width: 5.2;
       vector-effect: non-scaling-stroke;
     }
     .frame-highlight {
       fill: none;
-      stroke: url(#copperFrameHighlight);
+      stroke: url(#blueSteelHighlight);
       stroke-width: 1.5;
-      opacity: .98;
+      opacity: .96;
       vector-effect: non-scaling-stroke;
     }
     .number-text {
@@ -135,38 +115,6 @@
         <stop offset="42%" stop-color="#9AD7ED" />
         <stop offset="100%" stop-color="#557685" />
       </linearGradient>
-
-      <linearGradient id="silverMainStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#4C5962" />
-        <stop offset="15%" stop-color="#9DABB4" />
-        <stop offset="34%" stop-color="#F8FCFE" />
-        <stop offset="50%" stop-color="#CBD6DC" />
-        <stop offset="68%" stop-color="#7E8E98" />
-        <stop offset="86%" stop-color="#EEF5F8" />
-        <stop offset="100%" stop-color="#52606A" />
-      </linearGradient>
-
-      <linearGradient id="silverMainHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#FFFFFF" />
-        <stop offset="45%" stop-color="#EAF8FF" />
-        <stop offset="100%" stop-color="#9AAAB3" />
-      </linearGradient>
-
-      <linearGradient id="copperFrameStroke" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#63280B" />
-        <stop offset="16%" stop-color="#B44E18" />
-        <stop offset="34%" stop-color="#F19A53" />
-        <stop offset="49%" stop-color="#FFD6A1" />
-        <stop offset="63%" stop-color="#D66D2B" />
-        <stop offset="82%" stop-color="#F4A765" />
-        <stop offset="100%" stop-color="#73300E" />
-      </linearGradient>
-
-      <linearGradient id="copperFrameHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
-        <stop offset="0%" stop-color="#FFF2D9" />
-        <stop offset="38%" stop-color="#FFC88E" />
-        <stop offset="100%" stop-color="#A94816" />
-      </linearGradient>
     </defs>
 
     <g id="divisions"></g>
@@ -214,12 +162,6 @@
       var outerRadius = 400;
       var ringOneTextRadius = (innerRadius + middleRadius) / 2;
       var ringTwoTextRadius = (middleRadius + outerRadius) / 2;
-      var silverBoundaryIndices = {
-        0: true, 1: true,
-        9: true, 10: true,
-        18: true, 19: true,
-        27: true, 28: true
-      };
 
       function appendLine(group, className, x1, y1, x2, y2) {
         var line = document.createElementNS(SVG_NS, 'line');
@@ -258,20 +200,11 @@
         var x2 = cx + Math.cos(boundaryAngle) * outerRadius;
         var y2 = cy + Math.sin(boundaryAngle) * outerRadius;
         var rayGroup = document.createElementNS(SVG_NS, 'g');
-        var isSilverBoundary = Boolean(silverBoundaryIndices[i]);
-        rayGroup.setAttribute('class', isSilverBoundary ? 'ray main-ray' : 'ray');
+        rayGroup.setAttribute('class', 'ray');
         rayGroup.setAttribute('data-ray-index', String(i));
-        rayGroup.setAttribute('data-main-silver', String(isSilverBoundary));
-
-        if (isSilverBoundary) {
-          appendLine(rayGroup, 'main-ray-shadow', x1, y1, x2, y2);
-          appendLine(rayGroup, 'main-ray-metal', x1, y1, x2, y2);
-          appendLine(rayGroup, 'main-ray-highlight', x1, y1, x2, y2);
-        } else {
-          appendLine(rayGroup, 'ray-shadow', x1, y1, x2, y2);
-          appendLine(rayGroup, 'ray-metal', x1, y1, x2, y2);
-          appendLine(rayGroup, 'ray-highlight', x1, y1, x2, y2);
-        }
+        appendLine(rayGroup, 'ray-shadow', x1, y1, x2, y2);
+        appendLine(rayGroup, 'ray-metal', x1, y1, x2, y2);
+        appendLine(rayGroup, 'ray-highlight', x1, y1, x2, y2);
         divisions.appendChild(rayGroup);
 
         var fullValue = i === 0 ? 36 : i;
@@ -288,9 +221,7 @@
 
       Promise.all(chunkUrls.map(function (url) {
         return fetch(url, { cache: 'no-store' }).then(function (response) {
-          if (!response.ok) {
-            throw new Error('LOGO_CHUNK_HTTP_' + response.status);
-          }
+          if (!response.ok) throw new Error('LOGO_CHUNK_HTTP_' + response.status);
           return response.text();
         });
       })).then(function (chunks) {
@@ -302,16 +233,15 @@
         document.documentElement.dataset.logoReady = 'false';
       });
 
-      window.__auditKawkabatLogoWheelV6 = function () {
+      window.__auditKawkabatLogoWheelV7 = function () {
         return {
           ok: divisions.children.length === 36 && numbersRingOne.children.length === 36 && numbersRingTwo.children.length === 36,
-          build: 6,
+          build: 7,
           name: 'كود أول عجلة اللوجو بتنظيم',
-          frameColor: 'glossy-copper-orange',
-          secondaryRayColor: 'glossy-blue-steel',
-          mainRayColor: 'glossy-silver',
-          mainSilverBoundaryCount: 8,
-          mainSilverWedges: 4,
+          frameColor: 'glossy-blue-steel',
+          rayColor: 'glossy-blue-steel',
+          specialSilverRays: 0,
+          copperElements: 0,
           cardinalAlignment: {
             twelve: '36/9',
             three: '9/9',
