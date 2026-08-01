@@ -1,0 +1,62 @@
+name: V694 Frame Visual Proof
+
+on:
+  push:
+    branches:
+      - verify/v694-frame-visual-proof
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Show browser
+        run: |
+          google-chrome --version || chromium --version || chromium-browser --version
+
+      - name: Wait for production page
+        shell: bash
+        run: |
+          set -euo pipefail
+          url='https://tasi-ganzilla.vercel.app/v672.html?v=694-visual-proof-20260801'
+          for attempt in $(seq 1 30); do
+            code="$(curl -L -sS -o /tmp/page.html -w '%{http_code}' "$url" || true)"
+            if [ "$code" = '200' ]; then
+              echo "Production page ready on attempt $attempt"
+              exit 0
+            fi
+            echo "Attempt $attempt returned HTTP $code"
+            sleep 5
+          done
+          exit 1
+
+      - name: Capture full visual proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          browser="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          "$browser" \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --hide-scrollbars \
+            --force-device-scale-factor=1 \
+            --window-size=1920,1800 \
+            --virtual-time-budget=20000 \
+            --screenshot=frame-visual-proof.png \
+            'https://tasi-ganzilla.vercel.app/v672.html?v=694-visual-proof-20260801'
+          test -s frame-visual-proof.png
+          file frame-visual-proof.png
+
+      - name: Upload visual proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: v694-frame-visual-proof
+          path: frame-visual-proof.png
+          if-no-files-found: error
+          retention-days: 2
