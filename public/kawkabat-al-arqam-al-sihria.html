@@ -3,134 +3,116 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — الهيكل الأساسي للعجلة</title>
-  <meta name="description" content="القاعدة الجديدة المستقلة لهيكل عجلة كوكبة الأرقام السحرية" />
+  <title>كوكبة الأرقام السحرية — هيكل العجلة</title>
+  <meta name="description" content="هيكل عجلة كوكبة الأرقام السحرية بدون أي إطار خارجي" />
   <style>
     :root {
-      color-scheme: light;
       font-family: Arial, Tahoma, sans-serif;
-      background: #f4efe3;
       color: #17120b;
+      background: #f5f0e5;
     }
+
     * { box-sizing: border-box; }
-    html, body { margin: 0; min-height: 100%; }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
     body {
       min-height: 100vh;
       display: grid;
       place-items: center;
-      padding: 20px;
-      background:
-        radial-gradient(circle at 50% 42%, rgba(255,255,255,.98), rgba(247,242,230,.96) 58%, #e8deca 100%);
+      padding: 18px;
+      background: #f5f0e5;
     }
+
     main {
-      width: min(96vw, 1180px);
+      width: min(96vw, 1120px);
       display: grid;
       justify-items: center;
       gap: 14px;
     }
+
     h1 {
       margin: 0;
       font-size: clamp(28px, 4vw, 52px);
       font-weight: 800;
-      color: #2e1b08;
       text-align: center;
+      color: #2e1b08;
     }
+
     .subtitle {
       margin: 0;
-      color: #75654e;
-      font-size: clamp(13px, 1.5vw, 17px);
+      color: #6f624f;
+      font-size: 15px;
       text-align: center;
     }
-    .wheel-shell {
-      width: min(88vw, 880px);
+
+    .wheel-stage {
+      width: min(90vw, 860px);
       aspect-ratio: 1;
       display: grid;
       place-items: center;
     }
+
     svg {
       width: 100%;
       height: 100%;
+      display: block;
       overflow: visible;
-      filter: drop-shadow(0 18px 30px rgba(61,39,11,.14));
     }
-    .wheel-field {
-      fill: #fffdf7;
-      stroke: #caa66a;
-      stroke-width: 2.2;
+
+    .wheel-fill {
+      fill: #fffdf8;
     }
-    .outer-band {
-      fill: none;
-      stroke-linecap: round;
-    }
-    .outer-1 { stroke: #241407; stroke-width: 18; }
-    .outer-2 { stroke: #c98a2d; stroke-width: 10; }
-    .outer-3 { stroke: #f3d48e; stroke-width: 4; }
-    .inner-boundary {
-      fill: #fffdf7;
-      stroke: #a87528;
-      stroke-width: 3;
-    }
+
     .ring {
       fill: none;
-      stroke: #d9cdb6;
-      stroke-width: 1.35;
-      vector-effect: non-scaling-stroke;
-    }
-    .ring-major {
-      stroke: #b89250;
-      stroke-width: 2.2;
-    }
-    .spoke {
-      stroke: #d3c6ad;
+      stroke: #c9bda8;
       stroke-width: 1.15;
       vector-effect: non-scaling-stroke;
     }
-    .spoke-third {
-      stroke: #b79b6c;
-      stroke-width: 1.8;
-    }
-    .spoke-cardinal {
-      stroke: #8d5b16;
-      stroke-width: 4.4;
-    }
-    .center-disc {
-      fill: #fffaf0;
-      stroke: #9c681b;
-      stroke-width: 4;
-    }
-    .center-ring {
+
+    .outer-boundary {
       fill: none;
-      stroke: #e4c98b;
-      stroke-width: 9;
+      stroke: #8f7b5e;
+      stroke-width: 1.7;
+      vector-effect: non-scaling-stroke;
     }
-    .center-title {
-      font-family: Arial, Tahoma, sans-serif;
-      font-size: 25px;
-      font-weight: 800;
-      fill: #56360d;
-      text-anchor: middle;
+
+    .spoke {
+      stroke: #c9bda8;
+      stroke-width: 1;
+      vector-effect: non-scaling-stroke;
     }
-    .center-subtitle {
-      font-family: Arial, Tahoma, sans-serif;
-      font-size: 15px;
+
+    .cardinal {
+      stroke: #76542a;
+      stroke-width: 2.4;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .center-circle {
+      fill: #fffdf8;
+      stroke: #8f7b5e;
+      stroke-width: 1.7;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .cardinal-label {
+      fill: #5b3a16;
+      font-size: 22px;
       font-weight: 700;
-      fill: #8b713f;
       text-anchor: middle;
+      dominant-baseline: middle;
+      direction: ltr;
     }
-    .cardinal-label circle {
-      fill: #211307;
-      stroke: #d19a42;
-      stroke-width: 3;
-    }
-    .cardinal-label text {
-      font-family: Arial, sans-serif;
-      font-size: 17px;
-      font-weight: 800;
-      fill: #fff1bd;
-    }
+
     footer {
-      font-size: 13px;
-      color: #776a57;
+      color: #756956;
+      font-size: 14px;
       text-align: center;
     }
   </style>
@@ -138,89 +120,76 @@
 <body>
   <main>
     <h1>كوكبة الأرقام السحرية</h1>
-    <p class="subtitle">الهيكل الأساسي الجديد — 36 شعاعًا × 10 حلقات × سلطة SVG واحدة</p>
+    <p class="subtitle">هيكل أساسي فقط — بدون أي إطار خارجي أو زخارف</p>
 
-    <section class="wheel-shell" aria-label="هيكل عجلة كوكبة الأرقام السحرية">
-      <svg
-        id="magic-constellation-wheel-v1"
-        viewBox="0 0 1000 1000"
-        role="img"
-        aria-labelledby="wheel-title wheel-description"
-        data-build="MAGIC_CONSTELLATION_WHEEL_STRUCTURE_V1"
-        data-divisions="36"
-        data-rings="10"
-        data-single-render-authority="svg"
-      >
-        <title id="wheel-title">هيكل عجلة كوكبة الأرقام السحرية</title>
-        <desc id="wheel-description">عجلة هندسية ثابتة من ستة وثلاثين شعاعًا وعشر حلقات مع أربعة محاور أساسية.</desc>
-
-        <circle class="wheel-field" cx="500" cy="500" r="405" />
-        <circle class="outer-band outer-1" cx="500" cy="500" r="431" />
-        <circle class="outer-band outer-2" cx="500" cy="500" r="448" />
-        <circle class="outer-band outer-3" cx="500" cy="500" r="457" />
-
-        <circle class="ring" cx="500" cy="500" r="139.50" />
-        <circle class="ring" cx="500" cy="500" r="169.00" />
-        <circle class="ring" cx="500" cy="500" r="198.50" />
-        <circle class="ring" cx="500" cy="500" r="228.00" />
-        <circle class="ring ring-major" cx="500" cy="500" r="257.50" />
-        <circle class="ring" cx="500" cy="500" r="287.00" />
-        <circle class="ring" cx="500" cy="500" r="316.50" />
-        <circle class="ring" cx="500" cy="500" r="346.00" />
-        <circle class="ring" cx="500" cy="500" r="375.50" />
-        <circle class="ring ring-major" cx="500" cy="500" r="405.00" />
-
-        <line class="spoke spoke-cardinal" x1="500.00" y1="390.00" x2="500.00" y2="95.00" />
-        <line class="spoke" x1="519.10" y1="391.67" x2="570.33" y2="101.15" />
-        <line class="spoke" x1="537.62" y1="396.63" x2="638.52" y2="119.43" />
-        <line class="spoke spoke-third" x1="555.00" y1="404.74" x2="702.50" y2="149.26" />
-        <line class="spoke" x1="570.71" y1="415.74" x2="760.32" y2="189.76" />
-        <line class="spoke" x1="584.26" y1="429.29" x2="810.24" y2="239.68" />
-        <line class="spoke spoke-third" x1="595.26" y1="445.00" x2="850.74" y2="297.50" />
-        <line class="spoke" x1="603.37" y1="462.38" x2="880.57" y2="361.48" />
-        <line class="spoke" x1="608.33" y1="480.90" x2="898.85" y2="429.67" />
-        <line class="spoke spoke-cardinal" x1="610.00" y1="500.00" x2="905.00" y2="500.00" />
-        <line class="spoke" x1="608.33" y1="519.10" x2="898.85" y2="570.33" />
-        <line class="spoke" x1="603.37" y1="537.62" x2="880.57" y2="638.52" />
-        <line class="spoke spoke-third" x1="595.26" y1="555.00" x2="850.74" y2="702.50" />
-        <line class="spoke" x1="584.26" y1="570.71" x2="810.24" y2="760.32" />
-        <line class="spoke" x1="570.71" y1="584.26" x2="760.32" y2="810.24" />
-        <line class="spoke spoke-third" x1="555.00" y1="595.26" x2="702.50" y2="850.74" />
-        <line class="spoke" x1="537.62" y1="603.37" x2="638.52" y2="880.57" />
-        <line class="spoke" x1="519.10" y1="608.33" x2="570.33" y2="898.85" />
-        <line class="spoke spoke-cardinal" x1="500.00" y1="610.00" x2="500.00" y2="905.00" />
-        <line class="spoke" x1="480.90" y1="608.33" x2="429.67" y2="898.85" />
-        <line class="spoke" x1="462.38" y1="603.37" x2="361.48" y2="880.57" />
-        <line class="spoke spoke-third" x1="445.00" y1="595.26" x2="297.50" y2="850.74" />
-        <line class="spoke" x1="429.29" y1="584.26" x2="239.68" y2="810.24" />
-        <line class="spoke" x1="415.74" y1="570.71" x2="189.76" y2="760.32" />
-        <line class="spoke spoke-third" x1="404.74" y1="555.00" x2="149.26" y2="702.50" />
-        <line class="spoke" x1="396.63" y1="537.62" x2="119.43" y2="638.52" />
-        <line class="spoke" x1="391.67" y1="519.10" x2="101.15" y2="570.33" />
-        <line class="spoke spoke-cardinal" x1="390.00" y1="500.00" x2="95.00" y2="500.00" />
-        <line class="spoke" x1="391.67" y1="480.90" x2="101.15" y2="429.67" />
-        <line class="spoke" x1="396.63" y1="462.38" x2="119.43" y2="361.48" />
-        <line class="spoke spoke-third" x1="404.74" y1="445.00" x2="149.26" y2="297.50" />
-        <line class="spoke" x1="415.74" y1="429.29" x2="189.76" y2="239.68" />
-        <line class="spoke" x1="429.29" y1="415.74" x2="239.68" y2="189.76" />
-        <line class="spoke spoke-third" x1="445.00" y1="404.74" x2="297.50" y2="149.26" />
-        <line class="spoke" x1="462.38" y1="396.63" x2="361.48" y2="119.43" />
-        <line class="spoke" x1="480.90" y1="391.67" x2="429.67" y2="101.15" />
-
-        <circle class="inner-boundary" cx="500" cy="500" r="110" />
-        <circle class="center-ring" cx="500" cy="500" r="86" />
-        <circle class="center-disc" cx="500" cy="500" r="74" />
-        <text class="center-title" x="500" y="493">كوكبة الأرقام</text>
-        <text class="center-subtitle" x="500" y="523">الهيكل V1</text>
-
-        <g class="cardinal-label" transform="translate(500.00 55.00)"><circle r="28"/><text text-anchor="middle" dominant-baseline="central">360°</text></g>
-        <g class="cardinal-label" transform="translate(945.00 500.00)"><circle r="28"/><text text-anchor="middle" dominant-baseline="central">90°</text></g>
-        <g class="cardinal-label" transform="translate(500.00 945.00)"><circle r="28"/><text text-anchor="middle" dominant-baseline="central">180°</text></g>
-        <g class="cardinal-label" transform="translate(55.00 500.00)"><circle r="28"/><text text-anchor="middle" dominant-baseline="central">270°</text></g>
+    <section class="wheel-stage" aria-label="هيكل العجلة الأساسي">
+      <svg id="wheel" viewBox="0 0 1000 1000" role="img" aria-label="عجلة من 36 شعاعًا و10 حلقات">
+        <circle class="wheel-fill" cx="500" cy="500" r="430" />
+        <g id="rings"></g>
+        <g id="spokes"></g>
+        <circle class="center-circle" cx="500" cy="500" r="110" />
+        <text class="cardinal-label" x="500" y="46">360°</text>
+        <text class="cardinal-label" x="954" y="500">90°</text>
+        <text class="cardinal-label" x="500" y="954">180°</text>
+        <text class="cardinal-label" x="46" y="500">270°</text>
       </svg>
     </section>
 
-    <footer>قاعدة مستقلة بالكامل — لا React، لا Canvas، لا Runtime، ولا أي استدعاء من العمل السابق</footer>
+    <footer>قاعدة جديدة مستقلة — سلطة رسم واحدة — لا يوجد إطار إضافي</footer>
   </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var SVG_NS = 'http://www.w3.org/2000/svg';
+      var cx = 500;
+      var cy = 500;
+      var innerRadius = 110;
+      var outerRadius = 430;
+      var ringCount = 10;
+      var divisionCount = 36;
+      var rings = document.getElementById('rings');
+      var spokes = document.getElementById('spokes');
+
+      for (var ringIndex = 1; ringIndex <= ringCount; ringIndex += 1) {
+        var circle = document.createElementNS(SVG_NS, 'circle');
+        circle.setAttribute('cx', String(cx));
+        circle.setAttribute('cy', String(cy));
+        circle.setAttribute(
+          'r',
+          String(innerRadius + ((outerRadius - innerRadius) * ringIndex / ringCount))
+        );
+        circle.setAttribute('class', ringIndex === ringCount ? 'outer-boundary' : 'ring');
+        rings.appendChild(circle);
+      }
+
+      for (var index = 0; index < divisionCount; index += 1) {
+        var degrees = index * 10 - 90;
+        var radians = degrees * Math.PI / 180;
+        var line = document.createElementNS(SVG_NS, 'line');
+        line.setAttribute('x1', String(cx + Math.cos(radians) * innerRadius));
+        line.setAttribute('y1', String(cy + Math.sin(radians) * innerRadius));
+        line.setAttribute('x2', String(cx + Math.cos(radians) * outerRadius));
+        line.setAttribute('y2', String(cy + Math.sin(radians) * outerRadius));
+        line.setAttribute('class', index % 9 === 0 ? 'cardinal' : 'spoke');
+        spokes.appendChild(line);
+      }
+
+      window.__auditKawkabatCleanWheelStructureV2 = function () {
+        return {
+          ok: rings.children.length === 10 && spokes.children.length === 36,
+          build: 2,
+          framePresent: false,
+          decorativeFramePresent: false,
+          rings: rings.children.length,
+          spokes: spokes.children.length,
+          centerRadius: innerRadius,
+          outerRadius: outerRadius,
+          singleSvgAuthority: true
+        };
+      };
+    }());
+  </script>
 </body>
 </html>
