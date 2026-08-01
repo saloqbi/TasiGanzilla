@@ -3,193 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — هيكل العجلة</title>
-  <meta name="description" content="هيكل عجلة كوكبة الأرقام السحرية بدون أي إطار خارجي" />
+  <title>كوكبة الأرقام السحرية</title>
   <style>
-    :root {
-      font-family: Arial, Tahoma, sans-serif;
-      color: #17120b;
-      background: #f5f0e5;
-    }
-
-    * { box-sizing: border-box; }
-
-    html,
-    body {
+    html, body {
       margin: 0;
-      min-height: 100%;
+      width: 100%;
+      height: 100%;
     }
 
     body {
-      min-height: 100vh;
       display: grid;
       place-items: center;
-      padding: 18px;
-      background: #f5f0e5;
-    }
-
-    main {
-      width: min(96vw, 1120px);
-      display: grid;
-      justify-items: center;
-      gap: 14px;
+      background: #ffffff;
+      font-family: Arial, Tahoma, sans-serif;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(28px, 4vw, 52px);
+      color: #111111;
+      font-size: clamp(34px, 6vw, 84px);
       font-weight: 800;
-      text-align: center;
-      color: #2e1b08;
-    }
-
-    .subtitle {
-      margin: 0;
-      color: #6f624f;
-      font-size: 15px;
-      text-align: center;
-    }
-
-    .wheel-stage {
-      width: min(90vw, 860px);
-      aspect-ratio: 1;
-      display: grid;
-      place-items: center;
-    }
-
-    svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-      overflow: visible;
-    }
-
-    .wheel-fill {
-      fill: #fffdf8;
-    }
-
-    .ring {
-      fill: none;
-      stroke: #c9bda8;
-      stroke-width: 1.15;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .outer-boundary {
-      fill: none;
-      stroke: #8f7b5e;
-      stroke-width: 1.7;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .spoke {
-      stroke: #c9bda8;
-      stroke-width: 1;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .cardinal {
-      stroke: #76542a;
-      stroke-width: 2.4;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .center-circle {
-      fill: #fffdf8;
-      stroke: #8f7b5e;
-      stroke-width: 1.7;
-      vector-effect: non-scaling-stroke;
-    }
-
-    .cardinal-label {
-      fill: #5b3a16;
-      font-size: 22px;
-      font-weight: 700;
-      text-anchor: middle;
-      dominant-baseline: middle;
-      direction: ltr;
-    }
-
-    footer {
-      color: #756956;
-      font-size: 14px;
       text-align: center;
     }
   </style>
 </head>
 <body>
-  <main>
-    <h1>كوكبة الأرقام السحرية</h1>
-    <p class="subtitle">هيكل أساسي فقط — بدون أي إطار خارجي أو زخارف</p>
-
-    <section class="wheel-stage" aria-label="هيكل العجلة الأساسي">
-      <svg id="wheel" viewBox="0 0 1000 1000" role="img" aria-label="عجلة من 36 شعاعًا و10 حلقات">
-        <circle class="wheel-fill" cx="500" cy="500" r="430" />
-        <g id="rings"></g>
-        <g id="spokes"></g>
-        <circle class="center-circle" cx="500" cy="500" r="110" />
-        <text class="cardinal-label" x="500" y="46">360°</text>
-        <text class="cardinal-label" x="954" y="500">90°</text>
-        <text class="cardinal-label" x="500" y="954">180°</text>
-        <text class="cardinal-label" x="46" y="500">270°</text>
-      </svg>
-    </section>
-
-    <footer>قاعدة جديدة مستقلة — سلطة رسم واحدة — لا يوجد إطار إضافي</footer>
-  </main>
-
-  <script>
-    (function () {
-      'use strict';
-
-      var SVG_NS = 'http://www.w3.org/2000/svg';
-      var cx = 500;
-      var cy = 500;
-      var innerRadius = 110;
-      var outerRadius = 430;
-      var ringCount = 10;
-      var divisionCount = 36;
-      var rings = document.getElementById('rings');
-      var spokes = document.getElementById('spokes');
-
-      for (var ringIndex = 1; ringIndex <= ringCount; ringIndex += 1) {
-        var circle = document.createElementNS(SVG_NS, 'circle');
-        circle.setAttribute('cx', String(cx));
-        circle.setAttribute('cy', String(cy));
-        circle.setAttribute(
-          'r',
-          String(innerRadius + ((outerRadius - innerRadius) * ringIndex / ringCount))
-        );
-        circle.setAttribute('class', ringIndex === ringCount ? 'outer-boundary' : 'ring');
-        rings.appendChild(circle);
-      }
-
-      for (var index = 0; index < divisionCount; index += 1) {
-        var degrees = index * 10 - 90;
-        var radians = degrees * Math.PI / 180;
-        var line = document.createElementNS(SVG_NS, 'line');
-        line.setAttribute('x1', String(cx + Math.cos(radians) * innerRadius));
-        line.setAttribute('y1', String(cy + Math.sin(radians) * innerRadius));
-        line.setAttribute('x2', String(cx + Math.cos(radians) * outerRadius));
-        line.setAttribute('y2', String(cy + Math.sin(radians) * outerRadius));
-        line.setAttribute('class', index % 9 === 0 ? 'cardinal' : 'spoke');
-        spokes.appendChild(line);
-      }
-
-      window.__auditKawkabatCleanWheelStructureV2 = function () {
-        return {
-          ok: rings.children.length === 10 && spokes.children.length === 36,
-          build: 2,
-          framePresent: false,
-          decorativeFramePresent: false,
-          rings: rings.children.length,
-          spokes: spokes.children.length,
-          centerRadius: innerRadius,
-          outerRadius: outerRadius,
-          singleSvgAuthority: true
-        };
-      };
-    }());
-  </script>
+  <h1>كوكبة الأرقام السحرية</h1>
 </body>
 </html>
