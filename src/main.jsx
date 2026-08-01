@@ -87,6 +87,7 @@ import './components/GannTools/gannzillaToolbarFullMirrorStripV672';
 import './components/GannTools/gannzillaToolbarIconFramesRestoreV673';
 import './components/GannTools/gannzillaWheelIvoryChampagneFinalAuthorityV682';
 import './components/GannTools/gannzillaStableExternalFrameV731';
+import './components/GannTools/gannzillaStableExternalFrame172V732';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
