@@ -82,12 +82,11 @@ import './components/GannTools/gannzillaAngleMinorSilverShineV664';
 import './components/GannTools/gannzillaAngleTickHierarchyBlackSilverV665';
 import './components/GannTools/gannzillaAngleTickContrastBlackSilverV666';
 import './components/GannTools/gannzillaPanelMirrorZincOuterSilverV667';
+import './components/GannTools/gannzillaOuterEmptyRingMirrorSilverV668';
 import './components/GannTools/gannzillaPanelExactMirrorSilverV669';
 import './components/GannTools/gannzillaToolbarFullMirrorStripV672';
 import './components/GannTools/gannzillaToolbarIconFramesRestoreV673';
 import './components/GannTools/gannzillaWheelIvoryChampagneFinalAuthorityV682';
-import './components/GannTools/gannzillaStableExternalFrameV731';
-import './components/GannTools/gannzillaStableExternalFrame172V732';
 import './styles/globals.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
