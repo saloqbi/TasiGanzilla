@@ -1,3 +1,2 @@
-// V687 legacy approximation is intentionally replaced by the approved
-// reference-image frame authority V688.
-import './gannzillaReferenceOrnateFrameV688';
+// Legacy V687/V688 frame authorities are disabled.
+// V691 is the single exact-frame runtime injected by v672-bootstrap.js.
