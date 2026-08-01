@@ -1,7 +1,9 @@
-const BUILD = 720;
-const STATE_KEY = '__gannzillaOrnateFrameCleanRebuildV720';
-const OVERLAY_ID = 'gannzilla-ornate-frame-clean-v720';
-const ASSET_URL = '/assets/tasi-ornate-frame-exact-v691.webp?v=720-clean-rebuild';
+const BUILD = 721;
+const STATE_KEY = '__gannzillaOrnateFrameCleanAuthorityV721';
+const OVERLAY_ID = 'gannzilla-ornate-frame-clean-v721';
+const ASSET_URL = '/assets/tasi-ornate-frame-exact-v691.webp?v=721-clean-authority';
+const ASSET_HOLE_DIAMETER_RATIO = 0.7444444444;
+const BASE_RESERVED_MARGIN = 90;
 
 const LEGACY_OVERLAY_IDS = [
   'gannzilla-ornate-outer-frame-overlay-v687',
@@ -11,12 +13,14 @@ const LEGACY_OVERLAY_IDS = [
   'gannzilla-exact-reference-frame-v693',
   'gannzilla-exact-reference-frame-v707',
   'gannzilla-persistent-exact-frame-v712',
+  'gannzilla-ornate-frame-clean-v720',
 ];
 
 let wheel = null;
 let overlay = null;
 let resizeObserver = null;
-let mutationObserver = null;
+let wheelMutationObserver = null;
+let documentMutationObserver = null;
 let animationFrame = 0;
 let timer = 0;
 let applyCount = 0;
@@ -24,7 +28,8 @@ let lastApply = null;
 let assetError = null;
 
 function isEnabled() {
-  return window.location.pathname === '/v672.html';
+  return typeof window !== 'undefined'
+    && window.location.pathname === '/v672.html';
 }
 
 function removeLegacyOverlays() {
@@ -33,7 +38,11 @@ function removeLegacyOverlays() {
   });
 
   document
-    .querySelectorAll('[data-gannzilla-reference-ornate-frame-v688="true"], [data-gannzilla-exact-reference-frame-v707="true"]')
+    .querySelectorAll([
+      '[data-gannzilla-reference-ornate-frame-v688="true"]',
+      '[data-gannzilla-exact-reference-frame-v707="true"]',
+      '[data-gannzilla-persistent-exact-frame-v712="true"]',
+    ].join(','))
     .forEach((node) => {
       if (node.id !== OVERLAY_ID) node.remove();
     });
@@ -46,7 +55,10 @@ function isWheelCanvas(canvas) {
   if (id.includes('overlay') || id.includes('preview') || id.includes('tracker')) return false;
 
   const rect = canvas.getBoundingClientRect();
-  return rect.width > 300 && rect.height > 300 && canvas.width > 300 && canvas.height > 300;
+  return rect.width > 300
+    && rect.height > 300
+    && canvas.width > 300
+    && canvas.height > 300;
 }
 
 function findWheel() {
@@ -75,7 +87,7 @@ function createOverlay() {
   overlay.id = OVERLAY_ID;
   overlay.alt = '';
   overlay.setAttribute('aria-hidden', 'true');
-  overlay.dataset.gannzillaOrnateFrameCleanV720 = 'true';
+  overlay.dataset.gannzillaOrnateFrameCleanAuthorityV721 = 'true';
   overlay.draggable = false;
   overlay.decoding = 'async';
   overlay.src = ASSET_URL;
@@ -104,7 +116,7 @@ function createOverlay() {
   style.setProperty('pointer-events', 'none', 'important');
   style.setProperty('user-select', 'none', 'important');
   style.setProperty('touch-action', 'none', 'important');
-  style.setProperty('z-index', '8', 'important');
+  style.setProperty('z-index', '2147482000', 'important');
   style.setProperty('opacity', '1', 'important');
   style.setProperty('visibility', 'visible', 'important');
   style.setProperty('transform', 'translate3d(0,0,0)', 'important');
@@ -112,28 +124,68 @@ function createOverlay() {
   style.setProperty('image-rendering', 'auto', 'important');
   style.setProperty('filter', 'none', 'important');
   style.setProperty('mix-blend-mode', 'normal', 'important');
+  style.setProperty('will-change', 'left, top, width, height', 'important');
 
-  document.body.appendChild(overlay);
+  (document.body || document.documentElement).appendChild(overlay);
   return overlay;
 }
 
-function disconnectWheelObserver() {
+function disconnectWheelObservers() {
   resizeObserver?.disconnect();
+  wheelMutationObserver?.disconnect();
   resizeObserver = null;
+  wheelMutationObserver = null;
 }
 
 function observeWheel(canvas) {
-  disconnectWheelObserver();
+  disconnectWheelObservers();
 
   if (typeof ResizeObserver === 'function') {
     resizeObserver = new ResizeObserver(() => schedule('wheel-resize'));
     resizeObserver.observe(canvas);
+  }
+
+  if (typeof MutationObserver === 'function') {
+    wheelMutationObserver = new MutationObserver(() => schedule('wheel-mutation'));
+    wheelMutationObserver.observe(canvas, {
+      attributes: true,
+      attributeFilter: ['style', 'class', 'width', 'height'],
+    });
   }
 }
 
 function snapToDevicePixel(value) {
   const dpr = Math.max(1, Number(window.devicePixelRatio) || 1);
   return Math.round(value * dpr) / dpr;
+}
+
+function getGeometry(canvas, rect) {
+  const canvasSize = Math.min(rect.width, rect.height);
+  const zoom = Math.max(0.5, Number(canvas.dataset.gannzillaAppliedZoom) || 1);
+  const reservedMargin = Math.min(
+    canvasSize * 0.16,
+    Math.max(36, BASE_RESERVED_MARGIN * zoom),
+  );
+
+  const existingWheelDiameter = Math.max(
+    canvasSize * 0.68,
+    canvasSize - (reservedMargin * 2),
+  );
+  const targetHoleDiameter = existingWheelDiameter + Math.max(2, 4 * zoom);
+  const frameSize = targetHoleDiameter / ASSET_HOLE_DIAMETER_RATIO;
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+
+  return {
+    canvasSize,
+    zoom,
+    reservedMargin,
+    existingWheelDiameter,
+    targetHoleDiameter,
+    frameSize: snapToDevicePixel(frameSize),
+    centerX: snapToDevicePixel(centerX),
+    centerY: snapToDevicePixel(centerY),
+  };
 }
 
 function apply(source = 'apply') {
@@ -158,18 +210,16 @@ function apply(source = 'apply') {
   }
 
   const rect = wheel.getBoundingClientRect();
-  const size = snapToDevicePixel(Math.min(rect.width, rect.height));
-  if (!(size > 300)) return false;
+  const geometry = getGeometry(wheel, rect);
+  if (!(geometry.canvasSize > 300) || !(geometry.frameSize > 300)) return false;
 
-  const centerX = snapToDevicePixel(rect.left + rect.width / 2);
-  const centerY = snapToDevicePixel(rect.top + rect.height / 2);
-  const left = snapToDevicePixel(centerX - size / 2);
-  const top = snapToDevicePixel(centerY - size / 2);
+  const left = snapToDevicePixel(geometry.centerX - geometry.frameSize / 2);
+  const top = snapToDevicePixel(geometry.centerY - geometry.frameSize / 2);
 
   image.style.setProperty('left', `${left}px`, 'important');
   image.style.setProperty('top', `${top}px`, 'important');
-  image.style.setProperty('width', `${size}px`, 'important');
-  image.style.setProperty('height', `${size}px`, 'important');
+  image.style.setProperty('width', `${geometry.frameSize}px`, 'important');
+  image.style.setProperty('height', `${geometry.frameSize}px`, 'important');
   image.style.setProperty('display', 'block', 'important');
 
   applyCount += 1;
@@ -177,21 +227,29 @@ function apply(source = 'apply') {
     source,
     build: BUILD,
     asset: ASSET_URL,
+    assetLoaded: Boolean(image.complete && image.naturalWidth > 0),
+    assetNaturalWidth: Number(image.naturalWidth || 0),
+    assetNaturalHeight: Number(image.naturalHeight || 0),
     wheelWidth: rect.width,
     wheelHeight: rect.height,
-    frameSize: size,
-    scale: 1,
-    centerX,
-    centerY,
+    frameSize: geometry.frameSize,
+    frameToCanvasRatio: geometry.frameSize / geometry.canvasSize,
+    transparentHoleRatio: ASSET_HOLE_DIAMETER_RATIO,
+    targetHoleDiameter: geometry.targetHoleDiameter,
+    existingWheelDiameter: geometry.existingWheelDiameter,
+    reservedMargin: geometry.reservedMargin,
+    zoom: geometry.zoom,
+    centerX: geometry.centerX,
+    centerY: geometry.centerY,
     left,
     top,
-    exactSquareGeometry: true,
     centerLocked: true,
     existingWheelGeometryChanged: false,
+    zIndex: 2147482000,
     at: Date.now(),
   };
 
-  window.dispatchEvent(new CustomEvent('gannzilla:ornate-frame-clean-v720', {
+  window.dispatchEvent(new CustomEvent('gannzilla:ornate-frame-clean-authority-v721', {
     detail: lastApply,
   }));
 
@@ -207,7 +265,9 @@ function schedule(source = 'schedule', delay = 0) {
 }
 
 function install() {
-  if (typeof window === 'undefined' || typeof document === 'undefined' || window[STATE_KEY]) return;
+  if (typeof window === 'undefined'
+      || typeof document === 'undefined'
+      || window[STATE_KEY]) return;
 
   removeLegacyOverlays();
   createOverlay();
@@ -231,21 +291,24 @@ function install() {
     'gannzilla:layout-panel-visibility-change',
   ].forEach((name) => window.addEventListener(name, refresh, true));
 
-  if (typeof MutationObserver === 'function') {
-    mutationObserver = new MutationObserver(() => schedule('dom-replacement', 20));
-    mutationObserver.observe(document.body, { childList: true, subtree: true });
-  }
-
   document.addEventListener('visibilitychange', refresh, false);
 
-  [0, 60, 160, 360, 750, 1400, 2600, 4800, 8000].forEach((delay) => {
+  if (typeof MutationObserver === 'function') {
+    documentMutationObserver = new MutationObserver(() => schedule('document-child-change', 20));
+    documentMutationObserver.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
+  }
+
+  [0, 80, 180, 360, 700, 1200, 2200, 4000, 7000].forEach((delay) => {
     window.setTimeout(() => schedule(`boot-${delay}`), delay);
   });
 
-  const watchTimer = window.setInterval(() => schedule('geometry-watch'), 400);
+  const watchTimer = window.setInterval(() => schedule('geometry-watch'), 350);
 
-  window.GANNZILLA_ORNATE_FRAME_CLEAN_V720 = true;
-  window.__auditGannzillaOrnateFrameCleanV720 = () => ({
+  window.GANNZILLA_ORNATE_FRAME_CLEAN_AUTHORITY_V721 = true;
+  window.__auditGannzillaOrnateFrameCleanAuthorityV721 = () => ({
     ok: isEnabled()
       && wheel instanceof HTMLCanvasElement
       && overlay instanceof HTMLImageElement
@@ -253,19 +316,18 @@ function install() {
       && overlay.complete
       && overlay.naturalWidth > 0
       && overlay.style.display !== 'none'
-      && !assetError,
+      && overlay.style.zIndex === '2147482000',
     build: BUILD,
     enabled: isEnabled(),
     singleAuthority: true,
-    scale: 1,
-    geometryMode: 'canvas-square-center-lock',
+    sourceIntegrated: true,
+    legacyRuntimeRequired: false,
     exactReferenceAsset: true,
     asset: ASSET_URL,
     assetLoaded: Boolean(overlay?.complete && overlay?.naturalWidth > 0),
     assetError,
     overlayConnected: Boolean(overlay?.isConnected),
-    legacyOverlaysRemoved: LEGACY_OVERLAY_IDS.every((id) => !document.getElementById(id)),
-    existingWheelGeometryChanged: false,
+    zIndex: Number(overlay?.style?.zIndex || 0),
     applyCount,
     lastApply,
   });
