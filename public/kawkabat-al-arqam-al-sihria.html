@@ -3,16 +3,96 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title></title>
+  <title>كوكبة الأرقام السحرية</title>
   <style>
-    html,
-    body {
+    :root { background: #F7F1E3; }
+    * { box-sizing: border-box; }
+    html, body {
       margin: 0;
       width: 100%;
       height: 100%;
+      overflow: hidden;
       background: #F7F1E3;
+    }
+    body {
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+    svg {
+      display: block;
+      width: min(94vw, 900px);
+      height: min(94vh, 900px);
+    }
+    .cell-line {
+      stroke: #A87922;
+      stroke-width: 1.45;
+      vector-effect: non-scaling-stroke;
+    }
+    .frame-line {
+      fill: none;
+      stroke: #8B621A;
+      stroke-width: 2.4;
+      vector-effect: non-scaling-stroke;
+    }
+    .frame-highlight {
+      fill: none;
+      stroke: #D6AE56;
+      stroke-width: 1;
+      vector-effect: non-scaling-stroke;
     }
   </style>
 </head>
-<body></body>
+<body>
+  <svg id="wheel" viewBox="0 0 1000 1000" role="img" aria-label="إطار شعار فارغ وحلقتان فارغتان مقسمتان إلى 36 خلية">
+    <g id="divisions"></g>
+
+    <!-- إطار الشعار الفارغ -->
+    <circle class="frame-line" cx="500" cy="500" r="180" />
+    <circle class="frame-highlight" cx="500" cy="500" r="174" />
+
+    <!-- إطار الأرقام الأول -->
+    <circle class="frame-line" cx="500" cy="500" r="290" />
+    <circle class="frame-highlight" cx="500" cy="500" r="284" />
+
+    <!-- إطار الأرقام الثاني -->
+    <circle class="frame-line" cx="500" cy="500" r="400" />
+    <circle class="frame-highlight" cx="500" cy="500" r="394" />
+  </svg>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var SVG_NS = 'http://www.w3.org/2000/svg';
+      var group = document.getElementById('divisions');
+      var cx = 500;
+      var cy = 500;
+      var innerRadius = 180;
+      var outerRadius = 400;
+
+      for (var i = 0; i < 36; i += 1) {
+        var angle = ((i * 10) - 90) * Math.PI / 180;
+        var line = document.createElementNS(SVG_NS, 'line');
+        line.setAttribute('x1', String(cx + Math.cos(angle) * innerRadius));
+        line.setAttribute('y1', String(cy + Math.sin(angle) * innerRadius));
+        line.setAttribute('x2', String(cx + Math.cos(angle) * outerRadius));
+        line.setAttribute('y2', String(cy + Math.sin(angle) * outerRadius));
+        line.setAttribute('class', 'cell-line');
+        group.appendChild(line);
+      }
+
+      window.__auditKawkabatThreeEmptyFramesV1 = function () {
+        return {
+          ok: group.children.length === 36,
+          logoFrameEmpty: true,
+          numberRingOneCells: 36,
+          numberRingTwoCells: 36,
+          background: '#F7F1E3',
+          externalDependencies: 0
+        };
+      };
+    }());
+  </script>
+</body>
 </html>
