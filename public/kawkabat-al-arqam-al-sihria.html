@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — العجلة العاشرة</title>
+  <title>كوكبة الأرقام السحرية — العجلة الحادية عشرة</title>
   <style>
     :root { background:#F7F1E3; }
     * { box-sizing:border-box; }
@@ -78,7 +78,7 @@
   </style>
 </head>
 <body>
-  <svg id="wheel" viewBox="0 0 4400 2800" role="img" aria-label="عشر عجلات؛ أول عجلتين بالأرقام وثماني عجلات خارجية فارغة">
+  <svg id="wheel" viewBox="0 0 4400 2800" role="img" aria-label="إحدى عشرة عجلة؛ أول عجلتين بالأرقام وتسع عجلات خارجية فارغة">
     <defs>
       <clipPath id="logoClip"><circle cx="2200" cy="1400" r="179" /></clipPath>
       <linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -115,10 +115,10 @@
       var XLINK='http://www.w3.org/1999/xlink';
       var cx=2200, cy=1400;
       var radii=[];
-      for (var radiusIndex=0; radiusIndex<=10; radiusIndex+=1) {
+      for (var radiusIndex=0; radiusIndex<=11; radiusIndex+=1) {
         radii.push(180 + (radiusIndex * 110));
       }
-      var r0=radii[0], r1=radii[1], r2=radii[2], r10=radii[10];
+      var r0=radii[0], r1=radii[1], r2=radii[2], r11=radii[11];
       var textR1=(r0+r1)/2;
       var textR2=(r1+r2)/2;
       var cardinal=[0,9,18,27];
@@ -192,7 +192,7 @@
 
       for(var i=0;i<36;i+=1){
         var deg=i*10-95;
-        var p1=polar(r0,deg), p2=polar(r10,deg);
+        var p1=polar(r0,deg), p2=polar(r11,deg);
         var special=Boolean(specialBoundary[i]);
         var g=document.createElementNS(NS,'g');
         g.setAttribute('data-ray-index',i);
@@ -236,19 +236,19 @@
         window.scrollTo(left,top);
       },{once:true});
 
-      window.__auditKawkabatTenWheelsV1=function(){
+      window.__auditKawkabatElevenWheelsV1=function(){
         return {
           ok:divisions.children.length===36 && ringOne.children.length===36 && ringTwo.children.length===36,
-          build:21,
+          build:22,
           stageWidth:4400,
           stageHeight:2800,
           scrollbarThickness:8,
-          wheelCount:10,
+          wheelCount:11,
           numberedWheelCount:2,
-          emptyOuterWheelCount:8,
-          tenthWheelEmpty:true,
-          tenthWheelCells:36,
-          tenthWheelNumbers:0,
+          emptyOuterWheelCount:9,
+          eleventhWheelEmpty:true,
+          eleventhWheelCells:36,
+          eleventhWheelNumbers:0,
           radii:radii.slice(),
           baseColor:'glossy-blue-steel',
           specialColor:'satin-rose-bronze-high-contrast',
