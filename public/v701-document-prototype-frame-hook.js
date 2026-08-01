@@ -1,11 +1,11 @@
 (function () {
   'use strict';
 
-  if (window.__gannzillaV707DocumentPrototypeFrameHook) return;
-  window.__gannzillaV707DocumentPrototypeFrameHook = true;
+  if (window.__gannzillaV712DocumentPrototypeFrameHook) return;
+  window.__gannzillaV712DocumentPrototypeFrameHook = true;
 
-  var BUILD = 707;
-  var RUNTIME_PATH = '/v707-exact-reference-frame.js?v=707-exact-reference-frame';
+  var BUILD = 712;
+  var RUNTIME_PATH = '/v712-persistent-exact-frame-runtime.js?v=712-persistent-exact-frame';
   var runtimeTag = '<script src="' + RUNTIME_PATH + '"></' + 'script>';
   var injected = false;
   var writeCount = 0;
@@ -36,7 +36,7 @@
 
   function installMethod(proto, methodName) {
     if (!proto || typeof proto[methodName] !== 'function') return;
-    if (proto[methodName].__gannzillaV707Patched) return;
+    if (proto[methodName].__gannzillaV712Patched) return;
 
     var nativeMethod = proto[methodName];
     var replacement = function () {
@@ -55,8 +55,8 @@
       return nativeMethod.apply(this, args);
     };
 
-    replacement.__gannzillaV707Patched = true;
-    replacement.__gannzillaV707Native = nativeMethod;
+    replacement.__gannzillaV712Patched = true;
+    replacement.__gannzillaV712Native = nativeMethod;
 
     try {
       Object.defineProperty(proto, methodName, {
@@ -85,7 +85,7 @@
     installMethod(proto, 'writeln');
   });
 
-  window.__auditGannzillaV707DocumentPrototypeFrameHook = function () {
+  window.__auditGannzillaV712DocumentPrototypeFrameHook = function () {
     return {
       ok: injected,
       build: BUILD,
