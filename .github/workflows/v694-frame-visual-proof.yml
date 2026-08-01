@@ -15,7 +15,7 @@ permissions:
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
       - name: Show browser
         run: |
@@ -42,17 +42,24 @@ jobs:
         run: |
           set -euo pipefail
           browser="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
-          "$browser" \
+          set +e
+          timeout 75s "$browser" \
             --headless=new \
             --no-sandbox \
             --disable-gpu \
             --disable-dev-shm-usage \
+            --disable-background-networking \
+            --disable-renderer-backgrounding \
             --hide-scrollbars \
             --force-device-scale-factor=1 \
             --window-size=1920,1800 \
-            --virtual-time-budget=20000 \
+            --virtual-time-budget=18000 \
+            --run-all-compositor-stages-before-draw \
             --screenshot=frame-visual-proof.png \
             'https://tasi-ganzilla.vercel.app/v672.html?v=694-visual-proof-20260801'
+          status=$?
+          set -e
+          echo "Browser exit status: $status"
           test -s frame-visual-proof.png
           file frame-visual-proof.png
 
