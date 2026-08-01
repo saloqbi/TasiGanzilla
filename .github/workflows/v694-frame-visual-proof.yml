@@ -1,4 +1,4 @@
-name: V694 Frame Visual Proof
+name: V701 Native Frame Visual Proof
 
 on:
   push:
@@ -23,15 +23,15 @@ jobs:
           node --version
           npm --version
 
-      - name: Wait for production page
+      - name: Wait for preview page
         shell: bash
         run: |
           set -euo pipefail
-          url='https://tasi-ganzilla.vercel.app/v672.html?v=694-visual-proof-20260801'
+          url='https://tasi-ganzilla-git-fix-v701-vali-8b5768-shadis-projects-ad536883.vercel.app/v672.html?v=701-preview-proof-20260801'
           for attempt in $(seq 1 30); do
             code="$(curl -L -sS -o /tmp/page.html -w '%{http_code}' "$url" || true)"
             if [ "$code" = '200' ]; then
-              echo "Production page ready on attempt $attempt"
+              echo "Preview page ready on attempt $attempt"
               exit 0
             fi
             echo "Attempt $attempt returned HTTP $code"
@@ -42,7 +42,7 @@ jobs:
       - name: Install browser driver
         run: npm install --no-save --ignore-scripts puppeteer-core@24.15.0
 
-      - name: Capture and audit production frame
+      - name: Capture and audit preview frame
         shell: bash
         run: |
           set -euo pipefail
@@ -50,6 +50,7 @@ jobs:
           import puppeteer from 'puppeteer-core';
           import fs from 'node:fs';
 
+          const target = 'https://tasi-ganzilla-git-fix-v701-vali-8b5768-shadis-projects-ad536883.vercel.app/v672.html?v=701-preview-proof-20260801';
           const browser = await puppeteer.launch({
             executablePath: '/usr/bin/google-chrome',
             headless: true,
@@ -65,14 +66,10 @@ jobs:
           try {
             const page = await browser.newPage();
             await page.setViewport({ width: 1920, height: 1800, deviceScaleFactor: 1 });
-            await page.goto(
-              'https://tasi-ganzilla.vercel.app/v672.html?v=694-visual-proof-20260801',
-              { waitUntil: 'domcontentloaded', timeout: 90000 }
-            );
+            await page.goto(target, { waitUntil: 'domcontentloaded', timeout: 90000 });
             await new Promise((resolve) => setTimeout(resolve, 25000));
 
             const audit = await page.evaluate(() => {
-              const overlay = document.getElementById('gannzilla-exact-reference-frame-v693');
               const wheel = Array.from(document.querySelectorAll('canvas'))
                 .filter((canvas) => canvas.width > 300 && canvas.height > 300 && !canvas.closest('aside'))
                 .sort((a, b) => {
@@ -80,32 +77,18 @@ jobs:
                   const br = b.getBoundingClientRect();
                   return (br.width * br.height) - (ar.width * ar.height);
                 })[0] || null;
-              const overlayRect = overlay?.getBoundingClientRect?.() || null;
               const wheelRect = wheel?.getBoundingClientRect?.() || null;
               return {
                 href: location.href,
                 title: document.title,
-                hook: typeof window.__auditGannzillaV694DocumentPrototypeFrameHook === 'function'
-                  ? window.__auditGannzillaV694DocumentPrototypeFrameHook()
+                hook: typeof window.__auditGannzillaV701DocumentPrototypeFrameHook === 'function'
+                  ? window.__auditGannzillaV701DocumentPrototypeFrameHook()
                   : null,
-                runtime: typeof window.__auditGannzillaExactReferenceFrameV693 === 'function'
-                  ? window.__auditGannzillaExactReferenceFrameV693()
+                runtime: typeof window.__auditGannzillaOrnateOuterFrameV685 === 'function'
+                  ? window.__auditGannzillaOrnateOuterFrameV685()
                   : null,
-                overlay: overlay ? {
-                  connected: overlay.isConnected,
-                  complete: overlay.complete,
-                  naturalWidth: overlay.naturalWidth,
-                  naturalHeight: overlay.naturalHeight,
-                  display: getComputedStyle(overlay).display,
-                  visibility: getComputedStyle(overlay).visibility,
-                  opacity: getComputedStyle(overlay).opacity,
-                  rect: overlayRect ? {
-                    left: overlayRect.left,
-                    top: overlayRect.top,
-                    width: overlayRect.width,
-                    height: overlayRect.height
-                  } : null
-                } : null,
+                runtimeFlag: Boolean(window.__gannzillaOrnateOuterFrameV685),
+                wheelRenderKey: wheel?.dataset?.gannzillaOrnateOuterFrameRenderKeyV685 || null,
                 wheel: wheelRect ? {
                   left: wheelRect.left,
                   top: wheelRect.top,
@@ -130,7 +113,7 @@ jobs:
       - name: Upload visual proof
         uses: actions/upload-artifact@v4
         with:
-          name: v694-frame-visual-proof
+          name: v701-native-frame-visual-proof
           path: |
             frame-visual-proof.png
             frame-audit.json
