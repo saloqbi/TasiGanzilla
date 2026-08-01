@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat > /tmp/capture-frame.mjs <<'EOF'
+          cat > capture-frame.mjs <<'EOF'
           import puppeteer from 'puppeteer-core';
           import fs from 'node:fs';
 
@@ -122,7 +122,7 @@ jobs:
             await browser.close();
           }
           EOF
-          node /tmp/capture-frame.mjs
+          node ./capture-frame.mjs
           test -s frame-visual-proof.png
           test -s frame-audit.json
           file frame-visual-proof.png
