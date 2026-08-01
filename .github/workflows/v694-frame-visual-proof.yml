@@ -1,4 +1,4 @@
-name: V701 Native Frame Visual Proof
+name: V701 Production Frame Visual Proof
 
 on:
   push:
@@ -23,15 +23,15 @@ jobs:
           node --version
           npm --version
 
-      - name: Wait for preview page
+      - name: Wait for production page
         shell: bash
         run: |
           set -euo pipefail
-          url='https://tasi-ganzilla-git-fix-v701-vali-8b5768-shadis-projects-ad536883.vercel.app/v672.html?v=701-preview-proof-20260801'
+          url='https://tasi-ganzilla.vercel.app/v672.html?v=701-production-proof-20260801-0322'
           for attempt in $(seq 1 30); do
             code="$(curl -L -sS -o /tmp/page.html -w '%{http_code}' "$url" || true)"
             if [ "$code" = '200' ]; then
-              echo "Preview page ready on attempt $attempt"
+              echo "Production page ready on attempt $attempt"
               exit 0
             fi
             echo "Attempt $attempt returned HTTP $code"
@@ -42,7 +42,7 @@ jobs:
       - name: Install browser driver
         run: npm install --no-save --ignore-scripts puppeteer-core@24.15.0
 
-      - name: Capture and audit preview frame
+      - name: Capture and audit production frame
         shell: bash
         run: |
           set -euo pipefail
@@ -50,7 +50,7 @@ jobs:
           import puppeteer from 'puppeteer-core';
           import fs from 'node:fs';
 
-          const target = 'https://tasi-ganzilla-git-fix-v701-vali-8b5768-shadis-projects-ad536883.vercel.app/v672.html?v=701-preview-proof-20260801';
+          const target = 'https://tasi-ganzilla.vercel.app/v672.html?v=701-production-proof-20260801-0322';
           const browser = await puppeteer.launch({
             executablePath: '/usr/bin/google-chrome',
             headless: true,
@@ -113,7 +113,7 @@ jobs:
       - name: Upload visual proof
         uses: actions/upload-artifact@v4
         with:
-          name: v701-native-frame-visual-proof
+          name: v701-production-frame-visual-proof
           path: |
             frame-visual-proof.png
             frame-audit.json
