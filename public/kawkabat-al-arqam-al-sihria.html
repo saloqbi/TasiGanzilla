@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — العجلة الثانية عشرة</title>
+  <title>كوكبة الأرقام السحرية — العجلة الثالثة عشرة</title>
   <style>
     :root { background:#F7F1E3; }
     * { box-sizing:border-box; }
@@ -26,7 +26,7 @@
     html::-webkit-scrollbar-corner,body::-webkit-scrollbar-corner { background:#F7F1E3; }
     body {
       min-width:4400px;
-      min-height:3200px;
+      min-height:3600px;
       display:grid;
       place-items:center;
       padding:0;
@@ -34,7 +34,7 @@
     svg {
       display:block;
       width:3960px;
-      height:2880px;
+      height:3240px;
       max-width:none;
       max-height:none;
       filter:drop-shadow(0 8px 16px rgba(35,57,68,.24));
@@ -78,9 +78,9 @@
   </style>
 </head>
 <body>
-  <svg id="wheel" viewBox="0 0 4400 3200" role="img" aria-label="اثنتا عشرة عجلة؛ أول عجلتين بالأرقام وعشر عجلات خارجية فارغة">
+  <svg id="wheel" viewBox="0 0 4400 3600" role="img" aria-label="ثلاث عشرة عجلة؛ أول عجلتين بالأرقام وإحدى عشرة عجلة خارجية فارغة">
     <defs>
-      <clipPath id="logoClip"><circle cx="2200" cy="1600" r="179" /></clipPath>
+      <clipPath id="logoClip"><circle cx="2200" cy="1800" r="179" /></clipPath>
       <linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" stop-color="#20333D"/><stop offset="18%" stop-color="#6F8793"/><stop offset="36%" stop-color="#DDE8EC"/><stop offset="50%" stop-color="#8AA0AA"/><stop offset="68%" stop-color="#4D6875"/><stop offset="84%" stop-color="#B9D4DE"/><stop offset="100%" stop-color="#263B46"/>
       </linearGradient>
@@ -100,7 +100,7 @@
 
     <g id="specialFills"></g>
     <g id="divisions"></g>
-    <image id="logoImage" x="2021" y="1421" width="358" height="358" preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)" />
+    <image id="logoImage" x="2021" y="1621" width="358" height="358" preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)" />
     <g id="frames"></g>
     <g id="specialArcs"></g>
     <g id="numbersRingOne"></g>
@@ -112,9 +112,9 @@
       'use strict';
       var NS='http://www.w3.org/2000/svg';
       var XLINK='http://www.w3.org/1999/xlink';
-      var cx=2200, cy=1600;
+      var cx=2200, cy=1800;
       var radii=[];
-      for (var radiusIndex=0; radiusIndex<=12; radiusIndex+=1) {
+      for (var radiusIndex=0; radiusIndex<=13; radiusIndex+=1) {
         radii.push(180 + (radiusIndex * 110));
       }
       var innerRadius=radii[0];
@@ -183,18 +183,18 @@
 
       window.addEventListener('load',function(){var left=Math.max(0,(document.documentElement.scrollWidth-window.innerWidth)/2);var top=Math.max(0,(document.documentElement.scrollHeight-window.innerHeight)/2);window.scrollTo(left,top);},{once:true});
 
-      window.__auditKawkabatTwelveWheelsV1=function(){return{
+      window.__auditKawkabatThirteenWheelsV1=function(){return{
         ok:divisions.children.length===36&&ringOne.children.length===36&&ringTwo.children.length===36,
-        build:23,
+        build:24,
         stageWidth:4400,
-        stageHeight:3200,
+        stageHeight:3600,
         scrollbarThickness:8,
-        wheelCount:12,
+        wheelCount:13,
         numberedWheelCount:2,
-        emptyOuterWheelCount:10,
-        twelfthWheelEmpty:true,
-        twelfthWheelCells:36,
-        twelfthWheelNumbers:0,
+        emptyOuterWheelCount:11,
+        thirteenthWheelEmpty:true,
+        thirteenthWheelCells:36,
+        thirteenthWheelNumbers:0,
         ringWidth:110,
         outerRadius:outerRadius,
         radii:radii.slice(),
