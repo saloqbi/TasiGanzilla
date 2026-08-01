@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - verify/v694-frame-visual-proof
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
