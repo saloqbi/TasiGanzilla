@@ -55,16 +55,54 @@
         );
 
         html=html.replace(
+          '</style>',
+          '.black-band-vine-ring{fill:none;stroke:url(#ornateGold);stroke-width:2.2;opacity:.96;vector-effect:non-scaling-stroke}'+
+          '.black-band-mini-gold{fill:none;stroke:url(#ornateGold);stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}'+
+          '.black-band-mini-frame{fill:url(#ornamentFill);stroke:#F4CD75;stroke-width:2.3;vector-effect:non-scaling-stroke}'+
+          '.black-band-mini-gem{fill:url(#blueGem);stroke:#FFF1BA;stroke-width:2;vector-effect:non-scaling-stroke}'+
+          '#blackBandOrnaments{pointer-events:none;filter:drop-shadow(0 1.5px 1.5px rgba(0,0,0,.55))}'+
+          '</style>'
+        );
+
+        html=html.replace(
+          '</defs>',
+          '<g id="blackBandMiniOrnament">'+
+            '<path class="black-band-mini-gold" d="M2148 48 H2183 M2217 48 H2252"/>'+
+            '<path class="black-band-mini-gold" d="M2157 48 C2165 35 2176 36 2184 48 C2176 60 2165 61 2157 48"/>'+
+            '<path class="black-band-mini-gold" d="M2243 48 C2235 35 2224 36 2216 48 C2224 60 2235 61 2243 48"/>'+
+            '<path class="black-band-mini-frame" d="M2183 48 L2200 30 L2217 48 L2200 66 Z"/>'+
+            '<path class="black-band-mini-gem" d="M2191 48 L2200 39 L2209 48 L2200 57 Z"/>'+
+          '</g>'+
+          '</defs>'
+        );
+
+        html=html.replace(
           '<g id="specialFills"></g>',
           '<circle id="thirteenthWheelBackground" cx="2200" cy="1800" r="1555" fill="none" stroke="#E4D3C2" stroke-width="110"/>'+
           '<g id="specialFills"></g>'
         );
 
         html=html.replace(
-          'window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV15=function(){return{blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',blueGradientRemoved:true,angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandRestoredToBlack:true,outerDetailLinesPalette:\'uniform-blue-steel\',thirteenthWheelBackgroundColor:\'#E4D3C2\','
+          '<g id="cardinalOrnaments">',
+          '<g id="blackBandOrnaments" aria-label="زخارف ذهبية وفيروزية داخل الإطار الأسود">'+
+            '<circle class="black-band-vine-ring" cx="2200" cy="1800" r="1752"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(30 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(60 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(120 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(150 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(210 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(240 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(300 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(330 2200 1800)"/>'+
+          '</g>'+
+          '<g id="cardinalOrnaments">'
         );
-        html=html.replace('build:27,','build:39,');
+
+        html=html.replace(
+          'window.__auditKawkabatFinalStructureV3=function(){return{',
+          'window.__auditKawkabatFinalStructureV16=function(){return{blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',blueGradientRemoved:true,angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandRestoredToBlack:true,outerDetailLinesPalette:\'uniform-blue-steel\',thirteenthWheelBackgroundColor:\'#E4D3C2\',blackBandOrnamentsAdded:true,blackBandOrnamentCount:8,blackBandOrnamentAngles:[30,60,120,150,210,240,300,330],blackBandOrnamentPalette:\'gold-turquoise\',blackBandOnlyChanged:true,'
+        );
+        html=html.replace('build:27,','build:40,');
 
         document.open();
         document.write(html);
