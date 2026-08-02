@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — العجلة الثالثة عشرة</title>
+  <title>كوكبة الأرقام السحرية — الهيكل النهائي</title>
   <style>
     :root { background:#F7F1E3; }
     * { box-sizing:border-box; }
@@ -73,12 +73,146 @@
     .number-red { fill:#B21F2D; }
     .number-blue { fill:#174B98; }
     .number-black { fill:#17191B; }
+
+    .angle-band-shadow {
+      fill:none;
+      stroke:#3A2112;
+      stroke-width:104;
+      opacity:.72;
+      vector-effect:non-scaling-stroke;
+    }
+    .angle-band {
+      fill:none;
+      stroke:url(#angleGoldBand);
+      stroke-width:92;
+      vector-effect:non-scaling-stroke;
+    }
+    .angle-band-inner-line,
+    .angle-band-outer-line {
+      fill:none;
+      stroke:url(#ornateGold);
+      vector-effect:non-scaling-stroke;
+    }
+    .angle-band-inner-line { stroke-width:5.5; }
+    .angle-band-outer-line { stroke-width:6.5; }
+    .angle-band-highlight {
+      fill:none;
+      stroke:#FFF0BE;
+      stroke-width:2;
+      opacity:.72;
+      vector-effect:non-scaling-stroke;
+    }
+    .angle-tick {
+      stroke:#21150F;
+      stroke-linecap:round;
+      vector-effect:non-scaling-stroke;
+    }
+    .angle-label {
+      font-family:Arial,Tahoma,sans-serif;
+      font-size:18px;
+      font-weight:800;
+      fill:#17110D;
+      text-anchor:middle;
+      dominant-baseline:central;
+      direction:ltr;
+      unicode-bidi:bidi-override;
+      paint-order:stroke fill;
+      stroke:#F4D99D;
+      stroke-width:.8;
+      stroke-opacity:.55;
+      vector-effect:non-scaling-stroke;
+    }
+    .angle-label.ten-degree { font-size:20px; font-weight:900; }
+    .angle-label.cardinal-angle {
+      font-size:39px;
+      font-weight:900;
+      stroke:#FFE8B4;
+      stroke-width:1.5;
+      filter:drop-shadow(0 2px 0 rgba(255,255,255,.55));
+    }
+
+    .outer-frame-shadow {
+      fill:none;
+      stroke:#100C0A;
+      stroke-width:76;
+      opacity:.48;
+      vector-effect:non-scaling-stroke;
+    }
+    .outer-black-band {
+      fill:none;
+      stroke:url(#blackFrameBand);
+      stroke-width:64;
+      vector-effect:non-scaling-stroke;
+    }
+    .outer-gold-line {
+      fill:none;
+      stroke:url(#ornateGold);
+      vector-effect:non-scaling-stroke;
+    }
+    .outer-gold-line.thick { stroke-width:8; }
+    .outer-gold-line.medium { stroke-width:5; }
+    .outer-gold-line.thin { stroke-width:2.4; }
+    .outer-black-highlight {
+      fill:none;
+      stroke:#5C5049;
+      stroke-width:2;
+      opacity:.88;
+      vector-effect:non-scaling-stroke;
+    }
+    .ornament-line {
+      fill:none;
+      stroke:url(#ornateGold);
+      stroke-width:5;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      vector-effect:non-scaling-stroke;
+    }
+    .ornament-fine {
+      fill:none;
+      stroke:#F1C56A;
+      stroke-width:2.2;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+      vector-effect:non-scaling-stroke;
+    }
+    .ornament-fill {
+      fill:url(#ornamentFill);
+      stroke:#8B4C18;
+      stroke-width:3;
+      vector-effect:non-scaling-stroke;
+    }
+    .ornament-gem {
+      fill:url(#blueGem);
+      stroke:#FFF1BA;
+      stroke-width:3;
+      vector-effect:non-scaling-stroke;
+    }
+    .crest-plaque {
+      fill:url(#blackFrameBand);
+      stroke:url(#ornateGold);
+      stroke-width:5;
+      vector-effect:non-scaling-stroke;
+    }
+    .crest-label {
+      font-family:Arial,Tahoma,sans-serif;
+      font-size:28px;
+      font-weight:900;
+      fill:#F7D987;
+      text-anchor:middle;
+      dominant-baseline:central;
+      direction:ltr;
+      unicode-bidi:bidi-override;
+      paint-order:stroke fill;
+      stroke:#2B1608;
+      stroke-width:2;
+      vector-effect:non-scaling-stroke;
+    }
     #logoImage { opacity:0; transition:opacity .18s linear; }
     html[data-logo-ready="true"] #logoImage { opacity:1; }
   </style>
 </head>
 <body>
-  <svg id="wheel" viewBox="0 0 4400 3600" role="img" aria-label="ثلاث عشرة عجلة؛ أول عجلتين بالأرقام وإحدى عشرة عجلة خارجية فارغة">
+  <svg id="wheel" viewBox="0 0 4400 3600" role="img" aria-label="ثلاث عشرة عجلة مع إطار زوايا مستقل وإطار أسود مزخرف نهائي">
     <defs>
       <clipPath id="logoClip"><circle cx="2200" cy="1800" r="179" /></clipPath>
       <linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -96,6 +230,41 @@
       <linearGradient id="roseBronzeHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
         <stop offset="0%" stop-color="#FFFDFC"/><stop offset="42%" stop-color="#F1E2D9"/><stop offset="100%" stop-color="#B98B68"/>
       </linearGradient>
+      <linearGradient id="angleGoldBand" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#6E3511"/>
+        <stop offset="12%" stop-color="#C77924"/>
+        <stop offset="28%" stop-color="#F4CE7E"/>
+        <stop offset="45%" stop-color="#B96B1E"/>
+        <stop offset="58%" stop-color="#F7DB96"/>
+        <stop offset="78%" stop-color="#9B5017"/>
+        <stop offset="100%" stop-color="#54270D"/>
+      </linearGradient>
+      <linearGradient id="blackFrameBand" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#050505"/>
+        <stop offset="24%" stop-color="#2B2928"/>
+        <stop offset="48%" stop-color="#090909"/>
+        <stop offset="72%" stop-color="#35302D"/>
+        <stop offset="100%" stop-color="#050505"/>
+      </linearGradient>
+      <linearGradient id="ornateGold" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#6D310C"/>
+        <stop offset="18%" stop-color="#C56C1B"/>
+        <stop offset="38%" stop-color="#FFE19A"/>
+        <stop offset="52%" stop-color="#B85A14"/>
+        <stop offset="72%" stop-color="#F6C96E"/>
+        <stop offset="100%" stop-color="#642B0B"/>
+      </linearGradient>
+      <linearGradient id="ornamentFill" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FFD98A"/>
+        <stop offset="45%" stop-color="#B75D17"/>
+        <stop offset="100%" stop-color="#4E2108"/>
+      </linearGradient>
+      <radialGradient id="blueGem" cx="38%" cy="30%" r="70%">
+        <stop offset="0%" stop-color="#FFFFFF"/>
+        <stop offset="18%" stop-color="#8CE5FF"/>
+        <stop offset="52%" stop-color="#278DD0"/>
+        <stop offset="100%" stop-color="#073D73"/>
+      </radialGradient>
     </defs>
 
     <g id="specialFills"></g>
@@ -105,6 +274,47 @@
     <g id="specialArcs"></g>
     <g id="numbersRingOne"></g>
     <g id="numbersRingTwo"></g>
+
+    <g id="angleFrame" aria-label="إطار الزوايا المستقل">
+      <circle class="angle-band-shadow" cx="2200" cy="1800" r="1670" />
+      <circle class="angle-band" cx="2200" cy="1800" r="1670" />
+      <circle class="angle-band-inner-line" cx="2200" cy="1800" r="1623" />
+      <circle class="angle-band-outer-line" cx="2200" cy="1800" r="1717" />
+      <circle class="angle-band-highlight" cx="2200" cy="1800" r="1709" />
+    </g>
+    <g id="angleTicks" aria-label="تدريج الزوايا من درجة إلى درجة"></g>
+    <g id="angleLabels" aria-label="أرقام الزوايا كل خمس درجات"></g>
+
+    <g id="outerBlackFrame" aria-label="الإطار الأسود الخارجي المزخرف">
+      <circle class="outer-frame-shadow" cx="2200" cy="1800" r="1752" />
+      <circle class="outer-black-band" cx="2200" cy="1800" r="1752" />
+      <circle class="outer-gold-line thick" cx="2200" cy="1800" r="1784" />
+      <circle class="outer-gold-line medium" cx="2200" cy="1800" r="1774" />
+      <circle class="outer-black-highlight" cx="2200" cy="1800" r="1765" />
+      <circle class="outer-gold-line thin" cx="2200" cy="1800" r="1733" />
+      <circle class="outer-gold-line medium" cx="2200" cy="1800" r="1721" />
+    </g>
+
+    <g id="topOrnament" aria-label="الزخرفة العلوية للإطار النهائي">
+      <path class="ornament-line" d="M2200 24 C2183 42 2181 60 2200 78 C2219 60 2217 42 2200 24 Z" />
+      <path class="ornament-fine" d="M2200 30 L2200 74 M2188 48 Q2200 38 2212 48 M2187 62 Q2200 51 2213 62" />
+      <path class="ornament-line" d="M2190 64 C2158 42 2136 54 2122 78 C2146 68 2164 74 2181 92" />
+      <path class="ornament-line" d="M2210 64 C2242 42 2264 54 2278 78 C2254 68 2236 74 2219 92" />
+      <path class="ornament-fine" d="M2178 72 C2148 72 2124 89 2102 105 C2128 96 2153 99 2177 111" />
+      <path class="ornament-fine" d="M2222 72 C2252 72 2276 89 2298 105 C2272 96 2247 99 2223 111" />
+      <path class="ornament-line" d="M2168 84 C2134 94 2104 111 2072 112 C2098 122 2131 116 2160 105" />
+      <path class="ornament-line" d="M2232 84 C2266 94 2296 111 2328 112 C2302 122 2269 116 2240 105" />
+      <path class="ornament-fine" d="M2110 103 C2074 88 2038 88 2002 103 C2038 105 2072 112 2100 126" />
+      <path class="ornament-fine" d="M2290 103 C2326 88 2362 88 2398 103 C2362 105 2328 112 2300 126" />
+      <path class="ornament-fill" d="M2190 70 L2200 52 L2210 70 L2200 89 Z" />
+      <circle class="ornament-gem" cx="2200" cy="70" r="13" />
+      <path class="ornament-fill" d="M2038 85 L2052 69 L2066 85 L2052 101 Z" />
+      <circle class="ornament-gem" cx="2052" cy="85" r="8" />
+      <path class="ornament-fill" d="M2334 85 L2348 69 L2362 85 L2348 101 Z" />
+      <circle class="ornament-gem" cx="2348" cy="85" r="8" />
+      <rect class="crest-plaque" x="2132" y="91" width="136" height="50" rx="18" ry="18" />
+      <text class="crest-label" x="2200" y="116">360°</text>
+    </g>
   </svg>
 
   <script>
@@ -114,15 +324,15 @@
       var XLINK='http://www.w3.org/1999/xlink';
       var cx=2200, cy=1800;
       var radii=[];
-      for (var radiusIndex=0; radiusIndex<=13; radiusIndex+=1) {
-        radii.push(180 + (radiusIndex * 110));
-      }
+      for(var radiusIndex=0;radiusIndex<=13;radiusIndex+=1){radii.push(180+(radiusIndex*110));}
       var innerRadius=radii[0];
       var secondRadius=radii[1];
       var thirdRadius=radii[2];
       var outerRadius=radii[radii.length-1];
       var textR1=(innerRadius+secondRadius)/2;
       var textR2=(secondRadius+thirdRadius)/2;
+      var angleTextRadius=1658;
+      var angleTickOuterRadius=1708;
       var cardinal=[0,9,18,27];
       var specialBoundary={0:true,1:true,9:true,10:true,18:true,19:true,27:true,28:true};
       var divisions=document.getElementById('divisions');
@@ -131,10 +341,12 @@
       var frames=document.getElementById('frames');
       var ringOne=document.getElementById('numbersRingOne');
       var ringTwo=document.getElementById('numbersRingTwo');
+      var angleTicks=document.getElementById('angleTicks');
+      var angleLabels=document.getElementById('angleLabels');
       var logo=document.getElementById('logoImage');
 
       function polar(r,deg){var a=deg*Math.PI/180;return{x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};}
-      function line(group,cls,x1,y1,x2,y2){var el=document.createElementNS(NS,'line');el.setAttribute('x1',x1);el.setAttribute('y1',y1);el.setAttribute('x2',x2);el.setAttribute('y2',y2);el.setAttribute('class',cls);group.appendChild(el);}
+      function line(group,cls,x1,y1,x2,y2,width){var el=document.createElementNS(NS,'line');el.setAttribute('x1',x1);el.setAttribute('y1',y1);el.setAttribute('x2',x2);el.setAttribute('y2',y2);el.setAttribute('class',cls);if(width){el.setAttribute('stroke-width',width);}group.appendChild(el);return el;}
       function path(group,cls,d){var el=document.createElementNS(NS,'path');el.setAttribute('d',d);el.setAttribute('class',cls);group.appendChild(el);}
       function circle(group,cls,r){var el=document.createElementNS(NS,'circle');el.setAttribute('cx',cx);el.setAttribute('cy',cy);el.setAttribute('r',r);el.setAttribute('class',cls);group.appendChild(el);}
       function sector(inner,outer,start,end){var os=polar(outer,start),oe=polar(outer,end),ie=polar(inner,end),is=polar(inner,start);return['M',os.x,os.y,'A',outer,outer,0,0,1,oe.x,oe.y,'L',ie.x,ie.y,'A',inner,inner,0,0,0,is.x,is.y,'Z'].join(' ');}
@@ -143,12 +355,29 @@
       function addSpecialArc(r,start,end){var d=arc(r,start,end);path(specialArcs,'special-arc-shadow',d);path(specialArcs,'special-arc-metal',d);path(specialArcs,'special-arc-highlight',d);}
       function colorClass(v){var m=v%3;return m===1?'number-red':(m===2?'number-blue':'number-black');}
       function addNumber(group,value,angle,r,ringClass,isCardinal){var p=polar(r,angle),t=document.createElementNS(NS,'text');t.setAttribute('x',p.x);t.setAttribute('y',p.y);t.setAttribute('class','number-text '+ringClass+' '+colorClass(value)+(isCardinal?' cardinal-number':''));t.textContent=value;group.appendChild(t);}
+      function addAngleLabel(degree){
+        var displayValue=degree===0?360:degree;
+        var point=polar(angleTextRadius,degree-90);
+        var text=document.createElementNS(NS,'text');
+        var isCardinal=degree%90===0;
+        var className='angle-label';
+        if(degree%10===0){className+=' ten-degree';}
+        if(isCardinal){className+=' cardinal-angle';}
+        text.setAttribute('x',point.x);
+        text.setAttribute('y',point.y);
+        text.setAttribute('class',className);
+        if(!isCardinal){
+          var rotation=degree;
+          if(degree>90&&degree<270){rotation+=180;}
+          text.setAttribute('transform','rotate('+rotation+' '+point.x+' '+point.y+')');
+        }
+        text.textContent=displayValue+'°';
+        angleLabels.appendChild(text);
+      }
 
       cardinal.forEach(function(i){
         var start=i*10-95,end=i*10-85;
-        for(var ringIndex=0;ringIndex<radii.length-1;ringIndex+=1){
-          path(specialFills,'special-fill',sector(radii[ringIndex],radii[ringIndex+1],start,end));
-        }
+        for(var ringIndex=0;ringIndex<radii.length-1;ringIndex+=1){path(specialFills,'special-fill',sector(radii[ringIndex],radii[ringIndex+1],start,end));}
         radii.forEach(function(r){addSpecialArc(r,start,end);});
       });
 
@@ -178,29 +407,39 @@
         addNumber(ringTwo,root,centerDeg,textR2,'ring-two-number',isCardinal);
       }
 
+      for(var degree=0;degree<360;degree+=1){
+        var length=degree%10===0?25:(degree%5===0?16:8);
+        var width=degree%10===0?2.2:(degree%5===0?1.5:.72);
+        var outerPoint=polar(angleTickOuterRadius,degree-90);
+        var innerPoint=polar(angleTickOuterRadius-length,degree-90);
+        line(angleTicks,'angle-tick',outerPoint.x,outerPoint.y,innerPoint.x,innerPoint.y,width);
+      }
+      for(var labelDegree=0;labelDegree<360;labelDegree+=5){addAngleLabel(labelDegree);}
+
       var base='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/main/public/kawkabat-logo-v1/chunk-';
       Promise.all([0,1,2,3,4].map(function(i){return fetch(base+i+'.txt',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('LOGO_CHUNK_HTTP_'+r.status);return r.text();});})).then(function(chunks){var src='data:image/webp;base64,'+chunks.join('').trim();logo.setAttribute('href',src);logo.setAttributeNS(XLINK,'href',src);document.documentElement.dataset.logoReady='true';}).catch(function(){document.documentElement.dataset.logoReady='false';});
 
       window.addEventListener('load',function(){var left=Math.max(0,(document.documentElement.scrollWidth-window.innerWidth)/2);var top=Math.max(0,(document.documentElement.scrollHeight-window.innerHeight)/2);window.scrollTo(left,top);},{once:true});
 
-      window.__auditKawkabatThirteenWheelsV1=function(){return{
-        ok:divisions.children.length===36&&ringOne.children.length===36&&ringTwo.children.length===36,
-        build:24,
+      window.__auditKawkabatFinalStructureV1=function(){return{
+        ok:divisions.children.length===36&&ringOne.children.length===36&&ringTwo.children.length===36&&angleTicks.children.length===360&&angleLabels.children.length===72,
+        build:25,
         stageWidth:4400,
         stageHeight:3600,
-        scrollbarThickness:8,
         wheelCount:13,
         numberedWheelCount:2,
         emptyOuterWheelCount:11,
-        thirteenthWheelEmpty:true,
-        thirteenthWheelCells:36,
-        thirteenthWheelNumbers:0,
         ringWidth:110,
-        outerRadius:outerRadius,
-        radii:radii.slice(),
-        baseColor:'glossy-blue-steel',
-        specialColor:'satin-rose-bronze-high-contrast',
-        highlightedDirections:['12','3','6','9'],
+        outerWheelRadius:outerRadius,
+        angleFrameCount:1,
+        angleFrameIndependent:true,
+        angleLabelStep:5,
+        angleTickStep:1,
+        angleCardinalAlignment:{top:'360°/9',right:'90°/9',bottom:'180°/9',left:'270°/9'},
+        protrusions:false,
+        ornateBlackOuterFrameCount:1,
+        topOrnamentCount:1,
+        finalStructureComplete:true,
         logoReady:document.documentElement.dataset.logoReady==='true'
       };};
     }());
