@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Direct Wheel Pan Controls</title>
+  <title>Magic Numbers Constellation — Vertical Wheel Pan</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -54,7 +54,7 @@
             'win.addEventListener("pointerup",finish,true);win.addEventListener("pointercancel",finish,true);win.addEventListener("blur",finish);'+
             'doc.addEventListener("click",function(event){if(Date.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}},true);'+
             'doc.addEventListener("dragstart",function(event){event.preventDefault();},true);'+
-            'doc.addEventListener("wheel",function(event){if(event.ctrlKey)return;event.preventDefault();var factor=event.deltaMode===1?18:(event.deltaMode===2?win.innerHeight:1),dx=event.deltaX*factor,dy=event.deltaY*factor;if(event.shiftKey){if(Math.abs(dx)<Math.abs(dy))dx=dy;dy=0;}win.scrollBy({left:dx,top:dy,behavior:"auto"});},{passive:false});'+
+            'doc.addEventListener("wheel",function(event){if(event.ctrlKey)return;event.preventDefault();var factor=event.deltaMode===1?18:(event.deltaMode===2?win.innerHeight:1),dy=event.deltaY*factor;win.scrollBy({left:0,top:dy,behavior:"auto"});},{passive:false});'+
             'doc.addEventListener("keydown",function(event){arrow(event,win);},true);'+
             'return true;}catch(error){return false;}}'+
           'frame.addEventListener("load",function(){var tries=0,timer=setInterval(function(){tries+=1;if(bind()||tries>80)clearInterval(timer);},100);});'+
