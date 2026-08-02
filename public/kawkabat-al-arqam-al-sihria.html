@@ -26,6 +26,22 @@
         var html=new TextDecoder('utf-8').decode(bytes);
 
         html=html.replace(
+          /<linearGradient id="blueSteelStroke"[\s\S]*?<\/linearGradient>/,
+          '<linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="0%">'+
+          '<stop offset="0%" stop-color="#8FA8B6"/>'+
+          '<stop offset="100%" stop-color="#8FA8B6"/>'+
+          '</linearGradient>'
+        );
+
+        html=html.replace(
+          /<linearGradient id="blueSteelHighlight"[\s\S]*?<\/linearGradient>/,
+          '<linearGradient id="blueSteelHighlight" x1="0%" y1="0%" x2="100%" y2="0%">'+
+          '<stop offset="0%" stop-color="#8FA8B6"/>'+
+          '<stop offset="100%" stop-color="#8FA8B6"/>'+
+          '</linearGradient>'
+        );
+
+        html=html.replace(
           /<linearGradient id="angleGoldBand"[\s\S]*?<\/linearGradient>/,
           '<linearGradient id="angleGoldBand" x1="0%" y1="0%" x2="100%" y2="0%">'+
           '<stop offset="0%" stop-color="#8E8078"/>'+
@@ -46,9 +62,9 @@
 
         html=html.replace(
           'window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV14=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandRestoredToBlack:true,outerBandOnlyChanged:true,outerDetailLinesPalette:\'blue-steel-wheel-frame\',thirteenthWheelBackgroundColor:\'#E4D3C2\','
+          'window.__auditKawkabatFinalStructureV15=function(){return{blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',blueGradientRemoved:true,angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandRestoredToBlack:true,outerDetailLinesPalette:\'uniform-blue-steel\',thirteenthWheelBackgroundColor:\'#E4D3C2\','
         );
-        html=html.replace('build:27,','build:38,');
+        html=html.replace('build:27,','build:39,');
 
         document.open();
         document.write(html);
