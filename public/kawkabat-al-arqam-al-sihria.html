@@ -32,8 +32,8 @@
           '<stop offset="100%" stop-color="#8E8078"/>'+
           '</linearGradient>'+
           '<linearGradient id="outerUniformCopper" x1="0%" y1="0%" x2="100%" y2="0%">'+
-          '<stop offset="0%" stop-color="#B87958"/>'+
-          '<stop offset="100%" stop-color="#B87958"/>'+
+          '<stop offset="0%" stop-color="#D5A17F"/>'+
+          '<stop offset="100%" stop-color="#D5A17F"/>'+
           '</linearGradient>'
         );
 
@@ -48,14 +48,14 @@
           )
           .replace(
             '.outer-black-highlight{fill:none;stroke:#5C5049;',
-            '.outer-black-highlight{fill:none;stroke:#B87958;'
+            '.outer-black-highlight{fill:none;stroke:#D5A17F;'
           );
 
         html=html.replace(
           'window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV9=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',finalOuterFrameOnlyChanged:true,finalOuterFrameUniform:true,finalOuterFrameColor:\'#B87958\','
+          'window.__auditKawkabatFinalStructureV10=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',finalOuterFrameOnlyChanged:true,finalOuterFrameUniform:true,finalOuterFrameColor:\'#D5A17F\','
         );
-        html=html.replace('build:27,','build:33,');
+        html=html.replace('build:27,','build:34,');
 
         document.open();
         document.write(html);
