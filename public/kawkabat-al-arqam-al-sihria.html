@@ -6,7 +6,7 @@
   <title>كوكبة الأرقام السحرية — الهيكل النهائي</title>
   <style>
     html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
-    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A3C2B}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
     .loading{font-weight:800}
   </style>
 </head>
@@ -28,22 +28,22 @@
         html=html.replace(
           /<linearGradient id="angleGoldBand"[\s\S]*?<\/linearGradient>/,
           '<linearGradient id="angleGoldBand" x1="0%" y1="0%" x2="0%" y2="100%">'+
-          '<stop offset="0%" stop-color="#6A3A20"/>'+
-          '<stop offset="12%" stop-color="#9A5A32"/>'+
-          '<stop offset="28%" stop-color="#C98A5C"/>'+
-          '<stop offset="44%" stop-color="#E8B78E"/>'+
-          '<stop offset="57%" stop-color="#C77E4B"/>'+
-          '<stop offset="72%" stop-color="#DE9E6D"/>'+
-          '<stop offset="87%" stop-color="#9C5936"/>'+
-          '<stop offset="100%" stop-color="#5B321E"/>'+
+          '<stop offset="0%" stop-color="#75665E"/>'+
+          '<stop offset="12%" stop-color="#A38F82"/>'+
+          '<stop offset="28%" stop-color="#C7B3A4"/>'+
+          '<stop offset="44%" stop-color="#DFD0C3"/>'+
+          '<stop offset="57%" stop-color="#BBA697"/>'+
+          '<stop offset="72%" stop-color="#D1BDAE"/>'+
+          '<stop offset="87%" stop-color="#9C887B"/>'+
+          '<stop offset="100%" stop-color="#6B5D56"/>'+
           '</linearGradient>'+
           '<linearGradient id="angleTaupeEdge" x1="0%" y1="0%" x2="100%" y2="100%">'+
-          '<stop offset="0%" stop-color="#5A3424"/>'+
-          '<stop offset="20%" stop-color="#A8653D"/>'+
-          '<stop offset="40%" stop-color="#EDC29D"/>'+
-          '<stop offset="55%" stop-color="#B8714A"/>'+
-          '<stop offset="75%" stop-color="#D69B72"/>'+
-          '<stop offset="100%" stop-color="#523022"/>'+
+          '<stop offset="0%" stop-color="#514640"/>'+
+          '<stop offset="20%" stop-color="#927C6F"/>'+
+          '<stop offset="40%" stop-color="#DFCBBB"/>'+
+          '<stop offset="55%" stop-color="#AC9585"/>'+
+          '<stop offset="75%" stop-color="#C8B09D"/>'+
+          '<stop offset="100%" stop-color="#50453F"/>'+
           '</linearGradient>'+
           '<linearGradient id="outerRoseFrameBand" x1="0%" y1="0%" x2="0%" y2="100%">'+
           '<stop offset="0%" stop-color="#6A4938"/>'+
@@ -58,14 +58,14 @@
         );
 
         html=html
-          .replace('.angle-band-shadow{fill:none;stroke:#3A2112;', '.angle-band-shadow{fill:none;stroke:#4B2D20;')
+          .replace('.angle-band-shadow{fill:none;stroke:#3A2112;', '.angle-band-shadow{fill:none;stroke:#4A403A;')
           .replace('stroke:url(#ornateGold);vector-effect:non-scaling-stroke}.angle-band-inner-line', 'stroke:url(#angleTaupeEdge);vector-effect:non-scaling-stroke}.angle-band-inner-line')
-          .replace('.angle-band-highlight{fill:none;stroke:#FFF0BE;', '.angle-band-highlight{fill:none;stroke:#F6D8BE;')
-          .replace('stroke:#F4D99D;stroke-width:.8;', 'stroke:#D7AA83;stroke-width:.8;')
+          .replace('.angle-band-highlight{fill:none;stroke:#FFF0BE;', '.angle-band-highlight{fill:none;stroke:#EFE2D5;')
+          .replace('stroke:#F4D99D;stroke-width:.8;', 'stroke:#D1BFAF;stroke-width:.8;')
           .replace('.outer-black-band{fill:none;stroke:url(#blackFrameBand);', '.outer-black-band{fill:none;stroke:url(#outerRoseFrameBand);');
 
-        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{','window.__auditKawkabatFinalStructureV7=function(){return{anglePalette:\'calm-copper-orange\',outerFramePalette:\'rose-bronze-only\',angleGeometryChanged:false,outerFrameGeometryChanged:false,');
-        html=html.replace('build:27,','build:31,');
+        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{','window.__auditKawkabatFinalStructureV6=function(){return{anglePalette:\'approved-light-champagne-taupe\',outerFramePalette:\'rose-bronze-only\',angleGeometryChanged:false,outerFrameGeometryChanged:false,');
+        html=html.replace('build:27,','build:30,');
 
         document.open();
         document.write(html);
