@@ -44,6 +44,16 @@
           '<stop offset="55%" stop-color="#AC9585"/>'+
           '<stop offset="75%" stop-color="#C8B09D"/>'+
           '<stop offset="100%" stop-color="#50453F"/>'+
+          '</linearGradient>'+
+          '<linearGradient id="outerRoseFrameBand" x1="0%" y1="0%" x2="0%" y2="100%">'+
+          '<stop offset="0%" stop-color="#6A4938"/>'+
+          '<stop offset="12%" stop-color="#9B6F58"/>'+
+          '<stop offset="28%" stop-color="#D3A58F"/>'+
+          '<stop offset="44%" stop-color="#F3D2C3"/>'+
+          '<stop offset="58%" stop-color="#C58B72"/>'+
+          '<stop offset="72%" stop-color="#E3B9A7"/>'+
+          '<stop offset="88%" stop-color="#9D6853"/>'+
+          '<stop offset="100%" stop-color="#5C4032"/>'+
           '</linearGradient>'
         );
 
@@ -51,10 +61,11 @@
           .replace('.angle-band-shadow{fill:none;stroke:#3A2112;', '.angle-band-shadow{fill:none;stroke:#4A403A;')
           .replace('stroke:url(#ornateGold);vector-effect:non-scaling-stroke}.angle-band-inner-line', 'stroke:url(#angleTaupeEdge);vector-effect:non-scaling-stroke}.angle-band-inner-line')
           .replace('.angle-band-highlight{fill:none;stroke:#FFF0BE;', '.angle-band-highlight{fill:none;stroke:#EFE2D5;')
-          .replace('stroke:#F4D99D;stroke-width:.8;', 'stroke:#D1BFAF;stroke-width:.8;');
+          .replace('stroke:#F4D99D;stroke-width:.8;', 'stroke:#D1BFAF;stroke-width:.8;')
+          .replace('.outer-black-band{fill:none;stroke:url(#blackFrameBand);', '.outer-black-band{fill:none;stroke:url(#outerRoseFrameBand);');
 
-        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{','window.__auditKawkabatFinalStructureV5=function(){return{anglePalette:\'approved-light-champagne-taupe\',angleGeometryChanged:false,');
-        html=html.replace('build:27,','build:29,');
+        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{','window.__auditKawkabatFinalStructureV6=function(){return{anglePalette:\'approved-light-champagne-taupe\',outerFramePalette:\'rose-bronze-only\',angleGeometryChanged:false,outerFrameGeometryChanged:false,');
+        html=html.replace('build:27,','build:30,');
 
         document.open();
         document.write(html);
