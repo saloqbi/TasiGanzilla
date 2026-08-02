@@ -56,6 +56,7 @@
 
         html=html.replace(
           '</style>',
+          '.outer-gold-line.thick{stroke:url(#ornateGold)!important;filter:drop-shadow(0 1px 1px rgba(0,0,0,.48))}'+
           '.black-band-vine-ring{fill:none;stroke:url(#ornateGold);stroke-width:2.2;opacity:.96;vector-effect:non-scaling-stroke}'+
           '.black-band-mini-gold{fill:none;stroke:url(#ornateGold);stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}'+
           '.black-band-mini-frame{fill:url(#ornamentFill);stroke:#F4CD75;stroke-width:2.3;vector-effect:non-scaling-stroke}'+
@@ -100,9 +101,9 @@
 
         html=html.replace(
           'window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV16=function(){return{blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',blueGradientRemoved:true,angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandRestoredToBlack:true,outerDetailLinesPalette:\'uniform-blue-steel\',thirteenthWheelBackgroundColor:\'#E4D3C2\',blackBandOrnamentsAdded:true,blackBandOrnamentCount:8,blackBandOrnamentAngles:[30,60,120,150,210,240,300,330],blackBandOrnamentPalette:\'gold-turquoise\',blackBandOnlyChanged:true,'
+          'window.__auditKawkabatFinalStructureV17=function(){return{blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',blueGradientRemoved:true,angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandRestoredToBlack:true,outerDetailLinesPalette:\'uniform-blue-steel\',outermostCrownRailPalette:\'ornate-gold\',outermostCrownRailOnlyChanged:true,thirteenthWheelBackgroundColor:\'#E4D3C2\',blackBandOrnamentsAdded:true,blackBandOrnamentCount:8,blackBandOrnamentAngles:[30,60,120,150,210,240,300,330],blackBandOrnamentPalette:\'gold-turquoise\','
         );
-        html=html.replace('build:27,','build:40,');
+        html=html.replace('build:27,','build:41,');
 
         document.open();
         document.write(html);
