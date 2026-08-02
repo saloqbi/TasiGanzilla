@@ -6,7 +6,7 @@
   <title>كوكبة الأرقام السحرية — الهيكل النهائي</title>
   <style>
     html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
-    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#4A3D35}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
     .loading{font-weight:800}
   </style>
 </head>
@@ -28,33 +28,33 @@
         html=html.replace(
           /<linearGradient id="angleGoldBand"[\s\S]*?<\/linearGradient>/,
           '<linearGradient id="angleGoldBand" x1="0%" y1="0%" x2="0%" y2="100%">'+
-          '<stop offset="0%" stop-color="#282321"/>'+
-          '<stop offset="12%" stop-color="#51463F"/>'+
-          '<stop offset="28%" stop-color="#8F7968"/>'+
-          '<stop offset="44%" stop-color="#CDB29C"/>'+
-          '<stop offset="57%" stop-color="#756257"/>'+
-          '<stop offset="72%" stop-color="#AA907C"/>'+
-          '<stop offset="87%" stop-color="#564A43"/>'+
-          '<stop offset="100%" stop-color="#26211F"/>'+
+          '<stop offset="0%" stop-color="#75665E"/>'+
+          '<stop offset="12%" stop-color="#A38F82"/>'+
+          '<stop offset="28%" stop-color="#C7B3A4"/>'+
+          '<stop offset="44%" stop-color="#DFD0C3"/>'+
+          '<stop offset="57%" stop-color="#BBA697"/>'+
+          '<stop offset="72%" stop-color="#D1BDAE"/>'+
+          '<stop offset="87%" stop-color="#9C887B"/>'+
+          '<stop offset="100%" stop-color="#6B5D56"/>'+
           '</linearGradient>'+
           '<linearGradient id="angleTaupeEdge" x1="0%" y1="0%" x2="100%" y2="100%">'+
-          '<stop offset="0%" stop-color="#302824"/>'+
-          '<stop offset="20%" stop-color="#705A4F"/>'+
-          '<stop offset="40%" stop-color="#D2B8A3"/>'+
-          '<stop offset="55%" stop-color="#796357"/>'+
-          '<stop offset="75%" stop-color="#AF927E"/>'+
-          '<stop offset="100%" stop-color="#2E2723"/>'+
+          '<stop offset="0%" stop-color="#514640"/>'+
+          '<stop offset="20%" stop-color="#927C6F"/>'+
+          '<stop offset="40%" stop-color="#DFCBBB"/>'+
+          '<stop offset="55%" stop-color="#AC9585"/>'+
+          '<stop offset="75%" stop-color="#C8B09D"/>'+
+          '<stop offset="100%" stop-color="#50453F"/>'+
           '</linearGradient>'
         );
 
         html=html
-          .replace('.angle-band-shadow{fill:none;stroke:#3A2112;', '.angle-band-shadow{fill:none;stroke:#211D1A;')
+          .replace('.angle-band-shadow{fill:none;stroke:#3A2112;', '.angle-band-shadow{fill:none;stroke:#4A403A;')
           .replace('stroke:url(#ornateGold);vector-effect:non-scaling-stroke}.angle-band-inner-line', 'stroke:url(#angleTaupeEdge);vector-effect:non-scaling-stroke}.angle-band-inner-line')
-          .replace('.angle-band-highlight{fill:none;stroke:#FFF0BE;', '.angle-band-highlight{fill:none;stroke:#E5D1C0;')
-          .replace('stroke:#F4D99D;stroke-width:.8;', 'stroke:#B9A08D;stroke-width:.8;');
+          .replace('.angle-band-highlight{fill:none;stroke:#FFF0BE;', '.angle-band-highlight{fill:none;stroke:#EFE2D5;')
+          .replace('stroke:#F4D99D;stroke-width:.8;', 'stroke:#D1BFAF;stroke-width:.8;');
 
-        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{','window.__auditKawkabatFinalStructureV4=function(){return{anglePalette:\'dark-metallic-taupe-rose-bronze\',angleGeometryChanged:false,');
-        html=html.replace('build:27,','build:28,');
+        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{','window.__auditKawkabatFinalStructureV5=function(){return{anglePalette:\'approved-light-champagne-taupe\',angleGeometryChanged:false,');
+        html=html.replace('build:27,','build:29,');
 
         document.open();
         document.write(html);
