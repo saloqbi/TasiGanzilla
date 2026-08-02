@@ -16,22 +16,14 @@
   (async function(){
     'use strict';
 
-    var newWorkApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/8aae0ce45c2e18b510841acef41154b6c150d9d0';
+    var newWorkUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/c611a5bdcca7a18125113fa9382ea346e376ff9b/public/kawkabat-al-arqam-al-sihria.html';
     var oldRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/112477f023dfe9b8e66f0b49f5a27a507cd46a7e/public/kawkabat-wheel-view-runtime.html';
-    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/400626eabcef332e6d9dcd87638088ef0ad015ae/public/kawkabat-wheel-data-runtime-v4.html';
-
-    function decodeBase64(value){
-      var binary=atob(String(value||'').replace(/\s/g,''));
-      var bytes=new Uint8Array(binary.length);
-      for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
-      return new TextDecoder('utf-8').decode(bytes);
-    }
+    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/736c141a7e0b063c5c15c3ec695050774e241c51/public/kawkabat-wheel-data-runtime-v4.html';
 
     try{
-      var response=await fetch(newWorkApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      var response=await fetch(newWorkUrl,{cache:'no-store'});
       if(!response.ok)throw new Error('NEW_WORK_HTTP_'+response.status);
-      var payload=await response.json();
-      var html=decodeBase64(payload.content);
+      var html=await response.text();
 
       html=html.replace('Clockwise, Size and View','Clockwise, Size, View and Data Type');
       html=html.replace(oldRuntime,newRuntime);
