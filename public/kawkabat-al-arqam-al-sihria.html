@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Gannzilla Tools V3</title>
+  <title>Magic Numbers Constellation — Gannzilla Tools V4</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -11,13 +11,13 @@
   </style>
 </head>
 <body>
-  <div class="loading">Loading Gannzilla tools V3…</div>
+  <div class="loading">Loading Gannzilla tools V4…</div>
   <script>
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var fixedRef='75cbd31411c15b5c4fb84421e0e13e3ff5d8a156';
-    var wheelHostUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/'+fixedRef+'/public/kawkabat-wheel-tools-host-v1.html';
+    var fixedRef='c1828bc693cff5fd3ec48c000dd2df6ab51c4c1f';
+    var wheelStaticUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/'+fixedRef+'/public/kawkabat-wheel-static-v1.html';
     var partsBase='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/'+fixedRef+'/public/gannzilla-tools-v2/';
 
     function decodeBase64(value){
@@ -50,23 +50,25 @@
         '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="about:blank"></iframe>'
       );
 
-      var loader='<script id="gannzilla-tools-v3-loader">(async function(){'+
+      var loader='<script id="gannzilla-tools-v4-loader">(async function(){'+
         'var bottom=document.querySelector(".panel-bottom");'+
         'var frame=document.getElementById("workFrame");'+
         'function status(text,kind){if(bottom){bottom.textContent=text;bottom.dataset.status=kind||"waiting";}}'+
-        'status("Loading wheel and tools V3…","waiting");'+
+        'status("Loading static wheel and tools V4…","waiting");'+
         'try{'+
           'var names=["part-01.js","part-02.js","part-03.js","part-04.js"];'+
           'var all=await Promise.all(['+
-            'fetch("'+wheelHostUrl+'",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("WHEEL_HOST_HTTP_"+r.status);return r.text();}),' +
+            'fetch("'+wheelStaticUrl+'",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("STATIC_WHEEL_HTTP_"+r.status);return r.text();}),' +
             'Promise.all(names.map(function(name){return fetch("'+partsBase+'"+name,{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("ENGINE_PART_HTTP_"+r.status+"_"+name);return r.text();});}))'+
           ']);'+
-          'var hostHtml=all[0],code=all[1].join("");'+
+          'var wheelHtml=all[0],code=all[1].join("");'+
           'try{new Function(code);}catch(parseError){throw new Error("ENGINE_PARSE_"+parseError.message);}'+
-          'frame.addEventListener("load",function(){status("Wheel loaded • connecting tools…","waiting");},{once:true});'+
-          'frame.srcdoc=hostHtml;'+
+          'frame.addEventListener("load",function(){'+
+            'try{var d=frame.contentDocument;if(!d||!d.getElementById("wheel")){status("Static wheel loaded without #wheel","error");return;}status("Wheel SVG loaded • connecting tools…","waiting");}catch(e){status("Wheel access error: "+String(e.message||e),"error");}'+
+          '},{once:true});'+
+          'frame.srcdoc=wheelHtml;'+
           'var script=document.createElement("script");'+
-          'script.id="gannzilla-tools-engine-v3";'+
+          'script.id="gannzilla-tools-engine-v4";'+
           'script.textContent=code;'+
           'document.body.appendChild(script);'+
           'setTimeout(function(){'+
