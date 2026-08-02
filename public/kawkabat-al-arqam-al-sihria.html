@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Clockwise Direct DOM</title>
+  <title>Magic Numbers Constellation — Stable Clockwise Switch</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -16,7 +16,8 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var staticWheelApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a';
+    var clockwiseUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/52bb110d2d5be06acf1b570722dfaae7f116a8a5/public/kawkabat-wheel-cycles1to10.html';
+    var counterclockwiseUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/cca7630651bc3277be2f6dc2c2b791029fc146f0/public/kawkabat-wheel-cycles1to10-counterclockwise.html';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -25,218 +26,11 @@
       return new TextDecoder('utf-8').decode(bytes);
     }
 
-    function bootDirectWheel(staticWheelBase64){
-      'use strict';
-      var host=document.getElementById('wheelViewport');
-      var input=document.querySelector('[aria-label="Layout clockwise"]');
-      var bottom=document.querySelector('.panel-bottom');
-      var CX=2200,CY=1800;
-
-      function status(mode,message){
-        if(!bottom)return;
-        bottom.setAttribute('data-status',mode);
-        bottom.textContent=message;
-      }
-
-      function polar(radius,degree){
-        var angle=degree*Math.PI/180;
-        return{x:CX+Math.cos(angle)*radius,y:CY+Math.sin(angle)*radius};
-      }
-
-      function colorClass(value){
-        var mod=((value%3)+3)%3;
-        return mod===1?'number-red':mod===2?'number-blue':'number-black';
-      }
-
-      try{
-        status('loading','جارٍ تركيب العجلة مباشرة…');
-        if(!host)throw new Error('WHEEL_VIEWPORT_NOT_FOUND');
-
-        var source=decodeBase64(staticWheelBase64);
-        var parsed=new DOMParser().parseFromString(source,'text/html');
-        var sourceStyle=parsed.querySelector('style');
-        var sourceSvg=parsed.querySelector('svg#wheel');
-        var sourceScript=parsed.querySelector('body > script');
-        if(!sourceStyle||!sourceSvg||!sourceScript)throw new Error('STATIC_WHEEL_PARTS_MISSING');
-
-        var wheelStyle=document.createElement('style');
-        wheelStyle.id='direct-wheel-style-v1';
-        wheelStyle.textContent=sourceStyle.textContent+
-          '\nhtml,body{min-width:0!important;min-height:0!important;width:100%!important;height:100%!important;overflow:hidden!important;display:block!important;padding:0!important;background:#F7F1E3!important}'+
-          '#wheelViewport{position:fixed!important;top:0!important;right:0!important;bottom:0!important;left:390px!important;width:calc(100% - 390px)!important;height:100%!important;overflow:auto!important;background:#F7F1E3!important;outline:none!important;scrollbar-width:auto!important;scrollbar-color:#7d898f #e8e3d8!important;overscroll-behavior:none!important}'+
-          '#wheelViewport::-webkit-scrollbar{display:block!important;width:14px!important;height:14px!important}'+
-          '#wheelViewport::-webkit-scrollbar-track{background:#e8e3d8!important}'+
-          '#wheelViewport::-webkit-scrollbar-thumb{background:#7d898f!important;border:2px solid #e8e3d8!important;border-radius:999px!important}'+
-          '#wheelViewport>svg{display:block!important;width:3960px!important;height:3240px!important;max-width:none!important;max-height:none!important}'+
-          '.cycle-number{font-size:24px!important;pointer-events:none!important}'+
-          '.outer-text-label{font-family:Arial,Tahoma,sans-serif;text-anchor:middle;dominant-baseline:central;direction:rtl;unicode-bidi:plaintext;pointer-events:none;paint-order:stroke fill;stroke:#F7F1E3;stroke-width:1.15;stroke-opacity:.92;vector-effect:non-scaling-stroke}'+
-          '.calendar-day-label{font-size:22px;font-weight:900}'+
-          '.zodiac-element-label{font-size:20px;font-weight:800}'+
-          '@media(max-width:950px){#wheelViewport{left:330px!important;width:calc(100% - 330px)!important}}';
-        document.head.appendChild(wheelStyle);
-
-        host.innerHTML='';
-        host.appendChild(document.importNode(sourceSvg,true));
-        (new Function(sourceScript.textContent))();
-
-        var NS='http://www.w3.org/2000/svg';
-        var wheel=document.getElementById('wheel');
-        var angleFrame=document.getElementById('angleFrame');
-        if(!wheel||!angleFrame)throw new Error('BASE_WHEEL_RUNTIME_FAILED');
-
-        function ensureGroup(id,label){
-          var group=document.getElementById(id);
-          if(!group){
-            group=document.createElementNS(NS,'g');
-            group.id=id;
-            group.setAttribute('aria-label',label);
-            wheel.insertBefore(group,angleFrame);
-          }
-          while(group.firstChild)group.removeChild(group.firstChild);
-          return group;
-        }
-
-        function addNumber(group,value,degree,radius,cardinal){
-          var point=polar(radius,degree);
-          var text=document.createElementNS(NS,'text');
-          text.setAttribute('x',point.x);
-          text.setAttribute('y',point.y);
-          text.setAttribute('class','number-text cycle-number '+colorClass(value)+(cardinal?' cardinal-number':''));
-          text.textContent=String(value);
-          group.appendChild(text);
-        }
-
-        var cycleGroups=[];
-        for(var cycle=1;cycle<=10;cycle+=1){
-          var start=((cycle-1)*36)+1;
-          var end=cycle*36;
-          var radius=455+((cycle-1)*110);
-          var group=ensureGroup('numbersCycle'+cycle,'الدورة '+cycle+' من '+start+' إلى '+end);
-          for(var index=0;index<36;index+=1){
-            var value=index===0?end:start+index-1;
-            addNumber(group,value,index*10-90,radius,index%9===0);
-            var node=group.lastElementChild;
-            node.setAttribute('data-cycle',cycle);
-            node.setAttribute('data-value',value);
-          }
-          cycleGroups.push(group);
-        }
-
-        var dayNames=['الجمعة','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];
-        var zodiacElements=['ماء الحوت','نار الحمل','تراب الثور','هواء الجوزاء','ماء السرطان','نار الأسد','تراب السنبلة','هواء الميزان','ماء العقرب','نار القوس','تراب الجدي','هواء الدلو'];
-        var daysRing=ensureGroup('calendarDaysRing','الأيام');
-        var zodiacRing=ensureGroup('zodiacElementsRing','الأبراج والعناصر');
-
-        function addOuter(group,textValue,cellValue,index,radius,className){
-          var degree=index*10;
-          var point=polar(radius,degree-90);
-          var rotation=degree;
-          if(degree>90&&degree<270)rotation+=180;
-          var text=document.createElementNS(NS,'text');
-          text.setAttribute('x',point.x);
-          text.setAttribute('y',point.y);
-          text.setAttribute('class','outer-text-label '+className+' '+colorClass(cellValue));
-          text.setAttribute('transform','rotate('+rotation+' '+point.x+' '+point.y+')');
-          text.setAttribute('lang','ar');
-          text.textContent=textValue;
-          group.appendChild(text);
-        }
-
-        for(var outerIndex=0;outerIndex<36;outerIndex+=1){
-          var cellValue=outerIndex===0?36:outerIndex;
-          addOuter(daysRing,dayNames[cellValue%6],cellValue,outerIndex,1580,'calendar-day-label');
-          addOuter(zodiacRing,zodiacElements[cellValue%12],cellValue,outerIndex,1538,'zodiac-element-label');
-        }
-
-        var innerRings=[
-          {group:document.getElementById('numbersRingOne'),radius:235},
-          {group:document.getElementById('numbersRingTwo'),radius:345}
-        ];
-
-        function positionNumberGroup(group,radius,clockwise){
-          if(!group)return;
-          Array.prototype.forEach.call(group.children,function(node,index){
-            var degree=(clockwise?index*10:-index*10)-90;
-            var point=polar(radius,degree);
-            node.setAttribute('x',point.x);
-            node.setAttribute('y',point.y);
-          });
-        }
-
-        function positionOuterGroup(group,radius,clockwise){
-          if(!group)return;
-          Array.prototype.forEach.call(group.children,function(node,index){
-            var degree=clockwise?index*10:-index*10;
-            var normalized=((degree%360)+360)%360;
-            var point=polar(radius,degree-90);
-            var rotation=normalized;
-            if(normalized>90&&normalized<270)rotation+=180;
-            node.setAttribute('x',point.x);
-            node.setAttribute('y',point.y);
-            node.setAttribute('transform','rotate('+rotation+' '+point.x+' '+point.y+')');
-          });
-        }
-
-        function applyClockwise(clockwise){
-          innerRings.forEach(function(item){positionNumberGroup(item.group,item.radius,clockwise);});
-          cycleGroups.forEach(function(group,index){positionNumberGroup(group,455+(index*110),clockwise);});
-          positionOuterGroup(daysRing,1580,clockwise);
-          positionOuterGroup(zodiacRing,1538,clockwise);
-          host.dataset.clockwise=clockwise?'true':'false';
-          status('success',clockwise?'Clockwise مفعل — مع عقارب الساعة':'Clockwise ملغي — عكس عقارب الساعة');
-        }
-
-        if(!input)throw new Error('CLOCKWISE_CONTROL_NOT_FOUND');
-        input.checked=true;
-        input.addEventListener('change',function(){applyClockwise(!!input.checked);});
-        applyClockwise(true);
-
-        var dragging=false,startX=0,startY=0,startLeft=0,startTop=0;
-        host.addEventListener('mousedown',function(event){
-          if(event.button!==0)return;
-          dragging=true;
-          startX=event.clientX;
-          startY=event.clientY;
-          startLeft=host.scrollLeft;
-          startTop=host.scrollTop;
-          event.preventDefault();
-        });
-        window.addEventListener('mousemove',function(event){
-          if(!dragging)return;
-          host.scrollLeft=startLeft-(event.clientX-startX);
-          host.scrollTop=startTop-(event.clientY-startY);
-        });
-        window.addEventListener('mouseup',function(){dragging=false;});
-        host.addEventListener('wheel',function(event){
-          if(event.ctrlKey)return;
-          event.preventDefault();
-          if(event.shiftKey)host.scrollLeft+=event.deltaY;
-          else host.scrollTop+=event.deltaY;
-        },{passive:false});
-
-        requestAnimationFrame(function(){
-          host.scrollLeft=Math.max(0,(host.scrollWidth-host.clientWidth)/2);
-          host.scrollTop=Math.max(0,(host.scrollHeight-host.clientHeight)/2);
-        });
-
-        window.__auditKawkabatClockwiseDirectDomV1=function(){
-          return{ok:true,transport:'direct-dom',clockwise:host.dataset.clockwise==='true',cycleCount:cycleGroups.length,days:daysRing.children.length,zodiac:zodiacRing.children.length};
-        };
-      }catch(error){
-        status('error','فشل تركيب العجلة: '+String(error.message||error));
-      }
-    }
-
     try{
-      var responses=await Promise.all([
-        fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}}),
-        fetch(staticWheelApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}})
-      ]);
-      if(!responses[0].ok)throw new Error('APPROVED_HTTP_'+responses[0].status);
-      if(!responses[1].ok)throw new Error('STATIC_WHEEL_HTTP_'+responses[1].status);
-      var payloads=await Promise.all([responses[0].json(),responses[1].json()]);
-      var html=decodeBase64(payloads[0].content);
-      var staticWheelBase64=String(payloads[1].content||'').replace(/\s/g,'');
+      var response=await fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      if(!response.ok)throw new Error('APPROVED_HTTP_'+response.status);
+      var payload=await response.json();
+      var html=decodeBase64(payload.content);
       var closeTag='</scr'+'ipt>';
 
       html=html.replace('</style>',
@@ -252,11 +46,21 @@
 
       html=html.replace(
         /<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
-        '<div id="wheelViewport" class="work-frame" role="region" aria-label="Magic Numbers Constellation"></div>'
+        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" scrolling="yes" src="'+clockwiseUrl+'"></iframe>'
       );
 
-      var boot='<script id="clockwise-direct-dom-v1">('+bootDirectWheel.toString()+')('+JSON.stringify(staticWheelBase64)+');'+closeTag;
-      html=html.replace('</body>',boot+'</body>');
+      var switchScript='<script id="clockwise-stable-switch-v1">(function(){'+
+        "'use strict';"+
+        'var frame=document.getElementById("workFrame"),input=document.querySelector("[aria-label=\\"Layout clockwise\\"]"),bottom=document.querySelector(".panel-bottom"),cw='+JSON.stringify(clockwiseUrl)+',ccw='+JSON.stringify(counterclockwiseUrl)+';'+
+        'function status(mode,message){if(!bottom)return;bottom.setAttribute("data-status",mode);bottom.textContent=message;}'+
+        'function loadDirection(){if(!frame||!input)return;status("loading",input.checked?"جارٍ تحميل العجلة مع عقارب الساعة…":"جارٍ تحميل العجلة عكس عقارب الساعة…");var next=input.checked?cw:ccw;if(frame.src!==next)frame.src=next;}'+
+        'if(!frame||!input){status("error","تعذر العثور على العجلة أو خيار Clockwise");return;}'+
+        'input.checked=true;input.addEventListener("change",loadDirection);'+
+        'frame.addEventListener("load",function(){status("success",input.checked?"Clockwise مفعل — العجلة مع عقارب الساعة":"Clockwise ملغي — العجلة عكس عقارب الساعة");});'+
+        'status("loading","جارٍ تحميل العجلة مع عقارب الساعة…");'+
+      '}());'+closeTag;
+      html=html.replace('</body>',switchScript+'</body>');
+
       document.open();
       document.write(html);
       document.close();
