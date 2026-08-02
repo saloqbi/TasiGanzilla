@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Separated Scrollbars</title>
+  <title>Magic Numbers Constellation — Wheel Scrollbar Removed</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -26,22 +26,16 @@
         var html=new TextDecoder('utf-8').decode(bytes);
 
         html=html.replace('</style>',
-          '.work-frame{right:0!important;width:calc(100% - 390px)!important}'+
+          '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important}'+
           '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
           '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
           '</style>');
 
-        html=html.replace('<iframe class="work-frame"','<iframe id="workFrame" class="work-frame"');
+        html=html.replace(
+          '<iframe class="work-frame"',
+          '<iframe class="work-frame" scrolling="no"'
+        );
 
-        var closeTag='</scr'+'ipt>';
-        var sideFix='<script>(function(){'+
-          "'use strict';"+
-          'var frame=document.getElementById("workFrame");'+
-          'function moveWheelScrollbarRight(){try{var doc=frame.contentDocument;if(!doc)return;doc.documentElement.setAttribute("dir","ltr");if(doc.body)doc.body.setAttribute("dir","ltr");var style=doc.getElementById("host-scrollbar-side-fix");if(!style){style=doc.createElement("style");style.id="host-scrollbar-side-fix";style.textContent="html,body{direction:ltr!important}";(doc.head||doc.documentElement).appendChild(style)}}catch(error){}}'+
-          'frame.addEventListener("load",function(){moveWheelScrollbarRight();setTimeout(moveWheelScrollbarRight,250);setTimeout(moveWheelScrollbarRight,900)});'+
-        '}());'+closeTag;
-
-        html=html.replace('</body>',sideFix+'</body>');
         document.open();
         document.write(html);
         document.close();
