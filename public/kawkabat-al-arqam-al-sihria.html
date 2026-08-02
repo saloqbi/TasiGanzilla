@@ -27,23 +27,9 @@
 
         html=html.replace(
           /<linearGradient id="angleGoldBand"[\s\S]*?<\/linearGradient>/,
-          '<linearGradient id="angleGoldBand" x1="0%" y1="0%" x2="0%" y2="100%">'+
-          '<stop offset="0%" stop-color="#75665E"/>'+
-          '<stop offset="12%" stop-color="#A38F82"/>'+
-          '<stop offset="28%" stop-color="#C7B3A4"/>'+
-          '<stop offset="44%" stop-color="#DFD0C3"/>'+
-          '<stop offset="57%" stop-color="#BBA697"/>'+
-          '<stop offset="72%" stop-color="#D1BDAE"/>'+
-          '<stop offset="87%" stop-color="#9C887B"/>'+
-          '<stop offset="100%" stop-color="#6B5D56"/>'+
-          '</linearGradient>'+
-          '<linearGradient id="angleTaupeEdge" x1="0%" y1="0%" x2="100%" y2="100%">'+
-          '<stop offset="0%" stop-color="#514640"/>'+
-          '<stop offset="20%" stop-color="#927C6F"/>'+
-          '<stop offset="40%" stop-color="#DFCBBB"/>'+
-          '<stop offset="55%" stop-color="#AC9585"/>'+
-          '<stop offset="75%" stop-color="#C8B09D"/>'+
-          '<stop offset="100%" stop-color="#50453F"/>'+
+          '<linearGradient id="angleGoldBand" x1="0%" y1="0%" x2="100%" y2="0%">'+
+          '<stop offset="0%" stop-color="#8E8078"/>'+
+          '<stop offset="100%" stop-color="#8E8078"/>'+
           '</linearGradient>'+
           '<linearGradient id="outerRoseFrameBand" x1="0%" y1="0%" x2="0%" y2="100%">'+
           '<stop offset="0%" stop-color="#6A4938"/>'+
@@ -57,15 +43,16 @@
           '</linearGradient>'
         );
 
-        html=html
-          .replace('.angle-band-shadow{fill:none;stroke:#3A2112;', '.angle-band-shadow{fill:none;stroke:#4A403A;')
-          .replace('stroke:url(#ornateGold);vector-effect:non-scaling-stroke}.angle-band-inner-line', 'stroke:url(#angleTaupeEdge);vector-effect:non-scaling-stroke}.angle-band-inner-line')
-          .replace('.angle-band-highlight{fill:none;stroke:#FFF0BE;', '.angle-band-highlight{fill:none;stroke:#EFE2D5;')
-          .replace('stroke:#F4D99D;stroke-width:.8;', 'stroke:#D1BFAF;stroke-width:.8;')
-          .replace('.outer-black-band{fill:none;stroke:url(#blackFrameBand);', '.outer-black-band{fill:none;stroke:url(#outerRoseFrameBand);');
+        html=html.replace(
+          '.outer-black-band{fill:none;stroke:url(#blackFrameBand);',
+          '.outer-black-band{fill:none;stroke:url(#outerRoseFrameBand);'
+        );
 
-        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{','window.__auditKawkabatFinalStructureV6=function(){return{anglePalette:\'approved-light-champagne-taupe\',outerFramePalette:\'rose-bronze-only\',angleGeometryChanged:false,outerFrameGeometryChanged:false,');
-        html=html.replace('build:27,','build:30,');
+        html=html.replace(
+          'window.__auditKawkabatFinalStructureV3=function(){return{',
+          'window.__auditKawkabatFinalStructureV8=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',angleBandOnlyChanged:true,outerFramePalette:\'rose-bronze-only\','
+        );
+        html=html.replace('build:27,','build:32,');
 
         document.open();
         document.write(html);
