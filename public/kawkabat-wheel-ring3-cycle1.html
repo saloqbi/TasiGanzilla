@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — الدورة 1 على العجلة 3</title>
+  <title>كوكبة الأرقام السحرية — الدورتان 1 و2</title>
   <style>
     html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
     body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
@@ -32,7 +32,7 @@
       var closeTag='</scr'+'ipt>';
 
       html=html.replace('</style>',
-        '.ring-three-number{font-size:24px!important;pointer-events:none!important}'+
+        '.ring-three-number,.ring-four-number{font-size:24px!important;pointer-events:none!important}'+
         'html,body{overflow:auto!important;scrollbar-width:auto!important;-ms-overflow-style:auto!important;overscroll-behavior:none!important;scroll-behavior:auto!important}'+
         'html::-webkit-scrollbar,body::-webkit-scrollbar{display:block!important;width:14px!important;height:14px!important}'+
         'html::-webkit-scrollbar-track,body::-webkit-scrollbar-track{background:#e8e3d8!important}'+
@@ -42,12 +42,19 @@
         '</style>');
 
       var runtime=
+        "var wheelNode=document.getElementById('wheel'),angleFrameNode=document.getElementById('angleFrame');"+
         "var ringThree=document.getElementById('numbersRingThree');"+
-        "if(!ringThree){ringThree=document.createElementNS(NS,'g');ringThree.id='numbersRingThree';ringThree.setAttribute('aria-label','الدورة رقم 1 من 1 إلى 36 على العجلة رقم 3');var wheelNode=document.getElementById('wheel'),angleFrameNode=document.getElementById('angleFrame');if(angleFrameNode&&angleFrameNode.parentNode===wheelNode)wheelNode.insertBefore(ringThree,angleFrameNode);else wheelNode.appendChild(ringThree);}"+
+        "if(!ringThree){ringThree=document.createElementNS(NS,'g');ringThree.id='numbersRingThree';ringThree.setAttribute('aria-label','الدورة رقم 1 من 1 إلى 36 على العجلة رقم 3');if(angleFrameNode&&angleFrameNode.parentNode===wheelNode)wheelNode.insertBefore(ringThree,angleFrameNode);else wheelNode.appendChild(ringThree);}"+
         "while(ringThree.firstChild)ringThree.removeChild(ringThree.firstChild);"+
         "for(var ringThreeIndex=0;ringThreeIndex<36;ringThreeIndex+=1){var ringThreeValue=ringThreeIndex===0?36:ringThreeIndex;addNumber(ringThree,ringThreeValue,ringThreeIndex*10-90,455,'ring-three-number',ringThreeIndex%9===0);var ringThreeNode=ringThree.lastElementChild;ringThreeNode.setAttribute('data-wheel','3');ringThreeNode.setAttribute('data-cycle','1');ringThreeNode.setAttribute('data-value',ringThreeValue);}"+
+        "var ringFour=document.getElementById('numbersRingFour');"+
+        "if(!ringFour){ringFour=document.createElementNS(NS,'g');ringFour.id='numbersRingFour';ringFour.setAttribute('aria-label','الدورة رقم 2 من 37 إلى 72 على العجلة رقم 4');if(angleFrameNode&&angleFrameNode.parentNode===wheelNode)wheelNode.insertBefore(ringFour,angleFrameNode);else wheelNode.appendChild(ringFour);}"+
+        "while(ringFour.firstChild)ringFour.removeChild(ringFour.firstChild);"+
+        "for(var ringFourIndex=0;ringFourIndex<36;ringFourIndex+=1){var ringFourValue=ringFourIndex===0?72:36+ringFourIndex;addNumber(ringFour,ringFourValue,ringFourIndex*10-90,565,'ring-four-number',ringFourIndex%9===0);var ringFourNode=ringFour.lastElementChild;ringFourNode.setAttribute('data-wheel','4');ringFourNode.setAttribute('data-cycle','2');ringFourNode.setAttribute('data-value',ringFourValue);}"+
         "document.documentElement.dataset.ringThreeCycleOne=ringThree.children.length===36?'true':'false';"+
-        "window.__auditKawkabatRingThreeCycleOne=function(){var g=document.getElementById('numbersRingThree'),ok=!!g&&g.children.length===36;if(ok){for(var j=0;j<36;j+=1){var expected=j===0?36:j;if(Number(g.children[j].textContent)!==expected||Number(g.children[j].getAttribute('data-wheel'))!==3){ok=false;break;}}}return{ok:ok,wheel:3,cycle:1,range:[1,36],numberCount:g?g.children.length:0,radius:455,cardinalValues:{top:36,right:9,bottom:18,left:27},coreRuntime:true,panControls:true,nativeScrollbars:true};};";
+        "document.documentElement.dataset.ringFourCycleTwo=ringFour.children.length===36?'true':'false';"+
+        "window.__auditKawkabatCyclesOneTwo=function(){var g1=document.getElementById('numbersRingThree'),g2=document.getElementById('numbersRingFour'),ok1=!!g1&&g1.children.length===36,ok2=!!g2&&g2.children.length===36;if(ok1){for(var j=0;j<36;j+=1){var e1=j===0?36:j;if(Number(g1.children[j].textContent)!==e1||Number(g1.children[j].getAttribute('data-wheel'))!==3){ok1=false;break;}}}if(ok2){for(var k=0;k<36;k+=1){var e2=k===0?72:36+k;if(Number(g2.children[k].textContent)!==e2||Number(g2.children[k].getAttribute('data-wheel'))!==4){ok2=false;break;}}}return{ok:ok1&&ok2,cycleOne:{wheel:3,range:[1,36],numberCount:g1?g1.children.length:0,radius:455,cardinalValues:{top:36,right:9,bottom:18,left:27}},cycleTwo:{wheel:4,range:[37,72],numberCount:g2?g2.children.length:0,radius:565,cardinalValues:{top:72,right:45,bottom:54,left:63}},panControls:true,nativeScrollbars:true};};"+
+        "window.__auditKawkabatRingThreeCycleOne=function(){var a=window.__auditKawkabatCyclesOneTwo();return{ok:a.cycleOne.numberCount===36,wheel:3,cycle:1,range:[1,36],numberCount:a.cycleOne.numberCount,radius:455,cardinalValues:a.cycleOne.cardinalValues,coreRuntime:true,panControls:true,nativeScrollbars:true};};";
 
       var marker='window.__auditKawkabatFinalStructureV3=function(){';
       if(html.indexOf(marker)<0)throw new Error('STATIC_RUNTIME_MARKER_NOT_FOUND');
