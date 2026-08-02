@@ -55,7 +55,10 @@
         html=html.replace('.outer-gold-line{fill:none;stroke:url(#ornateGold);','.outer-gold-line{fill:none;stroke:url(#blueSteelStroke);');
 
         html=html.replace('</style>',
-          '.angle-band-inner-line{stroke:#C1872D!important;stroke-width:5.5!important;opacity:.82!important;filter:none!important}'+
+          '.angle-band-inner-line{stroke:none!important}'+
+          '.inner-angle-gold-shadow{fill:none;stroke:#5A2A07;stroke-width:9;opacity:.96;vector-effect:non-scaling-stroke}'+
+          '.inner-angle-gold-metal{fill:none;stroke:url(#ornateGold);stroke-width:6;vector-effect:non-scaling-stroke;filter:drop-shadow(0 1.5px 1.2px rgba(0,0,0,.48))}'+
+          '.inner-angle-gold-highlight{fill:none;stroke:#FFE7A7;stroke-width:1.35;opacity:.96;vector-effect:non-scaling-stroke}'+
           '.outer-gold-line.thick{stroke:#5A2A07!important;stroke-width:12!important;filter:drop-shadow(0 2px 1.5px rgba(0,0,0,.58))}'+
           '.outer-crown-metal{fill:none;stroke:url(#ornateGold);stroke-width:8;vector-effect:non-scaling-stroke;filter:drop-shadow(0 1.5px 1.2px rgba(0,0,0,.48))}'+
           '.outer-crown-highlight{fill:none;stroke:#FFE7A7;stroke-width:1.55;opacity:.96;vector-effect:non-scaling-stroke}'+
@@ -64,7 +67,7 @@
           '.black-band-mini-frame{fill:url(#ornamentFill);stroke:url(#ornateGold);stroke-width:2.3;vector-effect:non-scaling-stroke}'+
           '.black-band-mini-gem{fill:url(#blueGem);stroke:#FFF1BA;stroke-width:2;vector-effect:non-scaling-stroke}'+
           '.ornament-fine{stroke:url(#ornateGold)!important}.crest-label{fill:url(#ornateGold)!important}'+
-          '#blackBandOrnaments,#outerGoldCrown3D{pointer-events:none;filter:drop-shadow(0 1.5px 1.5px rgba(0,0,0,.55))}'+
+          '#blackBandOrnaments,#outerGoldCrown3D,#innerAngleGold3D{pointer-events:none;filter:drop-shadow(0 1.5px 1.5px rgba(0,0,0,.55))}'+
           '</style>');
 
         html=html.replace('</defs>',
@@ -80,6 +83,14 @@
         html=html.replace('<g id="specialFills"></g>',
           '<circle id="thirteenthWheelBackground" cx="2200" cy="1800" r="1555" fill="none" stroke="#E4D3C2" stroke-width="110"/>'+
           '<g id="specialFills"></g>');
+
+        html=html.replace('<g id="angleTicks"></g>',
+          '<g id="innerAngleGold3D" aria-label="حافة داخلية ذهبية ثلاثية الأبعاد مطابقة للإطار العلوي">'+
+            '<circle class="inner-angle-gold-shadow" cx="2200" cy="1800" r="1623"/>'+
+            '<circle class="inner-angle-gold-metal" cx="2200" cy="1800" r="1623"/>'+
+            '<circle class="inner-angle-gold-highlight" cx="2200" cy="1800" r="1620.8"/>'+
+          '</g>'+
+          '<g id="angleTicks"></g>');
 
         html=html.replace('<g id="cardinalOrnaments">',
           '<g id="outerGoldCrown3D" aria-label="حافة ذهبية موحدة ثلاثية الأبعاد">'+
@@ -100,8 +111,8 @@
           '<g id="cardinalOrnaments">');
 
         html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV20=function(){return{flattenedSingleLoader:true,sourceBlob:\'b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a\',blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',angleBandUniform:true,angleBandColor:\'#8E8078\',innerAngleGoldUnified:true,innerAngleGoldColor:\'#C1872D\',innerAngleGoldOpacity:.82,outerBandRestoredToBlack:true,unifiedGold:true,outerGoldCrown3D:true,blackBandOrnamentsAdded:true,blackBandOrnamentCount:8,thirteenthWheelBackgroundColor:\'#E4D3C2\',');
-        html=html.replace('build:27,','build:45,');
+          'window.__auditKawkabatFinalStructureV21=function(){return{flattenedSingleLoader:true,sourceBlob:\'b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a\',blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',angleBandUniform:true,angleBandColor:\'#8E8078\',innerAngleGold3D:true,innerAngleGoldRadius:1623,innerAngleGoldMatchesOuterCrown:true,outerBandRestoredToBlack:true,unifiedGold:true,outerGoldCrown3D:true,blackBandOrnamentsAdded:true,blackBandOrnamentCount:8,thirteenthWheelBackgroundColor:\'#E4D3C2\',');
+        html=html.replace('build:27,','build:46,');
 
         document.open();
         document.write(html);
