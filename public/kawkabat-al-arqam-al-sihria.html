@@ -43,10 +43,16 @@
         );
 
         html=html.replace(
-          'window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV11=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandOnlyChanged:true,outerBandWidthPreserved:true,innerGoldLinesRestored:true,outerHighlightRestored:true,outerBandColor:\'#D5A17F\','
+          '<g id="specialFills"></g>',
+          '<circle id="thirteenthWheelBackground" cx="2200" cy="1800" r="1555" fill="none" stroke="#E4D3C2" stroke-width="110"/>'+
+          '<g id="specialFills"></g>'
         );
-        html=html.replace('build:27,','build:35,');
+
+        html=html.replace(
+          'window.__auditKawkabatFinalStructureV3=function(){return{',
+          'window.__auditKawkabatFinalStructureV12=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandOnlyChanged:true,outerBandWidthPreserved:true,innerGoldLinesRestored:true,outerHighlightRestored:true,outerBandColor:\'#D5A17F\',thirteenthWheelOnlyChanged:true,thirteenthWheelBackgroundColor:\'#E4D3C2\',thirteenthWheelRadiusRange:[1500,1610],'
+        );
+        html=html.replace('build:27,','build:36,');
 
         document.open();
         document.write(html);
