@@ -37,25 +37,16 @@
           '</linearGradient>'
         );
 
-        html=html
-          .replace(
-            '.outer-black-band{fill:none;stroke:url(#blackFrameBand);',
-            '.outer-black-band{fill:none;stroke:url(#outerUniformCopper);'
-          )
-          .replace(
-            '.outer-gold-line{fill:none;stroke:url(#ornateGold);',
-            '.outer-gold-line{fill:none;stroke:url(#outerUniformCopper);'
-          )
-          .replace(
-            '.outer-black-highlight{fill:none;stroke:#5C5049;',
-            '.outer-black-highlight{fill:none;stroke:#D5A17F;'
-          );
+        html=html.replace(
+          '.outer-black-band{fill:none;stroke:url(#blackFrameBand);',
+          '.outer-black-band{fill:none;stroke:url(#outerUniformCopper);'
+        );
 
         html=html.replace(
           'window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV10=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',finalOuterFrameOnlyChanged:true,finalOuterFrameUniform:true,finalOuterFrameColor:\'#D5A17F\','
+          'window.__auditKawkabatFinalStructureV11=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandOnlyChanged:true,outerBandWidthPreserved:true,innerGoldLinesRestored:true,outerHighlightRestored:true,outerBandColor:\'#D5A17F\','
         );
-        html=html.replace('build:27,','build:34,');
+        html=html.replace('build:27,','build:35,');
 
         document.open();
         document.write(html);
