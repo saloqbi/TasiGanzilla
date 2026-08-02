@@ -16,20 +16,12 @@
   (async function(){
     'use strict';
 
-    var sourceApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/b45c46e69048f381fce315352e5b5442f0dfe17b';
-
-    function decodeBase64(value){
-      var binary=atob(String(value||'').replace(/\s/g,''));
-      var bytes=new Uint8Array(binary.length);
-      for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
-      return new TextDecoder('utf-8').decode(bytes);
-    }
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/85aa9f7a37ba37afa471744cc2cae8497c6eb520/public/kawkabat-wheel-view-runtime-v2.html';
 
     try{
-      var response=await fetch(sourceApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      var response=await fetch(sourceUrl,{cache:'no-store'});
       if(!response.ok)throw new Error('VIEW_V2_HTTP_'+response.status);
-      var payload=await response.json();
-      var html=decodeBase64(payload.content);
+      var html=await response.text();
 
       html=html.replace('View Runtime V2','Data Type Runtime V4');
       html=html.replace("var modeKey=params.get('view')||'circle24'","var modeKey=params.get('view')||'circle36'");
