@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — View Runtime V2</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
+    .loading{font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل العجلة الأساسية…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var staticWheelApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a';
+
+    function decodeBase64(value){
+      var binary=atob(String(value||'').replace(/\s/g,''));
+      var bytes=new Uint8Array(binary.length);
+      for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+
+    try{
+      var response=await fetch(staticWheelApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      if(!response.ok)throw new Error('STATIC_WHEEL_HTTP_'+response.status);
+      var payload=await response.json();
+      var html=decodeBase64(payload.content);
+      var closeTag='</scr'+'ipt>';
+
+      html=html.replace('</style>',
+        '.cycle-number{font-size:24px!important;pointer-events:none!important}'+
+        '.outer-text-label{font-family:Arial,Tahoma,sans-serif;text-anchor:middle;dominant-baseline:central;direction:rtl;unicode-bidi:plaintext;pointer-events:none;paint-order:stroke fill;stroke:#F7F1E3;stroke-width:1.15;stroke-opacity:.92;vector-effect:non-scaling-stroke}'+
+        '.calendar-day-label{font-size:22px;font-weight:900}'+
+        '.zodiac-element-label{font-size:20px;font-weight:800}'+
+        'html,body{overflow:auto!important;scrollbar-width:auto!important;-ms-overflow-style:auto!important;overscroll-behavior:none!important}'+
+        'html::-webkit-scrollbar,body::-webkit-scrollbar{display:block!important;width:14px!important;height:14px!important}'+
+        'html::-webkit-scrollbar-track,body::-webkit-scrollbar-track{background:#e8e3d8!important}'+
+        'html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb{background:#7d898f!important;border:2px solid #e8e3d8!important;border-radius:999px!important}'+
+        'html,body,svg{cursor:grab!important;touch-action:none!important}'+
+        '</style>');
+
+      var runtime=
+        ";(function(){'use strict';"+
+        "var params=new URLSearchParams(String(location.hash||'').replace(/^#/,''));"+
+        "var modeKey=params.get('view')||'circle24',direction=params.get('direction')==='ccw'?'ccw':'cw',sign=direction==='ccw'?-1:1;"+
+        "var modes={circle12:{label:'Circle of 12',shape:'circle',divisions:12},circle24:{label:'Circle of 24',shape:'circle',divisions:24},square4:{label:'Square of 4',shape:'polygon',sides:4,rotation:-45,divisions:4},square9:{label:'Square of 9',shape:'polygon',sides:4,rotation:-45,divisions:9},permanentSquare:{label:'Permanent square',shape:'polygon',sides:4,rotation:-45,divisions:9},tetragon:{label:'Tetragon',shape:'polygon',sides:4,rotation:-45,divisions:4}};"+
+        "var meta=modes[modeKey]||modes.circle24,divisionCount=meta.divisions,step=360/divisionCount,wheelNode=document.getElementById('wheel'),angleFrameNode=document.getElementById('angleFrame');"+
+        "function clearNode(node){while(node&&node.firstChild)node.removeChild(node.firstChild);}"+
+        "function make(name,attrs){var node=document.createElementNS(NS,name);Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,attrs[key]);});return node;}"+
+        "function polygonPoints(radius){var points=[];for(var i=0;i<meta.sides;i+=1)points.push(polar(radius,meta.rotation+(360/meta.sides)*i));return points;}"+
+        "function polygonPath(radius){return polygonPoints(radius).map(function(p,i){return(i===0?'M':'L')+p.x+' '+p.y;}).join(' ')+' Z';}"+
+        "function cross(ax,ay,bx,by){return ax*by-ay*bx;}"+
+        "function polygonPoint(radius,degree){var points=polygonPoints(radius),a=degree*Math.PI/180,dx=Math.cos(a),dy=Math.sin(a),best=null;for(var i=0;i<points.length;i+=1){var p=points[i],q=points[(i+1)%points.length],sx=q.x-p.x,sy=q.y-p.y,rx=p.x-cx,ry=p.y-cy,den=cross(dx,dy,sx,sy);if(Math.abs(den)<1e-8)continue;var t=cross(rx,ry,sx,sy)/den,u=cross(rx,ry,dx,dy)/den;if(t>=0&&u>=-1e-7&&u<=1+1e-7&&(best===null||t<best))best=t;}return best===null?polar(radius,degree):{x:cx+dx*best,y:cy+dy*best};}"+
+        "function geometryPoint(radius,degree){return meta.shape==='circle'?polar(radius,degree):polygonPoint(radius,degree);}"+
+        "function ensureGroup(id,label){var group=document.getElementById(id);if(!group){group=make('g',{id:id,'aria-label':label});wheelNode.insertBefore(group,angleFrameNode);}clearNode(group);return group;}"+
+        "function addGridFrame(radius){if(meta.shape==='circle'){circle(frames,'frame-shadow',radius);circle(frames,'frame-metal',radius);circle(frames,'frame-highlight',radius-6);}else{frames.appendChild(make('path',{d:polygonPath(radius),'class':'frame-shadow'}));frames.appendChild(make('path',{d:polygonPath(radius),'class':'frame-metal'}));frames.appendChild(make('path',{d:polygonPath(radius-6),'class':'frame-highlight'}));}}"+
+        "function addGridRay(index){var degree=sign*(index*step-step/2)-90,a=geometryPoint(180,degree),b=geometryPoint(1610,degree),group=make('g',{'data-ray-index':index});line(group,'ray-shadow',a.x,a.y,b.x,b.y);line(group,'ray-metal',a.x,a.y,b.x,b.y);line(group,'ray-highlight',a.x,a.y,b.x,b.y);divisions.appendChild(group);}"+
+        "function addViewNumber(group,value,index,radius,className){var degree=sign*index*step-90,p=geometryPoint(radius,degree),text=make('text',{x:p.x,y:p.y,'class':'number-text '+className+' '+colorClass(value)+(Math.abs((index*step)%90)<1e-6?' cardinal-number':'')});text.textContent=String(value);group.appendChild(text);return text;}"+
+        "function addOuter(group,textValue,cellValue,index,radius,className){var degree=sign*index*step,normal=((degree%360)+360)%360,p=geometryPoint(radius,degree-90),rotation=normal;if(normal>90&&normal<270)rotation+=180;var text=make('text',{x:p.x,y:p.y,'class':'outer-text-label '+className+' '+colorClass(cellValue),transform:'rotate('+rotation+' '+p.x+' '+p.y+')',lang:'ar','data-cell':cellValue});text.textContent=textValue;group.appendChild(text);}"+
+        "clearNode(divisions);clearNode(frames);clearNode(ringOne);clearNode(ringTwo);"+
+        "for(var oldCycle=1;oldCycle<=10;oldCycle+=1){var old=document.getElementById('numbersCycle'+oldCycle);if(old)old.remove();}"+
+        "var oldDays=document.getElementById('calendarDaysRing'),oldZodiac=document.getElementById('zodiacElementsRing');if(oldDays)oldDays.remove();if(oldZodiac)oldZodiac.remove();"+
+        "radii.forEach(addGridFrame);for(var rayIndex=0;rayIndex<divisionCount;rayIndex+=1)addGridRay(rayIndex);"+
+        "for(var innerIndex=0;innerIndex<divisionCount;innerIndex+=1){var full=innerIndex===0?divisionCount:innerIndex,root=((full-1)%9)+1;addViewNumber(ringOne,full,innerIndex,235,'ring-one-number');addViewNumber(ringTwo,root,innerIndex,345,'ring-two-number');}"+
+        "var cycleGroups=[];for(var cycle=1;cycle<=10;cycle+=1){var start=((cycle-1)*divisionCount)+1,end=cycle*divisionCount,radius=455+((cycle-1)*110),group=ensureGroup('numbersCycle'+cycle,'الدورة '+cycle+' من '+start+' إلى '+end);for(var numberIndex=0;numberIndex<divisionCount;numberIndex+=1){var value=numberIndex===0?end:start+numberIndex-1,node=addViewNumber(group,value,numberIndex,radius,'cycle-number');node.setAttribute('data-cycle',cycle);node.setAttribute('data-value',value);}cycleGroups.push(group);}"+
+        "var dayNames=['الجمعة','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'],zodiacElements=['ماء الحوت','نار الحمل','تراب الثور','هواء الجوزاء','ماء السرطان','نار الأسد','تراب السنبلة','هواء الميزان','ماء العقرب','نار القوس','تراب الجدي','هواء الدلو'],daysRing=ensureGroup('calendarDaysRing','الأيام'),zodiacRing=ensureGroup('zodiacElementsRing','الأبراج والعناصر');"+
+        "for(var outerIndex=0;outerIndex<divisionCount;outerIndex+=1){var cell=outerIndex===0?divisionCount:outerIndex;addOuter(daysRing,dayNames[cell%6],cell,outerIndex,1580,'calendar-day-label');addOuter(zodiacRing,zodiacElements[cell%12],cell,outerIndex,1538,'zodiac-element-label');}"+
+        "document.documentElement.dataset.viewMode=modeKey;document.documentElement.dataset.clockwise=direction==='cw'?'true':'false';"+
+        "window.__auditKawkabatViewRuntimeV2=function(){return{ok:cycleGroups.length===10&&daysRing.children.length===divisionCount&&zodiacRing.children.length===divisionCount,mode:modeKey,label:meta.label,shape:meta.shape,divisions:divisionCount,direction:direction,lastValue:divisionCount*10,cycleCount:cycleGroups.length,dayCount:daysRing.children.length,zodiacCount:zodiacRing.children.length};};"+
+        "}());";
+
+      var marker='window.__auditKawkabatFinalStructureV3=function(){';
+      if(html.indexOf(marker)<0)throw new Error('STATIC_RUNTIME_MARKER_NOT_FOUND');
+      html=html.replace(marker,runtime+marker);
+
+      var panControls='<script id="wheel-pan-controls-v2">(function(){'+
+        "'use strict';"+
+        'var dragging=false,startX=0,startY=0,startLeft=0,startTop=0;'+
+        'function root(){return document.scrollingElement||document.documentElement;}'+
+        'document.addEventListener("mousedown",function(event){if(event.button!==0)return;var r=root();dragging=true;startX=event.clientX;startY=event.clientY;startLeft=r.scrollLeft;startTop=r.scrollTop;},true);'+
+        'window.addEventListener("mousemove",function(event){if(!dragging)return;event.preventDefault();var r=root();r.scrollLeft=startLeft-(event.clientX-startX);r.scrollTop=startTop-(event.clientY-startY);},{capture:true,passive:false});'+
+        'window.addEventListener("mouseup",function(){dragging=false;},true);'+
+      '}());'+closeTag;
+
+      html=html.replace('</body>',panControls+'</body>');
+      document.open();document.write(html);document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تحميل العجلة: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
