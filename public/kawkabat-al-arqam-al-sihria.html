@@ -16,7 +16,7 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/6c3ee5f5a0876977644d1bea991e0c00d3aca3dc/public/kawkabat-wheel-cycles1to10.html';
+    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/dc492c01c3ca86589653164cfd3dd1667576da27/public/kawkabat-wheel-cycles1to10.html';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -45,7 +45,7 @@
         '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" scrolling="yes" src="'+wheelUrl+'"></iframe>'
       );
 
-      var statusScript='<script>(function(){var bottom=document.querySelector(".panel-bottom"),frame=document.getElementById("workFrame");if(bottom)bottom.textContent="1–360 • الأيام بالأعلى • البرج والعنصر بالأسفل";if(frame)frame.addEventListener("load",function(){if(bottom)bottom.textContent="العجلة محملة • الحلقة الخارجية: الأيام والأبراج والعناصر";});}());'+closeTag;
+      var statusScript='<script>(function(){var bottom=document.querySelector(".panel-bottom"),frame=document.getElementById("workFrame");if(bottom)bottom.textContent="1–360 • الأيام 22px • البرج والعنصر 20px";if(frame)frame.addEventListener("load",function(){if(bottom)bottom.textContent="العجلة محملة • تم تكبير خط الأيام والأبراج";});}());'+closeTag;
       html=html.replace('</body>',statusScript+'</body>');
 
       document.open();
