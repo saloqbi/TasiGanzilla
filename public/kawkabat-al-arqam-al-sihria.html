@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Data Type Active</title>
+  <title>Magic Numbers Constellation — Value Active</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -11,93 +11,64 @@
   </style>
 </head>
 <body>
-  <div class="loading">Loading Data type work…</div>
+  <div class="loading">Loading Value work…</div>
   <script>
   (async function(){
     'use strict';
 
-    var newWorkUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/c611a5bdcca7a18125113fa9382ea346e376ff9b/public/kawkabat-al-arqam-al-sihria.html';
-    var oldRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/112477f023dfe9b8e66f0b49f5a27a507cd46a7e/public/kawkabat-wheel-view-runtime.html';
-    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/736c141a7e0b063c5c15c3ec695050774e241c51/public/kawkabat-wheel-data-runtime-v4.html';
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/ed08ec6d205d80ef203060556dc790b0ee99418a/public/kawkabat-al-arqam-al-sihria.html';
+    var oldRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/736c141a7e0b063c5c15c3ec695050774e241c51/public/kawkabat-wheel-data-runtime-v4.html';
+    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/34ba76c9c3bbfd094c3771d9c3a89fc7119c11e4/public/kawkabat-wheel-data-runtime-v4.html';
 
     try{
-      var response=await fetch(newWorkUrl,{cache:'no-store'});
-      if(!response.ok)throw new Error('NEW_WORK_HTTP_'+response.status);
+      var response=await fetch(sourceUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('VALUE_SOURCE_HTTP_'+response.status);
       var html=await response.text();
 
-      html=html.replace('Clockwise, Size and View','Clockwise, Size, View and Data Type');
+      html=html.replace('Data Type Active','Value Active');
       html=html.replace(oldRuntime,newRuntime);
 
-      var reloadPattern=/clockwiseWheel\.src=buildViewUrl\('cw'\);\s*counterclockwiseWheel\.src=buildViewUrl\('ccw'\);\s*applyWheelDirection\(\);/;
-      var reloadCode=
-        "var nextClockwiseUrl=buildViewUrl('cw');\n"+
-        "          var nextCounterclockwiseUrl=buildViewUrl('ccw');\n"+
-        "          clockwiseWheel.src='about:blank';\n"+
-        "          counterclockwiseWheel.src='about:blank';\n"+
-        "          window.setTimeout(function(){\n"+
-        "            clockwiseWheel.src=nextClockwiseUrl;\n"+
-        "            counterclockwiseWheel.src=nextCounterclockwiseUrl;\n"+
-        "            applyWheelDirection();\n"+
-        "          },0);";
-      html=html.replace(reloadPattern,reloadCode);
-
       html=html.replace(
-        "        var viewControl=document.querySelector('[aria-label=\"View\"]');\n        var panelStatus=document.querySelector('.panel-bottom');",
-        "        var viewControl=document.querySelector('[aria-label=\"View\"]');\n        var dataTypeControl=document.querySelector('[aria-label=\"Data type\"]');\n        var panelStatus=document.querySelector('.panel-bottom');"
+        "        var dataTypeControl=document.querySelector('[aria-label=\"Data type\"]');\\n        var panelStatus=document.querySelector('.panel-bottom');",
+        "        var dataTypeControl=document.querySelector('[aria-label=\"Data type\"]');\\n        var valueControl=document.querySelector('[aria-label=\"Value\"]');\\n        var incrementControl=document.querySelector('[aria-label=\"Increment\"]');\\n        var panelStatus=document.querySelector('.panel-bottom');"
       );
 
       html=html.replace(
-        "        function setWheelStatus(mode,message){",
-        "        var dataTypeOptions=[\n          {value:'price',label:'Price'},\n          {value:'date',label:'Date'},\n          {value:'time',label:'Time'},\n          {value:'priceDate',label:'Price and date'},\n          {value:'priceTime',label:'Price and time'}\n        ];\n\n        function setWheelStatus(mode,message){"
+        "        function buildViewUrl(direction){\\n          var view=viewControl&&viewControl.value?viewControl.value:'circle36';\\n          var dataType=dataTypeControl&&dataTypeControl.value?dataTypeControl.value:'price';\\n          return runtimeBase+'#view='+encodeURIComponent(view)+'&direction='+direction+'&dataType='+encodeURIComponent(dataType);\\n        }",
+        "        function buildViewUrl(direction){\\n          var view=viewControl&&viewControl.value?viewControl.value:'circle36';\\n          var dataType=dataTypeControl&&dataTypeControl.value?dataTypeControl.value:'price';\\n          var value=Number(String(valueControl&&valueControl.value||'0.01').replace(',','.'));\\n          var increment=Number(String(incrementControl&&incrementControl.value||'1').replace(',','.'));\\n          if(!Number.isFinite(value))value=0.01;\\n          if(!Number.isFinite(increment)||increment===0)increment=1;\\n          return runtimeBase+'#view='+encodeURIComponent(view)+'&direction='+direction+'&dataType='+encodeURIComponent(dataType)+'&value='+encodeURIComponent(value)+'&increment='+encodeURIComponent(increment);\\n        }"
       );
 
       html=html.replace(
-        "        function buildViewUrl(direction){\n          var view=viewControl&&viewControl.value?viewControl.value:'circle36';\n          return runtimeBase+'#view='+encodeURIComponent(view)+'&direction='+direction;\n        }",
-        "        function buildViewUrl(direction){\n          var view=viewControl&&viewControl.value?viewControl.value:'circle36';\n          var dataType=dataTypeControl&&dataTypeControl.value?dataTypeControl.value:'price';\n          return runtimeBase+'#view='+encodeURIComponent(view)+'&direction='+direction+'&dataType='+encodeURIComponent(dataType);\n        }"
+        "        if(wheelStack&&clockwiseWheel&&counterclockwiseWheel&&clockwiseControl&&visibleControl&&sizeControl&&viewControl&&dataTypeControl){",
+        "        if(wheelStack&&clockwiseWheel&&counterclockwiseWheel&&clockwiseControl&&visibleControl&&sizeControl&&viewControl&&dataTypeControl&&valueControl&&incrementControl){"
       );
 
       html=html.replace(
-        "        function applyWheelDirection(){",
-        "        function populateDataTypeOptions(){\n          if(!dataTypeControl)return;\n          dataTypeControl.innerHTML='';\n          dataTypeOptions.forEach(function(item){\n            var option=document.createElement('option');\n            option.value=item.value;\n            option.textContent=item.label;\n            dataTypeControl.appendChild(option);\n          });\n          dataTypeControl.value='price';\n        }\n\n        function selectedDataTypeLabel(){\n          return dataTypeControl&&dataTypeControl.options[dataTypeControl.selectedIndex]?dataTypeControl.options[dataTypeControl.selectedIndex].textContent:'Price';\n        }\n\n        function applyWheelDirection(){"
+        "          populateViewOptions();\\n          populateDataTypeOptions();",
+        "          populateViewOptions();\\n          populateDataTypeOptions();\\n          valueControl.value='0.01';\\n          valueControl.inputMode='decimal';"
       );
 
       html=html.replace(
-        "          setWheelStatus('success',(clockwiseControl.checked?'مع عقارب الساعة':'عكس عقارب الساعة')+' • '+selectedViewLabel());",
-        "          setWheelStatus('success',(clockwiseControl.checked?'مع عقارب الساعة':'عكس عقارب الساعة')+' • '+selectedViewLabel()+' • '+selectedDataTypeLabel());"
+        "          viewControl.addEventListener('change',loadSelectedView);\\n          dataTypeControl.addEventListener('change',loadSelectedView);",
+        "          viewControl.addEventListener('change',loadSelectedView);\\n          dataTypeControl.addEventListener('change',loadSelectedView);\\n          valueControl.addEventListener('change',loadSelectedView);\\n          incrementControl.addEventListener('change',loadSelectedView);\\n          valueControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();loadSelectedView();}});\\n          incrementControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();loadSelectedView();}});"
       );
 
       html=html.replace(
-        "        if(wheelStack&&clockwiseWheel&&counterclockwiseWheel&&clockwiseControl&&visibleControl&&sizeControl&&viewControl){",
-        "        if(wheelStack&&clockwiseWheel&&counterclockwiseWheel&&clockwiseControl&&visibleControl&&sizeControl&&viewControl&&dataTypeControl){"
+        "          setWheelStatus('error','تعذر تهيئة Clockwise أو Size أو View أو Data type');",
+        "          setWheelStatus('error','تعذر تهيئة Clockwise أو Size أو View أو Data type أو Value');"
       );
 
-      html=html.replace(
-        "          populateViewOptions();",
-        "          populateViewOptions();\n          populateDataTypeOptions();"
-      );
-
-      html=html.replace(
-        "          viewControl.addEventListener('change',loadSelectedView);",
-        "          viewControl.addEventListener('change',loadSelectedView);\n          dataTypeControl.addEventListener('change',loadSelectedView);"
-      );
-
-      html=html.replace(
-        "          setWheelStatus('error','تعذر تهيئة Clockwise أو Size أو View');",
-        "          setWheelStatus('error','تعذر تهيئة Clockwise أو Size أو View أو Data type');"
-      );
-
-      if(html.indexOf(newRuntime)<0)throw new Error('DATA_RUNTIME_LINK_FAILED');
-      if(html.indexOf(oldRuntime)>=0)throw new Error('OLD_VIEW_RUNTIME_STILL_PRESENT');
-      if(html.indexOf('var dataTypeControl=')<0)throw new Error('DATA_TYPE_CONTROL_PATCH_FAILED');
-      if(html.indexOf("dataTypeControl.addEventListener('change',loadSelectedView)")<0)throw new Error('DATA_TYPE_EVENT_PATCH_FAILED');
-      if(html.indexOf("&dataType=")<0)throw new Error('DATA_TYPE_URL_PATCH_FAILED');
-      if(html.indexOf("clockwiseWheel.src='about:blank'")<0)throw new Error('FORCE_RELOAD_PATCH_FAILED');
+      if(html.indexOf(newRuntime)<0)throw new Error('VALUE_RUNTIME_LINK_FAILED');
+      if(html.indexOf('var valueControl=')<0)throw new Error('VALUE_CONTROL_PATCH_FAILED');
+      if(html.indexOf("valueControl.value='0.01'")<0)throw new Error('VALUE_DEFAULT_PATCH_FAILED');
+      if(html.indexOf("+'&value='+encodeURIComponent(value)")<0)throw new Error('VALUE_URL_PATCH_FAILED');
+      if(html.indexOf("valueControl.addEventListener('change',loadSelectedView)")<0)throw new Error('VALUE_EVENT_PATCH_FAILED');
 
       document.open();
       document.write(html);
       document.close();
     }catch(error){
-      document.body.innerHTML='<div class="loading">Unable to load Data type work: '+String(error.message||error)+'</div>';
+      document.body.innerHTML='<div class="loading">Unable to load Value work: '+String(error.message||error)+'</div>';
     }
   }());
   </script>
