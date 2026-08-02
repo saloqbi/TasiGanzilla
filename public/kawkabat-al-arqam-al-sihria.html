@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Cycles 1 and 2</title>
+  <title>Magic Numbers Constellation — Cycles 1, 2 and 3</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -30,6 +30,7 @@
       if(!response.ok)throw new Error('APPROVED_HTTP_'+response.status);
       var payload=await response.json();
       var html=decodeBase64(payload.content);
+      var closeTag='</scr'+'ipt>';
 
       html=html.replace('</style>',
         '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:auto!important;outline:none!important}'+
@@ -44,9 +45,19 @@
         '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" scrolling="yes" src="'+wheelUrl+'"></iframe>'
       );
 
-      var closeTag='</scr'+'ipt>';
-      var statusScript='<script>(function(){var bottom=document.querySelector(".panel-bottom"),frame=document.getElementById("workFrame");if(bottom)bottom.textContent="الدورة 1: 1–36 على العجلة 3 • الدورة 2: 37–72 على العجلة 4";if(frame)frame.addEventListener("load",function(){if(bottom)bottom.textContent="العجلة محملة • تحقق من الدورة الثانية 37–72";});}());'+closeTag;
-      html=html.replace('</body>',statusScript+'</body>');
+      var cycleThreeRuntime='<script id="cycle-three-wheel-five-runtime">(function(){'+
+        "'use strict';"+
+        'var NS="http://www.w3.org/2000/svg",CX=2200,CY=1800,RADIUS=675,attempt=0,timer=null;'+
+        'function colorClass(value){var mod=value%3;return mod===1?"number-red":mod===2?"number-blue":"number-black";}'+
+        'function validate(group){if(!group||group.children.length!==36)return false;for(var i=0;i<36;i+=1){var expected=i===0?108:72+i,node=group.children[i];if(Number(node.textContent)!==expected||Number(node.getAttribute("data-wheel"))!==5||Number(node.getAttribute("data-cycle"))!==3)return false;}return true;}'+
+        'function render(){try{var frame=document.getElementById("workFrame"),doc=frame&&frame.contentDocument,svg=doc&&doc.getElementById("wheel"),cycleOne=doc&&doc.getElementById("numbersRingThree"),cycleTwo=doc&&doc.getElementById("numbersRingFour");if(!svg||!cycleOne||!cycleTwo)return false;var group=doc.getElementById("numbersRingFive");if(validate(group))return true;if(group)group.remove();group=doc.createElementNS(NS,"g");group.id="numbersRingFive";group.setAttribute("aria-label","الدورة رقم 3 من 73 إلى 108 على العجلة رقم 5");for(var index=0;index<36;index+=1){var value=index===0?108:72+index,angle=(index*10-90)*Math.PI/180,x=CX+Math.cos(angle)*RADIUS,y=CY+Math.sin(angle)*RADIUS,text=doc.createElementNS(NS,"text");text.setAttribute("x",x);text.setAttribute("y",y);text.setAttribute("class","number-text "+colorClass(value)+(index%9===0?" cardinal-number":""));text.setAttribute("font-size","24");text.setAttribute("style","pointer-events:none");text.setAttribute("data-wheel","5");text.setAttribute("data-cycle","3");text.setAttribute("data-value",value);text.textContent=value;group.appendChild(text);}var angleFrame=doc.getElementById("angleFrame");if(angleFrame&&angleFrame.parentNode===svg)svg.insertBefore(group,angleFrame);else svg.appendChild(group);doc.documentElement.dataset.ringFiveCycleThree=validate(group)?"true":"false";return validate(group);}catch(error){return false;}}'+
+        'function start(){if(timer)clearInterval(timer);attempt=0;render();timer=setInterval(function(){attempt+=1;if(render()&&attempt>=4){clearInterval(timer);timer=null;}else if(attempt>=120){clearInterval(timer);timer=null;}},250);}'+
+        'var frame=document.getElementById("workFrame");if(frame)frame.addEventListener("load",start);start();'+
+        'window.__auditKawkabatCycleThreeWheelFive=function(){try{var frame=document.getElementById("workFrame"),doc=frame&&frame.contentDocument,group=doc&&doc.getElementById("numbersRingFive");return{ok:validate(group),wheel:5,cycle:3,range:[73,108],numberCount:group?group.children.length:0,radius:RADIUS,cardinalValues:{top:108,right:81,bottom:90,left:99},cyclesOneTwoPreserved:!!(doc&&doc.getElementById("numbersRingThree")&&doc.getElementById("numbersRingFour"))};}catch(error){return{ok:false,error:String(error)}}};'+
+      '}());'+closeTag;
+
+      var statusScript='<script>(function(){var bottom=document.querySelector(".panel-bottom"),frame=document.getElementById("workFrame");if(bottom)bottom.textContent="الدورة 1: 1–36 • الدورة 2: 37–72 • الدورة 3: 73–108";if(frame)frame.addEventListener("load",function(){if(bottom)bottom.textContent="العجلة محملة • تحقق من الدورة الثالثة 73–108 على العجلة 5";});}());'+closeTag;
+      html=html.replace('</body>',cycleThreeRuntime+statusScript+'</body>');
 
       document.open();
       document.write(html);
