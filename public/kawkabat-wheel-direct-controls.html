@@ -35,24 +35,31 @@
         'html,body{scrollbar-width:none!important;-ms-overflow-style:none!important;overscroll-behavior:none!important;scroll-behavior:auto!important}'+
         'html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}'+
         'html,body,svg{cursor:grab!important;touch-action:none!important}'+
-        'html.wheel-pan-dragging,html.wheel-pan-dragging body,html.wheel-pan-dragging svg{cursor:grabbing!important;user-select:none!important}'+
+        'html.wheel-pan-dragging,html.wheel-pan-dragging body,html.wheel-pan-dragging svg{cursor:grabbing!important;user-select:none!important;-webkit-user-select:none!important}'+
       '</style>';
 
       var controls='<script>(function(){'+
         "'use strict';"+
         'var STEP=90,dragging=false,moved=false,startX=0,startY=0,startScrollX=0,startScrollY=0,suppressClickUntil=0;'+
         'function editable(target){return !!(target&&((target.tagName&&/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(target.tagName))||target.isContentEditable));}'+
+        'function scroller(){return document.scrollingElement||document.documentElement;}'+
         'function focusWheel(){try{window.focus();document.documentElement.tabIndex=0;document.documentElement.focus({preventScroll:true});}catch(error){}}'+
-        'document.addEventListener("pointerdown",function(event){if(event.button!==0||editable(event.target))return;dragging=true;moved=false;startX=event.clientX;startY=event.clientY;startScrollX=window.scrollX||window.pageXOffset||0;startScrollY=window.scrollY||window.pageYOffset||0;focusWheel();try{event.target.setPointerCapture(event.pointerId);}catch(error){}},true);'+
-        'document.addEventListener("pointermove",function(event){if(!dragging)return;var dx=event.clientX-startX,dy=event.clientY-startY;if(!moved&&Math.hypot(dx,dy)>=4)moved=true;if(!moved)return;event.preventDefault();document.documentElement.classList.add("wheel-pan-dragging");window.scrollTo(startScrollX-dx,startScrollY-dy);},{capture:true,passive:false});'+
-        'function finish(){if(!dragging)return;dragging=false;document.documentElement.classList.remove("wheel-pan-dragging");if(moved)suppressClickUntil=Date.now()+220;}'+
-        'document.addEventListener("pointerup",finish,true);document.addEventListener("pointercancel",finish,true);window.addEventListener("blur",finish);'+
+        'function begin(clientX,clientY,target){if(editable(target))return false;var root=scroller();dragging=true;moved=false;startX=clientX;startY=clientY;startScrollX=root.scrollLeft;startScrollY=root.scrollTop;focusWheel();return true;}'+
+        'function drag(clientX,clientY,event){if(!dragging)return;var dx=clientX-startX,dy=clientY-startY;if(!moved&&Math.hypot(dx,dy)>=3)moved=true;if(!moved)return;if(event&&event.preventDefault)event.preventDefault();document.documentElement.classList.add("wheel-pan-dragging");var root=scroller();root.scrollLeft=startScrollX-dx;root.scrollTop=startScrollY-dy;}'+
+        'function finish(){if(!dragging)return;dragging=false;document.documentElement.classList.remove("wheel-pan-dragging");if(moved)suppressClickUntil=Date.now()+240;}'+
+        'document.addEventListener("mousedown",function(event){if(event.button!==0)return;begin(event.clientX,event.clientY,event.target);},true);'+
+        'window.addEventListener("mousemove",function(event){if(!dragging)return;if((event.buttons&1)!==1){finish();return;}drag(event.clientX,event.clientY,event);},{capture:true,passive:false});'+
+        'window.addEventListener("mouseup",finish,true);window.addEventListener("blur",finish);'+
+        'document.addEventListener("pointerdown",function(event){if(event.pointerType==="mouse"||event.button!==0)return;if(begin(event.clientX,event.clientY,event.target)){try{event.target.setPointerCapture(event.pointerId);}catch(error){}}},true);'+
+        'document.addEventListener("pointermove",function(event){if(event.pointerType==="mouse")return;drag(event.clientX,event.clientY,event);},{capture:true,passive:false});'+
+        'document.addEventListener("pointerup",function(event){if(event.pointerType!=="mouse")finish();},true);document.addEventListener("pointercancel",finish,true);'+
+        'document.addEventListener("selectstart",function(event){if(dragging)event.preventDefault();},true);'+
         'document.addEventListener("click",function(event){if(Date.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}},true);'+
         'document.addEventListener("dragstart",function(event){event.preventDefault();},true);'+
-        'document.addEventListener("wheel",function(event){if(event.ctrlKey)return;event.preventDefault();var factor=event.deltaMode===1?18:(event.deltaMode===2?window.innerHeight:1);var dy=event.deltaY*factor;if(!dy&&event.deltaX)dy=event.deltaX*factor;window.scrollBy({left:0,top:dy,behavior:"auto"});},{capture:true,passive:false});'+
-        'document.addEventListener("keydown",function(event){if(editable(event.target))return;var step=event.shiftKey?240:STEP,dx=0,dy=0;if(event.key==="ArrowLeft")dx=-step;else if(event.key==="ArrowRight")dx=step;else if(event.key==="ArrowUp")dy=-step;else if(event.key==="ArrowDown")dy=step;else return;event.preventDefault();window.scrollBy({left:dx,top:dy,behavior:"auto"});},true);'+
+        'document.addEventListener("wheel",function(event){if(event.ctrlKey)return;event.preventDefault();var factor=event.deltaMode===1?18:(event.deltaMode===2?window.innerHeight:1);var dy=event.deltaY*factor;if(!dy&&event.deltaX)dy=event.deltaX*factor;var root=scroller();root.scrollTop+=dy;},{capture:true,passive:false});'+
+        'document.addEventListener("keydown",function(event){if(editable(event.target))return;var step=event.shiftKey?240:STEP,dx=0,dy=0;if(event.key==="ArrowLeft")dx=-step;else if(event.key==="ArrowRight")dx=step;else if(event.key==="ArrowUp")dy=-step;else if(event.key==="ArrowDown")dy=step;else return;event.preventDefault();var root=scroller();root.scrollLeft+=dx;root.scrollTop+=dy;},true);'+
         'document.addEventListener("mousedown",focusWheel,true);'+
-        'window.__auditKawkabatWheelDirectControlsV1=function(){return{ok:true,dragPan:true,wheelVerticalOnly:true,keyboardArrows:true,step:STEP,scrollX:window.scrollX||0,scrollY:window.scrollY||0}};'+
+        'window.__auditKawkabatWheelDirectControlsV2=function(){var root=scroller();return{ok:true,mouseDragPan:true,touchDragPan:true,wheelVerticalOnly:true,keyboardArrows:true,step:STEP,scrollX:root.scrollLeft,scrollY:root.scrollTop}};'+
       '}());'+closeTag;
 
       html=html.replace('</head>',controlStyle+'</head>');
