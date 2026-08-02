@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — Data Type Runtime V4</title>
+  <title>كوكبة الأرقام السحرية — Value Runtime V5</title>
   <style>
     html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
     body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
@@ -11,48 +11,47 @@
   </style>
 </head>
 <body>
-  <div class="loading">جارٍ تحميل Runtime نوع البيانات…</div>
+  <div class="loading">جارٍ تحميل Runtime القيمة…</div>
   <script>
   (async function(){
     'use strict';
 
-    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/85aa9f7a37ba37afa471744cc2cae8497c6eb520/public/kawkabat-wheel-view-runtime-v2.html';
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/736c141a7e0b063c5c15c3ec695050774e241c51/public/kawkabat-wheel-data-runtime-v4.html';
 
     try{
       var response=await fetch(sourceUrl,{cache:'no-store'});
-      if(!response.ok)throw new Error('VIEW_V2_HTTP_'+response.status);
+      if(!response.ok)throw new Error('DATA_V4_HTTP_'+response.status);
       var html=await response.text();
 
-      html=html.replace('View Runtime V2','Data Type Runtime V4');
-      html=html.replace("var modeKey=params.get('view')||'circle24'","var modeKey=params.get('view')||'circle36'");
+      html=html.replace('Data Type Runtime V4','Value Runtime V5');
+      html=html.replace(/__auditKawkabatDataRuntimeV4/g,'__auditKawkabatValueRuntimeV5');
+
       html=html.replace(
-        "circle24:{label:'Circle of 24',shape:'circle',divisions:24},",
-        "circle24:{label:'Circle of 24',shape:'circle',divisions:24},circle36:{label:'Circle of 36',shape:'circle',divisions:36},"
+        "\"var dataType=params.get('dataType')||'price';\"+\n",
+        "\"var dataType=params.get('dataType')||'price',startValue=Number(params.get('value')),incrementValue=Number(params.get('increment'));if(!Number.isFinite(startValue))startValue=0.01;if(!Number.isFinite(incrementValue)||incrementValue===0)incrementValue=1;\"+\n"+
+        "        \"function decimalPlacesData(value){var text=String(value);if(/[eE]/.test(text)){var parts=text.toLowerCase().split('e'),base=(parts[0].split('.')[1]||'').length,exp=Number(parts[1]||0);return Math.max(0,base-exp);}return(text.split('.')[1]||'').length;}\"+\n"+
+        "        \"var valueDecimals=Math.min(8,Math.max(decimalPlacesData(startValue),decimalPlacesData(incrementValue)));\"+\n"+
+        "        \"function formatPriceData(value){var fixed=value.toFixed(valueDecimals);return valueDecimals?fixed.replace(/\\.?0+$/,''):fixed;}\"+\n"
       );
-      html=html.replace("var meta=modes[modeKey]||modes.circle24","var meta=modes[modeKey]||modes.circle36");
-      html=html.replace(/__auditKawkabatViewRuntimeV2/g,'__auditKawkabatDataRuntimeV4');
 
-      var dataMarker="\"document.documentElement.dataset.viewMode=modeKey;document.documentElement.dataset.clockwise=direction==='cw'?'true':'false';\"+";
-      var dataRuntime=
-        "\"var dataType=params.get('dataType')||'price';\"+\n"+
-        "        \"function pad2Data(value){return String(value).padStart(2,'0');}\"+\n"+
-        "        \"function dateLabel(offset){var date=new Date(Date.UTC(2019,11,31)+(offset*86400000));return pad2Data(date.getUTCDate())+'.'+pad2Data(date.getUTCMonth()+1);}\"+\n"+
-        "        \"function timeLabel(offset){var hours=((offset%24)+24)%24;return pad2Data(hours)+':00';}\"+\n"+
-        "        \"cycleGroups.forEach(function(group){Array.prototype.forEach.call(group.children,function(node){var raw=Number(node.getAttribute('data-value')||node.textContent),offset=Math.max(0,raw-1),dateValue=dateLabel(offset),timeValue=timeLabel(offset);if(dataType==='date')node.textContent=dateValue;else if(dataType==='time')node.textContent=timeValue;else if(dataType==='priceDate')node.textContent=raw+'·'+dateValue;else if(dataType==='priceTime')node.textContent=raw+'·'+timeValue;if(dataType==='date'||dataType==='time')node.style.setProperty('font-size','16px','important');else if(dataType==='priceDate'||dataType==='priceTime')node.style.setProperty('font-size','13px','important');});});\"+\n"+
-        "        \"document.documentElement.dataset.dataType=dataType;\"+\n"+
-        "        \"document.documentElement.dataset.viewMode=modeKey;document.documentElement.dataset.clockwise=direction==='cw'?'true':'false';\"+";
+      var oldCycleLine="        \"cycleGroups.forEach(function(group){Array.prototype.forEach.call(group.children,function(node){var raw=Number(node.getAttribute('data-value')||node.textContent),offset=Math.max(0,raw-1),dateValue=dateLabel(offset),timeValue=timeLabel(offset);if(dataType==='date')node.textContent=dateValue;else if(dataType==='time')node.textContent=timeValue;else if(dataType==='priceDate')node.textContent=raw+'·'+dateValue;else if(dataType==='priceTime')node.textContent=raw+'·'+timeValue;if(dataType==='date'||dataType==='time')node.style.setProperty('font-size','16px','important');else if(dataType==='priceDate'||dataType==='priceTime')node.style.setProperty('font-size','13px','important');});});\"+\n";
+      var newCycleLine="        \"cycleGroups.forEach(function(group){Array.prototype.forEach.call(group.children,function(node){var ordinal=Math.max(0,Number(node.getAttribute('data-value')||node.textContent)-1),priceValue=startValue+(ordinal*incrementValue),priceText=formatPriceData(priceValue),dateValue=dateLabel(ordinal),timeValue=timeLabel(ordinal);node.setAttribute('data-price-value',priceText);if(dataType==='price')node.textContent=priceText;else if(dataType==='date')node.textContent=dateValue;else if(dataType==='time')node.textContent=timeValue;else if(dataType==='priceDate')node.textContent=priceText+'·'+dateValue;else if(dataType==='priceTime')node.textContent=priceText+'·'+timeValue;if(dataType==='date'||dataType==='time')node.style.setProperty('font-size','16px','important');else if(dataType==='priceDate'||dataType==='priceTime')node.style.setProperty('font-size','13px','important');});});\"+\n";
+      if(html.indexOf(oldCycleLine)<0)throw new Error('VALUE_CYCLE_MARKER_NOT_FOUND');
+      html=html.replace(oldCycleLine,newCycleLine);
 
-      if(html.indexOf(dataMarker)<0)throw new Error('DATA_RUNTIME_MARKER_NOT_FOUND');
-      html=html.replace(dataMarker,dataRuntime);
+      html=html.replace(
+        "        \"document.documentElement.dataset.dataType=dataType;\"+\n",
+        "        \"document.documentElement.dataset.dataType=dataType;document.documentElement.dataset.startValue=String(startValue);document.documentElement.dataset.incrementValue=String(incrementValue);\"+\n"
+      );
 
-      if(html.indexOf("circle36:{label:'Circle of 36'")<0)throw new Error('CIRCLE36_MODE_PATCH_FAILED');
-      if(html.indexOf("document.documentElement.dataset.dataType=dataType")<0)throw new Error('DATA_TYPE_PATCH_FAILED');
+      if(html.indexOf("startValue=Number(params.get('value'))")<0)throw new Error('VALUE_PARAM_PATCH_FAILED');
+      if(html.indexOf("node.setAttribute('data-price-value',priceText)")<0)throw new Error('VALUE_RENDER_PATCH_FAILED');
 
       document.open();
       document.write(html);
       document.close();
     }catch(error){
-      document.body.innerHTML='<div class="loading">تعذر تحميل Runtime نوع البيانات: '+String(error.message||error)+'</div>';
+      document.body.innerHTML='<div class="loading">تعذر تحميل Runtime القيمة: '+String(error.message||error)+'</div>';
     }
   }());
   </script>
