@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Stable Clockwise</title>
+  <title>Magic Numbers Constellation — Clockwise Panel Runtime</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -33,19 +33,17 @@
 
       var payload=await response.json();
       var html=decodeBase64(payload.content);
-      var closeTag='</scr'+'ipt>';
 
       html=html.replace('</style>',
         '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important;background:#F7F1E3!important}'+
         '.wheel-stack{position:fixed!important}'+
-        '.wheel-layer{position:absolute;inset:0;width:100%;height:100%;border:0;background:#F7F1E3;visibility:hidden;pointer-events:none}'+
-        '.wheel-layer.is-active{visibility:visible;pointer-events:auto}'+
+        '.wheel-layer{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;background:#F7F1E3!important;visibility:hidden!important;pointer-events:none!important}'+
+        '.wheel-layer.is-active{visibility:visible!important;pointer-events:auto!important}'+
         '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
         '.panel-bottom{display:flex!important;align-items:center!important;padding:0 10px!important;font-size:12px!important;font-weight:800!important;color:#33444c!important}'+
         '.panel-bottom::before{content:"";width:9px;height:9px;border-radius:50%;margin-right:7px;background:#d3a80b}'+
         '.panel-bottom[data-status="success"]::before{background:#31a354}'+
         '.panel-bottom[data-status="error"]::before{background:#c93d3d}'+
-        '.panel-bottom[data-status="loading"]::before{background:#d3a80b}'+
         '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
         '</style>');
 
@@ -57,24 +55,16 @@
         '</div>'
       );
 
-      var switchScript='<script id="clockwise-dual-preload-v1">(function(){'+
-        "'use strict';"+
-        'var stack=document.getElementById("workFrame"),cw=document.getElementById("clockwiseWheel"),ccw=document.getElementById("counterclockwiseWheel"),clockwise=document.querySelector("[aria-label=\\"Layout clockwise\\"]"),visible=document.querySelector("[aria-label=\\"Layout visible\\"]"),bottom=document.querySelector(".panel-bottom"),loaded={cw:false,ccw:false};'+
-        'function status(mode,message){if(!bottom)return;bottom.setAttribute("data-status",mode);bottom.textContent=message;}'+
-        'function selectedLoaded(){return clockwise&&clockwise.checked?loaded.cw:loaded.ccw;}'+
-        'function showDirection(){if(!cw||!ccw||!clockwise)return;cw.classList.toggle("is-active",!!clockwise.checked);ccw.classList.toggle("is-active",!clockwise.checked);if(selectedLoaded())status("success",clockwise.checked?"Clockwise مفعل — مع عقارب الساعة":"Clockwise ملغي — عكس عقارب الساعة");else status("loading",clockwise.checked?"جارٍ تجهيز اتجاه عقارب الساعة…":"جارٍ تجهيز الاتجاه العكسي…");}'+
-        'if(!stack||!cw||!ccw||!clockwise||!visible){status("error","تعذر تهيئة تحكم الاتجاه");return;}'+
-        'clockwise.checked=true;visible.checked=true;'+
-        'cw.addEventListener("load",function(){loaded.cw=true;if(clockwise.checked)showDirection();});'+
-        'ccw.addEventListener("load",function(){loaded.ccw=true;if(!clockwise.checked)showDirection();});'+
-        'cw.addEventListener("error",function(){if(clockwise.checked)status("error","فشل تحميل اتجاه عقارب الساعة");});'+
-        'ccw.addEventListener("error",function(){if(!clockwise.checked)status("error","فشل تحميل الاتجاه العكسي");});'+
-        'clockwise.addEventListener("change",showDirection);'+
-        'visible.addEventListener("change",function(){stack.style.visibility=visible.checked?"visible":"hidden";status("success",visible.checked?"العجلة ظاهرة":"العجلة مخفية");});'+
-        'status("loading","جارٍ تجهيز اتجاهي العجلة…");showDirection();'+
-      '}());'+closeTag;
+      var marker='requestAnimationFrame(updateThumb);';
+      if(html.indexOf(marker)<0)throw new Error('PANEL_RUNTIME_MARKER_NOT_FOUND');
 
-      html=html.replace('</body>',switchScript+'</body>');
+      var binding=
+        'var wheelStack=document.getElementById("workFrame"),clockwiseWheel=document.getElementById("clockwiseWheel"),counterclockwiseWheel=document.getElementById("counterclockwiseWheel"),clockwiseControl=document.querySelector("[aria-label=\\"Layout clockwise\\"]"),visibleControl=document.querySelector("[aria-label=\\"Layout visible\\"]"),panelStatus=document.querySelector(".panel-bottom");'+
+        'function setWheelStatus(mode,message){if(!panelStatus)return;panelStatus.setAttribute("data-status",mode);panelStatus.textContent=message;}'+
+        'function applyWheelDirection(){if(!clockwiseWheel||!counterclockwiseWheel||!clockwiseControl)return;clockwiseWheel.classList.toggle("is-active",!!clockwiseControl.checked);counterclockwiseWheel.classList.toggle("is-active",!clockwiseControl.checked);setWheelStatus("success",clockwiseControl.checked?"Clockwise مفعل — مع عقارب الساعة":"Clockwise ملغي — عكس عقارب الساعة");}'+
+        'if(wheelStack&&clockwiseWheel&&counterclockwiseWheel&&clockwiseControl&&visibleControl){clockwiseControl.checked=true;visibleControl.checked=true;clockwiseControl.addEventListener("change",applyWheelDirection);visibleControl.addEventListener("change",function(){wheelStack.style.visibility=visibleControl.checked?"visible":"hidden";setWheelStatus("success",visibleControl.checked?"العجلة ظاهرة":"العجلة مخفية");});applyWheelDirection();}else{setWheelStatus("error","تعذر تهيئة تحكم Clockwise");}';
+
+      html=html.replace(marker,binding+marker);
       document.open();
       document.write(html);
       document.close();
