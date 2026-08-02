@@ -1,60 +1,59 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — لوحة التحكم الفضية</title>
+  <title>Magic Numbers Constellation — English Control Panel</title>
   <style>
     :root{
       color-scheme:light;
-      --silver-white:#fbfdfe;
-      --silver-light:#e4ebef;
-      --silver-mid:#aebbc3;
-      --silver-dark:#52636e;
-      --silver-black:#182126;
-      --panel-line:#b8c3c9;
-      --panel-text:#1e2529;
-      --section-blue:#2b8bb8;
+      --frame-dark:#4e5960;
+      --frame-mid:#8b989f;
+      --frame-light:#eef3f5;
+      --frame-white:#ffffff;
+      --panel-bg:#f7f8f8;
+      --panel-line:#c7cccf;
+      --row-line:#d7dbdd;
+      --text:#22272a;
+      --muted:#687277;
+      --cyan:#4fa6c7;
+      --green:#9fc442;
+      --yellow:#d6c34d;
+      --orange:#e3a536;
+      --red:#d46a60;
     }
     *{box-sizing:border-box}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif;font-variant-numeric:tabular-nums}
     .work-frame{
       position:fixed;
       top:0;
       right:0;
       bottom:0;
-      left:360px;
-      width:calc(100% - 360px);
+      left:350px;
+      width:calc(100% - 350px);
       height:100%;
       border:0;
       background:#f7f1e3;
     }
-    .silver-control-panel{
+    .control-panel{
       position:fixed;
-      top:0;
-      bottom:0;
-      left:0;
-      width:360px;
+      inset:0 auto 0 0;
+      width:350px;
       z-index:1000;
-      padding:10px;
-      border-right:1px solid #65757f;
+      padding:7px;
+      border-right:1px solid #707c82;
       background:
         linear-gradient(90deg,
-          var(--silver-black) 0%,
-          var(--silver-dark) 2.5%,
-          var(--silver-white) 7%,
-          var(--silver-mid) 12%,
-          var(--silver-white) 17%,
-          var(--silver-light) 50%,
-          var(--silver-white) 83%,
-          var(--silver-mid) 89%,
-          var(--silver-dark) 96%,
-          var(--silver-black) 100%);
-      box-shadow:
-        9px 0 22px rgba(18,25,29,.28),
-        inset 0 0 0 2px rgba(255,255,255,.86),
-        inset 0 0 0 5px rgba(76,91,100,.44),
-        inset 0 0 18px rgba(255,255,255,.9);
+          #465158 0%,
+          #8b989f 3%,
+          #f8fbfc 8%,
+          #aeb9bf 12%,
+          #f9fbfc 17%,
+          #cbd4d8 50%,
+          #f9fbfc 84%,
+          #9aa6ac 91%,
+          #4b565d 100%);
+      box-shadow:7px 0 18px rgba(21,28,32,.25),inset 0 0 0 1px rgba(255,255,255,.82);
     }
     .panel-shell{
       display:flex;
@@ -63,80 +62,91 @@
       height:100%;
       min-height:0;
       overflow:hidden;
-      border:2px solid #3e4d56;
-      border-radius:20px;
-      background:linear-gradient(90deg,#a7b4bc 0%,#f9fcfd 8%,#d6dfe4 25%,#fafcfd 50%,#c8d3d9 76%,#fff 92%,#82919a 100%);
-      box-shadow:
-        inset 0 0 0 2px rgba(255,255,255,.95),
-        inset 0 0 0 5px rgba(62,76,85,.28),
-        inset 0 0 18px rgba(45,58,66,.2);
+      border:1px solid #59666d;
+      border-radius:8px;
+      background:#edf1f2;
+      box-shadow:inset 0 0 0 2px #cbd4d8,inset 0 0 0 4px rgba(255,255,255,.75);
     }
     .panel-topbar{
-      flex:0 0 auto;
+      flex:0 0 32px;
       display:flex;
       align-items:center;
-      gap:8px;
-      min-height:48px;
-      margin:9px 9px 6px;
-      padding:0 13px;
-      border:1px solid #657781;
-      border-radius:13px;
-      color:#1b2226;
-      direction:ltr;
-      background:linear-gradient(180deg,#fff 0%,#edf3f6 23%,#bcc8cf 50%,#f8fbfc 72%,#b9c6cd 100%);
-      box-shadow:inset 0 2px 3px rgba(255,255,255,.96),inset 0 -3px 5px rgba(46,61,70,.28),0 2px 4px rgba(24,34,40,.24);
-      font-size:18px;
-      font-weight:800;
+      gap:7px;
+      margin:4px 4px 2px;
+      padding:0 8px;
+      border:1px solid #8f999e;
+      border-radius:3px;
+      color:#111718;
+      background:linear-gradient(180deg,#fff 0%,#f6f8f9 46%,#cfd6da 49%,#eef2f4 100%);
+      box-shadow:inset 0 1px 0 #fff,0 1px 1px rgba(43,53,58,.22);
+      font-size:14px;
+      font-weight:700;
     }
-    .panel-dot{width:11px;height:11px;border:2px solid #8b969c;border-radius:50%;background:#f8fbfc;box-shadow:inset 0 0 3px rgba(0,0,0,.26)}
-    .panel-title{flex:1;text-align:left}
-    .panel-chevron{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:9px solid #343b3f}
+    .panel-dot{width:8px;height:8px;border:1px solid #9aa3a8;border-radius:50%;background:#f8fafb}
+    .panel-title{flex:1}
+    .panel-tools{display:flex;gap:2px;align-items:center;margin-right:4px}
+    .tool-swatch{width:7px;height:7px;border:1px solid rgba(0,0,0,.14)}
+    .tool-swatch.green{background:#8ac63f}.tool-swatch.yellow{background:#f0d04f}.tool-swatch.orange{background:#ec9e40}.tool-swatch.red{background:#dd7366}
+    .panel-chevron{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:7px solid #2f3639}
     .panel-scroll{
       flex:1 1 auto;
       min-height:0;
-      margin:0 9px 9px;
+      margin:0 4px 4px;
       overflow-y:auto;
       overflow-x:hidden;
-      border:1px solid #73828b;
-      border-radius:11px;
-      background:rgba(247,249,250,.92);
-      box-shadow:inset 0 0 0 2px rgba(255,255,255,.85),inset 0 0 12px rgba(75,91,101,.18);
+      border:1px solid #aeb6ba;
+      background:#fbfbfb;
       scrollbar-width:thin;
-      scrollbar-color:#9aa7ae #e8eef1;
+      scrollbar-color:#8f999e #eceff0;
       direction:ltr;
     }
-    .panel-scroll::-webkit-scrollbar{width:10px}
-    .panel-scroll::-webkit-scrollbar-track{background:#e8eef1}
-    .panel-scroll::-webkit-scrollbar-thumb{background:#9aa7ae;border:2px solid #e8eef1;border-radius:999px}
-    .control-section{border-bottom:1px solid #c6cfd4;background:rgba(255,255,255,.7)}
+    .panel-scroll::-webkit-scrollbar{width:9px}
+    .panel-scroll::-webkit-scrollbar-track{background:#eceff0}
+    .panel-scroll::-webkit-scrollbar-thumb{background:#8f999e;border:2px solid #eceff0}
+    .control-section{border-bottom:1px solid #bcc3c7;background:#fff}
     .section-toggle{
+      position:relative;
       width:100%;
-      min-height:34px;
+      min-height:28px;
       display:flex;
       align-items:center;
-      gap:8px;
-      padding:0 10px;
+      gap:6px;
+      padding:0 7px 0 9px;
       border:0;
-      border-bottom:1px solid #c6cfd4;
-      background:linear-gradient(180deg,#fdfefe,#edf2f4);
-      color:#1d2529;
-      font:700 17px Arial,Tahoma,sans-serif;
+      border-bottom:1px solid #c9ced1;
+      background:linear-gradient(180deg,#fdfefe,#eef1f2);
+      color:#161b1e;
+      font:700 14px Arial,Tahoma,sans-serif;
       text-align:left;
       cursor:pointer;
       direction:ltr;
     }
-    .section-toggle:hover{background:linear-gradient(180deg,#fff,#e5edf1)}
-    .section-sign{color:var(--section-blue);font-size:22px;line-height:1;font-weight:900;width:14px;text-align:center}
+    .section-toggle::after{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:2px;
+      background:var(--section-color,var(--cyan));
+      opacity:.95;
+    }
+    .control-section[data-tone="green"]{--section-color:var(--green)}
+    .control-section[data-tone="yellow"]{--section-color:var(--yellow)}
+    .control-section[data-tone="cyan"]{--section-color:var(--cyan)}
+    .section-toggle:hover{background:linear-gradient(180deg,#fff,#e8edef)}
+    .section-sign{color:#2d95bd;font-size:16px;font-weight:900;width:12px;text-align:center}
     .section-name{flex:1}
-    .section-icon{font-size:15px;opacity:.72}
+    .section-icon{font-size:12px;color:#6d777c;opacity:.78}
     .section-body{display:block}
     .control-section.collapsed .section-body{display:none}
     .control-row{
-      min-height:32px;
+      min-height:28px;
       display:grid;
-      grid-template-columns:42% 58%;
+      grid-template-columns:45% 55%;
       align-items:center;
-      border-bottom:1px solid #d2d9dd;
+      border-bottom:1px solid var(--row-line);
+      background:#fbfbfb;
       direction:ltr;
     }
     .control-row:last-child{border-bottom:0}
@@ -144,77 +154,81 @@
       height:100%;
       display:flex;
       align-items:center;
-      padding:5px 10px 5px 24px;
-      color:var(--panel-text);
-      font-size:15px;
-      background:rgba(250,251,252,.72);
+      padding:4px 8px 4px 20px;
+      color:var(--text);
+      font-size:13px;
+      background:#fafafa;
     }
     .control-value{
       min-width:0;
       height:100%;
       display:flex;
       align-items:center;
-      gap:6px;
-      padding:4px 8px;
-      border-left:1px solid #d0d8dc;
-      background:rgba(244,247,248,.72);
-      color:#20272b;
-      font-size:15px;
+      gap:5px;
+      padding:3px 6px;
+      border-left:1px solid #d3d8da;
+      background:#f4f5f5;
+      color:#1f2528;
+      font-size:13px;
+      direction:ltr;
     }
     .control-value input[type="text"],
     .control-value input[type="number"],
     .control-value select{
       width:100%;
-      height:25px;
+      height:23px;
       min-width:0;
-      border:1px solid #aeb9bf;
-      border-radius:3px;
-      padding:2px 7px;
-      background:linear-gradient(180deg,#fff,#edf2f4);
-      color:#1d2428;
-      font:15px Arial,Tahoma,sans-serif;
+      border:1px solid #aab3b7;
+      border-radius:2px;
+      padding:1px 6px;
+      background:linear-gradient(180deg,#fff,#edf0f1);
+      color:#1d2326;
+      font:13px Arial,Tahoma,sans-serif;
+      font-variant-numeric:tabular-nums;
+      direction:ltr;
       outline:none;
     }
-    .control-value input:focus,.control-value select:focus{border-color:#5f9ec1;box-shadow:0 0 0 2px rgba(72,156,201,.18)}
-    .control-value input[type="checkbox"]{width:18px;height:18px;margin:0;accent-color:#5c9fc4}
-    .field-action{flex:0 0 auto;color:#66757d;font-weight:800;font-size:16px}
-    .compact-badge{margin-left:auto;min-width:28px;padding:1px 5px;border-radius:5px;background:#959fa5;color:white;text-align:center;font-size:13px}
+    .control-value input:focus,.control-value select:focus{border-color:#5e9ab7;box-shadow:0 0 0 1px rgba(72,156,201,.22)}
+    .control-value input[type="checkbox"]{width:15px;height:15px;margin:0;accent-color:#72a9c1}
+    .field-action{flex:0 0 auto;color:#738086;font-weight:800;font-size:14px}
+    .compact-badge{margin-left:auto;min-width:23px;padding:1px 4px;border-radius:3px;background:#979fa3;color:#fff;text-align:center;font-size:11px;font-variant-numeric:tabular-nums}
     .panel-bottom{
-      flex:0 0 42px;
-      margin:0 9px 9px;
-      border:1px solid #71818a;
-      border-radius:11px;
-      background:linear-gradient(180deg,#fff 0%,#dce5e9 25%,#aebbc3 52%,#f5f8fa 75%,#c2cdd3 100%);
-      box-shadow:inset 0 2px 4px rgba(255,255,255,.95),inset 0 -3px 5px rgba(52,67,76,.28),0 2px 4px rgba(28,38,44,.2);
+      flex:0 0 34px;
+      margin:0 4px 4px;
+      border:1px solid #8e999f;
+      border-radius:3px;
+      background:linear-gradient(180deg,#fff 0%,#d8dfe3 42%,#eef2f4 58%,#bcc7cc 100%);
+      box-shadow:inset 0 1px 2px #fff;
     }
     @media(max-width:900px){
-      .silver-control-panel{width:300px}
+      .control-panel{width:300px}
       .work-frame{left:300px;width:calc(100% - 300px)}
-      .control-label,.control-value{font-size:13px}
-      .section-toggle{font-size:15px}
+      .control-label,.control-value{font-size:12px}
+      .section-toggle{font-size:13px}
     }
   </style>
 </head>
 <body>
   <iframe
     class="work-frame"
-    title="كوكبة الأرقام السحرية"
+    title="Magic Numbers Constellation"
     src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f875bee17b588b02617bcad4ae55270c60033f3d/public/kawkabat-al-arqam-al-sihria.html">
   </iframe>
 
-  <aside class="silver-control-panel" aria-label="لوحة تحكم فضية">
+  <aside class="control-panel" aria-label="English control panel">
     <div class="panel-shell">
       <header class="panel-topbar">
         <span class="panel-dot" aria-hidden="true"></span>
         <span class="panel-title">Default</span>
+        <span class="panel-tools" aria-hidden="true">
+          <span class="tool-swatch green"></span><span class="tool-swatch yellow"></span><span class="tool-swatch orange"></span><span class="tool-swatch red"></span>
+        </span>
         <span class="panel-chevron" aria-hidden="true"></span>
       </header>
 
       <div class="panel-scroll">
-        <section class="control-section">
-          <button class="section-toggle" type="button" aria-expanded="true">
-            <span class="section-sign">−</span><span class="section-name">Layout</span><span class="section-icon">▦</span>
-          </button>
+        <section class="control-section" data-tone="green">
+          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Layout</span><span class="section-icon">▦</span></button>
           <div class="section-body">
             <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" checked aria-label="Layout visible"></div></div>
             <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" checked aria-label="Layout clockwise"></div></div>
@@ -224,31 +238,25 @@
           </div>
         </section>
 
-        <section class="control-section">
-          <button class="section-toggle" type="button" aria-expanded="true">
-            <span class="section-sign">−</span><span class="section-name">Price</span><span class="section-icon">●</span>
-          </button>
+        <section class="control-section" data-tone="cyan">
+          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Price</span><span class="section-icon">●</span></button>
           <div class="section-body">
-            <div class="control-row"><div class="control-label">Value</div><div class="control-value"><input type="text" value="79680" aria-label="Value"><span class="field-action">‹›</span></div></div>
-            <div class="control-row"><div class="control-label">Find</div><div class="control-value"><input type="text" value="79680" aria-label="Find"><span class="field-action">⌕</span></div></div>
+            <div class="control-row"><div class="control-label">Value</div><div class="control-value"><input type="text" value="79680" inputmode="numeric" aria-label="Value"><span class="field-action">‹›</span></div></div>
+            <div class="control-row"><div class="control-label">Find</div><div class="control-value"><input type="text" value="79680" inputmode="numeric" aria-label="Find"><span class="field-action">⌕</span></div></div>
             <div class="control-row"><div class="control-label">Increment</div><div class="control-value"><input type="number" value="1" aria-label="Increment"></div></div>
           </div>
         </section>
 
-        <section class="control-section">
-          <button class="section-toggle" type="button" aria-expanded="true">
-            <span class="section-sign">−</span><span class="section-name">Highlight</span><span class="section-icon">▦</span>
-          </button>
+        <section class="control-section" data-tone="green">
+          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Highlight</span><span class="section-icon">▦</span></button>
           <div class="section-body">
             <div class="control-row"><div class="control-label">Show marks</div><div class="control-value"><input type="checkbox" checked aria-label="Show marks"></div></div>
             <div class="control-row"><div class="control-label">Show numbers</div><div class="control-value"><input type="checkbox" aria-label="Show numbers"></div></div>
           </div>
         </section>
 
-        <section class="control-section">
-          <button class="section-toggle" type="button" aria-expanded="true">
-            <span class="section-sign">−</span><span class="section-name">Protractor</span><span class="section-icon">◔</span>
-          </button>
+        <section class="control-section" data-tone="yellow">
+          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Protractor</span><span class="section-icon">◔</span></button>
           <div class="section-body">
             <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" checked aria-label="Protractor visible"></div></div>
             <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" checked aria-label="Protractor clockwise"></div></div>
@@ -256,31 +264,18 @@
           </div>
         </section>
 
-        <section class="control-section collapsed">
-          <button class="section-toggle" type="button" aria-expanded="false">
-            <span class="section-sign">+</span><span class="section-name">Counter</span><span class="compact-badge">36</span>
-          </button>
-          <div class="section-body"></div>
+        <section class="control-section collapsed" data-tone="cyan">
+          <button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Counter</span><span class="compact-badge">36</span></button><div class="section-body"></div>
+        </section>
+        <section class="control-section collapsed" data-tone="cyan">
+          <button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Secondary scale</span><span class="section-icon">⌘</span></button><div class="section-body"></div>
+        </section>
+        <section class="control-section collapsed" data-tone="cyan">
+          <button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Marker</span><span class="section-icon">◇</span></button><div class="section-body"></div>
         </section>
 
-        <section class="control-section collapsed">
-          <button class="section-toggle" type="button" aria-expanded="false">
-            <span class="section-sign">+</span><span class="section-name">Secondary scale</span><span class="section-icon">⌘</span>
-          </button>
-          <div class="section-body"></div>
-        </section>
-
-        <section class="control-section collapsed">
-          <button class="section-toggle" type="button" aria-expanded="false">
-            <span class="section-sign">+</span><span class="section-name">Marker</span><span class="section-icon">◇</span>
-          </button>
-          <div class="section-body"></div>
-        </section>
-
-        <section class="control-section">
-          <button class="section-toggle" type="button" aria-expanded="true">
-            <span class="section-sign">−</span><span class="section-name">Chronometer</span><span class="section-icon">◷</span>
-          </button>
+        <section class="control-section" data-tone="green">
+          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Chronometer</span><span class="section-icon">◷</span></button>
           <div class="section-body">
             <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" checked aria-label="Chronometer visible"></div></div>
             <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" checked aria-label="Chronometer clockwise"></div></div>
@@ -289,18 +284,11 @@
           </div>
         </section>
 
-        <section class="control-section collapsed">
-          <button class="section-toggle" type="button" aria-expanded="false">
-            <span class="section-sign">+</span><span class="section-name">Secondary scale</span><span class="section-icon">⌘</span>
-          </button>
-          <div class="section-body"></div>
+        <section class="control-section collapsed" data-tone="cyan">
+          <button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Secondary scale</span><span class="section-icon">⌘</span></button><div class="section-body"></div>
         </section>
-
-        <section class="control-section collapsed">
-          <button class="section-toggle" type="button" aria-expanded="false">
-            <span class="section-sign">+</span><span class="section-name">Marker</span><span class="section-icon">◇</span>
-          </button>
-          <div class="section-body"></div>
+        <section class="control-section collapsed" data-tone="cyan">
+          <button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Marker</span><span class="section-icon">◇</span></button><div class="section-body"></div>
         </section>
       </div>
 
