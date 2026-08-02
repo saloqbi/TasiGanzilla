@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Clockwise, Size and View</title>
+  <title>Magic Numbers Constellation — Clockwise, Size and View V2</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -17,7 +17,9 @@
     'use strict';
 
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var runtimeUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/112477f023dfe9b8e66f0b49f5a27a507cd46a7e/public/kawkabat-wheel-view-runtime.html';
+    var circle36Clockwise='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/52bb110d2d5be06acf1b570722dfaae7f116a8a5/public/kawkabat-wheel-cycles1to10.html';
+    var circle36Counterclockwise='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/cca7630651bc3277be2f6dc2c2b791029fc146f0/public/kawkabat-wheel-cycles1to10-counterclockwise.html';
+    var runtimeUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/85aa9f7a37ba37afa471744cc2cae8497c6eb520/public/kawkabat-wheel-view-runtime-v2.html';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -66,6 +68,8 @@
         var sizeControl=document.querySelector('[aria-label="Size"]');
         var viewControl=document.querySelector('[aria-label="View"]');
         var panelStatus=document.querySelector('.panel-bottom');
+        var stableCw=${JSON.stringify(circle36Clockwise)};
+        var stableCcw=${JSON.stringify(circle36Counterclockwise)};
         var runtimeBase=${JSON.stringify(runtimeUrl)};
         var viewOptions=[
           {value:'permanentSquare',label:'Permanent square'},
@@ -95,6 +99,7 @@
 
         function buildViewUrl(direction){
           var view=viewControl&&viewControl.value?viewControl.value:'circle36';
+          if(view==='circle36')return direction==='cw'?stableCw:stableCcw;
           return runtimeBase+'#view='+encodeURIComponent(view)+'&direction='+direction;
         }
 
@@ -119,7 +124,6 @@
 
         function loadSelectedView(){
           if(!clockwiseWheel||!counterclockwiseWheel||!viewControl)return;
-          setWheelStatus('success','View = '+selectedViewLabel());
           clockwiseWheel.src=buildViewUrl('cw');
           counterclockwiseWheel.src=buildViewUrl('ccw');
           applyWheelDirection();
