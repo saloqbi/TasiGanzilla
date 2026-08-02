@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Verified Split Scrollbars</title>
+  <title>Magic Numbers Constellation — Separated Scrollbars</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -26,35 +26,22 @@
         var html=new TextDecoder('utf-8').decode(bytes);
 
         html=html.replace('</style>',
-          '.work-frame{right:18px!important;width:calc(100% - 408px)!important;direction:ltr!important}'+
+          '.work-frame{right:0!important;width:calc(100% - 390px)!important}'+
           '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
-          '.wheel-page-scrollbar{position:fixed;top:7px;right:3px;bottom:7px;width:13px;z-index:3200;border:1px solid #8d999f;border-radius:8px;background:linear-gradient(90deg,#d2dce0,#f8fafb 50%,#aab8bf);box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 1px 3px rgba(32,42,47,.28);touch-action:none;user-select:none}'+
-          '.wheel-page-scrollbar-thumb{position:absolute;top:0;left:1px;right:1px;min-height:40px;border:1px solid #5f6f77;border-radius:7px;background:linear-gradient(90deg,#60727b,#a9b7bd 48%,#667780);box-shadow:inset 1px 0 1px rgba(255,255,255,.5),inset -1px 0 1px rgba(0,0,0,.17);cursor:grab}'+
-          '.wheel-page-scrollbar-thumb:active{cursor:grabbing}'+
-          '@media(max-width:950px){.work-frame{left:330px!important;right:18px!important;width:calc(100% - 348px)!important}.page-scrollbar{left:315px!important}}'+
+          '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
           '</style>');
 
         html=html.replace('<iframe class="work-frame"','<iframe id="workFrame" class="work-frame"');
 
-        var wheelTrack='<div class="wheel-page-scrollbar" id="wheelPageTrack" role="scrollbar" aria-label="Wheel page vertical scrollbar" aria-controls="workFrame" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="wheel-page-scrollbar-thumb" id="wheelPageThumb"></div></div>';
         var closeTag='</scr'+'ipt>';
-        var wheelRuntime='<script>(function(){'+
+        var sideFix='<script>(function(){'+
           "'use strict';"+
-          'var frame=document.getElementById("workFrame"),track=document.getElementById("wheelPageTrack"),thumb=document.getElementById("wheelPageThumb");'+
-          'function frameState(){try{var win=frame.contentWindow,doc=frame.contentDocument,de=doc.documentElement,body=doc.body,maxHeight=Math.max(de?de.scrollHeight:0,body?body.scrollHeight:0),viewport=win.innerHeight||frame.clientHeight;return{win:win,doc:doc,max:Math.max(0,maxHeight-viewport),y:win.scrollY||win.pageYOffset||0,viewport:viewport}}catch(error){return{win:null,doc:null,max:0,y:0,viewport:frame.clientHeight}}}'+
-          'function hideNativeScrollbar(){try{var state=frameState();if(!state.doc)return;state.doc.documentElement.setAttribute("dir","ltr");if(state.doc.body)state.doc.body.setAttribute("dir","ltr");var style=state.doc.getElementById("host-hide-native-scrollbar");if(!style){style=state.doc.createElement("style");style.id="host-hide-native-scrollbar";style.textContent="html,body{direction:ltr!important;scrollbar-width:none!important;-ms-overflow-style:none!important}html::-webkit-scrollbar,body::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}";(state.doc.head||state.doc.documentElement).appendChild(style)}}catch(error){}}'+
-          'function update(){var state=frameState(),trackHeight=track.clientHeight,contentHeight=state.viewport+state.max,ratio=contentHeight>0?state.viewport/contentHeight:1,thumbHeight=Math.max(40,Math.round(trackHeight*ratio)),travel=Math.max(0,trackHeight-thumbHeight),progress=state.max>0?state.y/state.max:0;thumb.style.height=thumbHeight+"px";thumb.style.transform="translateY("+Math.round(travel*progress)+"px)";track.setAttribute("aria-valuenow",String(Math.round(progress*100)));track.style.display=state.max>1?"block":"none"}'+
-          'function bindFrame(){hideNativeScrollbar();try{frame.contentWindow.addEventListener("scroll",update,{passive:true})}catch(error){}update();setTimeout(function(){hideNativeScrollbar();update()},300);setTimeout(function(){hideNativeScrollbar();update()},900)}'+
-          'frame.addEventListener("load",bindFrame);window.addEventListener("resize",update);'+
-          'var dragging=false,startY=0,startScroll=0;'+
-          'thumb.addEventListener("pointerdown",function(event){var state=frameState();if(!state.win)return;dragging=true;startY=event.clientY;startScroll=state.y;thumb.setPointerCapture(event.pointerId);event.preventDefault()});'+
-          'thumb.addEventListener("pointermove",function(event){if(!dragging)return;var state=frameState(),travel=track.clientHeight-thumb.offsetHeight;if(!state.win||state.max<=0||travel<=0)return;state.win.scrollTo(state.win.scrollX||0,startScroll+((event.clientY-startY)/travel)*state.max)});'+
-          'thumb.addEventListener("pointerup",function(event){dragging=false;if(thumb.hasPointerCapture(event.pointerId))thumb.releasePointerCapture(event.pointerId)});'+
-          'track.addEventListener("pointerdown",function(event){if(event.target===thumb)return;var state=frameState();if(!state.win||state.max<=0)return;var rect=track.getBoundingClientRect(),fraction=(event.clientY-rect.top)/rect.height;state.win.scrollTo(state.win.scrollX||0,Math.max(0,Math.min(state.max,(fraction*state.max)-(state.viewport/2))))});'+
-          'setTimeout(bindFrame,700);'+
+          'var frame=document.getElementById("workFrame");'+
+          'function moveWheelScrollbarRight(){try{var doc=frame.contentDocument;if(!doc)return;doc.documentElement.setAttribute("dir","ltr");if(doc.body)doc.body.setAttribute("dir","ltr");var style=doc.getElementById("host-scrollbar-side-fix");if(!style){style=doc.createElement("style");style.id="host-scrollbar-side-fix";style.textContent="html,body{direction:ltr!important}";(doc.head||doc.documentElement).appendChild(style)}}catch(error){}}'+
+          'frame.addEventListener("load",function(){moveWheelScrollbarRight();setTimeout(moveWheelScrollbarRight,250);setTimeout(moveWheelScrollbarRight,900)});'+
         '}());'+closeTag;
 
-        html=html.replace('</body>',wheelTrack+wheelRuntime+'</body>');
+        html=html.replace('</body>',sideFix+'</body>');
         document.open();
         document.write(html);
         document.close();
