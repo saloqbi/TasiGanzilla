@@ -51,7 +51,6 @@
         '</linearGradient>';
         html=html.replace(/<linearGradient id="ornateGold"[\s\S]*?<\/linearGradient>/,unifiedGold);
         html=html.replace(/<linearGradient id="ornamentFill"[\s\S]*?<\/linearGradient>/,unifiedGoldFill);
-
         html=html.replace('.outer-gold-line{fill:none;stroke:url(#ornateGold);','.outer-gold-line{fill:none;stroke:url(#blueSteelStroke);');
 
         html=html.replace('</style>',
@@ -77,8 +76,7 @@
           '.clock-ring-highlight{fill:none;stroke:#FFE7A7;stroke-width:1.5;opacity:.96}'+
           '.clock-ornament{fill:url(#ornamentFill);stroke:url(#ornateGold);stroke-width:2}'+
           '.clock-text{font-family:Arial,Tahoma,sans-serif;fill:#17110D;text-anchor:middle;dominant-baseline:central;direction:ltr;unicode-bidi:bidi-override;font-weight:800}'+
-          '.clock-date{font-size:17px;letter-spacing:1px}'+
-          '.clock-angle{font-size:29px;font-weight:900}'+
+          '.clock-date{font-size:17px;letter-spacing:1px}.clock-angle{font-size:29px;font-weight:900}'+
           '.clock-time{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums}'+
           '.clock-hijri{font-size:14px;font-weight:800;direction:rtl;unicode-bidi:plaintext}'+
           '.clock-divider{stroke:#7A3B0D;stroke-width:2.4;stroke-linecap:round}'+
@@ -86,9 +84,7 @@
 
         html=html.replace('</defs>',
           '<radialGradient id="clockFaceFill" cx="42%" cy="34%" r="72%">'+
-            '<stop offset="0%" stop-color="#FFF8E8"/>'+
-            '<stop offset="54%" stop-color="#E8D9C2"/>'+
-            '<stop offset="100%" stop-color="#C6A982"/>'+
+            '<stop offset="0%" stop-color="#FFF8E8"/><stop offset="54%" stop-color="#E8D9C2"/><stop offset="100%" stop-color="#C6A982"/>'+
           '</radialGradient>'+
           '<g id="blackBandMiniOrnament">'+
             '<path class="black-band-mini-gold" d="M2148 48 H2183 M2217 48 H2252"/>'+
@@ -96,16 +92,36 @@
             '<path class="black-band-mini-gold" d="M2243 48 C2235 35 2224 36 2216 48 C2224 60 2235 61 2243 48"/>'+
             '<path class="black-band-mini-frame" d="M2183 48 L2200 30 L2217 48 L2200 66 Z"/>'+
             '<path class="black-band-mini-gem" d="M2191 48 L2200 39 L2209 48 L2200 57 Z"/>'+
-          '</g>'+
-          '</defs>');
+          '</g></defs>');
 
         html=html.replace('<g id="specialFills"></g>',
-          '<circle id="thirteenthWheelBackground" cx="2200" cy="1800" r="1555" fill="none" stroke="#E4D3C2" stroke-width="110"/>'+
-          '<g id="specialFills"></g>');
+          '<circle id="thirteenthWheelBackground" cx="2200" cy="1800" r="1555" fill="none" stroke="#E4D3C2" stroke-width="110"/><g id="specialFills"></g>');
 
-        html=html.replace(
-          '<image id="logoImage" x="2021" y="1621" width="358" height="358" preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)"/>',
-          '<image id="logoImage" x="2021" y="1621" width="358" height="358" preserveAspectRatio="xMidYMid slice" clip-path="url(#logoClip)"/>'+
+        html=html.replace('<g id="angleTicks"></g>',
+          '<g id="innerAngleGold3D" aria-label="حافة داخلية ذهبية ثلاثية الأبعاد مطابقة للإطار العلوي">'+
+            '<circle class="inner-angle-gold-shadow" cx="2200" cy="1800" r="1623"/>'+
+            '<circle class="inner-angle-gold-metal" cx="2200" cy="1800" r="1623"/>'+
+            '<circle class="inner-angle-gold-highlight" cx="2200" cy="1800" r="1620.8"/>'+
+          '</g><g id="angleTicks"></g>');
+
+        html=html.replace('<g id="cardinalOrnaments">',
+          '<g id="outerGoldCrown3D" aria-label="حافة ذهبية موحدة ثلاثية الأبعاد">'+
+            '<circle class="outer-crown-metal" cx="2200" cy="1800" r="1784"/>'+
+            '<circle class="outer-crown-highlight" cx="2200" cy="1800" r="1781.5"/>'+
+          '</g>'+
+          '<g id="blackBandOrnaments" aria-label="زخارف ذهبية وفيروزية داخل الإطار الأسود">'+
+            '<circle class="black-band-vine-ring" cx="2200" cy="1800" r="1752"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(30 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(60 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(120 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(150 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(210 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(240 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(300 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(330 2200 1800)"/>'+
+          '</g><g id="cardinalOrnaments">');
+
+        html=html.replace('</svg>',
           '<g id="centerClockPanel" aria-label="ساعة 24 و12 ساعة مع الزاوية والاختزال">'+
             '<circle class="clock-face-bg" cx="2200" cy="1800" r="176"/>'+
             '<circle class="clock-ring-shadow" cx="2200" cy="1800" r="173"/>'+
@@ -123,54 +139,28 @@
             '<text id="clockAngleBottom" class="clock-text clock-angle" x="2200" y="1882">0° = 0</text>'+
             '<text id="clockHijri" class="clock-text clock-hijri" x="2200" y="1928">اليوم والتاريخ الهجري</text>'+
           '</g>'+
-          '<circle id="centerToggleHit" cx="2200" cy="1800" r="190" role="button" tabindex="0" aria-label="التبديل بين الشعار والساعة" aria-pressed="false"/>'
-        );
-
-        html=html.replace('<g id="angleTicks"></g>',
-          '<g id="innerAngleGold3D" aria-label="حافة داخلية ذهبية ثلاثية الأبعاد مطابقة للإطار العلوي">'+
-            '<circle class="inner-angle-gold-shadow" cx="2200" cy="1800" r="1623"/>'+
-            '<circle class="inner-angle-gold-metal" cx="2200" cy="1800" r="1623"/>'+
-            '<circle class="inner-angle-gold-highlight" cx="2200" cy="1800" r="1620.8"/>'+
-          '</g>'+
-          '<g id="angleTicks"></g>');
-
-        html=html.replace('<g id="cardinalOrnaments">',
-          '<g id="outerGoldCrown3D" aria-label="حافة ذهبية موحدة ثلاثية الأبعاد">'+
-            '<circle class="outer-crown-metal" cx="2200" cy="1800" r="1784"/>'+
-            '<circle class="outer-crown-highlight" cx="2200" cy="1800" r="1781.5"/>'+
-          '</g>'+
-          '<g id="blackBandOrnaments" aria-label="زخارف ذهبية وفيروزية داخل الإطار الأسود">'+
-            '<circle class="black-band-vine-ring" cx="2200" cy="1800" r="1752"/>'+
-            '<use href="#blackBandMiniOrnament" transform="rotate(30 2200 1800)"/>'+
-            '<use href="#blackBandMiniOrnament" transform="rotate(60 2200 1800)"/>'+
-            '<use href="#blackBandMiniOrnament" transform="rotate(120 2200 1800)"/>'+
-            '<use href="#blackBandMiniOrnament" transform="rotate(150 2200 1800)"/>'+
-            '<use href="#blackBandMiniOrnament" transform="rotate(210 2200 1800)"/>'+
-            '<use href="#blackBandMiniOrnament" transform="rotate(240 2200 1800)"/>'+
-            '<use href="#blackBandMiniOrnament" transform="rotate(300 2200 1800)"/>'+
-            '<use href="#blackBandMiniOrnament" transform="rotate(330 2200 1800)"/>'+
-          '</g>'+
-          '<g id="cardinalOrnaments">');
+          '<circle id="centerToggleHit" cx="2200" cy="1800" r="190" role="button" tabindex="0" aria-label="التبديل بين الشعار والساعة" aria-pressed="false"/>'+
+          '</svg>');
 
         html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV23=function(){return{flattenedSingleLoader:true,sourceBlob:\'b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a\',blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',angleBandUniform:true,angleBandColor:\'#8E8078\',innerAngleGold3D:true,innerAngleGoldRadius:1623,innerAngleGoldMatchesOuterCrown:true,outerBandRestoredToBlack:true,unifiedGold:true,outerGoldCrown3D:true,blackBandOrnamentsAdded:true,blackBandOrnamentCount:8,thirteenthWheelBackgroundColor:\'#E4D3C2\',centerLogoClockToggle:true,centerToggleEventDelegated:true,clockDisplays24And12:true,clockReductionRule:\'digital-root(hour+minute)\',clockAngleRule:\'minute*6\',clockDateFirst:true,');
+          'window.__auditKawkabatFinalStructureV23=function(){return{flattenedSingleLoader:true,sourceBlob:\'b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a\',fullWheelRestored:true,centerLogoClockToggle:true,clockDateFirst:true,clockReductionRule:\'digital-root(hour+minute)\',clockAngleRule:\'minute*6\',blueFrameUniform:true,angleBandUniform:true,innerAngleGold3D:true,outerGoldCrown3D:true,');
         html=html.replace('build:27,','build:48,');
 
-        var toggleLogic='var wheelToggle=document.getElementById("wheel"),logoToggle=document.getElementById("logoImage"),panelToggle=document.getElementById("centerClockPanel"),hitToggle=document.getElementById("centerToggleHit");'+
-          'if(wheelToggle&&logoToggle&&panelToggle&&hitToggle){'+
-            'var showingClockToggle=false,clockTimerToggle=null;'+
-            'function padToggle(n){return String(n).padStart(2,"0")}'+
-            'function rootToggle(n){n=Math.abs(Math.trunc(Number(n)||0));return n===0?0:1+((n-1)%9)}'+
-            'function latinToggle(v){var map={"٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9"};return String(v).replace(/[٠-٩]/g,function(d){return map[d]})}'+
-            'function hijriToggle(now){try{var parts=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).formatToParts(now),vals={};parts.forEach(function(p){if(p.type!=="literal")vals[p.type]=latinToggle(p.value)});return [vals.weekday,vals.day,vals.month,vals.year].filter(Boolean).join(" ")}catch(e){return ""}}'+
-            'function updateToggleClock(){var now=new Date(),h24=now.getHours(),m=now.getMinutes(),s=now.getSeconds(),h12=h24%12||12,angle=m*6,angleRoot=rootToggle(angle);document.getElementById("clockDate").textContent=padToggle(now.getDate())+" - "+padToggle(now.getMonth()+1)+" - "+now.getFullYear();document.getElementById("clockAngleTop").textContent=angle+"° = "+angleRoot;document.getElementById("clockTime24").textContent=padToggle(h24)+":"+padToggle(m)+":"+padToggle(s)+" = "+rootToggle(h24+m);document.getElementById("clockTime12").textContent=padToggle(h12)+":"+padToggle(m)+":"+padToggle(s)+" = "+rootToggle(h12+m);document.getElementById("clockAngleBottom").textContent=angle+"° = "+angleRoot;document.getElementById("clockHijri").textContent=hijriToggle(now)}'+
-            'function setToggleMode(next){showingClockToggle=!!next;logoToggle.style.display=showingClockToggle?"none":"inline";panelToggle.style.setProperty("display",showingClockToggle?"block":"none","important");hitToggle.setAttribute("aria-pressed",showingClockToggle?"true":"false");if(showingClockToggle){updateToggleClock();if(!clockTimerToggle)clockTimerToggle=setInterval(updateToggleClock,1000)}else if(clockTimerToggle){clearInterval(clockTimerToggle);clockTimerToggle=null}}'+
-            'function pointIsCenter(e){var matrix=wheelToggle.getScreenCTM();if(!matrix)return false;var point=wheelToggle.createSVGPoint();point.x=e.clientX;point.y=e.clientY;var local=point.matrixTransform(matrix.inverse());var dx=local.x-2200,dy=local.y-1800;return dx*dx+dy*dy<=36100}'+
-            'wheelToggle.addEventListener("click",function(e){if(pointIsCenter(e)){e.preventDefault();e.stopPropagation();setToggleMode(!showingClockToggle)}},true);'+
-            'hitToggle.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();setToggleMode(!showingClockToggle)}});'+
-            'setToggleMode(false);window.__toggleKawkabatCenterClock=function(){setToggleMode(!showingClockToggle);return showingClockToggle};window.__kawkabatCenterToggleBound=true;'+
-          '}';
-        html=html.replace(/}\(\)\);\s*<\/script>/,toggleLogic+'}());\n<\/script>');
+        var runtime='<script>(function(){'+
+          "'use strict';"+
+          'var logo=document.getElementById("logoImage"),panel=document.getElementById("centerClockPanel"),hit=document.getElementById("centerToggleHit");'+
+          'if(!logo||!panel||!hit)return;var showing=false,timer=null;'+
+          'function pad(n){return String(n).padStart(2,"0")}'+
+          'function root(n){n=Math.abs(Math.trunc(Number(n)||0));return n===0?0:1+((n-1)%9)}'+
+          'function latin(v){var m={"٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9"};return String(v).replace(/[٠-٩]/g,function(d){return m[d]})}'+
+          'function hijri(now){try{var p=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).formatToParts(now),v={};p.forEach(function(x){if(x.type!=="literal")v[x.type]=latin(x.value)});return [v.weekday,v.day,v.month,v.year].filter(Boolean).join(" ")}catch(e){return ""}}'+
+          'function update(){var n=new Date(),h24=n.getHours(),m=n.getMinutes(),s=n.getSeconds(),h12=h24%12||12,a=m*6,ar=root(a);document.getElementById("clockDate").textContent=pad(n.getDate())+" - "+pad(n.getMonth()+1)+" - "+n.getFullYear();document.getElementById("clockAngleTop").textContent=a+"° = "+ar;document.getElementById("clockTime24").textContent=pad(h24)+":"+pad(m)+":"+pad(s)+" = "+root(h24+m);document.getElementById("clockTime12").textContent=pad(h12)+":"+pad(m)+":"+pad(s)+" = "+root(h12+m);document.getElementById("clockAngleBottom").textContent=a+"° = "+ar;document.getElementById("clockHijri").textContent=hijri(n)}'+
+          'function setMode(v){showing=!!v;logo.style.visibility=showing?"hidden":"visible";panel.style.display=showing?"inline":"none";hit.setAttribute("aria-pressed",showing?"true":"false");if(showing){update();if(!timer)timer=setInterval(update,1000)}else if(timer){clearInterval(timer);timer=null}}'+
+          'hit.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();setMode(!showing)});'+
+          'hit.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();setMode(!showing)}});'+
+          'setMode(false);window.__toggleKawkabatCenterClock=function(){setMode(!showing);return showing};'+
+        '}());<\/script>';
+        html=html.replace('</body>',runtime+'</body>');
 
         document.open();
         document.write(html);
