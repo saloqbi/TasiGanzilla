@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Clockwise Panel Runtime</title>
+  <title>Magic Numbers Constellation — Clockwise and Size</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -37,7 +37,7 @@
       html=html.replace('</style>',
         '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important;background:#F7F1E3!important}'+
         '.wheel-stack{position:fixed!important}'+
-        '.wheel-layer{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;background:#F7F1E3!important;visibility:hidden!important;pointer-events:none!important}'+
+        '.wheel-layer{position:absolute!important;top:0!important;left:0!important;border:0!important;background:#F7F1E3!important;visibility:hidden!important;pointer-events:none!important;transform-origin:0 0!important}'+
         '.wheel-layer.is-active{visibility:visible!important;pointer-events:auto!important}'+
         '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
         '.panel-bottom{display:flex!important;align-items:center!important;padding:0 10px!important;font-size:12px!important;font-weight:800!important;color:#33444c!important}'+
@@ -58,11 +58,76 @@
       var marker='requestAnimationFrame(updateThumb);';
       if(html.indexOf(marker)<0)throw new Error('PANEL_RUNTIME_MARKER_NOT_FOUND');
 
-      var binding=
-        'var wheelStack=document.getElementById("workFrame"),clockwiseWheel=document.getElementById("clockwiseWheel"),counterclockwiseWheel=document.getElementById("counterclockwiseWheel"),clockwiseControl=document.querySelector("[aria-label=\\"Layout clockwise\\"]"),visibleControl=document.querySelector("[aria-label=\\"Layout visible\\"]"),panelStatus=document.querySelector(".panel-bottom");'+
-        'function setWheelStatus(mode,message){if(!panelStatus)return;panelStatus.setAttribute("data-status",mode);panelStatus.textContent=message;}'+
-        'function applyWheelDirection(){if(!clockwiseWheel||!counterclockwiseWheel||!clockwiseControl)return;clockwiseWheel.classList.toggle("is-active",!!clockwiseControl.checked);counterclockwiseWheel.classList.toggle("is-active",!clockwiseControl.checked);setWheelStatus("success",clockwiseControl.checked?"Clockwise مفعل — مع عقارب الساعة":"Clockwise ملغي — عكس عقارب الساعة");}'+
-        'if(wheelStack&&clockwiseWheel&&counterclockwiseWheel&&clockwiseControl&&visibleControl){clockwiseControl.checked=true;visibleControl.checked=true;clockwiseControl.addEventListener("change",applyWheelDirection);visibleControl.addEventListener("change",function(){wheelStack.style.visibility=visibleControl.checked?"visible":"hidden";setWheelStatus("success",visibleControl.checked?"العجلة ظاهرة":"العجلة مخفية");});applyWheelDirection();}else{setWheelStatus("error","تعذر تهيئة تحكم Clockwise");}';
+      var binding=`
+        var wheelStack=document.getElementById('workFrame');
+        var clockwiseWheel=document.getElementById('clockwiseWheel');
+        var counterclockwiseWheel=document.getElementById('counterclockwiseWheel');
+        var clockwiseControl=document.querySelector('[aria-label="Layout clockwise"]');
+        var visibleControl=document.querySelector('[aria-label="Layout visible"]');
+        var sizeControl=document.querySelector('[aria-label="Size"]');
+        var panelStatus=document.querySelector('.panel-bottom');
+
+        function setWheelStatus(mode,message){
+          if(!panelStatus)return;
+          panelStatus.setAttribute('data-status',mode);
+          panelStatus.textContent=message;
+        }
+
+        function clampWheelSize(value){
+          var parsed=Math.round(Number(value));
+          if(!Number.isFinite(parsed))parsed=10;
+          return Math.max(1,Math.min(20,parsed));
+        }
+
+        function applyWheelDirection(){
+          if(!clockwiseWheel||!counterclockwiseWheel||!clockwiseControl)return;
+          clockwiseWheel.classList.toggle('is-active',!!clockwiseControl.checked);
+          counterclockwiseWheel.classList.toggle('is-active',!clockwiseControl.checked);
+          setWheelStatus('success',clockwiseControl.checked?'Clockwise مفعل — مع عقارب الساعة':'Clockwise ملغي — عكس عقارب الساعة');
+        }
+
+        function applyWheelSize(){
+          if(!clockwiseWheel||!counterclockwiseWheel||!sizeControl)return;
+          var size=clampWheelSize(sizeControl.value);
+          var scale=size/10;
+          var inverse=100/scale;
+          sizeControl.value=String(size);
+          [clockwiseWheel,counterclockwiseWheel].forEach(function(frame){
+            frame.style.width=inverse+'%';
+            frame.style.height=inverse+'%';
+            frame.style.transform='scale('+scale+')';
+          });
+          setWheelStatus('success','Size = '+size+' • التكبير '+Math.round(scale*100)+'%');
+        }
+
+        if(wheelStack&&clockwiseWheel&&counterclockwiseWheel&&clockwiseControl&&visibleControl&&sizeControl){
+          clockwiseControl.checked=true;
+          visibleControl.checked=true;
+          sizeControl.value='10';
+          sizeControl.min='1';
+          sizeControl.max='20';
+          sizeControl.step='1';
+
+          clockwiseControl.addEventListener('change',applyWheelDirection);
+          visibleControl.addEventListener('change',function(){
+            wheelStack.style.visibility=visibleControl.checked?'visible':'hidden';
+            setWheelStatus('success',visibleControl.checked?'العجلة ظاهرة':'العجلة مخفية');
+          });
+          sizeControl.addEventListener('input',applyWheelSize);
+          sizeControl.addEventListener('change',applyWheelSize);
+          sizeControl.addEventListener('keydown',function(event){
+            if(event.key==='Enter'){
+              event.preventDefault();
+              applyWheelSize();
+            }
+          });
+
+          applyWheelSize();
+          applyWheelDirection();
+        }else{
+          setWheelStatus('error','تعذر تهيئة Clockwise أو Size');
+        }
+      `;
 
       html=html.replace(marker,binding+marker);
       document.open();
