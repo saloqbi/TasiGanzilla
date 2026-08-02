@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — 1 to 360 with Days and Zodiac</title>
+  <title>Magic Numbers Constellation — Stable Clockwise</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -15,8 +15,10 @@
   <script>
   (async function(){
     'use strict';
+
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/52bb110d2d5be06acf1b570722dfaae7f116a8a5/public/kawkabat-wheel-cycles1to10.html';
+    var clockwiseUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/52bb110d2d5be06acf1b570722dfaae7f116a8a5/public/kawkabat-wheel-cycles1to10.html';
+    var counterclockwiseUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/cca7630651bc3277be2f6dc2c2b791029fc146f0/public/kawkabat-wheel-cycles1to10-counterclockwise.html';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -28,26 +30,51 @@
     try{
       var response=await fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
       if(!response.ok)throw new Error('APPROVED_HTTP_'+response.status);
+
       var payload=await response.json();
       var html=decodeBase64(payload.content);
       var closeTag='</scr'+'ipt>';
 
       html=html.replace('</style>',
-        '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:auto!important;outline:none!important}'+
+        '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important;background:#F7F1E3!important}'+
+        '.wheel-stack{position:fixed!important}'+
+        '.wheel-layer{position:absolute;inset:0;width:100%;height:100%;border:0;background:#F7F1E3;visibility:hidden;pointer-events:none}'+
+        '.wheel-layer.is-active{visibility:visible;pointer-events:auto}'+
         '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
         '.panel-bottom{display:flex!important;align-items:center!important;padding:0 10px!important;font-size:12px!important;font-weight:800!important;color:#33444c!important}'+
-        '.panel-bottom::before{content:"";width:9px;height:9px;border-radius:50%;background:#3fa35b;margin-right:7px}'+
+        '.panel-bottom::before{content:"";width:9px;height:9px;border-radius:50%;margin-right:7px;background:#d3a80b}'+
+        '.panel-bottom[data-status="success"]::before{background:#31a354}'+
+        '.panel-bottom[data-status="error"]::before{background:#c93d3d}'+
+        '.panel-bottom[data-status="loading"]::before{background:#d3a80b}'+
         '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
         '</style>');
 
       html=html.replace(
         /<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
-        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" scrolling="yes" src="'+wheelUrl+'"></iframe>'
+        '<div id="workFrame" class="work-frame wheel-stack" role="region" aria-label="Magic Numbers Constellation">'+
+          '<iframe id="clockwiseWheel" class="wheel-layer is-active" title="Clockwise wheel" scrolling="yes" loading="eager" src="'+clockwiseUrl+'"></iframe>'+
+          '<iframe id="counterclockwiseWheel" class="wheel-layer" title="Counterclockwise wheel" scrolling="yes" loading="eager" src="'+counterclockwiseUrl+'"></iframe>'+
+        '</div>'
       );
 
-      var statusScript='<script>(function(){var bottom=document.querySelector(".panel-bottom"),frame=document.getElementById("workFrame");if(bottom)bottom.textContent="الجمعة عادت كما كانت • الخط 22px / 20px";if(frame)frame.addEventListener("load",function(){if(bottom)bottom.textContent="العجلة محملة • الجمعة في الخلية العليا عند 360°";});}());'+closeTag;
-      html=html.replace('</body>',statusScript+'</body>');
+      var switchScript='<script id="clockwise-dual-preload-v1">(function(){'+
+        "'use strict';"+
+        'var stack=document.getElementById("workFrame"),cw=document.getElementById("clockwiseWheel"),ccw=document.getElementById("counterclockwiseWheel"),clockwise=document.querySelector("[aria-label=\\"Layout clockwise\\"]"),visible=document.querySelector("[aria-label=\\"Layout visible\\"]"),bottom=document.querySelector(".panel-bottom"),loaded={cw:false,ccw:false};'+
+        'function status(mode,message){if(!bottom)return;bottom.setAttribute("data-status",mode);bottom.textContent=message;}'+
+        'function selectedLoaded(){return clockwise&&clockwise.checked?loaded.cw:loaded.ccw;}'+
+        'function showDirection(){if(!cw||!ccw||!clockwise)return;cw.classList.toggle("is-active",!!clockwise.checked);ccw.classList.toggle("is-active",!clockwise.checked);if(selectedLoaded())status("success",clockwise.checked?"Clockwise مفعل — مع عقارب الساعة":"Clockwise ملغي — عكس عقارب الساعة");else status("loading",clockwise.checked?"جارٍ تجهيز اتجاه عقارب الساعة…":"جارٍ تجهيز الاتجاه العكسي…");}'+
+        'if(!stack||!cw||!ccw||!clockwise||!visible){status("error","تعذر تهيئة تحكم الاتجاه");return;}'+
+        'clockwise.checked=true;visible.checked=true;'+
+        'cw.addEventListener("load",function(){loaded.cw=true;if(clockwise.checked)showDirection();});'+
+        'ccw.addEventListener("load",function(){loaded.ccw=true;if(!clockwise.checked)showDirection();});'+
+        'cw.addEventListener("error",function(){if(clockwise.checked)status("error","فشل تحميل اتجاه عقارب الساعة");});'+
+        'ccw.addEventListener("error",function(){if(!clockwise.checked)status("error","فشل تحميل الاتجاه العكسي");});'+
+        'clockwise.addEventListener("change",showDirection);'+
+        'visible.addEventListener("change",function(){stack.style.visibility=visible.checked?"visible":"hidden";status("success",visible.checked?"العجلة ظاهرة":"العجلة مخفية");});'+
+        'status("loading","جارٍ تجهيز اتجاهي العجلة…");showDirection();'+
+      '}());'+closeTag;
 
+      html=html.replace('</body>',switchScript+'</body>');
       document.open();
       document.write(html);
       document.close();
