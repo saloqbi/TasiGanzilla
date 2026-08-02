@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Cycles 1 to 10 up to 360</title>
+  <title>Magic Numbers Constellation — 1 to 360 with Days and Zodiac</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -16,7 +16,7 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/790d0e8afb7b8a89e7600ba8ad0cf419b46604e4/public/kawkabat-wheel-cycles1to10.html';
+    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/6c3ee5f5a0876977644d1bea991e0c00d3aca3dc/public/kawkabat-wheel-cycles1to10.html';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -45,7 +45,7 @@
         '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" scrolling="yes" src="'+wheelUrl+'"></iframe>'
       );
 
-      var statusScript='<script>(function(){var bottom=document.querySelector(".panel-bottom"),frame=document.getElementById("workFrame");if(bottom)bottom.textContent="10 دورات • من 1 إلى 360 • العجلات 3 إلى 12";if(frame)frame.addEventListener("load",function(){if(bottom)bottom.textContent="العجلة محملة • 1–360 موزعة على 10 دورات";});}());'+closeTag;
+      var statusScript='<script>(function(){var bottom=document.querySelector(".panel-bottom"),frame=document.getElementById("workFrame");if(bottom)bottom.textContent="1–360 • الأيام بالأعلى • البرج والعنصر بالأسفل";if(frame)frame.addEventListener("load",function(){if(bottom)bottom.textContent="العجلة محملة • الحلقة الخارجية: الأيام والأبراج والعناصر";});}());'+closeTag;
       html=html.replace('</body>',statusScript+'</body>');
 
       document.open();
