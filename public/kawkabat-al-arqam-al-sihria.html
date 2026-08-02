@@ -55,6 +55,7 @@
         html=html.replace('.outer-gold-line{fill:none;stroke:url(#ornateGold);','.outer-gold-line{fill:none;stroke:url(#blueSteelStroke);');
 
         html=html.replace('</style>',
+          '.angle-band-inner-line{stroke:url(#ornateGold)!important;opacity:.95}'+
           '.outer-gold-line.thick{stroke:#5A2A07!important;stroke-width:12!important;filter:drop-shadow(0 2px 1.5px rgba(0,0,0,.58))}'+
           '.outer-crown-metal{fill:none;stroke:url(#ornateGold);stroke-width:8;vector-effect:non-scaling-stroke;filter:drop-shadow(0 1.5px 1.2px rgba(0,0,0,.48))}'+
           '.outer-crown-highlight{fill:none;stroke:#FFE7A7;stroke-width:1.55;opacity:.96;vector-effect:non-scaling-stroke}'+
@@ -99,8 +100,8 @@
           '<g id="cardinalOrnaments">');
 
         html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV18=function(){return{blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandRestoredToBlack:true,unifiedGold:true,unifiedGoldPalette:[\'#5A2A07\',\'#D9962F\',\'#FFE09A\',\'#B86B1D\'],outerGoldCrown3D:true,outerGoldCrownRadius:1784,blackBandOrnamentsAdded:true,blackBandOrnamentCount:8,thirteenthWheelBackgroundColor:\'#E4D3C2\',');
-        html=html.replace('build:27,','build:42,');
+          'window.__auditKawkabatFinalStructureV19=function(){return{blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',angleBandUniform:true,angleBandColor:\'#8E8078\',innerAngleGoldUnified:true,innerAngleGoldOpacity:.95,outerBandRestoredToBlack:true,unifiedGold:true,unifiedGoldPalette:[\'#5A2A07\',\'#D9962F\',\'#FFE09A\',\'#B86B1D\'],outerGoldCrown3D:true,outerGoldCrownRadius:1784,blackBandOrnamentsAdded:true,blackBandOrnamentCount:8,thirteenthWheelBackgroundColor:\'#E4D3C2\',');
+        html=html.replace('build:27,','build:43,');
 
         document.open();
         document.write(html);
