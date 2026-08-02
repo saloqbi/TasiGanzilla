@@ -69,21 +69,26 @@
           '#blackBandOrnaments,#outerGoldCrown3D,#innerAngleGold3D{pointer-events:none;filter:drop-shadow(0 1.5px 1.5px rgba(0,0,0,.55))}'+
           '#centerClockPanel{display:none;pointer-events:none}'+
           '#centerToggleHit{fill:#fff;fill-opacity:.001;cursor:pointer;pointer-events:all;stroke:none!important;outline:none}'+
-          '.clock-face-bg{fill:url(#clockFaceFill);stroke:#4A2105;stroke-width:4}'+
-          '.clock-ring-shadow{fill:none;stroke:#3B1A05;stroke-width:11}'+
-          '.clock-ring-metal{fill:none;stroke:url(#ornateGold);stroke-width:7}'+
-          '.clock-ring-highlight{fill:none;stroke:#FFE7A7;stroke-width:1.5;opacity:.96}'+
-          '.clock-ornament{fill:url(#ornamentFill);stroke:url(#ornateGold);stroke-width:2}'+
-          '.clock-text{font-family:Arial,Tahoma,sans-serif;fill:#17110D;text-anchor:middle;dominant-baseline:central;direction:ltr;unicode-bidi:bidi-override;font-weight:800}'+
-          '.clock-date{font-size:17px;letter-spacing:1px}.clock-angle{font-size:29px;font-weight:900}'+
-          '.clock-time{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums}'+
-          '.clock-hijri{font-size:14px;font-weight:800;direction:rtl;unicode-bidi:plaintext}'+
-          '.clock-divider{stroke:#7A3B0D;stroke-width:2.4;stroke-linecap:round}'+
+          '.clock-face-bg{fill:url(#clockFaceFill);stroke:#3A1804;stroke-width:5;filter:drop-shadow(0 3px 3px rgba(0,0,0,.42))}'+
+          '.clock-ring-shadow{fill:none;stroke:#321304;stroke-width:15;opacity:.96}'+
+          '.clock-ring-metal{fill:none;stroke:url(#ornateGold);stroke-width:9}'+
+          '.clock-ring-mid{fill:none;stroke:#B66A1C;stroke-width:3.2;opacity:.95}'+
+          '.clock-ring-highlight{fill:none;stroke:#FFE7A7;stroke-width:2;opacity:.98}'+
+          '.clock-ring-beads{fill:none;stroke:#7A3B0D;stroke-width:1.35;stroke-dasharray:2 5;opacity:.88}'+
+          '.clock-ornament{fill:url(#ornamentFill);stroke:url(#ornateGold);stroke-width:2.4;filter:drop-shadow(0 1px 1px rgba(0,0,0,.42))}'+
+          '.clock-filigree{fill:none;stroke:url(#ornateGold);stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}'+
+          '.clock-mini-gem{fill:url(#blueGem);stroke:#FFF1BA;stroke-width:1.25}'+
+          '.clock-text{font-family:Arial,Tahoma,sans-serif;fill:#17110D;text-anchor:middle;dominant-baseline:central;direction:ltr;unicode-bidi:bidi-override;font-weight:900;paint-order:stroke fill;stroke:#F6E8C8;stroke-width:.45}'+
+          '.clock-date{font-size:23px;letter-spacing:1.4px;font-weight:900}.clock-angle{font-size:31px;font-weight:900}'+
+          '.clock-time{font-size:29px;font-weight:900;font-variant-numeric:tabular-nums}'+
+          '.clock-hijri{font-size:16px;font-weight:900;direction:rtl;unicode-bidi:plaintext}'+
+          '.clock-divider{stroke:url(#ornateGold);stroke-width:2.8;stroke-linecap:round}'+
+          '.clock-divider-ornament{fill:url(#ornamentFill);stroke:#FFE09A;stroke-width:1.2}'+
           '</style>');
 
         html=html.replace('</defs>',
           '<radialGradient id="clockFaceFill" cx="42%" cy="34%" r="72%">'+
-            '<stop offset="0%" stop-color="#FFF8E8"/><stop offset="54%" stop-color="#E8D9C2"/><stop offset="100%" stop-color="#C6A982"/>'+
+            '<stop offset="0%" stop-color="#FFFDF4"/><stop offset="48%" stop-color="#F0E2CF"/><stop offset="82%" stop-color="#D5BC98"/><stop offset="100%" stop-color="#AD8458"/>'+
           '</radialGradient>'+
           '<g id="blackBandMiniOrnament">'+
             '<path class="black-band-mini-gold" d="M2148 48 H2183 M2217 48 H2252"/>'+
@@ -125,15 +130,26 @@
             '<circle class="clock-face-bg" cx="2200" cy="1800" r="176"/>'+
             '<circle class="clock-ring-shadow" cx="2200" cy="1800" r="173"/>'+
             '<circle class="clock-ring-metal" cx="2200" cy="1800" r="170"/>'+
-            '<circle class="clock-ring-highlight" cx="2200" cy="1800" r="166"/>'+
-            '<path class="clock-ornament" d="M2200 1627 L2211 1642 L2200 1657 L2189 1642 Z"/>'+
-            '<path class="clock-ornament" d="M2373 1800 L2358 1811 L2343 1800 L2358 1789 Z"/>'+
-            '<path class="clock-ornament" d="M2200 1973 L2189 1958 L2200 1943 L2211 1958 Z"/>'+
-            '<path class="clock-ornament" d="M2027 1800 L2042 1789 L2057 1800 L2042 1811 Z"/>'+
+            '<circle class="clock-ring-mid" cx="2200" cy="1800" r="164"/>'+
+            '<circle class="clock-ring-highlight" cx="2200" cy="1800" r="166.5"/>'+
+            '<circle class="clock-ring-beads" cx="2200" cy="1800" r="159"/>'+
+            '<path class="clock-ornament" d="M2200 1625 L2213 1642 L2200 1659 L2187 1642 Z"/>'+
+            '<path class="clock-ornament" d="M2375 1800 L2358 1813 L2341 1800 L2358 1787 Z"/>'+
+            '<path class="clock-ornament" d="M2200 1975 L2187 1958 L2200 1941 L2213 1958 Z"/>'+
+            '<path class="clock-ornament" d="M2025 1800 L2042 1787 L2059 1800 L2042 1813 Z"/>'+
+            '<path class="clock-filigree" d="M2183 1650 C2168 1638 2150 1642 2140 1657 C2152 1650 2163 1655 2171 1666"/>'+
+            '<path class="clock-filigree" d="M2217 1650 C2232 1638 2250 1642 2260 1657 C2248 1650 2237 1655 2229 1666"/>'+
+            '<path class="clock-filigree" d="M2183 1950 C2168 1962 2150 1958 2140 1943 C2152 1950 2163 1945 2171 1934"/>'+
+            '<path class="clock-filigree" d="M2217 1950 C2232 1962 2250 1958 2260 1943 C2248 1950 2237 1945 2229 1934"/>'+
+            '<circle class="clock-mini-gem" cx="2140" cy="1657" r="4.4"/>'+
+            '<circle class="clock-mini-gem" cx="2260" cy="1657" r="4.4"/>'+
+            '<circle class="clock-mini-gem" cx="2140" cy="1943" r="4.4"/>'+
+            '<circle class="clock-mini-gem" cx="2260" cy="1943" r="4.4"/>'+
             '<text id="clockDate" class="clock-text clock-date" x="2200" y="1679">-- - -- - ----</text>'+
             '<text id="clockAngleTop" class="clock-text clock-angle" x="2200" y="1724">0° = 0</text>'+
             '<text id="clockTime24" class="clock-text clock-time" x="2200" y="1768">00:00:00 = 0</text>'+
             '<line class="clock-divider" x1="2127" y1="1802" x2="2273" y2="1802"/>'+
+            '<path class="clock-divider-ornament" d="M2191 1802 L2200 1795 L2209 1802 L2200 1809 Z"/>'+
             '<text id="clockTime12" class="clock-text clock-time" x="2200" y="1838">00:00:00 = 0</text>'+
             '<text id="clockAngleBottom" class="clock-text clock-angle" x="2200" y="1882">0° = 0</text>'+
             '<text id="clockHijri" class="clock-text clock-hijri" x="2200" y="1928">اليوم والتاريخ الهجري</text>'+
@@ -142,8 +158,8 @@
           '</svg>');
 
         html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV24=function(){return{flattenedSingleLoader:true,sourceBlob:\'b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a\',fullWheelRestored:true,centerLogoClockToggle:true,clockRuntimeInsideOriginalScript:true,clockDateFirst:true,clockReductionRule:\'digital-root(hour+minute)\',clockAngleRule:\'minute*6\',blueFrameUniform:true,angleBandUniform:true,innerAngleGold3D:true,outerGoldCrown3D:true,');
-        html=html.replace('build:27,','build:49,');
+          'window.__auditKawkabatFinalStructureV25=function(){return{flattenedSingleLoader:true,sourceBlob:\'b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a\',fullWheelRestored:true,centerLogoClockToggle:true,clockRuntimeInsideOriginalScript:true,clockDateFirst:true,clockDateFontSize:23,clockTimeFontSize:29,clockHijriFontSize:16,clockFrameStyle:\'layered-gold-filigree\',clockReductionRule:\'digital-root(hour+minute)\',clockAngleRule:\'minute*6\',blueFrameUniform:true,angleBandUniform:true,innerAngleGold3D:true,outerGoldCrown3D:true,');
+        html=html.replace('build:27,','build:50,');
 
         var clockRuntime='\n'+
           'var centerLogo=document.getElementById("logoImage"),centerPanel=document.getElementById("centerClockPanel"),centerHit=document.getElementById("centerToggleHit"),centerShowingClock=false,centerClockTimer=null;'+
