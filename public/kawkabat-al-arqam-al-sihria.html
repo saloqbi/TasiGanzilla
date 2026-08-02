@@ -16,7 +16,7 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/c04f74b29c6573ec1cbed148e1840833c201371c/public/kawkabat-wheel-direct-controls.html';
+    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/c6e639e8eb756086ce21eefbd01fd4a139252295/public/kawkabat-wheel-direct-controls.html';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -42,23 +42,6 @@
         '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>'
       );
 
-      var closeTag='</scr'+'ipt>';
-      var firstCycleRuntime='<script>(function(){'+
-        "'use strict';"+
-        'var frame=document.getElementById("workFrame"),NS="http://www.w3.org/2000/svg",CX=2200,CY=1800;'+
-        'function colorClass(value){var mod=value%3;return mod===1?"number-red":mod===2?"number-blue":"number-black";}'+
-        'function clear(group){if(!group)return;while(group.firstChild)group.removeChild(group.firstChild);}'+
-        'function install(){try{var doc=frame.contentDocument,win=frame.contentWindow;if(!doc||!win)return false;var svg=doc.getElementById("wheel"),angleFrame=doc.getElementById("angleFrame");if(!svg||!angleFrame)return false;if(doc.documentElement.dataset.firstCycleOneTo360==="true")return true;'+
-          'clear(doc.getElementById("numbersRingOne"));clear(doc.getElementById("numbersRingTwo"));var old=doc.getElementById("firstCycleNumbers1to360");if(old)old.remove();'+
-          'var style=doc.getElementById("first-cycle-number-style");if(!style){style=doc.createElement("style");style.id="first-cycle-number-style";style.textContent=".first-cycle-number{font-size:24px;pointer-events:none}";(doc.head||doc.documentElement).appendChild(style);}'+
-          'var group=doc.createElementNS(NS,"g");group.id="firstCycleNumbers1to360";group.setAttribute("aria-label","الدورة الأولى من 1 إلى 360 على عشر عجلات");svg.insertBefore(group,angleFrame);'+
-          'for(var ring=0;ring<10;ring+=1){var radius=180+(ring*110)+55;for(var index=0;index<36;index+=1){var value=(ring*36)+(index===0?36:index),angle=(index*10-90)*Math.PI/180,x=CX+Math.cos(angle)*radius,y=CY+Math.sin(angle)*radius,text=doc.createElementNS(NS,"text");text.setAttribute("x",x);text.setAttribute("y",y);text.setAttribute("data-wheel",ring+1);text.setAttribute("data-value",value);text.setAttribute("class","number-text first-cycle-number "+colorClass(value)+(index%9===0?" cardinal-number":""));text.textContent=value;group.appendChild(text);}}'+
-          'doc.documentElement.dataset.firstCycleOneTo360="true";win.__auditKawkabatFirstCycle1To360=function(){return{ok:group.children.length===360,numberCount:group.children.length,numberedWheels:10,range:[1,360],topValues:[36,72,108,144,180,216,252,288,324,360],colorCycle:["red","blue","black"],outerThreeRingsUnnumbered:true};};return group.children.length===360;}catch(error){return false;}}'+
-        'function retry(){var tries=0,timer=setInterval(function(){tries+=1;if(install()||tries>=160)clearInterval(timer);},100);}'+
-        'frame.addEventListener("load",retry);retry();'+
-      '}());'+closeTag;
-
-      html=html.replace('</body>',firstCycleRuntime+'</body>');
       document.open();
       document.write(html);
       document.close();
