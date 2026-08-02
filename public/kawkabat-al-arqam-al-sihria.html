@@ -68,8 +68,7 @@
           '.ornament-fine{stroke:url(#ornateGold)!important}.crest-label{fill:url(#ornateGold)!important}'+
           '#blackBandOrnaments,#outerGoldCrown3D,#innerAngleGold3D{pointer-events:none;filter:drop-shadow(0 1.5px 1.5px rgba(0,0,0,.55))}'+
           '#centerClockPanel{display:none;pointer-events:none}'+
-          '#centerToggleHit{fill:#fff;fill-opacity:.001;cursor:pointer;pointer-events:all;outline:none}'+
-          '#centerToggleHit:focus{stroke:#FFE09A;stroke-width:4;stroke-opacity:.9}'+
+          '#centerToggleHit{fill:#fff;fill-opacity:.001;cursor:pointer;pointer-events:all;stroke:none!important;outline:none}'+
           '.clock-face-bg{fill:url(#clockFaceFill);stroke:#4A2105;stroke-width:4}'+
           '.clock-ring-shadow{fill:none;stroke:#3B1A05;stroke-width:11}'+
           '.clock-ring-metal{fill:none;stroke:url(#ornateGold);stroke-width:7}'+
@@ -139,28 +138,27 @@
             '<text id="clockAngleBottom" class="clock-text clock-angle" x="2200" y="1882">0° = 0</text>'+
             '<text id="clockHijri" class="clock-text clock-hijri" x="2200" y="1928">اليوم والتاريخ الهجري</text>'+
           '</g>'+
-          '<circle id="centerToggleHit" cx="2200" cy="1800" r="190" role="button" tabindex="0" aria-label="التبديل بين الشعار والساعة" aria-pressed="false"/>'+
+          '<circle id="centerToggleHit" cx="2200" cy="1800" r="190" role="button" aria-label="التبديل بين الشعار والساعة" aria-pressed="false"/>'+
           '</svg>');
 
         html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV23=function(){return{flattenedSingleLoader:true,sourceBlob:\'b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a\',fullWheelRestored:true,centerLogoClockToggle:true,clockDateFirst:true,clockReductionRule:\'digital-root(hour+minute)\',clockAngleRule:\'minute*6\',blueFrameUniform:true,angleBandUniform:true,innerAngleGold3D:true,outerGoldCrown3D:true,');
-        html=html.replace('build:27,','build:48,');
+          'window.__auditKawkabatFinalStructureV24=function(){return{flattenedSingleLoader:true,sourceBlob:\'b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a\',fullWheelRestored:true,centerLogoClockToggle:true,clockRuntimeInsideOriginalScript:true,clockDateFirst:true,clockReductionRule:\'digital-root(hour+minute)\',clockAngleRule:\'minute*6\',blueFrameUniform:true,angleBandUniform:true,innerAngleGold3D:true,outerGoldCrown3D:true,');
+        html=html.replace('build:27,','build:49,');
 
-        var runtime='<script>(function(){'+
-          "'use strict';"+
-          'var logo=document.getElementById("logoImage"),panel=document.getElementById("centerClockPanel"),hit=document.getElementById("centerToggleHit");'+
-          'if(!logo||!panel||!hit)return;var showing=false,timer=null;'+
-          'function pad(n){return String(n).padStart(2,"0")}'+
-          'function root(n){n=Math.abs(Math.trunc(Number(n)||0));return n===0?0:1+((n-1)%9)}'+
-          'function latin(v){var m={"٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9"};return String(v).replace(/[٠-٩]/g,function(d){return m[d]})}'+
-          'function hijri(now){try{var p=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).formatToParts(now),v={};p.forEach(function(x){if(x.type!=="literal")v[x.type]=latin(x.value)});return [v.weekday,v.day,v.month,v.year].filter(Boolean).join(" ")}catch(e){return ""}}'+
-          'function update(){var n=new Date(),h24=n.getHours(),m=n.getMinutes(),s=n.getSeconds(),h12=h24%12||12,a=m*6,ar=root(a);document.getElementById("clockDate").textContent=pad(n.getDate())+" - "+pad(n.getMonth()+1)+" - "+n.getFullYear();document.getElementById("clockAngleTop").textContent=a+"° = "+ar;document.getElementById("clockTime24").textContent=pad(h24)+":"+pad(m)+":"+pad(s)+" = "+root(h24+m);document.getElementById("clockTime12").textContent=pad(h12)+":"+pad(m)+":"+pad(s)+" = "+root(h12+m);document.getElementById("clockAngleBottom").textContent=a+"° = "+ar;document.getElementById("clockHijri").textContent=hijri(n)}'+
-          'function setMode(v){showing=!!v;logo.style.visibility=showing?"hidden":"visible";panel.style.display=showing?"inline":"none";hit.setAttribute("aria-pressed",showing?"true":"false");if(showing){update();if(!timer)timer=setInterval(update,1000)}else if(timer){clearInterval(timer);timer=null}}'+
-          'hit.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();setMode(!showing)});'+
-          'hit.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();setMode(!showing)}});'+
-          'setMode(false);window.__toggleKawkabatCenterClock=function(){setMode(!showing);return showing};'+
-        '}());<\/script>';
-        html=html.replace('</body>',runtime+'</body>');
+        var clockRuntime='\n'+
+          'var centerLogo=document.getElementById("logoImage"),centerPanel=document.getElementById("centerClockPanel"),centerHit=document.getElementById("centerToggleHit"),centerShowingClock=false,centerClockTimer=null;'+
+          'function centerPad(n){return String(n).padStart(2,"0")}'+
+          'function centerRoot(n){n=Math.abs(Math.trunc(Number(n)||0));return n===0?0:1+((n-1)%9)}'+
+          'function centerLatin(v){var m={"٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9"};return String(v).replace(/[٠-٩]/g,function(d){return m[d]})}'+
+          'function centerHijri(now){try{var p=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).formatToParts(now),v={};p.forEach(function(x){if(x.type!=="literal")v[x.type]=centerLatin(x.value)});return [v.weekday,v.day,v.month,v.year].filter(Boolean).join(" ")}catch(e){return ""}}'+
+          'function centerUpdateClock(){var n=new Date(),h24=n.getHours(),m=n.getMinutes(),s=n.getSeconds(),h12=h24%12||12,a=m*6,ar=centerRoot(a);document.getElementById("clockDate").textContent=centerPad(n.getDate())+" - "+centerPad(n.getMonth()+1)+" - "+n.getFullYear();document.getElementById("clockAngleTop").textContent=a+"° = "+ar;document.getElementById("clockTime24").textContent=centerPad(h24)+":"+centerPad(m)+":"+centerPad(s)+" = "+centerRoot(h24+m);document.getElementById("clockTime12").textContent=centerPad(h12)+":"+centerPad(m)+":"+centerPad(s)+" = "+centerRoot(h12+m);document.getElementById("clockAngleBottom").textContent=a+"° = "+ar;document.getElementById("clockHijri").textContent=centerHijri(n)}'+
+          'function centerSetMode(v){centerShowingClock=!!v;centerLogo.style.visibility=centerShowingClock?"hidden":"visible";centerPanel.style.display=centerShowingClock?"inline":"none";centerHit.setAttribute("aria-pressed",centerShowingClock?"true":"false");if(centerShowingClock){centerUpdateClock();if(!centerClockTimer)centerClockTimer=setInterval(centerUpdateClock,1000)}else if(centerClockTimer){clearInterval(centerClockTimer);centerClockTimer=null}}'+
+          'if(centerLogo&&centerPanel&&centerHit){centerHit.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();centerSetMode(!centerShowingClock)});centerSetMode(false);window.__toggleKawkabatCenterClock=function(){centerSetMode(!centerShowingClock);return centerShowingClock}}\n';
+        var closeTag='</scr'+'ipt>';
+        var marker='}());\n'+closeTag;
+        if(html.indexOf(marker)<0)marker='}());\r\n'+closeTag;
+        if(html.indexOf(marker)<0)throw new Error('BASE_SCRIPT_TAIL_NOT_FOUND');
+        html=html.replace(marker,clockRuntime+'}());\n'+closeTag);
 
         document.open();
         document.write(html);
