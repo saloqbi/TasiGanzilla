@@ -25,8 +25,12 @@
       return new TextDecoder('utf-8').decode(bytes);
     }
 
-    function panelBoot(wheelHtml){
+    function panelBoot(wheelBase64){
       'use strict';
+      var wheelBinary=atob(String(wheelBase64||'').replace(/\s/g,''));
+      var wheelBytes=new Uint8Array(wheelBinary.length);
+      for(var wheelIndex=0;wheelIndex<wheelBinary.length;wheelIndex+=1)wheelBytes[wheelIndex]=wheelBinary.charCodeAt(wheelIndex);
+      var wheelHtml=new TextDecoder('utf-8').decode(wheelBytes);
       var frame=document.getElementById('workFrame');
       var bottom=document.querySelector('.panel-bottom');
       var installAttempts=0;
@@ -162,7 +166,7 @@
       if(!responses[1].ok)throw new Error('WHEEL_HTTP_'+responses[1].status);
       var payloads=await Promise.all([responses[0].json(),responses[1].json()]);
       var html=decodeBase64(payloads[0].content);
-      var wheelHtml=decodeBase64(payloads[1].content);
+      var wheelBase64=String(payloads[1].content||'').replace(/\s/g,'');
       var closeTag='</scr'+'ipt>';
 
       html=html.replace('</style>',
@@ -175,7 +179,7 @@
         '</style>');
 
       html=html.replace(/<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,'<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" scrolling="yes"></iframe>');
-      var boot='<script id="kawkabat-direct-tools-v2">('+panelBoot.toString()+')('+JSON.stringify(wheelHtml)+');'+closeTag;
+      var boot='<script id="kawkabat-direct-tools-v2">('+panelBoot.toString()+')('+JSON.stringify(wheelBase64)+');'+closeTag;
       html=html.replace('</body>',boot+'</body>');
       document.open();document.write(html);document.close();
     }catch(error){
