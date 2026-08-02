@@ -11,11 +11,11 @@
   </style>
 </head>
 <body>
-  <div class="loading">جارٍ تحميل الهيكل النهائي…</div>
+  <div class="loading">جاري تحميل الهيكل النهائي…</div>
   <script>
     (async function(){
       'use strict';
-      var blobApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/13faefc8f64a97bd974281f6bc90cccc1536d828';
+      var blobApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a';
       try{
         var response=await fetch(blobApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
         if(!response.ok)throw new Error('SOURCE_HTTP_'+response.status);
@@ -25,15 +25,83 @@
         for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
         var html=new TextDecoder('utf-8').decode(bytes);
 
-        html=html.replace(
-          ".angle-band-inner-line{stroke:url(#ornateGold)!important;opacity:.95}",
-          ".angle-band-inner-line{stroke:#C1872D!important;stroke-width:5.5!important;opacity:.82!important;filter:none!important}"
-        );
-        html=html.replace(
-          "innerAngleGoldUnified:true,innerAngleGoldOpacity:.95,",
-          "innerAngleGoldUnified:true,innerAngleGoldColor:'#C1872D',innerAngleGoldOpacity:.82,"
-        );
-        html=html.replace('build:43,','build:44,');
+        html=html.replace(/<linearGradient id="blueSteelStroke"[\s\S]*?<\/linearGradient>/,
+          '<linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8FA8B6"/><stop offset="100%" stop-color="#8FA8B6"/></linearGradient>');
+        html=html.replace(/<linearGradient id="blueSteelHighlight"[\s\S]*?<\/linearGradient>/,
+          '<linearGradient id="blueSteelHighlight" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8FA8B6"/><stop offset="100%" stop-color="#8FA8B6"/></linearGradient>');
+        html=html.replace(/<linearGradient id="angleGoldBand"[\s\S]*?<\/linearGradient>/,
+          '<linearGradient id="angleGoldBand" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8E8078"/><stop offset="100%" stop-color="#8E8078"/></linearGradient>');
+
+        var unifiedGold='<linearGradient id="ornateGold" x1="0%" y1="0%" x2="100%" y2="100%">'+
+          '<stop offset="0%" stop-color="#5A2A07"/>'+
+          '<stop offset="14%" stop-color="#9A5516"/>'+
+          '<stop offset="30%" stop-color="#D9962F"/>'+
+          '<stop offset="46%" stop-color="#FFE09A"/>'+
+          '<stop offset="58%" stop-color="#E7B24C"/>'+
+          '<stop offset="74%" stop-color="#B86B1D"/>'+
+          '<stop offset="88%" stop-color="#F2C86E"/>'+
+          '<stop offset="100%" stop-color="#642D09"/>'+
+        '</linearGradient>';
+        var unifiedGoldFill='<linearGradient id="ornamentFill" x1="0%" y1="0%" x2="0%" y2="100%">'+
+          '<stop offset="0%" stop-color="#FFE09A"/>'+
+          '<stop offset="28%" stop-color="#E7B24C"/>'+
+          '<stop offset="58%" stop-color="#B86B1D"/>'+
+          '<stop offset="82%" stop-color="#7A3B0D"/>'+
+          '<stop offset="100%" stop-color="#4A2105"/>'+
+        '</linearGradient>';
+        html=html.replace(/<linearGradient id="ornateGold"[\s\S]*?<\/linearGradient>/,unifiedGold);
+        html=html.replace(/<linearGradient id="ornamentFill"[\s\S]*?<\/linearGradient>/,unifiedGoldFill);
+
+        html=html.replace('.outer-gold-line{fill:none;stroke:url(#ornateGold);','.outer-gold-line{fill:none;stroke:url(#blueSteelStroke);');
+
+        html=html.replace('</style>',
+          '.angle-band-inner-line{stroke:#C1872D!important;stroke-width:5.5!important;opacity:.82!important;filter:none!important}'+
+          '.outer-gold-line.thick{stroke:#5A2A07!important;stroke-width:12!important;filter:drop-shadow(0 2px 1.5px rgba(0,0,0,.58))}'+
+          '.outer-crown-metal{fill:none;stroke:url(#ornateGold);stroke-width:8;vector-effect:non-scaling-stroke;filter:drop-shadow(0 1.5px 1.2px rgba(0,0,0,.48))}'+
+          '.outer-crown-highlight{fill:none;stroke:#FFE7A7;stroke-width:1.55;opacity:.96;vector-effect:non-scaling-stroke}'+
+          '.black-band-vine-ring{fill:none;stroke:url(#ornateGold);stroke-width:2.2;opacity:.96;vector-effect:non-scaling-stroke}'+
+          '.black-band-mini-gold{fill:none;stroke:url(#ornateGold);stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}'+
+          '.black-band-mini-frame{fill:url(#ornamentFill);stroke:url(#ornateGold);stroke-width:2.3;vector-effect:non-scaling-stroke}'+
+          '.black-band-mini-gem{fill:url(#blueGem);stroke:#FFF1BA;stroke-width:2;vector-effect:non-scaling-stroke}'+
+          '.ornament-fine{stroke:url(#ornateGold)!important}.crest-label{fill:url(#ornateGold)!important}'+
+          '#blackBandOrnaments,#outerGoldCrown3D{pointer-events:none;filter:drop-shadow(0 1.5px 1.5px rgba(0,0,0,.55))}'+
+          '</style>');
+
+        html=html.replace('</defs>',
+          '<g id="blackBandMiniOrnament">'+
+            '<path class="black-band-mini-gold" d="M2148 48 H2183 M2217 48 H2252"/>'+
+            '<path class="black-band-mini-gold" d="M2157 48 C2165 35 2176 36 2184 48 C2176 60 2165 61 2157 48"/>'+
+            '<path class="black-band-mini-gold" d="M2243 48 C2235 35 2224 36 2216 48 C2224 60 2235 61 2243 48"/>'+
+            '<path class="black-band-mini-frame" d="M2183 48 L2200 30 L2217 48 L2200 66 Z"/>'+
+            '<path class="black-band-mini-gem" d="M2191 48 L2200 39 L2209 48 L2200 57 Z"/>'+
+          '</g>'+
+          '</defs>');
+
+        html=html.replace('<g id="specialFills"></g>',
+          '<circle id="thirteenthWheelBackground" cx="2200" cy="1800" r="1555" fill="none" stroke="#E4D3C2" stroke-width="110"/>'+
+          '<g id="specialFills"></g>');
+
+        html=html.replace('<g id="cardinalOrnaments">',
+          '<g id="outerGoldCrown3D" aria-label="حافة ذهبية موحدة ثلاثية الأبعاد">'+
+            '<circle class="outer-crown-metal" cx="2200" cy="1800" r="1784"/>'+
+            '<circle class="outer-crown-highlight" cx="2200" cy="1800" r="1781.5"/>'+
+          '</g>'+
+          '<g id="blackBandOrnaments" aria-label="زخارف ذهبية وفيروزية داخل الإطار الأسود">'+
+            '<circle class="black-band-vine-ring" cx="2200" cy="1800" r="1752"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(30 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(60 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(120 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(150 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(210 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(240 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(300 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(330 2200 1800)"/>'+
+          '</g>'+
+          '<g id="cardinalOrnaments">');
+
+        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{',
+          'window.__auditKawkabatFinalStructureV20=function(){return{flattenedSingleLoader:true,sourceBlob:\'b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a\',blueFrameUniform:true,blueFrameColor:\'#8FA8B6\',angleBandUniform:true,angleBandColor:\'#8E8078\',innerAngleGoldUnified:true,innerAngleGoldColor:\'#C1872D\',innerAngleGoldOpacity:.82,outerBandRestoredToBlack:true,unifiedGold:true,outerGoldCrown3D:true,blackBandOrnamentsAdded:true,blackBandOrnamentCount:8,thirteenthWheelBackgroundColor:\'#E4D3C2\',');
+        html=html.replace('build:27,','build:45,');
 
         document.open();
         document.write(html);
