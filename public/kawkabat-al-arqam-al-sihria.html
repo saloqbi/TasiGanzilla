@@ -31,28 +31,31 @@
           '<stop offset="0%" stop-color="#8E8078"/>'+
           '<stop offset="100%" stop-color="#8E8078"/>'+
           '</linearGradient>'+
-          '<linearGradient id="outerRoseFrameBand" x1="0%" y1="0%" x2="0%" y2="100%">'+
-          '<stop offset="0%" stop-color="#6A4938"/>'+
-          '<stop offset="12%" stop-color="#9B6F58"/>'+
-          '<stop offset="28%" stop-color="#D3A58F"/>'+
-          '<stop offset="44%" stop-color="#F3D2C3"/>'+
-          '<stop offset="58%" stop-color="#C58B72"/>'+
-          '<stop offset="72%" stop-color="#E3B9A7"/>'+
-          '<stop offset="88%" stop-color="#9D6853"/>'+
-          '<stop offset="100%" stop-color="#5C4032"/>'+
+          '<linearGradient id="outerUniformCopper" x1="0%" y1="0%" x2="100%" y2="0%">'+
+          '<stop offset="0%" stop-color="#B87958"/>'+
+          '<stop offset="100%" stop-color="#B87958"/>'+
           '</linearGradient>'
         );
 
-        html=html.replace(
-          '.outer-black-band{fill:none;stroke:url(#blackFrameBand);',
-          '.outer-black-band{fill:none;stroke:url(#outerRoseFrameBand);'
-        );
+        html=html
+          .replace(
+            '.outer-black-band{fill:none;stroke:url(#blackFrameBand);',
+            '.outer-black-band{fill:none;stroke:url(#outerUniformCopper);'
+          )
+          .replace(
+            '.outer-gold-line{fill:none;stroke:url(#ornateGold);',
+            '.outer-gold-line{fill:none;stroke:url(#outerUniformCopper);'
+          )
+          .replace(
+            '.outer-black-highlight{fill:none;stroke:#5C5049;',
+            '.outer-black-highlight{fill:none;stroke:#B87958;'
+          );
 
         html=html.replace(
           'window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV8=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',angleBandOnlyChanged:true,outerFramePalette:\'rose-bronze-only\','
+          'window.__auditKawkabatFinalStructureV9=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',finalOuterFrameOnlyChanged:true,finalOuterFrameUniform:true,finalOuterFrameColor:\'#B87958\','
         );
-        html=html.replace('build:27,','build:32,');
+        html=html.replace('build:27,','build:33,');
 
         document.open();
         document.write(html);
