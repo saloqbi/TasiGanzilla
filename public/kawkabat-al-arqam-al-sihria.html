@@ -33,10 +33,10 @@
     .work-frame{
       position:fixed;
       top:0;
-      right:0;
+      right:20px;
       bottom:0;
       left:390px;
-      width:calc(100% - 390px);
+      width:calc(100% - 410px);
       height:100%;
       border:0;
       background:#f7f1e3;
@@ -140,17 +140,15 @@
       flex:1 1 auto;
       min-height:0;
       margin:0 5px 5px;
-      overflow-y:auto;
+      overflow-y:scroll;
       overflow-x:hidden;
       border:1px solid #aab3b8;
       background:#fbfbfb;
-      scrollbar-width:auto;
-      scrollbar-color:#7f8b91 #edf0f1;
       direction:ltr;
+      scrollbar-width:none;
+      -ms-overflow-style:none;
     }
-    .panel-scroll::-webkit-scrollbar{width:12px}
-    .panel-scroll::-webkit-scrollbar-track{background:#edf0f1;border-left:1px solid #c4cacc}
-    .panel-scroll::-webkit-scrollbar-thumb{background:#7f8b91;border:2px solid #edf0f1;border-radius:999px}
+    .panel-scroll::-webkit-scrollbar{width:0;height:0}
     .control-section{border-bottom:1px solid #b9c1c5;background:#fff}
     .section-toggle{
       position:relative;
@@ -267,117 +265,118 @@
       background:linear-gradient(180deg,#fff 0%,#d6dde1 42%,#edf1f3 58%,#b9c4c9 100%);
       box-shadow:inset 0 1px 2px #fff;
     }
+    .page-scrollbar{
+      position:fixed;
+      top:7px;
+      right:4px;
+      bottom:7px;
+      width:13px;
+      z-index:3000;
+      border:1px solid #9ca7ac;
+      border-radius:8px;
+      background:linear-gradient(90deg,#d9e0e3,#f6f8f9 50%,#c6d0d5);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.85),0 1px 3px rgba(32,42,47,.24);
+      touch-action:none;
+      user-select:none;
+    }
+    .page-scrollbar-thumb{
+      position:absolute;
+      top:0;
+      left:1px;
+      right:1px;
+      min-height:38px;
+      border:1px solid #66737a;
+      border-radius:7px;
+      background:linear-gradient(90deg,#66747b,#a4b0b6 45%,#758289);
+      box-shadow:inset 1px 0 1px rgba(255,255,255,.48),inset -1px 0 1px rgba(0,0,0,.18);
+      cursor:grab;
+    }
+    .page-scrollbar-thumb:active{cursor:grabbing}
     @media(max-width:950px){
       .control-panel{width:330px}
-      .work-frame{left:330px;width:calc(100% - 330px)}
+      .work-frame{left:330px;width:calc(100% - 350px)}
       .control-label,.control-value{font-size:14px}
       .section-toggle{font-size:15px}
     }
   </style>
 </head>
 <body>
-  <iframe
-    class="work-frame"
-    title="Magic Numbers Constellation"
-    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f875bee17b588b02617bcad4ae55270c60033f3d/public/kawkabat-al-arqam-al-sihria.html">
-  </iframe>
-
+  <iframe class="work-frame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f875bee17b588b02617bcad4ae55270c60033f3d/public/kawkabat-al-arqam-al-sihria.html"></iframe>
   <aside class="control-panel" aria-label="English control panel">
     <div class="panel-shell">
       <header class="panel-topbar">
-        <span class="panel-dot" aria-hidden="true"></span>
-        <span class="panel-title">Default</span>
-        <span class="panel-actions" aria-hidden="true">
-          <span class="panel-action primary">+</span>
-          <span class="panel-action">−</span>
-          <span class="panel-action">╲</span>
-          <span class="panel-action">▣</span>
-        </span>
+        <span class="panel-dot" aria-hidden="true"></span><span class="panel-title">Default</span>
+        <span class="panel-actions" aria-hidden="true"><span class="panel-action primary">+</span><span class="panel-action">−</span><span class="panel-action">╲</span><span class="panel-action">▣</span></span>
         <span class="panel-info" aria-hidden="true">i</span>
       </header>
-
-      <div class="panel-scroll">
-        <section class="control-section" data-tone="green">
-          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Layout</span><span class="section-icon">▦</span></button>
-          <div class="section-body">
-            <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" checked aria-label="Layout visible"></div></div>
-            <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" checked aria-label="Layout clockwise"></div></div>
-            <div class="control-row"><div class="control-label">Size</div><div class="control-value"><input type="number" value="10" aria-label="Size"><span class="field-action">↔</span></div></div>
-            <div class="control-row"><div class="control-label">View</div><div class="control-value"><select aria-label="View"><option>Circle of 36</option></select></div></div>
-            <div class="control-row"><div class="control-label">Data type</div><div class="control-value"><select aria-label="Data type"><option>Price</option></select></div></div>
-          </div>
-        </section>
-
-        <section class="control-section" data-tone="cyan">
-          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Price</span><span class="section-icon">●</span></button>
-          <div class="section-body">
-            <div class="control-row"><div class="control-label">Value</div><div class="control-value"><input type="text" value="79680" inputmode="numeric" aria-label="Value"><span class="field-action">↔</span></div></div>
-            <div class="control-row"><div class="control-label">Find</div><div class="control-value"><input type="text" value="79680" inputmode="numeric" aria-label="Find"><span class="field-action">⌕</span></div></div>
-            <div class="control-row"><div class="control-label">Increment</div><div class="control-value"><input type="number" value="1" aria-label="Increment"><span class="field-action">↔</span></div></div>
-          </div>
-        </section>
-
-        <section class="control-section" data-tone="green">
-          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Highlight</span><span class="section-icon">▦</span></button>
-          <div class="section-body">
-            <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" aria-label="Highlight visible"></div></div>
-            <div class="control-row"><div class="control-label">Fill</div><div class="control-value"><select aria-label="Highlight fill"><option>Levels</option></select></div></div>
-            <div class="control-row"><div class="control-label">Show marks</div><div class="control-value"><input type="checkbox" aria-label="Show marks"></div></div>
-            <div class="control-row"><div class="control-label">Show numbers</div><div class="control-value"><input type="checkbox" aria-label="Show numbers"></div></div>
-          </div>
-        </section>
-
-        <section class="control-section" data-tone="yellow">
-          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Protractor</span><span class="section-icon">◉</span></button>
-          <div class="section-body">
-            <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" aria-label="Protractor visible"></div></div>
-            <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" aria-label="Protractor clockwise"></div></div>
-            <div class="control-row"><div class="control-label">Angle</div><div class="control-value"><input type="text" value="0°" aria-label="Protractor angle"><span class="field-action">↔</span></div></div>
-          </div>
-        </section>
-
-        <section class="control-section collapsed" data-tone="cyan">
-          <button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Counter</span><span class="compact-badge">36</span></button><div class="section-body"></div>
-        </section>
-        <section class="control-section collapsed" data-tone="cyan">
-          <button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Secondary scale</span><span class="section-icon">⌘</span></button><div class="section-body"></div>
-        </section>
-        <section class="control-section collapsed" data-tone="cyan">
-          <button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Marker</span><span class="section-icon">◇</span></button><div class="section-body"></div>
-        </section>
-
-        <section class="control-section" data-tone="green">
-          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Chronometer</span><span class="section-icon">◷</span></button>
-          <div class="section-body">
-            <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" checked aria-label="Chronometer visible"></div></div>
-            <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" checked aria-label="Chronometer clockwise"></div></div>
-            <div class="control-row"><div class="control-label">Angle</div><div class="control-value"><input type="text" value="0°" aria-label="Chronometer angle"><span class="field-action">↔</span></div></div>
-            <div class="control-row"><div class="control-label">Range</div><div class="control-value"><select aria-label="Chronometer range"><option>Annual</option></select></div></div>
-          </div>
-        </section>
-
-        <section class="control-section collapsed" data-tone="cyan">
-          <button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Secondary scale</span><span class="section-icon">⌘</span></button><div class="section-body"></div>
-        </section>
-        <section class="control-section collapsed" data-tone="cyan">
-          <button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Marker</span><span class="section-icon">◇</span></button><div class="section-body"></div>
-        </section>
+      <div class="panel-scroll" id="panelScroll">
+        <section class="control-section" data-tone="green"><button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Layout</span><span class="section-icon">▦</span></button><div class="section-body">
+          <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" checked aria-label="Layout visible"></div></div>
+          <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" checked aria-label="Layout clockwise"></div></div>
+          <div class="control-row"><div class="control-label">Size</div><div class="control-value"><input type="number" value="10" aria-label="Size"><span class="field-action">↔</span></div></div>
+          <div class="control-row"><div class="control-label">View</div><div class="control-value"><select aria-label="View"><option>Circle of 36</option></select></div></div>
+          <div class="control-row"><div class="control-label">Data type</div><div class="control-value"><select aria-label="Data type"><option>Price</option></select></div></div>
+        </div></section>
+        <section class="control-section" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Price</span><span class="section-icon">●</span></button><div class="section-body">
+          <div class="control-row"><div class="control-label">Value</div><div class="control-value"><input type="text" value="79680" inputmode="numeric" aria-label="Value"><span class="field-action">↔</span></div></div>
+          <div class="control-row"><div class="control-label">Find</div><div class="control-value"><input type="text" value="79680" inputmode="numeric" aria-label="Find"><span class="field-action">⌕</span></div></div>
+          <div class="control-row"><div class="control-label">Increment</div><div class="control-value"><input type="number" value="1" aria-label="Increment"><span class="field-action">↔</span></div></div>
+        </div></section>
+        <section class="control-section" data-tone="green"><button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Highlight</span><span class="section-icon">▦</span></button><div class="section-body">
+          <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" aria-label="Highlight visible"></div></div>
+          <div class="control-row"><div class="control-label">Fill</div><div class="control-value"><select aria-label="Highlight fill"><option>Levels</option></select></div></div>
+          <div class="control-row"><div class="control-label">Show marks</div><div class="control-value"><input type="checkbox" aria-label="Show marks"></div></div>
+          <div class="control-row"><div class="control-label">Show numbers</div><div class="control-value"><input type="checkbox" aria-label="Show numbers"></div></div>
+        </div></section>
+        <section class="control-section" data-tone="yellow"><button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Protractor</span><span class="section-icon">◉</span></button><div class="section-body">
+          <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" aria-label="Protractor visible"></div></div>
+          <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" aria-label="Protractor clockwise"></div></div>
+          <div class="control-row"><div class="control-label">Angle</div><div class="control-value"><input type="text" value="0°" aria-label="Protractor angle"><span class="field-action">↔</span></div></div>
+        </div></section>
+        <section class="control-section collapsed" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Counter</span><span class="compact-badge">36</span></button><div class="section-body"></div></section>
+        <section class="control-section collapsed" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Secondary scale</span><span class="section-icon">⌘</span></button><div class="section-body"></div></section>
+        <section class="control-section collapsed" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Marker</span><span class="section-icon">◇</span></button><div class="section-body"></div></section>
+        <section class="control-section" data-tone="green"><button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Chronometer</span><span class="section-icon">◷</span></button><div class="section-body">
+          <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" checked aria-label="Chronometer visible"></div></div>
+          <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" checked aria-label="Chronometer clockwise"></div></div>
+          <div class="control-row"><div class="control-label">Angle</div><div class="control-value"><input type="text" value="0°" aria-label="Chronometer angle"><span class="field-action">↔</span></div></div>
+          <div class="control-row"><div class="control-label">Range</div><div class="control-value"><select aria-label="Chronometer range"><option>Annual</option></select></div></div>
+        </div></section>
+        <section class="control-section collapsed" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Secondary scale</span><span class="section-icon">⌘</span></button><div class="section-body"></div></section>
+        <section class="control-section collapsed" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Marker</span><span class="section-icon">◇</span></button><div class="section-body"></div></section>
       </div>
-
       <div class="panel-bottom" aria-hidden="true"></div>
     </div>
   </aside>
-
+  <div class="page-scrollbar" id="pageScrollbar" aria-label="Panel scrollbar" role="scrollbar" aria-controls="panelScroll" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="page-scrollbar-thumb" id="pageScrollbarThumb"></div></div>
   <script>
-    document.querySelectorAll('.section-toggle').forEach(function(button){
-      button.addEventListener('click',function(){
-        var section=button.closest('.control-section');
-        var collapsed=section.classList.toggle('collapsed');
-        button.setAttribute('aria-expanded',collapsed?'false':'true');
-        var sign=button.querySelector('.section-sign');
-        if(sign)sign.textContent=collapsed?'+':'−';
-      });
-    });
+    (function(){
+      'use strict';
+      var panelScroll=document.getElementById('panelScroll');
+      var track=document.getElementById('pageScrollbar');
+      var thumb=document.getElementById('pageScrollbarThumb');
+      function updateThumb(){
+        var max=panelScroll.scrollHeight-panelScroll.clientHeight;
+        var trackHeight=track.clientHeight;
+        var ratio=panelScroll.scrollHeight>0?panelScroll.clientHeight/panelScroll.scrollHeight:1;
+        var thumbHeight=Math.max(38,Math.round(trackHeight*ratio));
+        var travel=Math.max(0,trackHeight-thumbHeight);
+        var progress=max>0?panelScroll.scrollTop/max:0;
+        thumb.style.height=thumbHeight+'px';
+        thumb.style.transform='translateY('+Math.round(travel*progress)+'px)';
+        track.setAttribute('aria-valuenow',String(Math.round(progress*100)));
+        track.style.display=max>1?'block':'none';
+      }
+      panelScroll.addEventListener('scroll',updateThumb,{passive:true});
+      window.addEventListener('resize',updateThumb);
+      var dragging=false,startY=0,startScrollTop=0;
+      thumb.addEventListener('pointerdown',function(event){dragging=true;startY=event.clientY;startScrollTop=panelScroll.scrollTop;thumb.setPointerCapture(event.pointerId);event.preventDefault()});
+      thumb.addEventListener('pointermove',function(event){if(!dragging)return;var max=panelScroll.scrollHeight-panelScroll.clientHeight;var travel=track.clientHeight-thumb.offsetHeight;if(max<=0||travel<=0)return;panelScroll.scrollTop=startScrollTop+((event.clientY-startY)/travel)*max});
+      thumb.addEventListener('pointerup',function(event){dragging=false;if(thumb.hasPointerCapture(event.pointerId))thumb.releasePointerCapture(event.pointerId)});
+      track.addEventListener('pointerdown',function(event){if(event.target===thumb)return;var rect=track.getBoundingClientRect();var fraction=(event.clientY-rect.top)/rect.height;var max=panelScroll.scrollHeight-panelScroll.clientHeight;panelScroll.scrollTop=Math.max(0,Math.min(max,(fraction*max)-(panelScroll.clientHeight/2)))});
+      document.querySelectorAll('.section-toggle').forEach(function(button){button.addEventListener('click',function(){var section=button.closest('.control-section');var collapsed=section.classList.toggle('collapsed');button.setAttribute('aria-expanded',collapsed?'false':'true');var sign=button.querySelector('.section-sign');if(sign)sign.textContent=collapsed?'+':'−';requestAnimationFrame(updateThumb)})});
+      requestAnimationFrame(updateThumb);
+    }());
   </script>
 </body>
 </html>
