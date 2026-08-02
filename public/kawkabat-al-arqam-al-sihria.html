@@ -16,7 +16,7 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/b88c5734f2e4817020860854aa62f501c336caa7/public/kawkabat-wheel-direct-controls.html';
+    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/c1828bc693cff5fd3ec48c000dd2df6ab51c4c1f/public/kawkabat-wheel-static-v1.html';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -30,6 +30,7 @@
       if(!response.ok)throw new Error('APPROVED_HTTP_'+response.status);
       var payload=await response.json();
       var html=decodeBase64(payload.content);
+      var closeTag='</scr'+'ipt>';
 
       html=html.replace('</style>',
         '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important}'+
@@ -42,6 +43,18 @@
         '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>'
       );
 
+      var numbersRuntime='<script id="ring-three-cycle-one-runtime">(function(){'+
+        "'use strict';"+
+        'var NS="http://www.w3.org/2000/svg",CX=2200,CY=1800,RADIUS=455,attempt=0,timer=null;'+
+        'function colorClass(value){var mod=value%3;return mod===1?"number-red":mod===2?"number-blue":"number-black";}'+
+        'function validate(group){if(!group||group.children.length!==36)return false;for(var i=0;i<36;i+=1){var expected=i===0?36:i;if(Number(group.children[i].textContent)!==expected)return false;}return true;}'+
+        'function render(){try{var frame=document.getElementById("workFrame"),doc=frame&&frame.contentDocument,svg=doc&&doc.getElementById("wheel");if(!svg)return false;var group=doc.getElementById("numbersRingThree");if(validate(group))return true;if(group)group.remove();group=doc.createElementNS(NS,"g");group.id="numbersRingThree";group.setAttribute("aria-label","الدورة رقم 1 من 1 إلى 36 على العجلة رقم 3");for(var index=0;index<36;index+=1){var value=index===0?36:index,angle=(index*10-90)*Math.PI/180,x=CX+Math.cos(angle)*RADIUS,y=CY+Math.sin(angle)*RADIUS,text=doc.createElementNS(NS,"text");text.setAttribute("x",x);text.setAttribute("y",y);text.setAttribute("class","number-text ring-three-number "+colorClass(value)+(index%9===0?" cardinal-number":""));text.setAttribute("font-size","24");text.setAttribute("data-wheel","3");text.setAttribute("data-cycle","1");text.setAttribute("data-value",value);text.textContent=value;group.appendChild(text);}var angleFrame=doc.getElementById("angleFrame");if(angleFrame&&angleFrame.parentNode===svg)svg.insertBefore(group,angleFrame);else svg.appendChild(group);doc.documentElement.dataset.ringThreeCycleOne=validate(group)?"true":"false";return validate(group);}catch(error){return false;}}'+
+        'function start(){if(timer)clearInterval(timer);attempt=0;render();timer=setInterval(function(){attempt+=1;if(render()&&attempt>=4){clearInterval(timer);timer=null;}else if(attempt>=80){clearInterval(timer);timer=null;}},250);}'+
+        'var frame=document.getElementById("workFrame");if(frame)frame.addEventListener("load",start);start();'+
+        'window.__auditKawkabatRingThreeCycleOne=function(){try{var frame=document.getElementById("workFrame"),doc=frame&&frame.contentDocument,group=doc&&doc.getElementById("numbersRingThree");return{ok:validate(group),wheel:3,cycle:1,range:[1,36],numberCount:group?group.children.length:0,radius:RADIUS,cardinalValues:{top:36,right:9,bottom:18,left:27},staticWheelDirect:true};}catch(error){return{ok:false,error:String(error)}}};'+
+      '}());'+closeTag;
+
+      html=html.replace('</body>',numbersRuntime+'</body>');
       document.open();
       document.write(html);
       document.close();
