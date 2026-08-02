@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Clockwise and Size</title>
+  <title>Magic Numbers Constellation — Clockwise, Size and View</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -17,8 +17,7 @@
     'use strict';
 
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var clockwiseUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/52bb110d2d5be06acf1b570722dfaae7f116a8a5/public/kawkabat-wheel-cycles1to10.html';
-    var counterclockwiseUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/cca7630651bc3277be2f6dc2c2b791029fc146f0/public/kawkabat-wheel-cycles1to10-counterclockwise.html';
+    var runtimeUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/112477f023dfe9b8e66f0b49f5a27a507cd46a7e/public/kawkabat-wheel-view-runtime.html';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -50,8 +49,8 @@
       html=html.replace(
         /<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
         '<div id="workFrame" class="work-frame wheel-stack" role="region" aria-label="Magic Numbers Constellation">'+
-          '<iframe id="clockwiseWheel" class="wheel-layer is-active" title="Clockwise wheel" scrolling="yes" loading="eager" src="'+clockwiseUrl+'"></iframe>'+
-          '<iframe id="counterclockwiseWheel" class="wheel-layer" title="Counterclockwise wheel" scrolling="yes" loading="eager" src="'+counterclockwiseUrl+'"></iframe>'+
+          '<iframe id="clockwiseWheel" class="wheel-layer is-active" title="Clockwise wheel" scrolling="yes" loading="eager"></iframe>'+
+          '<iframe id="counterclockwiseWheel" class="wheel-layer" title="Counterclockwise wheel" scrolling="yes" loading="eager"></iframe>'+
         '</div>'
       );
 
@@ -65,7 +64,18 @@
         var clockwiseControl=document.querySelector('[aria-label="Layout clockwise"]');
         var visibleControl=document.querySelector('[aria-label="Layout visible"]');
         var sizeControl=document.querySelector('[aria-label="Size"]');
+        var viewControl=document.querySelector('[aria-label="View"]');
         var panelStatus=document.querySelector('.panel-bottom');
+        var runtimeBase=${JSON.stringify(runtimeUrl)};
+        var viewOptions=[
+          {value:'permanentSquare',label:'Permanent square'},
+          {value:'circle12',label:'Circle of 12'},
+          {value:'circle24',label:'Circle of 24'},
+          {value:'circle36',label:'Circle of 36'},
+          {value:'square4',label:'Square of 4'},
+          {value:'square9',label:'Square of 9'},
+          {value:'tetragon',label:'Tetragon'}
+        ];
 
         function setWheelStatus(mode,message){
           if(!panelStatus)return;
@@ -79,11 +89,40 @@
           return Math.max(1,Math.min(20,parsed));
         }
 
+        function selectedViewLabel(){
+          return viewControl&&viewControl.options[viewControl.selectedIndex]?viewControl.options[viewControl.selectedIndex].textContent:'Circle of 36';
+        }
+
+        function buildViewUrl(direction){
+          var view=viewControl&&viewControl.value?viewControl.value:'circle36';
+          return runtimeBase+'#view='+encodeURIComponent(view)+'&direction='+direction;
+        }
+
+        function populateViewOptions(){
+          if(!viewControl)return;
+          viewControl.innerHTML='';
+          viewOptions.forEach(function(item){
+            var option=document.createElement('option');
+            option.value=item.value;
+            option.textContent=item.label;
+            viewControl.appendChild(option);
+          });
+          viewControl.value='circle36';
+        }
+
         function applyWheelDirection(){
           if(!clockwiseWheel||!counterclockwiseWheel||!clockwiseControl)return;
           clockwiseWheel.classList.toggle('is-active',!!clockwiseControl.checked);
           counterclockwiseWheel.classList.toggle('is-active',!clockwiseControl.checked);
-          setWheelStatus('success',clockwiseControl.checked?'Clockwise مفعل — مع عقارب الساعة':'Clockwise ملغي — عكس عقارب الساعة');
+          setWheelStatus('success',(clockwiseControl.checked?'مع عقارب الساعة':'عكس عقارب الساعة')+' • '+selectedViewLabel());
+        }
+
+        function loadSelectedView(){
+          if(!clockwiseWheel||!counterclockwiseWheel||!viewControl)return;
+          setWheelStatus('success','View = '+selectedViewLabel());
+          clockwiseWheel.src=buildViewUrl('cw');
+          counterclockwiseWheel.src=buildViewUrl('ccw');
+          applyWheelDirection();
         }
 
         function applyWheelSize(){
@@ -97,16 +136,17 @@
             frame.style.height=inverse+'%';
             frame.style.transform='scale('+scale+')';
           });
-          setWheelStatus('success','Size = '+size+' • التكبير '+Math.round(scale*100)+'%');
+          setWheelStatus('success','Size = '+size+' • '+Math.round(scale*100)+'% • '+selectedViewLabel());
         }
 
-        if(wheelStack&&clockwiseWheel&&counterclockwiseWheel&&clockwiseControl&&visibleControl&&sizeControl){
+        if(wheelStack&&clockwiseWheel&&counterclockwiseWheel&&clockwiseControl&&visibleControl&&sizeControl&&viewControl){
           clockwiseControl.checked=true;
           visibleControl.checked=true;
           sizeControl.value='10';
           sizeControl.min='1';
           sizeControl.max='20';
           sizeControl.step='1';
+          populateViewOptions();
 
           clockwiseControl.addEventListener('change',applyWheelDirection);
           visibleControl.addEventListener('change',function(){
@@ -121,11 +161,12 @@
               applyWheelSize();
             }
           });
+          viewControl.addEventListener('change',loadSelectedView);
 
           applyWheelSize();
-          applyWheelDirection();
+          loadSelectedView();
         }else{
-          setWheelStatus('error','تعذر تهيئة Clockwise أو Size');
+          setWheelStatus('error','تعذر تهيئة Clockwise أو Size أو View');
         }
       `;
 
