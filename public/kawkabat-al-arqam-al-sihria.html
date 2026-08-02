@@ -1,95 +1,29 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Gannzilla Tools V4</title>
-  <style>
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
-    body{display:grid;place-items:center;color:#43515a}
-    .loading{font-weight:800}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>كوكبة الأرقام السحرية — ربط مباشر V5</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}.loading{font-weight:800;display:grid;place-items:center;height:100%}</style>
 </head>
 <body>
-  <div class="loading">Loading Gannzilla tools V4…</div>
-  <script>
-  (async function(){
-    'use strict';
-    var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var fixedRef='c1828bc693cff5fd3ec48c000dd2df6ab51c4c1f';
-    var wheelStaticUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/'+fixedRef+'/public/kawkabat-wheel-static-v1.html';
-    var partsBase='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/'+fixedRef+'/public/gannzilla-tools-v2/';
-
-    function decodeBase64(value){
-      var binary=atob(String(value||'').replace(/\s/g,''));
-      var bytes=new Uint8Array(binary.length);
-      for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
-      return new TextDecoder('utf-8').decode(bytes);
-    }
-
-    try{
-      var response=await fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
-      if(!response.ok)throw new Error('APPROVED_HTTP_'+response.status);
-      var payload=await response.json();
-      var html=decodeBase64(payload.content);
-      var closeTag='</scr'+'ipt>';
-
-      html=html.replace('</style>',
-        '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important}'+
-        '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
-        '.panel-bottom{display:flex!important;align-items:center!important;padding:0 10px!important;font-size:12px!important;font-weight:800!important;color:#33444c!important;overflow:hidden!important;white-space:nowrap!important}'+
-        '.panel-bottom::before{content:"";width:9px;height:9px;flex:0 0 9px;border-radius:50%;margin-right:7px;background:#d59a2f;box-shadow:0 0 0 2px rgba(213,154,47,.18)}'+
-        '.panel-bottom[data-status="ready"]::before{background:#3fa35b;box-shadow:0 0 0 2px rgba(63,163,91,.18)}'+
-        '.panel-bottom[data-status="error"]::before{background:#c84242;box-shadow:0 0 0 2px rgba(200,66,66,.18)}'+
-        '.panel-action,.panel-info{cursor:pointer;user-select:none}'+
-        '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
-        '</style>');
-
-      html=html.replace(
-        /<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
-        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="about:blank"></iframe>'
-      );
-
-      var loader='<script id="gannzilla-tools-v4-loader">(async function(){'+
-        'var bottom=document.querySelector(".panel-bottom");'+
-        'var frame=document.getElementById("workFrame");'+
-        'function status(text,kind){if(bottom){bottom.textContent=text;bottom.dataset.status=kind||"waiting";}}'+
-        'status("Loading static wheel and tools V4…","waiting");'+
-        'try{'+
-          'var names=["part-01.js","part-02.js","part-03.js","part-04.js"];'+
-          'var all=await Promise.all(['+
-            'fetch("'+wheelStaticUrl+'",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("STATIC_WHEEL_HTTP_"+r.status);return r.text();}),' +
-            'Promise.all(names.map(function(name){return fetch("'+partsBase+'"+name,{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("ENGINE_PART_HTTP_"+r.status+"_"+name);return r.text();});}))'+
-          ']);'+
-          'var wheelHtml=all[0],code=all[1].join("");'+
-          'try{new Function(code);}catch(parseError){throw new Error("ENGINE_PARSE_"+parseError.message);}'+
-          'frame.addEventListener("load",function(){'+
-            'try{var d=frame.contentDocument;if(!d||!d.getElementById("wheel")){status("Static wheel loaded without #wheel","error");return;}status("Wheel SVG loaded • connecting tools…","waiting");}catch(e){status("Wheel access error: "+String(e.message||e),"error");}'+
-          '},{once:true});'+
-          'frame.srcdoc=wheelHtml;'+
-          'var script=document.createElement("script");'+
-          'script.id="gannzilla-tools-engine-v4";'+
-          'script.textContent=code;'+
-          'document.body.appendChild(script);'+
-          'setTimeout(function(){'+
-            'try{var audit=window.__auditKawkabatGannzillaToolsV2&&window.__auditKawkabatGannzillaToolsV2();'+
-            'if(!audit)status("Engine did not start","error");'+
-            'else if(!audit.wheelConnected)status("Engine started • wheel not connected","error");'+
-            'else if(audit.counterNumbers!==36)status("Connected • counter numbers "+audit.counterNumbers,"error");'+
-            'else status("Connected • Wheel 3 • 36 numbers","ready");'+
-            '}catch(e){status("Audit error: "+String(e.message||e),"error");}'+
-          '},4000);'+
-        '}catch(error){status("Tools failed: "+String(error.message||error),"error");}'+
-      '}());'+closeTag;
-
-      html=html.replace('</body>',loader+'</body>');
-      document.open();
-      document.write(html);
-      document.close();
-    }catch(error){
-      document.body.innerHTML='<div class="loading">Unable to load structure: '+String(error.message||error)+'</div>';
-    }
-  }());
-  </script>
+<div class="loading">جارٍ تحميل لوحة الأدوات والعجلة…</div>
+<script>
+(async function(){
+'use strict';
+var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
+var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/62b63812f492e69d4f04e6d007bc0b4cd005dda3/public/kawkabat-wheel-tools-host-v1.html';
+function decode(value){var b=atob(String(value||'').replace(/\s/g,'')),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return new TextDecoder('utf-8').decode(u);}
+try{
+ var r=await fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});if(!r.ok)throw new Error('PANEL_HTTP_'+r.status);var p=await r.json(),doc=decode(p.content),closeTag='</scr'+'ipt>';
+ doc=doc.replace('</style>','.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important}.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}</style>');
+ doc=doc.replace(/<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,'<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>');
+ var code="(function(){\n'use strict';\nvar NS='http://www.w3.org/2000/svg',CX=2200,CY=1800,INNER=180,STEP=110;\nvar frame=document.getElementById('workFrame');\nvar state={visible:true,clockwise:true,size:10,wheel:3,start:1,count:36,increment:1,fontSize:24,highlightVisible:false,highlightFill:'Levels',highlightMarks:false,highlightNumbers:false,find:1,protractorVisible:false,protractorClockwise:true,protractorAngle:0};\nvar retry=0,timer=null,statusNode=null;\nfunction n(v,f){var x=Number(String(v==null?'':v).replace(/[^0-9.+-]/g,''));return Number.isFinite(x)?x:f;}\nfunction clamp(v,a,b){return Math.max(a,Math.min(b,v));}\nfunction qLabel(label){return document.querySelector('[aria-label=\\\"'+label+'\\\"]');}\nfunction section(name){return Array.prototype.find.call(document.querySelectorAll('.control-section'),function(s){var x=s.querySelector('.section-name');return x&&x.textContent.trim()===name;});}\nfunction bodyFor(s){return s&&s.querySelector('.section-body');}\nfunction row(label,control){return '<div class=\\\"control-row\\\"><div class=\\\"control-label\\\">'+label+'</div><div class=\\\"control-value\\\">'+control+'</div></div>';}\nfunction setExpanded(s,on){if(!s)return;s.classList.toggle('collapsed',!on);var b=s.querySelector('.section-toggle'),sg=s.querySelector('.section-sign');if(b)b.setAttribute('aria-expanded',on?'true':'false');if(sg)sg.textContent=on?'−':'+';}\nfunction status(text,kind){if(!statusNode){statusNode=document.createElement('div');statusNode.id='gannLinkStatusV5';statusNode.style.cssText='position:fixed;left:8px;top:55px;z-index:5000;padding:7px 10px;border-radius:6px;font:800 12px Arial;background:#f4d77c;color:#222;box-shadow:0 1px 5px rgba(0,0,0,.3);max-width:365px';document.body.appendChild(statusNode);}statusNode.textContent=text;statusNode.dataset.kind=kind||'waiting';statusNode.style.background=kind==='ready'?'#67c77a':kind==='error'?'#e47777':'#f4d77c';}\nfunction getDoc(){try{var d=frame&&frame.contentDocument;return d&&d.getElementById('wheel')?d:null;}catch(e){return null;}}\nfunction polar(r,deg){var a=deg*Math.PI/180;return{x:CX+Math.cos(a)*r,y:CY+Math.sin(a)*r};}\nfunction radius(w){return INNER+(clamp(Math.round(w),1,13)-1)*STEP+STEP/2;}\nfunction colorClass(v){var m=((Math.round(v)%3)+3)%3;return m===1?'number-red':m===2?'number-blue':'number-black';}\nfunction ensure(doc){\n var style=doc.getElementById('gannLinkStyleV5');\n if(!style){style=doc.createElement('style');style.id='gannLinkStyleV5';style.textContent='.gann-v5-number{font-family:Arial,Tahoma,sans-serif;font-weight:800;text-anchor:middle;dominant-baseline:central;direction:ltr;unicode-bidi:bidi-override;paint-order:stroke fill;stroke:#E7CB84;stroke-width:1.05;stroke-opacity:.72;pointer-events:none}.gann-v5-highlight{fill:#F5D76E;fill-opacity:.34;stroke:#C88B16;stroke-width:2}.gann-v5-protractor{stroke:#B21F2D;stroke-width:4;fill:none;vector-effect:non-scaling-stroke}.gann-v5-label{font-family:Arial;font-size:25px;font-weight:900;text-anchor:middle;dominant-baseline:central;paint-order:stroke fill;stroke:#F7F1E3;stroke-width:4;fill:#17191B}';doc.head.appendChild(style);}\n var svg=doc.getElementById('wheel'),root=doc.getElementById('gannLinkRootV5');\n if(!root){root=doc.createElementNS(NS,'g');root.id='gannLinkRootV5';var a=doc.getElementById('angleFrame');if(a&&a.parentNode===svg)svg.insertBefore(root,a);else svg.appendChild(root);}\n ['counter','highlight','protractor'].forEach(function(id){if(!doc.getElementById('gannV5_'+id)){var g=doc.createElementNS(NS,'g');g.id='gannV5_'+id;root.appendChild(g);}});\n}\nfunction clear(g){while(g&&g.firstChild)g.removeChild(g.firstChild);}\nfunction svgEl(doc,name,attrs,parent){var e=doc.createElementNS(NS,name);Object.keys(attrs||{}).forEach(function(k){e.setAttribute(k,String(attrs[k]));});if(parent)parent.appendChild(e);return e;}\nfunction valueForSlot(slot){return slot===0?state.start+(state.count-1)*state.increment:state.start+(slot-1)*state.increment;}\nfunction angleForSlot(slot){return -90+(state.clockwise?1:-1)*(slot*360/state.count);}\nfunction render(){\n try{\n  var doc=getDoc();if(!doc){status('العجلة لم تكتمل بعد…','waiting');return false;}\n  ensure(doc);var wheel=doc.getElementById('wheel');\n  wheel.style.width=Math.round(3960*(state.size/10))+'px';wheel.style.height=Math.round(3240*(state.size/10))+'px';\n  var frames=doc.getElementById('frames'),div=doc.getElementById('divisions'),fills=doc.getElementById('specialFills'),arcs=doc.getElementById('specialArcs');[frames,div,fills,arcs].forEach(function(x){if(x)x.style.display=state.visible?'':'none';});\n  var g=doc.getElementById('gannV5_counter');clear(g);\n  if(state.visible){var r=radius(state.wheel);for(var i=0;i<state.count;i++){var v=valueForSlot(i),p=polar(r,angleForSlot(i)),t=svgEl(doc,'text',{x:p.x,y:p.y,'class':'gann-v5-number '+colorClass(v)+(i%(Math.max(1,Math.round(state.count/4)))===0?' cardinal-number':''),'font-size':state.fontSize,'data-wheel':state.wheel,'data-value':v},g);t.textContent=String(v);}}\n  var hg=doc.getElementById('gannV5_highlight');clear(hg);if(state.highlightVisible){var k=Math.round((state.find-state.start)/state.increment),slot=(k===state.count-1?0:k+1);if(k>=0&&k<state.count){var a=angleForSlot(slot),half=180/state.count,r1=INNER,r2=INNER+13*STEP,p1=polar(r2,a-half),p2=polar(r2,a+half),p3=polar(r1,a+half),p4=polar(r1,a-half),path='M '+p1.x+' '+p1.y+' A '+r2+' '+r2+' 0 0 1 '+p2.x+' '+p2.y+' L '+p3.x+' '+p3.y+' A '+r1+' '+r1+' 0 0 0 '+p4.x+' '+p4.y+' Z';svgEl(doc,'path',{d:path,'class':'gann-v5-highlight'},hg);}}\n  var pg=doc.getElementById('gannV5_protractor');clear(pg);if(state.protractorVisible){var deg=state.protractorAngle,a=-90+(state.protractorClockwise?1:-1)*deg,p1=polar(INNER,a),p2=polar(INNER+13*STEP,a);svgEl(doc,'line',{x1:p1.x,y1:p1.y,x2:p2.x,y2:p2.y,'class':'gann-v5-protractor'},pg);var lp=polar(1365,a),tx=svgEl(doc,'text',{x:lp.x,y:lp.y,'class':'gann-v5-label'},pg);tx.textContent=Math.round(deg)+'°';}\n  status('متصل ✓ العجلة '+state.wheel+' • '+g.children.length+' رقم','ready');\n  return g.children.length===state.count;\n }catch(e){status('خطأ الربط: '+String(e&&e.message||e),'error');return false;}\n}\nfunction setVal(el,v){if(!el)return;if(el.type==='checkbox')el.checked=!!v;else el.value=v;}\nfunction bind(el,key){if(!el||el.dataset.gannV5Bound)return;el.dataset.gannV5Bound='1';function apply(){var v=el.type==='checkbox'?el.checked:n(el.value,state[key]);if(key==='wheel')v=clamp(Math.round(v),1,13);if(key==='count')v=clamp(Math.round(v),1,360);if(key==='fontSize')v=clamp(v,10,48);if(key==='size')v=clamp(v,1,30);state[key]=v;render();}el.addEventListener('input',apply);el.addEventListener('change',apply);}\nfunction prepare(){\n var c=section('Counter');if(c){bodyFor(c).innerHTML=row('Visible','<input id=\\\"v5Visible\\\" type=\\\"checkbox\\\">')+row('Wheel','<input id=\\\"v5Wheel\\\" type=\\\"number\\\" min=\\\"1\\\" max=\\\"13\\\">')+row('Start','<input id=\\\"v5Start\\\" type=\\\"number\\\">')+row('Count','<input id=\\\"v5Count\\\" type=\\\"number\\\" min=\\\"1\\\" max=\\\"360\\\">')+row('Increment','<input id=\\\"v5Increment\\\" type=\\\"number\\\">')+row('Font size','<input id=\\\"v5Font\\\" type=\\\"number\\\" min=\\\"10\\\" max=\\\"48\\\">');setExpanded(c,true);}\n var map=[[qLabel('Layout visible'),'visible'],[qLabel('Layout clockwise'),'clockwise'],[qLabel('Size'),'size'],[qLabel('Find'),'find'],[qLabel('Highlight visible'),'highlightVisible'],[qLabel('Protractor visible'),'protractorVisible'],[qLabel('Protractor clockwise'),'protractorClockwise'],[qLabel('Protractor angle'),'protractorAngle'],[document.getElementById('v5Visible'),'visible'],[document.getElementById('v5Wheel'),'wheel'],[document.getElementById('v5Start'),'start'],[document.getElementById('v5Count'),'count'],[document.getElementById('v5Increment'),'increment'],[document.getElementById('v5Font'),'fontSize']];\n map.forEach(function(x){setVal(x[0],state[x[1]]);bind(x[0],x[1]);});\n var inc=qLabel('Increment');if(inc){setVal(inc,state.increment);bind(inc,'increment');}\n var value=qLabel('Value');if(value){setVal(value,state.start);bind(value,'start');}\n status('بانتظار تحميل العجلة…','waiting');\n}\nprepare();\nif(frame)frame.addEventListener('load',function(){retry=0;setTimeout(render,100);});\ntimer=setInterval(function(){retry++;if(render()&&retry>5){clearInterval(timer);}else if(retry>120){clearInterval(timer);status('فشل الوصول إلى SVG بعد 30 ثانية','error');}},250);\nwindow.__auditKawkabatLinkV5=function(){var d=getDoc(),g=d&&d.getElementById('gannV5_counter');return{ok:!!d&&!!g&&g.children.length===state.count,wheelConnected:!!d,wheel:state.wheel,count:g?g.children.length:0,state:Object.assign({},state)};};\n}());";
+ var loader='<script id="gann-link-v5-engine">'+code+closeTag;
+ doc=doc.replace('</body>',loader+'</body>');
+ document.open();document.write(doc);document.close();
+}catch(e){document.body.innerHTML='<div class="loading">تعذر التحميل: '+String(e.message||e)+'</div>';}
+}());
+</script>
 </body>
 </html>
