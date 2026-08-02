@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Gannzilla Tools V2</title>
+  <title>Magic Numbers Constellation — Gannzilla Tools V3</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -11,13 +11,14 @@
   </style>
 </head>
 <body>
-  <div class="loading">Loading Gannzilla tools V2…</div>
+  <div class="loading">Loading Gannzilla tools V3…</div>
   <script>
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/62b63812f492e69d4f04e6d007bc0b4cd005dda3/public/kawkabat-wheel-tools-host-v1.html';
-    var partsBase='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/62b63812f492e69d4f04e6d007bc0b4cd005dda3/public/gannzilla-tools-v2/';
+    var fixedRef='75cbd31411c15b5c4fb84421e0e13e3ff5d8a156';
+    var wheelHostUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/'+fixedRef+'/public/kawkabat-wheel-tools-host-v1.html';
+    var partsBase='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/'+fixedRef+'/public/gannzilla-tools-v2/';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -46,23 +47,36 @@
 
       html=html.replace(
         /<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
-        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>'
+        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="about:blank"></iframe>'
       );
 
-      var loader='<script id="gannzilla-tools-v2-loader">(async function(){'+
+      var loader='<script id="gannzilla-tools-v3-loader">(async function(){'+
         'var bottom=document.querySelector(".panel-bottom");'+
+        'var frame=document.getElementById("workFrame");'+
         'function status(text,kind){if(bottom){bottom.textContent=text;bottom.dataset.status=kind||"waiting";}}'+
-        'status("Loading tools engine V2…","waiting");'+
+        'status("Loading wheel and tools V3…","waiting");'+
         'try{'+
           'var names=["part-01.js","part-02.js","part-03.js","part-04.js"];'+
-          'var texts=await Promise.all(names.map(function(name){return fetch("'+partsBase+'"+name,{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("ENGINE_PART_HTTP_"+r.status+"_"+name);return r.text();});}));'+
-          'var code=texts.join("");'+
+          'var all=await Promise.all(['+
+            'fetch("'+wheelHostUrl+'",{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("WHEEL_HOST_HTTP_"+r.status);return r.text();}),' +
+            'Promise.all(names.map(function(name){return fetch("'+partsBase+'"+name,{cache:"no-store"}).then(function(r){if(!r.ok)throw new Error("ENGINE_PART_HTTP_"+r.status+"_"+name);return r.text();});}))'+
+          ']);'+
+          'var hostHtml=all[0],code=all[1].join("");'+
           'try{new Function(code);}catch(parseError){throw new Error("ENGINE_PARSE_"+parseError.message);}'+
+          'frame.addEventListener("load",function(){status("Wheel loaded • connecting tools…","waiting");},{once:true});'+
+          'frame.srcdoc=hostHtml;'+
           'var script=document.createElement("script");'+
-          'script.id="gannzilla-tools-engine-v2";'+
+          'script.id="gannzilla-tools-engine-v3";'+
           'script.textContent=code;'+
           'document.body.appendChild(script);'+
-          'setTimeout(function(){if(!window.__auditKawkabatGannzillaToolsV2)status("Engine did not start","error");},1500);'+
+          'setTimeout(function(){'+
+            'try{var audit=window.__auditKawkabatGannzillaToolsV2&&window.__auditKawkabatGannzillaToolsV2();'+
+            'if(!audit)status("Engine did not start","error");'+
+            'else if(!audit.wheelConnected)status("Engine started • wheel not connected","error");'+
+            'else if(audit.counterNumbers!==36)status("Connected • counter numbers "+audit.counterNumbers,"error");'+
+            'else status("Connected • Wheel 3 • 36 numbers","ready");'+
+            '}catch(e){status("Audit error: "+String(e.message||e),"error");}'+
+          '},4000);'+
         '}catch(error){status("Tools failed: "+String(error.message||error),"error");}'+
       '}());'+closeTag;
 
