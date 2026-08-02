@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — الاتجاه والحجم</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
+    .loading{font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل العجلة الأساسية…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var staticWheelApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a';
+
+    function decodeBase64(value){
+      var binary=atob(String(value||'').replace(/\s/g,''));
+      var bytes=new Uint8Array(binary.length);
+      for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+
+    try{
+      var response=await fetch(staticWheelApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      if(!response.ok)throw new Error('STATIC_WHEEL_HTTP_'+response.status);
+      var payload=await response.json();
+      var html=decodeBase64(payload.content);
+      var closeTag='</scr'+'ipt>';
+
+      html=html.replace('</style>',
+        '.cycle-number{font-size:24px!important;pointer-events:none!important}'+
+        '.outer-text-label{font-family:Arial,Tahoma,sans-serif;text-anchor:middle;dominant-baseline:central;direction:rtl;unicode-bidi:plaintext;pointer-events:none;paint-order:stroke fill;stroke:#F7F1E3;stroke-width:1.15;stroke-opacity:.92;vector-effect:non-scaling-stroke}'+
+        '.calendar-day-label{font-size:22px;font-weight:900}'+
+        '.zodiac-element-label{font-size:20px;font-weight:800}'+
+        'html,body{overflow:auto!important;scrollbar-width:auto!important;-ms-overflow-style:auto!important;overscroll-behavior:none!important;scroll-behavior:auto!important}'+
+        'html::-webkit-scrollbar,body::-webkit-scrollbar{display:block!important;width:14px!important;height:14px!important}'+
+        'html::-webkit-scrollbar-track,body::-webkit-scrollbar-track{background:#e8e3d8!important}'+
+        'html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb{background:#7d898f!important;border:2px solid #e8e3d8!important;border-radius:999px!important}'+
+        'html,body,svg{cursor:grab!important;touch-action:none!important}'+
+        'html.wheel-pan-dragging,html.wheel-pan-dragging body,html.wheel-pan-dragging svg{cursor:grabbing!important;user-select:none!important;-webkit-user-select:none!important}'+
+        '</style>');
+
+      var runtime=
+        "var wheelNode=document.getElementById('wheel'),angleFrameNode=document.getElementById('angleFrame'),cycleGroups=[];"+
+        "function readWheelSettings(){var params=new URLSearchParams(String(location.hash||'').replace(/^#/,'')),size=parseInt(params.get('size'),10);if(!Number.isFinite(size))size=10;size=Math.max(1,Math.min(10,size));return{clockwise:params.get('direction')!=='ccw',size:size};}"+
+        "function ensureDynamicGroup(id,label){var group=document.getElementById(id);if(!group){group=document.createElementNS(NS,'g');group.id=id;group.setAttribute('aria-label',label);if(angleFrameNode&&angleFrameNode.parentNode===wheelNode)wheelNode.insertBefore(group,angleFrameNode);else wheelNode.appendChild(group);}while(group.firstChild)group.removeChild(group.firstChild);return group;}"+
+        "function renderCycle(group,wheel,cycle,start,end,radius){for(var index=0;index<36;index+=1){var value=index===0?end:start+index-1;addNumber(group,value,index*10-90,radius,'cycle-number',index%9===0);var node=group.lastElementChild;node.setAttribute('data-wheel',wheel);node.setAttribute('data-cycle',cycle);node.setAttribute('data-value',value);}}"+
+        "for(var cycle=1;cycle<=10;cycle+=1){var wheel=cycle+2,start=((cycle-1)*36)+1,end=cycle*36,radius=455+((cycle-1)*110),group=ensureDynamicGroup('numbersCycle'+cycle,'الدورة رقم '+cycle+' من '+start+' إلى '+end+' على العجلة رقم '+wheel);renderCycle(group,wheel,cycle,start,end,radius);cycleGroups.push(group);}"+
+        "var dayNames=['الجمعة','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];"+
+        "var zodiacElements=['ماء الحوت','نار الحمل','تراب الثور','هواء الجوزاء','ماء السرطان','نار الأسد','تراب السنبلة','هواء الميزان','ماء العقرب','نار القوس','تراب الجدي','هواء الدلو'];"+
+        "function addOuter(group,textValue,cellValue,index,radius,className){var degree=index*10,p=polar(radius,degree-90),rotation=degree;if(degree>90&&degree<270)rotation+=180;var node=document.createElementNS(NS,'text');node.setAttribute('x',p.x);node.setAttribute('y',p.y);node.setAttribute('class','outer-text-label '+className+' '+colorClass(cellValue));node.setAttribute('transform','rotate('+rotation+' '+p.x+' '+p.y+')');node.setAttribute('lang','ar');node.setAttribute('data-cell',cellValue);node.textContent=textValue;group.appendChild(node);}"+
+        "var daysRing=ensureDynamicGroup('calendarDaysRing','الأيام في أعلى خلايا الحلقة الخارجية'),zodiacRing=ensureDynamicGroup('zodiacElementsRing','الأبراج مع العناصر أسفل الأيام');"+
+        "for(var outerIndex=0;outerIndex<36;outerIndex+=1){var cellValue=outerIndex===0?36:outerIndex;addOuter(daysRing,dayNames[cellValue%6],cellValue,outerIndex,1580,'calendar-day-label');addOuter(zodiacRing,zodiacElements[cellValue%12],cellValue,outerIndex,1538,'zodiac-element-label');}"+
+        "function positionNumberGroup(group,radius,clockwise){if(!group)return;Array.prototype.forEach.call(group.children,function(node,index){var p=polar(radius,(clockwise?index*10:-index*10)-90);node.setAttribute('x',p.x);node.setAttribute('y',p.y);});}"+
+        "function positionOuterGroup(group,radius,clockwise){if(!group)return;Array.prototype.forEach.call(group.children,function(node,index){var degree=clockwise?index*10:-index*10,normalized=((degree%360)+360)%360,p=polar(radius,degree-90),rotation=normalized;if(normalized>90&&normalized<270)rotation+=180;node.setAttribute('x',p.x);node.setAttribute('y',p.y);node.setAttribute('transform','rotate('+rotation+' '+p.x+' '+p.y+')');});}"+
+        "function applyDynamicWheelSettings(){var settings=readWheelSettings();positionNumberGroup(document.getElementById('numbersRingOne'),235,settings.clockwise);positionNumberGroup(document.getElementById('numbersRingTwo'),345,settings.clockwise);cycleGroups.forEach(function(group,index){positionNumberGroup(group,455+(index*110),settings.clockwise);group.style.display=index<settings.size?'':'none';});positionOuterGroup(daysRing,1580,settings.clockwise);positionOuterGroup(zodiacRing,1538,settings.clockwise);document.documentElement.dataset.clockwise=settings.clockwise?'true':'false';document.documentElement.dataset.visibleCycles=String(settings.size);}"+
+        "window.addEventListener('hashchange',applyDynamicWheelSettings);applyDynamicWheelSettings();"+
+        "window.__auditKawkabatDynamicSizeV1=function(){var settings=readWheelSettings();return{ok:cycleGroups.length===10,clockwise:settings.clockwise,visibleCycles:settings.size,lastVisibleValue:settings.size*36,cycleCount:cycleGroups.length,days:daysRing.children.length,zodiac:zodiacRing.children.length};};";
+
+      var marker='window.__auditKawkabatFinalStructureV3=function(){';
+      if(html.indexOf(marker)<0)throw new Error('STATIC_RUNTIME_MARKER_NOT_FOUND');
+      html=html.replace(marker,runtime+marker);
+
+      var panControls='<script id="wheel-pan-controls-v1">(function(){'+
+        "'use strict';"+
+        'var dragging=false,moved=false,startX=0,startY=0,startScrollX=0,startScrollY=0,suppressClickUntil=0;'+
+        'function editable(target){return !!(target&&((target.tagName&&/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(target.tagName))||target.isContentEditable));}'+
+        'function scroller(){return document.scrollingElement||document.documentElement;}'+
+        'function begin(x,y,target){if(editable(target))return;var root=scroller();dragging=true;moved=false;startX=x;startY=y;startScrollX=root.scrollLeft;startScrollY=root.scrollTop;}'+
+        'function drag(x,y,event){if(!dragging)return;var dx=x-startX,dy=y-startY;if(!moved&&Math.hypot(dx,dy)>=3)moved=true;if(!moved)return;event.preventDefault();document.documentElement.classList.add("wheel-pan-dragging");var root=scroller();root.scrollLeft=startScrollX-dx;root.scrollTop=startScrollY-dy;}'+
+        'function finish(){if(!dragging)return;dragging=false;document.documentElement.classList.remove("wheel-pan-dragging");if(moved)suppressClickUntil=Date.now()+240;}'+
+        'document.addEventListener("mousedown",function(event){if(event.button===0)begin(event.clientX,event.clientY,event.target);},true);'+
+        'window.addEventListener("mousemove",function(event){if(dragging)drag(event.clientX,event.clientY,event);},{capture:true,passive:false});'+
+        'window.addEventListener("mouseup",finish,true);window.addEventListener("blur",finish);'+
+        'document.addEventListener("click",function(event){if(Date.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}},true);'+
+        'document.addEventListener("wheel",function(event){if(event.ctrlKey)return;event.preventDefault();var root=scroller();if(event.shiftKey)root.scrollLeft+=event.deltaY;else root.scrollTop+=event.deltaY;},{capture:true,passive:false});'+
+      '}());'+closeTag;
+
+      html=html.replace('</body>',panControls+'</body>');
+      document.open();document.write(html);document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تحميل العجلة: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
