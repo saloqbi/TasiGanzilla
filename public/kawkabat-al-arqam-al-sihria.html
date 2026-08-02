@@ -30,22 +30,13 @@
           '<linearGradient id="angleGoldBand" x1="0%" y1="0%" x2="100%" y2="0%">'+
           '<stop offset="0%" stop-color="#8E8078"/>'+
           '<stop offset="100%" stop-color="#8E8078"/>'+
-          '</linearGradient>'+
-          '<linearGradient id="outerUniformCopper" x1="0%" y1="0%" x2="100%" y2="0%">'+
-          '<stop offset="0%" stop-color="#D5A17F"/>'+
-          '<stop offset="100%" stop-color="#D5A17F"/>'+
           '</linearGradient>'
         );
 
-        html=html
-          .replace(
-            '.outer-black-band{fill:none;stroke:url(#blackFrameBand);',
-            '.outer-black-band{fill:none;stroke:url(#outerUniformCopper);'
-          )
-          .replace(
-            '.outer-gold-line{fill:none;stroke:url(#ornateGold);',
-            '.outer-gold-line{fill:none;stroke:url(#blueSteelStroke);'
-          );
+        html=html.replace(
+          '.outer-gold-line{fill:none;stroke:url(#ornateGold);',
+          '.outer-gold-line{fill:none;stroke:url(#blueSteelStroke);'
+        );
 
         html=html.replace(
           '<g id="specialFills"></g>',
@@ -55,9 +46,9 @@
 
         html=html.replace(
           'window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV13=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandOnlyChanged:true,outerBandWidthPreserved:true,outerBandColor:\'#D5A17F\',outerDetailLinesPalette:\'blue-steel-wheel-frame\',outerDetailLinesOnlyChanged:true,thirteenthWheelOnlyChanged:true,thirteenthWheelBackgroundColor:\'#E4D3C2\',thirteenthWheelRadiusRange:[1500,1610],'
+          'window.__auditKawkabatFinalStructureV14=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandRestoredToBlack:true,outerBandOnlyChanged:true,outerDetailLinesPalette:\'blue-steel-wheel-frame\',thirteenthWheelBackgroundColor:\'#E4D3C2\','
         );
-        html=html.replace('build:27,','build:37,');
+        html=html.replace('build:27,','build:38,');
 
         document.open();
         document.write(html);
