@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Wheel Scrollbar Removed</title>
+  <title>Magic Numbers Constellation — Direct Wheel Pan Controls</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -26,16 +26,42 @@
         var html=new TextDecoder('utf-8').decode(bytes);
 
         html=html.replace('</style>',
-          '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important}'+
+          '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important}'+
           '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
           '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
           '</style>');
 
         html=html.replace(
           '<iframe class="work-frame"',
-          '<iframe class="work-frame" scrolling="no"'
+          '<iframe id="workFrame" class="work-frame" scrolling="no" tabindex="0"'
         );
 
+        var closeTag='</scr'+'ipt>';
+        var controls='<script>(function(){'+
+          "'use strict';"+
+          'var frame=document.getElementById("workFrame");'+
+          'var STEP=90;'+
+          'function editable(target){return !!(target&&((target.tagName&&/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(target.tagName))||target.isContentEditable));}'+
+          'function move(dx,dy){try{frame.contentWindow.scrollBy({left:dx,top:dy,behavior:"auto"});return true;}catch(error){return false;}}'+
+          'function arrow(event,inside){if(editable(event.target))return;var step=event.shiftKey?240:STEP,dx=0,dy=0;if(event.key==="ArrowLeft")dx=-step;else if(event.key==="ArrowRight")dx=step;else if(event.key==="ArrowUp")dy=-step;else if(event.key==="ArrowDown")dy=step;else return;event.preventDefault();if(inside){inside.scrollBy({left:dx,top:dy,behavior:"auto"});}else{move(dx,dy);}}'+
+          'document.addEventListener("keydown",function(event){arrow(event,null);},true);'+
+          'function bind(){try{var win=frame.contentWindow,doc=frame.contentDocument;if(!win||!doc||!doc.documentElement)return false;if(doc.documentElement.dataset.hostDirectPan==="true")return true;doc.documentElement.dataset.hostDirectPan="true";'+
+            'var style=doc.createElement("style");style.id="host-direct-pan-style";style.textContent="html,body,svg{cursor:grab!important;overscroll-behavior:none!important}html.host-direct-pan-dragging,html.host-direct-pan-dragging body,html.host-direct-pan-dragging svg{cursor:grabbing!important;user-select:none!important}";(doc.head||doc.documentElement).appendChild(style);'+
+            'var dragging=false,moved=false,startX=0,startY=0,startScrollX=0,startScrollY=0,suppressClickUntil=0;'+
+            'doc.addEventListener("pointerdown",function(event){if(event.button!==0)return;dragging=true;moved=false;startX=event.clientX;startY=event.clientY;startScrollX=win.scrollX||win.pageXOffset||0;startScrollY=win.scrollY||win.pageYOffset||0;try{event.target.setPointerCapture(event.pointerId);}catch(error){}win.focus();},true);'+
+            'win.addEventListener("pointermove",function(event){if(!dragging)return;var dx=event.clientX-startX,dy=event.clientY-startY;if(!moved&&Math.hypot(dx,dy)>=4)moved=true;if(!moved)return;event.preventDefault();doc.documentElement.classList.add("host-direct-pan-dragging");win.scrollTo(startScrollX-dx,startScrollY-dy);},{passive:false});'+
+            'function finish(){if(!dragging)return;dragging=false;doc.documentElement.classList.remove("host-direct-pan-dragging");if(moved)suppressClickUntil=Date.now()+220;}'+
+            'win.addEventListener("pointerup",finish,true);win.addEventListener("pointercancel",finish,true);win.addEventListener("blur",finish);'+
+            'doc.addEventListener("click",function(event){if(Date.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}},true);'+
+            'doc.addEventListener("dragstart",function(event){event.preventDefault();},true);'+
+            'doc.addEventListener("wheel",function(event){if(event.ctrlKey)return;event.preventDefault();var factor=event.deltaMode===1?18:(event.deltaMode===2?win.innerHeight:1),dx=event.deltaX*factor,dy=event.deltaY*factor;if(event.shiftKey){if(Math.abs(dx)<Math.abs(dy))dx=dy;dy=0;}win.scrollBy({left:dx,top:dy,behavior:"auto"});},{passive:false});'+
+            'doc.addEventListener("keydown",function(event){arrow(event,win);},true);'+
+            'return true;}catch(error){return false;}}'+
+          'frame.addEventListener("load",function(){var tries=0,timer=setInterval(function(){tries+=1;if(bind()||tries>80)clearInterval(timer);},100);});'+
+          'setTimeout(bind,500);'+
+        '}());'+closeTag;
+
+        html=html.replace('</body>',controls+'</body>');
         document.open();
         document.write(html);
         document.close();
