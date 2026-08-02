@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — 1 to 360 with Days and Zodiac</title>
+  <title>Magic Numbers Constellation — Clockwise Single Page</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -16,7 +16,7 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/52bb110d2d5be06acf1b570722dfaae7f116a8a5/public/kawkabat-wheel-cycles1to10.html';
+    var staticWheelApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -25,32 +25,142 @@
       return new TextDecoder('utf-8').decode(bytes);
     }
 
+    function panelBoot(staticWheelBase64){
+      'use strict';
+      var frame=document.getElementById('workFrame');
+      var input=document.querySelector('[aria-label="Layout clockwise"]');
+      var bottom=document.querySelector('.panel-bottom');
+      var attempts=0;
+      var timer=null;
+
+      function setStatus(mode,message){
+        if(!bottom)return;
+        bottom.setAttribute('data-status',mode);
+        bottom.textContent=message;
+      }
+
+      function decode(value){
+        var binary=atob(String(value||'').replace(/\s/g,''));
+        var bytes=new Uint8Array(binary.length);
+        for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
+        return new TextDecoder('utf-8').decode(bytes);
+      }
+
+      function buildWheelHtml(){
+        var html=decode(staticWheelBase64);
+        var closeTag='</scr'+'ipt>';
+
+        html=html.replace('</style>',
+          '.cycle-number{font-size:24px!important;pointer-events:none!important}'+
+          '.outer-text-label{font-family:Arial,Tahoma,sans-serif;text-anchor:middle;dominant-baseline:central;direction:rtl;unicode-bidi:plaintext;pointer-events:none;paint-order:stroke fill;stroke:#F7F1E3;stroke-width:1.15;stroke-opacity:.92;vector-effect:non-scaling-stroke}'+
+          '.calendar-day-label{font-size:22px;font-weight:900}'+
+          '.zodiac-element-label{font-size:20px;font-weight:800}'+
+          'html,body{overflow:auto!important;scrollbar-width:auto!important;-ms-overflow-style:auto!important;overscroll-behavior:none!important;scroll-behavior:auto!important}'+
+          'html::-webkit-scrollbar,body::-webkit-scrollbar{display:block!important;width:14px!important;height:14px!important}'+
+          'html::-webkit-scrollbar-track,body::-webkit-scrollbar-track{background:#e8e3d8!important}'+
+          'html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb{background:#7d898f!important;border:2px solid #e8e3d8!important;border-radius:999px!important}'+
+          'html,body,svg{cursor:grab!important;touch-action:none!important}'+
+          'html.wheel-pan-dragging,html.wheel-pan-dragging body,html.wheel-pan-dragging svg{cursor:grabbing!important;user-select:none!important;-webkit-user-select:none!important}'+
+          '</style>');
+
+        var runtime=
+          "var wheelNode=document.getElementById('wheel'),angleFrameNode=document.getElementById('angleFrame'),cycleGroups=[];"+
+          "function ensureCycleGroup(id,label){var group=document.getElementById(id);if(!group){group=document.createElementNS(NS,'g');group.id=id;group.setAttribute('aria-label',label);if(angleFrameNode&&angleFrameNode.parentNode===wheelNode)wheelNode.insertBefore(group,angleFrameNode);else wheelNode.appendChild(group);}while(group.firstChild)group.removeChild(group.firstChild);return group;}"+
+          "function renderCycle(group,wheel,cycle,start,end,radius){for(var index=0;index<36;index+=1){var value=index===0?end:start+index-1;addNumber(group,value,index*10-90,radius,'cycle-number',index%9===0);var node=group.lastElementChild;node.setAttribute('data-wheel',wheel);node.setAttribute('data-cycle',cycle);node.setAttribute('data-value',value);}}"+
+          "for(var cycle=1;cycle<=10;cycle+=1){var wheel=cycle+2,start=((cycle-1)*36)+1,end=cycle*36,radius=455+((cycle-1)*110),id='numbersCycle'+cycle,label='الدورة رقم '+cycle+' من '+start+' إلى '+end+' على العجلة رقم '+wheel,group=ensureCycleGroup(id,label);renderCycle(group,wheel,cycle,start,end,radius);cycleGroups.push({group:group,wheel:wheel,cycle:cycle,start:start,end:end,radius:radius});}"+
+          "var dayNames=['الجمعة','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];"+
+          "var zodiacElements=['ماء الحوت','نار الحمل','تراب الثور','هواء الجوزاء','ماء السرطان','نار الأسد','تراب السنبلة','هواء الميزان','ماء العقرب','نار القوس','تراب الجدي','هواء الدلو'];"+
+          "function ensureOuterTextGroup(id,label){var group=document.getElementById(id);if(!group){group=document.createElementNS(NS,'g');group.id=id;group.setAttribute('aria-label',label);if(angleFrameNode&&angleFrameNode.parentNode===wheelNode)wheelNode.insertBefore(group,angleFrameNode);else wheelNode.appendChild(group);}while(group.firstChild)group.removeChild(group.firstChild);return group;}"+
+          "function addOuterText(group,textValue,cellValue,degree,radius,className){var p=polar(radius,degree-90),node=document.createElementNS(NS,'text'),rotation=degree;if(degree>90&&degree<270)rotation+=180;node.setAttribute('x',p.x);node.setAttribute('y',p.y);node.setAttribute('class','outer-text-label '+className+' '+colorClass(cellValue));node.setAttribute('transform','rotate('+rotation+' '+p.x+' '+p.y+')');node.setAttribute('lang','ar');node.setAttribute('data-cell',cellValue);node.textContent=textValue;group.appendChild(node);return node;}"+
+          "var daysRing=ensureOuterTextGroup('calendarDaysRing','الأيام في أعلى خلايا الحلقة الخارجية');"+
+          "var zodiacRing=ensureOuterTextGroup('zodiacElementsRing','الأبراج مع العناصر أسفل الأيام');"+
+          "for(var outerIndex=0;outerIndex<36;outerIndex+=1){var cellValue=outerIndex===0?36:outerIndex,degree=outerIndex*10,dayName=dayNames[cellValue%6],zodiacElement=zodiacElements[cellValue%12];addOuterText(daysRing,dayName,cellValue,degree,1580,'calendar-day-label');addOuterText(zodiacRing,zodiacElement,cellValue,degree,1538,'zodiac-element-label');}"+
+          "function positionGroup(group,radius,clockwise){if(!group)return;Array.prototype.forEach.call(group.children,function(node,index){var degree=(clockwise?index*10:-index*10)-90,p=polar(radius,degree);node.setAttribute('x',p.x);node.setAttribute('y',p.y);});}"+
+          "function positionOuter(group,radius,clockwise){if(!group)return;Array.prototype.forEach.call(group.children,function(node,index){var degree=clockwise?index*10:-index*10,normalized=((degree%360)+360)%360,p=polar(radius,degree-90),rotation=normalized;if(normalized>90&&normalized<270)rotation+=180;node.setAttribute('x',p.x);node.setAttribute('y',p.y);node.setAttribute('transform','rotate('+rotation+' '+p.x+' '+p.y+')');});}"+
+          "window.__setKawkabatClockwise=function(clockwise){var enabled=!!clockwise;positionGroup(ringOne,textR1,enabled);positionGroup(ringTwo,textR2,enabled);for(var c=0;c<cycleGroups.length;c+=1)positionGroup(cycleGroups[c].group,cycleGroups[c].radius,enabled);positionOuter(daysRing,1580,enabled);positionOuter(zodiacRing,1538,enabled);document.documentElement.dataset.clockwise=enabled?'true':'false';return{ok:true,clockwise:enabled,cycleCount:cycleGroups.length};};"+
+          "window.__setKawkabatClockwise(true);"+
+          "window.__auditKawkabatClockwiseV1=function(){return{ok:typeof window.__setKawkabatClockwise==='function',clockwise:document.documentElement.dataset.clockwise==='true',cycleCount:cycleGroups.length,days:daysRing.children.length,zodiac:zodiacRing.children.length};};";
+
+        var marker='window.__auditKawkabatFinalStructureV3=function(){';
+        if(html.indexOf(marker)<0)throw new Error('STATIC_RUNTIME_MARKER_NOT_FOUND');
+        html=html.replace(marker,runtime+marker);
+
+        var panControls='<script id="wheel-pan-controls-v1">(function(){'+
+          "'use strict';"+
+          'var STEP=90,dragging=false,moved=false,startX=0,startY=0,startScrollX=0,startScrollY=0,suppressClickUntil=0;'+
+          'function editable(target){return !!(target&&((target.tagName&&/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(target.tagName))||target.isContentEditable));}'+
+          'function scroller(){return document.scrollingElement||document.documentElement;}'+
+          'function focusWheel(){try{window.focus();document.documentElement.tabIndex=0;document.documentElement.focus({preventScroll:true});}catch(error){}}'+
+          'function begin(clientX,clientY,target){if(editable(target))return false;var root=scroller();dragging=true;moved=false;startX=clientX;startY=clientY;startScrollX=root.scrollLeft;startScrollY=root.scrollTop;focusWheel();return true;}'+
+          'function drag(clientX,clientY,event){if(!dragging)return;var dx=clientX-startX,dy=clientY-startY;if(!moved&&Math.hypot(dx,dy)>=3)moved=true;if(!moved)return;if(event&&event.preventDefault)event.preventDefault();document.documentElement.classList.add("wheel-pan-dragging");var root=scroller();root.scrollLeft=startScrollX-dx;root.scrollTop=startScrollY-dy;}'+
+          'function finish(){if(!dragging)return;dragging=false;document.documentElement.classList.remove("wheel-pan-dragging");if(moved)suppressClickUntil=Date.now()+240;}'+
+          'document.addEventListener("mousedown",function(event){if(event.button!==0)return;begin(event.clientX,event.clientY,event.target);},true);'+
+          'window.addEventListener("mousemove",function(event){if(!dragging)return;if((event.buttons&1)!==1){finish();return;}drag(event.clientX,event.clientY,event);},{capture:true,passive:false});'+
+          'window.addEventListener("mouseup",finish,true);window.addEventListener("blur",finish);'+
+          'document.addEventListener("selectstart",function(event){if(dragging)event.preventDefault();},true);'+
+          'document.addEventListener("click",function(event){if(Date.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}},true);'+
+          'document.addEventListener("dragstart",function(event){event.preventDefault();},true);'+
+          'document.addEventListener("wheel",function(event){if(event.ctrlKey)return;event.preventDefault();var factor=event.deltaMode===1?18:(event.deltaMode===2?window.innerHeight:1),root=scroller();if(event.shiftKey||Math.abs(event.deltaX)>Math.abs(event.deltaY))root.scrollLeft+=(event.deltaX||event.deltaY)*factor;else root.scrollTop+=event.deltaY*factor;},{capture:true,passive:false});'+
+          'document.addEventListener("keydown",function(event){if(editable(event.target))return;var step=event.shiftKey?240:STEP,dx=0,dy=0;if(event.key==="ArrowLeft")dx=-step;else if(event.key==="ArrowRight")dx=step;else if(event.key==="ArrowUp")dy=-step;else if(event.key==="ArrowDown")dy=step;else return;event.preventDefault();var root=scroller();root.scrollLeft+=dx;root.scrollTop+=dy;},true);'+
+          'document.addEventListener("mousedown",focusWheel,true);'+
+        '}());'+closeTag;
+        html=html.replace('</body>',panControls+'</body>');
+        return html;
+      }
+
+      function connect(){
+        attempts+=1;
+        var api=null;
+        try{api=frame&&frame.contentWindow&&frame.contentWindow.__setKawkabatClockwise;}catch(error){api=null;}
+        if(typeof api!=='function'){
+          if(attempts<100){timer=setTimeout(connect,150);}
+          else setStatus('error','فشل ربط Clockwise بالعجلة');
+          return;
+        }
+        if(input){
+          input.checked=true;
+          input.addEventListener('change',function(){
+            var result=frame.contentWindow.__setKawkabatClockwise(!!input.checked);
+            setStatus('ready',result.clockwise?'Clockwise مفعل — مع عقارب الساعة':'Clockwise ملغي — عكس عقارب الساعة');
+          });
+        }
+        var initial=frame.contentWindow.__setKawkabatClockwise(true);
+        setStatus('ready',initial.ok?'Clockwise مفعل ومرتبط بالعجلة':'فشل تفعيل Clockwise');
+      }
+
+      if(!frame){setStatus('error','تعذر العثور على مساحة العجلة');return;}
+      frame.addEventListener('load',function(){attempts=0;if(timer)clearTimeout(timer);timer=setTimeout(connect,100);});
+      setStatus('loading','جارٍ تحميل العجلة وربط Clockwise…');
+      frame.srcdoc=buildWheelHtml();
+    }
+
     try{
-      var response=await fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
-      if(!response.ok)throw new Error('APPROVED_HTTP_'+response.status);
-      var payload=await response.json();
-      var html=decodeBase64(payload.content);
+      var responses=await Promise.all([
+        fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}}),
+        fetch(staticWheelApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}})
+      ]);
+      if(!responses[0].ok)throw new Error('APPROVED_HTTP_'+responses[0].status);
+      if(!responses[1].ok)throw new Error('STATIC_WHEEL_HTTP_'+responses[1].status);
+      var payloads=await Promise.all([responses[0].json(),responses[1].json()]);
+      var html=decodeBase64(payloads[0].content);
+      var staticWheelBase64=String(payloads[1].content||'').replace(/\s/g,'');
       var closeTag='</scr'+'ipt>';
 
       html=html.replace('</style>',
         '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:auto!important;outline:none!important}'+
         '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
         '.panel-bottom{display:flex!important;align-items:center!important;padding:0 10px!important;font-size:12px!important;font-weight:800!important;color:#33444c!important}'+
-        '.panel-bottom::before{content:"";width:9px;height:9px;border-radius:50%;background:#3fa35b;margin-right:7px}'+
+        '.panel-bottom::before{content:"";width:9px;height:9px;border-radius:50%;margin-right:7px;background:#d6a526!important}'+
+        '.panel-bottom[data-status="loading"]::before{background:#d6a526!important}'+
+        '.panel-bottom[data-status="ready"]::before{background:#2aa857!important}'+
+        '.panel-bottom[data-status="error"]::before{background:#d13b3b!important}'+
         '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
         '</style>');
 
-      html=html.replace(
-        /<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
-        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" scrolling="yes" src="'+wheelUrl+'"></iframe>'
-      );
-
-      var statusScript='<script>(function(){var bottom=document.querySelector(".panel-bottom"),frame=document.getElementById("workFrame");if(bottom)bottom.textContent="الجمعة عادت كما كانت • الخط 22px / 20px";if(frame)frame.addEventListener("load",function(){if(bottom)bottom.textContent="العجلة محملة • الجمعة في الخلية العليا عند 360°";});}());'+closeTag;
-      html=html.replace('</body>',statusScript+'</body>');
-
-      document.open();
-      document.write(html);
-      document.close();
+      html=html.replace(/<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,'<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" scrolling="yes"></iframe>');
+      var boot='<script id="clockwise-single-page-v1">('+panelBoot.toString()+')('+JSON.stringify(staticWheelBase64)+');'+closeTag;
+      html=html.replace('</body>',boot+'</body>');
+      document.open();document.write(html);document.close();
     }catch(error){
       document.body.innerHTML='<div class="loading">Unable to load structure: '+String(error.message||error)+'</div>';
     }
