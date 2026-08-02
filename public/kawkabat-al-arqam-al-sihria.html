@@ -16,7 +16,7 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/8b3940323c7629896f0ebfc6a1df32d5745804f6/public/kawkabat-wheel-ring3-cycle1.html';
+    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/c4f0b763f7dc6d7ef6c95e786db269e2290ecfb5/public/kawkabat-wheel-ring3-cycle1.html';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -32,20 +32,20 @@
       var html=decodeBase64(payload.content);
 
       html=html.replace('</style>',
-        '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important}'+
+        '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:auto!important;outline:none!important}'+
         '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
         '.panel-bottom{display:flex!important;align-items:center!important;padding:0 10px!important;font-size:12px!important;font-weight:800!important;color:#33444c!important}'+
-        '.panel-bottom::before{content:"";width:9px;height:9px;border-radius:50%;background:#d59a2f;margin-right:7px}'+
+        '.panel-bottom::before{content:"";width:9px;height:9px;border-radius:50%;background:#3fa35b;margin-right:7px}'+
         '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
         '</style>');
 
       html=html.replace(
         /<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
-        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>'
+        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" scrolling="yes" src="'+wheelUrl+'"></iframe>'
       );
 
       var closeTag='</scr'+'ipt>';
-      var statusScript='<script>(function(){var bottom=document.querySelector(".panel-bottom"),frame=document.getElementById("workFrame");if(bottom)bottom.textContent="الأدوات ظاهرة فقط — الربط مؤجل حتى اعتماد أرقام العجلة 3";if(frame)frame.addEventListener("load",function(){if(bottom)bottom.textContent="العجلة محملة — تحقق من أرقام 1–36 في العجلة 3";});}());'+closeTag;
+      var statusScript='<script>(function(){var bottom=document.querySelector(".panel-bottom"),frame=document.getElementById("workFrame");if(bottom)bottom.textContent="تحريك العجلة مفعّل • شريط أفقي ورأسي • الأدوات غير مرتبطة بعد";if(frame)frame.addEventListener("load",function(){if(bottom)bottom.textContent="العجلة محملة • اسحب بالماوس أو استخدم الشريطين والأسهم";});}());'+closeTag;
       html=html.replace('</body>',statusScript+'</body>');
 
       document.open();
