@@ -3,379 +3,51 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Main Control Panel</title>
+  <title>Magic Numbers Constellation — Separated Scrollbars</title>
   <style>
-    :root{
-      color-scheme:light;
-      --frame-dark:#465158;
-      --frame-mid:#8c999f;
-      --frame-light:#e5ebee;
-      --frame-white:#ffffff;
-      --panel-bg:#f7f8f8;
-      --panel-line:#b9c1c5;
-      --row-line:#d2d7da;
-      --text:#151a1d;
-      --muted:#69747a;
-      --cyan:#49a2c4;
-      --green:#9fc440;
-      --yellow:#d6c34b;
-    }
-    *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      width:100%;
-      height:100%;
-      overflow:hidden;
-      background:#f7f1e3;
-      font-family:Arial,Tahoma,sans-serif;
-      font-variant-numeric:tabular-nums;
-    }
-    .work-frame{
-      position:fixed;
-      top:0;
-      right:20px;
-      bottom:0;
-      left:390px;
-      width:calc(100% - 410px);
-      height:100%;
-      border:0;
-      background:#f7f1e3;
-    }
-    .control-panel{
-      position:fixed;
-      inset:0 auto 0 0;
-      width:390px;
-      z-index:1000;
-      padding:8px;
-      border-right:1px solid #66747b;
-      background:
-        linear-gradient(90deg,
-          #3e494f 0%,
-          #78878f 2.5%,
-          #eef3f5 7%,
-          #aab6bc 11%,
-          #fbfdfe 16%,
-          #ccd5d9 50%,
-          #fbfdfe 84%,
-          #9aa7ad 91%,
-          #465158 100%);
-      box-shadow:
-        9px 0 24px rgba(20,28,32,.28),
-        inset 0 0 0 1px rgba(255,255,255,.88),
-        inset 0 0 0 4px rgba(83,96,104,.36);
-    }
-    .panel-shell{
-      display:flex;
-      flex-direction:column;
-      width:100%;
-      height:100%;
-      min-height:0;
-      overflow:hidden;
-      border:1px solid #536168;
-      border-radius:12px;
-      background:#edf1f2;
-      box-shadow:
-        inset 0 0 0 2px #c8d1d5,
-        inset 0 0 0 4px rgba(255,255,255,.84),
-        inset 0 0 15px rgba(73,87,95,.16);
-    }
-    .panel-topbar{
-      flex:0 0 42px;
-      display:flex;
-      align-items:center;
-      gap:7px;
-      margin:5px 5px 3px;
-      padding:0 9px;
-      border:1px solid #879399;
-      border-radius:6px;
-      color:#111719;
-      background:linear-gradient(180deg,#ffffff 0%,#f8fafb 44%,#cbd3d7 49%,#eef2f4 100%);
-      box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(42,52,57,.25);
-      font-size:17px;
-      font-weight:800;
-    }
-    .panel-dot{
-      width:10px;
-      height:10px;
-      border:1px solid #8d979c;
-      transform:rotate(45deg);
-      background:#f8fafb;
-    }
-    .panel-title{flex:1}
-    .panel-actions{display:flex;gap:4px;align-items:center}
-    .panel-action{
-      width:29px;
-      height:29px;
-      display:grid;
-      place-items:center;
-      border:1px solid #8d989e;
-      border-radius:4px;
-      color:#172024;
-      background:linear-gradient(180deg,#fff,#dfe6e9);
-      box-shadow:inset 0 1px 0 #fff,0 1px 1px rgba(38,48,54,.22);
-      font-size:18px;
-      font-weight:900;
-      line-height:1;
-    }
-    .panel-action.primary{
-      color:white;
-      border-color:#397fa3;
-      background:linear-gradient(180deg,#5ab3db,#1680b5);
-      text-shadow:0 1px 0 rgba(0,0,0,.28);
-    }
-    .panel-info{
-      width:30px;
-      height:30px;
-      display:grid;
-      place-items:center;
-      margin-left:4px;
-      border:2px solid #5797c2;
-      border-radius:50%;
-      color:#267db0;
-      background:#eef8ff;
-      font-size:21px;
-      font-weight:900;
-    }
-    .panel-scroll{
-      flex:1 1 auto;
-      min-height:0;
-      margin:0 5px 5px;
-      overflow-y:scroll;
-      overflow-x:hidden;
-      border:1px solid #aab3b8;
-      background:#fbfbfb;
-      direction:ltr;
-      scrollbar-width:none;
-      -ms-overflow-style:none;
-    }
-    .panel-scroll::-webkit-scrollbar{width:0;height:0}
-    .control-section{border-bottom:1px solid #b9c1c5;background:#fff}
-    .section-toggle{
-      position:relative;
-      width:100%;
-      min-height:36px;
-      display:flex;
-      align-items:center;
-      gap:7px;
-      padding:0 9px 0 11px;
-      border:0;
-      border-bottom:1px solid #c7cdd0;
-      background:linear-gradient(180deg,#ffffff,#e9edef 72%,#f8fafb);
-      color:#121719;
-      font:800 16px Arial,Tahoma,sans-serif;
-      text-align:left;
-      cursor:pointer;
-      direction:ltr;
-    }
-    .section-toggle::after{
-      content:"";
-      position:absolute;
-      left:0;
-      right:0;
-      bottom:0;
-      height:2px;
-      background:var(--section-color,var(--cyan));
-      opacity:.96;
-    }
-    .control-section[data-tone="green"]{--section-color:var(--green)}
-    .control-section[data-tone="yellow"]{--section-color:var(--yellow)}
-    .control-section[data-tone="cyan"]{--section-color:var(--cyan)}
-    .section-toggle:hover{background:linear-gradient(180deg,#fff,#e3e9ec)}
-    .section-sign{color:#268daf;font-size:18px;font-weight:900;width:13px;text-align:center}
-    .section-name{flex:1}
-    .section-icon{font-size:14px;color:#68747a;opacity:.86}
-    .section-body{display:block}
-    .control-section.collapsed .section-body{display:none}
-    .control-row{
-      min-height:37px;
-      display:grid;
-      grid-template-columns:43% 57%;
-      align-items:center;
-      border-bottom:1px solid var(--row-line);
-      background:#fbfbfb;
-      direction:ltr;
-    }
-    .control-row:last-child{border-bottom:0}
-    .control-label{
-      height:100%;
-      display:flex;
-      align-items:center;
-      padding:5px 10px 5px 18px;
-      color:var(--text);
-      font-size:15px;
-      font-weight:600;
-      background:#fafafa;
-    }
-    .control-value{
-      min-width:0;
-      height:100%;
-      display:flex;
-      align-items:center;
-      gap:6px;
-      padding:4px 7px;
-      border-left:1px solid #ccd2d5;
-      background:#f2f4f5;
-      color:#1a2023;
-      font-size:15px;
-      direction:ltr;
-    }
-    .control-value input[type="text"],
-    .control-value input[type="number"],
-    .control-value select{
-      width:100%;
-      height:29px;
-      min-width:0;
-      border:1px solid #9fa9ae;
-      border-radius:3px;
-      padding:2px 8px;
-      background:linear-gradient(180deg,#fff,#e8edef);
-      color:#171c1f;
-      font:600 15px Arial,Tahoma,sans-serif;
-      font-variant-numeric:tabular-nums;
-      direction:ltr;
-      outline:none;
-    }
-    .control-value input:focus,.control-value select:focus{
-      border-color:#4f95b6;
-      box-shadow:0 0 0 2px rgba(72,156,201,.2);
-    }
-    .control-value input[type="checkbox"]{
-      width:18px;
-      height:18px;
-      margin:0;
-      accent-color:#2d8dbb;
-    }
-    .field-action{flex:0 0 auto;color:#617077;font-weight:900;font-size:16px}
-    .compact-badge{
-      margin-left:auto;
-      min-width:27px;
-      padding:2px 5px;
-      border-radius:3px;
-      background:#8f999e;
-      color:#fff;
-      text-align:center;
-      font-size:13px;
-      font-variant-numeric:tabular-nums;
-    }
-    .panel-bottom{
-      flex:0 0 38px;
-      margin:0 5px 5px;
-      border:1px solid #889399;
-      border-radius:4px;
-      background:linear-gradient(180deg,#fff 0%,#d6dde1 42%,#edf1f3 58%,#b9c4c9 100%);
-      box-shadow:inset 0 1px 2px #fff;
-    }
-    .page-scrollbar{
-      position:fixed;
-      top:7px;
-      right:4px;
-      bottom:7px;
-      width:13px;
-      z-index:3000;
-      border:1px solid #9ca7ac;
-      border-radius:8px;
-      background:linear-gradient(90deg,#d9e0e3,#f6f8f9 50%,#c6d0d5);
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,.85),0 1px 3px rgba(32,42,47,.24);
-      touch-action:none;
-      user-select:none;
-    }
-    .page-scrollbar-thumb{
-      position:absolute;
-      top:0;
-      left:1px;
-      right:1px;
-      min-height:38px;
-      border:1px solid #66737a;
-      border-radius:7px;
-      background:linear-gradient(90deg,#66747b,#a4b0b6 45%,#758289);
-      box-shadow:inset 1px 0 1px rgba(255,255,255,.48),inset -1px 0 1px rgba(0,0,0,.18);
-      cursor:grab;
-    }
-    .page-scrollbar-thumb:active{cursor:grabbing}
-    @media(max-width:950px){
-      .control-panel{width:330px}
-      .work-frame{left:330px;width:calc(100% - 350px)}
-      .control-label,.control-value{font-size:14px}
-      .section-toggle{font-size:15px}
-    }
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
+    body{display:grid;place-items:center;color:#43515a}
+    .loading{font-weight:800}
   </style>
 </head>
 <body>
-  <iframe class="work-frame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f875bee17b588b02617bcad4ae55270c60033f3d/public/kawkabat-al-arqam-al-sihria.html"></iframe>
-  <aside class="control-panel" aria-label="English control panel">
-    <div class="panel-shell">
-      <header class="panel-topbar">
-        <span class="panel-dot" aria-hidden="true"></span><span class="panel-title">Default</span>
-        <span class="panel-actions" aria-hidden="true"><span class="panel-action primary">+</span><span class="panel-action">−</span><span class="panel-action">╲</span><span class="panel-action">▣</span></span>
-        <span class="panel-info" aria-hidden="true">i</span>
-      </header>
-      <div class="panel-scroll" id="panelScroll">
-        <section class="control-section" data-tone="green"><button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Layout</span><span class="section-icon">▦</span></button><div class="section-body">
-          <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" checked aria-label="Layout visible"></div></div>
-          <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" checked aria-label="Layout clockwise"></div></div>
-          <div class="control-row"><div class="control-label">Size</div><div class="control-value"><input type="number" value="10" aria-label="Size"><span class="field-action">↔</span></div></div>
-          <div class="control-row"><div class="control-label">View</div><div class="control-value"><select aria-label="View"><option>Circle of 36</option></select></div></div>
-          <div class="control-row"><div class="control-label">Data type</div><div class="control-value"><select aria-label="Data type"><option>Price</option></select></div></div>
-        </div></section>
-        <section class="control-section" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Price</span><span class="section-icon">●</span></button><div class="section-body">
-          <div class="control-row"><div class="control-label">Value</div><div class="control-value"><input type="text" value="79680" inputmode="numeric" aria-label="Value"><span class="field-action">↔</span></div></div>
-          <div class="control-row"><div class="control-label">Find</div><div class="control-value"><input type="text" value="79680" inputmode="numeric" aria-label="Find"><span class="field-action">⌕</span></div></div>
-          <div class="control-row"><div class="control-label">Increment</div><div class="control-value"><input type="number" value="1" aria-label="Increment"><span class="field-action">↔</span></div></div>
-        </div></section>
-        <section class="control-section" data-tone="green"><button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Highlight</span><span class="section-icon">▦</span></button><div class="section-body">
-          <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" aria-label="Highlight visible"></div></div>
-          <div class="control-row"><div class="control-label">Fill</div><div class="control-value"><select aria-label="Highlight fill"><option>Levels</option></select></div></div>
-          <div class="control-row"><div class="control-label">Show marks</div><div class="control-value"><input type="checkbox" aria-label="Show marks"></div></div>
-          <div class="control-row"><div class="control-label">Show numbers</div><div class="control-value"><input type="checkbox" aria-label="Show numbers"></div></div>
-        </div></section>
-        <section class="control-section" data-tone="yellow"><button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Protractor</span><span class="section-icon">◉</span></button><div class="section-body">
-          <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" aria-label="Protractor visible"></div></div>
-          <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" aria-label="Protractor clockwise"></div></div>
-          <div class="control-row"><div class="control-label">Angle</div><div class="control-value"><input type="text" value="0°" aria-label="Protractor angle"><span class="field-action">↔</span></div></div>
-        </div></section>
-        <section class="control-section collapsed" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Counter</span><span class="compact-badge">36</span></button><div class="section-body"></div></section>
-        <section class="control-section collapsed" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Secondary scale</span><span class="section-icon">⌘</span></button><div class="section-body"></div></section>
-        <section class="control-section collapsed" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Marker</span><span class="section-icon">◇</span></button><div class="section-body"></div></section>
-        <section class="control-section" data-tone="green"><button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Chronometer</span><span class="section-icon">◷</span></button><div class="section-body">
-          <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input type="checkbox" checked aria-label="Chronometer visible"></div></div>
-          <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input type="checkbox" checked aria-label="Chronometer clockwise"></div></div>
-          <div class="control-row"><div class="control-label">Angle</div><div class="control-value"><input type="text" value="0°" aria-label="Chronometer angle"><span class="field-action">↔</span></div></div>
-          <div class="control-row"><div class="control-label">Range</div><div class="control-value"><select aria-label="Chronometer range"><option>Annual</option></select></div></div>
-        </div></section>
-        <section class="control-section collapsed" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Secondary scale</span><span class="section-icon">⌘</span></button><div class="section-body"></div></section>
-        <section class="control-section collapsed" data-tone="cyan"><button class="section-toggle" type="button" aria-expanded="false"><span class="section-sign">+</span><span class="section-name">Marker</span><span class="section-icon">◇</span></button><div class="section-body"></div></section>
-      </div>
-      <div class="panel-bottom" aria-hidden="true"></div>
-    </div>
-  </aside>
-  <div class="page-scrollbar" id="pageScrollbar" aria-label="Panel scrollbar" role="scrollbar" aria-controls="panelScroll" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="page-scrollbar-thumb" id="pageScrollbarThumb"></div></div>
+  <div class="loading">Loading approved structure…</div>
   <script>
-    (function(){
+    (async function(){
       'use strict';
-      var panelScroll=document.getElementById('panelScroll');
-      var track=document.getElementById('pageScrollbar');
-      var thumb=document.getElementById('pageScrollbarThumb');
-      function updateThumb(){
-        var max=panelScroll.scrollHeight-panelScroll.clientHeight;
-        var trackHeight=track.clientHeight;
-        var ratio=panelScroll.scrollHeight>0?panelScroll.clientHeight/panelScroll.scrollHeight:1;
-        var thumbHeight=Math.max(38,Math.round(trackHeight*ratio));
-        var travel=Math.max(0,trackHeight-thumbHeight);
-        var progress=max>0?panelScroll.scrollTop/max:0;
-        thumb.style.height=thumbHeight+'px';
-        thumb.style.transform='translateY('+Math.round(travel*progress)+'px)';
-        track.setAttribute('aria-valuenow',String(Math.round(progress*100)));
-        track.style.display=max>1?'block':'none';
+      var sourceApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
+      try{
+        var response=await fetch(sourceApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+        if(!response.ok)throw new Error('SOURCE_HTTP_'+response.status);
+        var payload=await response.json();
+        var binary=atob(String(payload.content||'').replace(/\s/g,''));
+        var bytes=new Uint8Array(binary.length);
+        for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
+        var html=new TextDecoder('utf-8').decode(bytes);
+
+        html=html.replace('</style>',
+          '.work-frame{right:0!important;width:calc(100% - 390px)!important}'+
+          '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
+          '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
+          '</style>');
+
+        html=html.replace('<iframe class="work-frame"','<iframe id="workFrame" class="work-frame"');
+
+        var closeTag='</scr'+'ipt>';
+        var sideFix='<script>(function(){'+
+          "'use strict';"+
+          'var frame=document.getElementById("workFrame");'+
+          'function moveWheelScrollbarRight(){try{var doc=frame.contentDocument;if(!doc)return;doc.documentElement.setAttribute("dir","ltr");if(doc.body)doc.body.setAttribute("dir","ltr");var style=doc.getElementById("host-scrollbar-side-fix");if(!style){style=doc.createElement("style");style.id="host-scrollbar-side-fix";style.textContent="html,body{direction:ltr!important}";(doc.head||doc.documentElement).appendChild(style)}}catch(error){}}'+
+          'frame.addEventListener("load",function(){moveWheelScrollbarRight();setTimeout(moveWheelScrollbarRight,250);setTimeout(moveWheelScrollbarRight,900)});'+
+        '}());'+closeTag;
+
+        html=html.replace('</body>',sideFix+'</body>');
+        document.open();
+        document.write(html);
+        document.close();
+      }catch(error){
+        document.body.innerHTML='<div class="loading">Unable to load structure: '+String(error.message||error)+'</div>';
       }
-      panelScroll.addEventListener('scroll',updateThumb,{passive:true});
-      window.addEventListener('resize',updateThumb);
-      var dragging=false,startY=0,startScrollTop=0;
-      thumb.addEventListener('pointerdown',function(event){dragging=true;startY=event.clientY;startScrollTop=panelScroll.scrollTop;thumb.setPointerCapture(event.pointerId);event.preventDefault()});
-      thumb.addEventListener('pointermove',function(event){if(!dragging)return;var max=panelScroll.scrollHeight-panelScroll.clientHeight;var travel=track.clientHeight-thumb.offsetHeight;if(max<=0||travel<=0)return;panelScroll.scrollTop=startScrollTop+((event.clientY-startY)/travel)*max});
-      thumb.addEventListener('pointerup',function(event){dragging=false;if(thumb.hasPointerCapture(event.pointerId))thumb.releasePointerCapture(event.pointerId)});
-      track.addEventListener('pointerdown',function(event){if(event.target===thumb)return;var rect=track.getBoundingClientRect();var fraction=(event.clientY-rect.top)/rect.height;var max=panelScroll.scrollHeight-panelScroll.clientHeight;panelScroll.scrollTop=Math.max(0,Math.min(max,(fraction*max)-(panelScroll.clientHeight/2)))});
-      document.querySelectorAll('.section-toggle').forEach(function(button){button.addEventListener('click',function(){var section=button.closest('.control-section');var collapsed=section.classList.toggle('collapsed');button.setAttribute('aria-expanded',collapsed?'false':'true');var sign=button.querySelector('.section-sign');if(sign)sign.textContent=collapsed?'+':'−';requestAnimationFrame(updateThumb)})});
-      requestAnimationFrame(updateThumb);
     }());
   </script>
 </body>
