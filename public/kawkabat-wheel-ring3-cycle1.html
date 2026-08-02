@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — الدورة 1 على العجلة 3</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
+    .loading{font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل العجلة الأساسية…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var staticWheelApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a';
+
+    function decodeBase64(value){
+      var binary=atob(String(value||'').replace(/\s/g,''));
+      var bytes=new Uint8Array(binary.length);
+      for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
+      return new TextDecoder('utf-8').decode(bytes);
+    }
+
+    try{
+      var response=await fetch(staticWheelApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      if(!response.ok)throw new Error('STATIC_WHEEL_HTTP_'+response.status);
+      var payload=await response.json();
+      var html=decodeBase64(payload.content);
+
+      html=html.replace('</style>',
+        '.ring-three-number{font-size:24px!important;pointer-events:none!important}'+
+        'html,body{scrollbar-width:none!important;-ms-overflow-style:none!important;overscroll-behavior:none!important}'+
+        'html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}'+
+        '</style>');
+
+      var runtime=
+        "var ringThree=document.getElementById('numbersRingThree');"+
+        "if(!ringThree){ringThree=document.createElementNS(NS,'g');ringThree.id='numbersRingThree';ringThree.setAttribute('aria-label','الدورة رقم 1 من 1 إلى 36 على العجلة رقم 3');var wheelNode=document.getElementById('wheel'),angleFrameNode=document.getElementById('angleFrame');if(angleFrameNode&&angleFrameNode.parentNode===wheelNode)wheelNode.insertBefore(ringThree,angleFrameNode);else wheelNode.appendChild(ringThree);}"+
+        "while(ringThree.firstChild)ringThree.removeChild(ringThree.firstChild);"+
+        "for(var ringThreeIndex=0;ringThreeIndex<36;ringThreeIndex+=1){var ringThreeValue=ringThreeIndex===0?36:ringThreeIndex;addNumber(ringThree,ringThreeValue,ringThreeIndex*10-90,455,'ring-three-number',ringThreeIndex%9===0);var ringThreeNode=ringThree.lastElementChild;ringThreeNode.setAttribute('data-wheel','3');ringThreeNode.setAttribute('data-cycle','1');ringThreeNode.setAttribute('data-value',ringThreeValue);}"+
+        "document.documentElement.dataset.ringThreeCycleOne=ringThree.children.length===36?'true':'false';"+
+        "window.__auditKawkabatRingThreeCycleOne=function(){var g=document.getElementById('numbersRingThree'),ok=!!g&&g.children.length===36;if(ok){for(var j=0;j<36;j+=1){var expected=j===0?36:j;if(Number(g.children[j].textContent)!==expected||Number(g.children[j].getAttribute('data-wheel'))!==3){ok=false;break;}}}return{ok:ok,wheel:3,cycle:1,range:[1,36],numberCount:g?g.children.length:0,radius:455,cardinalValues:{top:36,right:9,bottom:18,left:27},coreRuntime:true};};";
+
+      var marker='window.__auditKawkabatFinalStructureV3=function(){';
+      if(html.indexOf(marker)<0)throw new Error('STATIC_RUNTIME_MARKER_NOT_FOUND');
+      html=html.replace(marker,runtime+marker);
+
+      document.open();
+      document.write(html);
+      document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تحميل العجلة: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
