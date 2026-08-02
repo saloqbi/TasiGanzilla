@@ -37,10 +37,15 @@
           '</linearGradient>'
         );
 
-        html=html.replace(
-          '.outer-black-band{fill:none;stroke:url(#blackFrameBand);',
-          '.outer-black-band{fill:none;stroke:url(#outerUniformCopper);'
-        );
+        html=html
+          .replace(
+            '.outer-black-band{fill:none;stroke:url(#blackFrameBand);',
+            '.outer-black-band{fill:none;stroke:url(#outerUniformCopper);'
+          )
+          .replace(
+            '.outer-gold-line{fill:none;stroke:url(#ornateGold);',
+            '.outer-gold-line{fill:none;stroke:url(#blueSteelStroke);'
+          );
 
         html=html.replace(
           '<g id="specialFills"></g>',
@@ -50,9 +55,9 @@
 
         html=html.replace(
           'window.__auditKawkabatFinalStructureV3=function(){return{',
-          'window.__auditKawkabatFinalStructureV12=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandOnlyChanged:true,outerBandWidthPreserved:true,innerGoldLinesRestored:true,outerHighlightRestored:true,outerBandColor:\'#D5A17F\',thirteenthWheelOnlyChanged:true,thirteenthWheelBackgroundColor:\'#E4D3C2\',thirteenthWheelRadiusRange:[1500,1610],'
+          'window.__auditKawkabatFinalStructureV13=function(){return{angleBandUniform:true,angleBandColor:\'#8E8078\',outerBandOnlyChanged:true,outerBandWidthPreserved:true,outerBandColor:\'#D5A17F\',outerDetailLinesPalette:\'blue-steel-wheel-frame\',outerDetailLinesOnlyChanged:true,thirteenthWheelOnlyChanged:true,thirteenthWheelBackgroundColor:\'#E4D3C2\',thirteenthWheelRadiusRange:[1500,1610],'
         );
-        html=html.replace('build:27,','build:36,');
+        html=html.replace('build:27,','build:37,');
 
         document.open();
         document.write(html);
