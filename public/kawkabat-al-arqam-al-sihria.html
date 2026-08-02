@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Clockwise Active</title>
+  <title>Magic Numbers Constellation — Clockwise Direct</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -16,7 +16,7 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/38d4c566d4203368291195a084007f48b4d3fd3f/public/kawkabat-wheel-cycles1to10.html';
+    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/52bb110d2d5be06acf1b570722dfaae7f116a8a5/public/kawkabat-wheel-cycles1to10.html';
 
     function decodeBase64(value){
       var binary=atob(String(value||'').replace(/\s/g,''));
@@ -45,16 +45,17 @@
         '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" scrolling="yes" src="'+wheelUrl+'"></iframe>'
       );
 
-      var clockwiseScript='<script id="clockwise-panel-binding-v1">(function(){'+
+      var clockwiseScript='<script id="clockwise-direct-binding-v2">(function(){'+
         "'use strict';"+
-        'var frame=document.getElementById("workFrame"),input=document.querySelector("[aria-label=\\"Layout clockwise\\"]"),bottom=document.querySelector(".panel-bottom"),ready=false,attempts=0,timer=null;'+
+        'var frame=document.getElementById("workFrame"),input=document.querySelector("[aria-label=\\"Layout clockwise\\"]"),bottom=document.querySelector(".panel-bottom"),timer=null,attempts=0,bound=false;'+
+        'var CX=2200,CY=1800;'+
         'function status(message){if(bottom)bottom.textContent=message;}'+
-        'function send(){if(!frame||!frame.contentWindow||!input)return;frame.contentWindow.postMessage({type:"KAWKABAT_SET_CLOCKWISE",clockwise:!!input.checked},"*");}'+
-        'function retry(){attempts+=1;send();if(!ready&&attempts<30)timer=setTimeout(retry,400);}'+
-        'if(input){input.checked=true;input.addEventListener("change",function(){send();status(input.checked?"Clockwise مفعل — مع عقارب الساعة":"Clockwise ملغي — عكس عقارب الساعة");});}'+
-        'if(frame)frame.addEventListener("load",function(){attempts=0;ready=false;if(timer)clearTimeout(timer);setTimeout(retry,250);});'+
-        'window.addEventListener("message",function(event){if(!frame||event.source!==frame.contentWindow)return;var data=event.data||{};if(data.type==="KAWKABAT_WHEEL_READY"){ready=true;if(timer)clearTimeout(timer);send();status("Clockwise مفعل ومرتبط بالعجلة");}else if(data.type==="KAWKABAT_CLOCKWISE_STATE"){ready=true;if(timer)clearTimeout(timer);if(input)input.checked=!!data.clockwise;status(data.clockwise?"العجلة مع عقارب الساعة":"العجلة عكس عقارب الساعة");}});'+
-        'status("جارٍ تفعيل Clockwise…");setTimeout(retry,500);'+
+        'function polar(radius,degree){var angle=degree*Math.PI/180;return{x:CX+Math.cos(angle)*radius,y:CY+Math.sin(angle)*radius};}'+
+        'function findWheelDocument(root){if(!root)return null;try{if(root.getElementById("wheel")&&root.getElementById("numbersCycle10"))return root;var frames=root.querySelectorAll("iframe");for(var i=0;i<frames.length;i+=1){var child=null;try{child=frames[i].contentDocument;}catch(error){child=null;}var found=findWheelDocument(child);if(found)return found;}}catch(error){}return null;}'+
+        'function apply(clockwise,doc){for(var cycle=1;cycle<=10;cycle+=1){var group=doc.getElementById("numbersCycle"+cycle);if(!group)continue;var radius=455+((cycle-1)*110);Array.prototype.forEach.call(group.children,function(node,index){var degree=(clockwise?index*10:-index*10)-90,p=polar(radius,degree);node.setAttribute("x",p.x);node.setAttribute("y",p.y);});}[["calendarDaysRing",1580],["zodiacElementsRing",1538]].forEach(function(pair){var group=doc.getElementById(pair[0]);if(!group)return;Array.prototype.forEach.call(group.children,function(node,index){var degree=clockwise?index*10:-index*10,normalized=((degree%360)+360)%360,p=polar(pair[1],degree-90),rotation=normalized;if(normalized>90&&normalized<270)rotation+=180;node.setAttribute("x",p.x);node.setAttribute("y",p.y);node.setAttribute("transform","rotate("+rotation+" "+p.x+" "+p.y+")");});});doc.documentElement.dataset.clockwise=clockwise?"true":"false";status(clockwise?"Clockwise مفعل — مع عقارب الساعة":"Clockwise ملغي — عكس عقارب الساعة");}'+
+        'function connect(){attempts+=1;var root=null;try{root=frame&&frame.contentDocument;}catch(error){root=null;}var doc=findWheelDocument(root);if(!doc){if(attempts<180)timer=setTimeout(connect,200);else status("العجلة ظاهرة لكن تعذر الوصول إلى Runtime لتفعيل Clockwise");return;}if(!bound&&input){bound=true;input.checked=true;input.addEventListener("change",function(){apply(!!input.checked,doc);});}apply(input?!!input.checked:true,doc);}'+
+        'if(frame)frame.addEventListener("load",function(){attempts=0;if(timer)clearTimeout(timer);timer=setTimeout(connect,150);});'+
+        'status("جارٍ ربط Clockwise مباشرة بالعجلة…");setTimeout(connect,300);'+
       '}());'+closeTag;
       html=html.replace('</body>',clockwiseScript+'</body>');
 
