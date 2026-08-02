@@ -207,12 +207,13 @@
       stroke-width:2;
       vector-effect:non-scaling-stroke;
     }
+    .cardinal-ornament-copy { pointer-events:none; }
     #logoImage { opacity:0; transition:opacity .18s linear; }
     html[data-logo-ready="true"] #logoImage { opacity:1; }
   </style>
 </head>
 <body>
-  <svg id="wheel" viewBox="0 0 4400 3600" role="img" aria-label="ثلاث عشرة عجلة مع إطار زوايا مستقل وإطار أسود مزخرف نهائي">
+  <svg id="wheel" viewBox="0 0 4400 3600" role="img" aria-label="ثلاث عشرة عجلة مع إطار زوايا مستقل وإطار أسود مزخرف وزخارف فيروزية للجهات الأربع">
     <defs>
       <clipPath id="logoClip"><circle cx="2200" cy="1800" r="179" /></clipPath>
       <linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -315,6 +316,21 @@
       <rect class="crest-plaque" x="2132" y="91" width="136" height="50" rx="18" ry="18" />
       <text class="crest-label" x="2200" y="116">360°</text>
     </g>
+
+    <g id="cardinalOrnamentCopies" aria-label="زخارف فيروزية مطابقة عند 90 و180 و270 درجة">
+      <g class="cardinal-ornament-copy" data-angle="90" transform="rotate(90 2200 1800)">
+        <use href="#topOrnament" xlink:href="#topOrnament" />
+        <rect class="crest-plaque" x="2132" y="91" width="136" height="50" rx="18" ry="18" />
+      </g>
+      <g class="cardinal-ornament-copy" data-angle="180" transform="rotate(180 2200 1800)">
+        <use href="#topOrnament" xlink:href="#topOrnament" />
+        <rect class="crest-plaque" x="2132" y="91" width="136" height="50" rx="18" ry="18" />
+      </g>
+      <g class="cardinal-ornament-copy" data-angle="270" transform="rotate(270 2200 1800)">
+        <use href="#topOrnament" xlink:href="#topOrnament" />
+        <rect class="crest-plaque" x="2132" y="91" width="136" height="50" rx="18" ry="18" />
+      </g>
+    </g>
   </svg>
 
   <script>
@@ -343,6 +359,7 @@
       var ringTwo=document.getElementById('numbersRingTwo');
       var angleTicks=document.getElementById('angleTicks');
       var angleLabels=document.getElementById('angleLabels');
+      var cardinalOrnamentCopies=document.getElementById('cardinalOrnamentCopies');
       var logo=document.getElementById('logoImage');
 
       function polar(r,deg){var a=deg*Math.PI/180;return{x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};}
@@ -421,9 +438,9 @@
 
       window.addEventListener('load',function(){var left=Math.max(0,(document.documentElement.scrollWidth-window.innerWidth)/2);var top=Math.max(0,(document.documentElement.scrollHeight-window.innerHeight)/2);window.scrollTo(left,top);},{once:true});
 
-      window.__auditKawkabatFinalStructureV1=function(){return{
-        ok:divisions.children.length===36&&ringOne.children.length===36&&ringTwo.children.length===36&&angleTicks.children.length===360&&angleLabels.children.length===72,
-        build:25,
+      window.__auditKawkabatFinalStructureV2=function(){return{
+        ok:divisions.children.length===36&&ringOne.children.length===36&&ringTwo.children.length===36&&angleTicks.children.length===360&&angleLabels.children.length===72&&cardinalOrnamentCopies.children.length===3,
+        build:26,
         stageWidth:4400,
         stageHeight:3600,
         wheelCount:13,
@@ -439,6 +456,10 @@
         protrusions:false,
         ornateBlackOuterFrameCount:1,
         topOrnamentCount:1,
+        copiedCardinalOrnamentCount:3,
+        copiedCardinalOrnamentAngles:[90,180,270],
+        copiedCardinalOrnamentLabelsHidden:true,
+        turquoiseCardinalOrnamentCount:4,
         finalStructureComplete:true,
         logoReady:document.documentElement.dataset.logoReady==='true'
       };};
