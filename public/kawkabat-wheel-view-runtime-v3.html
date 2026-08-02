@@ -30,6 +30,7 @@
       if(!response.ok)throw new Error('VIEW_V2_HTTP_'+response.status);
       var payload=await response.json();
       var html=decodeBase64(payload.content);
+      var closeTag='</scr'+'ipt>';
 
       html=html.replace('View Runtime V2','View Runtime V3');
       html=html.replace("var modeKey=params.get('view')||'circle24'","var modeKey=params.get('view')||'circle36'");
@@ -46,6 +47,12 @@
       if(html.indexOf("var meta=modes[modeKey]||modes.circle36")<0){
         throw new Error('CIRCLE36_FALLBACK_PATCH_FAILED');
       }
+
+      var hashReload='<script id="kawkabat-view-hash-reload-v1">(function(){'+
+        "'use strict';"+
+        'window.addEventListener("hashchange",function(){window.location.reload();});'+
+      '}());'+closeTag;
+      html=html.replace('</body>',hashReload+'</body>');
 
       document.open();
       document.write(html);
