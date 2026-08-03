@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية — Composite V6</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#F7F1E3}
+    #wheelFrame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#F7F1E3}
+    #overlay{position:absolute;width:3960px;height:3240px;pointer-events:none;overflow:visible;z-index:5}
+    .overlay-text{font-family:Arial,Tahoma,sans-serif;text-anchor:middle;dominant-baseline:central;paint-order:stroke fill;stroke:#F7F1E3;stroke-width:1.2;stroke-opacity:.9}
+  </style>
+</head>
+<body>
+  <iframe id="wheelFrame" title="العجلة الأساسية" scrolling="yes"></iframe>
+  <svg id="overlay" viewBox="0 0 4400 3600" aria-label="طبقة المنقلة والكرونومتر"></svg>
+  <script>
+  (function(){
+    'use strict';
+    var NS='http://www.w3.org/2000/svg';
+    var cx=2200,cy=1800;
+    var params=new URLSearchParams(String(location.hash||'').replace(/^#/,''));
+    var frame=document.getElementById('wheelFrame');
+    var overlay=document.getElementById('overlay');
+    var baseUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/2333b246c24e560c960661a001c3f9380c3dcaf6/public/kawkabat-wheel-runtime-highlight-v2.html';
+    frame.src=baseUrl+(location.hash||'');
+
+    function bool(name,fallback){var value=params.get(name);if(value===null)return !!fallback;return value==='1'||value==='true'||value==='on';}
+    function num(name,fallback){var value=Number(String(params.get(name)==null?fallback:params.get(name)).replace(',','.').replace(/°/g,''));return Number.isFinite(value)?value:fallback;}
+    function text(name,fallback){var value=params.get(name);return value===null?fallback:String(value);}
+    function make(name,attrs){var node=document.createElementNS(NS,name);Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,String(attrs[key]));});return node;}
+    function polar(radius,degree){var radians=degree*Math.PI/180;return{x:cx+Math.cos(radians)*radius,y:cy+Math.sin(radians)*radius};}
+    function normalize(degree){var value=degree%360;return value<0?value+360:value;}
+    function addCircle(group,radius,stroke,width,opacity,dash){var node=make('circle',{cx:cx,cy:cy,r:radius,fill:'none',stroke:stroke,'stroke-width':width,'stroke-opacity':opacity,'vector-effect':'non-scaling-stroke'});if(dash)node.setAttribute('stroke-dasharray',dash);group.appendChild(node);return node;}
+    function addLine(group,x1,y1,x2,y2,stroke,width,opacity,dash){var node=make('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:stroke,'stroke-width':width,'stroke-opacity':opacity,'stroke-linecap':'round','vector-effect':'non-scaling-stroke'});if(dash)node.setAttribute('stroke-dasharray',dash);group.appendChild(node);return node;}
+    function addText(group,value,radius,degree,size,fill,weight){var point=polar(radius,degree),rotation=normalize(degree+90);if(rotation>90&&rotation<270)rotation+=180;var node=make('text',{x:point.x,y:point.y,'class':'overlay-text','font-size':size,'font-weight':weight||800,fill:fill||'#17191B',transform:'rotate('+rotation+' '+point.x+' '+point.y+')'});node.textContent=value;group.appendChild(node);return node;}
+    function addTriangle(group,radius,degree,color,size,label){var point=polar(radius,degree),radians=degree*Math.PI/180,tangentX=-Math.sin(radians),tangentY=Math.cos(radians),normalX=Math.cos(radians),normalY=Math.sin(radians);var tip={x:point.x+normalX*size,y:point.y+normalY*size},left={x:point.x-tangentX*size*.62,y:point.y-tangentY*size*.62},right={x:point.x+tangentX*size*.62,y:point.y+tangentY*size*.62};var node=make('path',{d:'M '+tip.x+' '+tip.y+' L '+left.x+' '+left.y+' L '+right.x+' '+right.y+' Z',fill:color,stroke:'#2B1608','stroke-width':'2.5','vector-effect':'non-scaling-stroke'});node.style.filter='drop-shadow(0 0 6px rgba(0,0,0,.38))';group.appendChild(node);if(label)addText(group,label,radius+size+18,degree,18,color,900);}
+    function formatDecimal(value){var fixed=Number(value).toFixed(8).replace(/\.?0+$/,'');return fixed==='-0'?'0':fixed;}
+
+    function draw(){
+      while(overlay.firstChild)overlay.removeChild(overlay.firstChild);
+
+      var proVisible=bool('protractorVisible',false),proClockwise=bool('protractorClockwise',true),proAngle=num('protractorAngle',0),proSign=proClockwise?1:-1;
+      var counterVisible=bool('counterVisible',false),counterClockwise=bool('counterClockwise',true),counterStart=num('counterStart',1),counterStep=num('counterStep',1),counterOffset=Math.max(20,num('counterRadius',34)),counterFont=Math.max(8,num('counterFontSize',11));
+      var proSecondaryVisible=bool('proSecondaryVisible',false),proSecondaryClockwise=bool('proSecondaryClockwise',true),proSecondaryStart=num('proSecondaryStart',0),proSecondaryIncrement=num('proSecondaryIncrement',10),proSecondaryDivisions=Math.max(4,Math.round(num('proSecondaryDivisions',36))),proSecondaryOffset=Math.max(25,num('proSecondaryRadius',60)),proSecondaryFont=Math.max(8,num('proSecondaryFontSize',10));
+      var proMarkerVisible=bool('proMarkerVisible',false),proMarkerAngle=num('proMarkerAngle',0),proMarkerRadius=num('proMarkerRadius',0),proMarkerColor=text('proMarkerColor','#e93020'),proMarkerWidth=Math.max(12,num('proMarkerWidth',24)),proMarkerLabel=text('proMarkerLabel','');
+
+      if(proVisible){
+        var proLayer=make('g',{id:'protractorCompositeLayer','aria-label':'Protractor'});overlay.appendChild(proLayer);
+        var proRadius=1480;
+        addCircle(proLayer,proRadius,'#D43C32',5,.95);
+        addCircle(proLayer,proRadius-15,'#F7B2A8',1.6,.75);
+        for(var index=0;index<360;index+=5){var degree=proSign*index+proAngle-90,length=index%30===0?28:index%10===0?18:9,outer=polar(proRadius,degree),inner=polar(proRadius-length,degree);addLine(proLayer,outer.x,outer.y,inner.x,inner.y,'#8E1914',index%30===0?3:index%10===0?2:1,.95);if(index%30===0)addText(proLayer,String(index)+'°',proRadius-46,degree,15,'#8E1914',900);}
+        if(counterVisible){var counterRadius=proRadius-counterOffset,counterSign=counterClockwise?1:-1;addCircle(proLayer,counterRadius,'#7D3D32',1.5,.55,'8 7');for(var counterIndex=0;counterIndex<36;counterIndex+=1)addText(proLayer,formatDecimal(counterStart+counterIndex*counterStep),counterRadius,counterSign*counterIndex*10+proAngle-90,counterFont,'#4D281F',800);}
+        if(proSecondaryVisible){var secondaryRadius=proRadius+proSecondaryOffset,secondarySign=proSecondaryClockwise?1:-1;addCircle(proLayer,secondaryRadius,'#235D8A',2.5,.78);for(var secondaryIndex=0;secondaryIndex<proSecondaryDivisions;secondaryIndex+=1){var secondaryDegree=secondarySign*secondaryIndex*(360/proSecondaryDivisions)+proAngle-90,secondaryOuter=polar(secondaryRadius,secondaryDegree),secondaryInner=polar(secondaryRadius-14,secondaryDegree);addLine(proLayer,secondaryOuter.x,secondaryOuter.y,secondaryInner.x,secondaryInner.y,'#235D8A',1.5,.8);if(secondaryIndex%Math.max(1,Math.round(proSecondaryDivisions/12))===0)addText(proLayer,formatDecimal(proSecondaryStart+secondaryIndex*proSecondaryIncrement),secondaryRadius+22,secondaryDegree,proSecondaryFont,'#174B72',800);}}
+        if(proMarkerVisible)addTriangle(proLayer,proMarkerRadius>0?proMarkerRadius:proRadius,proSign*proMarkerAngle+proAngle-90,proMarkerColor,proMarkerWidth,proMarkerLabel);
+      }
+
+      var chronoVisible=bool('chronoVisible',true),chronoClockwise=bool('chronoClockwise',true),chronoAngle=num('chronoAngle',0),chronoRange=text('chronoRange','Annual'),chronoSign=chronoClockwise?1:-1;
+      var chronoSecondaryVisible=bool('chronoSecondaryVisible',false),chronoSecondaryReverse=bool('chronoSecondaryReverse',true),chronoSecondaryAngle=num('chronoSecondaryAngle',180);
+      var chronoMarkerVisible=bool('chronoMarkerVisible',false),chronoMarkerAngle=num('chronoMarkerAngle',0),chronoMarkerColor=text('chronoMarkerColor','#168A52'),chronoMarkerLabel=text('chronoMarkerLabel','');
+      if(chronoVisible){
+        var chronoLayer=make('g',{id:'chronometerCompositeLayer','aria-label':'Chronometer'});overlay.appendChild(chronoLayer);
+        var chronoRadius=1260;
+        var rangeMap={Annual:{count:12,labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']},Semiannual:{count:6,labels:['1','2','3','4','5','6']},Quarterly:{count:4,labels:['Q1','Q2','Q3','Q4']},Monthly:{count:31,labels:null},Weekly:{count:7,labels:['Sun','Mon','Tue','Wed','Thu','Fri','Sat']},Daily:{count:24,labels:null},Intraday:{count:24,labels:null}};
+        var range=rangeMap[chronoRange]||rangeMap.Annual;
+        addCircle(chronoLayer,chronoRadius,'#168A52',5,.9);
+        addCircle(chronoLayer,chronoRadius+15,'#8BD3AC',1.5,.7);
+        for(var tick=0;tick<range.count;tick+=1){var tickDegree=chronoSign*tick*(360/range.count)+chronoAngle-90,tickOuter=polar(chronoRadius,tickDegree),tickInner=polar(chronoRadius-22,tickDegree);addLine(chronoLayer,tickOuter.x,tickOuter.y,tickInner.x,tickInner.y,'#0B6A3B',tick%Math.max(1,Math.round(range.count/12))===0?2.6:1.3,.9);var tickLabel=range.labels?range.labels[tick]:String(tick+1);if(range.count<=12||tick%Math.max(1,Math.round(range.count/12))===0)addText(chronoLayer,tickLabel,chronoRadius-46,tickDegree,15,'#0B6A3B',900);}
+        if(chronoSecondaryVisible){var secondaryChronoRadius=chronoRadius-82,secondaryChronoSign=chronoSecondaryReverse?-chronoSign:chronoSign;addCircle(chronoLayer,secondaryChronoRadius,'#5AB783',2,.68,'10 7');for(var secondaryTick=0;secondaryTick<12;secondaryTick+=1)addText(chronoLayer,String(secondaryTick+1),secondaryChronoRadius,secondaryChronoSign*secondaryTick*30+chronoAngle+chronoSecondaryAngle-90,13,'#397759',800);}
+        if(chronoMarkerVisible)addTriangle(chronoLayer,chronoRadius,chronoSign*chronoMarkerAngle+chronoAngle-90,chronoMarkerColor,24,chronoMarkerLabel);
+      }
+
+      document.documentElement.dataset.compositeReady='true';
+      window.__auditKawkabatCompositeV6=function(){return{ok:true,protractorVisible:proVisible,chronometerVisible:chronoVisible,overlayChildCount:overlay.children.length};};
+    }
+
+    function syncOverlay(){
+      try{
+        var doc=frame.contentDocument;
+        if(!doc)return;
+        var root=doc.scrollingElement||doc.documentElement;
+        overlay.style.left=(220-root.scrollLeft)+'px';
+        overlay.style.top=(180-root.scrollTop)+'px';
+      }catch(error){
+        overlay.style.left='220px';
+        overlay.style.top='180px';
+      }
+    }
+
+    frame.addEventListener('load',function(){
+      syncOverlay();
+      try{frame.contentWindow.addEventListener('scroll',syncOverlay,{passive:true});}catch(error){}
+    });
+    window.addEventListener('resize',syncOverlay);
+    window.setInterval(syncOverlay,120);
+    draw();
+  }());
+  </script>
+</body>
+</html>
