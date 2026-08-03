@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية — Unified Tools V10</title>
+  <style>html,body{margin:0;width:100%;height:100%;background:#F7F1E3}body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}.loading{font-weight:800}</style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل العجلة الموحدة…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/0e1aa64595feccc46ddc92fb44a9b34633e35cec/public/kawkabat-wheel-runtime-final.html';
+
+    var toolsRuntime=`
+
+  /* Unified tools V10: runs inside the proven wheel runtime after all rings are built. */
+  function toolBool(name,fallback){
+    var value=params.get(name);
+    if(value===null)return !!fallback;
+    return value==='1'||value==='true'||value==='on';
+  }
+  function toolNum(name,fallback){
+    var raw=params.get(name);
+    var value=Number(String(raw===null?fallback:raw).replace(',','.').replace(/°/g,''));
+    return Number.isFinite(value)?value:fallback;
+  }
+  function toolText(name,fallback){
+    var value=params.get(name);
+    return value===null?fallback:String(value);
+  }
+  function toolGroup(id,label,before){
+    var old=document.getElementById(id);
+    if(old)old.remove();
+    var group=make('g',{id:id,'aria-label':label,'pointer-events':'none'});
+    wheelNode.insertBefore(group,before||angleFrameNode);
+    return group;
+  }
+  function toolCircle(group,radius,stroke,width,opacity,dash){
+    var node=make('circle',{cx:cx,cy:cy,r:radius,fill:'none',stroke:stroke,'stroke-width':width,'stroke-opacity':opacity,'vector-effect':'non-scaling-stroke'});
+    if(dash)node.setAttribute('stroke-dasharray',dash);
+    group.appendChild(node);
+    return node;
+  }
+  function toolLine(group,x1,y1,x2,y2,stroke,width,opacity,dash){
+    var node=make('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:stroke,'stroke-width':width,'stroke-opacity':opacity,'stroke-linecap':'round','vector-effect':'non-scaling-stroke'});
+    if(dash)node.setAttribute('stroke-dasharray',dash);
+    group.appendChild(node);
+    return node;
+  }
+  function toolNormalize(degree){
+    var value=degree%360;
+    return value<0?value+360:value;
+  }
+  function toolLabel(group,value,radius,degree,size,fill,weight){
+    var point=geometryPoint(radius,degree);
+    var rotation=toolNormalize(degree+90);
+    if(rotation>90&&rotation<270)rotation+=180;
+    var node=make('text',{
+      x:point.x,y:point.y,'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'Arial,Tahoma,sans-serif','font-size':size,'font-weight':weight||800,
+      fill:fill||'#17191B',transform:'rotate('+rotation+' '+point.x+' '+point.y+')',
+      'paint-order':'stroke fill',stroke:'#F7F1E3','stroke-width':'1.2','stroke-opacity':'0.92',
+      'vector-effect':'non-scaling-stroke'
+    });
+    node.textContent=String(value);
+    group.appendChild(node);
+    return node;
+  }
+  function toolTriangle(group,radius,degree,color,size,label){
+    var point=geometryPoint(radius,degree);
+    var radians=degree*Math.PI/180;
+    var tangentX=-Math.sin(radians),tangentY=Math.cos(radians);
+    var normalX=Math.cos(radians),normalY=Math.sin(radians);
+    var tip={x:point.x+normalX*size,y:point.y+normalY*size};
+    var left={x:point.x-tangentX*size*0.62,y:point.y-tangentY*size*0.62};
+    var right={x:point.x+tangentX*size*0.62,y:point.y+tangentY*size*0.62};
+    var node=make('path',{
+      d:'M '+tip.x+' '+tip.y+' L '+left.x+' '+left.y+' L '+right.x+' '+right.y+' Z',
+      fill:color,stroke:'#2B1608','stroke-width':'2.5','vector-effect':'non-scaling-stroke'
+    });
+    node.style.filter='drop-shadow(0 0 6px rgba(0,0,0,.38))';
+    group.appendChild(node);
+    if(label)toolLabel(group,label,radius+size+18,degree,18,color,900);
+  }
+
+  /* Find */
+  var rawFind=String(params.get('find')||'').trim().replace(',','.');
+  var findValue=Number(rawFind),findNode=null;
+  if(rawFind!==''&&Number.isFinite(findValue)){
+    Array.prototype.some.call(wheelNode.querySelectorAll('[data-price-value]'),function(node){
+      var candidate=Number(node.getAttribute('data-price-value'));
+      if(Number.isFinite(candidate)&&Math.abs(candidate-findValue)<=Math.max(1e-9,Math.abs(findValue)*1e-10)){
+        findNode=node;
+        return true;
+      }
+      return false;
+    });
+  }
+  if(findNode){
+    var findLayer=toolGroup('findHighlightLayer','Find '+rawFind);
+    var findBox=findNode.getBBox();
+    var findRect=make('rect',{
+      x:findBox.x-14,y:findBox.y-10,width:findBox.width+28,height:findBox.height+20,
+      rx:Math.max(10,(findBox.height+20)/2),fill:'#FFD86A','fill-opacity':'0.24',
+      stroke:'#B87900','stroke-width':'4','vector-effect':'non-scaling-stroke'
+    });
+    findRect.style.filter='drop-shadow(0 0 8px rgba(255,190,0,.9))';
+    findLayer.appendChild(findRect);
+    findNode.setAttribute('data-find-match','true');
+  }
+
+  /* Highlight */
+  var highlightVisible=toolBool('highlight',false);
+  var highlightFill=toolText('highlightFill','levels').toLowerCase();
+  var highlightMarks=toolBool('highlightMarks',false);
+  var highlightNumbers=toolBool('highlightNumbers',false);
+  if(highlightVisible){
+    var highlightLayer=toolGroup('highlightUnifiedLayer','Highlight '+highlightFill,document.getElementById('numbersCycle1')||angleFrameNode);
+    if(highlightFill==='cross'){
+      toolLine(highlightLayer,590,cy,3810,cy,'#D49A32',104,0.13);
+      toolLine(highlightLayer,cx,190,cx,3410,'#4E8EAE',104,0.11);
+      toolLine(highlightLayer,590,cy,3810,cy,'#FFF1C0',3,0.52);
+      toolLine(highlightLayer,cx,190,cx,3410,'#E9F7FF',3,0.52);
+      [{degree:-90,label:'0°'},{degree:0,label:'90°'},{degree:90,label:'180°'},{degree:180,label:'270°'}].forEach(function(item){
+        var point=geometryPoint(1580,item.degree);
+        if(highlightMarks)highlightLayer.appendChild(make('circle',{cx:point.x,cy:point.y,r:10,fill:'#FFD86A',stroke:'#8A5A00','stroke-width':3,'vector-effect':'non-scaling-stroke'}));
+        if(highlightNumbers)toolLabel(highlightLayer,item.label,1542,item.degree,18,'#17191B',900);
+      });
+    }else{
+      for(var level=1;level<=10;level+=1){
+        var radius=455+(level-1)*110;
+        var color=level%2===1?'#E0B044':'#4E8EAE';
+        var opacity=level%2===1?0.11:0.075;
+        if(meta.shape==='circle'){
+          toolCircle(highlightLayer,radius,color,94,opacity);
+        }else{
+          highlightLayer.appendChild(make('path',{d:polygonPath(radius),fill:'none',stroke:color,'stroke-width':94,'stroke-opacity':opacity,'stroke-linejoin':'round','vector-effect':'non-scaling-stroke'}));
+        }
+        var point=geometryPoint(radius,-90);
+        if(highlightMarks)highlightLayer.appendChild(make('circle',{cx:point.x,cy:point.y,r:10,fill:'#FFD86A',stroke:'#8A5A00','stroke-width':3,'vector-effect':'non-scaling-stroke'}));
+        if(highlightNumbers){
+          var endOrdinal=level*divisionCount;
+          toolLabel(highlightLayer,formatPrice(startValue+((endOrdinal-1)*incrementValue)),radius,-90,18,'#17191B',900);
+        }
+      }
+    }
+  }
+
+  /* Protractor */
+  var protractorVisible=toolBool('protractorVisible',false);
+  var protractorClockwise=toolBool('protractorClockwise',true);
+  var protractorAngle=toolNum('protractorAngle',0);
+  var protractorSign=protractorClockwise?1:-1;
+  var counterVisible=toolBool('counterVisible',false);
+  var counterClockwise=toolBool('counterClockwise',true);
+  var counterStart=toolNum('counterStart',1);
+  var counterStep=toolNum('counterStep',1);
+  var counterOffset=Math.max(20,toolNum('counterRadius',34));
+  var counterFont=Math.max(8,toolNum('counterFontSize',11));
+  var proSecondaryVisible=toolBool('proSecondaryVisible',false);
+  var proSecondaryClockwise=toolBool('proSecondaryClockwise',true);
+  var proSecondaryStart=toolNum('proSecondaryStart',0);
+  var proSecondaryIncrement=toolNum('proSecondaryIncrement',10);
+  var proSecondaryDivisions=Math.max(4,Math.round(toolNum('proSecondaryDivisions',36)));
+  var proSecondaryOffset=Math.max(25,toolNum('proSecondaryRadius',60));
+  var proSecondaryFont=Math.max(8,toolNum('proSecondaryFontSize',10));
+  var proMarkerVisible=toolBool('proMarkerVisible',false);
+  var proMarkerAngle=toolNum('proMarkerAngle',0);
+  var proMarkerRadius=toolNum('proMarkerRadius',0);
+  var proMarkerColor=toolText('proMarkerColor','#e93020');
+  var proMarkerWidth=Math.max(12,toolNum('proMarkerWidth',24));
+  var proMarkerLabel=toolText('proMarkerLabel','');
+
+  if(protractorVisible){
+    var protractorLayer=toolGroup('protractorUnifiedLayer','Protractor');
+    var protractorRadius=1480;
+    toolCircle(protractorLayer,protractorRadius,'#D43C32',6,0.98);
+    toolCircle(protractorLayer,protractorRadius-15,'#F7B2A8',2,0.82);
+    for(var proIndex=0;proIndex<360;proIndex+=5){
+      var proDegree=protractorSign*proIndex+protractorAngle-90;
+      var tickLength=proIndex%30===0?28:(proIndex%10===0?18:9);
+      var proOuter=geometryPoint(protractorRadius,proDegree);
+      var proInner=geometryPoint(protractorRadius-tickLength,proDegree);
+      toolLine(protractorLayer,proOuter.x,proOuter.y,proInner.x,proInner.y,'#8E1914',proIndex%30===0?3:(proIndex%10===0?2:1),0.96);
+      if(proIndex%30===0)toolLabel(protractorLayer,String(proIndex)+'°',protractorRadius-46,proDegree,15,'#8E1914',900);
+    }
+    if(counterVisible){
+      var counterRadius=protractorRadius-counterOffset;
+      var counterSign=counterClockwise?1:-1;
+      toolCircle(protractorLayer,counterRadius,'#7D3D32',1.5,0.6,'8 7');
+      for(var counterIndex=0;counterIndex<36;counterIndex+=1){
+        toolLabel(protractorLayer,formatPrice(counterStart+counterIndex*counterStep),counterRadius,counterSign*counterIndex*10+protractorAngle-90,counterFont,'#4D281F',800);
+      }
+    }
+    if(proSecondaryVisible){
+      var secondaryRadius=protractorRadius+proSecondaryOffset;
+      var secondarySign=proSecondaryClockwise?1:-1;
+      toolCircle(protractorLayer,secondaryRadius,'#235D8A',2.5,0.8);
+      for(var secondaryIndex=0;secondaryIndex<proSecondaryDivisions;secondaryIndex+=1){
+        var secondaryDegree=secondarySign*secondaryIndex*(360/proSecondaryDivisions)+protractorAngle-90;
+        var secondaryOuter=geometryPoint(secondaryRadius,secondaryDegree);
+        var secondaryInner=geometryPoint(secondaryRadius-14,secondaryDegree);
+        toolLine(protractorLayer,secondaryOuter.x,secondaryOuter.y,secondaryInner.x,secondaryInner.y,'#235D8A',1.5,0.82);
+        if(secondaryIndex%Math.max(1,Math.round(proSecondaryDivisions/12))===0){
+          toolLabel(protractorLayer,formatPrice(proSecondaryStart+secondaryIndex*proSecondaryIncrement),secondaryRadius+22,secondaryDegree,proSecondaryFont,'#174B72',800);
+        }
+      }
+    }
+    if(proMarkerVisible){
+      toolTriangle(protractorLayer,proMarkerRadius>0?proMarkerRadius:protractorRadius,protractorSign*proMarkerAngle+protractorAngle-90,proMarkerColor,proMarkerWidth,proMarkerLabel);
+    }
+  }
+
+  /* Chronometer */
+  var chronometerVisible=toolBool('chronoVisible',true);
+  var chronometerClockwise=toolBool('chronoClockwise',true);
+  var chronometerAngle=toolNum('chronoAngle',0);
+  var chronometerRange=toolText('chronoRange','Annual');
+  var chronometerSign=chronometerClockwise?1:-1;
+  var chronoSecondaryVisible=toolBool('chronoSecondaryVisible',false);
+  var chronoSecondaryReverse=toolBool('chronoSecondaryReverse',true);
+  var chronoSecondaryAngle=toolNum('chronoSecondaryAngle',180);
+  var chronoMarkerVisible=toolBool('chronoMarkerVisible',false);
+  var chronoMarkerAngle=toolNum('chronoMarkerAngle',0);
+  var chronoMarkerColor=toolText('chronoMarkerColor','#168A52');
+  var chronoMarkerLabel=toolText('chronoMarkerLabel','');
+
+  if(chronometerVisible){
+    var chronometerLayer=toolGroup('chronometerUnifiedLayer','Chronometer');
+    var chronometerRadius=1260;
+    var ranges={
+      Annual:{count:12,labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']},
+      Semiannual:{count:6,labels:['1','2','3','4','5','6']},
+      Quarterly:{count:4,labels:['Q1','Q2','Q3','Q4']},
+      Monthly:{count:31,labels:null},
+      Weekly:{count:7,labels:['Sun','Mon','Tue','Wed','Thu','Fri','Sat']},
+      Daily:{count:24,labels:null},
+      Intraday:{count:24,labels:null}
+    };
+    var chronoMeta=ranges[chronometerRange]||ranges.Annual;
+    toolCircle(chronometerLayer,chronometerRadius,'#168A52',8,1);
+    toolCircle(chronometerLayer,chronometerRadius+15,'#8BD3AC',2.4,0.86);
+    for(var chronoIndex=0;chronoIndex<chronoMeta.count;chronoIndex+=1){
+      var chronoDegree=chronometerSign*chronoIndex*(360/chronoMeta.count)+chronometerAngle-90;
+      var chronoOuter=geometryPoint(chronometerRadius,chronoDegree);
+      var chronoInner=geometryPoint(chronometerRadius-26,chronoDegree);
+      toolLine(chronometerLayer,chronoOuter.x,chronoOuter.y,chronoInner.x,chronoInner.y,'#0B6A3B',chronoIndex%Math.max(1,Math.round(chronoMeta.count/12))===0?3.2:1.6,0.98);
+      var chronoLabel=chronoMeta.labels?chronoMeta.labels[chronoIndex]:String(chronoIndex+1);
+      if(chronoMeta.count<=12||chronoIndex%Math.max(1,Math.round(chronoMeta.count/12))===0){
+        toolLabel(chronometerLayer,chronoLabel,chronometerRadius-52,chronoDegree,18,'#0B6A3B',900);
+      }
+    }
+    if(chronoSecondaryVisible){
+      var chronoSecondaryRadius=chronometerRadius-82;
+      var chronoSecondarySign=chronoSecondaryReverse?-chronometerSign:chronometerSign;
+      toolCircle(chronometerLayer,chronoSecondaryRadius,'#5AB783',2.2,0.78,'10 7');
+      for(var chronoSecondaryIndex=0;chronoSecondaryIndex<12;chronoSecondaryIndex+=1){
+        toolLabel(chronometerLayer,String(chronoSecondaryIndex+1),chronoSecondaryRadius,chronoSecondarySign*chronoSecondaryIndex*30+chronometerAngle+chronoSecondaryAngle-90,14,'#397759',800);
+      }
+    }
+    if(chronoMarkerVisible){
+      toolTriangle(chronometerLayer,chronometerRadius,chronometerSign*chronoMarkerAngle+chronometerAngle-90,chronoMarkerColor,26,chronoMarkerLabel);
+    }
+  }
+
+  document.documentElement.dataset.findRequested=rawFind!==''?'true':'false';
+  document.documentElement.dataset.findFound=findNode?'true':'false';
+  document.documentElement.dataset.highlightVisible=highlightVisible?'true':'false';
+  document.documentElement.dataset.protractorVisible=protractorVisible?'true':'false';
+  document.documentElement.dataset.chronometerVisible=chronometerVisible?'true':'false';
+  document.documentElement.dataset.unifiedToolsReady='true';
+  window.__auditKawkabatUnifiedToolsV10=function(){
+    return{
+      ok:true,
+      findFound:!!findNode,
+      highlightVisible:highlightVisible,
+      protractorVisible:protractorVisible,
+      chronometerVisible:chronometerVisible,
+      protractorNode:!!document.getElementById('protractorUnifiedLayer'),
+      chronometerNode:!!document.getElementById('chronometerUnifiedLayer')
+    };
+  };
+  try{
+    window.parent.postMessage({type:'KAWKABAT_UNIFIED_TOOLS_READY',protractorVisible:protractorVisible,chronometerVisible:chronometerVisible},'*');
+  }catch(ignore){}
+`;
+
+    try{
+      var response=await fetch(sourceUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('DIRECT_RUNTIME_HTTP_'+response.status);
+      var source=await response.text();
+      source=source.replace('Runtime مباشر','Unified Tools V10');
+      var marker='  document.documentElement.dataset.viewMode=modeKey;';
+      if(source.indexOf(marker)<0)throw new Error('UNIFIED_RUNTIME_MARKER_NOT_FOUND');
+      source=source.replace(marker,toolsRuntime+'\n'+marker);
+      if(source.indexOf('chronometerUnifiedLayer')<0)throw new Error('CHRONOMETER_INJECTION_FAILED');
+      if(source.indexOf('protractorUnifiedLayer')<0)throw new Error('PROTRACTOR_INJECTION_FAILED');
+      document.open();document.write(source);document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تحميل Runtime الموحد: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
