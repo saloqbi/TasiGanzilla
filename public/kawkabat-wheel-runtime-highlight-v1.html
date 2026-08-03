@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — Highlight Runtime V1</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
+    .loading{font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل العجلة والتظليل…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/0e1aa64595feccc46ddc92fb44a9b34633e35cec/public/kawkabat-wheel-runtime-final.html';
+    try{
+      var response=await fetch(sourceUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('DIRECT_RUNTIME_HTTP_'+response.status);
+      var source=await response.text();
+      source=source.replace('Runtime مباشر','Highlight Runtime V1');
+
+      var marker="  document.documentElement.dataset.incrementValue=String(incrementValue);";
+      var integratedRuntime=`  document.documentElement.dataset.incrementValue=String(incrementValue);
+
+  var rawFind=String(params.get('find')||'').trim().replace(',','.');
+  var findValue=Number(rawFind);
+  var hasFind=rawFind!==''&&Number.isFinite(findValue);
+  var foundNode=null;
+  function almostEqualFind(a,b){var tolerance=Math.max(1e-9,Math.abs(b)*1e-10);return Math.abs(a-b)<=tolerance;}
+  if(hasFind){
+    for(var findCycle=1;findCycle<=10&&!foundNode;findCycle+=1){
+      var findGroup=document.getElementById('numbersCycle'+findCycle);
+      if(!findGroup)continue;
+      Array.prototype.some.call(findGroup.children,function(node){
+        var candidate=Number(node.getAttribute('data-price-value'));
+        if(Number.isFinite(candidate)&&almostEqualFind(candidate,findValue)){foundNode=node;return true;}
+        return false;
+      });
+    }
+  }
+  document.documentElement.dataset.findRequested=hasFind?'true':'false';
+  document.documentElement.dataset.findFound=foundNode?'true':'false';
+
+  var highlightVisible=params.get('highlight')==='1'||params.get('highlight')==='true';
+  var highlightFill=params.get('highlightFill')||'levels';
+  var highlightMarks=params.get('highlightMarks')==='1'||params.get('highlightMarks')==='true';
+  var highlightNumbers=params.get('highlightNumbers')==='1'||params.get('highlightNumbers')==='true';
+  document.documentElement.dataset.highlightVisible=highlightVisible?'true':'false';
+  document.documentElement.dataset.highlightFill=highlightFill;
+  document.documentElement.dataset.highlightMarks=highlightMarks?'true':'false';
+  document.documentElement.dataset.highlightNumbers=highlightNumbers?'true':'false';
+
+  var highlightLayer=null;
+  if(highlightVisible&&highlightFill==='levels'){
+    highlightLayer=make('g',{id:'levelsHighlightLayer','aria-label':'Highlight levels'});
+    highlightLayer.setAttribute('pointer-events','none');
+    var firstCycle=document.getElementById('numbersCycle1');
+    wheelNode.insertBefore(highlightLayer,firstCycle||angleFrameNode);
+    for(var highlightLevel=1;highlightLevel<=10;highlightLevel+=1){
+      var highlightRadius=455+((highlightLevel-1)*110);
+      var highlightColor=highlightLevel%2===1?'#E0B044':'#4E8EAE';
+      var highlightShape;
+      if(meta.shape==='circle'){
+        highlightShape=make('circle',{cx:cx,cy:cy,r:highlightRadius,fill:'none',stroke:highlightColor,'stroke-width':'94','stroke-opacity':highlightLevel%2===1?'0.11':'0.075','vector-effect':'non-scaling-stroke'});
+      }else{
+        highlightShape=make('path',{d:polygonPath(highlightRadius),fill:'none',stroke:highlightColor,'stroke-width':'94','stroke-opacity':highlightLevel%2===1?'0.11':'0.075','stroke-linejoin':'round','vector-effect':'non-scaling-stroke'});
+      }
+      highlightShape.setAttribute('data-highlight-level',String(highlightLevel));
+      highlightLayer.appendChild(highlightShape);
+
+      var markPoint=geometryPoint(highlightRadius,-90);
+      if(highlightMarks){
+        var mark=make('circle',{cx:markPoint.x,cy:markPoint.y,r:'10',fill:'#FFD86A',stroke:'#8A5A00','stroke-width':'3','vector-effect':'non-scaling-stroke','data-highlight-mark':String(highlightLevel)});
+        mark.style.filter='drop-shadow(0 0 5px rgba(255,190,0,.75))';
+        highlightLayer.appendChild(mark);
+      }
+      if(highlightNumbers){
+        var endOrdinal=highlightLevel*divisionCount;
+        var endPrice=formatPrice(startValue+((endOrdinal-1)*incrementValue));
+        var label=make('text',{x:markPoint.x,y:markPoint.y-25,'class':'number-text number-black','font-size':'18','font-weight':'900','data-highlight-number':String(highlightLevel)});
+        label.textContent=endPrice;
+        highlightLayer.appendChild(label);
+      }
+    }
+  }
+
+  if(foundNode){
+    var findLayer=make('g',{id:'findHighlightLayer','aria-label':'Find highlight '+rawFind});
+    wheelNode.insertBefore(findLayer,angleFrameNode);
+    var findBox=foundNode.getBBox();
+    var findRect=make('rect',{x:findBox.x-14,y:findBox.y-10,width:findBox.width+28,height:findBox.height+20,rx:Math.max(10,(findBox.height+20)/2),fill:'#FFD86A','fill-opacity':'0.24',stroke:'#B87900','stroke-width':'4','vector-effect':'non-scaling-stroke'});
+    findRect.style.filter='drop-shadow(0 0 8px rgba(255,190,0,.9))';
+    findLayer.appendChild(findRect);
+    foundNode.setAttribute('data-find-match','true');
+    window.setTimeout(function(){
+      var rect=foundNode.getBoundingClientRect(),root=document.scrollingElement||document.documentElement;
+      root.scrollLeft+=rect.left+(rect.width/2)-(window.innerWidth/2);
+      root.scrollTop+=rect.top+(rect.height/2)-(window.innerHeight/2);
+    },180);
+  }
+
+  window.__auditKawkabatHighlightRuntimeV1=function(){
+    return{
+      ok:true,
+      visible:highlightVisible,
+      fill:highlightFill,
+      marks:highlightMarks,
+      numbers:highlightNumbers,
+      levelCount:highlightLayer?highlightLayer.querySelectorAll('[data-highlight-level]').length:0,
+      markCount:highlightLayer?highlightLayer.querySelectorAll('[data-highlight-mark]').length:0,
+      numberCount:highlightLayer?highlightLayer.querySelectorAll('[data-highlight-number]').length:0,
+      findRequested:hasFind,
+      findFound:!!foundNode
+    };
+  };`;
+
+      if(source.indexOf(marker)<0)throw new Error('HIGHLIGHT_RUNTIME_MARKER_NOT_FOUND');
+      source=source.replace(marker,integratedRuntime);
+      document.open();document.write(source);document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تحميل Highlight: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
