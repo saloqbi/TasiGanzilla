@@ -1,102 +1,75 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>كوكبة الأرقام السحرية — Complete Tools Functional V1</title>
-<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}#app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e3}#fatal{position:fixed;inset:auto 18px 18px auto;z-index:9999;max-width:560px;padding:10px 14px;border:1px solid #9d1d28;border-radius:6px;background:#fff3f3;color:#8c101c;font:700 13px Arial;display:none}</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>كوكبة الأرقام السحرية — Square of 9 Default</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
+#app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#f7f1e3}
+#loading{position:fixed;inset:0;display:grid;place-items:center;background:#f7f1e3;color:#50463f;font-weight:800;z-index:2}
+</style>
 </head>
 <body>
-<iframe id="app" title="Complete Gannzilla controls" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/286ae8235df5ddc68e0ef2980701d7cddee2bcbf/public/kawkabat-al-arqam-al-sihria.html"></iframe>
-<div id="fatal"></div>
+<div id="loading">جارٍ تشغيل Square of 9…</div>
 <script>
 (function(){
 'use strict';
-const APP_COMMIT='286ae8235df5ddc68e0ef2980701d7cddee2bcbf';
-const ENGINE='KAWKABAT_COMPLETE_TOOLS_FUNCTIONAL_V1';
-const NS='http://www.w3.org/2000/svg',CX=2200,CY=1800;
-const app=document.getElementById('app'),fatal=document.getElementById('fatal');
-let pdoc=null,wframe=null,wdoc=null,wheel=null,renderTimer=0,attachTimer=0,installed=false;
-const planetRows=[
- ['Sun','☉',279,'#f39c12'],['Moon','☽',337,'#5dade2'],['Mercury','☿',273,'#27ae60'],['Venus','♀',313,'#e84393'],['Mars','♂',288,'#d63031'],['Ceres','⚳',288,'#8e6e53'],['Jupiter','♃',276,'#8e44ad'],['Saturn','♄',291,'#795548'],['Uranus','♅',33,'#00a8a8'],['Neptune','♆',346,'#1565c0'],['Pluto','♇',292,'#8e3d86'],['Eris','⯰',23,'#555'],['Summary','Σ',110,'#333'],['Average','Σ',249,'#666']
-];
-const aspectTargets={Conjunction:0,Semisextile:30,Semisquare:45,Sextile:60,Quadrature:90,Trine:120,Sesquisquare:135,Quincunx:150,Opposition:180};
-const zodiac=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
-const moonGlyphs=['●','◔','◑','◕','○','◕','◑','◔'];
-const figureSides={Triangle:3,Square:4,Pentagon:5,Hexagon:6,Septagon:7,Octagon:8,Nonagon:9,Decagon:10,Hendecagon:11,Dodecagon:12};
-function fail(error){fatal.style.display='block';fatal.textContent='ENGINE ERROR: '+String(error&&error.message||error);try{setFooter('Engine error: '+String(error&&error.message||error),'error')}catch(_){} }
-function allControls(){return pdoc?Array.from(pdoc.querySelectorAll('[data-key]')):[]}
-function ctrl(key){return allControls().find(node=>node.dataset.key===key)||null}
-function checked(key,fallback=false){const c=ctrl(key);return c?!!c.checked:!!fallback}
-function value(key,fallback=''){const c=ctrl(key);return c?String(c.value):String(fallback)}
-function number(key,fallback=0){const raw=value(key,fallback).replace(/[،,٫]/g,'.').replace(/°/g,'').match(/-?\d+(?:\.\d+)?/);const n=raw?Number(raw[0]):NaN;return Number.isFinite(n)?n:fallback}
-function color(name,fallback){return value('color.'+name,fallback)||fallback}
-function radio(key,fallback){const list=allControls().filter(n=>n.dataset.key===key);const hit=list.find(n=>n.checked);return hit?hit.value:fallback}
-function svg(tag,attrs,text){const n=wdoc.createElementNS(NS,tag);Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,String(v)));if(text!==undefined)n.textContent=String(text);return n}
-function point(r,deg){const a=(deg-90)*Math.PI/180;return{x:CX+Math.cos(a)*r,y:CY+Math.sin(a)*r}}
-function layer(id,before){wdoc.getElementById(id)?.remove();const g=svg('g',{id,'data-kawkabat-engine':ENGINE,'pointer-events':'none'});const anchor=before||wdoc.getElementById('angleFrame');if(anchor&&anchor.parentNode===wheel)wheel.insertBefore(g,anchor);else wheel.appendChild(g);return g}
-function circle(g,r,stroke,width=3,opacity=1,dash=''){const n=svg('circle',{cx:CX,cy:CY,r,fill:'none',stroke,'stroke-width':width,'stroke-opacity':opacity,'vector-effect':'non-scaling-stroke'});if(dash)n.setAttribute('stroke-dasharray',dash);g.appendChild(n);return n}
-function line(g,a,b,stroke,width=2,opacity=1,dash=''){const n=svg('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke,'stroke-width':width,'stroke-opacity':opacity,'stroke-linecap':'round','vector-effect':'non-scaling-stroke'});if(dash)n.setAttribute('stroke-dasharray',dash);g.appendChild(n);return n}
-function text(g,label,r,deg,size=18,fill='#111',weight=800){const q=point(r,deg);let rot=((deg%360)+360)%360;if(rot>90&&rot<270)rot+=180;const n=svg('text',{x:q.x,y:q.y,'text-anchor':'middle','dominant-baseline':'central','font-family':'Arial,Tahoma,sans-serif','font-size':size,'font-weight':weight,fill,transform:`rotate(${rot} ${q.x} ${q.y})`,'paint-order':'stroke fill',stroke:color('Background','#f7f1e3'),'stroke-width':1.6,'stroke-opacity':.94,'vector-effect':'non-scaling-stroke'},label);g.appendChild(n);return n}
-function polygonPath(r,sides,rotation=0){let d='';for(let i=0;i<sides;i++){const q=point(r,rotation+i*360/sides);d+=(i?'L':'M')+q.x+' '+q.y+' '}return d+'Z'}
-function path(g,d,stroke,width=3,fill='none',opacity=1,dash=''){const n=svg('path',{d,fill,stroke,'stroke-width':width,'stroke-opacity':opacity,'fill-opacity':fill==='none'?0:opacity,'stroke-linejoin':'round','vector-effect':'non-scaling-stroke'});if(dash)n.setAttribute('stroke-dasharray',dash);g.appendChild(n);return n}
-function dateNumber(raw,today){const d=today?new Date():parseDate(raw);return Math.floor(d.getTime()/86400000)}
-function parseDate(raw){const m=String(raw||'').match(/(\d{1,2})\D+(\d{1,2})\D+(\d{4})/);return m?new Date(Date.UTC(+m[3],+m[2]-1,+m[1])):new Date(Date.UTC(2019,11,31))}
-function setFooter(message,mode='ready'){if(!pdoc)return;const s=pdoc.getElementById('status'),t=pdoc.getElementById('statusText');if(s)s.dataset.status=mode;if(t)t.textContent=message}
-function schedule(){clearTimeout(renderTimer);renderTimer=setTimeout(renderAll,80)}
-function removeEngineLayers(){if(!wdoc)return;wdoc.querySelectorAll(`[data-kawkabat-engine="${ENGINE}"]`).forEach(n=>n.remove())}
-function applyBaseColors(){
- const bg=color('Background','#ffffff'),grid=color('Grid','#d7d7d2');wdoc.documentElement.style.background=bg;wdoc.body.style.background=bg;wheel.style.background=bg;
- wdoc.querySelectorAll('.ray-metal,.frame-metal,.special-ray-metal,.special-arc-metal').forEach(n=>{n.style.stroke=grid});
- const fire=color('Fire','#ff0000'),earth=color('Earth','#008000'),air=color('Air','#dda0dd'),water=color('Water','#0000ff');
- wdoc.querySelectorAll('.zodiac-element-label').forEach(n=>{const s=n.textContent||'';n.style.fill=s.startsWith('نار')?fire:s.startsWith('تراب')?earth:s.startsWith('هواء')?air:water});
- wdoc.querySelectorAll('#levelsHighlightLayer circle,#levelsHighlightLayer path,#crossHighlightLayer line').forEach(n=>{if(n.getAttribute('stroke-opacity')!=='0.52')n.style.stroke=color('Highlight','#ececec')});
+var STORAGE='kawkabat-complete-panel-v1';
+var MIGRATION='kawkabat-square9-default-migration-v1';
+var state={};
+try{state=JSON.parse(localStorage.getItem(STORAGE)||'{}')||{}}catch(_){state={}}
+
+if(localStorage.getItem(MIGRATION)!=='done'){
+  state['core.visible']=true;
+  state['core.clockwise']=true;
+  state['core.size']='10';
+  state['core.view']='square9';
+  state['core.dataType']='price';
+  state['core.value']='1';
+  state['core.find']='1';
+  state['core.increment']='1';
+  state['core.highlightVisible']=true;
+  state['core.highlightFill']='cross';
+  state['core.showMarks']=true;
+  state['core.showNumbers']=false;
+
+  state['protractor.visible']=true;
+  state['protractor.clockwise']=true;
+  state['protractor.angle']='0';
+  state['chronometer.visible']=true;
+  state['chronometer.clockwise']=true;
+  state['chronometer.angle']='0';
+  state['chronometer.range']='Annual';
+  state['cosmogram.visible']=true;
+  state['cosmogram.clockwise']=true;
+  state['cosmogram.angle']='0';
+  state['cosmogram.system']='Geocentric';
+  state['moon.visible']=true;
+  state['cycles.visible']=true;
+
+  localStorage.setItem(STORAGE,JSON.stringify(state));
+  localStorage.setItem(MIGRATION,'done');
 }
-function renderProtractor(){
- if(!checked('protractor.visible'))return;const g=layer('engineProtractor');const c=color('Protractor','#ff0000'),cw=checked('protractor.clockwise',true),ang=number('protractor.angle',0),sign=cw?1:-1,r=1460;circle(g,r,c,7,1);circle(g,r-15,c,2,.55);
- for(let i=0;i<360;i+=5){const d=sign*i+ang,a=point(r,d),b=point(r-(i%30===0?32:i%10===0?20:10),d);line(g,a,b,c,i%30===0?3:i%10===0?2:1,.96);if(i%30===0)text(g,i+'°',r-48,d,15,c,900)}
- if(checked('counter.visible')){const rr=Math.max(300,r-number('counter.radius',34)),ccw=checked('counter.clockwise',true)?1:-1,start=number('counter.start',1),step=number('counter.step',1),fs=number('counter.fontSize',11);circle(g,rr,c,1.6,.55,'8 7');for(let i=0;i<36;i++)text(g,format(start+i*step),rr,ccw*i*10+ang,fs,c,800)}
- if(checked('secondary.visible')){const rr=r+Math.max(10,number('secondary.radius',60)),ss=checked('secondary.clockwise',true)?1:-1,start=number('secondary.start',0),inc=number('secondary.increment',10),div=Math.max(4,Math.round(number('secondary.divisions',36))),fs=number('secondary.fontSize',10);circle(g,rr,color('Axes','#555'),2,.8);for(let i=0;i<div;i++){const d=ss*i*360/div+ang;line(g,point(rr,d),point(rr-14,d),color('Axes','#555'),1.4,.8);if(i%Math.max(1,Math.round(div/12))===0)text(g,format(start+i*inc),rr+24,d,fs,color('Axes','#555'),800)}}
- if(checked('marker.visible'))renderMarker(g,'marker',ang,r);
-}
-function renderMarker(g,prefix,baseAngle,defaultRadius){const a=number(prefix+'.angle',0)+baseAngle,r=number(prefix+'.radius',0)||defaultRadius,c=value(prefix+'.color',color('Marker','#fff5d6')),w=Math.max(1,number(prefix+'.lineWidth',3)),shape=value(prefix+'.shape','Triangle'),q=point(r,a),label=value(prefix+'.label','');let n;if(shape==='Circle')n=svg('circle',{cx:q.x,cy:q.y,r:18,fill:c,stroke:'#222','stroke-width':w,'vector-effect':'non-scaling-stroke'});else if(shape==='Square')n=svg('rect',{x:q.x-16,y:q.y-16,width:32,height:32,fill:c,stroke:'#222','stroke-width':w,'vector-effect':'non-scaling-stroke'});else{const a1=point(r+28,a),a2=point(r-16,a-1.1),a3=point(r-16,a+1.1);n=svg('path',{d:`M${a1.x} ${a1.y}L${a2.x} ${a2.y}L${a3.x} ${a3.y}Z`,fill:c,stroke:'#222','stroke-width':w,'vector-effect':'non-scaling-stroke'})}g.appendChild(n);if(label)text(g,label,r+52,a,18,c,900)}
-function renderChronometer(){
- if(!checked('chronometer.visible'))return;const g=layer('engineChronometer'),c=color('Chronometer','#008000'),cw=checked('chronometer.clockwise',true),sign=cw?1:-1,ang=number('chronometer.angle',0),range=value('chronometer.range','Annual'),meta={Annual:[12,['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']],Monthly:[31,null],Weekly:[7,['Sun','Mon','Tue','Wed','Thu','Fri','Sat']],Daily:[24,null]}[range]||[12,null],r=1240;circle(g,r,c,8,1);circle(g,r+15,c,2.2,.6);for(let i=0;i<meta[0];i++){const d=sign*i*360/meta[0]+ang;line(g,point(r,d),point(r-27,d),c,i%Math.max(1,Math.round(meta[0]/12))===0?3:1.4,.95);if(meta[0]<=12||i%Math.max(1,Math.round(meta[0]/12))===0)text(g,meta[1]?meta[1][i]:String(i+1),r-52,d,17,c,900)}
- if(checked('chronometer.secondary.visible')){const rr=r-82,ss=checked('chronometer.secondary.reverse',true)?-sign:sign,sa=number('chronometer.secondary.angle',180);circle(g,rr,c,2,.55,'10 7');for(let i=0;i<12;i++)text(g,String(i+1),rr,ss*i*30+ang+sa,14,c,800)}
- if(checked('chronometer.marker.visible')){const mg={angle:number('chronometer.marker.angle',0),color:value('chronometer.marker.color',c),label:value('chronometer.marker.label','')};const q=point(r,sign*mg.angle+ang);g.appendChild(svg('circle',{cx:q.x,cy:q.y,r:18,fill:mg.color,stroke:'#222','stroke-width':3,'vector-effect':'non-scaling-stroke'}));if(mg.label)text(g,mg.label,r+44,sign*mg.angle+ang,18,mg.color,900)}
-}
-function renderCosmogram(){
- if(!checked('cosmogram.visible'))return;const g=layer('engineCosmogram'),cw=checked('cosmogram.clockwise',true),sign=cw?1:-1,ang=number('cosmogram.angle',0),system=value('cosmogram.system','Geocentric'),longitude=number('location.longitude',0),r=1080,shift=system==='Heliocentric'?180:0;circle(g,r,color('Grid','#999'),4,.9);for(let i=0;i<12;i++){const d=sign*i*30+ang+shift+longitude;line(g,point(r,d),point(r-26,d),color('Grid','#999'),2,.8);text(g,zodiac[i],r-52,d,25,[color('Fire','#f00'),color('Earth','#080'),color('Air','#dda0dd'),color('Water','#00f')][i%4],900)}const labelText=`${system} • ${value('location.city','New York')} • ${value('location.timeZone','-05:00')}`;text(g,labelText,r+34,ang,16,color('Axes','#555'),800)}
-function renderMoon(){
- if(!checked('moon.visible',true))return;const g=layer('engineMoon'),r=970,size=Math.max(12,number('moon.size',10)*1.8),offset=number('moon.offset',28),dn=dateNumber(value('moon.date','31.12.2019'),checked('moon.today',true)),phase=((dn+offset)%29.530588853)/29.530588853;for(let i=0;i<8;i++){const d=(i/8+phase)*360;text(g,moonGlyphs[i],r,d,size,'#333',900);if(checked('moon.eclipses',true)&&(i===0||i===4)){const q=point(r,d);g.appendChild(svg('circle',{cx:q.x,cy:q.y,r:size*.72,fill:'none',stroke:color('Error','#555'),'stroke-width':3,'stroke-opacity':.8,'vector-effect':'non-scaling-stroke'}))}}}
-function rulerDegree(name){const row=planetRows.find(p=>p[0]===name);return row?row[2]:0}
-function renderCycles(){
- if(!checked('cycles.visible',true))return;const g=layer('engineCycles'),spec=[['Tetragram',4,680,color('Square','#ff7f50')],['Pentagram',5,730,color('Pentagon','#6495ed')],['Hexagram',6,780,color('Hexagon','#00ffff')]];spec.forEach(([name,sides,r,c])=>{if(!checked(`cycles.${name}.visible`,true))return;const rev=checked(`cycles.${name}.reverse`,true)?-1:1,day=dateNumber(value(`cycles.${name}.date`,'31.12.2019'),checked(`cycles.${name}.today`,true)),rot=rev*(rulerDegree(value(`cycles.${name}.ruler`,'Sun'))+day%360);path(g,polygonPath(r,sides,rot),c,3,'none',.8)})}
-function currentProfileMode(){return radio('profile.mode','Radix')}
-function renderProfilesAndPlanets(){
- const g=layer('engineProfilesPlanets'),planetR=860;const visiblePlanets=[];planetRows.forEach(([name,glyph,deg,pc])=>{if(!checked(`planet.${name}.visible`,true))return;visiblePlanets.push({name,glyph,deg,color:pc});const q=point(planetR,deg);g.appendChild(svg('circle',{cx:q.x,cy:q.y,r:19,fill:color('Background','#fff'),stroke:pc,'stroke-width':3,'vector-effect':'non-scaling-stroke'}));text(g,glyph,planetR,deg,25,pc,900)});
- if(checked('profile.visible',true)){const mode=currentProfileMode(),r=mode==='Transit'?800:820,c=mode==='Transit'?color('Forecast','#fff44f'):color('High','#b7e4a8');circle(g,r,c,4,.9,mode==='Transit'?'8 6':'');const pv=value('profile.price.value','1'),dv=value('profile.date.value','31.12.2019'),tv=value('profile.time.value','00:00'),ticker=value('profile.price.ticker','None');text(g,`${mode} • ${ticker} ${pv} • ${dv} ${tv}`,r+28,0,15,color('Axes','#555'),800);visiblePlanets.forEach(p=>{if(checked('projection.'+p.name,true))line(g,point(190,p.deg),point(r,p.deg),p.color,1.4,.45,'5 5')})}
- renderAspects(g,visiblePlanets,planetR);renderInspector(g,visiblePlanets,planetR)
-}
-function styleDash(style){return style==='Dash'?'8 6':style==='Bold dash'?'10 6':''}
-function styleWidth(style){return style==='Bold line'||style==='Bold dash'?3.8:1.8}
-function renderAspects(g,planets,r){Object.entries(aspectTargets).forEach(([name,target])=>{if(!checked(`aspect.${name}.visible`,true))return;const orb=Math.max(0,number(`aspect.${name}.orb`,name==='Conjunction'?5:1)),style=value(`aspect.${name}.style`,'Line'),c=color(name,'#777');for(let i=0;i<planets.length;i++)for(let j=i+1;j<planets.length;j++){let diff=Math.abs(planets[i].deg-planets[j].deg)%360;diff=Math.min(diff,360-diff);if(Math.abs(diff-target)<=orb)line(g,point(r,planets[i].deg),point(r,planets[j].deg),c,styleWidth(style),.7,styleDash(style))}})}
-function renderInspector(g,planets,r){if(!checked('inspector.visible',true))return;const section=pdoc.querySelector('[data-id="inspector"]'),buttons=section?Array.from(section.querySelectorAll('.matrix button')):[];buttons.forEach((b,idx)=>{if(b.textContent.trim()!=='×')return;const row=Math.floor(idx/12),col=idx%12;if(row<planets.length&&col<planets.length)line(g,point(r,planets[row].deg),point(r,planets[col].deg),color('Axes','#555'),4,.9)})}
-function renderFigures(){
- const g=layer('engineFigures');if(checked('figures.hide',false))return;let idx=0;Object.entries(figureSides).forEach(([name,sides])=>{if(!checked(`figure.${name}.visible`,false))return;const r=500+idx*24,ang=number(`figure.${name}.angle`,0),c=color(name,'#777'),highlight=checked(`figure.${name}.highlight`,true);path(g,polygonPath(r,sides,ang),c,highlight?7:3,'none',highlight ? 0.75 : 0.9);idx++});
- if(checked('vectors.visible',false)){const ang=number('vectors.angle',0),sign=checked('vectors.clockwise',true)?1:-1,c=color('Vectors','#808080');for(let i=0;i<4;i++)line(g,point(210,sign*(ang+i*90)),point(1540,sign*(ang+i*90)),c,3,.8)}
- if(checked('locator.visible',false)){const a=number('locator.angle',181),c=color('Axes','#555'),q=point(1550,a);line(g,{x:CX,y:CY},q,c,4,.9);g.appendChild(svg('circle',{cx:q.x,cy:q.y,r:14,fill:c,stroke:'#fff','stroke-width':3,'vector-effect':'non-scaling-stroke'}))}
- if(checked('vortex.visible',false))renderVortex(g)
-}
-function renderVortex(g){const ang=number('vortex.angle',0),trend=value('vortex.trend','Both'),scale=Math.max(.2,number('vortex.radius',1)),c=trend==='Bull'?color('Bull trend','#50c878'):trend==='Bear'?color('Bear trend','#ff007f'):color('Axes','#555');let d='';const sign=trend==='Bear'?-1:1;for(let i=0;i<=240;i++){const r=190+i*4.6*scale,a=ang+sign*i*4.2,q=point(r,a);d+=(i?'L':'M')+q.x+' '+q.y+' '}path(g,d,c,3,'none',.82);text(g,`${trend} • ${value('vortex.price','1')} • ${value('vortex.date','31.12.2019')} ${value('vortex.time','00:00')}`,900,ang,15,c,800)}
-function format(n){return Number(n.toFixed(8)).toString()}
-function renderAll(){
- try{if(!pdoc||!wframe)return;wdoc=wframe.contentDocument;if(!wdoc)return;wheel=wdoc.getElementById('wheel');if(!wheel){setTimeout(renderAll,100);return}removeEngineLayers();applyBaseColors();renderCosmogram();renderMoon();renderCycles();renderProfilesAndPlanets();renderFigures();renderChronometer();renderProtractor();wdoc.documentElement.dataset.completeToolsFunctional='true';wdoc.documentElement.dataset.completeToolsEngine=ENGINE;setFooter('All panel tools linked • single SVG engine','ready');fatal.style.display='none';window.__auditCompleteToolsFunctionalV1=()=>({ok:true,appCommit:APP_COMMIT,controlCount:allControls().length,layerCount:wdoc.querySelectorAll(`[data-kawkabat-engine="${ENGINE}"]`).length,svgCount:wdoc.querySelectorAll('svg').length});}catch(error){fail(error)}
-}
-function attach(){
- try{pdoc=app.contentDocument;if(!pdoc||!pdoc.getElementById('panelRoot')){clearTimeout(attachTimer);attachTimer=setTimeout(attach,100);return}wframe=pdoc.getElementById('wheelFrame');if(!wframe){attachTimer=setTimeout(attach,100);return}if(installed)return;installed=true;pdoc.addEventListener('input',schedule,true);pdoc.addEventListener('change',schedule,true);pdoc.addEventListener('click',schedule,true);wframe.addEventListener('load',()=>setTimeout(renderAll,120));setFooter('Connecting all tools…','loading');setTimeout(renderAll,250);}
- catch(error){fail(error);attachTimer=setTimeout(()=>{installed=false;attach()},500)}
-}
-app.addEventListener('load',()=>{installed=false;attach()});attach();
-})();
+
+var frame=document.createElement('iframe');
+frame.id='app';
+frame.title='Magic Numbers Constellation — Square of 9';
+frame.src='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/ef7b3237ee1a48bc9761b9b0ee8657cbc45a43bd/public/kawkabat-al-arqam-al-sihria.html';
+frame.addEventListener('load',function(){var loading=document.getElementById('loading');if(loading)loading.remove();});
+document.body.appendChild(frame);
+
+window.__auditSquareOf9DefaultV1=function(){
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem(STORAGE)||'{}')||{}}catch(_){}
+  return{
+    ok:true,
+    defaultView:saved['core.view'],
+    circle36OnlyWhenSelected:saved['core.view']!=='circle36',
+    migration:localStorage.getItem(MIGRATION)
+  };
+};
+}());
 </script>
-</body></html>
+</body>
+</html>
