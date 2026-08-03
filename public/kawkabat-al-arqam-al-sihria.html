@@ -3,161 +3,212 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>كوكبة الأرقام السحرية — أشرطة الأدوات المرجعية V6</title>
+<title>كوكبة الأرقام السحرية — Square of 9 Approved Table V7</title>
 <style>
-:root{--panel-width:300px}
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:"Segoe UI",Arial,Tahoma,sans-serif}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:Arial,Tahoma,sans-serif}
 #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
-#loading{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
-.rail{position:fixed;top:122px;z-index:2000;display:flex;flex-direction:column;align-items:center;gap:7px;width:58px;padding:9px 7px;border:1px solid #e2e2e2;border-radius:23px;background:rgba(252,252,252,.95);box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 0 0 1px rgba(255,255,255,.92);backdrop-filter:blur(3px)}
-#viewRail{left:calc(var(--panel-width) + 13px)}
-#shapeRail{right:16px}
-.rail-btn{position:relative;width:44px;height:44px;display:grid;place-items:center;padding:0;border:1px solid #d7d7d7;border-radius:8px;background:linear-gradient(#fff,#f5f5f5);color:#9fa4a8;cursor:pointer;box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(0,0,0,.05);transition:transform .12s,border-color .12s,background .12s,color .12s}
-.rail-btn:hover{transform:translateY(-1px);border-color:#9eb8c8;background:#fff}
-.rail-btn.active{border-color:#315b8c;background:linear-gradient(#eef6ff,#dceafa);color:#17375f;box-shadow:0 0 0 2px rgba(49,91,140,.16),inset 0 1px 0 #fff}
-.rail-btn.round{border-radius:50%;font-size:18px;font-weight:800;color:#9a9a9a}
-.rail-btn svg{width:31px;height:31px;overflow:visible}
-.rail-btn .stroke{fill:none;stroke:currentColor;stroke-width:2.1;stroke-linejoin:round;stroke-linecap:round}
-.rail-btn .fill{fill:currentColor;stroke:currentColor;stroke-width:1.2;stroke-linejoin:round}
-.rail-btn .dot{fill:#fff;stroke:none}
-.rail-btn[data-view="square9"]{color:#264b7d}
-.rail-btn[data-view="square9"].active{color:#17375f}
-.rail-btn[data-view="tetragon"],.rail-btn[data-figure="Pentagon"],.rail-btn[data-figure="Hexagon"],.rail-btn[data-figure="Octagon"],.rail-btn[data-figure="Dodecagon"]{color:#7e7e7e}
-#shapeRail .rail-btn[data-figure="Triangle"]{color:#62c96f}
-#shapeRail .rail-btn[data-figure="Square"]{color:#ff727a}
-#shapeRail .rail-btn[data-figure="Pentagon"]{color:#c9d0d5}
-#shapeRail .rail-btn[data-figure="Hexagon"]{color:#b8d7da}
-#shapeRail .rail-btn[data-figure="Septagon"]{color:#c9c7cf}
-#shapeRail .rail-btn[data-figure="Octagon"]{color:#d7c8cd}
-#shapeRail .rail-btn[data-figure="Nonagon"]{color:#ded5c7}
-#shapeRail .rail-btn[data-figure="Dodecagon"]{color:#dfdcb5}
-#shapeRail .rail-btn[data-action="locator"]{color:#a8abad}
-#shapeRail .rail-btn[data-action="marker"]{color:#7c9b87}
-#shapeRail .rail-btn[data-action="vortex"]{color:#8b8b8b}
-.small-label{position:absolute;right:4px;bottom:2px;font-size:10px;font-weight:900;color:inherit}
-#error{position:fixed;right:16px;bottom:14px;z-index:2200;display:none;max-width:560px;padding:9px 12px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
-@media(max-width:900px){:root{--panel-width:270px}.rail{width:52px;padding:8px 6px}.rail-btn{width:39px;height:39px}.rail-btn svg{width:28px;height:28px}#viewRail{left:calc(var(--panel-width) + 8px)}}
+#loading{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
+#error{position:fixed;right:16px;bottom:14px;z-index:20;display:none;max-width:600px;padding:10px 14px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
 </style>
 </head>
 <body>
-<iframe id="app" title="Square of 9 with reference-size rails"></iframe>
-<div id="loading">جارٍ تركيب أشرطة الأدوات بالحجم والألوان المرجعية…</div>
+<iframe id="app" title="Square of 9 approved visual"></iframe>
+<div id="loading">جارٍ تطبيق الجدول الشفاف والتظليل وأشكال الأبراج…</div>
 <div id="error"></div>
-
-<nav id="viewRail" class="rail" aria-label="أدوات العرض">
-  <button class="rail-btn round" data-view="circle12">12</button>
-  <button class="rail-btn round" data-view="circle24">24</button>
-  <button class="rail-btn round" data-view="circle36">36</button>
-  <button class="rail-btn" data-view="square4" title="Square of 4">
-    <svg viewBox="0 0 36 36" aria-hidden="true"><rect class="stroke" x="7" y="7" width="22" height="22" rx="1"/><path class="stroke" d="M10 15V10H15M21 10H26V15M26 21V26H21M15 26H10V21"/></svg><span class="small-label">4</span>
-  </button>
-  <button class="rail-btn active" data-view="square9" title="Square of 9">
-    <svg viewBox="0 0 36 36" aria-hidden="true"><rect class="stroke" x="6" y="6" width="24" height="24" rx="1"/><path class="stroke" d="M10 14V10H14M22 10H26V14M26 22V26H22M14 26H10V22"/><circle class="fill" cx="18" cy="18" r="2.2"/></svg><span class="small-label">9</span>
-  </button>
-  <button class="rail-btn" data-view="permanentSquare" title="Permanent square"><span style="font:700 italic 22px Georgia;color:inherit">N</span></button>
-  <button class="rail-btn" data-view="tetragon" title="Tetragon">
-    <svg viewBox="0 0 36 36"><path class="fill" d="M18 3L33 18L18 33L3 18Z"/><circle class="dot" cx="18" cy="10" r="1.5"/><circle class="dot" cx="26" cy="18" r="1.5"/><circle class="dot" cx="18" cy="26" r="1.5"/><circle class="dot" cx="10" cy="18" r="1.5"/></svg>
-  </button>
-  <button class="rail-btn" data-figure="Pentagon" title="Pentagon">
-    <svg viewBox="0 0 36 36"><path class="fill" d="M18 3L33 14L27 32H9L3 14Z"/><circle class="dot" cx="18" cy="8" r="1.4"/><circle class="dot" cx="27" cy="15" r="1.4"/><circle class="dot" cx="24" cy="26" r="1.4"/><circle class="dot" cx="12" cy="26" r="1.4"/><circle class="dot" cx="9" cy="15" r="1.4"/></svg>
-  </button>
-  <button class="rail-btn" data-figure="Hexagon" title="Hexagon">
-    <svg viewBox="0 0 36 36"><path class="fill" d="M10 4H26L34 18L26 32H10L2 18Z"/><circle class="dot" cx="18" cy="8" r="1.35"/><circle class="dot" cx="27" cy="13" r="1.35"/><circle class="dot" cx="27" cy="23" r="1.35"/><circle class="dot" cx="18" cy="28" r="1.35"/><circle class="dot" cx="9" cy="23" r="1.35"/><circle class="dot" cx="9" cy="13" r="1.35"/></svg>
-  </button>
-  <button class="rail-btn" data-figure="Octagon" title="Octagon">
-    <svg viewBox="0 0 36 36"><path class="fill" d="M11 2H25L34 11V25L25 34H11L2 25V11Z"/><circle class="dot" cx="18" cy="7" r="1.2"/><circle class="dot" cx="27" cy="10" r="1.2"/><circle class="dot" cx="29" cy="18" r="1.2"/><circle class="dot" cx="27" cy="26" r="1.2"/><circle class="dot" cx="18" cy="29" r="1.2"/><circle class="dot" cx="9" cy="26" r="1.2"/><circle class="dot" cx="7" cy="18" r="1.2"/><circle class="dot" cx="9" cy="10" r="1.2"/></svg>
-  </button>
-  <button class="rail-btn" data-figure="Dodecagon" title="Dodecagon">
-    <svg viewBox="0 0 36 36"><path class="fill" d="M12 2H24L31 6L35 13V23L31 30L24 34H12L5 30L1 23V13L5 6Z"/><g class="dot"><circle cx="18" cy="6" r="1.1"/><circle cx="27" cy="10" r="1.1"/><circle cx="30" cy="18" r="1.1"/><circle cx="27" cy="26" r="1.1"/><circle cx="18" cy="30" r="1.1"/><circle cx="9" cy="26" r="1.1"/><circle cx="6" cy="18" r="1.1"/><circle cx="9" cy="10" r="1.1"/></g></svg>
-  </button>
-</nav>
-
-<nav id="shapeRail" class="rail" aria-label="أدوات الأشكال">
-  <button class="rail-btn" data-figure="Triangle" title="Triangle"><svg viewBox="0 0 36 36"><path class="stroke" d="M18 3L33 31H3Z"/></svg></button>
-  <button class="rail-btn" data-figure="Square" title="Square"><svg viewBox="0 0 36 36"><rect class="stroke" x="5" y="5" width="26" height="26"/></svg></button>
-  <button class="rail-btn" data-figure="Pentagon" title="Pentagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M18 3L33 14L27 32H9L3 14Z"/></svg></button>
-  <button class="rail-btn" data-figure="Hexagon" title="Hexagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M10 4H26L34 18L26 32H10L2 18Z"/></svg></button>
-  <button class="rail-btn" data-figure="Septagon" title="Septagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M18 2L31 8L35 21L27 33H9L1 21L5 8Z"/></svg></button>
-  <button class="rail-btn" data-figure="Octagon" title="Octagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M11 2H25L34 11V25L25 34H11L2 25V11Z"/></svg></button>
-  <button class="rail-btn" data-figure="Nonagon" title="Nonagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M18 2L29 6L35 16L32 28L23 34H12L3 28L0 16L7 6Z"/></svg></button>
-  <button class="rail-btn" data-figure="Dodecagon" title="Dodecagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M12 2H24L31 6L35 13V23L31 30L24 34H12L5 30L1 23V13L5 6Z"/></svg></button>
-  <button class="rail-btn" data-action="locator" title="Locator"><svg viewBox="0 0 36 36"><path class="stroke" d="M6 29L29 6M7 28H29M7 28V6"/></svg></button>
-  <button class="rail-btn" data-action="marker" title="Marker"><svg viewBox="0 0 36 36"><path class="fill" d="M5 26C12 9 24 5 31 5C27 14 22 25 5 31Z"/><circle class="dot" cx="22" cy="14" r="2.2"/></svg></button>
-  <button class="rail-btn" data-action="vortex" title="Vortex"><svg viewBox="0 0 36 36"><path class="stroke" d="M18 4C29 4 33 15 29 23C25 31 13 34 6 27C-1 20 3 8 12 7C21 6 26 14 23 21C20 28 10 27 9 20C8 13 17 10 20 15C23 20 17 24 14 21"/></svg></button>
-</nav>
-
 <script>
 (function(){
 'use strict';
-var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/0a27d9806ee7f2e373b5abe645f508a258fb5198/public/kawkabat-al-arqam-al-sihria.html';
+var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/79351e9e606066b3f5747a489c94eb92380b4c79/public/kawkabat-al-arqam-al-sihria.html';
+var STORAGE='kawkabat-complete-panel-v1';
+var MIGRATION='kawkabat-approved-table-v7';
+var NS='http://www.w3.org/2000/svg';
 var frame=document.getElementById('app');
 var loading=document.getElementById('loading');
 var errorBox=document.getElementById('error');
-var hiddenStyleId='kawkabat-hide-inner-rails-v6';
-
-function walkDocuments(win,callback,seen){
+var lastSquare=null;
+var zodiac=[
+  ['♈','#e65353',270],['♉','#5eaa68',300],['♊','#7965bd',330],['♋','#438fc9',0],
+  ['♌','#e65353',30],['♍','#5eaa68',60],['♎','#7965bd',90],['♏','#438fc9',120],
+  ['♐','#e65353',150],['♑','#5eaa68',180],['♒','#7965bd',210],['♓','#438fc9',240]
+];
+var planetMarks=[
+  [6,4,'#e19a19',8],[9,5,'#68ad62',10],[13,6,'#4a8c84',9],[3,8,'#9f7b4b',8],
+  [8,9,'#6e82ba',9],[11,10,'#d06f66',8],[5,12,'#9a7137',8],[14,14,'#a87635',8]
+];
+function readState(){try{return JSON.parse(localStorage.getItem(STORAGE)||'{}')||{};}catch(_){return {};}}
+function writeState(state){localStorage.setItem(STORAGE,JSON.stringify(state));}
+function prepareState(){
+  if(localStorage.getItem(MIGRATION)==='done')return;
+  var state=readState();
+  ['Triangle','Square','Pentagon','Hexagon','Septagon','Octagon','Nonagon','Decagon','Hendecagon','Dodecagon'].forEach(function(name){state['figure.'+name+'.visible']=false;});
+  state['figures.hide']=false;
+  state['vectors.visible']=false;
+  state['locator.visible']=false;
+  state['vortex.visible']=false;
+  state['marker.visible']=false;
+  state['core.view']='square9';
+  state['core.highlightVisible']=true;
+  state['core.highlightFill']='cross';
+  writeState(state);
+  localStorage.setItem(MIGRATION,'done');
+}
+function findSquareDocument(win,seen){
   seen=seen||new Set();
   try{
-    if(!win||seen.has(win))return;
+    if(!win||seen.has(win))return null;
     seen.add(win);
     var doc=win.document;
-    if(doc)callback(doc);
+    if(doc&&doc.getElementById('squareSvg'))return doc;
     var frames=doc?Array.from(doc.querySelectorAll('iframe')):[];
-    frames.forEach(function(item){try{if(item.contentWindow)walkDocuments(item.contentWindow,callback,seen);}catch(_){}});
+    for(var i=0;i<frames.length;i++){
+      try{var found=findSquareDocument(frames[i].contentWindow,seen);if(found)return found;}catch(_){}
+    }
   }catch(_){}
+  return null;
 }
-function hideInnerRails(){
-  walkDocuments(frame.contentWindow,function(doc){
-    var style=doc.getElementById(hiddenStyleId);
-    if(!style){
-      style=doc.createElement('style');
-      style.id=hiddenStyleId;
-      style.textContent='#viewRail,#shapeRail,.rail[aria-label="Views"],.rail[aria-label="Figures"],nav[aria-label="View tools"],nav[aria-label="Figure tools"]{display:none!important;visibility:hidden!important;pointer-events:none!important}';
-      doc.head&&doc.head.appendChild(style);
+function S(doc,tag,attrs,text){
+  var node=doc.createElementNS(NS,tag);
+  Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,String(attrs[key]));});
+  if(text!==undefined)node.textContent=String(text);
+  return node;
+}
+function polar(radius,degree){
+  var angle=(degree-90)*Math.PI/180;
+  return{x:500+Math.cos(angle)*radius,y:500+Math.sin(angle)*radius};
+}
+function styleMainShapes(doc){
+  var main=doc.getElementById('mainShapes');
+  if(!main)return;
+  var paths=Array.from(main.querySelectorAll('path'));
+  paths.forEach(function(path,index){
+    if(index===0){
+      path.setAttribute('fill','#ef7777');
+      path.setAttribute('fill-opacity','0.17');
+      path.setAttribute('stroke','#e75b5b');
+      path.setAttribute('stroke-opacity','0.70');
+      path.setAttribute('stroke-width','1.45');
+    }else{
+      path.setAttribute('fill','#7fbd6d');
+      path.setAttribute('fill-opacity','0.15');
+      path.setAttribute('stroke','#58a95f');
+      path.setAttribute('stroke-opacity','0.72');
+      path.setAttribute('stroke-width','1.45');
     }
   });
-}
-function findControl(key){
-  var result=null;
-  walkDocuments(frame.contentWindow,function(doc){
-    if(result)return;
-    result=Array.from(doc.querySelectorAll('[data-key]')).find(function(node){return node.dataset.key===key;})||null;
+  Array.from(main.querySelectorAll('line')).forEach(function(line){
+    line.setAttribute('stroke-opacity','0.66');
+    line.setAttribute('stroke-width','1.35');
   });
-  return result;
 }
-function emit(node,name){var w=node.ownerDocument.defaultView;node.dispatchEvent(new w.Event(name,{bubbles:true}));}
-function setControl(key,next){
-  var node=findControl(key);
-  if(!node)return false;
-  if(node.type==='checkbox')node.checked=!!next;else node.value=String(next);
-  emit(node,'input');emit(node,'change');
-  setTimeout(sync,90);
-  return true;
+function styleGrid(doc,squareGroup){
+  var base=Array.from(squareGroup.children).find(function(node){return node.tagName&&node.tagName.toLowerCase()==='rect';});
+  if(base){
+    base.setAttribute('fill','#fffdf8');
+    base.setAttribute('fill-opacity','0.56');
+    base.setAttribute('stroke','#7d7d78');
+    base.setAttribute('stroke-width','1.15');
+  }
+  Array.from(squareGroup.querySelectorAll('line')).forEach(function(line){
+    line.setAttribute('stroke','#80837f');
+    line.setAttribute('stroke-width','0.52');
+    line.setAttribute('stroke-opacity','0.62');
+  });
+  Array.from(squareGroup.querySelectorAll('text')).forEach(function(node){
+    var n=Number(String(node.textContent||'').trim());
+    node.setAttribute('font-family','Arial,Tahoma,sans-serif');
+    node.setAttribute('font-size','8.6');
+    node.setAttribute('fill','#22231f');
+    node.setAttribute('font-weight',Number.isFinite(n)&&n%9===0?'800':'650');
+    node.setAttribute('paint-order','stroke fill');
+    node.setAttribute('stroke','#fffdf8');
+    node.setAttribute('stroke-width','0.30');
+    node.setAttribute('stroke-opacity','0.70');
+  });
 }
-function getControl(key,fallback){var node=findControl(key);return node?(node.type==='checkbox'?node.checked:node.value):fallback;}
-function sync(){
-  hideInnerRails();
-  var view=String(getControl('core.view','square9'));
-  document.querySelectorAll('[data-view]').forEach(function(button){button.classList.toggle('active',button.dataset.view===view);});
-  document.querySelectorAll('[data-figure]').forEach(function(button){var key='figure.'+button.dataset.figure+'.visible';button.classList.toggle('active',!!getControl(key,false));});
-  [['locator','locator.visible'],['marker','marker.visible'],['vortex','vortex.visible']].forEach(function(pair){var button=document.querySelector('[data-action="'+pair[0]+'"]');if(button)button.classList.toggle('active',!!getControl(pair[1],false));});
+function drawApprovedOverlay(doc,squareSvg,squareGroup){
+  var previous=doc.getElementById('approvedSquareOverlayV7');
+  if(previous)previous.remove();
+  var root=S(doc,'g',{id:'approvedSquareOverlayV7','data-approved-table':'true','pointer-events':'none'});
+  var firstText=squareGroup.querySelector('text');
+  if(firstText)squareGroup.insertBefore(root,firstText);else squareGroup.appendChild(root);
+  var x0=272,y0=272,cell=24,total=456;
+  root.appendChild(S(doc,'rect',{x:x0,y:500-cell/2,width:total,height:cell,fill:'#dbc99f','fill-opacity':'0.18'}));
+  root.appendChild(S(doc,'rect',{x:500-cell/2,y:y0,width:cell,height:total,fill:'#efaaa2','fill-opacity':'0.14'}));
+  root.appendChild(S(doc,'rect',{x:x0,y:y0,width:total,height:total,fill:'none',stroke:'#7b7d78','stroke-width':'1.05','stroke-opacity':'0.72'}));
+
+  var symbols=S(doc,'g',{id:'approvedZodiacInsideGridV7'});
+  squareSvg.appendChild(symbols);
+  zodiac.forEach(function(item){
+    var point=polar(128,item[2]);
+    var halo=S(doc,'circle',{cx:point.x,cy:point.y,r:12.5,fill:'#fff','fill-opacity':'0.54',stroke:item[1],'stroke-width':'0.9','stroke-opacity':'0.62'});
+    symbols.appendChild(halo);
+    symbols.appendChild(S(doc,'text',{x:point.x,y:point.y,'text-anchor':'middle','dominant-baseline':'central','font-family':'Segoe UI Symbol,Arial,Tahoma,sans-serif','font-size':'18','font-weight':'800',fill:item[1],'fill-opacity':'0.82','paint-order':'stroke fill',stroke:'#fff','stroke-width':'1.15','stroke-opacity':'0.9'},item[0]));
+  });
+
+  var markers=S(doc,'g',{id:'approvedPlanetMarkersV7'});
+  squareSvg.appendChild(markers);
+  planetMarks.forEach(function(mark){
+    var cx=x0+mark[0]*cell+cell/2,cy=y0+mark[1]*cell+cell/2;
+    markers.appendChild(S(doc,'circle',{cx:cx,cy:cy,r:mark[3],fill:mark[2],'fill-opacity':'0.70',stroke:'#fff','stroke-width':'1.25'}));
+    markers.appendChild(S(doc,'circle',{cx:cx,cy:cy,r:Math.max(2,mark[3]-3.5),fill:'none',stroke:'#3f403d','stroke-width':'0.55','stroke-opacity':'0.48'}));
+  });
 }
-function bind(){
-  document.querySelectorAll('[data-view]').forEach(function(button){button.addEventListener('click',function(){setControl('core.view',button.dataset.view);});});
-  document.querySelectorAll('[data-figure]').forEach(function(button){button.addEventListener('click',function(){var key='figure.'+button.dataset.figure+'.visible';setControl(key,!getControl(key,false));});});
-  document.querySelector('[data-action="locator"]').addEventListener('click',function(){setControl('locator.visible',!getControl('locator.visible',false));});
-  document.querySelector('[data-action="marker"]').addEventListener('click',function(){setControl('marker.visible',!getControl('marker.visible',false));});
-  document.querySelector('[data-action="vortex"]').addEventListener('click',function(){setControl('vortex.visible',!getControl('vortex.visible',false));});
+function removeOptionalBlackFrame(doc){
+  var optional=doc.getElementById('optional');
+  if(optional){
+    optional.style.setProperty('display','none','important');
+    optional.replaceChildren();
+  }
+  doc.querySelectorAll('[data-black-optional-frame="true"]').forEach(function(node){node.remove();});
 }
+function applyApprovedDesign(){
+  try{
+    var doc=findSquareDocument(frame.contentWindow);
+    if(!doc)return false;
+    var squareSvg=doc.getElementById('squareSvg');
+    var squareGroup=doc.getElementById('square');
+    if(!squareSvg||!squareGroup)return false;
+    var display=doc.defaultView.getComputedStyle(squareSvg).display;
+    if(display==='none')return false;
+    if(squareSvg===lastSquare&&doc.getElementById('approvedSquareOverlayV7')){
+      removeOptionalBlackFrame(doc);
+      return true;
+    }
+    lastSquare=squareSvg;
+    removeOptionalBlackFrame(doc);
+    styleMainShapes(doc);
+    styleGrid(doc,squareGroup);
+    var oldSymbols=doc.getElementById('approvedZodiacInsideGridV7');if(oldSymbols)oldSymbols.remove();
+    var oldMarkers=doc.getElementById('approvedPlanetMarkersV7');if(oldMarkers)oldMarkers.remove();
+    drawApprovedOverlay(doc,squareSvg,squareGroup);
+    doc.documentElement.dataset.approvedSquareTableV7='true';
+    doc.documentElement.dataset.approvedZodiacInsideGridV7='12';
+    errorBox.style.display='none';
+    return true;
+  }catch(error){
+    errorBox.style.display='block';
+    errorBox.textContent='APPROVED TABLE V7 ERROR: '+String(error&&error.message||error);
+    return false;
+  }
+}
+prepareState();
 frame.addEventListener('load',function(){
   if(loading)loading.remove();
-  setTimeout(sync,220);setTimeout(sync,700);setTimeout(sync,1500);
+  setTimeout(applyApprovedDesign,250);
+  setTimeout(applyApprovedDesign,800);
+  setTimeout(applyApprovedDesign,1600);
 });
 frame.src=SOURCE;
-bind();
-window.setInterval(sync,450);
-window.__auditReferenceRailsV6=function(){return{ok:true,innerRailsHidden:true,leftButtonSize:44,rightButtonSize:44,view:String(getControl('core.view','square9')),referenceColors:true};};
+window.setInterval(applyApprovedDesign,420);
+window.__auditApprovedSquareTableV7=function(){
+  var doc=findSquareDocument(frame.contentWindow);
+  return{
+    ok:!!(doc&&doc.getElementById('approvedSquareOverlayV7')),
+    transparentTable:doc?doc.documentElement.dataset.approvedSquareTableV7:null,
+    zodiacCount:doc?doc.documentElement.dataset.approvedZodiacInsideGridV7:null,
+    optionalFrameHidden:!!(doc&&doc.getElementById('optional')&&doc.getElementById('optional').style.display==='none')
+  };
+};
 }());
 </script>
 </body>
