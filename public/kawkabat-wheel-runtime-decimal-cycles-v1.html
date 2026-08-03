@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — Decimal Cycles V1</title>
+  <style>html,body{margin:0;width:100%;height:100%;background:#F7F1E3}body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}.loading{font-weight:800}</style>
+</head>
+<body>
+  <div class="loading">جارٍ تطبيق ترقيم الدورات العشرية…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/a99cfc66117a93c6f1af5e3c143d8286fa0cd397/public/kawkabat-wheel-runtime-final.html';
+    try{
+      var response=await fetch(sourceUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('RUNTIME_SOURCE_HTTP_'+response.status);
+      var html=await response.text();
+      var decimalAnchor="var valueDecimals=Math.min(8,Math.max(decimalPlaces(startValue),decimalPlaces(incrementValue)));";
+      var decimalPatch=decimalAnchor+"\n  var startValueDecimals=Math.min(8,decimalPlaces(startValue));\n  var priceStep=incrementValue*Math.pow(10,-startValueDecimals);\n  if(startValueDecimals===0)priceStep=incrementValue;";
+      if(html.indexOf(decimalAnchor)<0)throw new Error('DECIMAL_ANCHOR_NOT_FOUND');
+      html=html.replace(decimalAnchor,decimalPatch);
+      html=html.split('startValue+(offset*incrementValue)').join('startValue+(offset*priceStep)');
+      html=html.split('startValue+((ordinal-1)*incrementValue)').join('startValue+((ordinal-1)*priceStep)');
+      html=html.replace("document.documentElement.dataset.incrementValue=String(incrementValue);","document.documentElement.dataset.incrementValue=String(incrementValue);document.documentElement.dataset.priceStep=String(priceStep);");
+      html=html.replace("increment:incrementValue,lastOrdinal:","increment:incrementValue,priceStep:priceStep,firstCycleEnd:startValue+((divisionCount-1)*priceStep),secondCycleEnd:startValue+(((divisionCount*2)-1)*priceStep),lastOrdinal:");
+      document.open();document.write(html);document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تطبيق ترقيم الدورات: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
