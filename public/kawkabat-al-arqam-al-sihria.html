@@ -3,121 +3,51 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>كوكبة الأرقام السحرية — Square of 9 Angle Wheel V2</title>
+<title>كوكبة الأرقام السحرية — Square of 9 Visual Reference V3</title>
 <style>
-html,body{margin:0;width:100%;height:100%;background:#fff;font-family:Arial,Tahoma,sans-serif;color:#4d4740}
-body{display:grid;place-items:center}.loading{font-weight:800}.error{max-width:760px;padding:14px;border:1px solid #a32935;border-radius:7px;background:#fff3f3;color:#8c101c}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:Arial,Tahoma,sans-serif}
+#app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
+#loading{position:fixed;inset:0;z-index:5;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
+#status{position:fixed;right:14px;bottom:12px;z-index:6;padding:6px 9px;border:1px solid #bbb;border-radius:5px;background:rgba(255,255,255,.9);font-size:11px;color:#555;direction:ltr}
 </style>
 </head>
 <body>
-<div class="loading">جارٍ ضبط عجلة الزوايا والأبراج والكواكب…</div>
+<iframe id="app" title="Square of 9 reference"></iframe>
+<div id="loading">جارٍ تركيب عجلة الزوايا والأبراج والعناصر المرجعية…</div>
+<div id="status">Visual Reference V3</div>
 <script>
-(async function(){
+(function(){
 'use strict';
-var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/6546286934d7f1df46fc96ddf5ea59af64dc07d3/public/kawkabat-al-arqam-al-sihria.html';
-function replaceBetween(source,start,end,replacement){
-  var from=source.indexOf(start);
-  if(from<0)throw new Error('START_MARKER_NOT_FOUND_'+start);
-  var to=source.indexOf(end,from+start.length);
-  if(to<0)throw new Error('END_MARKER_NOT_FOUND_'+end);
-  return source.slice(0,from)+replacement+'\n'+source.slice(to);
-}
-try{
-  var response=await fetch(sourceUrl,{cache:'no-store'});
-  if(!response.ok)throw new Error('SOURCE_HTTP_'+response.status);
-  var source=await response.text();
-  source=source.replace('Square of 9 Reference Engine','Square of 9 Angle Wheel V2');
-
-  var zodiacReplacement=`function drawZodiac(parent){
-    for(let i=0;i<12;i++){
-      const mid=i*30-90,a0=mid-15,a1=mid+15;
-      parent.appendChild(S('path',{d:polarArc(452,474,a0,a1),fill:zodiac[i][2],stroke:'#cfcfcf','stroke-width':1}));
-      const p=pt(463,mid);let rot=((mid%360)+360)%360;if(rot>90&&rot<270)rot+=180;
-      text(parent,zodiac[i][0],p.x,p.y,9.4,'#222',750,rot);
-      const b=pt(452,a0);
-      parent.appendChild(S('circle',{cx:b.x,cy:b.y,r:15.5,fill:'#fff','fill-opacity':.54,stroke:zodiac[i][2],'stroke-width':2.2}));
-      text(parent,zodiac[i][1],b.x,b.y,19.5,zodiac[i][2],900);
-    }
-    document.documentElement.dataset.zodiacOrientation='aries-left-cancer-top';
-  }`;
-
-  var angleReplacement=`function drawDegreeRings(parent){
-    parent.appendChild(S('circle',{cx:500,cy:500,r:438,fill:'#fff','fill-opacity':.72,stroke:'#aaa','stroke-width':1.1}));
-    [430,422,414,404,394,382,370].forEach((r,i)=>parent.appendChild(S('circle',{cx:500,cy:500,r,fill:'none',stroke:i===0?'#949494':i===2?'#b1b1b1':'#d2d2d2','stroke-width':i===0?1.2:i===2?1:.65})));
-    for(let geo=0;geo<360;geo+=1){
-      const shown=(geo+90)%360;
-      const major=shown%10===0,medium=!major&&shown%5===0;
-      const outer=pt(422,geo),inner=pt(422-(major?14:medium?8:4),geo);
-      const cardinal=shown%90===0;
-      line(parent,outer,inner,major?'#d34b4b':medium?'#6f6f6f':'#b9b9b9',cardinal?2.1:major?1.35:medium?.8:.4,major?1:.82,.95);
-      if(shown%5===0){
-        const p=pt(398,geo);let rot=((geo%360)+360)%360;if(rot>90&&rot<270)rot+=180;
-        const label=shown===0?'0°':shown+'°';
-        text(parent,label,p.x,p.y,cardinal?10.8:major?8.4:7.1,cardinal?'#111':major?'#343434':'#777',cardinal?900:major?750:500,rot);
-      }
-    }
-    const dateLabels=[[0,'21 JUN',true],[90,'22 SEP',true],[180,'21 DEC',true],[270,'21 MAR',true],[30,'23 JUL',false],[60,'6 JUL',false],[120,'22 AUG',false],[150,'7 OCT',false],[210,'21 NOV',false],[240,'6 NOV',false],[300,'6 MAY',false],[330,'21 MAY',false]];
-    dateLabels.forEach(([geo,label,isQuarter])=>{
-      const p=pt(isQuarter?432:410,geo);const fill=isQuarter?'#f8dada':'#edf6e9',stroke=isQuarter?'#e96f6f':'#70af6a';
-      const width=label.length*5.6+10;let rot=((geo%360)+360)%360;if(rot>90&&rot<270)rot+=180;
-      parent.appendChild(S('rect',{x:p.x-width/2,y:p.y-8,width,height:16,rx:7,fill,stroke,'stroke-width':1.1,transform:'rotate('+rot+' '+p.x+' '+p.y+')'}));
-      text(parent,label,p.x,p.y,8,isQuarter?'#7a2727':'#315d31',isQuarter?850:700,rot);
-    });
-    [[0,'90°'],[90,'180°'],[180,'270°'],[270,'0°']].forEach(([geo,label])=>{
-      const p=pt(366,geo);text(parent,label,p.x,p.y,10.8,'#111',900,((geo%360)+360)%360>90&&((geo%360)+360)%360<270?geo+180:geo);
-    });
-    document.documentElement.dataset.angleWheelReady='true';
-    document.documentElement.dataset.angleWheelOrientation='0-left-90-top-180-right-270-bottom';
-  }`;
-
-  var planetReplacement=`function drawPlanets(parent){
-    const ring=360;
-    planetData.forEach(([glyph,displayAngle,c],i)=>{
-      const geo=displayAngle-90,p=pt(ring,geo);
-      parent.appendChild(S('circle',{cx:p.x,cy:p.y,r:i<2?13:5.5,fill:'#fff','fill-opacity':.92,stroke:c,'stroke-width':i<2?2:1.2}));
-      text(parent,glyph,p.x,p.y,12,c,900);
-    });
-    aspects.forEach(([c,i,j])=>{
-      const a=pt(ring,planetData[i][1]-90),b=pt(ring,planetData[j][1]-90);
-      line(parent,a,b,c,c==='red'?2:1.4,c==='red'?.45:.6,c==='green'?'5 4':'');
-    });
-    document.documentElement.dataset.planetOrientation='display-angle-minus-90';
-  }`;
-
-  var markerReplacement=`function drawOrbitMarkers(parent){
-    const markers=[[315,'♀','#61b865'],[300,'♀','#61b865'],[270,'☾','#e75b5b'],[55,'☉','#ef5b5b'],[125,'♂','#ef5b5b'],[210,'☽','#61b865']];
-    markers.forEach(([displayAngle,glyph,c])=>{
-      const p=pt(378,displayAngle-90);
-      parent.appendChild(S('circle',{cx:p.x,cy:p.y,r:12,fill:c,'fill-opacity':.18,stroke:c,'stroke-width':1.5}));
-      text(parent,glyph,p.x,p.y,13,c,900);
-    });
-  }`;
-
-  var figuresReplacement=`function drawOptionalFigures(parent){
-    const figs={Triangle:3,Square:4,Pentagon:5,Hexagon:6,Septagon:7,Octagon:8,Nonagon:9,Dodecagon:12};
-    let idx=0;
-    Object.entries(figs).forEach(([name,sides])=>{
-      if(!val('figure.'+name+'.visible',false))return;
-      const r=250+idx*13,displayAngle=Number(val('figure.'+name+'.angle',0))||0,geo=displayAngle-90,c=color(name,'#777');
-      let d='';for(let i=0;i<sides;i++){const p=pt(r,geo+i*360/sides);d+=(i?'L':'M')+p.x+' '+p.y+' '}
-      parent.appendChild(S('path',{d:d+'Z',fill:'none',stroke:c,'stroke-width':val('figure.'+name+'.highlight',true)?4:2,'stroke-opacity':.72}));idx++;
-    });
-  }`;
-
-  source=replaceBetween(source,'function drawZodiac(parent){','function drawDegreeRings(parent){',zodiacReplacement);
-  source=replaceBetween(source,'function drawDegreeRings(parent){','function drawSquare(parent){',angleReplacement);
-  source=replaceBetween(source,'function drawPlanets(parent){','function drawOrbitMarkers(parent){',planetReplacement);
-  source=replaceBetween(source,'function drawOrbitMarkers(parent){','function drawOptionalFigures(parent){',markerReplacement);
-  source=replaceBetween(source,'function drawOptionalFigures(parent){','function renderSquare9(){',figuresReplacement);
-  source=source.replace("status.textContent='Square of 9 • 19×19 • 1–361 • الشعار والإطار مخفيان'","status.textContent='Square of 9 • عجلة الزوايا 0°–360° • 90° أعلى • 19×19 • 1–361'");
-
-  if(source.indexOf("angleWheelOrientation='0-left-90-top-180-right-270-bottom'")<0)throw new Error('ANGLE_WHEEL_PATCH_FAILED');
-  if(source.indexOf("zodiacOrientation='aries-left-cancer-top'")<0)throw new Error('ZODIAC_ORIENTATION_PATCH_FAILED');
-  if(source.indexOf("planetOrientation='display-angle-minus-90'")<0)throw new Error('PLANET_ORIENTATION_PATCH_FAILED');
-  document.open();document.write(source);document.close();
-}catch(error){
-  document.body.innerHTML='<div class="error">تعذر تشغيل النسخة المصححة: '+String(error&&error.message||error)+'</div>';
-}
+var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f93e88cac23472abf0e995add32cff102f997648/public/kawkabat-al-arqam-al-sihria.html';
+var NS='http://www.w3.org/2000/svg';
+var frame=document.getElementById('app');
+var loading=document.getElementById('loading');
+var status=document.getElementById('status');
+var lastSvg=null;
+var zodiac=[
+ ['ARIES','♈','#f6b2ae'],['TAURUS','♉','#b9e3c1'],['GEMINI','♊','#d9c9ed'],['CANCER','♋','#b9dff0'],
+ ['LEO','♌','#f4b6b0'],['VIRGO','♍','#b8e2c0'],['LIBRA','♎','#d9caec'],['SCORPIO','♏','#b8deef'],
+ ['SAGITTARIUS','♐','#f3b8b1'],['CAPRICORN','♑','#bce3c4'],['AQUARIUS','♒','#d7c9eb'],['PISCES','♓','#b8dced']
+];
+var moon=[['09:36','29 JUL','2026'],['06:47','2 AUG','2026'],['21:20','5 AUG','2026'],['05:49','9 AUG','2026'],['12:35','12 AUG','2026'],['12:35','12 AUG','2026'],['11:47','31 DEC','2028']];
+function doc(){try{return frame.contentDocument||null}catch(_){return null}}
+function S(d,tag,attrs,text){var n=d.createElementNS(NS,tag);Object.keys(attrs||{}).forEach(function(k){n.setAttribute(k,String(attrs[k]))});if(text!==undefined)n.textContent=String(text);return n}
+function P(r,geo){var a=(geo-90)*Math.PI/180;return{x:500+Math.cos(a)*r,y:500+Math.sin(a)*r}}
+function sector(r1,r2,a0,a1){var p0=P(r2,a0),p1=P(r2,a1),q1=P(r1,a1),q0=P(r1,a0);return'M'+p0.x+' '+p0.y+'A'+r2+' '+r2+' 0 0 1 '+p1.x+' '+p1.y+'L'+q1.x+' '+q1.y+'A'+r1+' '+r1+' 0 0 0 '+q0.x+' '+q0.y+'Z'}
+function line(d,g,a,b,c,w,o,dash){var n=S(d,'line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:c,'stroke-width':w,'stroke-opacity':o,'stroke-linecap':'round','vector-effect':'non-scaling-stroke'});if(dash)n.setAttribute('stroke-dasharray',dash);g.appendChild(n)}
+function text(d,g,label,x,y,size,fill,weight,rotate){var n=S(d,'text',{x:x,y:y,'text-anchor':'middle','dominant-baseline':'central','font-family':'Segoe UI Symbol,Segoe UI,Arial,Tahoma,sans-serif','font-size':size,'font-weight':weight,fill:fill,'paint-order':'stroke fill',stroke:'#fff','stroke-width':size>14?1.6:.8,'stroke-opacity':.9,'vector-effect':'non-scaling-stroke',transform:rotate?'rotate('+rotate+' '+x+' '+y+')':''},label);g.appendChild(n);return n}
+function polygon(d,g,cx,cy,r,sides,rot,stroke,fill,opacity,width){var path='';for(var i=0;i<sides;i++){var a=(rot+i*360/sides-90)*Math.PI/180,x=cx+Math.cos(a)*r,y=cy+Math.sin(a)*r;path+=(i?'L':'M')+x+' '+y+' '}g.appendChild(S(d,'path',{d:path+'Z',fill:fill,stroke:stroke,'stroke-width':width,'fill-opacity':opacity,'stroke-opacity':.8,'stroke-linejoin':'round','vector-effect':'non-scaling-stroke'}))}
+function drawZodiac(d,svg,root){var g=S(d,'g',{id:'referenceZodiacV3'});root.appendChild(g);for(var i=0;i<12;i++){var mid=270+i*30,a0=mid-15,a1=mid+15;g.appendChild(S(d,'path',{d:sector(448,478,a0,a1),fill:zodiac[i][2],stroke:'#c7c7c7','stroke-width':1.1}));var p=P(463,mid),rot=((mid%360)+360)%360;if(rot>90&&rot<270)rot+=180;text(d,g,zodiac[i][0],p.x,p.y,10,'#202020',750,rot);var b=P(448,a0);g.appendChild(S(d,'circle',{cx:b.x,cy:b.y,r:15.5,fill:'#fff','fill-opacity':.58,stroke:zodiac[i][2],'stroke-width':2.3}));text(d,g,zodiac[i][1],b.x,b.y,20,zodiac[i][2],900,0)}}
+function drawAngles(d,svg,root){var g=S(d,'g',{id:'referenceAngleWheelV3'});root.appendChild(g);[438,430,422,414,404,394,382,370].forEach(function(r,i){g.appendChild(S(d,'circle',{cx:500,cy:500,r:r,fill:i===0?'#fff':'none','fill-opacity':i===0?.54:0,stroke:i===0?'#999':i===2?'#aaa':'#d1d1d1','stroke-width':i===0?1.2:i===2?1:.65}))});for(var geo=0;geo<360;geo++){var shown=(geo+90)%360,major=shown%10===0,medium=!major&&shown%5===0,card=shown%90===0;var a=P(422,geo),b=P(422-(card?18:major?13:medium?8:4),geo);line(d,g,a,b,card?'#a92828':major?'#d04949':medium?'#666':'#bbb',card?2.3:major?1.35:medium?.8:.38,1,'');if(shown%5===0){var q=P(397,geo),rot=geo;if(rot>90&&rot<270)rot+=180;text(d,g,shown+'°',q.x,q.y,card?11:major?8.6:7.2,card?'#111':major?'#333':'#777',card?900:major?750:500,rot)}}var dates=[[0,'21 JUN',1],[30,'23 JUL',0],[60,'22 AUG',0],[90,'22 SEP',1],[120,'7 OCT',0],[150,'21 NOV',0],[180,'21 DEC',1],[210,'6 NOV',0],[240,'19 FEB',0],[270,'21 MAR',1],[300,'6 MAY',0],[330,'21 MAY',0]];dates.forEach(function(item){var geo=item[0],label=item[1],quarter=item[2],p=P(quarter?432:410,geo),w=label.length*5.5+10,rot=geo;if(rot>90&&rot<270)rot+=180;g.appendChild(S(d,'rect',{x:p.x-w/2,y:p.y-8,width:w,height:16,rx:7,fill:quarter?'#f8dada':'#edf6e9',stroke:quarter?'#e36d6d':'#6eaa68','stroke-width':1.1,transform:'rotate('+rot+' '+p.x+' '+p.y+')'}));text(d,g,label,p.x,p.y,8,quarter?'#7b2929':'#315d31',quarter?850:700,rot)});[[270,'0°'],[0,'90°'],[90,'180°'],[180,'270°']].forEach(function(item){var p=P(362,item[0]);text(d,g,item[1],p.x,p.y,12,'#111',900,0)})}
+function drawMoonStrip(d,svg,root){var g=S(d,'g',{id:'referenceMoonStripV3'});root.appendChild(g);g.appendChild(S(d,'rect',{x:350,y:32,width:300,height:78,rx:10,fill:'#fff','fill-opacity':.9,stroke:'#d0d0d0','stroke-width':1}));for(var i=0;i<moon.length;i++){var x=375+i*42,phase=i/6;g.appendChild(S(d,'circle',{cx:x,cy:56,r:13,fill:i===0?'#d8d8d8':i===1?'#bbb':i===2?'#111':i===3?'#777':i===4?'#555':i===5?'#171717':'#9a4f14',stroke:i===5?'#d7b23a':'#aaa','stroke-width':i===5?2:1}));if(i===1||i===3||i===4)g.appendChild(S(d,'circle',{cx:x-5+(i%2)*10,cy:56,r:13,fill:'#fff','fill-opacity':.72,stroke:'none'}));text(d,g,moon[i][0],x,78,7,'#555',600,0);text(d,g,moon[i][1],x,89,7,'#444',700,0);text(d,g,moon[i][2],x,100,7,'#444',700,0)}}
+function drawCycleCards(d,svg,root){var g=S(d,'g',{id:'referenceCycleCardsV3'});root.appendChild(g);var cards=[['TETRAGRAM',4,320],['PENTAGRAM',5,445],['HEXAGRAM',6,570]];cards.forEach(function(card,index){var x=card[2],y=805,w=115,h=132;g.appendChild(S(d,'rect',{x:x,y:y,width:w,height:h,rx:13,fill:'#fff','fill-opacity':.92,stroke:'#ddd','stroke-width':1}));text(d,g,card[0],x+w/2,y+14,8,'#333',850,0);polygon(d,g,x+w/2,y+67,35,card[1],index===0?45:-90,'#555','none',0,2.2);g.appendChild(S(d,'circle',{cx:x+w/2,cy:y+67,r:5.5,fill:'none',stroke:'#e75b5b','stroke-width':1.5}));var labels=index===0?['01 MAR','03 AUG','30 NOV','31 JAN']:index===1?['07 MAR','20 MAY','03 AUG','26 DEC','2025']:['07 APR','01 JUN','03 AUG','03 DEC','2025'];labels.forEach(function(label,j){var a=j*360/labels.length-90,p={x:x+w/2+Math.cos(a*Math.PI/180)*48,y:y+67+Math.sin(a*Math.PI/180)*48};text(d,g,label,p.x,p.y,6.7,'#666',650,a+90)})})}
+function drawGridMarkers(d,svg,root){var g=S(d,'g',{id:'referenceGridMarkersV3'});root.appendChild(g);var x0=272,y0=272,c=24;var marks=[[1,4,'#9a6a2a',8],[4,6,'#e69a00',9],[7,7,'#88bd6b',10],[9,8,'#d66f67',9],[11,8,'#68b770',9],[15,5,'#3d8078',9],[16,2,'#ed6268',10],[5,11,'#a3662c',8],[6,14,'#999',9],[15,15,'#a8702f',8],[2,9,'#7fba69',10],[13,4,'#b58b50',9]];marks.forEach(function(m){var x=x0+m[0]*c+c/2,y=y0+m[1]*c+c/2;g.appendChild(S(d,'circle',{cx:x,cy:y,r:m[3],fill:m[2],'fill-opacity':.72,stroke:'#fff','stroke-width':1.4}));g.appendChild(S(d,'circle',{cx:x,cy:y,r:m[3]-3,fill:'none',stroke:'#333','stroke-width':.6,'stroke-opacity':.45}))})}
+function enhance(){var d=doc();if(!d)return false;var svg=d.getElementById('squareSvg');if(!svg)return false;var win=d.defaultView;if(win&&win.getComputedStyle(svg).display==='none')return false;if(svg===lastSvg&&d.getElementById('referenceVisualV3'))return true;lastSvg=svg;['zodiac','rings'].forEach(function(id){var n=d.getElementById(id);if(n)n.style.display='none'});['logoImage','angleFrame','angleTicks','angleLabels','outerBlackFrame','cardinalOrnaments'].forEach(function(id){var n=d.getElementById(id);if(n)n.style.display='none'});var old=d.getElementById('referenceVisualV3');if(old)old.remove();var root=S(d,'g',{id:'referenceVisualV3','data-reference-ready':'true'});var anchor=d.getElementById('mainShapes');if(anchor&&anchor.parentNode===svg)svg.insertBefore(root,anchor);else svg.appendChild(root);drawZodiac(d,svg,root);drawAngles(d,svg,root);drawMoonStrip(d,svg,root);drawCycleCards(d,svg,root);drawGridMarkers(d,svg,root);d.documentElement.dataset.referenceVisualV3='true';status.textContent='Zodiac + Angle Wheel + Moon + Cycles + Grid markers • ready';return true}
+function sync(){try{enhance()}catch(error){status.textContent='V3 ERROR: '+String(error&&error.message||error)}}
+frame.addEventListener('load',function(){if(loading)loading.remove();setTimeout(sync,250);setTimeout(sync,700);setTimeout(sync,1400)});
+frame.src=SOURCE;
+window.setInterval(sync,450);
+window.__auditSquare9VisualReferenceV3=function(){var d=doc();return{ok:!!(d&&d.getElementById('referenceVisualV3')),zodiac:!!(d&&d.getElementById('referenceZodiacV3')),angleWheel:!!(d&&d.getElementById('referenceAngleWheelV3')),moonStrip:!!(d&&d.getElementById('referenceMoonStripV3')),cycleCards:!!(d&&d.getElementById('referenceCycleCardsV3')),gridMarkers:!!(d&&d.getElementById('referenceGridMarkersV3'))}};
 }());
 </script>
 </body>
