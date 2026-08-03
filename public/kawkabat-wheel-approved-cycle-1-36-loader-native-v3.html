@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>كوكبة الأرقام السحرية — الدورة الأولى المعتمدة V3</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#F7F1E3;font-family:Arial,Tahoma,sans-serif}body{display:grid;place-items:center;color:#43515a}.loading{font-weight:800}</style></head>
+<body><div class="loading">جارٍ تحميل العجلة المعتمدة…</div><script>
+(async function(){'use strict';
+var sourceApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/5fb2032b666ff17b2c04c0c837b1fdf41aceb216';
+function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes)}
+try{
+ var response=await fetch(sourceApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});if(!response.ok)throw new Error('WHEEL_HTTP_'+response.status);
+ var payload=await response.json(),loader=decodeBase64(payload.content);
+ var injector="\n        html=html.replace('</style>','.approved-cycle-number{font-size:24px!important;pointer-events:none!important}</style>');\n        var cycleItems='';\n        for(var cycleIndex=0;cycleIndex<36;cycleIndex+=1){var cycleValue=cycleIndex===0?36:cycleIndex,cycleAngle=(cycleIndex*10-90)*Math.PI/180,cycleX=2200+Math.cos(cycleAngle)*455,cycleY=1800+Math.sin(cycleAngle)*455,cycleMod=cycleValue%3,cycleColor=cycleMod===1?'number-red':cycleMod===2?'number-blue':'number-black',cycleCardinal=cycleIndex%9===0?' cardinal-number':'';cycleItems+='<text x=\\\"'+cycleX.toFixed(3)+'\\\" y=\\\"'+cycleY.toFixed(3)+'\\\" data-cycle=\\\"1\\\" data-wheel=\\\"3\\\" data-value=\\\"'+cycleValue+'\\\" class=\\\"number-text approved-cycle-number '+cycleColor+cycleCardinal+'\\\">'+cycleValue+'</text>';}\n        var cycleGroup='<g id=\\\"approvedCycleOneNumbers\\\" aria-label=\\\"الدورة الأولى من 1 إلى 36 على العجلة رقم 3\\\">'+cycleItems+'</g>';\n        if(html.indexOf('</svg>')<0)throw new Error('FINAL_SVG_CLOSE_NOT_FOUND');\n        html=html.replace('</svg>',cycleGroup+'</svg>');\n        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{','window.__auditApprovedCycleOneV3=function(){var g=document.getElementById(\\\"approvedCycleOneNumbers\\\");return{ok:!!g&&g.children.length===36,numberCount:g?g.children.length:0,range:[1,36],wheel:3,cardinals:{top:36,right:9,bottom:18,left:27},loaderNative:true};};window.__auditKawkabatFinalStructureV3=function(){return{');\n";
+ var marker='        document.open();\n        document.write(html);';
+ if(loader.indexOf(marker)<0)throw new Error('LOADER_DOCUMENT_WRITE_MARKER_NOT_FOUND');
+ loader=loader.replace(marker,injector+marker);
+ document.open();document.write(loader);document.close();
+}catch(error){document.body.innerHTML='<div class="loading">تعذر تحميل العجلة: '+String(error.message||error)+'</div>'}
+}());
+</script></body></html>
