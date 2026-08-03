@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Highlight Cross V2</title>
+  <title>Magic Numbers Constellation — Show Marks Active V1</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -11,7 +11,7 @@
   </style>
 </head>
 <body>
-  <div class="loading">جارٍ تحميل Highlight Cross…</div>
+  <div class="loading">جارٍ تحميل Show marks…</div>
   <script>
   (async function(){
     'use strict';
@@ -24,19 +24,24 @@
       if(!response.ok)throw new Error('HIGHLIGHT_SOURCE_HTTP_'+response.status);
       var source=await response.text();
 
-      source=source.replace('Magic Numbers Constellation — Highlight Active V1','Magic Numbers Constellation — Highlight Cross V2');
+      source=source.replace('Magic Numbers Constellation — Highlight Active V1','Magic Numbers Constellation — Show Marks Active V1');
       source=source.replace(oldRuntime,newRuntime);
       source=source.replace(
         "highlightFillControl.innerHTML='<option value=\"levels\">Levels</option>';",
         "highlightFillControl.innerHTML='<option value=\"levels\">Levels</option><option value=\"cross\">Cross</option>';"
       );
+      source=source.replace(
+        "          highlightMarksControl.addEventListener('change',reloadWheels);",
+        "          highlightMarksControl.addEventListener('change',function(){if(highlightMarksControl.checked&&!highlightVisibleControl.checked)highlightVisibleControl.checked=true;reloadWheels();});"
+      );
 
-      if(source.indexOf(newRuntime)<0)throw new Error('CROSS_RUNTIME_LINK_FAILED');
-      if(source.indexOf('<option value="cross">Cross</option>')<0)throw new Error('CROSS_OPTION_PATCH_FAILED');
+      if(source.indexOf(newRuntime)<0)throw new Error('SHOW_MARKS_RUNTIME_LINK_FAILED');
+      if(source.indexOf('<option value="cross">Cross</option>')<0)throw new Error('SHOW_MARKS_CROSS_OPTION_FAILED');
+      if(source.indexOf("highlightMarksControl.addEventListener('change',function(){if(highlightMarksControl.checked&&!highlightVisibleControl.checked)highlightVisibleControl.checked=true;reloadWheels();})")<0)throw new Error('SHOW_MARKS_BINDING_FAILED');
 
       document.open();document.write(source);document.close();
     }catch(error){
-      document.body.innerHTML='<div class="loading">تعذر تحميل Highlight Cross: '+String(error.message||error)+'</div>';
+      document.body.innerHTML='<div class="loading">تعذر تحميل Show marks: '+String(error.message||error)+'</div>';
     }
   }());
   </script>
