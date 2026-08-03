@@ -3,28 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>كوكبة الأرقام السحرية — Square of 9 Cell Shading V8</title>
+<title>كوكبة الأرقام السحرية — Square of 9 Zodiac Clean V9</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:Arial,Tahoma,sans-serif}
 #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
 #loading{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
-#error{position:fixed;right:16px;bottom:14px;z-index:30;display:none;max-width:600px;padding:10px 14px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
+#error{position:fixed;right:16px;bottom:14px;z-index:30;display:none;max-width:620px;padding:10px 14px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
 </style>
 </head>
 <body>
-<iframe id="app" title="Square of 9 with cell shading"></iframe>
-<div id="loading">جارٍ تطبيق التظليل الغامق والفاتح على 361 خلية…</div>
+<iframe id="app" title="Square of 9 zodiac clean"></iframe>
+<div id="loading">جارٍ إزالة علامات الأبراج وترتيب مواقعها…</div>
 <div id="error"></div>
 <script>
 (function(){
 'use strict';
-var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/50cf090f82d2de6c2081f4fd9f1cbbd2b3117eb7/public/kawkabat-al-arqam-al-sihria.html';
-var NS='http://www.w3.org/2000/svg';
-var ROOT_ID='approvedCellShadingV8';
+var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/06068425a5740978fa3ca1bf803fec3a993adedd/public/kawkabat-al-arqam-al-sihria.html';
 var frame=document.getElementById('app');
 var loading=document.getElementById('loading');
 var errorBox=document.getElementById('error');
-
+var X0=272,Y0=272,CELL=24;
+var positions=[
+  ['Aries',3,9],['Taurus',4,6],['Gemini',6,3],['Cancer',9,2],
+  ['Leo',12,3],['Virgo',14,6],['Libra',15,9],['Scorpio',14,12],
+  ['Sagittarius',12,15],['Capricorn',9,16],['Aquarius',6,15],['Pisces',4,12]
+];
 function findSquareDocument(win,seen){
   seen=seen||new Set();
   try{
@@ -34,113 +37,76 @@ function findSquareDocument(win,seen){
     if(doc&&doc.getElementById('squareSvg'))return doc;
     var frames=doc?Array.from(doc.querySelectorAll('iframe')):[];
     for(var i=0;i<frames.length;i++){
-      try{
-        var found=findSquareDocument(frames[i].contentWindow,seen);
-        if(found)return found;
-      }catch(_){}
+      try{var found=findSquareDocument(frames[i].contentWindow,seen);if(found)return found;}catch(_){}
     }
   }catch(_){}
   return null;
 }
-function S(doc,tag,attrs){
-  var node=doc.createElementNS(NS,tag);
-  Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,String(attrs[key]));});
-  return node;
-}
-function styleGrid(doc,squareGroup){
-  var direct=Array.from(squareGroup.children);
-  var base=direct.find(function(node){return node.tagName&&node.tagName.toLowerCase()==='rect';});
-  if(base){
-    base.setAttribute('fill','#fffdf8');
-    base.setAttribute('fill-opacity','0.30');
-    base.setAttribute('stroke','#74756f');
-    base.setAttribute('stroke-width','1.15');
-  }
-  Array.from(squareGroup.querySelectorAll(':scope > line')).forEach(function(line){
-    line.setAttribute('stroke','#6f736c');
-    line.setAttribute('stroke-width','0.56');
-    line.setAttribute('stroke-opacity','0.67');
-  });
-  Array.from(squareGroup.querySelectorAll(':scope > text')).forEach(function(node){
-    var n=Number(String(node.textContent||'').trim());
-    node.setAttribute('fill','#25251f');
-    node.setAttribute('font-size','8.7');
-    node.setAttribute('font-weight',Number.isFinite(n)&&n%9===0?'800':'650');
-    node.setAttribute('paint-order','stroke fill');
-    node.setAttribute('stroke','#fffdf8');
-    node.setAttribute('stroke-width','0.34');
-    node.setAttribute('stroke-opacity','0.77');
-  });
-}
-function buildShading(doc){
-  var root=S(doc,'g',{id:ROOT_ID,'data-cell-count':'361','pointer-events':'none'});
-  var x0=272,y0=272,cell=24,size=19,center=9;
-  for(var row=0;row<size;row++){
-    for(var col=0;col<size;col++){
-      var ring=Math.max(Math.abs(row-center),Math.abs(col-center));
-      var onAxis=row===center||col===center;
-      var nearCenter=Math.abs(row-center)<=1&&Math.abs(col-center)<=1;
-      var fill=ring%2===0?'#81775d':'#d8cda9';
-      var opacity=ring%2===0?0.155:0.088;
-      if(onAxis)opacity+=0.042;
-      if(row===col||row+col===size-1)opacity+=0.012;
-      if(nearCenter){fill='#706852';opacity=0.205;}
-      root.appendChild(S(doc,'rect',{
-        x:(x0+col*cell+0.45).toFixed(2),
-        y:(y0+row*cell+0.45).toFixed(2),
-        width:(cell-0.9).toFixed(2),
-        height:(cell-0.9).toFixed(2),
-        fill:fill,
-        'fill-opacity':opacity.toFixed(3),
-        stroke:'none'
-      }));
-    }
-  }
-  return root;
-}
-function applyCellShading(){
+function cellCenter(col,row){return{x:X0+col*CELL+CELL/2,y:Y0+row*CELL+CELL/2};}
+function cleanAndAlignZodiac(){
   try{
     var doc=findSquareDocument(frame.contentWindow);
     if(!doc)return false;
-    var squareSvg=doc.getElementById('squareSvg');
-    var squareGroup=doc.getElementById('square');
-    var approved=doc.getElementById('approvedSquareOverlayV7');
-    if(!squareSvg||!squareGroup||!approved)return false;
-    if(doc.defaultView.getComputedStyle(squareSvg).display==='none')return false;
-    var old=doc.getElementById(ROOT_ID);
-    if(old)old.remove();
-    approved.insertBefore(buildShading(doc),approved.firstChild);
-    styleGrid(doc,squareGroup);
-    doc.documentElement.dataset.approvedCellShadingV8='361';
-    doc.documentElement.dataset.approvedCellShadingPattern='alternating-dark-light-rings';
+    var square=doc.getElementById('squareSvg');
+    if(!square||doc.defaultView.getComputedStyle(square).display==='none')return false;
+    var group=doc.getElementById('approvedZodiacInsideGridV7')||doc.getElementById('approvedZodiacInsideGridV8');
+    if(!group)return false;
+
+    Array.from(group.querySelectorAll('circle,ellipse,rect,path')).forEach(function(node){node.remove();});
+    var labels=Array.from(group.querySelectorAll('text'));
+    labels.slice(12).forEach(function(node){node.remove();});
+    labels=labels.slice(0,12);
+    labels.forEach(function(node,index){
+      var item=positions[index],point=cellCenter(item[1],item[2]);
+      node.setAttribute('x',point.x);
+      node.setAttribute('y',point.y);
+      node.setAttribute('font-size','18');
+      node.setAttribute('font-weight','800');
+      node.setAttribute('text-anchor','middle');
+      node.setAttribute('dominant-baseline','central');
+      node.setAttribute('paint-order','stroke fill');
+      node.setAttribute('stroke','#fffdf8');
+      node.setAttribute('stroke-width','0.75');
+      node.setAttribute('stroke-opacity','0.88');
+      node.removeAttribute('transform');
+      node.dataset.zodiacName=item[0];
+      node.dataset.gridColumn=String(item[1]);
+      node.dataset.gridRow=String(item[2]);
+    });
+    group.id='approvedZodiacInsideGridV9';
+    group.dataset.halos='removed';
+    group.dataset.positionMode='fixed-grid-cells';
+    doc.documentElement.dataset.zodiacMarkersRemovedV9='true';
+    doc.documentElement.dataset.zodiacFixedPositionsV9='12';
     errorBox.style.display='none';
-    return true;
+    return labels.length===12;
   }catch(error){
     errorBox.style.display='block';
-    errorBox.textContent='CELL SHADING V8 ERROR: '+String(error&&error.message||error);
+    errorBox.textContent='ZODIAC CLEAN V9 ERROR: '+String(error&&error.message||error);
     return false;
   }
 }
 frame.addEventListener('load',function(){
   if(loading)loading.remove();
-  setTimeout(applyCellShading,260);
-  setTimeout(applyCellShading,850);
-  setTimeout(applyCellShading,1700);
+  setTimeout(cleanAndAlignZodiac,260);
+  setTimeout(cleanAndAlignZodiac,850);
+  setTimeout(cleanAndAlignZodiac,1700);
 });
 frame.src=SOURCE;
 window.setInterval(function(){
   var doc=findSquareDocument(frame.contentWindow);
-  if(!doc||!doc.getElementById(ROOT_ID))applyCellShading();
+  var group=doc?doc.getElementById('approvedZodiacInsideGridV9'):null;
+  if(!group||group.querySelector('circle,ellipse,rect,path'))cleanAndAlignZodiac();
 },450);
-window.__auditSquare9CellShadingV8=function(){
+window.__auditSquare9ZodiacCleanV9=function(){
   var doc=findSquareDocument(frame.contentWindow);
-  var root=doc?doc.getElementById(ROOT_ID):null;
+  var group=doc?doc.getElementById('approvedZodiacInsideGridV9'):null;
   return{
-    ok:!!root,
-    cellCount:root?root.children.length:0,
-    pattern:doc?doc.documentElement.dataset.approvedCellShadingPattern:null,
-    zodiacCount:doc?doc.documentElement.dataset.approvedZodiacInsideGridV7:null,
-    transparentTable:doc?doc.documentElement.dataset.approvedSquareTableV7:null
+    ok:!!group,
+    zodiacCount:group?group.querySelectorAll('text').length:0,
+    haloCount:group?group.querySelectorAll('circle,ellipse,rect,path').length:null,
+    positionMode:group?group.dataset.positionMode:null,
+    positions:positions.map(function(item){return{name:item[0],column:item[1],row:item[2]};})
   };
 };
 }());
