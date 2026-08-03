@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية — Unified Tools V11</title>
+  <style>html,body{margin:0;width:100%;height:100%;background:#F7F1E3}body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}.loading{font-weight:800}</style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل أدوات العجلة V11…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/edca767d5f359d4a1dce97e81402eff508724df3/public/kawkabat-wheel-unified-tools-v10.html';
+    try{
+      var response=await fetch(sourceUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('V10_SOURCE_HTTP_'+response.status);
+      var source=await response.text();
+      source=source.replace('Unified Tools V10','Unified Tools V11');
+
+      var marker='  /* Find */';
+      var guaranteed=`  /* Guaranteed visible instrument layers V11. Isolated from Find and Highlight. */
+  try{
+    var guaranteedChronometerVisible=toolBool('chronoVisible',true);
+    var guaranteedChronometerOld=document.getElementById('chronometerGuaranteedLayer');
+    if(guaranteedChronometerOld)guaranteedChronometerOld.remove();
+    if(guaranteedChronometerVisible){
+      var guaranteedChronometerLayer=make('g',{id:'chronometerGuaranteedLayer','aria-label':'Chronometer visible layer','pointer-events':'none'});
+      wheelNode.insertBefore(guaranteedChronometerLayer,angleFrameNode);
+      var guaranteedChronometerRadius=980;
+      guaranteedChronometerLayer.appendChild(make('circle',{cx:cx,cy:cy,r:guaranteedChronometerRadius,fill:'none',stroke:'#168A52','stroke-width':14,'stroke-opacity':1,'vector-effect':'non-scaling-stroke'}));
+      guaranteedChronometerLayer.appendChild(make('circle',{cx:cx,cy:cy,r:guaranteedChronometerRadius+18,fill:'none',stroke:'#8BD3AC','stroke-width':4,'stroke-opacity':0.92,'vector-effect':'non-scaling-stroke'}));
+      var guaranteedMonthLabels=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      var guaranteedChronometerClockwise=toolBool('chronoClockwise',true);
+      var guaranteedChronometerSign=guaranteedChronometerClockwise?1:-1;
+      var guaranteedChronometerAngle=toolNum('chronoAngle',0);
+      for(var guaranteedChronometerIndex=0;guaranteedChronometerIndex<12;guaranteedChronometerIndex+=1){
+        var guaranteedChronometerDegree=guaranteedChronometerSign*guaranteedChronometerIndex*30+guaranteedChronometerAngle-90;
+        var guaranteedChronometerOuter=geometryPoint(guaranteedChronometerRadius,guaranteedChronometerDegree);
+        var guaranteedChronometerInner=geometryPoint(guaranteedChronometerRadius-42,guaranteedChronometerDegree);
+        guaranteedChronometerLayer.appendChild(make('line',{x1:guaranteedChronometerOuter.x,y1:guaranteedChronometerOuter.y,x2:guaranteedChronometerInner.x,y2:guaranteedChronometerInner.y,stroke:'#0B6A3B','stroke-width':5,'stroke-opacity':1,'stroke-linecap':'round','vector-effect':'non-scaling-stroke'}));
+        var guaranteedChronometerLabelPoint=geometryPoint(guaranteedChronometerRadius-70,guaranteedChronometerDegree);
+        var guaranteedChronometerLabel=make('text',{x:guaranteedChronometerLabelPoint.x,y:guaranteedChronometerLabelPoint.y,'text-anchor':'middle','dominant-baseline':'central','font-family':'Arial,Tahoma,sans-serif','font-size':24,'font-weight':900,fill:'#0B6A3B','paint-order':'stroke fill',stroke:'#F7F1E3','stroke-width':2,'stroke-opacity':1,'vector-effect':'non-scaling-stroke'});
+        guaranteedChronometerLabel.textContent=guaranteedMonthLabels[guaranteedChronometerIndex];
+        guaranteedChronometerLayer.appendChild(guaranteedChronometerLabel);
+      }
+      document.documentElement.dataset.guaranteedChronometer='true';
+    }else{
+      document.documentElement.dataset.guaranteedChronometer='false';
+    }
+  }catch(guaranteedChronometerError){
+    document.documentElement.dataset.guaranteedChronometer='error';
+    document.documentElement.dataset.guaranteedChronometerError=String(guaranteedChronometerError&&guaranteedChronometerError.message||guaranteedChronometerError);
+  }
+
+  try{
+    var guaranteedProtractorVisible=toolBool('protractorVisible',false);
+    var guaranteedProtractorOld=document.getElementById('protractorGuaranteedLayer');
+    if(guaranteedProtractorOld)guaranteedProtractorOld.remove();
+    if(guaranteedProtractorVisible){
+      var guaranteedProtractorLayer=make('g',{id:'protractorGuaranteedLayer','aria-label':'Protractor visible layer','pointer-events':'none'});
+      wheelNode.insertBefore(guaranteedProtractorLayer,angleFrameNode);
+      var guaranteedProtractorRadius=1160;
+      guaranteedProtractorLayer.appendChild(make('circle',{cx:cx,cy:cy,r:guaranteedProtractorRadius,fill:'none',stroke:'#D43C32','stroke-width':12,'stroke-opacity':1,'vector-effect':'non-scaling-stroke'}));
+      var guaranteedProtractorClockwise=toolBool('protractorClockwise',true);
+      var guaranteedProtractorSign=guaranteedProtractorClockwise?1:-1;
+      var guaranteedProtractorAngle=toolNum('protractorAngle',0);
+      for(var guaranteedProtractorIndex=0;guaranteedProtractorIndex<360;guaranteedProtractorIndex+=10){
+        var guaranteedProtractorDegree=guaranteedProtractorSign*guaranteedProtractorIndex+guaranteedProtractorAngle-90;
+        var guaranteedProtractorOuter=geometryPoint(guaranteedProtractorRadius,guaranteedProtractorDegree);
+        var guaranteedProtractorInner=geometryPoint(guaranteedProtractorRadius-(guaranteedProtractorIndex%30===0?38:22),guaranteedProtractorDegree);
+        guaranteedProtractorLayer.appendChild(make('line',{x1:guaranteedProtractorOuter.x,y1:guaranteedProtractorOuter.y,x2:guaranteedProtractorInner.x,y2:guaranteedProtractorInner.y,stroke:'#8E1914','stroke-width':guaranteedProtractorIndex%30===0?5:3,'stroke-opacity':1,'stroke-linecap':'round','vector-effect':'non-scaling-stroke'}));
+      }
+      document.documentElement.dataset.guaranteedProtractor='true';
+    }else{
+      document.documentElement.dataset.guaranteedProtractor='false';
+    }
+  }catch(guaranteedProtractorError){
+    document.documentElement.dataset.guaranteedProtractor='error';
+    document.documentElement.dataset.guaranteedProtractorError=String(guaranteedProtractorError&&guaranteedProtractorError.message||guaranteedProtractorError);
+  }
+
+  try{
+    window.parent.postMessage({type:'KAWKABAT_INSTRUMENTS_V11',chronometer:document.documentElement.dataset.guaranteedChronometer,protractor:document.documentElement.dataset.guaranteedProtractor},'*');
+  }catch(guaranteedMessageError){}
+`;
+
+      if(source.indexOf(marker)<0)throw new Error('V11_INSERTION_MARKER_NOT_FOUND');
+      source=source.replace(marker,guaranteed+'\n'+marker);
+      if(source.indexOf('chronometerGuaranteedLayer')<0)throw new Error('V11_CHRONOMETER_INJECTION_FAILED');
+      if(source.indexOf('protractorGuaranteedLayer')<0)throw new Error('V11_PROTRACTOR_INJECTION_FAILED');
+      document.open();document.write(source);document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تحميل أدوات V11: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
