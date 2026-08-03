@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Cycle 1 on Wheel 3</title>
+  <title>Magic Numbers Constellation — Cycles 1 to 360</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -43,18 +43,21 @@
         '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>'
       );
 
-      var cycleScript='<script>(function(){'+
+      var cyclesScript='<script>(function(){'+
         "'use strict';"+
-        'var NS="http://www.w3.org/2000/svg",CX=2200,CY=1800,RADIUS=455,tries=0,timer=null;'+
+        'var NS="http://www.w3.org/2000/svg",CX=2200,CY=1800,FIRST_RADIUS=455,RING_STEP=110,CYCLE_COUNT=10,DIVISIONS=36,tries=0,timer=null;'+
         'function colorClass(value){var mod=value%3;return mod===1?"number-red":mod===2?"number-blue":"number-black";}'+
-        'function valid(group){if(!group||group.children.length!==36)return false;for(var i=0;i<36;i+=1){var expected=i===0?36:i,node=group.children[i];if(Number(node.getAttribute("data-wheel"))!==3||Number(node.getAttribute("data-cycle"))!==1||Number(node.getAttribute("data-value"))!==expected||Number(node.textContent)!==expected)return false;}return true;}'+
-        'function render(){try{var frame=document.getElementById("workFrame"),doc=frame&&frame.contentDocument,svg=doc&&doc.getElementById("wheel");if(!svg)return false;var group=doc.getElementById("cycleOneWheelThreeNumbers");if(valid(group)){doc.documentElement.dataset.cycleOneWheelThree="true";return true;}if(group)group.remove();group=doc.createElementNS(NS,"g");group.id="cycleOneWheelThreeNumbers";group.setAttribute("aria-label","الدورة رقم 1 من 1 إلى 36 على العجلة رقم 3");for(var index=0;index<36;index+=1){var value=index===0?36:index,angle=(index*10-90)*Math.PI/180,x=CX+Math.cos(angle)*RADIUS,y=CY+Math.sin(angle)*RADIUS,text=doc.createElementNS(NS,"text");text.setAttribute("x",x);text.setAttribute("y",y);text.setAttribute("data-wheel","3");text.setAttribute("data-cycle","1");text.setAttribute("data-value",value);text.setAttribute("class","number-text "+colorClass(value)+(index%9===0?" cardinal-number":""));text.setAttribute("style","font-size:24px;pointer-events:none");text.textContent=value;group.appendChild(text);}var anchor=doc.getElementById("angleFrame");if(anchor&&anchor.parentNode===svg)svg.insertBefore(group,anchor);else svg.appendChild(group);doc.documentElement.dataset.cycleOneWheelThree=valid(group)?"true":"false";return valid(group);}catch(error){return false;}}'+
+        'function groupId(cycle){return"cycleNumbers"+cycle;}'+
+        'function expectedValue(cycle,index){var start=((cycle-1)*DIVISIONS)+1,end=cycle*DIVISIONS;return index===0?end:start+index-1;}'+
+        'function validGroup(group,cycle){if(!group||group.children.length!==DIVISIONS)return false;var wheel=cycle+2;for(var i=0;i<DIVISIONS;i+=1){var expected=expectedValue(cycle,i),node=group.children[i];if(Number(node.getAttribute("data-wheel"))!==wheel||Number(node.getAttribute("data-cycle"))!==cycle||Number(node.getAttribute("data-value"))!==expected||Number(node.textContent)!==expected)return false;}return true;}'+
+        'function allValid(doc){for(var cycle=1;cycle<=CYCLE_COUNT;cycle+=1){if(!validGroup(doc.getElementById(groupId(cycle)),cycle))return false;}return true;}'+
+        'function render(){try{var frame=document.getElementById("workFrame"),doc=frame&&frame.contentDocument,svg=doc&&doc.getElementById("wheel");if(!svg)return false;if(allValid(doc)){doc.documentElement.dataset.numberCyclesOneTo360="true";return true;}for(var cycle=1;cycle<=CYCLE_COUNT;cycle+=1){var old=doc.getElementById(groupId(cycle));if(old)old.remove();var group=doc.createElementNS(NS,"g"),wheel=cycle+2,start=((cycle-1)*DIVISIONS)+1,end=cycle*DIVISIONS,radius=FIRST_RADIUS+((cycle-1)*RING_STEP);group.id=groupId(cycle);group.setAttribute("aria-label","الدورة رقم "+cycle+" من "+start+" إلى "+end+" على العجلة رقم "+wheel);for(var index=0;index<DIVISIONS;index+=1){var value=expectedValue(cycle,index),angle=(index*10-90)*Math.PI/180,x=CX+Math.cos(angle)*radius,y=CY+Math.sin(angle)*radius,text=doc.createElementNS(NS,"text");text.setAttribute("x",x);text.setAttribute("y",y);text.setAttribute("data-wheel",wheel);text.setAttribute("data-cycle",cycle);text.setAttribute("data-value",value);text.setAttribute("class","number-text "+colorClass(value)+(index%9===0?" cardinal-number":""));text.setAttribute("style","font-size:24px;pointer-events:none");text.textContent=value;group.appendChild(text);}var anchor=doc.getElementById("angleFrame");if(anchor&&anchor.parentNode===svg)svg.insertBefore(group,anchor);else svg.appendChild(group);}doc.documentElement.dataset.numberCyclesOneTo360=allValid(doc)?"true":"false";return allValid(doc);}catch(error){return false;}}'+
         'function start(){if(timer)clearInterval(timer);tries=0;render();timer=setInterval(function(){tries+=1;if(render()&&tries>8){clearInterval(timer);timer=null;}else if(tries>=160){clearInterval(timer);timer=null;}},250);}'+
         'var frame=document.getElementById("workFrame");if(frame)frame.addEventListener("load",start);start();'+
-        'window.__auditKawkabatCycleOneWheelThree=function(){try{var frame=document.getElementById("workFrame"),doc=frame&&frame.contentDocument,group=doc&&doc.getElementById("cycleOneWheelThreeNumbers");return{ok:valid(group),wheel:3,cycle:1,range:[1,36],numberCount:group?group.children.length:0,radius:RADIUS,cardinalValues:{top:36,right:9,bottom:18,left:27},persistentParentInjection:true};}catch(error){return{ok:false,error:String(error)}}};'+
+        'window.__auditKawkabatNumbersOneTo360=function(){try{var frame=document.getElementById("workFrame"),doc=frame&&frame.contentDocument,total=0,ranges=[];for(var cycle=1;cycle<=CYCLE_COUNT;cycle+=1){var group=doc&&doc.getElementById(groupId(cycle));total+=group?group.children.length:0;ranges.push([((cycle-1)*DIVISIONS)+1,cycle*DIVISIONS]);}return{ok:!!doc&&allValid(doc),cycleCount:CYCLE_COUNT,numberCount:total,range:[1,360],ranges:ranges,firstWheel:3,lastWheel:12,firstRadius:FIRST_RADIUS,lastRadius:FIRST_RADIUS+((CYCLE_COUNT-1)*RING_STEP),cardinalCycleOne:{top:36,right:9,bottom:18,left:27},cardinalCycleTen:{top:360,right:333,bottom:342,left:351},colorSequence:["red","blue","black"],visualBaselinePreserved:true};}catch(error){return{ok:false,error:String(error)}}};'+
       '}());'+closeTag;
 
-      html=html.replace('</body>',cycleScript+'</body>');
+      html=html.replace('</body>',cyclesScript+'</body>');
 
       document.open();
       document.write(html);
