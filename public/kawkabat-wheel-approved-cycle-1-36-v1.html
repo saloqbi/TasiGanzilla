@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — الدورة الأولى المعتمدة</title>
+  <style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#F7F1E3;font-family:Arial,Tahoma,sans-serif}body{display:grid;place-items:center;color:#43515a}.loading{font-weight:800}</style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل العجلة المعتمدة…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/5fb2032b666ff17b2c04c0c837b1fdf41aceb216';
+    function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes);}
+    try{
+      var response=await fetch(sourceApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      if(!response.ok)throw new Error('WHEEL_HTTP_'+response.status);
+      var payload=await response.json();
+      var html=decodeBase64(payload.content);
+      var closeTag='</scr'+'ipt>';
+      html=html.replace('</style>',
+        '.approved-cycle-number{font-size:24px!important;pointer-events:none!important}'+
+        'html,body{scrollbar-width:none!important;-ms-overflow-style:none!important;overscroll-behavior:none!important}'+
+        'html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}'+
+        '</style>');
+      var runtime='<script>(function(){'+
+        "'use strict';"+
+        'var NS="http://www.w3.org/2000/svg",CX=2200,CY=1800,RADIUS=455,DIVISIONS=36,rendering=false;'+
+        'function colorClass(value){var mod=value%3;return mod===1?"number-red":mod===2?"number-blue":"number-black";}'+
+        'function valueAt(index){return index===0?36:index;}'+
+        'function valid(doc){var group=doc.getElementById("approvedCycleOneNumbers");if(!group||group.children.length!==DIVISIONS)return false;for(var i=0;i<DIVISIONS;i+=1){if(Number(group.children[i].textContent)!==valueAt(i))return false;}return true;}'+
+        'function render(){if(rendering)return false;rendering=true;try{var doc=document,svg=doc.getElementById("wheel");if(!svg)return false;var old=doc.getElementById("approvedCycleOneNumbers");if(old)old.remove();var group=doc.createElementNS(NS,"g");group.id="approvedCycleOneNumbers";group.setAttribute("aria-label","الدورة الأولى من 1 إلى 36 على العجلة رقم 3");for(var index=0;index<DIVISIONS;index+=1){var value=valueAt(index),angle=(index*10-90)*Math.PI/180,x=CX+Math.cos(angle)*RADIUS,y=CY+Math.sin(angle)*RADIUS,text=doc.createElementNS(NS,"text");text.setAttribute("x",x);text.setAttribute("y",y);text.setAttribute("data-cycle","1");text.setAttribute("data-wheel","3");text.setAttribute("data-value",value);text.setAttribute("class","number-text approved-cycle-number "+colorClass(value)+(index%9===0?" cardinal-number":""));text.textContent=value;group.appendChild(text);}var anchor=doc.getElementById("angleFrame");if(anchor&&anchor.parentNode===svg)svg.insertBefore(group,anchor);else svg.appendChild(group);doc.documentElement.dataset.approvedCycleOne=valid(doc)?"true":"false";return valid(doc);}finally{rendering=false;}}'+
+        'function ensure(){if(!valid(document))render();}'+
+        'function start(){render();setTimeout(ensure,150);setTimeout(ensure,500);setTimeout(ensure,1200);}'+
+        'if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();'+
+        'window.__auditApprovedCycleOne=function(){var g=document.getElementById("approvedCycleOneNumbers");return{ok:valid(document),cycle:1,numberCount:g?g.children.length:0,range:[1,36],wheel:3,cardinals:{top:36,right:9,bottom:18,left:27},colorSequence:["red","blue","black"],approvedVisualSource:true};};'+
+      '}());'+closeTag;
+      html=html.replace('</body>',runtime+'</body>');
+      document.open();document.write(html);document.close();
+    }catch(error){document.body.innerHTML='<div class="loading">تعذر تحميل العجلة: '+String(error.message||error)+'</div>';}
+  }());
+  </script>
+</body>
+</html>
