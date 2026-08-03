@@ -1,52 +1,8 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>كوكبة الأرقام السحرية — Square of 9 Direct Expanded V15</title><link rel="stylesheet" href="https://raw.githubusercontent.com/saloqbi/TasiGanzilla/square9-direct-expanded-v15/public/kawkabat-square9-v13.css"><style>#v15Badge{position:fixed;right:12px;bottom:10px;z-index:3000;padding:5px 8px;border:1px solid #2b7a43;border-radius:4px;background:rgba(255,255,255,.92);font:700 11px Arial;color:#246238;direction:ltr}</style></head><body>
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>كوكبة الأرقام السحرية — Square of 9 Visible Shapes V16</title><link rel="stylesheet" href="https://raw.githubusercontent.com/saloqbi/TasiGanzilla/square9-direct-expanded-v15/public/kawkabat-square9-v13.css"><style>#v16Badge{position:fixed;right:12px;bottom:10px;z-index:3000;padding:5px 8px;border:1px solid #7a7a7a;border-radius:4px;background:rgba(255,255,255,.92);font:700 11px Arial;color:#555;direction:ltr}</style></head><body>
 <header id="toolbar"><div class="brand"><span class="brand-logo"></span><span>Gannzilla Pro — كوكبة تاسي</span></div><div class="tools"><button class="tool active" data-tool="cursor">↖</button><button class="tool" data-tool="line">―</button><button class="tool" data-tool="rectangle">□</button><button class="tool" data-tool="text">T</button><button class="tool" data-tool="lock">▣</button><button class="tool" data-tool="search">⌕</button><span class="sep"></span><button id="zoomOut" class="quick">−</button><span id="zoomReadout" class="zoom-text">100%</span><button id="zoomIn" class="quick">＋</button><button id="fit" class="quick">⛶</button><button id="full" class="quick">▣</button><span class="sep"></span><div id="lang" class="lang"><span>🇬🇧</span><span id="langText">English</span><span>▾</span></div><button class="quick">ⓘ</button></div></header>
 <iframe id="panelFrame" title="Gannzilla property panel" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/286ae8235df5ddc68e0ef2980701d7cddee2bcbf/public/kawkabat-al-arqam-al-sihria.html"></iframe>
-<main id="stage"><svg id="squareSvg" viewBox="0 0 1000 1000" role="img" aria-label="Square of 9 expanded directly to frame"></svg><iframe id="circleFrame" title="Circle of 36"></iframe><div id="status">Square of 9 • Direct expanded geometry • 19×19 • 1–361</div></main>
+<main id="stage"><svg id="squareSvg" viewBox="0 0 1000 1000" role="img" aria-label="Square of 9 fitted inside angle wheel with visible shapes"></svg><iframe id="circleFrame" title="Circle of 36"></iframe><div id="status">Square of 9 • fitted table • visible square and triangle • 1–361</div></main>
 <nav id="viewRail" class="rail" aria-label="Views"><button class="round" data-view="circle12">12</button><button class="round" data-view="circle24">24</button><button class="round" data-view="circle36">36</button><button data-view="square4">4</button><button class="active" data-view="square9">9</button><button data-view="permanentSquare">N</button><button data-view="tetragon">◆</button><button data-figure="Pentagon">⬠</button><button data-figure="Hexagon">⬡</button><button data-figure="Octagon">⯃</button><button data-figure="Dodecagon">✺</button></nav>
 <nav id="shapeRail" class="rail" aria-label="Figures"><button class="green" data-figure="Triangle"><span class="poly tri"></span></button><button class="red" data-figure="Square"><span class="poly"></span></button><button data-figure="Pentagon"><span class="poly pent"></span></button><button class="cyan" data-figure="Hexagon"><span class="poly hex"></span></button><button class="violet" data-figure="Septagon">⬡</button><button class="violet" data-figure="Octagon"><span class="poly oct"></span></button><button class="violet" data-figure="Nonagon">⯃</button><button class="gold" data-figure="Dodecagon">◯</button><button data-action="locator">∠</button><button data-action="marker">◒</button><button class="vortex" data-action="vortex">◎</button></nav>
-<div id="loading">جارٍ تكبير الجدول والمربع والمثلث حتى الإطار…</div><div id="v15Badge">V15 waiting…</div>
-<script>(async()=>{try{const b='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/square9-direct-expanded-v15/public/',u=['kawkabat-square9-v13.part1.txt','kawkabat-square9-v13.part2.txt','kawkabat-square9-v13.part3.txt'];const a=await Promise.all(u.map(x=>fetch(b+x,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(x+' HTTP '+r.status);return r.text()})));(0,eval)(a.join('\n'));}catch(e){document.getElementById('loading').textContent='تعذر تشغيل المحرك: '+e.message;}})();</script>
-<script>
-(function(){
-'use strict';
-const SVG_NS='http://www.w3.org/2000/svg';
-const TABLE_SCALE=1.50;
-const SHAPE_SCALE=346/340;
-const FRAME_RADIUS=346;
-const ARROW_ID='directDirectionArrowsV15';
-const svg=document.getElementById('squareSvg');
-const badge=document.getElementById('v15Badge');
-let applying=false;
-function S(tag,attrs){const n=document.createElementNS(SVG_NS,tag);Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,String(v)));return n}
-function displayPoint(radius,displayAngle){const a=(displayAngle-180)*Math.PI/180;return{x:500+Math.cos(a)*radius,y:500+Math.sin(a)*radius}}
-function arrowPath(displayAngle,radius,length,width){const a=(displayAngle-180)*Math.PI/180;const tip=displayPoint(radius,displayAngle);const base=displayPoint(radius-length,displayAngle);const px=-Math.sin(a)*width,py=Math.cos(a)*width;return`M${tip.x} ${tip.y}L${base.x+px} ${base.y+py}L${base.x-px} ${base.y-py}Z`}
-function addArrow(root,angle,color,length,width){root.appendChild(S('path',{d:arrowPath(angle,FRAME_RADIUS,length,width),fill:color,stroke:color,'stroke-width':1,'fill-opacity':.92,'stroke-opacity':1,'stroke-linejoin':'round','vector-effect':'non-scaling-stroke'}))}
-function buildArrows(){const g=S('g',{id:ARROW_ID,'data-arrow-count':'6','pointer-events':'none'});[0,90,180,270].forEach(a=>addArrow(g,a,'#df5f59',24,10));[135,225].forEach(a=>addArrow(g,a,'#38923e',21,8));return g}
-function apply(){
- if(applying||!svg||getComputedStyle(svg).display==='none')return false;
- const square=svg.querySelector('#square'),shapes=svg.querySelector('#mainShapes');
- if(!square||!shapes)return false;
- applying=true;
- try{
-   square.setAttribute('transform',`translate(500 500) scale(${TABLE_SCALE}) translate(-500 -500)`);
-   shapes.setAttribute('transform',`translate(500 500) scale(${SHAPE_SCALE}) translate(-500 -500)`);
-   square.dataset.directScale=String(TABLE_SCALE);
-   shapes.dataset.directScale=String(SHAPE_SCALE);
-   svg.querySelector('#'+ARROW_ID)?.remove();
-   svg.appendChild(buildArrows());
-   const status=document.getElementById('status');
-   if(status)status.textContent='Square of 9 • table 684×684 • shapes touching frame • arrows restored';
-   badge.textContent='V15 ACTIVE • table 1.50× • arrows 6';
-   badge.style.borderColor='#2b7a43';badge.style.color='#246238';
-   document.documentElement.dataset.directExpandedV15='true';
-   return true;
- }finally{applying=false;}
-}
-const observer=new MutationObserver(()=>setTimeout(apply,0));
-observer.observe(svg,{childList:true});
-setInterval(()=>{const square=svg?.querySelector('#square');if(!square||square.dataset.directScale!==String(TABLE_SCALE)||!svg.querySelector('#'+ARROW_ID))apply()},180);
-window.addEventListener('resize',apply);
-window.__auditSquare9DirectExpandedV15=()=>({ok:document.documentElement.dataset.directExpandedV15==='true',tableScale:svg.querySelector('#square')?.dataset.directScale||null,shapeScale:svg.querySelector('#mainShapes')?.dataset.directScale||null,arrowCount:svg.querySelector('#'+ARROW_ID)?.querySelectorAll('path').length||0,estimatedTableSide:456*TABLE_SCALE,frameDiameter:FRAME_RADIUS*2});
-setTimeout(apply,50);setTimeout(apply,400);setTimeout(apply,1000);
-}());
-</script></body></html>
+<div id="loading">جارٍ تصغير الجدول وإظهار المربع والمثلث…</div><div id="v16Badge">V16 waiting…</div>
+<script>(async()=>{try{const base='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/square9-direct-expanded-v15/public/',parts=['kawkabat-square9-v13.part1.txt','kawkabat-square9-v13.part2.txt','kawkabat-square9-v13.part3.txt'];const code=await Promise.all(parts.map(name=>fetch(base+name,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error(name+' HTTP '+r.status);return r.text()})));(0,eval)(code.join('\n'));const patchUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/square9-visible-shapes-v16/public/kawkabat-square9-v16-patch.js';const patch=await fetch(patchUrl,{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('V16 PATCH HTTP '+r.status);return r.text()});(0,eval)(patch);}catch(e){document.getElementById('loading').textContent='تعذر تشغيل المحرك: '+e.message;document.getElementById('v16Badge').textContent='V16 ERROR';}})();</script></body></html>
