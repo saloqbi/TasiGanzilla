@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — Runtime مباشر</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
+    .loading{font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل العجلة…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/d5892894ad1f6c0c1c1018d938dcedf25ebc9ac8/public/kawkabat-wheel-static-base.html';
+
+    try{
+      var response=await fetch(sourceUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('WHEEL_BASE_HTTP_'+response.status);
+      var html=await response.text();
+
+      html=html.replace('</style>',
+        '.cycle-number{font-size:24px!important;pointer-events:none!important}'+
+        '.outer-text-label{font-family:Arial,Tahoma,sans-serif;text-anchor:middle;dominant-baseline:central;direction:rtl;unicode-bidi:plaintext;pointer-events:none;paint-order:stroke fill;stroke:#F7F1E3;stroke-width:1.15;stroke-opacity:.92;vector-effect:non-scaling-stroke}'+
+        '.calendar-day-label{font-size:22px;font-weight:900}'+
+        '.zodiac-element-label{font-size:20px;font-weight:800}'+
+        'html,body{overflow:auto!important;overscroll-behavior:none!important;scroll-behavior:auto!important}'+
+        'html,body,svg{cursor:grab!important;touch-action:none!important}'+
+        'html.wheel-pan-dragging,html.wheel-pan-dragging body,html.wheel-pan-dragging svg{cursor:grabbing!important;user-select:none!important;-webkit-user-select:none!important}'+
+        '</style>');
+
+      var runtime=`
+;(function(){
+  'use strict';
+  var params=new URLSearchParams(String(location.hash||'').replace(/^#/,''));
+  var modeKey=params.get('view')||'circle36';
+  var direction=params.get('direction')==='ccw'?'ccw':'cw';
+  var dataType=params.get('dataType')||'price';
+  var startValue=Number(String(params.get('value')||'0.01').replace(',','.'));
+  var incrementValue=Number(String(params.get('increment')||'1').replace(',','.'));
+  if(!Number.isFinite(startValue))startValue=0.01;
+  if(!Number.isFinite(incrementValue)||incrementValue===0)incrementValue=1;
+  var sign=direction==='ccw'?-1:1;
+  var modes={
+    circle12:{label:'Circle of 12',shape:'circle',divisions:12},
+    circle24:{label:'Circle of 24',shape:'circle',divisions:24},
+    circle36:{label:'Circle of 36',shape:'circle',divisions:36},
+    square4:{label:'Square of 4',shape:'polygon',sides:4,rotation:-45,divisions:4},
+    square9:{label:'Square of 9',shape:'polygon',sides:4,rotation:-45,divisions:9},
+    permanentSquare:{label:'Permanent square',shape:'polygon',sides:4,rotation:-45,divisions:9},
+    tetragon:{label:'Tetragon',shape:'polygon',sides:4,rotation:-45,divisions:4}
+  };
+  var meta=modes[modeKey]||modes.circle36;
+  var divisionCount=meta.divisions;
+  var step=360/divisionCount;
+  var wheelNode=document.getElementById('wheel');
+  var angleFrameNode=document.getElementById('angleFrame');
+  if(!wheelNode||!angleFrameNode)return;
+
+  function clearNode(node){while(node&&node.firstChild)node.removeChild(node.firstChild);}
+  function make(name,attrs){var node=document.createElementNS(NS,name);Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,attrs[key]);});return node;}
+  function ensureGroup(id,label){var group=document.getElementById(id);if(!group){group=make('g',{id:id,'aria-label':label});wheelNode.insertBefore(group,angleFrameNode);}clearNode(group);return group;}
+  function polygonPoints(radius){var points=[];for(var i=0;i<meta.sides;i+=1)points.push(polar(radius,meta.rotation+(360/meta.sides)*i));return points;}
+  function polygonPath(radius){return polygonPoints(radius).map(function(p,i){return(i===0?'M':'L')+p.x+' '+p.y;}).join(' ')+' Z';}
+  function cross(ax,ay,bx,by){return ax*by-ay*bx;}
+  function polygonPoint(radius,degree){
+    var points=polygonPoints(radius),a=degree*Math.PI/180,dx=Math.cos(a),dy=Math.sin(a),best=null;
+    for(var i=0;i<points.length;i+=1){
+      var p=points[i],q=points[(i+1)%points.length],sx=q.x-p.x,sy=q.y-p.y,rx=p.x-cx,ry=p.y-cy,den=cross(dx,dy,sx,sy);
+      if(Math.abs(den)<1e-8)continue;
+      var t=cross(rx,ry,sx,sy)/den,u=cross(rx,ry,dx,dy)/den;
+      if(t>=0&&u>=-1e-7&&u<=1+1e-7&&(best===null||t<best))best=t;
+    }
+    return best===null?polar(radius,degree):{x:cx+dx*best,y:cy+dy*best};
+  }
+  function geometryPoint(radius,degree){return meta.shape==='circle'?polar(radius,degree):polygonPoint(radius,degree);}
+  function addGridFrame(radius){
+    if(meta.shape==='circle'){
+      circle(frames,'frame-shadow',radius);circle(frames,'frame-metal',radius);circle(frames,'frame-highlight',radius-6);
+    }else{
+      path(frames,'frame-shadow',polygonPath(radius));path(frames,'frame-metal',polygonPath(radius));path(frames,'frame-highlight',polygonPath(radius-6));
+    }
+  }
+  function addGridRay(index){
+    var degree=sign*(index*step-step/2)-90,a=geometryPoint(180,degree),b=geometryPoint(1610,degree),group=make('g',{'data-ray-index':index});
+    line(group,'ray-shadow',a.x,a.y,b.x,b.y);line(group,'ray-metal',a.x,a.y,b.x,b.y);line(group,'ray-highlight',a.x,a.y,b.x,b.y);divisions.appendChild(group);
+  }
+  function decimalPlaces(value){var text=String(value);if(/[eE]/.test(text)){var parts=text.toLowerCase().split('e'),base=(parts[0].split('.')[1]||'').length,exp=Number(parts[1]||0);return Math.max(0,base-exp);}return(text.split('.')[1]||'').length;}
+  var valueDecimals=Math.min(8,Math.max(decimalPlaces(startValue),decimalPlaces(incrementValue)));
+  function formatPrice(value){var fixed=value.toFixed(valueDecimals);return valueDecimals?fixed.replace(/\.?0+$/,''):fixed;}
+  function pad2(value){return String(value).padStart(2,'0');}
+  function dateLabel(offset){var date=new Date(Date.UTC(2019,11,31)+(offset*86400000));return pad2(date.getUTCDate())+'.'+pad2(date.getUTCMonth()+1);}
+  function timeLabel(offset){return pad2(((offset%24)+24)%24)+':00';}
+  function displayValue(ordinal){
+    var offset=Math.max(0,ordinal-1),priceText=formatPrice(startValue+(offset*incrementValue)),dateText=dateLabel(offset),timeText=timeLabel(offset);
+    if(dataType==='date')return dateText;
+    if(dataType==='time')return timeText;
+    if(dataType==='priceDate')return priceText+'·'+dateText;
+    if(dataType==='priceTime')return priceText+'·'+timeText;
+    return priceText;
+  }
+  function fontSizeFor(text){var length=String(text).length;if(dataType==='date'||dataType==='time')return 16;if(dataType==='priceDate'||dataType==='priceTime')return length>13?11:13;return length>8?16:length>6?19:24;}
+  function addViewNumber(group,ordinal,index,radius,className){
+    var degree=sign*index*step-90,p=geometryPoint(radius,degree),shown=displayValue(ordinal),cardinal=Math.abs((index*step)%90)<1e-6;
+    var text=make('text',{x:p.x,y:p.y,'class':'number-text '+className+' '+colorClass(ordinal)+(cardinal?' cardinal-number':''),'data-value':ordinal,'data-price-value':formatPrice(startValue+((ordinal-1)*incrementValue))});
+    text.style.setProperty('font-size',fontSizeFor(shown)+'px','important');text.textContent=shown;group.appendChild(text);return text;
+  }
+  function addInnerNumber(group,value,index,radius,className){
+    var degree=sign*index*step-90,p=geometryPoint(radius,degree),cardinal=Math.abs((index*step)%90)<1e-6;
+    var text=make('text',{x:p.x,y:p.y,'class':'number-text '+className+' '+colorClass(value)+(cardinal?' cardinal-number':'')});text.textContent=String(value);group.appendChild(text);
+  }
+  function addOuter(group,textValue,cellValue,index,radius,className){
+    var degree=sign*index*step,normal=((degree%360)+360)%360,p=geometryPoint(radius,degree-90),rotation=normal;if(normal>90&&normal<270)rotation+=180;
+    var text=make('text',{x:p.x,y:p.y,'class':'outer-text-label '+className+' '+colorClass(cellValue),transform:'rotate('+rotation+' '+p.x+' '+p.y+')',lang:'ar','data-cell':cellValue});text.textContent=textValue;group.appendChild(text);
+  }
+
+  clearNode(divisions);clearNode(frames);clearNode(specialFills);clearNode(specialArcs);clearNode(ringOne);clearNode(ringTwo);
+  for(var oldCycle=1;oldCycle<=10;oldCycle+=1){var old=document.getElementById('numbersCycle'+oldCycle);if(old)old.remove();}
+  var oldDays=document.getElementById('calendarDaysRing'),oldZodiac=document.getElementById('zodiacElementsRing');if(oldDays)oldDays.remove();if(oldZodiac)oldZodiac.remove();
+
+  radii.forEach(addGridFrame);
+  for(var rayIndex=0;rayIndex<divisionCount;rayIndex+=1)addGridRay(rayIndex);
+  for(var innerIndex=0;innerIndex<divisionCount;innerIndex+=1){var full=innerIndex===0?divisionCount:innerIndex,root=((full-1)%9)+1;addInnerNumber(ringOne,full,innerIndex,235,'ring-one-number');addInnerNumber(ringTwo,root,innerIndex,345,'ring-two-number');}
+
+  var cycleGroups=[];
+  for(var cycle=1;cycle<=10;cycle+=1){
+    var start=((cycle-1)*divisionCount)+1,end=cycle*divisionCount,radius=455+((cycle-1)*110),group=ensureGroup('numbersCycle'+cycle,'الدورة '+cycle+' من '+start+' إلى '+end);
+    for(var numberIndex=0;numberIndex<divisionCount;numberIndex+=1){var ordinal=numberIndex===0?end:start+numberIndex-1,node=addViewNumber(group,ordinal,numberIndex,radius,'cycle-number');node.setAttribute('data-cycle',cycle);}
+    cycleGroups.push(group);
+  }
+
+  var dayNames=['الجمعة','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس'];
+  var zodiacElements=['ماء الحوت','نار الحمل','تراب الثور','هواء الجوزاء','ماء السرطان','نار الأسد','تراب السنبلة','هواء الميزان','ماء العقرب','نار القوس','تراب الجدي','هواء الدلو'];
+  var daysRing=ensureGroup('calendarDaysRing','الأيام');
+  var zodiacRing=ensureGroup('zodiacElementsRing','الأبراج والعناصر');
+  for(var outerIndex=0;outerIndex<divisionCount;outerIndex+=1){var cell=outerIndex===0?divisionCount:outerIndex;addOuter(daysRing,dayNames[cell%6],cell,outerIndex,1580,'calendar-day-label');addOuter(zodiacRing,zodiacElements[cell%12],cell,outerIndex,1538,'zodiac-element-label');}
+
+  document.documentElement.dataset.viewMode=modeKey;
+  document.documentElement.dataset.clockwise=direction==='cw'?'true':'false';
+  document.documentElement.dataset.dataType=dataType;
+  document.documentElement.dataset.startValue=String(startValue);
+  document.documentElement.dataset.incrementValue=String(incrementValue);
+  window.__auditKawkabatDirectRuntimeV1=function(){return{ok:cycleGroups.length===10&&daysRing.children.length===divisionCount&&zodiacRing.children.length===divisionCount,mode:modeKey,label:meta.label,shape:meta.shape,divisions:divisionCount,direction:direction,dataType:dataType,startValue:startValue,increment:incrementValue,lastOrdinal:divisionCount*10,cycleCount:cycleGroups.length,dayCount:daysRing.children.length,zodiacCount:zodiacRing.children.length};};
+
+  var dragging=false,moved=false,startX=0,startY=0,startLeft=0,startTop=0,suppressClickUntil=0;
+  function scroller(){return document.scrollingElement||document.documentElement;}
+  function editable(target){return !!(target&&target.tagName&&/^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(target.tagName));}
+  document.addEventListener('mousedown',function(event){if(event.button!==0||editable(event.target))return;var root=scroller();dragging=true;moved=false;startX=event.clientX;startY=event.clientY;startLeft=root.scrollLeft;startTop=root.scrollTop;},true);
+  window.addEventListener('mousemove',function(event){if(!dragging)return;var dx=event.clientX-startX,dy=event.clientY-startY;if(!moved&&Math.hypot(dx,dy)>=3)moved=true;if(!moved)return;event.preventDefault();document.documentElement.classList.add('wheel-pan-dragging');var root=scroller();root.scrollLeft=startLeft-dx;root.scrollTop=startTop-dy;},{capture:true,passive:false});
+  window.addEventListener('mouseup',function(){if(moved)suppressClickUntil=Date.now()+220;dragging=false;document.documentElement.classList.remove('wheel-pan-dragging');},true);
+  document.addEventListener('click',function(event){if(Date.now()<suppressClickUntil){event.preventDefault();event.stopImmediatePropagation();}},true);
+}());
+`;
+
+      var marker='window.__auditKawkabatFinalStructureV3=function(){';
+      if(html.indexOf(marker)<0)throw new Error('WHEEL_RUNTIME_MARKER_NOT_FOUND');
+      html=html.replace(marker,runtime+marker);
+      document.open();document.write(html);document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تحميل العجلة: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
