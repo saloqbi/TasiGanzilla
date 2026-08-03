@@ -3,142 +3,159 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>كوكبة الأرقام السحرية — Angle Frames Clean V11</title>
+<title>كوكبة الأرقام السحرية — Angle Frames Overlay V12</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:Arial,Tahoma,sans-serif}
 #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
-#loading{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
-#error{position:fixed;right:16px;bottom:14px;z-index:30;display:none;max-width:640px;padding:10px 14px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
+#frameOverlay{position:fixed;inset:0;width:100%;height:100%;z-index:2147483000;pointer-events:none;overflow:visible;display:none}
+#frameOverlay .red-frame{fill:none;stroke:#df3f3f;stroke-width:3;stroke-opacity:.98;vector-effect:non-scaling-stroke}
+#frameOverlay .green-frame{fill:none;stroke:#1f9f3a;stroke-width:3;stroke-opacity:.98;vector-effect:non-scaling-stroke}
+#frameOverlay .frame-highlight{fill:none;stroke:#fff;stroke-width:.75;stroke-opacity:.72;vector-effect:non-scaling-stroke}
+#loading{position:fixed;inset:0;z-index:2147483600;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
+#error{position:fixed;right:16px;bottom:14px;z-index:2147483640;display:none;max-width:680px;padding:10px 14px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800;direction:ltr}
 </style>
 </head>
 <body>
-<iframe id="app" title="Square of 9 clean angle frames"></iframe>
-<div id="loading">جارٍ إلغاء رموز الأبراج وتنظيم الإطارين الأحمر والأخضر…</div>
+<iframe id="app" title="Square of 9 with synchronized angle frames"></iframe>
+<svg id="frameOverlay" aria-hidden="true"></svg>
+<div id="loading">جارٍ تثبيت الإطارين فوق Square of 9…</div>
 <div id="error"></div>
 <script>
 (function(){
 'use strict';
-var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/b5aee23491eb516604631753b4e8ee79bafb7115/public/kawkabat-al-arqam-al-sihria.html';
+var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/d9df106c948df16d8e08bb712cc27ae26cd42ba0/public/kawkabat-al-arqam-al-sihria.html';
 var NS='http://www.w3.org/2000/svg';
-var ROOT_ID='cleanAngleFramesV11';
 var ZODIAC=new Set(['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓']);
+var INNER_FRAME_IDS=['cleanAngleFramesV11','protractor','chronometer','engineProtractor','engineChronometer','chronometerGuaranteedLayer','protractorGuaranteedLayer','protractorIntegratedLayer','chronometerIntegratedLayer'];
 var frame=document.getElementById('app');
+var overlay=document.getElementById('frameOverlay');
 var loading=document.getElementById('loading');
 var errorBox=document.getElementById('error');
+var lastMetrics=null;
 
-function findSquareDocument(win,seen){
+function showError(error){
+  errorBox.style.display='block';
+  errorBox.textContent='ANGLE FRAME OVERLAY V12 ERROR: '+String(error&&error.message||error);
+}
+function findSquareContext(win,seen){
   seen=seen||new Set();
   try{
     if(!win||seen.has(win))return null;
     seen.add(win);
     var doc=win.document;
-    if(doc&&doc.getElementById('squareSvg'))return doc;
+    var square=doc&&doc.getElementById('squareSvg');
+    if(square)return{win:win,doc:doc,square:square};
     var frames=doc?Array.from(doc.querySelectorAll('iframe')):[];
     for(var i=0;i<frames.length;i++){
-      try{var found=findSquareDocument(frames[i].contentWindow,seen);if(found)return found;}catch(_){}
+      try{
+        var found=findSquareContext(frames[i].contentWindow,seen);
+        if(found)return found;
+      }catch(_){}
     }
   }catch(_){}
   return null;
 }
-function S(doc,tag,attrs){
-  var node=doc.createElementNS(NS,tag);
-  Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,String(attrs[key]));});
-  return node;
+function globalRect(element){
+  var rect=element.getBoundingClientRect();
+  var left=rect.left,top=rect.top,width=rect.width,height=rect.height;
+  var win=element.ownerDocument.defaultView;
+  while(win&&win!==window){
+    var frameElement=win.frameElement;
+    if(!frameElement)break;
+    var frameRect=frameElement.getBoundingClientRect();
+    left+=frameRect.left;
+    top+=frameRect.top;
+    win=frameElement.ownerDocument.defaultView;
+  }
+  return{left:left,top:top,width:width,height:height};
 }
-function removeZodiacGlyphs(doc,square){
+function removeInnerFramesAndZodiac(context){
+  var doc=context.doc,square=context.square;
+  INNER_FRAME_IDS.forEach(function(id){
+    var node=doc.getElementById(id);
+    if(node)node.style.setProperty('display','none','important');
+  });
   ['approvedZodiacInsideGridV7','approvedZodiacInsideGridV8','approvedZodiacInsideGridV9','approvedZodiacInsideGridV10'].forEach(function(id){
     var node=doc.getElementById(id);if(node)node.remove();
   });
   Array.from(square.querySelectorAll('text')).forEach(function(node){
     if(ZODIAC.has(String(node.textContent||'').trim()))node.remove();
   });
-}
-function colorLooksRed(value){
-  value=String(value||'').toLowerCase();
-  return value==='red'||value.includes('#ff0000')||value.includes('#e75b5b')||value.includes('#df3f3f')||value.includes('#d34')||value.includes('#e36');
-}
-function colorLooksGreen(value){
-  value=String(value||'').toLowerCase();
-  return value==='green'||value.includes('#008000')||value.includes('#21a43b')||value.includes('#58a95f')||value.includes('#2a9')||value.includes('#4c9');
-}
-function removeDuplicateFrames(doc,square){
-  ['protractor','chronometer','engineProtractor','engineChronometer','chronometerGuaranteedLayer','protractorGuaranteedLayer','protractorIntegratedLayer','chronometerIntegratedLayer'].forEach(function(id){
-    var node=doc.getElementById(id);if(node)node.style.setProperty('display','none','important');
-  });
   Array.from(square.querySelectorAll('circle')).forEach(function(circle){
-    if(circle.closest('#'+ROOT_ID))return;
     var r=Number(circle.getAttribute('r'));
     if(!Number.isFinite(r)||r<325||r>390)return;
-    var stroke=circle.getAttribute('stroke')||circle.style.stroke||'';
-    if(colorLooksRed(stroke)||colorLooksGreen(stroke))circle.style.setProperty('display','none','important');
+    var stroke=String(circle.getAttribute('stroke')||circle.style.stroke||'').toLowerCase();
+    if(stroke.includes('df3f3f')||stroke.includes('1f9f3a')||stroke.includes('e75b5b')||stroke.includes('008000')||stroke==='red'||stroke==='green'){
+      circle.style.setProperty('display','none','important');
+    }
   });
 }
-function drawCleanFrames(doc,square){
-  var old=doc.getElementById(ROOT_ID);if(old)old.remove();
-  var root=S(doc,'g',{id:ROOT_ID,'data-frame-layout':'red-inner-green-outer','pointer-events':'none'});
-  var anchor=doc.getElementById('mainShapes');
-  if(anchor&&anchor.parentNode===square)square.insertBefore(root,anchor);else square.appendChild(root);
-
-  root.appendChild(S(doc,'circle',{
-    cx:500,cy:500,r:346,
-    fill:'none',stroke:'#df3f3f','stroke-width':2.7,
-    'stroke-opacity':0.96,'vector-effect':'non-scaling-stroke'
-  }));
-  root.appendChild(S(doc,'circle',{
-    cx:500,cy:500,r:363,
-    fill:'none',stroke:'#1f9f3a','stroke-width':2.7,
-    'stroke-opacity':0.96,'vector-effect':'non-scaling-stroke'
-  }));
+function createCircle(className,cx,cy,r){
+  var circle=document.createElementNS(NS,'circle');
+  circle.setAttribute('class',className);
+  circle.setAttribute('cx',String(cx));
+  circle.setAttribute('cy',String(cy));
+  circle.setAttribute('r',String(r));
+  return circle;
 }
-function applyFix(){
+function renderOverlay(){
   try{
-    var doc=findSquareDocument(frame.contentWindow);
-    if(!doc)return false;
-    var square=doc.getElementById('squareSvg');
-    if(!square||doc.defaultView.getComputedStyle(square).display==='none')return false;
-    removeZodiacGlyphs(doc,square);
-    removeDuplicateFrames(doc,square);
-    drawCleanFrames(doc,square);
-    doc.documentElement.dataset.zodiacGlyphsRemovedV11='true';
-    doc.documentElement.dataset.cleanAngleFramesV11='2';
+    var context=findSquareContext(frame.contentWindow);
+    if(!context){overlay.style.display='none';return false;}
+    var style=context.win.getComputedStyle(context.square);
+    if(style.display==='none'||style.visibility==='hidden'||Number(style.opacity)===0){overlay.style.display='none';return false;}
+    removeInnerFramesAndZodiac(context);
+    var rect=globalRect(context.square);
+    if(rect.width<10||rect.height<10){overlay.style.display='none';return false;}
+    var scale=Math.min(rect.width/1000,rect.height/1000);
+    var contentWidth=1000*scale,contentHeight=1000*scale;
+    var contentLeft=rect.left+(rect.width-contentWidth)/2;
+    var contentTop=rect.top+(rect.height-contentHeight)/2;
+    var cx=contentLeft+500*scale;
+    var cy=contentTop+500*scale;
+    var redRadius=346*scale;
+    var greenRadius=363*scale;
+    var metrics=[cx,cy,redRadius,greenRadius,window.innerWidth,window.innerHeight].map(function(v){return Math.round(v*100)/100;}).join('|');
+    if(metrics===lastMetrics&&overlay.childElementCount===4){return true;}
+    lastMetrics=metrics;
+    overlay.setAttribute('viewBox','0 0 '+window.innerWidth+' '+window.innerHeight);
+    overlay.replaceChildren(
+      createCircle('green-frame',cx,cy,greenRadius),
+      createCircle('frame-highlight',cx,cy,greenRadius-1.3),
+      createCircle('red-frame',cx,cy,redRadius),
+      createCircle('frame-highlight',cx,cy,redRadius-1.3)
+    );
+    overlay.style.display='block';
+    overlay.dataset.frameCount='2';
+    overlay.dataset.layout='red-inner-green-outer';
+    overlay.dataset.scale=String(scale);
     errorBox.style.display='none';
     return true;
   }catch(error){
-    errorBox.style.display='block';
-    errorBox.textContent='ANGLE FRAMES V11 ERROR: '+String(error&&error.message||error);
+    overlay.style.display='none';
+    showError(error);
     return false;
   }
 }
+function sync(){renderOverlay();}
 frame.addEventListener('load',function(){
   if(loading)loading.remove();
-  setTimeout(applyFix,260);
-  setTimeout(applyFix,850);
-  setTimeout(applyFix,1700);
+  setTimeout(sync,250);
+  setTimeout(sync,800);
+  setTimeout(sync,1600);
 });
 frame.src=SOURCE;
-window.setInterval(function(){
-  var doc=findSquareDocument(frame.contentWindow);
-  if(!doc||!doc.getElementById(ROOT_ID))applyFix();
-  else{
-    var square=doc.getElementById('squareSvg');
-    if(square){removeZodiacGlyphs(doc,square);removeDuplicateFrames(doc,square);}
-  }
-},450);
-window.__auditSquare9AngleFramesCleanV11=function(){
-  var doc=findSquareDocument(frame.contentWindow);
-  var root=doc?doc.getElementById(ROOT_ID):null;
-  var zodiacCount=0;
-  if(doc){
-    var square=doc.getElementById('squareSvg');
-    if(square)zodiacCount=Array.from(square.querySelectorAll('text')).filter(function(node){return ZODIAC.has(String(node.textContent||'').trim());}).length;
-  }
+window.addEventListener('resize',function(){lastMetrics=null;sync();});
+window.setInterval(sync,180);
+window.__auditSquare9AngleFramesOverlayV12=function(){
+  var context=findSquareContext(frame.contentWindow);
   return{
-    ok:!!root,
-    frameCount:root?root.querySelectorAll('circle').length:0,
-    zodiacGlyphCount:zodiacCount,
-    layout:root?root.dataset.frameLayout:null,
-    redRadius:346,
-    greenRadius:363
+    ok:overlay.style.display!=='none'&&overlay.childElementCount===4,
+    visibleFrameCount:overlay.dataset.frameCount||null,
+    layout:overlay.dataset.layout||null,
+    scale:overlay.dataset.scale||null,
+    squareFound:!!context,
+    zodiacGlyphCount:context?Array.from(context.square.querySelectorAll('text')).filter(function(node){return ZODIAC.has(String(node.textContent||'').trim());}).length:null
   };
 };
 }());
