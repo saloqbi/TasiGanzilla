@@ -3,24 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>كوكبة الأرقام السحرية — Square of 9 Fraction Guides V10</title>
+<title>كوكبة الأرقام السحرية — Angle Frames Clean V11</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:Arial,Tahoma,sans-serif}
 #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
 #loading{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
-#error{position:fixed;right:16px;bottom:14px;z-index:30;display:none;max-width:620px;padding:10px 14px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
+#error{position:fixed;right:16px;bottom:14px;z-index:30;display:none;max-width:640px;padding:10px 14px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
 </style>
 </head>
 <body>
-<iframe id="app" title="Square of 9 fraction guides"></iframe>
-<div id="loading">جارٍ إضافة الكسور ونقاط المحاور الناقصة…</div>
+<iframe id="app" title="Square of 9 clean angle frames"></iframe>
+<div id="loading">جارٍ إلغاء رموز الأبراج وتنظيم الإطارين الأحمر والأخضر…</div>
 <div id="error"></div>
 <script>
 (function(){
 'use strict';
-var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/59bc862aa4a2d4e049a6d1e564e8be3c88660451/public/kawkabat-al-arqam-al-sihria.html';
+var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/b5aee23491eb516604631753b4e8ee79bafb7115/public/kawkabat-al-arqam-al-sihria.html';
 var NS='http://www.w3.org/2000/svg';
-var ROOT_ID='fractionGuidesV10';
+var ROOT_ID='cleanAngleFramesV11';
+var ZODIAC=new Set(['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓']);
 var frame=document.getElementById('app');
 var loading=document.getElementById('loading');
 var errorBox=document.getElementById('error');
@@ -39,97 +40,105 @@ function findSquareDocument(win,seen){
   }catch(_){}
   return null;
 }
-function S(doc,tag,attrs,text){
+function S(doc,tag,attrs){
   var node=doc.createElementNS(NS,tag);
   Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,String(attrs[key]));});
-  if(text!==undefined)node.textContent=String(text);
   return node;
 }
-function addText(doc,root,label,x,y,color,size){
-  root.appendChild(S(doc,'text',{
-    x:x,y:y,'text-anchor':'middle','dominant-baseline':'central',
-    'font-family':'Arial,Tahoma,sans-serif','font-size':size||13,
-    'font-weight':'900',fill:color,'paint-order':'stroke fill',
-    stroke:'#fffdf8','stroke-width':'1.5','stroke-opacity':'0.96'
-  },label));
-}
-function addPoint(doc,root,x,y,color,r){
-  root.appendChild(S(doc,'circle',{cx:x,cy:y,r:r||4.2,fill:color,stroke:'#fff','stroke-width':'1.5'}));
-  root.appendChild(S(doc,'circle',{cx:x,cy:y,r:1.45,fill:'#fff','fill-opacity':'0.96',stroke:'none'}));
-}
-function removeOldLabels(doc){
-  var main=doc.getElementById('mainShapes');
-  if(!main)return;
-  var labels={'1/4':1,'1/2':1,'1/3':1,'2/3':1,'3/4':1};
-  Array.from(main.querySelectorAll('text')).forEach(function(node){
-    if(labels[String(node.textContent||'').trim()])node.style.setProperty('display','none','important');
+function removeZodiacGlyphs(doc,square){
+  ['approvedZodiacInsideGridV7','approvedZodiacInsideGridV8','approvedZodiacInsideGridV9','approvedZodiacInsideGridV10'].forEach(function(id){
+    var node=doc.getElementById(id);if(node)node.remove();
+  });
+  Array.from(square.querySelectorAll('text')).forEach(function(node){
+    if(ZODIAC.has(String(node.textContent||'').trim()))node.remove();
   });
 }
-function applyFractionGuides(){
+function colorLooksRed(value){
+  value=String(value||'').toLowerCase();
+  return value==='red'||value.includes('#ff0000')||value.includes('#e75b5b')||value.includes('#df3f3f')||value.includes('#d34')||value.includes('#e36');
+}
+function colorLooksGreen(value){
+  value=String(value||'').toLowerCase();
+  return value==='green'||value.includes('#008000')||value.includes('#21a43b')||value.includes('#58a95f')||value.includes('#2a9')||value.includes('#4c9');
+}
+function removeDuplicateFrames(doc,square){
+  ['protractor','chronometer','engineProtractor','engineChronometer','chronometerGuaranteedLayer','protractorGuaranteedLayer','protractorIntegratedLayer','chronometerIntegratedLayer'].forEach(function(id){
+    var node=doc.getElementById(id);if(node)node.style.setProperty('display','none','important');
+  });
+  Array.from(square.querySelectorAll('circle')).forEach(function(circle){
+    if(circle.closest('#'+ROOT_ID))return;
+    var r=Number(circle.getAttribute('r'));
+    if(!Number.isFinite(r)||r<325||r>390)return;
+    var stroke=circle.getAttribute('stroke')||circle.style.stroke||'';
+    if(colorLooksRed(stroke)||colorLooksGreen(stroke))circle.style.setProperty('display','none','important');
+  });
+}
+function drawCleanFrames(doc,square){
+  var old=doc.getElementById(ROOT_ID);if(old)old.remove();
+  var root=S(doc,'g',{id:ROOT_ID,'data-frame-layout':'red-inner-green-outer','pointer-events':'none'});
+  var anchor=doc.getElementById('mainShapes');
+  if(anchor&&anchor.parentNode===square)square.insertBefore(root,anchor);else square.appendChild(root);
+
+  root.appendChild(S(doc,'circle',{
+    cx:500,cy:500,r:346,
+    fill:'none',stroke:'#df3f3f','stroke-width':2.7,
+    'stroke-opacity':0.96,'vector-effect':'non-scaling-stroke'
+  }));
+  root.appendChild(S(doc,'circle',{
+    cx:500,cy:500,r:363,
+    fill:'none',stroke:'#1f9f3a','stroke-width':2.7,
+    'stroke-opacity':0.96,'vector-effect':'non-scaling-stroke'
+  }));
+}
+function applyFix(){
   try{
     var doc=findSquareDocument(frame.contentWindow);
     if(!doc)return false;
     var square=doc.getElementById('squareSvg');
     if(!square||doc.defaultView.getComputedStyle(square).display==='none')return false;
-    var old=doc.getElementById(ROOT_ID);if(old)old.remove();
-    removeOldLabels(doc);
-
-    var root=S(doc,'g',{id:ROOT_ID,'data-fraction-guides':'complete','pointer-events':'none'});
-    square.appendChild(root);
-
-    var red='#e36a63',orange='#d88b00',green='#4c9b19',dark='#222';
-    var top={x:500,y:160},right={x:840,y:500},bottom={x:500,y:840},left={x:160,y:500};
-    var greenTop={x:740.42,y:259.58},greenBottom={x:740.42,y:740.42};
-
-    addPoint(doc,root,top.x,top.y,red,4.3);
-    addPoint(doc,root,right.x,right.y,red,4.3);
-    addPoint(doc,root,bottom.x,bottom.y,red,4.3);
-    addPoint(doc,root,left.x,left.y,red,4.3);
-    root.appendChild(S(doc,'circle',{cx:143,cy:500,r:3.4,fill:'#fff',stroke:dark,'stroke-width':'1.3'}));
-    root.appendChild(S(doc,'line',{x1:146.5,y1:500,x2:155.5,y2:500,stroke:red,'stroke-width':'1.4'}));
-    addPoint(doc,root,greenTop.x,greenTop.y,green,3.6);
-    addPoint(doc,root,greenBottom.x,greenBottom.y,green,3.6);
-
-    root.appendChild(S(doc,'path',{d:'M493 177 L500 163 L507 177 Z',fill:red,'fill-opacity':'0.72',stroke:red,'stroke-width':'0.8'}));
-    root.appendChild(S(doc,'path',{d:'M824 493 L839 500 L824 507 Z',fill:red,'fill-opacity':'0.72',stroke:red,'stroke-width':'0.8'}));
-    root.appendChild(S(doc,'path',{d:'M493 823 L500 839 L507 823 Z',fill:red,'fill-opacity':'0.72',stroke:red,'stroke-width':'0.8'}));
-
-    addText(doc,root,'1/4',500,188,orange,13);
-    addText(doc,root,'1/2',812,500,orange,13);
-    addText(doc,root,'1/3',719,276,green,12.5);
-    addText(doc,root,'2/3',719,724,green,12.5);
-    addText(doc,root,'3/4',500,812,orange,13);
-
-    doc.documentElement.dataset.fractionGuidesV10='true';
-    doc.documentElement.dataset.fractionLabelCountV10='5';
-    doc.documentElement.dataset.fractionAnchorCountV10='7';
+    removeZodiacGlyphs(doc,square);
+    removeDuplicateFrames(doc,square);
+    drawCleanFrames(doc,square);
+    doc.documentElement.dataset.zodiacGlyphsRemovedV11='true';
+    doc.documentElement.dataset.cleanAngleFramesV11='2';
     errorBox.style.display='none';
     return true;
   }catch(error){
     errorBox.style.display='block';
-    errorBox.textContent='FRACTION GUIDES V10 ERROR: '+String(error&&error.message||error);
+    errorBox.textContent='ANGLE FRAMES V11 ERROR: '+String(error&&error.message||error);
     return false;
   }
 }
 frame.addEventListener('load',function(){
   if(loading)loading.remove();
-  setTimeout(applyFractionGuides,260);
-  setTimeout(applyFractionGuides,850);
-  setTimeout(applyFractionGuides,1700);
+  setTimeout(applyFix,260);
+  setTimeout(applyFix,850);
+  setTimeout(applyFix,1700);
 });
 frame.src=SOURCE;
 window.setInterval(function(){
   var doc=findSquareDocument(frame.contentWindow);
-  if(!doc||!doc.getElementById(ROOT_ID))applyFractionGuides();
+  if(!doc||!doc.getElementById(ROOT_ID))applyFix();
+  else{
+    var square=doc.getElementById('squareSvg');
+    if(square){removeZodiacGlyphs(doc,square);removeDuplicateFrames(doc,square);}
+  }
 },450);
-window.__auditSquare9FractionGuidesV10=function(){
+window.__auditSquare9AngleFramesCleanV11=function(){
   var doc=findSquareDocument(frame.contentWindow);
   var root=doc?doc.getElementById(ROOT_ID):null;
+  var zodiacCount=0;
+  if(doc){
+    var square=doc.getElementById('squareSvg');
+    if(square)zodiacCount=Array.from(square.querySelectorAll('text')).filter(function(node){return ZODIAC.has(String(node.textContent||'').trim());}).length;
+  }
   return{
     ok:!!root,
-    labelCount:doc?doc.documentElement.dataset.fractionLabelCountV10:null,
-    anchorCount:doc?doc.documentElement.dataset.fractionAnchorCountV10:null,
-    guideState:root?root.dataset.fractionGuides:null
+    frameCount:root?root.querySelectorAll('circle').length:0,
+    zodiacGlyphCount:zodiacCount,
+    layout:root?root.dataset.frameLayout:null,
+    redRadius:346,
+    greenRadius:363
   };
 };
 }());
