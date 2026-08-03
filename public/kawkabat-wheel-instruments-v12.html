@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية — Instruments V12</title>
+  <style>html,body{margin:0;width:100%;height:100%;background:#F7F1E3}body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}.loading{font-weight:800}</style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل العجلة والأدوات V12…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/0e1aa64595feccc46ddc92fb44a9b34633e35cec/public/kawkabat-wheel-runtime-final.html';
+    var instruments=(function(){
+      'use strict';
+      var NS='http://www.w3.org/2000/svg';
+      var attempts=0;
+      function boolParam(params,name,fallback){var value=params.get(name);if(value===null)return !!fallback;return value==='1'||value==='true'||value==='on';}
+      function numParam(params,name,fallback){var raw=params.get(name);var value=Number(String(raw===null?fallback:raw).replace(',','.').replace(/°/g,''));return Number.isFinite(value)?value:fallback;}
+      function textParam(params,name,fallback){var value=params.get(name);return value===null?fallback:String(value);}
+      function boot(){
+        var wheel=document.getElementById('wheel');
+        var cycle=document.getElementById('numbersCycle1');
+        if(!wheel||!cycle){attempts+=1;if(attempts<100)return window.setTimeout(boot,50);return;}
+        try{
+          var params=new URLSearchParams(String(location.hash||'').replace(/^#/,''));
+          var cx=2200,cy=1800;
+          function make(name,attrs){var node=document.createElementNS(NS,name);Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,String(attrs[key]));});return node;}
+          function polar(radius,degree){var radians=degree*Math.PI/180;return{x:cx+Math.cos(radians)*radius,y:cy+Math.sin(radians)*radius};}
+          function group(id,label){var old=document.getElementById(id);if(old)old.remove();var node=make('g',{id:id,'aria-label':label,'pointer-events':'none'});wheel.appendChild(node);return node;}
+          function circle(parent,radius,stroke,width,opacity,dash){var node=make('circle',{cx:cx,cy:cy,r:radius,fill:'none',stroke:stroke,'stroke-width':width,'stroke-opacity':opacity,'vector-effect':'non-scaling-stroke'});if(dash)node.setAttribute('stroke-dasharray',dash);parent.appendChild(node);return node;}
+          function line(parent,x1,y1,x2,y2,stroke,width,opacity,dash){var node=make('line',{x1:x1,y1:y1,x2:x2,y2:y2,stroke:stroke,'stroke-width':width,'stroke-opacity':opacity,'stroke-linecap':'round','vector-effect':'non-scaling-stroke'});if(dash)node.setAttribute('stroke-dasharray',dash);parent.appendChild(node);return node;}
+          function label(parent,value,radius,degree,size,fill){var point=polar(radius,degree);var node=make('text',{x:point.x,y:point.y,'text-anchor':'middle','dominant-baseline':'central','font-family':'Arial,Tahoma,sans-serif','font-size':size,'font-weight':900,fill:fill,'paint-order':'stroke fill',stroke:'#F7F1E3','stroke-width':2,'stroke-opacity':1,'vector-effect':'non-scaling-stroke'});node.textContent=String(value);parent.appendChild(node);return node;}
+          var chronoVisible=boolParam(params,'chronoVisible',true);
+          if(chronoVisible){
+            var chrono=group('chronometerV12Layer','Chronometer V12');
+            var chronoRadius=1260;
+            circle(chrono,chronoRadius,'#0B6A3B',16,1);
+            circle(chrono,chronoRadius+18,'#8BD3AC',5,0.95);
+            var rangeName=textParam(params,'chronoRange','Annual');
+            var ranges={Annual:{count:12,labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']},Semiannual:{count:6,labels:['1','2','3','4','5','6']},Quarterly:{count:4,labels:['Q1','Q2','Q3','Q4']},Monthly:{count:31,labels:null},Weekly:{count:7,labels:['Sun','Mon','Tue','Wed','Thu','Fri','Sat']},Daily:{count:24,labels:null},Intraday:{count:24,labels:null}};
+            var meta=ranges[rangeName]||ranges.Annual;
+            var sign=boolParam(params,'chronoClockwise',true)?1:-1;
+            var angle=numParam(params,'chronoAngle',0);
+            for(var i=0;i<meta.count;i+=1){var degree=sign*i*(360/meta.count)+angle-90;var outer=polar(chronoRadius,degree);var inner=polar(chronoRadius-38,degree);line(chrono,outer.x,outer.y,inner.x,inner.y,'#064D2A',i%Math.max(1,Math.round(meta.count/12))===0?5:2.4,1);if(meta.count<=12||i%Math.max(1,Math.round(meta.count/12))===0)label(chrono,meta.labels?meta.labels[i]:String(i+1),chronoRadius-72,degree,24,'#064D2A');}
+          }
+          var proVisible=boolParam(params,'protractorVisible',false);
+          if(proVisible){
+            var pro=group('protractorV12Layer','Protractor V12');
+            var proRadius=1460;
+            circle(pro,proRadius,'#C72B24',14,1);
+            circle(pro,proRadius-18,'#F2A39B',4,0.95);
+            var proSign=boolParam(params,'protractorClockwise',true)?1:-1;
+            var proAngle=numParam(params,'protractorAngle',0);
+            for(var p=0;p<360;p+=5){var pDegree=proSign*p+proAngle-90;var pOuter=polar(proRadius,pDegree);var pInner=polar(proRadius-(p%30===0?42:(p%10===0?28:15)),pDegree);line(pro,pOuter.x,pOuter.y,pInner.x,pInner.y,'#8E1914',p%30===0?5:(p%10===0?3:1.8),1);if(p%30===0)label(pro,String(p)+'°',proRadius-78,pDegree,20,'#8E1914');}
+          }
+          var findRaw=String(params.get('find')||'').trim().replace(',','.');var findValue=Number(findRaw);
+          if(findRaw!==''&&Number.isFinite(findValue)){var found=null;Array.prototype.some.call(wheel.querySelectorAll('[data-price-value]'),function(node){var value=Number(node.getAttribute('data-price-value'));if(Number.isFinite(value)&&Math.abs(value-findValue)<=Math.max(1e-9,Math.abs(findValue)*1e-10)){found=node;return true;}return false;});if(found){var findGroup=group('findV12Layer','Find V12');var box=found.getBBox();findGroup.appendChild(make('rect',{x:box.x-14,y:box.y-10,width:box.width+28,height:box.height+20,rx:14,fill:'#FFD86A','fill-opacity':0.25,stroke:'#B87900','stroke-width':4,'vector-effect':'non-scaling-stroke'}));}}
+          var highlight=boolParam(params,'highlight',false);
+          if(highlight){var h=group('highlightV12Layer','Highlight V12');var fill=textParam(params,'highlightFill','levels').toLowerCase();var marks=boolParam(params,'highlightMarks',false);var numbers=boolParam(params,'highlightNumbers',false);if(fill==='cross'){line(h,590,cy,3810,cy,'#D49A32',90,0.15);line(h,cx,190,cx,3410,'#4E8EAE',90,0.13);}else{for(var level=1;level<=10;level+=1){var radius=455+(level-1)*110;circle(h,radius,level%2===1?'#E0B044':'#4E8EAE',86,level%2===1?0.10:0.07);if(marks){var q=polar(radius,-90);h.appendChild(make('circle',{cx:q.x,cy:q.y,r:10,fill:'#FFD86A',stroke:'#8A5A00','stroke-width':3,'vector-effect':'non-scaling-stroke'}));}if(numbers)label(h,String(level),radius,-90,18,'#17191B');}}}
+          document.documentElement.dataset.instrumentsV12Ready='true';
+          document.documentElement.dataset.chronometerV12=chronoVisible?'true':'false';
+          document.documentElement.dataset.protractorV12=proVisible?'true':'false';
+          try{window.parent.postMessage({type:'KAWKABAT_INSTRUMENTS_V12_READY',chronometer:chronoVisible,protractor:proVisible},'*');}catch(ignore){}
+        }catch(error){
+          try{var wheelFallback=document.getElementById('wheel');if(wheelFallback){var errorText=document.createElementNS(NS,'text');errorText.setAttribute('x','2200');errorText.setAttribute('y','700');errorText.setAttribute('text-anchor','middle');errorText.setAttribute('font-size','34');errorText.setAttribute('font-weight','900');errorText.setAttribute('fill','#B00020');errorText.textContent='TOOLS V12 ERROR: '+String(error&&error.message||error);wheelFallback.appendChild(errorText);}}catch(ignore2){}
+        }
+      }
+      boot();
+    }).toString();
+    try{
+      var response=await fetch(sourceUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('BASE_RUNTIME_HTTP_'+response.status);
+      var source=await response.text();
+      var writeMarker="      document.open();document.write(html);document.close();";
+      var injected="      var instrumentsClose='</scr'+'ipt>';\n"+
+        "      var instrumentsScript='<script id=\"kawkabat-instruments-v12\">('+"+JSON.stringify(instruments)+"+')();'+instrumentsClose;\n"+
+        "      var instrumentsBodyClose=html.lastIndexOf('</body>');\n"+
+        "      if(instrumentsBodyClose<0)throw new Error('INSTRUMENTS_BODY_CLOSE_NOT_FOUND');\n"+
+        "      html=html.slice(0,instrumentsBodyClose)+instrumentsScript+html.slice(instrumentsBodyClose);\n";
+      if(source.indexOf(writeMarker)<0)throw new Error('BASE_WRITE_MARKER_NOT_FOUND');
+      source=source.replace(writeMarker,injected+writeMarker);
+      document.open();document.write(source);document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تحميل أدوات V12: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
