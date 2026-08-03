@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — Highlight Runtime V2</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
+    .loading{font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل Highlight V2…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/9e26516c5ae03114c9325ffcab86a6c42161a968/public/kawkabat-wheel-runtime-highlight-v1.html';
+    try{
+      var response=await fetch(sourceUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('HIGHLIGHT_V1_HTTP_'+response.status);
+      var source=await response.text();
+      source=source.replace('Highlight Runtime V1','Highlight Runtime V2');
+
+      var writeMarker="      document.open();document.write(source);document.close();";
+      var patch=`      var crossCloseTag='</scr'+'ipt>';
+      var crossScript='<script id="kawkabat-highlight-cross-v2">(function(){'+
+        "'use strict';"+
+        'var params=new URLSearchParams(String(location.hash||"").replace(/^#/,""));'+
+        'var visible=params.get("highlight")==="1"||params.get("highlight")==="true";'+
+        'var fill=String(params.get("highlightFill")||"levels").toLowerCase();'+
+        'var marks=params.get("highlightMarks")==="1"||params.get("highlightMarks")==="true";'+
+        'var numbers=params.get("highlightNumbers")==="1"||params.get("highlightNumbers")==="true";'+
+        'if(!visible||fill!=="cross")return;'+
+        'var NS="http://www.w3.org/2000/svg",wheel=document.getElementById("wheel");if(!wheel)return;'+
+        'var old=document.getElementById("crossHighlightLayer");if(old)old.remove();'+
+        'var group=document.createElementNS(NS,"g");group.id="crossHighlightLayer";group.setAttribute("pointer-events","none");group.setAttribute("aria-label","Highlight cross");'+
+        'var anchor=document.getElementById("logoImage")||wheel.firstChild;wheel.insertBefore(group,anchor);'+
+        'function line(x1,y1,x2,y2,stroke,width,opacity){var node=document.createElementNS(NS,"line");node.setAttribute("x1",x1);node.setAttribute("y1",y1);node.setAttribute("x2",x2);node.setAttribute("y2",y2);node.setAttribute("stroke",stroke);node.setAttribute("stroke-width",width);node.setAttribute("stroke-opacity",opacity);node.setAttribute("stroke-linecap","butt");node.setAttribute("vector-effect","non-scaling-stroke");group.appendChild(node);return node;}'+
+        'line(590,1800,3810,1800,"#D49A32",104,"0.13");'+
+        'line(2200,190,2200,3410,"#4E8EAE",104,"0.11");'+
+        'line(590,1800,3810,1800,"#FFF1C0",3,"0.52");'+
+        'line(2200,190,2200,3410,"#E9F7FF",3,"0.52");'+
+        'var points=[{x:2200,y:220,label:"0°"},{x:3780,y:1800,label:"90°"},{x:2200,y:3380,label:"180°"},{x:620,y:1800,label:"270°"}];'+
+        'points.forEach(function(point){if(marks){var mark=document.createElementNS(NS,"circle");mark.setAttribute("cx",point.x);mark.setAttribute("cy",point.y);mark.setAttribute("r",10);mark.setAttribute("fill","#FFD86A");mark.setAttribute("stroke","#8A5A00");mark.setAttribute("stroke-width",3);mark.setAttribute("vector-effect","non-scaling-stroke");group.appendChild(mark);}if(numbers){var text=document.createElementNS(NS,"text");text.setAttribute("x",point.x);text.setAttribute("y",point.y-24);text.setAttribute("text-anchor","middle");text.setAttribute("font-family","Arial,Tahoma,sans-serif");text.setAttribute("font-size","18");text.setAttribute("font-weight","900");text.setAttribute("fill","#17191B");text.textContent=point.label;group.appendChild(text);}});'+
+        'document.documentElement.dataset.highlightVisible="true";document.documentElement.dataset.highlightFill="cross";'+
+        'window.__auditKawkabatHighlightCrossV2=function(){return{ok:true,visible:true,fill:"cross",lineCount:group.querySelectorAll("line").length,markCount:group.querySelectorAll("circle").length,numberCount:group.querySelectorAll("text").length};};'+
+      '}());'+crossCloseTag;
+      var bodyClose=source.lastIndexOf('</body>');
+      if(bodyClose<0)throw new Error('CROSS_BODY_CLOSE_NOT_FOUND');
+      source=source.slice(0,bodyClose)+crossScript+source.slice(bodyClose);
+`;
+
+      if(source.indexOf(writeMarker)<0)throw new Error('CROSS_WRITE_MARKER_NOT_FOUND');
+      source=source.replace(writeMarker,patch+writeMarker);
+      document.open();document.write(source);document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تحميل Highlight V2: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
