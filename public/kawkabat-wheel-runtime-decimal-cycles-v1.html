@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — Fixed Cycles + Center Clock V7</title>
+  <title>كوكبة الأرقام السحرية — Fixed Cycles + Center Clock V8</title>
   <style>html,body{margin:0;width:100%;height:100%;background:#F7F1E3}body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}.loading{font-weight:800}</style>
 </head>
 <body>
@@ -31,18 +31,6 @@
       html=html.replace("document.documentElement.dataset.incrementValue=String(incrementValue);","document.documentElement.dataset.incrementValue=String(incrementValue);document.documentElement.dataset.priceStep=String(priceStep);");
       html=html.replace("startValue:startValue,increment:incrementValue,lastOrdinal:","startValue:referenceValue,increment:incrementValue,priceStep:priceStep,sequenceAnchored:true,firstCycleStart:ordinalPrice(1),firstCycleEnd:ordinalPrice(divisionCount),secondCycleStart:ordinalPrice(divisionCount+1),secondCycleEnd:ordinalPrice(divisionCount*2),lastOrdinal:");
 
-      html=html.replace('</style>',
-        '#centerClockFace{display:none;pointer-events:none}'+
-        '#centerClockFace .clock-face{fill:#f6ead0;stroke:#7b3b10;stroke-width:8}'+
-        '#centerClockFace .clock-rim{fill:none;stroke:#d99b3b;stroke-width:11}'+
-        '#centerClockFace .clock-inner{fill:none;stroke:#54270d;stroke-width:3}'+
-        '#centerClockFace text{font-family:Arial,Tahoma,sans-serif;text-anchor:middle;dominant-baseline:central;fill:#15100c;font-weight:800;direction:ltr;unicode-bidi:bidi-override;paint-order:stroke fill;stroke:#f6ead0;stroke-width:1}'+
-        '#centerClockFace .clock-date{font-size:25px;letter-spacing:2px}'+
-        '#centerClockFace .clock-line{font-size:30px}'+
-        '#centerClockFace .clock-footer{font-size:17px;fill:#5b391e}'+
-        '#centerInteractionCursor{fill:transparent;pointer-events:all;cursor:pointer}'+
-        '</style>');
-
       var runtimeMarker='window.__auditKawkabatDirectRuntimeV1=function(){';
       if(html.indexOf(runtimeMarker)<0)throw new Error('CENTER_RUNTIME_MARKER_NOT_FOUND');
       var centerRuntime=`
@@ -53,19 +41,24 @@
   function centerNode(name,attrs,text){var el=document.createElementNS(NS,name);Object.keys(attrs||{}).forEach(function(key){el.setAttribute(key,attrs[key]);});if(text!==undefined)el.textContent=text;return el;}
   function centerRoot(value){var n=Math.abs(Math.trunc(Number(value)||0));while(n>9)n=String(n).split('').reduce(function(sum,digit){return sum+Number(digit);},0);return n;}
   function centerPad(value){return String(value).padStart(2,'0');}
+  function centerText(id,y,size,fill,text){return centerNode('text',{id:id,x:2200,y:y,fill:fill,'font-family':'Arial,Tahoma,sans-serif','font-size':size,'font-weight':'800','text-anchor':'middle','dominant-baseline':'central',direction:'ltr','unicode-bidi':'bidi-override','paint-order':'stroke fill',stroke:'#f6ead0','stroke-width':'1.2','pointer-events':'none'},text||'');}
   function centerInstall(){
     if(!wheelNode||!centerLogo||document.getElementById('centerClockFace'))return false;
-    centerClockFace=centerNode('g',{id:'centerClockFace','aria-hidden':'true'});
-    centerClockFace.appendChild(centerNode('circle',{cx:2200,cy:1800,r:179,'class':'clock-face'}));
-    centerClockFace.appendChild(centerNode('circle',{cx:2200,cy:1800,r:168,'class':'clock-rim'}));
-    centerClockFace.appendChild(centerNode('circle',{cx:2200,cy:1800,r:157,'class':'clock-inner'}));
-    centerClockFace.appendChild(centerNode('text',{id:'centerClockDate',x:2200,y:1695,'class':'clock-date'},''));
-    centerClockFace.appendChild(centerNode('text',{id:'centerClockAngle',x:2200,y:1758,'class':'clock-line'},''));
-    centerClockFace.appendChild(centerNode('text',{id:'centerClockLocal',x:2200,y:1818,'class':'clock-line'},''));
-    centerClockFace.appendChild(centerNode('text',{id:'centerClockUtc',x:2200,y:1878,'class':'clock-line'},''));
-    centerClockFace.appendChild(centerNode('text',{x:2200,y:1933,'class':'clock-footer'},'كوكبة الأرقام السحرية'));
+    centerClockFace=centerNode('g',{id:'centerClockFace','aria-hidden':'true','pointer-events':'none'});
+    centerClockFace.appendChild(centerNode('circle',{cx:2200,cy:1800,r:179,fill:'#f6ead0',stroke:'#6d3512','stroke-width':'9'}));
+    centerClockFace.appendChild(centerNode('circle',{cx:2200,cy:1800,r:168,fill:'none',stroke:'#d99b3b','stroke-width':'11'}));
+    centerClockFace.appendChild(centerNode('circle',{cx:2200,cy:1800,r:157,fill:'none',stroke:'#54270d','stroke-width':'3'}));
+    centerClockFace.appendChild(centerNode('path',{d:'M2035 1800 L2055 1787 L2055 1813 Z',fill:'#b96b1e',stroke:'#6d3512','stroke-width':'2'}));
+    centerClockFace.appendChild(centerNode('path',{d:'M2365 1800 L2345 1787 L2345 1813 Z',fill:'#b96b1e',stroke:'#6d3512','stroke-width':'2'}));
+    centerClockFace.appendChild(centerText('centerClockDate',1695,25,'#15100c',''));
+    centerClockFace.appendChild(centerText('centerClockAngle',1758,30,'#15100c',''));
+    centerClockFace.appendChild(centerText('centerClockLocal',1818,30,'#15100c',''));
+    centerClockFace.appendChild(centerText('centerClockUtc',1878,30,'#15100c',''));
+    centerClockFace.appendChild(centerText('centerClockFooter',1933,17,'#5b391e','كوكبة الأرقام السحرية'));
+    centerClockFace.style.display='none';
     wheelNode.appendChild(centerClockFace);
-    wheelNode.appendChild(centerNode('circle',{id:'centerInteractionCursor',cx:2200,cy:1800,r:179,'aria-label':'تبديل الشعار والساعة',role:'button',tabindex:'0'}));
+    var hit=centerNode('circle',{id:'centerInteractionCursor',cx:2200,cy:1800,r:179,fill:'transparent','pointer-events':'all',cursor:'pointer','aria-label':'تبديل الشعار والساعة',role:'button',tabindex:'0'});
+    wheelNode.appendChild(hit);
     centerApply();
     centerInterval=window.setInterval(function(){if(centerShowingClock)centerUpdate();},1000);
     return true;
@@ -100,7 +93,7 @@
     centerHit.addEventListener('click',centerToggle,true);
     centerHit.addEventListener('keydown',function(event){if(event.key==='Enter'||event.key===' ')centerToggle(event);},true);
   }
-  window.__auditCenterLogoClockToggleV3=function(){return{ok:!!centerHit&&!!centerClockFace,showingClock:centerShowingClock,logoVisible:centerLogo&&centerLogo.style.display!=='none',clockVisible:centerClockFace&&centerClockFace.style.display!=='none',directRuntimeInjection:true};};
+  window.__auditCenterLogoClockToggleV4=function(){return{ok:!!centerHit&&!!centerClockFace,showingClock:centerShowingClock,logoVisible:centerLogo&&centerLogo.style.display!=='none',clockVisible:centerClockFace&&centerClockFace.style.display!=='none',inlineSvgStyling:true};};
 
 `;
       html=html.replace(runtimeMarker,centerRuntime+runtimeMarker);
