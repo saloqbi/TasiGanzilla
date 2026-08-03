@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — Decimal Cycles V3</title>
+  <title>كوكبة الأرقام السحرية — Fixed Ordinal Cycles V4</title>
   <style>html,body{margin:0;width:100%;height:100%;background:#F7F1E3}body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}.loading{font-weight:800}</style>
 </head>
 <body>
-  <div class="loading">جارٍ تطبيق ترقيم الدورات العشرية…</div>
+  <div class="loading">جارٍ تثبيت مواضع الدورات الرقمية…</div>
   <script>
   (async function(){
     'use strict';
@@ -16,21 +16,40 @@
       var response=await fetch(sourceUrl,{cache:'no-store'});
       if(!response.ok)throw new Error('RUNTIME_SOURCE_HTTP_'+response.status);
       var html=await response.text();
+
       var paramsAnchor="var params=new URLSearchParams(String(location.hash||'').replace(/^#/,''));";
       var paramsPatch="window.addEventListener('hashchange',function(){window.location.reload();},{once:true});\n  "+paramsAnchor;
       if(html.indexOf(paramsAnchor)<0)throw new Error('PARAMS_ANCHOR_NOT_FOUND');
       html=html.replace(paramsAnchor,paramsPatch);
+
       var decimalAnchor="var valueDecimals=Math.min(8,Math.max(decimalPlaces(startValue),decimalPlaces(incrementValue)));";
-      var decimalPatch=decimalAnchor+"\n  var startValueDecimals=Math.min(8,decimalPlaces(startValue));\n  var priceStep=incrementValue*Math.pow(10,-startValueDecimals);\n  if(startValueDecimals===0)priceStep=incrementValue;";
+      var decimalPatch=
+        "var referenceValue=startValue;\n  "+
+        "var priceStep=incrementValue*0.01;\n  "+
+        "var valueDecimals=2;\n  "+
+        "function ordinalPrice(ordinal){return ordinal*priceStep;}";
       if(html.indexOf(decimalAnchor)<0)throw new Error('DECIMAL_ANCHOR_NOT_FOUND');
       html=html.replace(decimalAnchor,decimalPatch);
-      html=html.split('startValue+(offset*incrementValue)').join('startValue+(offset*priceStep)');
-      html=html.split('startValue+((ordinal-1)*incrementValue)').join('startValue+((ordinal-1)*priceStep)');
-      html=html.replace("document.documentElement.dataset.incrementValue=String(incrementValue);","document.documentElement.dataset.incrementValue=String(incrementValue);document.documentElement.dataset.priceStep=String(priceStep);");
-      html=html.replace("increment:incrementValue,lastOrdinal:","increment:incrementValue,priceStep:priceStep,firstCycleEnd:startValue+((divisionCount-1)*priceStep),secondCycleEnd:startValue+(((divisionCount*2)-1)*priceStep),lastOrdinal:");
+
+      html=html.split('startValue+(offset*incrementValue)').join('ordinalPrice(ordinal)');
+      html=html.split('startValue+((ordinal-1)*incrementValue)').join('ordinalPrice(ordinal)');
+
+      html=html.replace(
+        "document.documentElement.dataset.startValue=String(startValue);",
+        "document.documentElement.dataset.startValue=String(referenceValue);document.documentElement.dataset.sequenceAnchor='ordinal-1';"
+      );
+      html=html.replace(
+        "document.documentElement.dataset.incrementValue=String(incrementValue);",
+        "document.documentElement.dataset.incrementValue=String(incrementValue);document.documentElement.dataset.priceStep=String(priceStep);"
+      );
+      html=html.replace(
+        "startValue:startValue,increment:incrementValue,lastOrdinal:",
+        "startValue:referenceValue,increment:incrementValue,priceStep:priceStep,sequenceAnchored:true,firstCycleStart:ordinalPrice(1),firstCycleEnd:ordinalPrice(divisionCount),secondCycleStart:ordinalPrice(divisionCount+1),secondCycleEnd:ordinalPrice(divisionCount*2),lastOrdinal:"
+      );
+
       document.open();document.write(html);document.close();
     }catch(error){
-      document.body.innerHTML='<div class="loading">تعذر تطبيق ترقيم الدورات: '+String(error.message||error)+'</div>';
+      document.body.innerHTML='<div class="loading">تعذر تثبيت مواضع الدورات: '+String(error.message||error)+'</div>';
     }
   }());
   </script>
