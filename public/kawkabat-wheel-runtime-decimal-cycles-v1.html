@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — Fixed Ordinal Cycles V5</title>
+  <title>كوكبة الأرقام السحرية — Fixed Ordinal Cycles V6</title>
   <style>html,body{margin:0;width:100%;height:100%;background:#F7F1E3}body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}.loading{font-weight:800}</style>
 </head>
 <body>
@@ -30,25 +30,14 @@
         "function ordinalPrice(ordinal){return ordinal*priceStep;}";
       if(html.indexOf(decimalAnchor)<0)throw new Error('DECIMAL_ANCHOR_NOT_FOUND');
       html=html.replace(decimalAnchor,decimalPatch);
-
       html=html.split('startValue+(offset*incrementValue)').join('ordinalPrice(ordinal)');
       html=html.split('startValue+((ordinal-1)*incrementValue)').join('ordinalPrice(ordinal)');
-
-      html=html.replace(
-        "document.documentElement.dataset.startValue=String(startValue);",
-        "document.documentElement.dataset.startValue=String(referenceValue);document.documentElement.dataset.sequenceAnchor='ordinal-1';"
-      );
-      html=html.replace(
-        "document.documentElement.dataset.incrementValue=String(incrementValue);",
-        "document.documentElement.dataset.incrementValue=String(incrementValue);document.documentElement.dataset.priceStep=String(priceStep);"
-      );
-      html=html.replace(
-        "startValue:startValue,increment:incrementValue,lastOrdinal:",
-        "startValue:referenceValue,increment:incrementValue,priceStep:priceStep,sequenceAnchored:true,firstCycleStart:ordinalPrice(1),firstCycleEnd:ordinalPrice(divisionCount),secondCycleStart:ordinalPrice(divisionCount+1),secondCycleEnd:ordinalPrice(divisionCount*2),lastOrdinal:"
-      );
+      html=html.replace("document.documentElement.dataset.startValue=String(startValue);","document.documentElement.dataset.startValue=String(referenceValue);document.documentElement.dataset.sequenceAnchor='ordinal-1';");
+      html=html.replace("document.documentElement.dataset.incrementValue=String(incrementValue);","document.documentElement.dataset.incrementValue=String(incrementValue);document.documentElement.dataset.priceStep=String(priceStep);");
+      html=html.replace("startValue:startValue,increment:incrementValue,lastOrdinal:","startValue:referenceValue,increment:incrementValue,priceStep:priceStep,sequenceAnchored:true,firstCycleStart:ordinalPrice(1),firstCycleEnd:ordinalPrice(divisionCount),secondCycleStart:ordinalPrice(divisionCount+1),secondCycleEnd:ordinalPrice(divisionCount*2),lastOrdinal:");
 
       html=html.replace('</style>',
-        '#centerClockToggle{cursor:pointer;pointer-events:all}'+
+        '#centerClockToggle{cursor:pointer;pointer-events:none}'+
         '#centerClockFace{display:none;pointer-events:none}'+
         '#centerClockFace .clock-face{fill:#f6ead0;stroke:#7b3b10;stroke-width:8}'+
         '#centerClockFace .clock-rim{fill:none;stroke:#d99b3b;stroke-width:11}'+
@@ -57,7 +46,6 @@
         '#centerClockFace .clock-date{font-size:25px;letter-spacing:2px}'+
         '#centerClockFace .clock-line{font-size:30px}'+
         '#centerClockFace .clock-footer{font-size:17px;fill:#5b391e}'+
-        '#centerClockHit{fill:transparent;stroke:transparent;pointer-events:all;cursor:pointer}'+
         '</style>');
 
       var centerToggleCode = String.raw`
@@ -68,67 +56,38 @@
   var wheel=document.getElementById('wheel');
   var logo=document.getElementById('logoImage');
   if(!wheel||!logo||document.getElementById('centerClockToggle'))return;
-  function node(name,attrs,text){
-    var el=document.createElementNS(NS,name);
-    Object.keys(attrs||{}).forEach(function(key){el.setAttribute(key,attrs[key]);});
-    if(text!==undefined)el.textContent=text;
-    return el;
-  }
-  function root(value){
-    var n=Math.abs(Math.trunc(Number(value)||0));
-    while(n>9)n=String(n).split('').reduce(function(sum,digit){return sum+Number(digit);},0);
-    return n;
-  }
+  function node(name,attrs,text){var el=document.createElementNS(NS,name);Object.keys(attrs||{}).forEach(function(key){el.setAttribute(key,attrs[key]);});if(text!==undefined)el.textContent=text;return el;}
+  function root(value){var n=Math.abs(Math.trunc(Number(value)||0));while(n>9)n=String(n).split('').reduce(function(sum,digit){return sum+Number(digit);},0);return n;}
   function pad(value){return String(value).padStart(2,'0');}
-  var layer=node('g',{id:'centerClockToggle','aria-label':'تبديل الشعار والساعة',role:'button',tabindex:'0'});
+  var layer=node('g',{id:'centerClockToggle','aria-label':'تبديل الشعار والساعة'});
   var face=node('g',{id:'centerClockFace'});
   face.appendChild(node('circle',{cx:2200,cy:1800,r:179,'class':'clock-face'}));
   face.appendChild(node('circle',{cx:2200,cy:1800,r:168,'class':'clock-rim'}));
   face.appendChild(node('circle',{cx:2200,cy:1800,r:157,'class':'clock-inner'}));
-  var dateText=node('text',{id:'centerClockDate',x:2200,y:1695,'class':'clock-date'},'');
-  var angleText=node('text',{id:'centerClockAngle',x:2200,y:1758,'class':'clock-line'},'');
-  var localText=node('text',{id:'centerClockLocal',x:2200,y:1818,'class':'clock-line'},'');
-  var utcText=node('text',{id:'centerClockUtc',x:2200,y:1878,'class':'clock-line'},'');
+  var dateText=node('text',{x:2200,y:1695,'class':'clock-date'},'');
+  var angleText=node('text',{x:2200,y:1758,'class':'clock-line'},'');
+  var localText=node('text',{x:2200,y:1818,'class':'clock-line'},'');
+  var utcText=node('text',{x:2200,y:1878,'class':'clock-line'},'');
   var footerText=node('text',{x:2200,y:1933,'class':'clock-footer'},'كوكبة الأرقام السحرية');
   face.appendChild(dateText);face.appendChild(angleText);face.appendChild(localText);face.appendChild(utcText);face.appendChild(footerText);
-  var hit=node('circle',{id:'centerClockHit',cx:2200,cy:1800,r:179});
-  layer.appendChild(face);layer.appendChild(hit);wheel.appendChild(layer);
+  layer.appendChild(face);wheel.appendChild(layer);
   var showingClock=false;
-  function update(){
-    var now=new Date();
-    var hour=now.getHours()%12;
-    var angle=Math.round((hour*30)+(now.getMinutes()*0.5)+(now.getSeconds()/120));
-    dateText.textContent=pad(now.getDate())+' - '+pad(now.getMonth()+1)+' - '+now.getFullYear();
-    angleText.textContent=angle+'° = '+root(angle);
-    var local=pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
-    localText.textContent=local+' = '+root(Number(local.replace(/:/g,'')));
-    var utc=pad(now.getUTCHours())+':'+pad(now.getUTCMinutes())+':'+pad(now.getUTCSeconds());
-    utcText.textContent=utc+' = '+root(Number(utc.replace(/:/g,'')));
-  }
-  function apply(){
-    face.style.display=showingClock?'inline':'none';
-    logo.style.display=showingClock?'none':'inline';
-    layer.setAttribute('aria-pressed',showingClock?'true':'false');
-    if(showingClock)update();
-  }
-  function toggle(event){
-    event.preventDefault();event.stopPropagation();
-    showingClock=!showingClock;apply();
-  }
-  ['pointerdown','mousedown','touchstart'].forEach(function(type){hit.addEventListener(type,function(event){event.stopPropagation();},{passive:false});});
-  hit.addEventListener('click',toggle,false);
-  layer.addEventListener('keydown',function(event){if(event.key==='Enter'||event.key===' '){toggle(event);}},false);
+  function update(){var now=new Date();var hour=now.getHours()%12;var angle=Math.round((hour*30)+(now.getMinutes()*0.5)+(now.getSeconds()/120));dateText.textContent=pad(now.getDate())+' - '+pad(now.getMonth()+1)+' - '+now.getFullYear();angleText.textContent=angle+'° = '+root(angle);var local=pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());localText.textContent=local+' = '+root(Number(local.replace(/:/g,'')));var utc=pad(now.getUTCHours())+':'+pad(now.getUTCMinutes())+':'+pad(now.getUTCSeconds());utcText.textContent=utc+' = '+root(Number(utc.replace(/:/g,'')));}
+  function apply(){face.style.display=showingClock?'inline':'none';logo.style.display=showingClock?'none':'inline';if(showingClock)update();}
+  function pointInCenter(event){var matrix=wheel.getScreenCTM();if(!matrix)return false;var point=new DOMPoint(event.clientX,event.clientY).matrixTransform(matrix.inverse());var dx=point.x-2200,dy=point.y-1800;return(dx*dx+dy*dy)<=179*179;}
+  function captureCenter(event){if(!pointInCenter(event))return;event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();showingClock=!showingClock;apply();}
+  wheel.addEventListener('click',captureCenter,true);
+  wheel.addEventListener('pointerup',function(event){if(pointInCenter(event)){event.preventDefault();event.stopPropagation();}},true);
+  wheel.addEventListener('mousedown',function(event){if(pointInCenter(event)){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();}},true);
+  wheel.addEventListener('pointerdown',function(event){if(pointInCenter(event)){event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();}},true);
   window.setInterval(function(){if(showingClock)update();},1000);
   apply();
-  window.__auditCenterLogoClockToggleV1=function(){return{ok:true,showingClock:showingClock,logoVisible:logo.style.display!=='none',clockVisible:face.style.display!=='none',hitRadius:179};};
+  window.__auditCenterLogoClockToggleV2=function(){return{ok:true,showingClock:showingClock,captureHitTesting:true,logoVisible:logo.style.display!=='none',clockVisible:face.style.display!=='none'};};
 }());
 <\/script>`;
       html=html.replace('</body>',centerToggleCode+'</body>');
-
       document.open();document.write(html);document.close();
-    }catch(error){
-      document.body.innerHTML='<div class="loading">تعذر تثبيت مواضع الدورات ووظيفة الساعة: '+String(error.message||error)+'</div>';
-    }
+    }catch(error){document.body.innerHTML='<div class="loading">تعذر تثبيت مواضع الدورات ووظيفة الساعة: '+String(error.message||error)+'</div>';}
   }());
   </script>
 </body>
