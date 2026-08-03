@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Value Active V2</title>
+  <title>Magic Numbers Constellation — Value Active V3</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -18,59 +18,38 @@
 
     var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/ed08ec6d205d80ef203060556dc790b0ee99418a/public/kawkabat-al-arqam-al-sihria.html';
     var oldRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/736c141a7e0b063c5c15c3ec695050774e241c51/public/kawkabat-wheel-data-runtime-v4.html';
-    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/0f42c11b7d9787c065bb6c702c646e136e8c36f7/public/kawkabat-wheel-data-runtime-v4.html';
+    var valueRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/0f42c11b7d9787c065bb6c702c646e136e8c36f7/public/kawkabat-wheel-data-runtime-v4.html';
 
     try{
       var response=await fetch(sourceUrl,{cache:'no-store'});
       if(!response.ok)throw new Error('VALUE_SOURCE_HTTP_'+response.status);
       var source=await response.text();
 
-      source=source.replace('Data Type Active','Value Active V2');
-      source=source.replace(oldRuntime,newRuntime);
+      source=source.replace('Data Type Active','Value Active V3');
+      source=source.replace(oldRuntime,valueRuntime);
 
       var sourceWriteMarker="      document.open();\n      document.write(html);\n      document.close();";
-      var valuePatch=`      /* Value binding V2: patch the fully generated panel page. */
-      html=html.replace(
-        /(var dataTypeControl=document\\.querySelector\\('\\[aria-label=\"Data type\"\\]'\\);)\\s*(var panelStatus=document\\.querySelector\\('\\.panel-bottom'\\);)/,
-        "$1\\n        var valueControl=document.querySelector('[aria-label=\\\"Value\\\"]');\\n        var incrementControl=document.querySelector('[aria-label=\\\"Increment\\\"]');\\n        $2"
-      );
+      var valuePatch=`      var panelRuntimeMarker='requestAnimationFrame(updateThumb);';
+      if(html.indexOf(panelRuntimeMarker)<0)throw new Error('VALUE_PANEL_RUNTIME_MARKER_NOT_FOUND');
 
-      html=html.replace(
-        /function buildViewUrl\\(direction\\)\\{[\\s\\S]*?return runtimeBase\\+'#view='\\+encodeURIComponent\\(view\\)\\+'&direction='\\+direction\\+'&dataType='\\+encodeURIComponent\\(dataType\\);\\s*\\}/,
-        "function buildViewUrl(direction){\\n          var view=viewControl&&viewControl.value?viewControl.value:'circle36';\\n          var dataType=dataTypeControl&&dataTypeControl.value?dataTypeControl.value:'price';\\n          var value=Number(String(valueControl&&valueControl.value||'0.01').replace(',','.'));\\n          var increment=Number(String(incrementControl&&incrementControl.value||'1').replace(',','.'));\\n          if(!Number.isFinite(value))value=0.01;\\n          if(!Number.isFinite(increment)||increment===0)increment=1;\\n          return runtimeBase+'#view='+encodeURIComponent(view)+'&direction='+direction+'&dataType='+encodeURIComponent(dataType)+'&value='+encodeURIComponent(value)+'&increment='+encodeURIComponent(increment);\\n        }"
-      );
+      var valueBinding=
+        "var valueControl=document.querySelector('[aria-label=\\\"Value\\\"]'),incrementControl=document.querySelector('[aria-label=\\\"Increment\\\"]');"+
+        "var valueReloadTimer=0;"+
+        "function normalizeValueNumber(control,fallback){var parsed=Number(String(control&&control.value||fallback).replace(',','.'));return Number.isFinite(parsed)?parsed:fallback;}"+
+        "buildViewUrl=function(direction){var view=viewControl&&viewControl.value?viewControl.value:'circle36',dataType=dataTypeControl&&dataTypeControl.value?dataTypeControl.value:'price',value=normalizeValueNumber(valueControl,0.01),increment=normalizeValueNumber(incrementControl,1);if(increment===0)increment=1;return runtimeBase+'#view='+encodeURIComponent(view)+'&direction='+direction+'&dataType='+encodeURIComponent(dataType)+'&value='+encodeURIComponent(value)+'&increment='+encodeURIComponent(increment);};"+
+        "function applyValueNow(){window.clearTimeout(valueReloadTimer);if(!valueControl||!incrementControl)return;var value=normalizeValueNumber(valueControl,0.01),increment=normalizeValueNumber(incrementControl,1);if(increment===0){increment=1;incrementControl.value='1';}valueControl.value=String(value);loadSelectedView();setWheelStatus('success','Value = '+value+' • Increment = '+increment);}"+
+        "function scheduleValueApply(){window.clearTimeout(valueReloadTimer);valueReloadTimer=window.setTimeout(applyValueNow,260);}"+
+        "if(valueControl&&incrementControl){valueControl.value='0.01';valueControl.inputMode='decimal';incrementControl.inputMode='decimal';valueControl.addEventListener('input',scheduleValueApply);incrementControl.addEventListener('input',scheduleValueApply);valueControl.addEventListener('change',applyValueNow);incrementControl.addEventListener('change',applyValueNow);valueControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();applyValueNow();}});incrementControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();applyValueNow();}});window.setTimeout(applyValueNow,0);}else{setWheelStatus('error','تعذر ربط Value و Increment');}";
 
-      html=html.replace(
-        '&&viewControl&&dataTypeControl){',
-        '&&viewControl&&dataTypeControl&&valueControl&&incrementControl){'
-      );
-
-      html=html.replace(
-        '          populateDataTypeOptions();',
-        "          populateDataTypeOptions();\\n          valueControl.value='0.01';\\n          valueControl.inputMode='decimal';"
-      );
-
-      html=html.replace(
-        "          dataTypeControl.addEventListener('change',loadSelectedView);",
-        "          dataTypeControl.addEventListener('change',loadSelectedView);\\n          valueControl.addEventListener('change',loadSelectedView);\\n          incrementControl.addEventListener('change',loadSelectedView);\\n          valueControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();loadSelectedView();}});\\n          incrementControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();loadSelectedView();}});"
-      );
-
-      html=html.replace(
-        'تعذر تهيئة Clockwise أو Size أو View أو Data type',
-        'تعذر تهيئة Clockwise أو Size أو View أو Data type أو Value'
-      );
-
-      if(html.indexOf('var valueControl=')<0)throw new Error('VALUE_CONTROL_PATCH_FAILED');
-      if(html.indexOf("valueControl.value='0.01'")<0)throw new Error('VALUE_DEFAULT_PATCH_FAILED');
-      if(html.indexOf("+'&value='+encodeURIComponent(value)")<0)throw new Error('VALUE_URL_PATCH_FAILED');
-      if(html.indexOf("valueControl.addEventListener('change',loadSelectedView)")<0)throw new Error('VALUE_EVENT_PATCH_FAILED');
+      html=html.replace(panelRuntimeMarker,valueBinding+panelRuntimeMarker);
+      if(html.indexOf("valueControl.addEventListener('input',scheduleValueApply)")<0)throw new Error('VALUE_INPUT_BINDING_FAILED');
+      if(html.indexOf("+'&value='+encodeURIComponent(value)")<0)throw new Error('VALUE_URL_BINDING_FAILED');
 `;
 
       if(source.indexOf(sourceWriteMarker)<0)throw new Error('VALUE_SOURCE_WRITE_MARKER_NOT_FOUND');
       source=source.replace(sourceWriteMarker,valuePatch+sourceWriteMarker);
-
-      if(source.indexOf(newRuntime)<0)throw new Error('VALUE_RUNTIME_LINK_FAILED');
-      if(source.indexOf(oldRuntime)>=0)throw new Error('OLD_DATA_RUNTIME_STILL_PRESENT');
+      if(source.indexOf(valueRuntime)<0)throw new Error('VALUE_RUNTIME_LINK_FAILED');
+      if(source.indexOf(oldRuntime)>=0)throw new Error('OLD_VALUE_RUNTIME_STILL_PRESENT');
 
       document.open();
       document.write(source);
