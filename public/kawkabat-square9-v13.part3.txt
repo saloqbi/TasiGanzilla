@@ -1,5 +1,7 @@
 function anyPlanetVisible(){if(!pdoc)return false;const controls=Array.from(pdoc.querySelectorAll('[data-key^="planet."][data-key$=".visible"]'));return controls.length?controls.some(c=>c.checked):!!val('cosmogram.visible',false)}
 function anyAspectVisible(){if(!pdoc)return false;const controls=Array.from(pdoc.querySelectorAll('[data-key^="aspect."][data-key$=".visible"]'));return controls.length?controls.some(c=>c.checked):false}
+function resetVisualControlsForCleanOpen(){if(!pdoc)return;const exact=['cosmogram.visible','moon.visible','cycles.visible','protractor.visible','counter.visible','secondary.visible','marker.visible','chronometer.visible','chronometer.secondary.visible','chronometer.marker.visible','vectors.visible','locator.visible','vortex.visible','core.highlightVisible','core.showMarks','core.showNumbers'];const patterns=[/^planet\..+\.visible$/, /^aspect\..+\.visible$/, /^figure\..+\.visible$/, /^cycles\..+\.visible$/];Array.from(pdoc.querySelectorAll('[data-key]')).forEach(c=>{const key=c.dataset.key||'';if(c.type==='checkbox'&&(exact.includes(key)||patterns.some(r=>r.test(key))))c.checked=false});const hide=pdoc.querySelector('[data-key="figures.hide"]');if(hide)hide.checked=false;try{sessionStorage.setItem('kawkabatCleanOpenV15','1')}catch(_){}}
+function anyBaseWheelControlVisible(){return !!val('protractor.visible',false)||!!val('counter.visible',false)||!!val('secondary.visible',false)||!!val('chronometer.visible',false)||!!val('cosmogram.visible',false)}
 function renderSquare9(){clear();svg.setAttribute('viewBox','0 0 1000 1000');svg.style.transform=`scale(${zoom})`;svg.style.transformOrigin='center center';svg.appendChild(S('rect',{x:0,y:0,width:1000,height:1000,fill:color('Background','#fff')}));
 const cosmogramVisible=!!val('cosmogram.visible',false);
 const moonVisible=!!val('moon.visible',false);
@@ -8,8 +10,8 @@ const hideFigures=!!val('figures.hide',false);
 const squareFigureVisible=!hideFigures&&!!val('figure.Square.visible',false);
 const triangleFigureVisible=!hideFigures&&!!val('figure.Triangle.visible',false);
 if(cosmogramVisible)drawOuterZodiac(group('zodiacRing'));
-drawAngleWheel(group('angleWheel'));
-drawFrames(group('angleFrames'));
+if(anyBaseWheelControlVisible())drawAngleWheel(group('angleWheel'));
+if(!!val('protractor.visible',false)||!!val('chronometer.visible',false))drawFrames(group('angleFrames'));
 if(squareFigureVisible||triangleFigureVisible)drawMainShapes(group('mainShapes'));
 if(cosmogramVisible&&(anyPlanetVisible()||anyAspectVisible()))drawPlanetsAndAspects(group('aspects'));
 drawSquare(group('square'));
@@ -17,16 +19,16 @@ if(!cosmogramVisible||!anyPlanetVisible())document.querySelectorAll('#square cir
 if(moonVisible)drawMoon(group('moonStrip'));
 if(cyclesVisible)drawCards(group('cycleCards'));
 drawOptional(group('optional'));
-status.textContent='Square of 9 • native visibility controls active • 19×19 • 1–361'}
-function render(){document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='circle36'){svg.style.display='none';circleFrame.style.display='block';if(!circleFrame.src)circleFrame.src=CIRCLE36;status.textContent='Circle of 36 • الشعار والإطار الأصليان ظاهران';return}circleFrame.style.display='none';svg.style.display='block';renderSquare9()}
+status.textContent='Square of 9 • number square only on open • drawings appear by selection'}
+function render(){document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));if(view==='circle36'){svg.style.display='none';circleFrame.style.display='block';if(!circleFrame.src)circleFrame.src=CIRCLE36;status.textContent='Circle of 36';return}circleFrame.style.display='none';svg.style.display='block';renderSquare9()}
 function changeView(next){view=next;setVal('core.view',next);render()}
 function setZoom(next){zoom=Math.max(.45,Math.min(1.8,next));document.getElementById('zoomReadout').textContent=Math.round(zoom*100)+'%';render()}
-panelFrame.addEventListener('load',()=>{let tries=0;const timer=setInterval(()=>{if(bindPanel()){clearInterval(timer);view=String(val('core.view','square9'));if(view==='circle36')view='square9';setVal('core.view',view);render();document.getElementById('loading')?.remove()}else if(++tries>30){clearInterval(timer);render();document.getElementById('loading')?.remove()}},100)});
+panelFrame.addEventListener('load',()=>{let tries=0;const timer=setInterval(()=>{if(bindPanel()){clearInterval(timer);view='square9';setVal('core.view','square9');resetVisualControlsForCleanOpen();render();document.getElementById('loading')?.remove()}else if(++tries>30){clearInterval(timer);render();document.getElementById('loading')?.remove()}},100)});
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>changeView(b.dataset.view)));
 document.querySelectorAll('[data-figure]').forEach(b=>b.addEventListener('click',()=>{const key='figure.'+b.dataset.figure+'.visible';setVal(key,!val(key,false));render()}));
 document.querySelector('[data-action="locator"]').addEventListener('click',()=>{setVal('locator.visible',!val('locator.visible',false));render()});document.querySelector('[data-action="marker"]').addEventListener('click',()=>{setVal('marker.visible',!val('marker.visible',false));render()});document.querySelector('[data-action="vortex"]').addEventListener('click',()=>{setVal('vortex.visible',!val('vortex.visible',false));render()});
 document.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>{activeTool=b.dataset.tool;document.querySelectorAll('[data-tool]').forEach(x=>x.classList.toggle('active',x===b))}));
 document.getElementById('zoomOut').addEventListener('click',()=>setZoom(zoom-.1));document.getElementById('zoomIn').addEventListener('click',()=>setZoom(zoom+.1));document.getElementById('fit').addEventListener('click',()=>setZoom(1));document.getElementById('full').addEventListener('click',()=>{if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.()});document.getElementById('lang').addEventListener('click',()=>{const t=document.getElementById('langText');t.textContent=t.textContent==='English'?'العربية':'English'});
-window.__auditSquare9CleanAngleEngineV14=()=>({ok:true,view,zoom,zodiacVisible:!!document.querySelector('#zodiacRing'),moonVisible:!!document.querySelector('#moonStrip'),cardsVisible:!!document.querySelector('#cycleCards'),aspectsVisible:!!document.querySelector('#aspects'),mainShapesVisible:!!document.querySelector('#mainShapes'),matrixCells:361,nativeVisibilityControls:true});
+window.__auditSquare9CleanOpenV15=()=>({ok:true,view,zoom,onlySquareOnOpen:!document.querySelector('#zodiacRing,#angleWheel,#angleFrames,#mainShapes,#aspects,#moonStrip,#cycleCards'),matrixCells:361,drawingsBySelection:true});
 render();
 }());
