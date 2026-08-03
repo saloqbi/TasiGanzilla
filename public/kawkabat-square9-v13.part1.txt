@@ -1,0 +1,25 @@
+(function(){
+'use strict';
+const NS='http://www.w3.org/2000/svg';
+const CIRCLE36='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/2333b246c24e560c960661a001c3f9380c3dcaf6/public/kawkabat-wheel-runtime-highlight-v2.html#view=circle36&direction=cw&dataType=price&value=0.01&increment=1&find=0.01&highlight=0&highlightFill=levels&highlightMarks=0&highlightNumbers=0';
+const svg=document.getElementById('squareSvg'),circleFrame=document.getElementById('circleFrame'),panelFrame=document.getElementById('panelFrame'),status=document.getElementById('status');
+let view='square9',zoom=1,activeTool='cursor',pdoc=null,renderTimer=0;
+const zodiac=[['ARIES','♈','#f2aca8'],['TAURUS','♉','#b6dfbe'],['GEMINI','♊','#d5c5e9'],['CANCER','♋','#b6dced'],['LEO','♌','#f1aea9'],['VIRGO','♍','#b5debd'],['LIBRA','♎','#d4c5e8'],['SCORPIO','♏','#b5dbea'],['SAGITTARIUS','♐','#f0b1aa'],['CAPRICORN','♑','#bae0c0'],['AQUARIUS','♒','#d3c5e7'],['PISCES','♓','#b6d9e9']];
+const planets=[['☉',110,'#e95555'],['☽',270,'#d84f4f'],['☿',95,'#222'],['♀',180,'#222'],['♂',145,'#ee5a61'],['♃',126,'#111'],['♄',287,'#222'],['♅',344,'#222'],['♆',270,'#222'],['♇',205,'#222']];
+const aspects=[['#e25555',0,3,2],['#e25555',0,6,2],['#4fad5a',1,5,1.5],['#4fad5a',1,8,1.5],['#4fad5a',4,7,1.5],['#397bd0',3,6,1.2],['#29bfd0',2,8,1.2],['#d98855',0,7,1.1],['#b1a01f',5,9,1.1]];
+const moon=[['09:36','29 JUL','2026'],['06:47','2 AUG','2026'],['21:20','5 AUG','2026'],['05:49','9 AUG','2026'],['12:35','12 AUG','2026'],['12:35','12 AUG','2026'],['11:47','31 DEC','2028']];
+function S(tag,attrs,textValue){const n=document.createElementNS(NS,tag);Object.entries(attrs||{}).forEach(([k,v])=>n.setAttribute(k,String(v)));if(textValue!==undefined)n.textContent=String(textValue);return n}
+function pt(r,geo){const a=(geo-90)*Math.PI/180;return{x:500+Math.cos(a)*r,y:500+Math.sin(a)*r}}
+function fromDisplay(r,displayAngle){return pt(r,displayAngle-90)}
+function sector(r1,r2,a0,a1){const p0=pt(r2,a0),p1=pt(r2,a1),q1=pt(r1,a1),q0=pt(r1,a0);return`M${p0.x} ${p0.y}A${r2} ${r2} 0 0 1 ${p1.x} ${p1.y}L${q1.x} ${q1.y}A${r1} ${r1} 0 0 0 ${q0.x} ${q0.y}Z`}
+function line(parent,a,b,stroke,width=1,opacity=1,dash=''){const n=S('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke,'stroke-width':width,'stroke-opacity':opacity,'stroke-linecap':'round','vector-effect':'non-scaling-stroke'});if(dash)n.setAttribute('stroke-dasharray',dash);parent.appendChild(n);return n}
+function text(parent,label,x,y,size=10,fill='#222',weight=600,rotate=0){const n=S('text',{x,y,'text-anchor':'middle','dominant-baseline':'central','font-family':'Segoe UI Symbol,Segoe UI,Arial,Tahoma,sans-serif','font-size':size,'font-weight':weight,fill,transform:rotate?`rotate(${rotate} ${x} ${y})`:'','paint-order':'stroke fill',stroke:'#fff','stroke-width':size>14?1.25:.55,'stroke-opacity':.88,'vector-effect':'non-scaling-stroke'},label);parent.appendChild(n);return n}
+function group(id){const g=S('g',{id});svg.appendChild(g);return g}
+function clear(){while(svg.firstChild)svg.removeChild(svg.firstChild)}
+function spiralMatrix(n){const size=2*n+1,m=Array.from({length:size},()=>Array(size).fill(0));let x=n,y=n,value=1;m[y][x]=value;const dirs=[[-1,0],[0,-1],[1,0],[0,1]];let len=1,di=0;while(value<size*size){for(let twice=0;twice<2;twice++){const [dx,dy]=dirs[di%4];for(let i=0;i<len&&value<size*size;i++){x+=dx;y+=dy;m[y][x]=++value}di++}len++}return m}
+function bindPanel(){try{pdoc=panelFrame.contentDocument;if(!pdoc||!pdoc.getElementById('panelRoot'))return false;pdoc.documentElement.style.overflow='hidden';const work=pdoc.querySelector('.work');if(work)work.style.display='none';const panel=pdoc.querySelector('.panel');if(panel){panel.style.width='300px';panel.style.right='auto';panel.style.left='0'}pdoc.addEventListener('input',schedule,true);pdoc.addEventListener('change',schedule,true);return true}catch(_){return false}}
+function ctrl(key){if(!pdoc)return null;return Array.from(pdoc.querySelectorAll('[data-key]')).find(n=>n.dataset.key===key)||null}
+function val(key,fallback){const c=ctrl(key);return c?(c.type==='checkbox'?c.checked:c.value):fallback}
+function setVal(key,next){const c=ctrl(key);if(!c)return false;if(c.type==='checkbox')c.checked=!!next;else c.value=String(next);const w=c.ownerDocument.defaultView;c.dispatchEvent(new w.Event('input',{bubbles:true}));c.dispatchEvent(new w.Event('change',{bubbles:true}));return true}
+function color(name,fallback){return String(val('color.'+name,fallback)||fallback)}
+function schedule(){clearTimeout(renderTimer);renderTimer=setTimeout(()=>{view=String(val('core.view',view));render()},90)}
