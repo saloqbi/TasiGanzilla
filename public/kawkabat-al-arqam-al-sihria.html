@@ -3,51 +3,303 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Show Numbers Active V1</title>
+  <title>Magic Numbers Constellation — Clean Controls Rebuild V1</title>
   <style>
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
-    body{display:grid;place-items:center;color:#43515a}
-    .loading{font-weight:800}
+    :root{
+      color-scheme:light;
+      --green:#9fc440;
+      --cyan:#49a2c4;
+      --row-line:#d2d7da;
+      --text:#151a1d;
+    }
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      overflow:hidden;
+      background:#f7f1e3;
+      font-family:Arial,Tahoma,sans-serif;
+      font-variant-numeric:tabular-nums;
+    }
+    .work-area{
+      position:fixed;
+      top:0;
+      right:0;
+      bottom:0;
+      left:300px;
+      overflow:hidden;
+      background:#f7f1e3;
+    }
+    .wheel-frame{
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      border:0;
+      background:#f7f1e3;
+      transform-origin:0 0;
+    }
+    .control-panel{
+      position:fixed;
+      inset:0 auto 0 0;
+      width:300px;
+      z-index:1000;
+      padding:5px;
+      border-right:1px solid #66747b;
+      background:linear-gradient(90deg,#3e494f 0%,#78878f 3%,#eef3f5 8%,#aab6bc 12%,#fbfdfe 17%,#ccd5d9 50%,#fbfdfe 84%,#9aa7ad 92%,#465158 100%);
+      box-shadow:8px 0 20px rgba(20,28,32,.24),inset 0 0 0 1px rgba(255,255,255,.88),inset 0 0 0 4px rgba(83,96,104,.32);
+    }
+    .panel-shell{
+      display:flex;
+      flex-direction:column;
+      width:100%;
+      height:100%;
+      min-height:0;
+      overflow:hidden;
+      border:1px solid #536168;
+      border-radius:9px;
+      background:#edf1f2;
+      box-shadow:inset 0 0 0 2px #c8d1d5,inset 0 0 0 4px rgba(255,255,255,.84);
+    }
+    .panel-topbar{
+      flex:0 0 34px;
+      display:flex;
+      align-items:center;
+      gap:5px;
+      margin:4px 4px 3px;
+      padding:0 7px;
+      border:1px solid #879399;
+      border-radius:5px;
+      background:linear-gradient(180deg,#fff 0%,#f8fafb 44%,#cbd3d7 49%,#eef2f4 100%);
+      color:#111719;
+      font-size:14px;
+      font-weight:800;
+    }
+    .panel-dot{width:8px;height:8px;border:1px solid #8d979c;transform:rotate(45deg);background:#f8fafb}
+    .panel-title{flex:1}
+    .panel-actions{display:flex;gap:3px;align-items:center}
+    .panel-action{width:23px;height:23px;display:grid;place-items:center;border:1px solid #8d989e;border-radius:3px;background:linear-gradient(180deg,#fff,#dfe6e9);font-size:14px;font-weight:900}
+    .panel-action.primary{color:#fff;border-color:#397fa3;background:linear-gradient(180deg,#5ab3db,#1680b5)}
+    .panel-info{width:24px;height:24px;display:grid;place-items:center;border:2px solid #5797c2;border-radius:50%;color:#267db0;background:#eef8ff;font-size:16px;font-weight:900}
+    .panel-scroll{
+      flex:1 1 auto;
+      min-height:0;
+      margin:0 4px 4px;
+      overflow-y:auto;
+      overflow-x:hidden;
+      border:1px solid #aab3b8;
+      background:#fbfbfb;
+      scrollbar-width:thin;
+      scrollbar-color:#7d898f #eef2f4;
+    }
+    .control-section{border-bottom:1px solid #b9c1c5;background:#fff}
+    .section-toggle{
+      position:relative;
+      width:100%;
+      min-height:31px;
+      display:flex;
+      align-items:center;
+      gap:5px;
+      padding:0 7px;
+      border:0;
+      border-bottom:1px solid #c7cdd0;
+      background:linear-gradient(180deg,#fff,#e9edef 72%,#f8fafb);
+      color:#121719;
+      font:800 13px Arial,Tahoma,sans-serif;
+      text-align:left;
+      cursor:pointer;
+    }
+    .section-toggle::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--section-color,var(--cyan))}
+    .control-section[data-tone="green"]{--section-color:var(--green)}
+    .control-section[data-tone="cyan"]{--section-color:var(--cyan)}
+    .section-sign{color:#268daf;font-size:15px;font-weight:900;width:12px;text-align:center}
+    .section-name{flex:1}
+    .section-icon{font-size:12px;color:#68747a}
+    .section-body{display:block}
+    .control-section.collapsed .section-body{display:none}
+    .control-row{
+      min-height:31px;
+      display:grid;
+      grid-template-columns:42% 58%;
+      align-items:center;
+      border-bottom:1px solid var(--row-line);
+      background:#fbfbfb;
+    }
+    .control-row:last-child{border-bottom:0}
+    .control-label{height:100%;display:flex;align-items:center;padding:4px 8px;color:var(--text);font-size:12px;font-weight:600;background:#fafafa}
+    .control-value{min-width:0;height:100%;display:flex;align-items:center;gap:4px;padding:3px 5px;border-left:1px solid #ccd2d5;background:#f2f4f5;color:#1a2023;font-size:12px}
+    .control-value input[type="text"],.control-value input[type="number"],.control-value select{
+      width:100%;height:25px;min-width:0;border:1px solid #9fa9ae;border-radius:3px;padding:2px 6px;background:linear-gradient(180deg,#fff,#e8edef);color:#171c1f;font:600 12px Arial,Tahoma,sans-serif;outline:none;
+    }
+    .control-value input:focus,.control-value select:focus{border-color:#4f95b6;box-shadow:0 0 0 2px rgba(72,156,201,.18)}
+    .control-value input[type="checkbox"]{width:15px;height:15px;margin:0;accent-color:#2d8dbb}
+    .field-action{flex:0 0 auto;color:#617077;font-weight:900;font-size:13px}
+    .panel-bottom{
+      flex:0 0 31px;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      margin:0 4px 4px;
+      padding:0 8px;
+      border:1px solid #889399;
+      border-radius:4px;
+      background:linear-gradient(180deg,#fff 0%,#d6dde1 42%,#edf1f3 58%,#b9c4c9 100%);
+      color:#33444c;
+      font-size:11px;
+      font-weight:800;
+    }
+    .status-dot{width:8px;height:8px;border-radius:50%;background:#d3a80b}
+    .panel-bottom[data-status="ready"] .status-dot{background:#31a354}
+    .panel-bottom[data-status="error"] .status-dot{background:#c93d3d}
+    @media(max-width:900px){.control-panel{width:270px}.work-area{left:270px}}
   </style>
 </head>
 <body>
-  <div class="loading">جارٍ تحميل Show numbers…</div>
+  <main class="work-area" id="workArea">
+    <iframe id="wheelFrame" class="wheel-frame" title="Magic Numbers Constellation wheel" scrolling="yes"></iframe>
+  </main>
+
+  <aside class="control-panel" aria-label="Clean control panel">
+    <div class="panel-shell">
+      <header class="panel-topbar">
+        <span class="panel-dot" aria-hidden="true"></span>
+        <span class="panel-title">Default</span>
+        <span class="panel-actions" aria-hidden="true">
+          <span class="panel-action primary">+</span><span class="panel-action">−</span><span class="panel-action">╲</span><span class="panel-action">▣</span>
+        </span>
+        <span class="panel-info" aria-hidden="true">i</span>
+      </header>
+
+      <div class="panel-scroll" id="panelScroll">
+        <section class="control-section" data-tone="green">
+          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Layout</span><span class="section-icon">▦</span></button>
+          <div class="section-body">
+            <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input id="layoutVisible" type="checkbox" checked></div></div>
+            <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input id="clockwise" type="checkbox" checked></div></div>
+            <div class="control-row"><div class="control-label">Size</div><div class="control-value"><input id="size" type="number" min="1" max="20" step="1" value="10"><span class="field-action">↔</span></div></div>
+            <div class="control-row"><div class="control-label">View</div><div class="control-value"><select id="view"><option value="circle36" selected>Circle of 36</option><option value="circle24">Circle of 24</option><option value="circle12">Circle of 12</option><option value="square4">Square of 4</option><option value="square9">Square of 9</option><option value="permanentSquare">Permanent square</option><option value="tetragon">Tetragon</option></select></div></div>
+            <div class="control-row"><div class="control-label">Data type</div><div class="control-value"><select id="dataType"><option value="price" selected>Price</option><option value="date">Date</option><option value="time">Time</option><option value="priceDate">Price and date</option><option value="priceTime">Price and time</option></select></div></div>
+          </div>
+        </section>
+
+        <section class="control-section" data-tone="cyan">
+          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Price</span><span class="section-icon">●</span></button>
+          <div class="section-body">
+            <div class="control-row"><div class="control-label">Value</div><div class="control-value"><input id="value" type="text" inputmode="decimal" value="0.01"><span class="field-action">↔</span></div></div>
+            <div class="control-row"><div class="control-label">Find</div><div class="control-value"><input id="find" type="text" inputmode="decimal" value="0.01"><span class="field-action">⌕</span></div></div>
+            <div class="control-row"><div class="control-label">Increment</div><div class="control-value"><input id="increment" type="text" inputmode="decimal" value="1"><span class="field-action">↔</span></div></div>
+          </div>
+        </section>
+
+        <section class="control-section" data-tone="green">
+          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Highlight</span><span class="section-icon">▦</span></button>
+          <div class="section-body">
+            <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input id="highlightVisible" type="checkbox"></div></div>
+            <div class="control-row"><div class="control-label">Fill</div><div class="control-value"><select id="highlightFill"><option value="levels" selected>Levels</option><option value="cross">Cross</option></select></div></div>
+            <div class="control-row"><div class="control-label">Show marks</div><div class="control-value"><input id="showMarks" type="checkbox"></div></div>
+            <div class="control-row"><div class="control-label">Show numbers</div><div class="control-value"><input id="showNumbers" type="checkbox"></div></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="panel-bottom" id="status" data-status="loading"><span class="status-dot"></span><span id="statusText">Clean rebuild loading…</span></div>
+    </div>
+  </aside>
+
   <script>
-  (async function(){
+  (function(){
     'use strict';
-    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/b9a49673eda7a46429797cc1c8ccd9810d7c3909/public/kawkabat-al-arqam-al-sihria.html';
-    var oldRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/9e26516c5ae03114c9325ffcab86a6c42161a968/public/kawkabat-wheel-runtime-highlight-v1.html';
-    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/2333b246c24e560c960661a001c3f9380c3dcaf6/public/kawkabat-wheel-runtime-highlight-v2.html';
+    var runtimeUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/2333b246c24e560c960661a001c3f9380c3dcaf6/public/kawkabat-wheel-runtime-highlight-v2.html';
+    var frame=document.getElementById('wheelFrame');
+    var status=document.getElementById('status');
+    var statusText=document.getElementById('statusText');
+    var controls={
+      visible:document.getElementById('layoutVisible'),
+      clockwise:document.getElementById('clockwise'),
+      size:document.getElementById('size'),
+      view:document.getElementById('view'),
+      dataType:document.getElementById('dataType'),
+      value:document.getElementById('value'),
+      find:document.getElementById('find'),
+      increment:document.getElementById('increment'),
+      highlightVisible:document.getElementById('highlightVisible'),
+      highlightFill:document.getElementById('highlightFill'),
+      showMarks:document.getElementById('showMarks'),
+      showNumbers:document.getElementById('showNumbers')
+    };
+    var timer=0,nonce=0;
 
-    try{
-      var response=await fetch(sourceUrl,{cache:'no-store'});
-      if(!response.ok)throw new Error('HIGHLIGHT_SOURCE_HTTP_'+response.status);
-      var source=await response.text();
-
-      source=source.replace('Magic Numbers Constellation — Highlight Active V1','Magic Numbers Constellation — Show Numbers Active V1');
-      source=source.replace(oldRuntime,newRuntime);
-      source=source.replace(
-        "highlightFillControl.innerHTML='<option value=\"levels\">Levels</option>';",
-        "highlightFillControl.innerHTML='<option value=\"levels\">Levels</option><option value=\"cross\">Cross</option>';"
-      );
-      source=source.replace(
-        "          highlightMarksControl.addEventListener('change',reloadWheels);",
-        "          highlightMarksControl.addEventListener('change',function(){if(highlightMarksControl.checked&&!highlightVisibleControl.checked)highlightVisibleControl.checked=true;reloadWheels();});"
-      );
-      source=source.replace(
-        "          highlightNumbersControl.addEventListener('change',reloadWheels);",
-        "          highlightNumbersControl.addEventListener('change',function(){if(highlightNumbersControl.checked&&!highlightVisibleControl.checked)highlightVisibleControl.checked=true;reloadWheels();});"
-      );
-
-      if(source.indexOf(newRuntime)<0)throw new Error('SHOW_NUMBERS_RUNTIME_LINK_FAILED');
-      if(source.indexOf('<option value="cross">Cross</option>')<0)throw new Error('SHOW_NUMBERS_CROSS_OPTION_FAILED');
-      if(source.indexOf("highlightMarksControl.addEventListener('change',function(){if(highlightMarksControl.checked&&!highlightVisibleControl.checked)highlightVisibleControl.checked=true;reloadWheels();})")<0)throw new Error('SHOW_MARKS_BINDING_FAILED');
-      if(source.indexOf("highlightNumbersControl.addEventListener('change',function(){if(highlightNumbersControl.checked&&!highlightVisibleControl.checked)highlightVisibleControl.checked=true;reloadWheels();})")<0)throw new Error('SHOW_NUMBERS_BINDING_FAILED');
-
-      document.open();document.write(source);document.close();
-    }catch(error){
-      document.body.innerHTML='<div class="loading">تعذر تحميل Show numbers: '+String(error.message||error)+'</div>';
+    function normalize(value){
+      var arabic='٠١٢٣٤٥٦٧٨٩',persian='۰۱۲۳۴۵۶۷۸۹';
+      return String(value==null?'':value).trim()
+        .replace(/[٠-٩]/g,function(d){return String(arabic.indexOf(d));})
+        .replace(/[۰-۹]/g,function(d){return String(persian.indexOf(d));})
+        .replace(/[،,٫]/g,'.');
     }
+    function finite(control,fallback){var value=Number(normalize(control.value));return Number.isFinite(value)?value:fallback;}
+    function setStatus(mode,text){status.dataset.status=mode;statusText.textContent=text;}
+    function add(parts,key,value){parts.push(encodeURIComponent(key)+'='+encodeURIComponent(String(value)));}
+    function buildUrl(){
+      var parts=[];
+      add(parts,'view',controls.view.value);
+      add(parts,'direction',controls.clockwise.checked?'cw':'ccw');
+      add(parts,'dataType',controls.dataType.value);
+      add(parts,'value',finite(controls.value,0.01));
+      add(parts,'increment',finite(controls.increment,1)||1);
+      add(parts,'find',normalize(controls.find.value));
+      add(parts,'highlight',controls.highlightVisible.checked?1:0);
+      add(parts,'highlightFill',controls.highlightFill.value);
+      add(parts,'highlightMarks',controls.showMarks.checked?1:0);
+      add(parts,'highlightNumbers',controls.showNumbers.checked?1:0);
+      add(parts,'cleanV1',++nonce);
+      return runtimeUrl+'#'+parts.join('&');
+    }
+    function applyVisibility(){frame.style.display=controls.visible.checked?'block':'none';}
+    function applySize(){
+      var value=Math.max(1,Math.min(20,Math.round(finite(controls.size,10))));
+      controls.size.value=String(value);
+      var scale=value/10;
+      frame.style.width=(100/scale)+'%';
+      frame.style.height=(100/scale)+'%';
+      frame.style.transform='scale('+scale+')';
+    }
+    function reload(){
+      window.clearTimeout(timer);
+      applyVisibility();
+      applySize();
+      setStatus('loading','Applying clean controls…');
+      frame.src=buildUrl();
+    }
+    function schedule(){window.clearTimeout(timer);timer=window.setTimeout(reload,220);}
+
+    frame.addEventListener('load',function(){setStatus('ready','Clean V1 • Wheel ready');});
+    frame.addEventListener('error',function(){setStatus('error','Wheel load failed');});
+
+    Object.keys(controls).forEach(function(key){
+      var control=controls[key];
+      if(!control)return;
+      control.addEventListener('change',reload);
+      if(control.tagName==='INPUT'&&control.type!=='checkbox'){
+        control.addEventListener('input',schedule);
+        control.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reload();}});
+      }
+    });
+
+    controls.showMarks.addEventListener('change',function(){if(controls.showMarks.checked)controls.highlightVisible.checked=true;});
+    controls.showNumbers.addEventListener('change',function(){if(controls.showNumbers.checked)controls.highlightVisible.checked=true;});
+
+    Array.prototype.forEach.call(document.querySelectorAll('.section-toggle'),function(button){
+      button.addEventListener('click',function(){
+        var section=button.closest('.control-section');
+        var collapsed=section.classList.toggle('collapsed');
+        button.setAttribute('aria-expanded',collapsed?'false':'true');
+        button.querySelector('.section-sign').textContent=collapsed?'+':'−';
+      });
+    });
+
+    reload();
   }());
   </script>
 </body>
