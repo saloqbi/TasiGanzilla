@@ -1,306 +1,59 @@
 <!doctype html>
 <html lang="en" dir="ltr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Clean Controls Rebuild V1</title>
-  <style>
-    :root{
-      color-scheme:light;
-      --green:#9fc440;
-      --cyan:#49a2c4;
-      --row-line:#d2d7da;
-      --text:#151a1d;
-    }
-    *{box-sizing:border-box}
-    html,body{
-      margin:0;
-      width:100%;
-      height:100%;
-      overflow:hidden;
-      background:#f7f1e3;
-      font-family:Arial,Tahoma,sans-serif;
-      font-variant-numeric:tabular-nums;
-    }
-    .work-area{
-      position:fixed;
-      top:0;
-      right:0;
-      bottom:0;
-      left:300px;
-      overflow:hidden;
-      background:#f7f1e3;
-    }
-    .wheel-frame{
-      position:absolute;
-      top:0;
-      left:0;
-      width:100%;
-      height:100%;
-      border:0;
-      background:#f7f1e3;
-      transform-origin:0 0;
-    }
-    .control-panel{
-      position:fixed;
-      inset:0 auto 0 0;
-      width:300px;
-      z-index:1000;
-      padding:5px;
-      border-right:1px solid #66747b;
-      background:linear-gradient(90deg,#3e494f 0%,#78878f 3%,#eef3f5 8%,#aab6bc 12%,#fbfdfe 17%,#ccd5d9 50%,#fbfdfe 84%,#9aa7ad 92%,#465158 100%);
-      box-shadow:8px 0 20px rgba(20,28,32,.24),inset 0 0 0 1px rgba(255,255,255,.88),inset 0 0 0 4px rgba(83,96,104,.32);
-    }
-    .panel-shell{
-      display:flex;
-      flex-direction:column;
-      width:100%;
-      height:100%;
-      min-height:0;
-      overflow:hidden;
-      border:1px solid #536168;
-      border-radius:9px;
-      background:#edf1f2;
-      box-shadow:inset 0 0 0 2px #c8d1d5,inset 0 0 0 4px rgba(255,255,255,.84);
-    }
-    .panel-topbar{
-      flex:0 0 34px;
-      display:flex;
-      align-items:center;
-      gap:5px;
-      margin:4px 4px 3px;
-      padding:0 7px;
-      border:1px solid #879399;
-      border-radius:5px;
-      background:linear-gradient(180deg,#fff 0%,#f8fafb 44%,#cbd3d7 49%,#eef2f4 100%);
-      color:#111719;
-      font-size:14px;
-      font-weight:800;
-    }
-    .panel-dot{width:8px;height:8px;border:1px solid #8d979c;transform:rotate(45deg);background:#f8fafb}
-    .panel-title{flex:1}
-    .panel-actions{display:flex;gap:3px;align-items:center}
-    .panel-action{width:23px;height:23px;display:grid;place-items:center;border:1px solid #8d989e;border-radius:3px;background:linear-gradient(180deg,#fff,#dfe6e9);font-size:14px;font-weight:900}
-    .panel-action.primary{color:#fff;border-color:#397fa3;background:linear-gradient(180deg,#5ab3db,#1680b5)}
-    .panel-info{width:24px;height:24px;display:grid;place-items:center;border:2px solid #5797c2;border-radius:50%;color:#267db0;background:#eef8ff;font-size:16px;font-weight:900}
-    .panel-scroll{
-      flex:1 1 auto;
-      min-height:0;
-      margin:0 4px 4px;
-      overflow-y:auto;
-      overflow-x:hidden;
-      border:1px solid #aab3b8;
-      background:#fbfbfb;
-      scrollbar-width:thin;
-      scrollbar-color:#7d898f #eef2f4;
-    }
-    .control-section{border-bottom:1px solid #b9c1c5;background:#fff}
-    .section-toggle{
-      position:relative;
-      width:100%;
-      min-height:31px;
-      display:flex;
-      align-items:center;
-      gap:5px;
-      padding:0 7px;
-      border:0;
-      border-bottom:1px solid #c7cdd0;
-      background:linear-gradient(180deg,#fff,#e9edef 72%,#f8fafb);
-      color:#121719;
-      font:800 13px Arial,Tahoma,sans-serif;
-      text-align:left;
-      cursor:pointer;
-    }
-    .section-toggle::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--section-color,var(--cyan))}
-    .control-section[data-tone="green"]{--section-color:var(--green)}
-    .control-section[data-tone="cyan"]{--section-color:var(--cyan)}
-    .section-sign{color:#268daf;font-size:15px;font-weight:900;width:12px;text-align:center}
-    .section-name{flex:1}
-    .section-icon{font-size:12px;color:#68747a}
-    .section-body{display:block}
-    .control-section.collapsed .section-body{display:none}
-    .control-row{
-      min-height:31px;
-      display:grid;
-      grid-template-columns:42% 58%;
-      align-items:center;
-      border-bottom:1px solid var(--row-line);
-      background:#fbfbfb;
-    }
-    .control-row:last-child{border-bottom:0}
-    .control-label{height:100%;display:flex;align-items:center;padding:4px 8px;color:var(--text);font-size:12px;font-weight:600;background:#fafafa}
-    .control-value{min-width:0;height:100%;display:flex;align-items:center;gap:4px;padding:3px 5px;border-left:1px solid #ccd2d5;background:#f2f4f5;color:#1a2023;font-size:12px}
-    .control-value input[type="text"],.control-value input[type="number"],.control-value select{
-      width:100%;height:25px;min-width:0;border:1px solid #9fa9ae;border-radius:3px;padding:2px 6px;background:linear-gradient(180deg,#fff,#e8edef);color:#171c1f;font:600 12px Arial,Tahoma,sans-serif;outline:none;
-    }
-    .control-value input:focus,.control-value select:focus{border-color:#4f95b6;box-shadow:0 0 0 2px rgba(72,156,201,.18)}
-    .control-value input[type="checkbox"]{width:15px;height:15px;margin:0;accent-color:#2d8dbb}
-    .field-action{flex:0 0 auto;color:#617077;font-weight:900;font-size:13px}
-    .panel-bottom{
-      flex:0 0 31px;
-      display:flex;
-      align-items:center;
-      gap:6px;
-      margin:0 4px 4px;
-      padding:0 8px;
-      border:1px solid #889399;
-      border-radius:4px;
-      background:linear-gradient(180deg,#fff 0%,#d6dde1 42%,#edf1f3 58%,#b9c4c9 100%);
-      color:#33444c;
-      font-size:11px;
-      font-weight:800;
-    }
-    .status-dot{width:8px;height:8px;border-radius:50%;background:#d3a80b}
-    .panel-bottom[data-status="ready"] .status-dot{background:#31a354}
-    .panel-bottom[data-status="error"] .status-dot{background:#c93d3d}
-    @media(max-width:900px){.control-panel{width:270px}.work-area{left:270px}}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Magic Numbers Constellation — Complete Tools Rebuild</title>
+<style>
+:root{--green:#9fc440;--cyan:#49a2c4;--yellow:#d6c34b;--line:#d2d7da;--text:#151a1d}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif;font-variant-numeric:tabular-nums}.work{position:fixed;inset:0 0 0 300px;overflow:hidden;background:#f7f1e3}.wheel{position:absolute;inset:0;width:100%;height:100%;border:0;background:#f7f1e3;transform-origin:0 0}.panel{position:fixed;inset:0 auto 0 0;width:300px;z-index:1000;padding:5px;border-right:1px solid #66747b;background:linear-gradient(90deg,#3e494f 0%,#78878f 3%,#eef3f5 8%,#aab6bc 12%,#fbfdfe 17%,#ccd5d9 50%,#fbfdfe 84%,#9aa7ad 92%,#465158 100%);box-shadow:8px 0 20px rgba(20,28,32,.24),inset 0 0 0 1px rgba(255,255,255,.88),inset 0 0 0 4px rgba(83,96,104,.32)}.shell{display:flex;flex-direction:column;width:100%;height:100%;min-height:0;overflow:hidden;border:1px solid #536168;border-radius:9px;background:#edf1f2;box-shadow:inset 0 0 0 2px #c8d1d5,inset 0 0 0 4px rgba(255,255,255,.84)}.top{flex:0 0 34px;display:flex;align-items:center;gap:5px;margin:4px 4px 3px;padding:0 7px;border:1px solid #879399;border-radius:5px;background:linear-gradient(180deg,#fff 0%,#f8fafb 44%,#cbd3d7 49%,#eef2f4 100%);color:#111719;font-size:14px;font-weight:800}.diamond{width:8px;height:8px;border:1px solid #8d979c;transform:rotate(45deg);background:#f8fafb}.title{flex:1}.actions{display:flex;gap:3px}.action{width:23px;height:23px;display:grid;place-items:center;border:1px solid #8d989e;border-radius:3px;background:linear-gradient(180deg,#fff,#dfe6e9);font-size:14px;font-weight:900}.action.primary{color:#fff;border-color:#397fa3;background:linear-gradient(180deg,#5ab3db,#1680b5)}.info{width:24px;height:24px;display:grid;place-items:center;border:2px solid #5797c2;border-radius:50%;color:#267db0;background:#eef8ff;font-size:16px;font-weight:900}.scroll{flex:1;min-height:0;margin:0 4px 4px;overflow:auto;border:1px solid #aab3b8;background:#fbfbfb;scrollbar-width:thin;scrollbar-color:#7d898f #eef2f4}.section{border-bottom:1px solid #b9c1c5;background:#fff}.section.level1{margin-left:8px;border-left:1px solid #c3cacc}.section.level2{margin-left:15px;border-left:1px solid #c3cacc}.head{position:relative;width:100%;min-height:30px;display:flex;align-items:center;gap:5px;padding:0 7px;border:0;border-bottom:1px solid #c7cdd0;background:linear-gradient(180deg,#fff,#e9edef 72%,#f8fafb);color:#121719;font:800 12px Arial,Tahoma,sans-serif;text-align:left;cursor:pointer}.head:after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--tone,var(--cyan))}.tone-green{--tone:var(--green)}.tone-cyan{--tone:var(--cyan)}.tone-yellow{--tone:var(--yellow)}.sign{color:#268daf;font-size:14px;font-weight:900;width:11px;text-align:center}.name{flex:1}.icon{color:#68747a}.body{display:block}.collapsed>.body{display:none}.row{min-height:29px;display:grid;grid-template-columns:42% 58%;align-items:center;border-bottom:1px solid var(--line);background:#fbfbfb}.label{height:100%;display:flex;align-items:center;padding:4px 7px;color:var(--text);font-size:11px;font-weight:600;background:#fafafa}.value{min-width:0;height:100%;display:flex;align-items:center;gap:4px;padding:3px 5px;border-left:1px solid #ccd2d5;background:#f2f4f5;font-size:11px}.value input[type=text],.value input[type=number],.value select{width:100%;height:24px;min-width:0;border:1px solid #9fa9ae;border-radius:3px;padding:2px 5px;background:linear-gradient(180deg,#fff,#e8edef);color:#171c1f;font:600 11px Arial,Tahoma,sans-serif;outline:none}.value input[type=checkbox]{width:14px;height:14px;margin:0;accent-color:#2d8dbb}.value input[type=color]{width:100%;height:23px;padding:0;border:1px solid #9fa9ae}.glyph{color:#617077;font-weight:900}.profile-switch{display:flex;gap:12px;padding:6px 9px;border-bottom:1px solid #bbb;background:#eee;font-size:11px}.strip{display:flex;flex-wrap:wrap;gap:3px;padding:5px}.strip label{display:flex;align-items:center;gap:2px;font-size:10px}.table-wrap{overflow:auto}.grid-table{width:100%;border-collapse:collapse;font-size:9px}.grid-table th,.grid-table td{border:1px solid #d0d0d0;padding:2px 3px;text-align:left;white-space:nowrap}.grid-table th{background:#e7e9e9}.grid-table input[type=number],.grid-table select{width:55px;font-size:9px}.matrix{display:grid;grid-template-columns:16px repeat(12,16px);gap:1px;padding:4px;background:#f2f2f0}.matrix span,.matrix button{width:16px;height:16px;padding:0;border:1px solid #ccc;background:#fff;font-size:8px;line-height:14px;text-align:center}.matrix span{border:0;background:transparent}.footer{flex:0 0 31px;display:flex;align-items:center;gap:6px;margin:0 4px 4px;padding:0 8px;border:1px solid #889399;border-radius:4px;background:linear-gradient(180deg,#fff 0%,#d6dde1 42%,#edf1f3 58%,#b9c4c9 100%);color:#33444c;font-size:10px;font-weight:800}.dot{width:8px;height:8px;border-radius:50%;background:#d3a80b}.footer[data-status=ready] .dot{background:#31a354}.footer[data-status=error] .dot{background:#c93d3d}@media(max-width:900px){.panel{width:270px}.work{left:270px}}
+</style>
 </head>
 <body>
-  <main class="work-area" id="workArea">
-    <iframe id="wheelFrame" class="wheel-frame" title="Magic Numbers Constellation wheel" scrolling="yes"></iframe>
-  </main>
-
-  <aside class="control-panel" aria-label="Clean control panel">
-    <div class="panel-shell">
-      <header class="panel-topbar">
-        <span class="panel-dot" aria-hidden="true"></span>
-        <span class="panel-title">Default</span>
-        <span class="panel-actions" aria-hidden="true">
-          <span class="panel-action primary">+</span><span class="panel-action">−</span><span class="panel-action">╲</span><span class="panel-action">▣</span>
-        </span>
-        <span class="panel-info" aria-hidden="true">i</span>
-      </header>
-
-      <div class="panel-scroll" id="panelScroll">
-        <section class="control-section" data-tone="green">
-          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Layout</span><span class="section-icon">▦</span></button>
-          <div class="section-body">
-            <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input id="layoutVisible" type="checkbox" checked></div></div>
-            <div class="control-row"><div class="control-label">Clockwise</div><div class="control-value"><input id="clockwise" type="checkbox" checked></div></div>
-            <div class="control-row"><div class="control-label">Size</div><div class="control-value"><input id="size" type="number" min="1" max="20" step="1" value="10"><span class="field-action">↔</span></div></div>
-            <div class="control-row"><div class="control-label">View</div><div class="control-value"><select id="view"><option value="circle36" selected>Circle of 36</option><option value="circle24">Circle of 24</option><option value="circle12">Circle of 12</option><option value="square4">Square of 4</option><option value="square9">Square of 9</option><option value="permanentSquare">Permanent square</option><option value="tetragon">Tetragon</option></select></div></div>
-            <div class="control-row"><div class="control-label">Data type</div><div class="control-value"><select id="dataType"><option value="price" selected>Price</option><option value="date">Date</option><option value="time">Time</option><option value="priceDate">Price and date</option><option value="priceTime">Price and time</option></select></div></div>
-          </div>
-        </section>
-
-        <section class="control-section" data-tone="cyan">
-          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Price</span><span class="section-icon">●</span></button>
-          <div class="section-body">
-            <div class="control-row"><div class="control-label">Value</div><div class="control-value"><input id="value" type="text" inputmode="decimal" value="0.01"><span class="field-action">↔</span></div></div>
-            <div class="control-row"><div class="control-label">Find</div><div class="control-value"><input id="find" type="text" inputmode="decimal" value="0.01"><span class="field-action">⌕</span></div></div>
-            <div class="control-row"><div class="control-label">Increment</div><div class="control-value"><input id="increment" type="text" inputmode="decimal" value="1"><span class="field-action">↔</span></div></div>
-          </div>
-        </section>
-
-        <section class="control-section" data-tone="green">
-          <button class="section-toggle" type="button" aria-expanded="true"><span class="section-sign">−</span><span class="section-name">Highlight</span><span class="section-icon">▦</span></button>
-          <div class="section-body">
-            <div class="control-row"><div class="control-label">Visible</div><div class="control-value"><input id="highlightVisible" type="checkbox"></div></div>
-            <div class="control-row"><div class="control-label">Fill</div><div class="control-value"><select id="highlightFill"><option value="levels" selected>Levels</option><option value="cross">Cross</option></select></div></div>
-            <div class="control-row"><div class="control-label">Show marks</div><div class="control-value"><input id="showMarks" type="checkbox"></div></div>
-            <div class="control-row"><div class="control-label">Show numbers</div><div class="control-value"><input id="showNumbers" type="checkbox"></div></div>
-          </div>
-        </section>
-      </div>
-
-      <div class="panel-bottom" id="status" data-status="loading"><span class="status-dot"></span><span id="statusText">Clean rebuild loading…</span></div>
-    </div>
-  </aside>
-
-  <script>
-  (function(){
-    'use strict';
-    var runtimeUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/2333b246c24e560c960661a001c3f9380c3dcaf6/public/kawkabat-wheel-runtime-highlight-v2.html';
-    var frame=document.getElementById('wheelFrame');
-    var status=document.getElementById('status');
-    var statusText=document.getElementById('statusText');
-    var controls={
-      visible:document.getElementById('layoutVisible'),
-      clockwise:document.getElementById('clockwise'),
-      size:document.getElementById('size'),
-      view:document.getElementById('view'),
-      dataType:document.getElementById('dataType'),
-      value:document.getElementById('value'),
-      find:document.getElementById('find'),
-      increment:document.getElementById('increment'),
-      highlightVisible:document.getElementById('highlightVisible'),
-      highlightFill:document.getElementById('highlightFill'),
-      showMarks:document.getElementById('showMarks'),
-      showNumbers:document.getElementById('showNumbers')
-    };
-    var timer=0,nonce=0;
-
-    function normalize(value){
-      var arabic='٠١٢٣٤٥٦٧٨٩',persian='۰۱۲۳۴۵۶۷۸۹';
-      return String(value==null?'':value).trim()
-        .replace(/[٠-٩]/g,function(d){return String(arabic.indexOf(d));})
-        .replace(/[۰-۹]/g,function(d){return String(persian.indexOf(d));})
-        .replace(/[،,٫]/g,'.');
-    }
-    function finite(control,fallback){var value=Number(normalize(control.value));return Number.isFinite(value)?value:fallback;}
-    function setStatus(mode,text){status.dataset.status=mode;statusText.textContent=text;}
-    function add(parts,key,value){parts.push(encodeURIComponent(key)+'='+encodeURIComponent(String(value)));}
-    function buildUrl(){
-      var parts=[];
-      add(parts,'view',controls.view.value);
-      add(parts,'direction',controls.clockwise.checked?'cw':'ccw');
-      add(parts,'dataType',controls.dataType.value);
-      add(parts,'value',finite(controls.value,0.01));
-      add(parts,'increment',finite(controls.increment,1)||1);
-      add(parts,'find',normalize(controls.find.value));
-      add(parts,'highlight',controls.highlightVisible.checked?1:0);
-      add(parts,'highlightFill',controls.highlightFill.value);
-      add(parts,'highlightMarks',controls.showMarks.checked?1:0);
-      add(parts,'highlightNumbers',controls.showNumbers.checked?1:0);
-      add(parts,'cleanV1',++nonce);
-      return runtimeUrl+'#'+parts.join('&');
-    }
-    function applyVisibility(){frame.style.display=controls.visible.checked?'block':'none';}
-    function applySize(){
-      var value=Math.max(1,Math.min(20,Math.round(finite(controls.size,10))));
-      controls.size.value=String(value);
-      var scale=value/10;
-      frame.style.width=(100/scale)+'%';
-      frame.style.height=(100/scale)+'%';
-      frame.style.transform='scale('+scale+')';
-    }
-    function reload(){
-      window.clearTimeout(timer);
-      applyVisibility();
-      applySize();
-      setStatus('loading','Applying clean controls…');
-      frame.src=buildUrl();
-    }
-    function schedule(){window.clearTimeout(timer);timer=window.setTimeout(reload,220);}
-
-    frame.addEventListener('load',function(){setStatus('ready','Clean V1 • Wheel ready');});
-    frame.addEventListener('error',function(){setStatus('error','Wheel load failed');});
-
-    Object.keys(controls).forEach(function(key){
-      var control=controls[key];
-      if(!control)return;
-      control.addEventListener('change',reload);
-      if(control.tagName==='INPUT'&&control.type!=='checkbox'){
-        control.addEventListener('input',schedule);
-        control.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reload();}});
-      }
-    });
-
-    controls.showMarks.addEventListener('change',function(){if(controls.showMarks.checked)controls.highlightVisible.checked=true;});
-    controls.showNumbers.addEventListener('change',function(){if(controls.showNumbers.checked)controls.highlightVisible.checked=true;});
-
-    Array.prototype.forEach.call(document.querySelectorAll('.section-toggle'),function(button){
-      button.addEventListener('click',function(){
-        var section=button.closest('.control-section');
-        var collapsed=section.classList.toggle('collapsed');
-        button.setAttribute('aria-expanded',collapsed?'false':'true');
-        button.querySelector('.section-sign').textContent=collapsed?'+':'−';
-      });
-    });
-
-    reload();
-  }());
-  </script>
-</body>
-</html>
+<main class="work"><iframe id="wheelFrame" class="wheel" title="Magic Numbers Constellation wheel" scrolling="yes"></iframe></main>
+<aside class="panel"><div class="shell"><header class="top"><span class="diamond"></span><span class="title">Default</span><span class="actions"><button id="openAll" class="action primary">+</button><button id="closeAll" class="action">−</button><button id="reset" class="action">↺</button><button class="action">▣</button></span><span class="info">i</span></header><div id="panelRoot" class="scroll"></div><div id="status" class="footer" data-status="loading"><span class="dot"></span><span id="statusText">Building complete tool list…</span></div></div></aside>
+<script>
+(function(){
+'use strict';
+const runtimeUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/2333b246c24e560c960661a001c3f9380c3dcaf6/public/kawkabat-wheel-runtime-highlight-v2.html';
+const root=document.getElementById('panelRoot'),frame=document.getElementById('wheelFrame'),status=document.getElementById('status'),statusText=document.getElementById('statusText');
+const STORAGE='kawkabat-complete-panel-v1';let saved={};try{saved=JSON.parse(localStorage.getItem(STORAGE)||'{}')}catch(_){saved={}}const refs={},sections=[];let timer=0,nonce=0;
+const planets=[['Sun','☉'],['Moon','☽'],['Mercury','☿'],['Venus','♀'],['Mars','♂'],['Ceres','⚳'],['Jupiter','♃'],['Saturn','♄'],['Uranus','♅'],['Neptune','♆'],['Pluto','♇'],['Eris','⯰'],['Summary','Σ'],['Average','Σ']];
+const aspects=[['Conjunction','☌'],['Semisextile','⚺'],['Semisquare','∠'],['Sextile','⚹'],['Quadrature','□'],['Trine','△'],['Sesquisquare','⚼'],['Quincunx','⚻'],['Opposition','☍']];
+const figures=['Triangle','Square','Pentagon','Hexagon','Septagon','Octagon','Nonagon','Decagon','Hendecagon','Dodecagon'];
+const colors={Background:'#ffffff',Grid:'#d7d7d2',Marker:'#fff5d6',Highlight:'#ececec',High:'#b7e4a8',Low:'#fa8072',Forecast:'#fff44f',Error:'#555555',Protractor:'#ff0000',Chronometer:'#008000',Fire:'#ff0000',Earth:'#008000',Air:'#dda0dd',Water:'#0000ff',Conjunction:'#6495ed',Semisextile:'#00ff00',Semisquare:'#ff7f50',Sextile:'#00ff00',Quadrature:'#ff7f50',Trine:'#00ff00',Sesquisquare:'#ff7f50',Quincunx:'#00ff00',Opposition:'#ff7f50',Triangle:'#00ff00',Square:'#ff7f50',Pentagon:'#6495ed',Hexagon:'#00ffff',Septagon:'#e6e6fa',Octagon:'#df73ff',Nonagon:'#ed9121',Decagon:'#f2f27a',Hendecagon:'#c19a6b',Dodecagon:'#555555',Vectors:'#808080','Bull trend':'#50c878','Bear trend':'#ff007f',Axes:'#555555'};
+function save(){const out={};document.querySelectorAll('[data-key]').forEach(c=>out[c.dataset.key]=c.type==='checkbox'?c.checked:c.value);localStorage.setItem(STORAGE,JSON.stringify(out))}
+function E(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n}
+function control(key,type,value,options){let c;if(type==='select'){c=E('select');(options||[]).forEach(o=>{const op=E('option');if(typeof o==='object'){op.value=o.value;op.textContent=o.label}else{op.value=o;op.textContent=o}c.appendChild(op)})}else{c=E('input');c.type=type||'text';if(type==='number')c.step='any'}c.dataset.key=key;const v=Object.prototype.hasOwnProperty.call(saved,key)?saved[key]:value;if(c.type==='checkbox')c.checked=v===true||v==='true';else c.value=v;c.addEventListener('change',()=>{save();if(key.startsWith('core.'))reload();else setStatus('ready','Complete list • setting saved')});c.addEventListener('input',()=>{if(key.startsWith('core.'))schedule();else save()});refs[key]=c;return c}
+function row(label,c,glyph){const r=E('div','row'),l=E('div','label',label),v=E('div','value');v.appendChild(c);if(glyph)v.appendChild(E('span','glyph',glyph));r.append(l,v);return r}
+function section(id,title,icon,tone,level,open){const s=E('section','section '+(tone||'tone-cyan')+(level?' level'+level:''));s.dataset.id=id;if(!open)s.classList.add('collapsed');const h=E('button','head');h.type='button';const sign=E('span','sign',open?'−':'+');h.append(sign,E('span','name',title),E('span','icon',icon||''));const b=E('div','body');h.addEventListener('click',()=>{s.classList.toggle('collapsed');sign.textContent=s.classList.contains('collapsed')?'+':'−'});s.append(h,b);sections.push(s);return{s,b}}
+function add(parent,obj){parent.appendChild(obj.s)}
+function check(key,value){return control(key,'checkbox',value)}function text(key,value){return control(key,'text',value)}function num(key,value){return control(key,'number',value)}function select(key,value,opts){return control(key,'select',value,opts)}function color(key,value){return control(key,'color',value)}
+const layout=section('layout','Layout','▦','tone-green',0,true);layout.b.append(row('Visible',check('core.visible',true)),row('Clockwise',check('core.clockwise',true)),row('Size',num('core.size',10),'↔'),row('View',select('core.view','circle36',[{value:'circle12',label:'Circle of 12'},{value:'circle24',label:'Circle of 24'},{value:'circle36',label:'Circle of 36'},{value:'square4',label:'Square of 4'},{value:'square9',label:'Square of 9'},{value:'permanentSquare',label:'Permanent square'},{value:'tetragon',label:'Tetragon'}])),row('Data type',select('core.dataType','price',[{value:'price',label:'Price'},{value:'date',label:'Date'},{value:'time',label:'Time'},{value:'priceDate',label:'Price and date'},{value:'priceTime',label:'Price and time'}])));add(root,layout);
+const price=section('price','Price','●','tone-cyan',0,true);price.b.append(row('Value',text('core.value','0.01'),'↔'),row('Find',text('core.find','0.01'),'⌕'),row('Increment',text('core.increment','1'),'↔'));add(root,price);
+const highlight=section('highlight','Highlight','▧','tone-green',0,true);highlight.b.append(row('Visible',check('core.highlightVisible',false)),row('Fill',select('core.highlightFill','levels',[{value:'levels',label:'Levels'},{value:'cross',label:'Cross'}])),row('Show marks',check('core.showMarks',false)),row('Show numbers',check('core.showNumbers',false)));add(root,highlight);
+const pro=section('protractor','Protractor','◴','tone-yellow',0,false);pro.b.append(row('Visible',check('protractor.visible',false)),row('Clockwise',check('protractor.clockwise',true)),row('Angle',num('protractor.angle',0),'↔'));add(root,pro);
+const counter=section('counter','Counter','36','tone-cyan',1,false);counter.b.append(row('Visible',check('counter.visible',false)),row('Clockwise',check('counter.clockwise',true)),row('Start',num('counter.start',1)),row('Step',num('counter.step',1)),row('Radius',num('counter.radius',34)),row('Font size',num('counter.fontSize',11)));add(root,counter);
+const sec=section('secondaryScale','Secondary scale','⌘','tone-cyan',1,false);sec.b.append(row('Visible',check('secondary.visible',false)),row('Clockwise',check('secondary.clockwise',true)),row('Start',num('secondary.start',0)),row('Increment',num('secondary.increment',10)),row('Divisions',num('secondary.divisions',36)),row('Radius',num('secondary.radius',60)),row('Font size',num('secondary.fontSize',10)));add(root,sec);
+const marker=section('marker','Marker','◇','tone-cyan',1,false);marker.b.append(row('Visible',check('marker.visible',false)),row('Angle',num('marker.angle',0)),row('Radius',num('marker.radius',0)),row('Shape',select('marker.shape','Triangle',['Triangle','Circle','Square'])),row('Color',color('marker.color','#e93020')),row('Line width',num('marker.lineWidth',2)),row('Label',text('marker.label','')));add(root,marker);
+const chrono=section('chronometer','Chronometer','◷','tone-green',0,false);chrono.b.append(row('Visible',check('chronometer.visible',false)),row('Clockwise',check('chronometer.clockwise',true)),row('Angle',num('chronometer.angle',0),'↔'),row('Range',select('chronometer.range','Annual',['Annual','Semiannual','Quarterly','Monthly','Weekly','Daily','Intraday'])));add(root,chrono);
+const chronoSec=section('chronoSecondary','Secondary scale','⌘','tone-cyan',1,false);chronoSec.b.append(row('Visible',check('chronometer.secondary.visible',false)),row('Reverse',check('chronometer.secondary.reverse',true)),row('Angle',num('chronometer.secondary.angle',180)));add(root,chronoSec);
+const chronoMark=section('chronoMarker','Marker','◇','tone-cyan',1,false);chronoMark.b.append(row('Visible',check('chronometer.marker.visible',false)),row('Angle',num('chronometer.marker.angle',0)),row('Color',color('chronometer.marker.color','#168a52')),row('Label',text('chronometer.marker.label','')));add(root,chronoMark);
+const cosmo=section('cosmogram','Cosmogram','★','tone-green',0,false);cosmo.b.append(row('Visible',check('cosmogram.visible',false)),row('Clockwise',check('cosmogram.clockwise',true)),row('Angle',num('cosmogram.angle',0)),row('System',select('cosmogram.system','Geocentric',['Geocentric','Heliocentric'])));add(root,cosmo);
+const locationSec=section('location','Location','⌖','tone-cyan',1,false);locationSec.b.append(row('City',text('location.city','New York')),row('Time zone',text('location.timeZone','-05:00')),row('Latitude',text('location.latitude','40° 43′ North')),row('Longitude',text('location.longitude','74° 1′ West')));add(root,locationSec);
+const moon=section('moonPhases','Moon phases','◐','tone-cyan',1,false);moon.b.append(row('Visible',check('moon.visible',true)),row('Show eclipses',check('moon.eclipses',true)),row('Today',check('moon.today',true)),row('Date',text('moon.date','31.12.2019')),row('Size',num('moon.size',10)),row('Offset',num('moon.offset',28)));add(root,moon);
+const cycles=section('cycles','Cycles','○','tone-cyan',1,false);cycles.b.append(row('Visible',check('cycles.visible',true)));['Tetragram','Pentagram','Hexagram'].forEach(name=>{const s=section(name.toLowerCase(),name,'','tone-cyan',2,false);s.b.append(row('Visible',check('cycles.'+name+'.visible',true)),row('Ruler',select('cycles.'+name+'.ruler','Sun',planets.slice(0,12).map(p=>p[0]))),row('Reverse',check('cycles.'+name+'.reverse',true)),row('Today',check('cycles.'+name+'.today',true)),row('Date',text('cycles.'+name+'.date','31.12.2019')));cycles.b.appendChild(s.s)});add(root,cycles);
+const switcher=E('div','profile-switch');['Radix','Transit'].forEach((n,i)=>{const lab=E('label'),r=control('profile.mode','radio',i?'Transit':'Radix');r.name='profileMode';r.value=n;r.checked=(saved['profile.mode']||'Radix')===n;r.addEventListener('change',save);lab.append(r,document.createTextNode(n));switcher.appendChild(lab)});root.appendChild(switcher);
+const profile=section('profile','Profile','◉','tone-green',0,false);profile.b.append(row('Visible',check('profile.visible',true)));const pp=section('profilePrice','Price','','tone-cyan',1,false);pp.b.append(row('Ticker',select('profile.price.ticker','None',['None','TASI','XAUUSD','BTCUSD'])),row('Quote',num('profile.price.quote',0)),row('Value',num('profile.price.value',1)),row('Increment',num('profile.price.increment',1)));profile.b.appendChild(pp.s);const pd=section('profileDate','Date','','tone-cyan',1,false);pd.b.append(row('Today',check('profile.date.today',true)),row('Value',text('profile.date.value','31.12.2019')),row('Increment',num('profile.date.increment',1)),row('Period',select('profile.date.period','Day',['Day','Week','Month','Year'])));profile.b.appendChild(pd.s);const pt=section('profileTime','Time','','tone-cyan',1,false);pt.b.append(row('Now',check('profile.time.now',false)),row('Value',text('profile.time.value','00:00')),row('Increment',num('profile.time.increment',1)),row('Period',select('profile.time.period','Hour',['Minute','Hour','Day'])));profile.b.appendChild(pt.s);const projections=section('projections','Projections','✈','tone-cyan',1,false);const strip=E('div','strip');planets.forEach(([n,s])=>{const l=E('label');l.append(check('projection.'+n,true),document.createTextNode(s));strip.appendChild(l)});projections.b.appendChild(strip);profile.b.appendChild(projections.s);add(root,profile);
+const planetsSec=section('planets','Planets','●','tone-green',0,false);const pwrap=E('div','table-wrap'),ptable=E('table','grid-table');ptable.innerHTML='<thead><tr><th>Planet</th><th>✓</th><th>Degree</th><th>Zodiac</th><th>△</th></tr></thead>';const ptbody=E('tbody');planets.forEach(([n,s],i)=>{const tr=E('tr');const td1=E('td',null,s+' '+n),td2=E('td'),td3=E('td',null,[279,337,273,313,288,288,276,291,33,346,292,23,110,249][i]+'°'),td4=E('td',null,[9,7,3,13,28,18,6,21,3,16,22,23,20,9][i]+'°'),td5=E('td',null,'△ '+[179,292,203,185,182,145,204,83,31,18,13,3,97,218][i]+'°');td2.appendChild(check('planet.'+n+'.visible',true));tr.append(td1,td2,td3,td4,td5);ptbody.appendChild(tr)});ptable.appendChild(ptbody);pwrap.appendChild(ptable);planetsSec.b.appendChild(pwrap);add(root,planetsSec);
+const aspectsSec=section('aspects','Aspects','A','tone-green',0,false);const aw=E('div','table-wrap'),at=E('table','grid-table');at.innerHTML='<thead><tr><th>Aspect</th><th>✓</th><th>Orb</th><th>Style</th></tr></thead>';const ab=E('tbody');aspects.forEach(([n,s],i)=>{const tr=E('tr'),a=E('td',null,s+' '+n),v=E('td'),o=E('td'),st=E('td');v.appendChild(check('aspect.'+n+'.visible',true));o.appendChild(num('aspect.'+n+'.orb',i?1:5));st.appendChild(select('aspect.'+n+'.style',i===0?'Line':(i%3===1?'Dash':'Bold line'),['Line','Dash','Bold line','Bold dash']));tr.append(a,v,o,st);ab.appendChild(tr)});at.appendChild(ab);aw.appendChild(at);aspectsSec.b.appendChild(aw);add(root,aspectsSec);
+const inspector=section('inspector','Inspector','⌘','tone-green',0,false);inspector.b.append(row('Visible',check('inspector.visible',true)));const matrix=E('div','matrix');matrix.appendChild(E('span'));planets.slice(0,12).forEach(p=>matrix.appendChild(E('span',null,p[1])));planets.slice(0,12).forEach((p,ri)=>{matrix.appendChild(E('span',null,p[1]));planets.slice(0,12).forEach((_,ci)=>{const b=E('button',null,ri===ci?'·':'·');b.type='button';b.addEventListener('click',()=>{b.textContent=b.textContent==='×'?'·':'×';b.style.background=b.textContent==='×'?'#ccecff':'#fff'});matrix.appendChild(b)})});inspector.b.appendChild(matrix);add(root,inspector);
+const figs=section('figures','Figures','▱','tone-green',0,false);figs.b.append(row('Hide',check('figures.hide',false)));figures.forEach(n=>{const s=section('figure-'+n,n,'','tone-cyan',1,false);s.b.append(row('Visible',check('figure.'+n+'.visible',false)),row('Show highlight',check('figure.'+n+'.highlight',true)),row('Angle',num('figure.'+n+'.angle',0)));figs.b.appendChild(s.s)});const vectors=section('vectors','Vectors','','tone-cyan',1,false);vectors.b.append(row('Visible',check('vectors.visible',false)),row('Clockwise',check('vectors.clockwise',true)),row('Angle',num('vectors.angle',0)));figs.b.appendChild(vectors.s);const locator=section('locator','Locator','','tone-cyan',1,false);locator.b.append(row('Visible',check('locator.visible',false)),row('Angle',num('locator.angle',181)));figs.b.appendChild(locator.s);const vortex=section('vortex','Vortex','','tone-cyan',1,false);vortex.b.append(row('Visible',check('vortex.visible',false)),row('Angle',num('vortex.angle',0)),row('Trend',select('vortex.trend','Both',['Both','Bull','Bear'])),row('Price',num('vortex.price',1)),row('Date',text('vortex.date','31.12.2019')),row('Time',text('vortex.time','00:00')),row('Radius',num('vortex.radius',1)));figs.b.appendChild(vortex.s);add(root,figs);
+const colorSec=section('colors','Colors','▴','tone-green',0,false);Object.entries(colors).forEach(([n,v])=>colorSec.b.append(row(n,color('color.'+n,v))));add(root,colorSec);
+function normalize(v){const a='٠١٢٣٤٥٦٧٨٩',p='۰۱۲۳۴۵۶۷۸۹';return String(v==null?'':v).trim().replace(/[٠-٩]/g,d=>String(a.indexOf(d))).replace(/[۰-۹]/g,d=>String(p.indexOf(d))).replace(/[،,٫]/g,'.')}
+function finite(k,f){const v=Number(normalize(refs[k].value));return Number.isFinite(v)?v:f}function addParam(parts,k,v){parts.push(encodeURIComponent(k)+'='+encodeURIComponent(String(v)))}
+function buildUrl(){const parts=[];addParam(parts,'view',refs['core.view'].value);addParam(parts,'direction',refs['core.clockwise'].checked?'cw':'ccw');addParam(parts,'dataType',refs['core.dataType'].value);addParam(parts,'value',finite('core.value',0.01));addParam(parts,'increment',finite('core.increment',1)||1);addParam(parts,'find',normalize(refs['core.find'].value));addParam(parts,'highlight',refs['core.highlightVisible'].checked?1:0);addParam(parts,'highlightFill',refs['core.highlightFill'].value);addParam(parts,'highlightMarks',refs['core.showMarks'].checked?1:0);addParam(parts,'highlightNumbers',refs['core.showNumbers'].checked?1:0);addParam(parts,'completePanel',++nonce);return runtimeUrl+'#'+parts.join('&')}
+function setStatus(mode,msg){status.dataset.status=mode;statusText.textContent=msg}function applySize(){let s=Math.max(1,Math.min(20,Math.round(finite('core.size',10))));refs['core.size'].value=s;const scale=s/10;frame.style.width=(100/scale)+'%';frame.style.height=(100/scale)+'%';frame.style.transform='scale('+scale+')'}function reload(){clearTimeout(timer);frame.style.display=refs['core.visible'].checked?'block':'none';applySize();setStatus('loading','Loading complete panel wheel…');frame.src=buildUrl()}function schedule(){clearTimeout(timer);timer=setTimeout(reload,240)}
+refs['core.visible'].addEventListener('change',reload);refs['core.size'].addEventListener('change',reload);refs['core.showMarks'].addEventListener('change',()=>{if(refs['core.showMarks'].checked)refs['core.highlightVisible'].checked=true;reload()});refs['core.showNumbers'].addEventListener('change',()=>{if(refs['core.showNumbers'].checked)refs['core.highlightVisible'].checked=true;reload()});frame.addEventListener('load',()=>setStatus('ready','All tools installed • core tools active'));document.getElementById('openAll').onclick=()=>sections.forEach(s=>s.classList.remove('collapsed'));document.getElementById('closeAll').onclick=()=>sections.forEach(s=>s.classList.add('collapsed'));document.getElementById('reset').onclick=()=>{localStorage.removeItem(STORAGE);location.reload()};reload();
+window.__auditCompletePanelV1=()=>({ok:true,sectionCount:sections.length,controlCount:document.querySelectorAll('[data-key]').length,hasPlanets:!!document.querySelector('[data-id=planets]'),hasAspects:!!document.querySelector('[data-id=aspects]'),hasFigures:!!document.querySelector('[data-id=figures]'),hasColors:!!document.querySelector('[data-id=colors]')});
+})();
+</script>
+</body></html>
