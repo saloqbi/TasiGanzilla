@@ -104,7 +104,7 @@
         })));
         (0,eval)(code.join('\n'));
 
-        const patchUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/64142cbec36d93b8ea779d91255a2359e503c1c4/public/kawkabat-square9-v17-reference-patch.js';
+        const patchUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/3d505b52dcdeb37d5c78e737778c74240daa93e9/public/kawkabat-square9-v17-reference-patch.js';
         const patch=await fetch(patchUrl,{cache:'no-store'}).then(response=>{
           if(!response.ok)throw Error('V17 PATCH HTTP '+response.status);
           return response.text();
