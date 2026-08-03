@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — Protractor & Chronometer V6</title>
+  <title>كوكبة الأرقام السحرية — Protractor & Chronometer V7</title>
   <style>
     html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
     body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
@@ -11,32 +11,32 @@
   </style>
 </head>
 <body>
-  <div class="loading">جارٍ تحميل العمل المركّب…</div>
+  <div class="loading">جارٍ تحميل العمل المتكامل…</div>
   <script>
   (async function(){
     'use strict';
 
     var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/a6ee61bba9846acb1a97ebca90cd9ad1e082cec5/public/kawkabat-al-arqam-al-sihria.html';
     var oldRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/e205f1289f1e78b6c615944727df10d423f19338/public/kawkabat-wheel-runtime-protractor-chronometer-v1.html';
-    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/4653e20fcc315999a2ae8e1679f5dedc71acbae4/public/kawkabat-wheel-composite-protractor-chronometer-v6.html';
+    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/517ec5185324305c90ddfa92dd565eac84095a9a/public/kawkabat-wheel-integrated-protractor-chronometer-v7.html';
 
     try{
       var response=await fetch(sourceUrl,{cache:'no-store'});
       if(!response.ok)throw new Error('MAIN_SOURCE_HTTP_'+response.status);
       var source=await response.text();
-      source=source.replace('Protractor & Chronometer Active V1','Protractor & Chronometer Active V6');
+      source=source.replace('Protractor & Chronometer Active V1','Protractor & Chronometer Active V7');
 
       if(source.indexOf(oldRuntime)<0)throw new Error('OLD_RUNTIME_REFERENCE_NOT_FOUND');
       source=source.replace(oldRuntime,newRuntime);
 
-      if(source.indexOf(newRuntime)<0)throw new Error('COMPOSITE_RUNTIME_LINK_FAILED');
+      if(source.indexOf(newRuntime)<0)throw new Error('INTEGRATED_RUNTIME_LINK_FAILED');
       if(source.indexOf(oldRuntime)>=0)throw new Error('OLD_RUNTIME_STILL_PRESENT');
 
       document.open();
       document.write(source);
       document.close();
     }catch(error){
-      document.body.innerHTML='<div class="loading">تعذر تحميل العمل المركّب: '+String(error.message||error)+'</div>';
+      document.body.innerHTML='<div class="loading">تعذر تحميل العمل المتكامل: '+String(error.message||error)+'</div>';
     }
   }());
   </script>
