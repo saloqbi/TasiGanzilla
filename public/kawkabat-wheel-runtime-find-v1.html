@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — Find Runtime</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
+    .loading{font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل أداة البحث…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/0e1aa64595feccc46ddc92fb44a9b34633e35cec/public/kawkabat-wheel-runtime-final.html';
+
+    try{
+      var response=await fetch(sourceUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('FIND_RUNTIME_SOURCE_HTTP_'+response.status);
+      var source=await response.text();
+      source=source.replace('Runtime مباشر','Find Runtime');
+
+      var writeMarker="      document.open();\n      document.write(html);\n      document.close();";
+      var patch=`      var closeTagFind='</scr'+'ipt>';
+      var findScript='<script id="kawkabat-find-runtime-v1">(function(){'+
+        "'use strict';"+
+        'var params=new URLSearchParams(String(location.hash||"").replace(/^#/,""));'+
+        'var rawFind=String(params.get("find")||"").trim().replace(",",".");'+
+        'var findValue=Number(rawFind),hasFind=rawFind!==""&&Number.isFinite(findValue);'+
+        'function almostEqual(a,b){var tolerance=Math.max(1e-9,Math.abs(b)*1e-10);return Math.abs(a-b)<=tolerance;}'+
+        'function runFind(){var wheel=document.getElementById("wheel"),angleFrame=document.getElementById("angleFrame"),old=document.getElementById("findHighlightLayer");if(old)old.remove();document.documentElement.dataset.findRequested=hasFind?"true":"false";if(!hasFind||!wheel)return;var found=null;for(var cycle=1;cycle<=10&&!found;cycle+=1){var group=document.getElementById("numbersCycle"+cycle);if(!group)continue;Array.prototype.some.call(group.children,function(node){var value=Number(node.getAttribute("data-price-value"));if(Number.isFinite(value)&&almostEqual(value,findValue)){found=node;return true;}return false;});}document.documentElement.dataset.findFound=found?"true":"false";if(!found)return;var NS="http://www.w3.org/2000/svg",layer=document.createElementNS(NS,"g");layer.id="findHighlightLayer";layer.setAttribute("aria-label","Find highlight "+rawFind);if(angleFrame&&angleFrame.parentNode===wheel)wheel.insertBefore(layer,angleFrame);else wheel.appendChild(layer);var box=found.getBBox(),rect=document.createElementNS(NS,"rect");rect.setAttribute("x",box.x-14);rect.setAttribute("y",box.y-10);rect.setAttribute("width",box.width+28);rect.setAttribute("height",box.height+20);rect.setAttribute("rx",Math.max(10,(box.height+20)/2));rect.setAttribute("fill","#FFD86A");rect.setAttribute("fill-opacity","0.22");rect.setAttribute("stroke","#B87900");rect.setAttribute("stroke-width","4");rect.setAttribute("vector-effect","non-scaling-stroke");rect.style.filter="drop-shadow(0 0 8px rgba(255,190,0,.9))";layer.appendChild(rect);found.setAttribute("data-find-match","true");window.setTimeout(function(){var r=found.getBoundingClientRect(),root=document.scrollingElement||document.documentElement;root.scrollLeft+=r.left+(r.width/2)-(window.innerWidth/2);root.scrollTop+=r.top+(r.height/2)-(window.innerHeight/2);},180);}'+
+        'if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",function(){window.setTimeout(runFind,60);},{once:true});else window.setTimeout(runFind,60);'+
+        'window.__auditKawkabatFindRuntimeV1=function(){return{ok:true,requested:hasFind,value:hasFind?findValue:null,found:document.documentElement.dataset.findFound==="true"};};'+
+      '}());'+closeTagFind;
+      var bodyClose=html.lastIndexOf('</body>');
+      if(bodyClose<0)throw new Error('FIND_BODY_CLOSE_NOT_FOUND');
+      html=html.slice(0,bodyClose)+findScript+html.slice(bodyClose);
+`;
+
+      if(source.indexOf(writeMarker)<0)throw new Error('FIND_WRITE_MARKER_NOT_FOUND');
+      source=source.replace(writeMarker,patch+writeMarker);
+      document.open();
+      document.write(source);
+      document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">تعذر تحميل أداة البحث: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
