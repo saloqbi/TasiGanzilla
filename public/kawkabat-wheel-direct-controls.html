@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — الدورة 1 على العجلة 3</title>
+  <title>كوكبة الأرقام السحرية — الدورات 1 إلى 360</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#F7F1E3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -31,18 +31,18 @@
       var html=decodeBase64(payload.content);
 
       html=html.replace('</style>',
-        '.ring-three-number{font-size:24px!important;pointer-events:none!important}'+
+        '.cycle-number-1-360{font-size:24px!important;pointer-events:none!important}'+
         'html,body{scrollbar-width:none!important;-ms-overflow-style:none!important;overscroll-behavior:none!important}'+
         'html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}'+
         '</style>');
 
       var runtime=
-        "var ringThree=document.getElementById('numbersRingThree');"+
-        "if(!ringThree){ringThree=document.createElementNS(NS,'g');ringThree.id='numbersRingThree';ringThree.setAttribute('aria-label','الدورة رقم 1 من 1 إلى 36 على العجلة رقم 3');var angleFrame=document.getElementById('angleFrame');if(angleFrame&&angleFrame.parentNode===document.getElementById('wheel'))document.getElementById('wheel').insertBefore(ringThree,angleFrame);else document.getElementById('wheel').appendChild(ringThree);}"+
-        "while(ringThree.firstChild)ringThree.removeChild(ringThree.firstChild);"+
-        "for(var ringThreeIndex=0;ringThreeIndex<36;ringThreeIndex+=1){var ringThreeValue=ringThreeIndex===0?36:ringThreeIndex;addNumber(ringThree,ringThreeValue,ringThreeIndex*10-90,455,'ring-three-number',ringThreeIndex%9===0);}"+
-        "document.documentElement.dataset.ringThreeCycleOne=ringThree.children.length===36?'true':'false';"+
-        "window.__auditKawkabatRingThreeCycleOne=function(){var g=document.getElementById('numbersRingThree'),ok=!!g&&g.children.length===36;if(ok){for(var j=0;j<36;j+=1){var expected=j===0?36:j;if(Number(g.children[j].textContent)!==expected){ok=false;break;}}}return{ok:ok,wheel:3,cycle:1,range:[1,36],numberCount:g?g.children.length:0,radius:455,cardinalValues:{top:36,right:9,bottom:18,left:27},colors:['red','blue','black']};};";
+        "var cycleCount=10,cycleDivisions=36,cycleFirstRadius=455,cycleStep=110;"+
+        "function cycleGroupId(c){return 'numbersCycle'+c+'Native';}"+
+        "function cycleExpected(c,i){var start=((c-1)*cycleDivisions)+1,end=c*cycleDivisions;return i===0?end:start+i-1;}"+
+        "function cycleRenderAll(){var wheel=document.getElementById('wheel'),angleFrame=document.getElementById('angleFrame');if(!wheel)return false;for(var c=1;c<=cycleCount;c+=1){var id=cycleGroupId(c),old=document.getElementById(id);if(old)old.remove();var group=document.createElementNS(NS,'g');group.id=id;group.setAttribute('aria-label','الدورة '+c+' من '+(((c-1)*36)+1)+' إلى '+(c*36));var radius=cycleFirstRadius+((c-1)*cycleStep);for(var i=0;i<cycleDivisions;i+=1){var value=cycleExpected(c,i);addNumber(group,value,i*10-90,radius,'cycle-number-1-360',i%9===0);}if(angleFrame&&angleFrame.parentNode===wheel)wheel.insertBefore(group,angleFrame);else wheel.appendChild(group);}document.documentElement.dataset.cyclesOneTo360='true';return true;}"+
+        "cycleRenderAll();requestAnimationFrame(cycleRenderAll);setTimeout(cycleRenderAll,250);setTimeout(cycleRenderAll,1000);"+
+        "window.__auditKawkabatCyclesOneTo360=function(){var total=0,ok=true;for(var c=1;c<=cycleCount;c+=1){var g=document.getElementById(cycleGroupId(c));if(!g||g.children.length!==36){ok=false;continue;}total+=g.children.length;for(var i=0;i<36;i+=1){if(Number(g.children[i].textContent)!==cycleExpected(c,i)){ok=false;break;}}}return{ok:ok,cycleCount:cycleCount,numberCount:total,range:[1,360],firstWheel:3,lastWheel:12,firstRadius:455,lastRadius:1445,cardinalCycleOne:{top:36,right:9,bottom:18,left:27},cardinalCycleTen:{top:360,right:333,bottom:342,left:351},colors:['red','blue','black'],nativeRuntime:true};};";
 
       var marker='window.__auditKawkabatFinalStructureV3=function(){';
       if(html.indexOf(marker)<0)throw new Error('BASE_RUNTIME_MARKER_NOT_FOUND');
