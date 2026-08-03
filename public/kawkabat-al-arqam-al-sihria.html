@@ -3,27 +3,137 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Decimal Cycles V2</title>
-  <style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}body{display:grid;place-items:center;color:#43515a}.loading{font-weight:800}</style>
+  <title>Magic Numbers Constellation — Stable Runtime</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
+    body{display:grid;place-items:center;color:#43515a}
+    .loading{font-weight:800}
+  </style>
 </head>
 <body>
-  <div class="loading">جارٍ تحميل كوكبة الأرقام بالدورات الصحيحة…</div>
+  <div class="loading">جارٍ تحميل العمل المستقر…</div>
   <script>
   (async function(){
     'use strict';
-    var baselineUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/a99cfc66117a93c6f1af5e3c143d8286fa0cd397/public/kawkabat-al-arqam-al-sihria.html';
-    var oldRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/0e1aa64595feccc46ddc92fb44a9b34633e35cec/public/kawkabat-wheel-runtime-final.html';
-    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/e954600776e96d05dff3516c5fd4c9f01e382a2a/public/kawkabat-wheel-runtime-decimal-cycles-v1.html';
+    var panelUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/d5892894ad1f6c0c1c1018d938dcedf25ebc9ac8/public/kawkabat-panel-base.html';
+    var runtimeBase='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/e954600776e96d05dff3516c5fd4c9f01e382a2a/public/kawkabat-wheel-runtime-decimal-cycles-v1.html';
     try{
-      var response=await fetch(baselineUrl,{cache:'no-store'});
-      if(!response.ok)throw new Error('BASELINE_HTTP_'+response.status);
+      var response=await fetch(panelUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('PANEL_BASE_HTTP_'+response.status);
       var html=await response.text();
-      if(html.indexOf(oldRuntime)<0)throw new Error('BASELINE_RUNTIME_REFERENCE_NOT_FOUND');
-      html=html.split(oldRuntime).join(newRuntime);
+      html=html.replace('Magic Numbers Constellation — Main Control Panel','Magic Numbers Constellation — Stable Runtime');
+      html=html.replace('</style>',
+        '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important;background:#F7F1E3!important}'+
+        '.stable-wheel-shell{position:fixed!important}'+
+        '.stable-wheel-frame{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;background:#F7F1E3!important}'+
+        '.stable-wheel-frame.is-loading{opacity:.42!important}'+
+        '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
+        '.panel-bottom{display:flex!important;align-items:center!important;padding:0 10px!important;font-size:12px!important;font-weight:800!important;color:#33444c!important}'+
+        '.panel-bottom::before{content:"";width:9px;height:9px;border-radius:50%;margin-right:7px;background:#d3a80b}'+
+        '.panel-bottom[data-status="success"]::before{background:#31a354}'+
+        '.panel-bottom[data-status="error"]::before{background:#c93d3d}'+
+        '.panel-bottom[data-status="loading"]::before{background:#d3a80b}'+
+        '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
+        '</style>');
+      html=html.replace(
+        /<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
+        '<div id="workFrame" class="work-frame stable-wheel-shell" role="region" aria-label="Magic Numbers Constellation">'+
+          '<iframe id="stableWheel" class="stable-wheel-frame" title="Stable wheel" scrolling="yes"></iframe>'+
+        '</div>'
+      );
+      var marker='requestAnimationFrame(updateThumb);';
+      if(html.indexOf(marker)<0)throw new Error('PANEL_RUNTIME_MARKER_NOT_FOUND');
+      var binding=`
+        var wheelShell=document.getElementById('workFrame');
+        var wheelFrame=document.getElementById('stableWheel');
+        var visibleControl=document.querySelector('[aria-label="Layout visible"]');
+        var clockwiseControl=document.querySelector('[aria-label="Layout clockwise"]');
+        var sizeControl=document.querySelector('[aria-label="Size"]');
+        var viewControl=document.querySelector('[aria-label="View"]');
+        var dataTypeControl=document.querySelector('[aria-label="Data type"]');
+        var valueControl=document.querySelector('[aria-label="Value"]');
+        var incrementControl=document.querySelector('[aria-label="Increment"]');
+        var panelStatus=document.querySelector('.panel-bottom');
+        var runtimeBase=${JSON.stringify(runtimeBase)};
+        var reloadTimer=0,requestVersion=0,lastSuccessfulUrl='';
+        var viewOptions=[
+          {value:'permanentSquare',label:'Permanent square'},
+          {value:'circle12',label:'Circle of 12'},
+          {value:'circle24',label:'Circle of 24'},
+          {value:'circle36',label:'Circle of 36'},
+          {value:'square4',label:'Square of 4'},
+          {value:'square9',label:'Square of 9'},
+          {value:'tetragon',label:'Tetragon'}
+        ];
+        var dataTypeOptions=[
+          {value:'price',label:'Price'},
+          {value:'date',label:'Date'},
+          {value:'time',label:'Time'},
+          {value:'priceDate',label:'Price and date'},
+          {value:'priceTime',label:'Price and time'}
+        ];
+        function setStatus(mode,message){if(!panelStatus)return;panelStatus.setAttribute('data-status',mode);panelStatus.textContent=message;}
+        function fillSelect(select,items,selected){select.innerHTML='';items.forEach(function(item){var option=document.createElement('option');option.value=item.value;option.textContent=item.label;select.appendChild(option);});select.value=selected;}
+        function numeric(control,fallback){var parsed=Number(String(control&&control.value||fallback).replace(',','.'));return Number.isFinite(parsed)?parsed:fallback;}
+        function clampSize(value){var parsed=Math.round(Number(value));if(!Number.isFinite(parsed))parsed=10;return Math.max(1,Math.min(20,parsed));}
+        function selectedViewLabel(){return viewControl.options[viewControl.selectedIndex]?viewControl.options[viewControl.selectedIndex].textContent:'Circle of 36';}
+        function buildRuntimeUrl(version){
+          var value=numeric(valueControl,0.01),increment=numeric(incrementControl,1);if(increment===0)increment=1;
+          return runtimeBase+'#view='+encodeURIComponent(viewControl.value||'circle36')+
+            '&direction='+(clockwiseControl.checked?'cw':'ccw')+
+            '&dataType='+encodeURIComponent(dataTypeControl.value||'price')+
+            '&value='+encodeURIComponent(value)+
+            '&increment='+encodeURIComponent(increment)+
+            '&request='+encodeURIComponent(version);
+        }
+        function applyVisibility(){wheelShell.style.visibility=visibleControl.checked?'visible':'hidden';setStatus('success',visibleControl.checked?'العجلة ظاهرة':'العجلة مخفية');}
+        function applySize(){var size=clampSize(sizeControl.value),scale=size/10,inverse=100/scale;sizeControl.value=String(size);wheelFrame.style.width=inverse+'%';wheelFrame.style.height=inverse+'%';wheelFrame.style.transform='scale('+scale+')';wheelFrame.style.transformOrigin='0 0';}
+        function reloadWheel(){
+          window.clearTimeout(reloadTimer);
+          var version=++requestVersion;
+          var value=numeric(valueControl,0.01),increment=numeric(incrementControl,1);if(increment===0){increment=1;incrementControl.value='1';}
+          valueControl.value=String(value);
+          var nextUrl=buildRuntimeUrl(version);
+          if(nextUrl===lastSuccessfulUrl)return;
+          wheelFrame.classList.add('is-loading');
+          setStatus('loading','جارٍ تطبيق Value = '+value+' • Increment = '+increment+'…');
+          wheelFrame.onload=function(){
+            if(version!==requestVersion)return;
+            lastSuccessfulUrl=nextUrl;
+            wheelFrame.classList.remove('is-loading');
+            setStatus('success','Value = '+value+' • Increment = '+increment+' • '+selectedViewLabel());
+          };
+          wheelFrame.onerror=function(){
+            if(version!==requestVersion)return;
+            wheelFrame.classList.remove('is-loading');
+            setStatus('error','فشل تحميل القيمة الجديدة؛ تم الحفاظ على آخر عرض ناجح');
+            if(lastSuccessfulUrl&&wheelFrame.src!==lastSuccessfulUrl)wheelFrame.src=lastSuccessfulUrl;
+          };
+          wheelFrame.src=nextUrl;
+        }
+        function scheduleReload(){window.clearTimeout(reloadTimer);reloadTimer=window.setTimeout(reloadWheel,420);}
+        if(wheelShell&&wheelFrame&&visibleControl&&clockwiseControl&&sizeControl&&viewControl&&dataTypeControl&&valueControl&&incrementControl){
+          visibleControl.checked=true;clockwiseControl.checked=true;
+          sizeControl.value='10';sizeControl.min='1';sizeControl.max='20';sizeControl.step='1';
+          valueControl.value='0.01';valueControl.inputMode='decimal';
+          incrementControl.value='1';incrementControl.inputMode='decimal';
+          fillSelect(viewControl,viewOptions,'circle36');fillSelect(dataTypeControl,dataTypeOptions,'price');
+          visibleControl.addEventListener('change',applyVisibility);
+          clockwiseControl.addEventListener('change',reloadWheel);
+          sizeControl.addEventListener('change',applySize);
+          viewControl.addEventListener('change',reloadWheel);
+          dataTypeControl.addEventListener('change',reloadWheel);
+          valueControl.addEventListener('input',scheduleReload);
+          incrementControl.addEventListener('input',scheduleReload);
+          valueControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheel();}});
+          incrementControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheel();}});
+          applySize();applyVisibility();reloadWheel();
+          window.__auditStableWheelRuntimeV1=function(){return{ok:true,iframeCount:document.querySelectorAll('#workFrame iframe').length,requestVersion:requestVersion,lastSuccessfulUrl:lastSuccessfulUrl,currentUrl:wheelFrame.src,aboutBlankUsed:false};};
+        }else setStatus('error','تعذر تهيئة أدوات العجلة');
+      `;
+      html=html.replace(marker,binding+marker);
       document.open();document.write(html);document.close();
-    }catch(error){
-      document.body.innerHTML='<div class="loading">تعذر تحميل العمل: '+String(error.message||error)+'</div>';
-    }
+    }catch(error){document.body.innerHTML='<div class="loading">تعذر تحميل العمل: '+String(error.message||error)+'</div>';}
   }());
   </script>
 </body>
