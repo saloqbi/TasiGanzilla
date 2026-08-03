@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>كوكبة الأرقام السحرية — الدورتان الأولى والثانية V4</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#F7F1E3;font-family:Arial,Tahoma,sans-serif}body{display:grid;place-items:center;color:#43515a}.loading{font-weight:800}</style></head>
+<body><div class="loading">جارٍ تحميل العجلة المعتمدة…</div><script>
+(async function(){'use strict';
+var sourceApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/5fb2032b666ff17b2c04c0c837b1fdf41aceb216';
+function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes)}
+try{
+ var response=await fetch(sourceApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});if(!response.ok)throw new Error('WHEEL_HTTP_'+response.status);
+ var payload=await response.json(),loader=decodeBase64(payload.content);
+ var injector="\n        html=html.replace('</style>','.approved-cycle-number{font-size:24px!important;pointer-events:none!important}</style>');\n        function buildApprovedCycle(cycleNumber,radius,startValue,endValue,groupId,wheelNumber){var items='';for(var cycleIndex=0;cycleIndex<36;cycleIndex+=1){var cycleValue=cycleIndex===0?endValue:startValue+cycleIndex-1,cycleAngle=(cycleIndex*10-90)*Math.PI/180,cycleX=2200+Math.cos(cycleAngle)*radius,cycleY=1800+Math.sin(cycleAngle)*radius,cycleMod=cycleValue%3,cycleColor=cycleMod===1?'number-red':cycleMod===2?'number-blue':'number-black',cycleCardinal=cycleIndex%9===0?' cardinal-number':'';items+='<text x=\\\"'+cycleX.toFixed(3)+'\\\" y=\\\"'+cycleY.toFixed(3)+'\\\" data-cycle=\\\"'+cycleNumber+'\\\" data-wheel=\\\"'+wheelNumber+'\\\" data-value=\\\"'+cycleValue+'\\\" class=\\\"number-text approved-cycle-number '+cycleColor+cycleCardinal+'\\\">'+cycleValue+'</text>';}return '<g id=\\\"'+groupId+'\\\" aria-label=\\\"الدورة '+cycleNumber+' من '+startValue+' إلى '+endValue+' على العجلة رقم '+wheelNumber+'\\\">'+items+'</g>';}\n        var cycleGroups=buildApprovedCycle(1,455,1,36,'approvedCycleOneNumbers',3)+buildApprovedCycle(2,565,37,72,'approvedCycleTwoNumbers',4);\n        if(html.indexOf('</svg>')<0)throw new Error('FINAL_SVG_CLOSE_NOT_FOUND');\n        html=html.replace('</svg>',cycleGroups+'</svg>');\n        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{','window.__auditApprovedCyclesOneToTwoV4=function(){var g1=document.getElementById(\\\"approvedCycleOneNumbers\\\"),g2=document.getElementById(\\\"approvedCycleTwoNumbers\\\");return{ok:!!g1&&g1.children.length===36&&!!g2&&g2.children.length===36,numberCount:(g1?g1.children.length:0)+(g2?g2.children.length:0),ranges:[[1,36],[37,72]],wheels:[3,4],cardinals:{cycle1:{top:36,right:9,bottom:18,left:27},cycle2:{top:72,right:45,bottom:54,left:63}},loaderNative:true};};window.__auditKawkabatFinalStructureV3=function(){return{');\n";
+ var marker='        document.open();\n        document.write(html);';
+ if(loader.indexOf(marker)<0)throw new Error('LOADER_DOCUMENT_WRITE_MARKER_NOT_FOUND');
+ loader=loader.replace(marker,injector+marker);
+ document.open();document.write(loader);document.close();
+}catch(error){document.body.innerHTML='<div class="loading">تعذر تحميل العجلة: '+String(error.message||error)+'</div>'}
+}());
+</script></body></html>
