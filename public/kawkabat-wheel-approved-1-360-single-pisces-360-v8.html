@@ -9,7 +9,7 @@ try{
  var response=await fetch(sourceApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});if(!response.ok)throw new Error('SOURCE_HTTP_'+response.status);
  var payload=await response.json(),loader=decodeBase64(payload.content);
  var target="html=html.replace('</svg>',cycleGroups+'</svg>');";
- var replacement="var singlePisces='<g id=\\\"singlePisces360\\\" aria-label=\\\"الجمعة ماء الحوت\\\"><text x=\\\"2200\\\" y=\\\"185\\\" text-anchor=\\\"middle\\\" direction=\\\"rtl\\\" unicode-bidi=\\\"plaintext\\\" fill=\\\"#111111\\\" style=\\\"font-family:Arial,Tahoma,sans-serif;font-size:24px;font-weight:700;pointer-events:none\\\"><tspan x=\\\"2200\\\" dy=\\\"0\\\">الجمعة</tspan><tspan x=\\\"2200\\\" dy=\\\"36\\\">ماء الحوت</tspan></text></g>';html=html.replace('</svg>',cycleGroups+singlePisces+'</svg>');";
+ var replacement="var singlePisces='<g id=\\\"singlePisces360\\\" aria-label=\\\"الجمعة ماء الحوت\\\"><text x=\\\"2200\\\" y=\\\"220\\\" text-anchor=\\\"middle\\\" direction=\\\"rtl\\\" unicode-bidi=\\\"plaintext\\\" fill=\\\"#111111\\\" style=\\\"font-family:Arial,Tahoma,sans-serif;font-size:24px;font-weight:700;pointer-events:none\\\"><tspan x=\\\"2200\\\" dy=\\\"0\\\">الجمعة</tspan><tspan x=\\\"2200\\\" dy=\\\"34\\\">ماء الحوت</tspan></text></g>';html=html.replace('</svg>',cycleGroups+singlePisces+'</svg>');";
  if(loader.indexOf(target)<0)throw new Error('CYCLE_SVG_INSERT_MARKER_NOT_FOUND');
  loader=loader.replace(target,replacement);
  document.open();document.write(loader);document.close();
