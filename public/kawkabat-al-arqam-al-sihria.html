@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Find Active V2</title>
+  <title>Magic Numbers Constellation — Increment Active V1</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -11,7 +11,7 @@
   </style>
 </head>
 <body>
-  <div class="loading">جارٍ تحميل العمل مع Find…</div>
+  <div class="loading">جارٍ تحميل العمل مع Increment…</div>
   <script>
   (async function(){
     'use strict';
@@ -23,7 +23,7 @@
       var response=await fetch(sourceUrl,{cache:'no-store'});
       if(!response.ok)throw new Error('STABLE_PAGE_HTTP_'+response.status);
       var source=await response.text();
-      source=source.replace('Magic Numbers Constellation — Direct Runtime','Magic Numbers Constellation — Find Active V2');
+      source=source.replace('Magic Numbers Constellation — Direct Runtime','Magic Numbers Constellation — Increment Active V1');
       source=source.replace(oldRuntime,findRuntime);
 
       source=source.replace(
@@ -32,8 +32,13 @@
       );
 
       source=source.replace(
+        "        function numeric(control,fallback){\n          var parsed=Number(String(control&&control.value||fallback).replace(',','.'));\n          return Number.isFinite(parsed)?parsed:fallback;\n        }",
+        "        function normalizeNumericText(value){\n          var arabic='٠١٢٣٤٥٦٧٨٩',persian='۰۱۲۳۴۵۶۷۸۹';\n          return String(value==null?'':value).trim()\n            .replace(/[٠-٩]/g,function(d){return String(arabic.indexOf(d));})\n            .replace(/[۰-۹]/g,function(d){return String(persian.indexOf(d));})\n            .replace(/[،,٫]/g,'.');\n        }\n        function numeric(control,fallback){\n          var parsed=Number(normalizeNumericText(control&&control.value||fallback));\n          return Number.isFinite(parsed)?parsed:fallback;\n        }"
+      );
+
+      source=source.replace(
         "        function applyDirection(){",
-        "        var buildRuntimeUrlWithoutFind=buildRuntimeUrl;\n        buildRuntimeUrl=function(direction,nonce){\n          var url=buildRuntimeUrlWithoutFind(direction,nonce);\n          var findText=String(findControl&&findControl.value||'').trim().replace(',','.');\n          return url+'&find='+encodeURIComponent(findText);\n        };\n        function applyDirection(){"
+        "        var buildRuntimeUrlWithoutFind=buildRuntimeUrl;\n        buildRuntimeUrl=function(direction,nonce){\n          var url=buildRuntimeUrlWithoutFind(direction,nonce);\n          var findText=normalizeNumericText(findControl&&findControl.value||'');\n          return url+'&find='+encodeURIComponent(findText);\n        };\n        function applyDirection(){"
       );
 
       source=source.replace(
@@ -43,27 +48,29 @@
 
       source=source.replace(
         "          incrementControl.value='1';incrementControl.inputMode='decimal';",
-        "          incrementControl.value='1';incrementControl.inputMode='decimal';\n          findControl.value='0.01';findControl.inputMode='decimal';"
+        "          incrementControl.value='1';incrementControl.inputMode='decimal';incrementControl.step='any';incrementControl.setAttribute('step','any');\n          findControl.value='0.01';findControl.inputMode='decimal';"
       );
 
       source=source.replace(
         "          incrementControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheels();}});",
-        "          incrementControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheels();}});\n          findControl.addEventListener('input',scheduleReload);\n          findControl.addEventListener('change',reloadWheels);\n          findControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheels();}});"
+        "          incrementControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheels();}});\n          findControl.addEventListener('input',scheduleReload);\n          findControl.addEventListener('change',reloadWheels);\n          findControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheels();}});\n          window.__auditKawkabatIncrementBindingV1=function(){return{ok:true,value:numeric(valueControl,0.01),increment:numeric(incrementControl,1),decimalStep:incrementControl.step==='any'};};"
       );
 
       source=source.replace(
         "          setStatus('error','تعذر تهيئة أدوات العجلة');",
-        "          setStatus('error','تعذر تهيئة أدوات العجلة أو Find');"
+        "          setStatus('error','تعذر تهيئة أدوات العجلة أو Increment أو Find');"
       );
 
-      if(source.indexOf(findRuntime)<0)throw new Error('FIND_RUNTIME_LINK_FAILED');
-      if(source.indexOf('var findControl=')<0)throw new Error('FIND_CONTROL_BINDING_FAILED');
-      if(source.indexOf("+'&find='+encodeURIComponent(findText)")<0)throw new Error('FIND_URL_BINDING_FAILED');
-      if(source.indexOf("findControl.addEventListener('input',scheduleReload)")<0)throw new Error('FIND_EVENT_BINDING_FAILED');
+      if(source.indexOf(findRuntime)<0)throw new Error('INCREMENT_RUNTIME_LINK_FAILED');
+      if(source.indexOf('function normalizeNumericText')<0)throw new Error('INCREMENT_NORMALIZER_FAILED');
+      if(source.indexOf("incrementControl.addEventListener('input',scheduleReload)")<0)throw new Error('INCREMENT_INPUT_BINDING_FAILED');
+      if(source.indexOf("incrementControl.addEventListener('change',reloadWheels)")<0)throw new Error('INCREMENT_CHANGE_BINDING_FAILED');
+      if(source.indexOf("incrementControl.step='any'")<0)throw new Error('INCREMENT_DECIMAL_STEP_FAILED');
+      if(source.indexOf('window.__auditKawkabatIncrementBindingV1')<0)throw new Error('INCREMENT_AUDIT_FAILED');
 
       document.open();document.write(source);document.close();
     }catch(error){
-      document.body.innerHTML='<div class="loading">تعذر تحميل Find V2: '+String(error.message||error)+'</div>';
+      document.body.innerHTML='<div class="loading">تعذر تحميل Increment: '+String(error.message||error)+'</div>';
     }
   }());
   </script>
