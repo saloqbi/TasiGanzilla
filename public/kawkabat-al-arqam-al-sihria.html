@@ -3,55 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>كوكبة الأرقام السحرية — Square of 9 Approved Table V7</title>
+<title>كوكبة الأرقام السحرية — Square of 9 Cell Shading V8</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:Arial,Tahoma,sans-serif}
 #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
-#loading{position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
-#error{position:fixed;right:16px;bottom:14px;z-index:20;display:none;max-width:600px;padding:10px 14px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
+#loading{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
+#error{position:fixed;right:16px;bottom:14px;z-index:30;display:none;max-width:600px;padding:10px 14px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
 </style>
 </head>
 <body>
-<iframe id="app" title="Square of 9 approved visual"></iframe>
-<div id="loading">جارٍ تطبيق الجدول الشفاف والتظليل وأشكال الأبراج…</div>
+<iframe id="app" title="Square of 9 with cell shading"></iframe>
+<div id="loading">جارٍ تطبيق التظليل الغامق والفاتح على 361 خلية…</div>
 <div id="error"></div>
 <script>
 (function(){
 'use strict';
-var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/79351e9e606066b3f5747a489c94eb92380b4c79/public/kawkabat-al-arqam-al-sihria.html';
-var STORAGE='kawkabat-complete-panel-v1';
-var MIGRATION='kawkabat-approved-table-v7';
+var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/50cf090f82d2de6c2081f4fd9f1cbbd2b3117eb7/public/kawkabat-al-arqam-al-sihria.html';
 var NS='http://www.w3.org/2000/svg';
+var ROOT_ID='approvedCellShadingV8';
 var frame=document.getElementById('app');
 var loading=document.getElementById('loading');
 var errorBox=document.getElementById('error');
-var lastSquare=null;
-var zodiac=[
-  ['♈','#e65353',270],['♉','#5eaa68',300],['♊','#7965bd',330],['♋','#438fc9',0],
-  ['♌','#e65353',30],['♍','#5eaa68',60],['♎','#7965bd',90],['♏','#438fc9',120],
-  ['♐','#e65353',150],['♑','#5eaa68',180],['♒','#7965bd',210],['♓','#438fc9',240]
-];
-var planetMarks=[
-  [6,4,'#e19a19',8],[9,5,'#68ad62',10],[13,6,'#4a8c84',9],[3,8,'#9f7b4b',8],
-  [8,9,'#6e82ba',9],[11,10,'#d06f66',8],[5,12,'#9a7137',8],[14,14,'#a87635',8]
-];
-function readState(){try{return JSON.parse(localStorage.getItem(STORAGE)||'{}')||{};}catch(_){return {};}}
-function writeState(state){localStorage.setItem(STORAGE,JSON.stringify(state));}
-function prepareState(){
-  if(localStorage.getItem(MIGRATION)==='done')return;
-  var state=readState();
-  ['Triangle','Square','Pentagon','Hexagon','Septagon','Octagon','Nonagon','Decagon','Hendecagon','Dodecagon'].forEach(function(name){state['figure.'+name+'.visible']=false;});
-  state['figures.hide']=false;
-  state['vectors.visible']=false;
-  state['locator.visible']=false;
-  state['vortex.visible']=false;
-  state['marker.visible']=false;
-  state['core.view']='square9';
-  state['core.highlightVisible']=true;
-  state['core.highlightFill']='cross';
-  writeState(state);
-  localStorage.setItem(MIGRATION,'done');
-}
+
 function findSquareDocument(win,seen){
   seen=seen||new Set();
   try{
@@ -61,152 +34,113 @@ function findSquareDocument(win,seen){
     if(doc&&doc.getElementById('squareSvg'))return doc;
     var frames=doc?Array.from(doc.querySelectorAll('iframe')):[];
     for(var i=0;i<frames.length;i++){
-      try{var found=findSquareDocument(frames[i].contentWindow,seen);if(found)return found;}catch(_){}
+      try{
+        var found=findSquareDocument(frames[i].contentWindow,seen);
+        if(found)return found;
+      }catch(_){}
     }
   }catch(_){}
   return null;
 }
-function S(doc,tag,attrs,text){
+function S(doc,tag,attrs){
   var node=doc.createElementNS(NS,tag);
   Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,String(attrs[key]));});
-  if(text!==undefined)node.textContent=String(text);
   return node;
 }
-function polar(radius,degree){
-  var angle=(degree-90)*Math.PI/180;
-  return{x:500+Math.cos(angle)*radius,y:500+Math.sin(angle)*radius};
-}
-function styleMainShapes(doc){
-  var main=doc.getElementById('mainShapes');
-  if(!main)return;
-  var paths=Array.from(main.querySelectorAll('path'));
-  paths.forEach(function(path,index){
-    if(index===0){
-      path.setAttribute('fill','#ef7777');
-      path.setAttribute('fill-opacity','0.17');
-      path.setAttribute('stroke','#e75b5b');
-      path.setAttribute('stroke-opacity','0.70');
-      path.setAttribute('stroke-width','1.45');
-    }else{
-      path.setAttribute('fill','#7fbd6d');
-      path.setAttribute('fill-opacity','0.15');
-      path.setAttribute('stroke','#58a95f');
-      path.setAttribute('stroke-opacity','0.72');
-      path.setAttribute('stroke-width','1.45');
-    }
-  });
-  Array.from(main.querySelectorAll('line')).forEach(function(line){
-    line.setAttribute('stroke-opacity','0.66');
-    line.setAttribute('stroke-width','1.35');
-  });
-}
 function styleGrid(doc,squareGroup){
-  var base=Array.from(squareGroup.children).find(function(node){return node.tagName&&node.tagName.toLowerCase()==='rect';});
+  var direct=Array.from(squareGroup.children);
+  var base=direct.find(function(node){return node.tagName&&node.tagName.toLowerCase()==='rect';});
   if(base){
     base.setAttribute('fill','#fffdf8');
-    base.setAttribute('fill-opacity','0.56');
-    base.setAttribute('stroke','#7d7d78');
+    base.setAttribute('fill-opacity','0.30');
+    base.setAttribute('stroke','#74756f');
     base.setAttribute('stroke-width','1.15');
   }
-  Array.from(squareGroup.querySelectorAll('line')).forEach(function(line){
-    line.setAttribute('stroke','#80837f');
-    line.setAttribute('stroke-width','0.52');
-    line.setAttribute('stroke-opacity','0.62');
+  Array.from(squareGroup.querySelectorAll(':scope > line')).forEach(function(line){
+    line.setAttribute('stroke','#6f736c');
+    line.setAttribute('stroke-width','0.56');
+    line.setAttribute('stroke-opacity','0.67');
   });
-  Array.from(squareGroup.querySelectorAll('text')).forEach(function(node){
+  Array.from(squareGroup.querySelectorAll(':scope > text')).forEach(function(node){
     var n=Number(String(node.textContent||'').trim());
-    node.setAttribute('font-family','Arial,Tahoma,sans-serif');
-    node.setAttribute('font-size','8.6');
-    node.setAttribute('fill','#22231f');
+    node.setAttribute('fill','#25251f');
+    node.setAttribute('font-size','8.7');
     node.setAttribute('font-weight',Number.isFinite(n)&&n%9===0?'800':'650');
     node.setAttribute('paint-order','stroke fill');
     node.setAttribute('stroke','#fffdf8');
-    node.setAttribute('stroke-width','0.30');
-    node.setAttribute('stroke-opacity','0.70');
+    node.setAttribute('stroke-width','0.34');
+    node.setAttribute('stroke-opacity','0.77');
   });
 }
-function drawApprovedOverlay(doc,squareSvg,squareGroup){
-  var previous=doc.getElementById('approvedSquareOverlayV7');
-  if(previous)previous.remove();
-  var root=S(doc,'g',{id:'approvedSquareOverlayV7','data-approved-table':'true','pointer-events':'none'});
-  var firstText=squareGroup.querySelector('text');
-  if(firstText)squareGroup.insertBefore(root,firstText);else squareGroup.appendChild(root);
-  var x0=272,y0=272,cell=24,total=456;
-  root.appendChild(S(doc,'rect',{x:x0,y:500-cell/2,width:total,height:cell,fill:'#dbc99f','fill-opacity':'0.18'}));
-  root.appendChild(S(doc,'rect',{x:500-cell/2,y:y0,width:cell,height:total,fill:'#efaaa2','fill-opacity':'0.14'}));
-  root.appendChild(S(doc,'rect',{x:x0,y:y0,width:total,height:total,fill:'none',stroke:'#7b7d78','stroke-width':'1.05','stroke-opacity':'0.72'}));
-
-  var symbols=S(doc,'g',{id:'approvedZodiacInsideGridV7'});
-  squareSvg.appendChild(symbols);
-  zodiac.forEach(function(item){
-    var point=polar(128,item[2]);
-    var halo=S(doc,'circle',{cx:point.x,cy:point.y,r:12.5,fill:'#fff','fill-opacity':'0.54',stroke:item[1],'stroke-width':'0.9','stroke-opacity':'0.62'});
-    symbols.appendChild(halo);
-    symbols.appendChild(S(doc,'text',{x:point.x,y:point.y,'text-anchor':'middle','dominant-baseline':'central','font-family':'Segoe UI Symbol,Arial,Tahoma,sans-serif','font-size':'18','font-weight':'800',fill:item[1],'fill-opacity':'0.82','paint-order':'stroke fill',stroke:'#fff','stroke-width':'1.15','stroke-opacity':'0.9'},item[0]));
-  });
-
-  var markers=S(doc,'g',{id:'approvedPlanetMarkersV7'});
-  squareSvg.appendChild(markers);
-  planetMarks.forEach(function(mark){
-    var cx=x0+mark[0]*cell+cell/2,cy=y0+mark[1]*cell+cell/2;
-    markers.appendChild(S(doc,'circle',{cx:cx,cy:cy,r:mark[3],fill:mark[2],'fill-opacity':'0.70',stroke:'#fff','stroke-width':'1.25'}));
-    markers.appendChild(S(doc,'circle',{cx:cx,cy:cy,r:Math.max(2,mark[3]-3.5),fill:'none',stroke:'#3f403d','stroke-width':'0.55','stroke-opacity':'0.48'}));
-  });
-}
-function removeOptionalBlackFrame(doc){
-  var optional=doc.getElementById('optional');
-  if(optional){
-    optional.style.setProperty('display','none','important');
-    optional.replaceChildren();
+function buildShading(doc){
+  var root=S(doc,'g',{id:ROOT_ID,'data-cell-count':'361','pointer-events':'none'});
+  var x0=272,y0=272,cell=24,size=19,center=9;
+  for(var row=0;row<size;row++){
+    for(var col=0;col<size;col++){
+      var ring=Math.max(Math.abs(row-center),Math.abs(col-center));
+      var onAxis=row===center||col===center;
+      var nearCenter=Math.abs(row-center)<=1&&Math.abs(col-center)<=1;
+      var fill=ring%2===0?'#81775d':'#d8cda9';
+      var opacity=ring%2===0?0.155:0.088;
+      if(onAxis)opacity+=0.042;
+      if(row===col||row+col===size-1)opacity+=0.012;
+      if(nearCenter){fill='#706852';opacity=0.205;}
+      root.appendChild(S(doc,'rect',{
+        x:(x0+col*cell+0.45).toFixed(2),
+        y:(y0+row*cell+0.45).toFixed(2),
+        width:(cell-0.9).toFixed(2),
+        height:(cell-0.9).toFixed(2),
+        fill:fill,
+        'fill-opacity':opacity.toFixed(3),
+        stroke:'none'
+      }));
+    }
   }
-  doc.querySelectorAll('[data-black-optional-frame="true"]').forEach(function(node){node.remove();});
+  return root;
 }
-function applyApprovedDesign(){
+function applyCellShading(){
   try{
     var doc=findSquareDocument(frame.contentWindow);
     if(!doc)return false;
     var squareSvg=doc.getElementById('squareSvg');
     var squareGroup=doc.getElementById('square');
-    if(!squareSvg||!squareGroup)return false;
-    var display=doc.defaultView.getComputedStyle(squareSvg).display;
-    if(display==='none')return false;
-    if(squareSvg===lastSquare&&doc.getElementById('approvedSquareOverlayV7')){
-      removeOptionalBlackFrame(doc);
-      return true;
-    }
-    lastSquare=squareSvg;
-    removeOptionalBlackFrame(doc);
-    styleMainShapes(doc);
+    var approved=doc.getElementById('approvedSquareOverlayV7');
+    if(!squareSvg||!squareGroup||!approved)return false;
+    if(doc.defaultView.getComputedStyle(squareSvg).display==='none')return false;
+    var old=doc.getElementById(ROOT_ID);
+    if(old)old.remove();
+    approved.insertBefore(buildShading(doc),approved.firstChild);
     styleGrid(doc,squareGroup);
-    var oldSymbols=doc.getElementById('approvedZodiacInsideGridV7');if(oldSymbols)oldSymbols.remove();
-    var oldMarkers=doc.getElementById('approvedPlanetMarkersV7');if(oldMarkers)oldMarkers.remove();
-    drawApprovedOverlay(doc,squareSvg,squareGroup);
-    doc.documentElement.dataset.approvedSquareTableV7='true';
-    doc.documentElement.dataset.approvedZodiacInsideGridV7='12';
+    doc.documentElement.dataset.approvedCellShadingV8='361';
+    doc.documentElement.dataset.approvedCellShadingPattern='alternating-dark-light-rings';
     errorBox.style.display='none';
     return true;
   }catch(error){
     errorBox.style.display='block';
-    errorBox.textContent='APPROVED TABLE V7 ERROR: '+String(error&&error.message||error);
+    errorBox.textContent='CELL SHADING V8 ERROR: '+String(error&&error.message||error);
     return false;
   }
 }
-prepareState();
 frame.addEventListener('load',function(){
   if(loading)loading.remove();
-  setTimeout(applyApprovedDesign,250);
-  setTimeout(applyApprovedDesign,800);
-  setTimeout(applyApprovedDesign,1600);
+  setTimeout(applyCellShading,260);
+  setTimeout(applyCellShading,850);
+  setTimeout(applyCellShading,1700);
 });
 frame.src=SOURCE;
-window.setInterval(applyApprovedDesign,420);
-window.__auditApprovedSquareTableV7=function(){
+window.setInterval(function(){
   var doc=findSquareDocument(frame.contentWindow);
+  if(!doc||!doc.getElementById(ROOT_ID))applyCellShading();
+},450);
+window.__auditSquare9CellShadingV8=function(){
+  var doc=findSquareDocument(frame.contentWindow);
+  var root=doc?doc.getElementById(ROOT_ID):null;
   return{
-    ok:!!(doc&&doc.getElementById('approvedSquareOverlayV7')),
-    transparentTable:doc?doc.documentElement.dataset.approvedSquareTableV7:null,
+    ok:!!root,
+    cellCount:root?root.children.length:0,
+    pattern:doc?doc.documentElement.dataset.approvedCellShadingPattern:null,
     zodiacCount:doc?doc.documentElement.dataset.approvedZodiacInsideGridV7:null,
-    optionalFrameHidden:!!(doc&&doc.getElementById('optional')&&doc.getElementById('optional').style.display==='none')
+    transparentTable:doc?doc.documentElement.dataset.approvedSquareTableV7:null
   };
 };
 }());
