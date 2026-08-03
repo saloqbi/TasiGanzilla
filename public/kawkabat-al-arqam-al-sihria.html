@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Stable Fixed Cycles V3</title>
+  <title>Magic Numbers Constellation — Stable Fixed Cycles V4</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -16,12 +16,12 @@
   (async function(){
     'use strict';
     var panelUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/d5892894ad1f6c0c1c1018d938dcedf25ebc9ac8/public/kawkabat-panel-base.html';
-    var runtimeBase='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/1170facfd9329c4d964c6920dc81c03512c98168/public/kawkabat-wheel-runtime-decimal-cycles-v1.html';
+    var runtimeBase='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/56d7dada86156b305aa1e076768e631763728566/public/kawkabat-wheel-runtime-decimal-cycles-v1.html';
     try{
       var response=await fetch(panelUrl,{cache:'no-store'});
       if(!response.ok)throw new Error('PANEL_BASE_HTTP_'+response.status);
       var html=await response.text();
-      html=html.replace('Magic Numbers Constellation — Main Control Panel','Magic Numbers Constellation — Stable Fixed Cycles V3');
+      html=html.replace('Magic Numbers Constellation — Main Control Panel','Magic Numbers Constellation — Stable Fixed Cycles V4');
       html=html.replace('</style>',
         '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important;background:#F7F1E3!important}'+
         '.stable-wheel-shell{position:fixed!important}'+
@@ -101,7 +101,7 @@
             if(version!==requestVersion)return;
             lastSuccessfulUrl=nextUrl;
             wheelFrame.classList.remove('is-loading');
-            setStatus('success','Reference Value = '+value+' • fixed cycle anchors • '+selectedViewLabel());
+            setStatus('success','Reference Value = '+value+' • fixed cycle anchors • center toggle active • '+selectedViewLabel());
           };
           wheelFrame.onerror=function(){
             if(version!==requestVersion)return;
@@ -128,7 +128,7 @@
           valueControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheel();}});
           incrementControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheel();}});
           applySize();applyVisibility();reloadWheel();
-          window.__auditStableWheelRuntimeV3=function(){return{ok:true,iframeCount:document.querySelectorAll('#workFrame iframe').length,requestVersion:requestVersion,lastSuccessfulUrl:lastSuccessfulUrl,currentUrl:wheelFrame.src,aboutBlankUsed:false,hashResponsiveRuntime:true,fixedOrdinalCycleAnchors:true};};
+          window.__auditStableWheelRuntimeV4=function(){return{ok:true,iframeCount:document.querySelectorAll('#workFrame iframe').length,requestVersion:requestVersion,lastSuccessfulUrl:lastSuccessfulUrl,currentUrl:wheelFrame.src,aboutBlankUsed:false,hashResponsiveRuntime:true,fixedOrdinalCycleAnchors:true,centerLogoClockToggle:true};};
         }else setStatus('error','تعذر تهيئة أدوات العجلة');
       `;
       html=html.replace(marker,binding+marker);
