@@ -1,165 +1,40 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Protractor & Chronometer Active V1</title>
+  <title>كوكبة الأرقام السحرية — Protractor & Chronometer Runtime V2</title>
   <style>
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
-    body{display:grid;place-items:center;color:#43515a}.loading{font-weight:800}
+    html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
+    .loading{font-weight:800}
   </style>
 </head>
 <body>
-  <div class="loading">جارٍ تحميل المنقلة والكرونومتر…</div>
+  <div class="loading">جارٍ تحميل العمل المصحح…</div>
   <script>
   (async function(){
     'use strict';
-    var panelUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/d5892894ad1f6c0c1c1018d938dcedf25ebc9ac8/public/kawkabat-panel-base.html';
-    var runtimeBase='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/e205f1289f1e78b6c615944727df10d423f19338/public/kawkabat-wheel-runtime-protractor-chronometer-v1.html';
 
-    function row(label,control){return '<div class="control-row"><div class="control-label">'+label+'</div><div class="control-value">'+control+'</div></div>';}
-    function checkbox(label,checked){return '<input type="checkbox" '+(checked?'checked ':'')+'aria-label="'+label+'">';}
-    function numberInput(label,value,step){return '<input type="number" value="'+value+'" step="'+(step||'1')+'" aria-label="'+label+'"><span class="field-action">↔</span>';}
-    function textInput(label,value){return '<input type="text" value="'+value+'" aria-label="'+label+'"><span class="field-action">↔</span>';}
+    var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/a6ee61bba9846acb1a97ebca90cd9ad1e082cec5/public/kawkabat-al-arqam-al-sihria.html';
+    var oldRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/e205f1289f1e78b6c615944727df10d423f19338/public/kawkabat-wheel-runtime-protractor-chronometer-v1.html';
+    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/073aab909f30513135db6e75830e0583bbfdef55/public/kawkabat-wheel-runtime-protractor-chronometer-v1.html';
 
     try{
-      var response=await fetch(panelUrl,{cache:'no-store'});
-      if(!response.ok)throw new Error('PANEL_BASE_HTTP_'+response.status);
-      var panelHtml=await response.text();
-      var doc=new DOMParser().parseFromString(panelHtml,'text/html');
-      doc.title='Magic Numbers Constellation — Protractor & Chronometer Active V1';
+      var response=await fetch(sourceUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('MAIN_SOURCE_HTTP_'+response.status);
+      var source=await response.text();
+      source=source.replace('Protractor & Chronometer Active V1','Protractor & Chronometer Active V2');
+      source=source.replace(oldRuntime,newRuntime);
 
-      var style=doc.createElement('style');
-      style.textContent='.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important;background:#F7F1E3!important}.wheel-stack{position:fixed!important}.wheel-layer{position:absolute!important;top:0!important;left:0!important;border:0!important;background:#F7F1E3!important;visibility:hidden!important;pointer-events:none!important;transform-origin:0 0!important}.wheel-layer.is-active{visibility:visible!important;pointer-events:auto!important}.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}.panel-bottom{display:flex!important;align-items:center!important;padding:0 10px!important;font-size:12px!important;font-weight:800!important;color:#33444c!important}.panel-bottom::before{content:"";width:9px;height:9px;border-radius:50%;margin-right:7px;background:#d3a80b}.panel-bottom[data-status="success"]::before{background:#31a354}.panel-bottom[data-status="error"]::before{background:#c93d3d}.panel-bottom[data-status="loading"]::before{background:#d3a80b}.control-value input[type="color"]{width:100%;height:29px;border:1px solid #9fa9ae;border-radius:3px;background:#fff}@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}';
-      doc.head.appendChild(style);
+      if(source.indexOf(newRuntime)<0)throw new Error('CORRECTED_RUNTIME_LINK_FAILED');
+      if(source.indexOf(oldRuntime)>=0)throw new Error('OLD_RUNTIME_STILL_PRESENT');
 
-      var originalFrame=doc.querySelector('.work-frame');
-      var wheelStack=doc.createElement('div');
-      wheelStack.id='workFrame';wheelStack.className='work-frame wheel-stack';wheelStack.setAttribute('role','region');wheelStack.setAttribute('aria-label','Magic Numbers Constellation');
-      wheelStack.innerHTML='<iframe id="clockwiseWheel" class="wheel-layer is-active" title="Clockwise wheel" scrolling="yes"></iframe><iframe id="counterclockwiseWheel" class="wheel-layer" title="Counterclockwise wheel" scrolling="yes"></iframe>';
-      originalFrame.replaceWith(wheelStack);
-
-      var sections=Array.from(doc.querySelectorAll('.control-section'));
-      function byName(name,index){var list=sections.filter(function(section){var node=section.querySelector('.section-name');return node&&node.textContent.trim()===name;});return list[index||0]||null;}
-      function bodyOf(section){return section&&section.querySelector('.section-body');}
-
-      var protractorSection=byName('Protractor',0);
-      var counterSection=byName('Counter',0);
-      var proSecondarySection=byName('Secondary scale',0);
-      var proMarkerSection=byName('Marker',0);
-      var chronoSection=byName('Chronometer',0);
-      var chronoSecondarySection=byName('Secondary scale',1);
-      var chronoMarkerSection=byName('Marker',1);
-
-      if(counterSection)bodyOf(counterSection).innerHTML=
-        row('Visible',checkbox('Counter visible',false))+
-        row('Clockwise',checkbox('Counter clockwise',true))+
-        row('Start',numberInput('Counter start','1','0.01'))+
-        row('Step',numberInput('Counter step','1','0.01'))+
-        row('Radius',numberInput('Counter radius','34','1'))+
-        row('Font size',numberInput('Counter font size','11','1'));
-
-      if(proSecondarySection)bodyOf(proSecondarySection).innerHTML=
-        row('Visible',checkbox('Protractor secondary visible',false))+
-        row('Clockwise',checkbox('Protractor secondary clockwise',true))+
-        row('Start',numberInput('Protractor secondary start','0','0.01'))+
-        row('Increment',numberInput('Protractor secondary increment','10','0.01'))+
-        row('Divisions',numberInput('Protractor secondary divisions','36','1'))+
-        row('Radius',numberInput('Protractor secondary radius','60','1'))+
-        row('Font size',numberInput('Protractor secondary font size','10','1'));
-
-      if(proMarkerSection)bodyOf(proMarkerSection).innerHTML=
-        row('Visible',checkbox('Protractor marker visible',false))+
-        row('Angle',textInput('Protractor marker angle','0°'))+
-        row('Radius',numberInput('Protractor marker radius','0','1'))+
-        row('Color','<input type="color" value="#e93020" aria-label="Protractor marker color">')+
-        row('Width',numberInput('Protractor marker width','24','1'))+
-        row('Label',textInput('Protractor marker label',''));
-
-      if(chronoSecondarySection)bodyOf(chronoSecondarySection).innerHTML=
-        row('Visible',checkbox('Chronometer secondary visible',false))+
-        row('Reverse',checkbox('Chronometer secondary reverse',true))+
-        row('Angle',textInput('Chronometer secondary angle','180°'));
-
-      if(chronoMarkerSection)bodyOf(chronoMarkerSection).innerHTML=
-        row('Visible',checkbox('Chronometer marker visible',false))+
-        row('Angle',textInput('Chronometer marker angle','0°'))+
-        row('Color','<input type="color" value="#168a52" aria-label="Chronometer marker color">')+
-        row('Label',textInput('Chronometer marker label',''));
-
-      var chronoRange=doc.querySelector('[aria-label="Chronometer range"]');
-      if(chronoRange)chronoRange.innerHTML='<option>Annual</option><option>Semiannual</option><option>Quarterly</option><option>Monthly</option><option>Weekly</option><option>Daily</option><option>Intraday</option>';
-
-      var runtimeScript=doc.createElement('script');
-      runtimeScript.textContent=`(function(){
-        'use strict';
-        var wheelStack=document.getElementById('workFrame');
-        var cw=document.getElementById('clockwiseWheel');
-        var ccw=document.getElementById('counterclockwiseWheel');
-        var status=document.querySelector('.panel-bottom');
-        function q(label){return document.querySelector('[aria-label="'+label+'"]');}
-        var c={
-          visible:q('Layout visible'),clockwise:q('Layout clockwise'),size:q('Size'),view:q('View'),dataType:q('Data type'),value:q('Value'),find:q('Find'),increment:q('Increment'),
-          highlightVisible:q('Highlight visible'),highlightFill:q('Highlight fill'),highlightMarks:q('Show marks'),highlightNumbers:q('Show numbers'),
-          proVisible:q('Protractor visible'),proClockwise:q('Protractor clockwise'),proAngle:q('Protractor angle'),
-          counterVisible:q('Counter visible'),counterClockwise:q('Counter clockwise'),counterStart:q('Counter start'),counterStep:q('Counter step'),counterRadius:q('Counter radius'),counterFont:q('Counter font size'),
-          proSecVisible:q('Protractor secondary visible'),proSecClockwise:q('Protractor secondary clockwise'),proSecStart:q('Protractor secondary start'),proSecIncrement:q('Protractor secondary increment'),proSecDivisions:q('Protractor secondary divisions'),proSecRadius:q('Protractor secondary radius'),proSecFont:q('Protractor secondary font size'),
-          proMarkerVisible:q('Protractor marker visible'),proMarkerAngle:q('Protractor marker angle'),proMarkerRadius:q('Protractor marker radius'),proMarkerColor:q('Protractor marker color'),proMarkerWidth:q('Protractor marker width'),proMarkerLabel:q('Protractor marker label'),
-          chronoVisible:q('Chronometer visible'),chronoClockwise:q('Chronometer clockwise'),chronoAngle:q('Chronometer angle'),chronoRange:q('Chronometer range'),
-          chronoSecVisible:q('Chronometer secondary visible'),chronoSecReverse:q('Chronometer secondary reverse'),chronoSecAngle:q('Chronometer secondary angle'),
-          chronoMarkerVisible:q('Chronometer marker visible'),chronoMarkerAngle:q('Chronometer marker angle'),chronoMarkerColor:q('Chronometer marker color'),chronoMarkerLabel:q('Chronometer marker label')
-        };
-        var runtimeBase=${JSON.stringify(runtimeBase)},timer=0,nonce=0,loaded=0;
-        var views=[['permanentSquare','Permanent square'],['circle12','Circle of 12'],['circle24','Circle of 24'],['circle36','Circle of 36'],['square4','Square of 4'],['square9','Square of 9'],['tetragon','Tetragon']];
-        var dataTypes=[['price','Price'],['date','Date'],['time','Time'],['priceDate','Price and date'],['priceTime','Price and time']];
-        function setStatus(mode,message){if(!status)return;status.dataset.status=mode;status.textContent=message;}
-        function fill(select,items,value){select.innerHTML='';items.forEach(function(item){var option=document.createElement('option');option.value=item[0];option.textContent=item[1];select.appendChild(option);});select.value=value;}
-        function normalize(value){var arabic='٠١٢٣٤٥٦٧٨٩',persian='۰۱۲۳۴۵۶۷۸۹';return String(value==null?'':value).trim().replace(/[٠-٩]/g,function(d){return String(arabic.indexOf(d));}).replace(/[۰-۹]/g,function(d){return String(persian.indexOf(d));}).replace(/[،,٫]/g,'.').replace(/°/g,'');}
-        function n(control,fallback){var value=Number(normalize(control&&control.value));return Number.isFinite(value)?value:fallback;}
-        function b(control){return !!(control&&control.checked);}
-        function t(control,fallback){return control?String(control.value||fallback):fallback;}
-        function param(parts,key,value){parts.push(encodeURIComponent(key)+'='+encodeURIComponent(String(value)));}
-        function url(direction){
-          var parts=[];param(parts,'view',t(c.view,'circle36'));param(parts,'direction',direction);param(parts,'dataType',t(c.dataType,'price'));param(parts,'value',n(c.value,.01));param(parts,'increment',n(c.increment,1)||1);param(parts,'find',normalize(c.find&&c.find.value));
-          param(parts,'highlight',b(c.highlightVisible)?1:0);param(parts,'highlightFill',t(c.highlightFill,'levels'));param(parts,'highlightMarks',b(c.highlightMarks)?1:0);param(parts,'highlightNumbers',b(c.highlightNumbers)?1:0);
-          param(parts,'protractorVisible',b(c.proVisible)?1:0);param(parts,'protractorClockwise',b(c.proClockwise)?1:0);param(parts,'protractorAngle',n(c.proAngle,0));
-          param(parts,'counterVisible',b(c.counterVisible)?1:0);param(parts,'counterClockwise',b(c.counterClockwise)?1:0);param(parts,'counterStart',n(c.counterStart,1));param(parts,'counterStep',n(c.counterStep,1));param(parts,'counterRadius',n(c.counterRadius,34));param(parts,'counterFontSize',n(c.counterFont,11));
-          param(parts,'proSecondaryVisible',b(c.proSecVisible)?1:0);param(parts,'proSecondaryClockwise',b(c.proSecClockwise)?1:0);param(parts,'proSecondaryStart',n(c.proSecStart,0));param(parts,'proSecondaryIncrement',n(c.proSecIncrement,10));param(parts,'proSecondaryDivisions',n(c.proSecDivisions,36));param(parts,'proSecondaryRadius',n(c.proSecRadius,60));param(parts,'proSecondaryFontSize',n(c.proSecFont,10));
-          param(parts,'proMarkerVisible',b(c.proMarkerVisible)?1:0);param(parts,'proMarkerAngle',n(c.proMarkerAngle,0));param(parts,'proMarkerRadius',n(c.proMarkerRadius,0));param(parts,'proMarkerColor',t(c.proMarkerColor,'#e93020'));param(parts,'proMarkerWidth',n(c.proMarkerWidth,24));param(parts,'proMarkerLabel',t(c.proMarkerLabel,''));
-          param(parts,'chronoVisible',b(c.chronoVisible)?1:0);param(parts,'chronoClockwise',b(c.chronoClockwise)?1:0);param(parts,'chronoAngle',n(c.chronoAngle,0));param(parts,'chronoRange',t(c.chronoRange,'Annual'));
-          param(parts,'chronoSecondaryVisible',b(c.chronoSecVisible)?1:0);param(parts,'chronoSecondaryReverse',b(c.chronoSecReverse)?1:0);param(parts,'chronoSecondaryAngle',n(c.chronoSecAngle,180));
-          param(parts,'chronoMarkerVisible',b(c.chronoMarkerVisible)?1:0);param(parts,'chronoMarkerAngle',n(c.chronoMarkerAngle,0));param(parts,'chronoMarkerColor',t(c.chronoMarkerColor,'#168a52'));param(parts,'chronoMarkerLabel',t(c.chronoMarkerLabel,''));
-          param(parts,'nonce',nonce);return runtimeBase+'#'+parts.join('&');
-        }
-        function direction(){cw.classList.toggle('is-active',b(c.clockwise));ccw.classList.toggle('is-active',!b(c.clockwise));}
-        function size(){var value=Math.max(1,Math.min(20,Math.round(n(c.size,10)))),scale=value/10,inverse=100/scale;c.size.value=String(value);[cw,ccw].forEach(function(frame){frame.style.width=inverse+'%';frame.style.height=inverse+'%';frame.style.transform='scale('+scale+')';});}
-        function reload(){clearTimeout(timer);nonce+=1;loaded=0;setStatus('loading','جارٍ تطبيق Protractor وChronometer…');var a=url('cw'),d=url('ccw');cw.src='about:blank';ccw.src='about:blank';setTimeout(function(){cw.src=a;ccw.src=d;direction();},20);}
-        function schedule(){clearTimeout(timer);timer=setTimeout(reload,260);}
-        function autoParent(child,parent){if(child&&child.checked&&parent&&!parent.checked)parent.checked=true;}
-        function bind(control,event,handler){if(control)control.addEventListener(event,handler);}
-        function bindReload(control){bind(control,'change',reload);bind(control,'input',schedule);bind(control,'keydown',function(event){if(event.key==='Enter'){event.preventDefault();reload();}});}
-        fill(c.view,views,'circle36');fill(c.dataType,dataTypes,'price');if(c.highlightFill){c.highlightFill.innerHTML='<option value="levels">Levels</option><option value="cross">Cross</option>';c.highlightFill.value='levels';}
-        c.visible.checked=true;c.clockwise.checked=true;c.size.value='10';c.value.value='0.01';c.find.value='0.01';c.increment.value='1';c.increment.step='any';
-        c.highlightVisible.checked=false;c.highlightMarks.checked=false;c.highlightNumbers.checked=false;
-        c.proVisible.checked=false;c.proClockwise.checked=false;c.proAngle.value='0°';
-        c.chronoVisible.checked=true;c.chronoClockwise.checked=true;c.chronoAngle.value='0°';c.chronoRange.value='Annual';
-        bind(c.visible,'change',function(){wheelStack.style.visibility=b(c.visible)?'visible':'hidden';setStatus('success',b(c.visible)?'العجلة ظاهرة':'العجلة مخفية');});bind(c.clockwise,'change',direction);bind(c.size,'input',size);bind(c.size,'change',size);
-        [c.view,c.dataType,c.highlightFill,c.chronoRange].forEach(function(control){bind(control,'change',reload);});
-        [c.value,c.find,c.increment,c.proAngle,c.counterStart,c.counterStep,c.counterRadius,c.counterFont,c.proSecStart,c.proSecIncrement,c.proSecDivisions,c.proSecRadius,c.proSecFont,c.proMarkerAngle,c.proMarkerRadius,c.proMarkerWidth,c.proMarkerLabel,c.chronoAngle,c.chronoSecAngle,c.chronoMarkerAngle,c.chronoMarkerLabel].forEach(bindReload);
-        [c.highlightVisible,c.proVisible,c.proClockwise,c.counterClockwise,c.proSecClockwise,c.chronoVisible,c.chronoClockwise,c.chronoSecReverse].forEach(function(control){bind(control,'change',reload);});
-        bind(c.highlightMarks,'change',function(){autoParent(c.highlightMarks,c.highlightVisible);reload();});bind(c.highlightNumbers,'change',function(){autoParent(c.highlightNumbers,c.highlightVisible);reload();});
-        bind(c.counterVisible,'change',function(){autoParent(c.counterVisible,c.proVisible);reload();});bind(c.proSecVisible,'change',function(){autoParent(c.proSecVisible,c.proVisible);reload();});bind(c.proMarkerVisible,'change',function(){autoParent(c.proMarkerVisible,c.proVisible);reload();});
-        bind(c.chronoSecVisible,'change',function(){autoParent(c.chronoSecVisible,c.chronoVisible);reload();});bind(c.chronoMarkerVisible,'change',function(){autoParent(c.chronoMarkerVisible,c.chronoVisible);reload();});bind(c.proMarkerColor,'change',reload);bind(c.chronoMarkerColor,'change',reload);
-        [cw,ccw].forEach(function(frame){frame.addEventListener('load',function(){if(frame.src==='about:blank')return;loaded+=1;if(loaded>=1)setStatus('success','Protractor '+(b(c.proVisible)?'ON':'OFF')+' • Chronometer '+(b(c.chronoVisible)?'ON':'OFF'));});});
-        window.__auditKawkabatProtractorChronometerBindingV1=function(){return{ok:true,protractorVisible:b(c.proVisible),chronometerVisible:b(c.chronoVisible),range:t(c.chronoRange,'Annual')};};
-        size();reload();
-      }());`;
-      doc.body.appendChild(runtimeScript);
-
-      var finalHtml='<!doctype html>\n'+doc.documentElement.outerHTML;
-      document.open();document.write(finalHtml);document.close();
+      document.open();
+      document.write(source);
+      document.close();
     }catch(error){
-      document.body.innerHTML='<div class="loading">تعذر تحميل المنقلة والكرونومتر: '+String(error.message||error)+'</div>';
+      document.body.innerHTML='<div class="loading">تعذر تحميل العمل المصحح: '+String(error.message||error)+'</div>';
     }
   }());
   </script>
