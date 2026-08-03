@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — Protractor & Chronometer Runtime V2</title>
+  <title>كوكبة الأرقام السحرية — Protractor & Chronometer Runtime V3</title>
   <style>
     html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
     body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
@@ -11,24 +11,30 @@
   </style>
 </head>
 <body>
-  <div class="loading">جارٍ تحميل المنقلة والكرونومتر…</div>
+  <div class="loading">جارٍ تحميل العجلة…</div>
   <script>
   (async function(){
     'use strict';
 
     var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/0e1aa64595feccc46ddc92fb44a9b34633e35cec/public/kawkabat-wheel-runtime-final.html';
-    var overlayUrl='https://raw.githack.com/saloqbi/TasiGanzilla/4ecd305b8597918c624068276dd46aa6b6ccc58a/public/kawkabat-protractor-chronometer-overlay-v2.js';
+    var overlaySourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/4ecd305b8597918c624068276dd46aa6b6ccc58a/public/kawkabat-protractor-chronometer-overlay-v2.js';
 
     try{
-      var response=await fetch(sourceUrl,{cache:'no-store'});
-      if(!response.ok)throw new Error('DIRECT_RUNTIME_HTTP_'+response.status);
-      var source=await response.text();
-      source=source.replace('Runtime مباشر','Protractor & Chronometer Runtime V2');
+      var responses=await Promise.all([
+        fetch(sourceUrl,{cache:'no-store'}),
+        fetch(overlaySourceUrl,{cache:'no-store'})
+      ]);
+      if(!responses[0].ok)throw new Error('DIRECT_RUNTIME_HTTP_'+responses[0].status);
+      if(!responses[1].ok)throw new Error('OVERLAY_SOURCE_HTTP_'+responses[1].status);
+
+      var source=await responses[0].text();
+      var overlayCode=await responses[1].text();
+      source=source.replace('Runtime مباشر','Protractor & Chronometer Runtime V3');
 
       var writeMarker="      document.open();document.write(html);document.close();";
       var patch=
         "      var overlayCloseTag='</scr'+'ipt>';\n"+
-        "      var overlayScript='<script src=\""+overlayUrl+"\"></scr'+'ipt>';\n"+
+        "      var overlayScript='<script id=\"kawkabat-protractor-chronometer-v3\">'+"+JSON.stringify(overlayCode)+"+overlayCloseTag;\n"+
         "      var bodyClose=html.lastIndexOf('</body>');\n"+
         "      if(bodyClose<0)throw new Error('OVERLAY_BODY_CLOSE_NOT_FOUND');\n"+
         "      html=html.slice(0,bodyClose)+overlayScript+html.slice(bodyClose);\n";
