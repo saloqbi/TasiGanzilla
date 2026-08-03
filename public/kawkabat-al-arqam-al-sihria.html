@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — Find Active</title>
+  <title>Magic Numbers Constellation — Find Active V2</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -11,46 +11,59 @@
   </style>
 </head>
 <body>
-  <div class="loading">جارٍ تحميل Find…</div>
+  <div class="loading">جارٍ تحميل العمل مع Find…</div>
   <script>
   (async function(){
     'use strict';
     var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/a99cfc66117a93c6f1af5e3c143d8286fa0cd397/public/kawkabat-al-arqam-al-sihria.html';
     var oldRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/0e1aa64595feccc46ddc92fb44a9b34633e35cec/public/kawkabat-wheel-runtime-final.html';
-    var findRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/1e69a1300fdf1b47ea5bde74ae70952c069f2cae/public/kawkabat-wheel-runtime-find-v1.html';
+    var findRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/78f95dc694b82ec99293721361ed3aa694ffd2a9/public/kawkabat-wheel-runtime-find-v2.html';
 
     try{
       var response=await fetch(sourceUrl,{cache:'no-store'});
-      if(!response.ok)throw new Error('FIND_SOURCE_HTTP_'+response.status);
+      if(!response.ok)throw new Error('STABLE_PAGE_HTTP_'+response.status);
       var source=await response.text();
-      source=source.replace('Direct Runtime','Find Active');
+      source=source.replace('Magic Numbers Constellation — Direct Runtime','Magic Numbers Constellation — Find Active V2');
       source=source.replace(oldRuntime,findRuntime);
 
-      var writeMarker="      document.open();\n      document.write(html);\n      document.close();";
-      var patch=`      var panelMarker='requestAnimationFrame(updateThumb);';
-      if(html.indexOf(panelMarker)<0)throw new Error('FIND_PANEL_MARKER_NOT_FOUND');
-      var findBinding=
-        "var findControl=document.querySelector('[aria-label=\\\"Find\\\"]'),findReloadTimer=0;"+
-        "var buildRuntimeUrlBeforeFind=buildRuntimeUrl;"+
-        "buildRuntimeUrl=function(direction,nonce){var url=buildRuntimeUrlBeforeFind(direction,nonce),findText=String(findControl&&findControl.value||'').trim().replace(',','.');return url+'&find='+encodeURIComponent(findText);};"+
-        "function applyFindNow(){window.clearTimeout(findReloadTimer);if(!findControl)return;var text=String(findControl.value||'').trim().replace(',','.');findControl.value=text;reloadWheels();setStatus('loading',text?'جارٍ البحث عن '+text+'…':'تم إلغاء البحث');}"+
-        "function scheduleFind(){window.clearTimeout(findReloadTimer);findReloadTimer=window.setTimeout(applyFindNow,280);}"+
-        "if(findControl){findControl.value=valueControl&&valueControl.value?valueControl.value:'0.01';findControl.inputMode='decimal';findControl.addEventListener('input',scheduleFind);findControl.addEventListener('change',applyFindNow);findControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();applyFindNow();}});window.setTimeout(applyFindNow,0);}else{setStatus('error','تعذر ربط Find');}";
-      html=html.replace(panelMarker,findBinding+panelMarker);
-      if(html.indexOf("findControl.addEventListener('input',scheduleFind)")<0)throw new Error('FIND_INPUT_BINDING_FAILED');
-      if(html.indexOf("+'&find='+encodeURIComponent(findText)")<0)throw new Error('FIND_URL_BINDING_FAILED');
-`;
+      source=source.replace(
+        "        var incrementControl=document.querySelector('[aria-label=\"Increment\"]');",
+        "        var incrementControl=document.querySelector('[aria-label=\"Increment\"]');\n        var findControl=document.querySelector('[aria-label=\"Find\"]');"
+      );
 
-      if(source.indexOf(writeMarker)<0)throw new Error('FIND_SOURCE_WRITE_MARKER_NOT_FOUND');
-      source=source.replace(writeMarker,patch+writeMarker);
+      source=source.replace(
+        "        function applyDirection(){",
+        "        var buildRuntimeUrlWithoutFind=buildRuntimeUrl;\n        buildRuntimeUrl=function(direction,nonce){\n          var url=buildRuntimeUrlWithoutFind(direction,nonce);\n          var findText=String(findControl&&findControl.value||'').trim().replace(',','.');\n          return url+'&find='+encodeURIComponent(findText);\n        };\n        function applyDirection(){"
+      );
+
+      source=source.replace(
+        "&&valueControl&&incrementControl){",
+        "&&valueControl&&incrementControl&&findControl){"
+      );
+
+      source=source.replace(
+        "          incrementControl.value='1';incrementControl.inputMode='decimal';",
+        "          incrementControl.value='1';incrementControl.inputMode='decimal';\n          findControl.value='0.01';findControl.inputMode='decimal';"
+      );
+
+      source=source.replace(
+        "          incrementControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheels();}});",
+        "          incrementControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheels();}});\n          findControl.addEventListener('input',scheduleReload);\n          findControl.addEventListener('change',reloadWheels);\n          findControl.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();reloadWheels();}});"
+      );
+
+      source=source.replace(
+        "          setStatus('error','تعذر تهيئة أدوات العجلة');",
+        "          setStatus('error','تعذر تهيئة أدوات العجلة أو Find');"
+      );
+
       if(source.indexOf(findRuntime)<0)throw new Error('FIND_RUNTIME_LINK_FAILED');
-      if(source.indexOf(oldRuntime)>=0)throw new Error('OLD_RUNTIME_STILL_PRESENT');
+      if(source.indexOf('var findControl=')<0)throw new Error('FIND_CONTROL_BINDING_FAILED');
+      if(source.indexOf("+'&find='+encodeURIComponent(findText)")<0)throw new Error('FIND_URL_BINDING_FAILED');
+      if(source.indexOf("findControl.addEventListener('input',scheduleReload)")<0)throw new Error('FIND_EVENT_BINDING_FAILED');
 
-      document.open();
-      document.write(source);
-      document.close();
+      document.open();document.write(source);document.close();
     }catch(error){
-      document.body.innerHTML='<div class="loading">تعذر تحميل Find: '+String(error.message||error)+'</div>';
+      document.body.innerHTML='<div class="loading">تعذر تحميل Find V2: '+String(error.message||error)+'</div>';
     }
   }());
   </script>
