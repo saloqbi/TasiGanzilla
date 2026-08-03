@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>كوكبة الأرقام السحرية — Protractor & Chronometer V4</title>
+  <title>كوكبة الأرقام السحرية — Protractor & Chronometer V5</title>
   <style>
     html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
     body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
@@ -18,13 +18,13 @@
 
     var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/a6ee61bba9846acb1a97ebca90cd9ad1e082cec5/public/kawkabat-al-arqam-al-sihria.html';
     var oldRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/e205f1289f1e78b6c615944727df10d423f19338/public/kawkabat-wheel-runtime-protractor-chronometer-v1.html';
-    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/ceb87edf5f7789446d206ba18fe34c505ea5f183/public/kawkabat-wheel-runtime-protractor-chronometer-v1.html';
+    var newRuntime='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/a6e07fee24142b7deb41c813d39077b47abb0ff0/public/kawkabat-wheel-runtime-protractor-chronometer-v1.html';
 
     try{
       var response=await fetch(sourceUrl,{cache:'no-store'});
       if(!response.ok)throw new Error('MAIN_SOURCE_HTTP_'+response.status);
       var source=await response.text();
-      source=source.replace('Protractor & Chronometer Active V1','Protractor & Chronometer Active V4');
+      source=source.replace('Protractor & Chronometer Active V1','Protractor & Chronometer Active V5');
 
       if(source.indexOf(oldRuntime)<0)throw new Error('OLD_RUNTIME_REFERENCE_NOT_FOUND');
       source=source.replace(oldRuntime,newRuntime);
