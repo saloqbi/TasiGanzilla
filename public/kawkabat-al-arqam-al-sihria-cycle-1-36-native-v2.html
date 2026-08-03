@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — الدورة الأولى الأصلية</title>
+  <style>html,body{margin:0;width:100%;height:100%;background:#F7F1E3}body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}.loading{font-weight:800}</style>
+</head>
+<body>
+  <div class="loading">جاري تحميل الدورة الأولى…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/b8cec022685d53af5a5d1c7ed3b5e99a2c25d47a';
+    function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,''));var bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes);}
+    try{
+      var response=await fetch(sourceApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      if(!response.ok)throw new Error('SOURCE_HTTP_'+response.status);
+      var payload=await response.json();
+      var html=decodeBase64(payload.content);
+      html=html.replace('</style>','.cycle-one-number{font-size:24px!important;pointer-events:none!important}</style>');
+      var marker='window.__auditKawkabatFinalStructureV3=function(){';
+      if(html.indexOf(marker)<0)throw new Error('RUNTIME_MARKER_NOT_FOUND');
+      var cycleRuntime="var cycleOne=document.getElementById('cycleOneNumbers');if(cycleOne)cycleOne.remove();cycleOne=document.createElementNS(NS,'g');cycleOne.id='cycleOneNumbers';cycleOne.setAttribute('aria-label','الدورة الأولى من 1 إلى 36 على العجلة رقم 3');for(var ci=0;ci<36;ci+=1){var cv=ci===0?36:ci,ca=ci*10-90;addNumber(cycleOne,cv,ca,455,'cycle-one-number',ci%9===0);}var wheelNode=document.getElementById('wheel'),angleFrameNode=document.getElementById('angleFrame');if(angleFrameNode&&angleFrameNode.parentNode===wheelNode)wheelNode.insertBefore(cycleOne,angleFrameNode);else wheelNode.appendChild(cycleOne);document.documentElement.dataset.cycleOneReady=cycleOne.children.length===36?'true':'false';window.__auditKawkabatCycleOneNative=function(){var g=document.getElementById('cycleOneNumbers'),ok=!!g&&g.children.length===36;if(ok){for(var k=0;k<36;k+=1){var expected=k===0?36:k;if(Number(g.children[k].textContent)!==expected){ok=false;break;}}}return{ok:ok,range:[1,36],wheel:3,radius:455,cardinals:{top:36,right:9,bottom:18,left:27},numberCount:g?g.children.length:0,nativeRuntime:true};};";
+      html=html.replace(marker,cycleRuntime+marker);
+      document.open();document.write(html);document.close();
+    }catch(error){document.body.innerHTML='<div class="loading">تعذر تحميل الدورة الأولى: '+String(error.message||error)+'</div>';}
+  }());
+  </script>
+</body>
+</html>
