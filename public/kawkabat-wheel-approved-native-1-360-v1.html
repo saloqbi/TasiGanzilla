@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — أرقام 1 إلى 360</title>
+  <style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#F7F1E3;font-family:Arial,Tahoma,sans-serif}body{display:grid;place-items:center;color:#43515a}.loading{font-weight:800}</style>
+</head>
+<body>
+  <div class="loading">جارٍ تحميل العجلة المعتمدة…</div>
+  <script>
+  (async function(){
+    'use strict';
+    var sourceApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/5fb2032b666ff17b2c04c0c837b1fdf41aceb216';
+    function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes);}
+    try{
+      var response=await fetch(sourceApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      if(!response.ok)throw new Error('WHEEL_HTTP_'+response.status);
+      var payload=await response.json();
+      var html=decodeBase64(payload.content);
+      var closeTag='</scr'+'ipt>';
+      html=html.replace('</style>',
+        '.approved-cycle-number{font-size:24px!important;pointer-events:none!important}'+
+        'html,body{scrollbar-width:none!important;-ms-overflow-style:none!important;overscroll-behavior:none!important}'+
+        'html::-webkit-scrollbar,body::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}'+
+        '</style>');
+      var runtime='<script>(function(){'+
+        "'use strict';"+
+        'var NS="http://www.w3.org/2000/svg",CX=2200,CY=1800,FIRST_RADIUS=455,RING_STEP=110,CYCLES=10,DIVISIONS=36,rendering=false;'+
+        'function colorClass(value){var mod=value%3;return mod===1?"number-red":mod===2?"number-blue":"number-black";}'+
+        'function groupId(cycle){return"approvedCycleNumbers"+cycle;}'+
+        'function valueAt(cycle,index){var start=((cycle-1)*DIVISIONS)+1,end=cycle*DIVISIONS;return index===0?end:start+index-1;}'+
+        'function valid(doc){for(var cycle=1;cycle<=CYCLES;cycle+=1){var group=doc.getElementById(groupId(cycle));if(!group||group.children.length!==DIVISIONS)return false;for(var i=0;i<DIVISIONS;i+=1){if(Number(group.children[i].textContent)!==valueAt(cycle,i))return false;}}return true;}'+
+        'function render(){if(rendering)return false;rendering=true;try{var doc=document,svg=doc.getElementById("wheel");if(!svg)return false;for(var cycle=1;cycle<=CYCLES;cycle+=1){var old=doc.getElementById(groupId(cycle));if(old)old.remove();var group=doc.createElementNS(NS,"g"),radius=FIRST_RADIUS+((cycle-1)*RING_STEP),start=((cycle-1)*DIVISIONS)+1,end=cycle*DIVISIONS;group.id=groupId(cycle);group.setAttribute("aria-label","الدورة "+cycle+" من "+start+" إلى "+end);for(var index=0;index<DIVISIONS;index+=1){var value=valueAt(cycle,index),angle=(index*10-90)*Math.PI/180,x=CX+Math.cos(angle)*radius,y=CY+Math.sin(angle)*radius,text=doc.createElementNS(NS,"text");text.setAttribute("x",x);text.setAttribute("y",y);text.setAttribute("data-cycle",cycle);text.setAttribute("data-wheel",cycle+2);text.setAttribute("data-value",value);text.setAttribute("class","number-text approved-cycle-number "+colorClass(value)+(index%9===0?" cardinal-number":""));text.textContent=value;group.appendChild(text);}var anchor=doc.getElementById("angleFrame");if(anchor&&anchor.parentNode===svg)svg.insertBefore(group,anchor);else svg.appendChild(group);}doc.documentElement.dataset.approvedNumbersOneTo360=valid(doc)?"true":"false";return valid(doc);}finally{rendering=false;}}'+
+        'function ensure(){if(!valid(document))render();}'+
+        'function start(){render();setTimeout(ensure,150);setTimeout(ensure,500);setTimeout(ensure,1200);var svg=document.getElementById("wheel");if(svg){var observer=new MutationObserver(function(){setTimeout(ensure,0);});observer.observe(svg,{childList:true,subtree:false});window.__approvedNumbersObserver=observer;}setInterval(ensure,2000);}'+
+        'if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start,{once:true});else start();'+
+        'window.__auditApprovedNumbersOneTo360=function(){var total=0;for(var cycle=1;cycle<=CYCLES;cycle+=1){var g=document.getElementById(groupId(cycle));total+=g?g.children.length:0;}return{ok:valid(document),cycleCount:CYCLES,numberCount:total,range:[1,360],firstWheel:3,lastWheel:12,topValues:[36,72,108,144,180,216,252,288,324,360],colorSequence:["red","blue","black"],visualBaselinePreserved:true};};'+
+      '}());'+closeTag;
+      html=html.replace('</body>',runtime+'</body>');
+      document.open();document.write(html);document.close();
+    }catch(error){document.body.innerHTML='<div class="loading">تعذر تحميل العجلة: '+String(error.message||error)+'</div>';}
+  }());
+  </script>
+</body>
+</html>
