@@ -21,34 +21,40 @@
     try{
       var response=await fetch(sourceUrl,{cache:'no-store'});
       if(!response.ok)throw new Error('DATA_V4_HTTP_'+response.status);
-      var html=await response.text();
+      var source=await response.text();
 
-      html=html.replace('Data Type Runtime V4','Value Runtime V5');
-      html=html.replace(/__auditKawkabatDataRuntimeV4/g,'__auditKawkabatValueRuntimeV5');
+      source=source.replace('Data Type Runtime V4','Value Runtime V5');
+      source=source.replace(/__auditKawkabatDataRuntimeV4/g,'__auditKawkabatValueRuntimeV5Base');
 
-      html=html.replace(
-        "\"var dataType=params.get('dataType')||'price';\"+\n",
-        "\"var dataType=params.get('dataType')||'price',startValue=Number(params.get('value')),incrementValue=Number(params.get('increment'));if(!Number.isFinite(startValue))startValue=0.01;if(!Number.isFinite(incrementValue)||incrementValue===0)incrementValue=1;\"+\n"+
-        "        \"function decimalPlacesData(value){var text=String(value);if(/[eE]/.test(text)){var parts=text.toLowerCase().split('e'),base=(parts[0].split('.')[1]||'').length,exp=Number(parts[1]||0);return Math.max(0,base-exp);}return(text.split('.')[1]||'').length;}\"+\n"+
-        "        \"var valueDecimals=Math.min(8,Math.max(decimalPlacesData(startValue),decimalPlacesData(incrementValue)));\"+\n"+
-        "        \"function formatPriceData(value){var fixed=value.toFixed(valueDecimals);return valueDecimals?fixed.replace(/\\.?0+$/,''):fixed;}\"+\n"
-      );
+      var writeMarker="      document.open();\n      document.write(html);\n      document.close();";
+      var valuePatch=`      var valueCloseTag='</scr'+'ipt>';
+      var valueScript='<script id="kawkabat-value-runtime-v5">(function(){'+
+        "'use strict';"+
+        'var params=new URLSearchParams(String(location.hash||"").replace(/^#/,""));'+
+        'var dataType=params.get("dataType")||"price";'+
+        'var startValue=Number(params.get("value"));if(!Number.isFinite(startValue))startValue=0.01;'+
+        'var incrementValue=Number(params.get("increment"));if(!Number.isFinite(incrementValue)||incrementValue===0)incrementValue=1;'+
+        'function decimalPlaces(value){var text=String(value);if(/[eE]/.test(text)){var parts=text.toLowerCase().split("e"),base=(parts[0].split(".")[1]||"").length,exp=Number(parts[1]||0);return Math.max(0,base-exp);}return(text.split(".")[1]||"").length;}'+
+        'var decimals=Math.min(8,Math.max(decimalPlaces(startValue),decimalPlaces(incrementValue)));'+
+        'function formatPrice(value){var fixed=value.toFixed(decimals);return decimals?fixed.replace(/\\.?0+$/,""):fixed;}'+
+        'function pad2(value){return String(value).padStart(2,"0");}'+
+        'function dateLabel(offset){var date=new Date(Date.UTC(2019,11,31)+(offset*86400000));return pad2(date.getUTCDate())+"."+pad2(date.getUTCMonth()+1);}'+
+        'function timeLabel(offset){return pad2(((offset%24)+24)%24)+":00";}'+
+        'var count=0;'+
+        'for(var cycle=1;cycle<=10;cycle+=1){var group=document.getElementById("numbersCycle"+cycle);if(!group)continue;Array.prototype.forEach.call(group.children,function(node){var raw=Number(node.getAttribute("data-value")||node.textContent),ordinal=Math.max(0,raw-1),priceText=formatPrice(startValue+(ordinal*incrementValue)),dateText=dateLabel(ordinal),timeText=timeLabel(ordinal);node.setAttribute("data-price-value",priceText);if(dataType==="price")node.textContent=priceText;else if(dataType==="date")node.textContent=dateText;else if(dataType==="time")node.textContent=timeText;else if(dataType==="priceDate")node.textContent=priceText+"·"+dateText;else if(dataType==="priceTime")node.textContent=priceText+"·"+timeText;var length=String(node.textContent).length;if(dataType==="date"||dataType==="time")node.style.setProperty("font-size","16px","important");else if(dataType==="priceDate"||dataType==="priceTime")node.style.setProperty("font-size",length>13?"11px":"13px","important");else node.style.setProperty("font-size",length>8?"16px":length>6?"19px":"24px","important");count+=1;});}'+
+        'document.documentElement.dataset.startValue=String(startValue);document.documentElement.dataset.incrementValue=String(incrementValue);document.documentElement.dataset.dataType=dataType;'+
+        'window.__auditKawkabatValueRuntimeV5=function(){return{ok:count>0,startValue:startValue,increment:incrementValue,dataType:dataType,numberCount:count};};'+
+      '}());'+valueCloseTag;
+      var bodyCloseIndex=html.lastIndexOf('</body>');
+      if(bodyCloseIndex<0)throw new Error('VALUE_BODY_CLOSE_NOT_FOUND');
+      html=html.slice(0,bodyCloseIndex)+valueScript+html.slice(bodyCloseIndex);
+`;
 
-      var oldCycleLine="        \"cycleGroups.forEach(function(group){Array.prototype.forEach.call(group.children,function(node){var raw=Number(node.getAttribute('data-value')||node.textContent),offset=Math.max(0,raw-1),dateValue=dateLabel(offset),timeValue=timeLabel(offset);if(dataType==='date')node.textContent=dateValue;else if(dataType==='time')node.textContent=timeValue;else if(dataType==='priceDate')node.textContent=raw+'·'+dateValue;else if(dataType==='priceTime')node.textContent=raw+'·'+timeValue;if(dataType==='date'||dataType==='time')node.style.setProperty('font-size','16px','important');else if(dataType==='priceDate'||dataType==='priceTime')node.style.setProperty('font-size','13px','important');});});\"+\n";
-      var newCycleLine="        \"cycleGroups.forEach(function(group){Array.prototype.forEach.call(group.children,function(node){var ordinal=Math.max(0,Number(node.getAttribute('data-value')||node.textContent)-1),priceValue=startValue+(ordinal*incrementValue),priceText=formatPriceData(priceValue),dateValue=dateLabel(ordinal),timeValue=timeLabel(ordinal);node.setAttribute('data-price-value',priceText);if(dataType==='price')node.textContent=priceText;else if(dataType==='date')node.textContent=dateValue;else if(dataType==='time')node.textContent=timeValue;else if(dataType==='priceDate')node.textContent=priceText+'·'+dateValue;else if(dataType==='priceTime')node.textContent=priceText+'·'+timeValue;if(dataType==='date'||dataType==='time')node.style.setProperty('font-size','16px','important');else if(dataType==='priceDate'||dataType==='priceTime')node.style.setProperty('font-size','13px','important');});});\"+\n";
-      if(html.indexOf(oldCycleLine)<0)throw new Error('VALUE_CYCLE_MARKER_NOT_FOUND');
-      html=html.replace(oldCycleLine,newCycleLine);
-
-      html=html.replace(
-        "        \"document.documentElement.dataset.dataType=dataType;\"+\n",
-        "        \"document.documentElement.dataset.dataType=dataType;document.documentElement.dataset.startValue=String(startValue);document.documentElement.dataset.incrementValue=String(incrementValue);\"+\n"
-      );
-
-      if(html.indexOf("startValue=Number(params.get('value'))")<0)throw new Error('VALUE_PARAM_PATCH_FAILED');
-      if(html.indexOf("node.setAttribute('data-price-value',priceText)")<0)throw new Error('VALUE_RENDER_PATCH_FAILED');
+      if(source.indexOf(writeMarker)<0)throw new Error('VALUE_WRITE_MARKER_NOT_FOUND');
+      source=source.replace(writeMarker,valuePatch+writeMarker);
 
       document.open();
-      document.write(html);
+      document.write(source);
       document.close();
     }catch(error){
       document.body.innerHTML='<div class="loading">تعذر تحميل Runtime القيمة: '+String(error.message||error)+'</div>';
