@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>كوكبة الأرقام السحرية — Square of 9 بدون الإطار الأسود</title>
+<title>كوكبة الأرقام السحرية — بطاقات الدورات المطابقة V5</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:Arial,Tahoma,sans-serif}
 #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
@@ -12,30 +12,28 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-f
 </style>
 </head>
 <body>
-<iframe id="app" title="Square of 9 without persisted black frame"></iframe>
-<div id="loading">جارٍ إزالة الإطار الأسود المحفوظ…</div>
+<iframe id="app" title="Square of 9 matched cycle cards"></iframe>
+<div id="loading">جارٍ مطابقة أشكال Tetragram وPentagram وHexagram…</div>
 <div id="error"></div>
 <script>
 (function(){
 'use strict';
 var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/d28c06559b52617bb92b4df75da0bf4ba942d427/public/kawkabat-al-arqam-al-sihria.html';
 var STORAGE='kawkabat-complete-panel-v1';
-var MIGRATION='kawkabat-square9-remove-black-optional-frame-v4';
+var MIGRATION='kawkabat-square9-cycle-cards-match-v5';
 var FIGURES=['Triangle','Square','Pentagon','Hexagon','Septagon','Octagon','Nonagon','Decagon','Hendecagon','Dodecagon'];
+var NS='http://www.w3.org/2000/svg';
 var frame=document.getElementById('app');
 var loading=document.getElementById('loading');
 var errorBox=document.getElementById('error');
+var ROOT_ID='referenceCycleCardsMatchedV5';
 
-function readState(){
-  try{return JSON.parse(localStorage.getItem(STORAGE)||'{}')||{};}catch(_){return {};}
-}
+function readState(){try{return JSON.parse(localStorage.getItem(STORAGE)||'{}')||{};}catch(_){return {};}}
 function writeState(state){localStorage.setItem(STORAGE,JSON.stringify(state));}
 function clearPersistedOptionalFiguresOnce(){
   if(localStorage.getItem(MIGRATION)==='done')return;
   var state=readState();
-  FIGURES.forEach(function(name){
-    state['figure.'+name+'.visible']=false;
-  });
+  FIGURES.forEach(function(name){state['figure.'+name+'.visible']=false;});
   state['figures.hide']=false;
   state['vectors.visible']=false;
   state['locator.visible']=false;
@@ -46,35 +44,102 @@ function clearPersistedOptionalFiguresOnce(){
 }
 function anyOptionalFigureEnabled(){
   var state=readState();
-  return FIGURES.some(function(name){return state['figure.'+name+'.visible']===true||state['figure.'+name+'.visible']==='true';})||
-    state['vectors.visible']===true||state['vectors.visible']==='true'||
-    state['locator.visible']===true||state['locator.visible']==='true'||
-    state['vortex.visible']===true||state['vortex.visible']==='true';
+  return FIGURES.some(function(name){return state['figure.'+name+'.visible']===true||state['figure.'+name+'.visible']==='true';})||state['vectors.visible']===true||state['vectors.visible']==='true'||state['locator.visible']===true||state['locator.visible']==='true'||state['vortex.visible']===true||state['vortex.visible']==='true';
 }
-function innerDocument(){
-  try{return frame.contentDocument||null;}catch(_){return null;}
-}
-function applyBlackFrameGate(){
+function findSquareDocument(win){
   try{
-    var doc=innerDocument();
+    var doc=win.document;
+    if(doc&&doc.getElementById('squareSvg'))return doc;
+    var frames=doc?Array.from(doc.querySelectorAll('iframe')):[];
+    for(var i=0;i<frames.length;i++){
+      try{
+        if(frames[i].contentWindow){var found=findSquareDocument(frames[i].contentWindow);if(found)return found;}
+      }catch(_){}
+    }
+  }catch(_){}
+  return null;
+}
+function svg(doc,tag,attrs,text){
+  var node=doc.createElementNS(NS,tag);
+  Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,String(attrs[key]));});
+  if(text!==undefined)node.textContent=String(text);
+  return node;
+}
+function addText(doc,g,label,x,y,size,weight,rotate){
+  g.appendChild(svg(doc,'text',{x:x,y:y,'text-anchor':'middle','dominant-baseline':'central','font-family':'Segoe UI,Arial,Tahoma,sans-serif','font-size':size,'font-weight':weight,fill:'#555',transform:rotate?'rotate('+rotate+' '+x+' '+y+')':''},label));
+}
+function polygonPath(cx,cy,r,sides,rotation){
+  var d='';
+  for(var i=0;i<sides;i++){
+    var a=(rotation+i*360/sides)*Math.PI/180;
+    d+=(i?'L':'M')+(cx+Math.cos(a)*r)+' '+(cy+Math.sin(a)*r)+' ';
+  }
+  return d+'Z';
+}
+function starPath(cx,cy,rOuter,rInner,points,rotation){
+  var d='';
+  for(var i=0;i<points*2;i++){
+    var r=i%2===0?rOuter:rInner;
+    var a=(rotation+i*180/points)*Math.PI/180;
+    d+=(i?'L':'M')+(cx+Math.cos(a)*r)+' '+(cy+Math.sin(a)*r)+' ';
+  }
+  return d+'Z';
+}
+function drawCard(doc,g,x,title,kind){
+  var y=808,w=96,h=118,cx=x+w/2,cy=y+59;
+  g.appendChild(svg(doc,'rect',{x:x,y:y,width:w,height:h,rx:11,fill:'#fff','fill-opacity':0.84,stroke:'#e2e2e2','stroke-width':0.9}));
+  addText(doc,g,title,cx,y+12,7.4,800,0);
+  g.appendChild(svg(doc,'circle',{cx:cx,cy:cy,r:34,fill:'none',stroke:'#bdbdbd','stroke-width':0.9}));
+  if(kind==='tetragram'){
+    g.appendChild(svg(doc,'path',{d:polygonPath(cx,cy,29,4,-45),fill:'none',stroke:'#555','stroke-width':1.8,'stroke-linejoin':'round'}));
+  }else if(kind==='pentagram'){
+    g.appendChild(svg(doc,'path',{d:starPath(cx,cy,31,12.5,5,-90),fill:'none',stroke:'#555','stroke-width':1.8,'stroke-linejoin':'round'}));
+  }else{
+    g.appendChild(svg(doc,'path',{d:polygonPath(cx,cy,31,3,-90),fill:'none',stroke:'#555','stroke-width':1.8,'stroke-linejoin':'round'}));
+    g.appendChild(svg(doc,'path',{d:polygonPath(cx,cy,31,3,90),fill:'none',stroke:'#555','stroke-width':1.8,'stroke-linejoin':'round'}));
+  }
+  g.appendChild(svg(doc,'circle',{cx:cx,cy:cy,r:5.2,fill:'none',stroke:'#e45e5e','stroke-width':1.5}));
+  g.appendChild(svg(doc,'circle',{cx:cx,cy:cy,r:1.6,fill:'#e45e5e'}));
+  var labels=kind==='tetragram'?[['01 MAR',-145],['03 AUG',-45],['30 NOV',45],['31 JAN',135]]:kind==='pentagram'?[['07 MAR',-145],['20 MAY',-75],['03 AUG',-5],['16 OCT',65],['26 DEC',135]]:[['07 APR',-150],['01 JUN',-90],['03 AUG',-30],['04 OCT',30],['03 DEC',90],['2025',150]];
+  labels.forEach(function(item){
+    var a=item[1]*Math.PI/180;
+    addText(doc,g,item[0],cx+Math.cos(a)*44,cy+Math.sin(a)*44,5.9,650,item[1]+90);
+  });
+  if(kind!=='tetragram')addText(doc,g,'2026',cx,y+29,6.2,650,0);
+}
+function applyOptionalGate(doc){
+  var optional=doc.getElementById('optional');
+  var enabled=anyOptionalFigureEnabled();
+  if(optional){
+    optional.style.setProperty('display',enabled?'':'none','important');
+    optional.setAttribute('aria-hidden',enabled?'false':'true');
+    if(!enabled&&optional.childNodes.length)optional.replaceChildren();
+  }
+  doc.documentElement.dataset.square9BlackFrameRemoved=enabled?'false':'true';
+}
+function applyCycleCards(){
+  try{
+    var doc=findSquareDocument(window);
     if(!doc)return false;
     var square=doc.getElementById('squareSvg');
     if(!square)return false;
-    var optional=doc.getElementById('optional');
-    var enabled=anyOptionalFigureEnabled();
-    if(optional){
-      optional.style.setProperty('display',enabled?'':'none','important');
-      optional.setAttribute('aria-hidden',enabled?'false':'true');
-      if(!enabled&&optional.childNodes.length)optional.replaceChildren();
-    }
-    doc.querySelectorAll('[data-black-optional-frame="true"]').forEach(function(node){node.remove();});
-    doc.documentElement.dataset.square9OptionalFiguresEnabled=enabled?'true':'false';
-    doc.documentElement.dataset.square9BlackFrameRemoved=enabled?'false':'true';
+    applyOptionalGate(doc);
+    var old=doc.getElementById('referenceCycleCardsV3');
+    if(old)old.style.setProperty('display','none','important');
+    var previous=doc.getElementById(ROOT_ID);
+    if(previous)previous.remove();
+    var root=svg(doc,'g',{id:ROOT_ID,'data-cycle-cards-match':'true','pointer-events':'none'});
+    var anchor=doc.getElementById('referenceGridMarkersV3')||doc.getElementById('optional');
+    if(anchor&&anchor.parentNode===square)square.insertBefore(root,anchor);else square.appendChild(root);
+    drawCard(doc,root,351,'TETRAGRAM','tetragram');
+    drawCard(doc,root,452,'PENTAGRAM','pentagram');
+    drawCard(doc,root,553,'HEXAGRAM','hexagram');
+    doc.documentElement.dataset.cycleCardsMatchedV5='true';
     errorBox.style.display='none';
     return true;
   }catch(error){
     errorBox.style.display='block';
-    errorBox.textContent='BLACK FRAME GATE ERROR: '+String(error&&error.message||error);
+    errorBox.textContent='CYCLE CARDS V5 ERROR: '+String(error&&error.message||error);
     return false;
   }
 }
@@ -82,22 +147,19 @@ function applyBlackFrameGate(){
 clearPersistedOptionalFiguresOnce();
 frame.addEventListener('load',function(){
   if(loading)loading.remove();
-  setTimeout(applyBlackFrameGate,180);
-  setTimeout(applyBlackFrameGate,600);
-  setTimeout(applyBlackFrameGate,1300);
+  setTimeout(applyCycleCards,220);
+  setTimeout(applyCycleCards,700);
+  setTimeout(applyCycleCards,1500);
 });
 frame.src=SOURCE;
-window.setInterval(applyBlackFrameGate,350);
-window.__auditSquare9RemoveBlackFrameV4=function(){
-  var doc=innerDocument();
-  var optional=doc?doc.getElementById('optional'):null;
+window.setInterval(applyCycleCards,450);
+window.__auditSquare9CycleCardsMatchedV5=function(){
+  var doc=findSquareDocument(window);
   return{
-    ok:!!doc,
-    migration:localStorage.getItem(MIGRATION),
-    optionalFiguresEnabled:anyOptionalFigureEnabled(),
-    optionalGroupVisible:optional?optional.style.display!=='none':null,
-    blackFrameRemoved:doc?doc.documentElement.dataset.square9BlackFrameRemoved:null,
-    controlledFigures:FIGURES.slice()
+    ok:!!(doc&&doc.getElementById(ROOT_ID)),
+    oldCardsHidden:!!(doc&&doc.getElementById('referenceCycleCardsV3')&&doc.getElementById('referenceCycleCardsV3').style.display==='none'),
+    blackOptionalFrameRemoved:doc?doc.documentElement.dataset.square9BlackFrameRemoved:null,
+    geometry:['square','five-point-star','six-point-star']
   };
 };
 }());
