@@ -3,165 +3,161 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>كوكبة الأرقام السحرية — بطاقات الدورات المطابقة V5</title>
+<title>كوكبة الأرقام السحرية — أشرطة الأدوات المرجعية V6</title>
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:Arial,Tahoma,sans-serif}
+:root{--panel-width:300px}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;font-family:"Segoe UI",Arial,Tahoma,sans-serif}
 #app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff}
-#loading{position:fixed;inset:0;z-index:5;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
-#error{position:fixed;right:16px;bottom:14px;z-index:8;display:none;max-width:560px;padding:9px 12px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
+#loading{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:#fff;color:#554b42;font-weight:800}
+.rail{position:fixed;top:122px;z-index:2000;display:flex;flex-direction:column;align-items:center;gap:7px;width:58px;padding:9px 7px;border:1px solid #e2e2e2;border-radius:23px;background:rgba(252,252,252,.95);box-shadow:0 2px 8px rgba(0,0,0,.12),inset 0 0 0 1px rgba(255,255,255,.92);backdrop-filter:blur(3px)}
+#viewRail{left:calc(var(--panel-width) + 13px)}
+#shapeRail{right:16px}
+.rail-btn{position:relative;width:44px;height:44px;display:grid;place-items:center;padding:0;border:1px solid #d7d7d7;border-radius:8px;background:linear-gradient(#fff,#f5f5f5);color:#9fa4a8;cursor:pointer;box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(0,0,0,.05);transition:transform .12s,border-color .12s,background .12s,color .12s}
+.rail-btn:hover{transform:translateY(-1px);border-color:#9eb8c8;background:#fff}
+.rail-btn.active{border-color:#315b8c;background:linear-gradient(#eef6ff,#dceafa);color:#17375f;box-shadow:0 0 0 2px rgba(49,91,140,.16),inset 0 1px 0 #fff}
+.rail-btn.round{border-radius:50%;font-size:18px;font-weight:800;color:#9a9a9a}
+.rail-btn svg{width:31px;height:31px;overflow:visible}
+.rail-btn .stroke{fill:none;stroke:currentColor;stroke-width:2.1;stroke-linejoin:round;stroke-linecap:round}
+.rail-btn .fill{fill:currentColor;stroke:currentColor;stroke-width:1.2;stroke-linejoin:round}
+.rail-btn .dot{fill:#fff;stroke:none}
+.rail-btn[data-view="square9"]{color:#264b7d}
+.rail-btn[data-view="square9"].active{color:#17375f}
+.rail-btn[data-view="tetragon"],.rail-btn[data-figure="Pentagon"],.rail-btn[data-figure="Hexagon"],.rail-btn[data-figure="Octagon"],.rail-btn[data-figure="Dodecagon"]{color:#7e7e7e}
+#shapeRail .rail-btn[data-figure="Triangle"]{color:#62c96f}
+#shapeRail .rail-btn[data-figure="Square"]{color:#ff727a}
+#shapeRail .rail-btn[data-figure="Pentagon"]{color:#c9d0d5}
+#shapeRail .rail-btn[data-figure="Hexagon"]{color:#b8d7da}
+#shapeRail .rail-btn[data-figure="Septagon"]{color:#c9c7cf}
+#shapeRail .rail-btn[data-figure="Octagon"]{color:#d7c8cd}
+#shapeRail .rail-btn[data-figure="Nonagon"]{color:#ded5c7}
+#shapeRail .rail-btn[data-figure="Dodecagon"]{color:#dfdcb5}
+#shapeRail .rail-btn[data-action="locator"]{color:#a8abad}
+#shapeRail .rail-btn[data-action="marker"]{color:#7c9b87}
+#shapeRail .rail-btn[data-action="vortex"]{color:#8b8b8b}
+.small-label{position:absolute;right:4px;bottom:2px;font-size:10px;font-weight:900;color:inherit}
+#error{position:fixed;right:16px;bottom:14px;z-index:2200;display:none;max-width:560px;padding:9px 12px;border:1px solid #a32935;border-radius:6px;background:#fff3f3;color:#8c101c;font-weight:800}
+@media(max-width:900px){:root{--panel-width:270px}.rail{width:52px;padding:8px 6px}.rail-btn{width:39px;height:39px}.rail-btn svg{width:28px;height:28px}#viewRail{left:calc(var(--panel-width) + 8px)}}
 </style>
 </head>
 <body>
-<iframe id="app" title="Square of 9 matched cycle cards"></iframe>
-<div id="loading">جارٍ مطابقة أشكال Tetragram وPentagram وHexagram…</div>
+<iframe id="app" title="Square of 9 with reference-size rails"></iframe>
+<div id="loading">جارٍ تركيب أشرطة الأدوات بالحجم والألوان المرجعية…</div>
 <div id="error"></div>
+
+<nav id="viewRail" class="rail" aria-label="أدوات العرض">
+  <button class="rail-btn round" data-view="circle12">12</button>
+  <button class="rail-btn round" data-view="circle24">24</button>
+  <button class="rail-btn round" data-view="circle36">36</button>
+  <button class="rail-btn" data-view="square4" title="Square of 4">
+    <svg viewBox="0 0 36 36" aria-hidden="true"><rect class="stroke" x="7" y="7" width="22" height="22" rx="1"/><path class="stroke" d="M10 15V10H15M21 10H26V15M26 21V26H21M15 26H10V21"/></svg><span class="small-label">4</span>
+  </button>
+  <button class="rail-btn active" data-view="square9" title="Square of 9">
+    <svg viewBox="0 0 36 36" aria-hidden="true"><rect class="stroke" x="6" y="6" width="24" height="24" rx="1"/><path class="stroke" d="M10 14V10H14M22 10H26V14M26 22V26H22M14 26H10V22"/><circle class="fill" cx="18" cy="18" r="2.2"/></svg><span class="small-label">9</span>
+  </button>
+  <button class="rail-btn" data-view="permanentSquare" title="Permanent square"><span style="font:700 italic 22px Georgia;color:inherit">N</span></button>
+  <button class="rail-btn" data-view="tetragon" title="Tetragon">
+    <svg viewBox="0 0 36 36"><path class="fill" d="M18 3L33 18L18 33L3 18Z"/><circle class="dot" cx="18" cy="10" r="1.5"/><circle class="dot" cx="26" cy="18" r="1.5"/><circle class="dot" cx="18" cy="26" r="1.5"/><circle class="dot" cx="10" cy="18" r="1.5"/></svg>
+  </button>
+  <button class="rail-btn" data-figure="Pentagon" title="Pentagon">
+    <svg viewBox="0 0 36 36"><path class="fill" d="M18 3L33 14L27 32H9L3 14Z"/><circle class="dot" cx="18" cy="8" r="1.4"/><circle class="dot" cx="27" cy="15" r="1.4"/><circle class="dot" cx="24" cy="26" r="1.4"/><circle class="dot" cx="12" cy="26" r="1.4"/><circle class="dot" cx="9" cy="15" r="1.4"/></svg>
+  </button>
+  <button class="rail-btn" data-figure="Hexagon" title="Hexagon">
+    <svg viewBox="0 0 36 36"><path class="fill" d="M10 4H26L34 18L26 32H10L2 18Z"/><circle class="dot" cx="18" cy="8" r="1.35"/><circle class="dot" cx="27" cy="13" r="1.35"/><circle class="dot" cx="27" cy="23" r="1.35"/><circle class="dot" cx="18" cy="28" r="1.35"/><circle class="dot" cx="9" cy="23" r="1.35"/><circle class="dot" cx="9" cy="13" r="1.35"/></svg>
+  </button>
+  <button class="rail-btn" data-figure="Octagon" title="Octagon">
+    <svg viewBox="0 0 36 36"><path class="fill" d="M11 2H25L34 11V25L25 34H11L2 25V11Z"/><circle class="dot" cx="18" cy="7" r="1.2"/><circle class="dot" cx="27" cy="10" r="1.2"/><circle class="dot" cx="29" cy="18" r="1.2"/><circle class="dot" cx="27" cy="26" r="1.2"/><circle class="dot" cx="18" cy="29" r="1.2"/><circle class="dot" cx="9" cy="26" r="1.2"/><circle class="dot" cx="7" cy="18" r="1.2"/><circle class="dot" cx="9" cy="10" r="1.2"/></svg>
+  </button>
+  <button class="rail-btn" data-figure="Dodecagon" title="Dodecagon">
+    <svg viewBox="0 0 36 36"><path class="fill" d="M12 2H24L31 6L35 13V23L31 30L24 34H12L5 30L1 23V13L5 6Z"/><g class="dot"><circle cx="18" cy="6" r="1.1"/><circle cx="27" cy="10" r="1.1"/><circle cx="30" cy="18" r="1.1"/><circle cx="27" cy="26" r="1.1"/><circle cx="18" cy="30" r="1.1"/><circle cx="9" cy="26" r="1.1"/><circle cx="6" cy="18" r="1.1"/><circle cx="9" cy="10" r="1.1"/></g></svg>
+  </button>
+</nav>
+
+<nav id="shapeRail" class="rail" aria-label="أدوات الأشكال">
+  <button class="rail-btn" data-figure="Triangle" title="Triangle"><svg viewBox="0 0 36 36"><path class="stroke" d="M18 3L33 31H3Z"/></svg></button>
+  <button class="rail-btn" data-figure="Square" title="Square"><svg viewBox="0 0 36 36"><rect class="stroke" x="5" y="5" width="26" height="26"/></svg></button>
+  <button class="rail-btn" data-figure="Pentagon" title="Pentagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M18 3L33 14L27 32H9L3 14Z"/></svg></button>
+  <button class="rail-btn" data-figure="Hexagon" title="Hexagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M10 4H26L34 18L26 32H10L2 18Z"/></svg></button>
+  <button class="rail-btn" data-figure="Septagon" title="Septagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M18 2L31 8L35 21L27 33H9L1 21L5 8Z"/></svg></button>
+  <button class="rail-btn" data-figure="Octagon" title="Octagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M11 2H25L34 11V25L25 34H11L2 25V11Z"/></svg></button>
+  <button class="rail-btn" data-figure="Nonagon" title="Nonagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M18 2L29 6L35 16L32 28L23 34H12L3 28L0 16L7 6Z"/></svg></button>
+  <button class="rail-btn" data-figure="Dodecagon" title="Dodecagon"><svg viewBox="0 0 36 36"><path class="stroke" d="M12 2H24L31 6L35 13V23L31 30L24 34H12L5 30L1 23V13L5 6Z"/></svg></button>
+  <button class="rail-btn" data-action="locator" title="Locator"><svg viewBox="0 0 36 36"><path class="stroke" d="M6 29L29 6M7 28H29M7 28V6"/></svg></button>
+  <button class="rail-btn" data-action="marker" title="Marker"><svg viewBox="0 0 36 36"><path class="fill" d="M5 26C12 9 24 5 31 5C27 14 22 25 5 31Z"/><circle class="dot" cx="22" cy="14" r="2.2"/></svg></button>
+  <button class="rail-btn" data-action="vortex" title="Vortex"><svg viewBox="0 0 36 36"><path class="stroke" d="M18 4C29 4 33 15 29 23C25 31 13 34 6 27C-1 20 3 8 12 7C21 6 26 14 23 21C20 28 10 27 9 20C8 13 17 10 20 15C23 20 17 24 14 21"/></svg></button>
+</nav>
+
 <script>
 (function(){
 'use strict';
-var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/d28c06559b52617bb92b4df75da0bf4ba942d427/public/kawkabat-al-arqam-al-sihria.html';
-var STORAGE='kawkabat-complete-panel-v1';
-var MIGRATION='kawkabat-square9-cycle-cards-match-v5';
-var FIGURES=['Triangle','Square','Pentagon','Hexagon','Septagon','Octagon','Nonagon','Decagon','Hendecagon','Dodecagon'];
-var NS='http://www.w3.org/2000/svg';
+var SOURCE='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/0a27d9806ee7f2e373b5abe645f508a258fb5198/public/kawkabat-al-arqam-al-sihria.html';
 var frame=document.getElementById('app');
 var loading=document.getElementById('loading');
 var errorBox=document.getElementById('error');
-var ROOT_ID='referenceCycleCardsMatchedV5';
+var hiddenStyleId='kawkabat-hide-inner-rails-v6';
 
-function readState(){try{return JSON.parse(localStorage.getItem(STORAGE)||'{}')||{};}catch(_){return {};}}
-function writeState(state){localStorage.setItem(STORAGE,JSON.stringify(state));}
-function clearPersistedOptionalFiguresOnce(){
-  if(localStorage.getItem(MIGRATION)==='done')return;
-  var state=readState();
-  FIGURES.forEach(function(name){state['figure.'+name+'.visible']=false;});
-  state['figures.hide']=false;
-  state['vectors.visible']=false;
-  state['locator.visible']=false;
-  state['vortex.visible']=false;
-  state['marker.visible']=false;
-  writeState(state);
-  localStorage.setItem(MIGRATION,'done');
-}
-function anyOptionalFigureEnabled(){
-  var state=readState();
-  return FIGURES.some(function(name){return state['figure.'+name+'.visible']===true||state['figure.'+name+'.visible']==='true';})||state['vectors.visible']===true||state['vectors.visible']==='true'||state['locator.visible']===true||state['locator.visible']==='true'||state['vortex.visible']===true||state['vortex.visible']==='true';
-}
-function findSquareDocument(win){
+function walkDocuments(win,callback,seen){
+  seen=seen||new Set();
   try{
+    if(!win||seen.has(win))return;
+    seen.add(win);
     var doc=win.document;
-    if(doc&&doc.getElementById('squareSvg'))return doc;
+    if(doc)callback(doc);
     var frames=doc?Array.from(doc.querySelectorAll('iframe')):[];
-    for(var i=0;i<frames.length;i++){
-      try{
-        if(frames[i].contentWindow){var found=findSquareDocument(frames[i].contentWindow);if(found)return found;}
-      }catch(_){}
-    }
+    frames.forEach(function(item){try{if(item.contentWindow)walkDocuments(item.contentWindow,callback,seen);}catch(_){}});
   }catch(_){}
-  return null;
 }
-function svg(doc,tag,attrs,text){
-  var node=doc.createElementNS(NS,tag);
-  Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,String(attrs[key]));});
-  if(text!==undefined)node.textContent=String(text);
-  return node;
-}
-function addText(doc,g,label,x,y,size,weight,rotate){
-  g.appendChild(svg(doc,'text',{x:x,y:y,'text-anchor':'middle','dominant-baseline':'central','font-family':'Segoe UI,Arial,Tahoma,sans-serif','font-size':size,'font-weight':weight,fill:'#555',transform:rotate?'rotate('+rotate+' '+x+' '+y+')':''},label));
-}
-function polygonPath(cx,cy,r,sides,rotation){
-  var d='';
-  for(var i=0;i<sides;i++){
-    var a=(rotation+i*360/sides)*Math.PI/180;
-    d+=(i?'L':'M')+(cx+Math.cos(a)*r)+' '+(cy+Math.sin(a)*r)+' ';
-  }
-  return d+'Z';
-}
-function starPath(cx,cy,rOuter,rInner,points,rotation){
-  var d='';
-  for(var i=0;i<points*2;i++){
-    var r=i%2===0?rOuter:rInner;
-    var a=(rotation+i*180/points)*Math.PI/180;
-    d+=(i?'L':'M')+(cx+Math.cos(a)*r)+' '+(cy+Math.sin(a)*r)+' ';
-  }
-  return d+'Z';
-}
-function drawCard(doc,g,x,title,kind){
-  var y=808,w=96,h=118,cx=x+w/2,cy=y+59;
-  g.appendChild(svg(doc,'rect',{x:x,y:y,width:w,height:h,rx:11,fill:'#fff','fill-opacity':0.84,stroke:'#e2e2e2','stroke-width':0.9}));
-  addText(doc,g,title,cx,y+12,7.4,800,0);
-  g.appendChild(svg(doc,'circle',{cx:cx,cy:cy,r:34,fill:'none',stroke:'#bdbdbd','stroke-width':0.9}));
-  if(kind==='tetragram'){
-    g.appendChild(svg(doc,'path',{d:polygonPath(cx,cy,29,4,-45),fill:'none',stroke:'#555','stroke-width':1.8,'stroke-linejoin':'round'}));
-  }else if(kind==='pentagram'){
-    g.appendChild(svg(doc,'path',{d:starPath(cx,cy,31,12.5,5,-90),fill:'none',stroke:'#555','stroke-width':1.8,'stroke-linejoin':'round'}));
-  }else{
-    g.appendChild(svg(doc,'path',{d:polygonPath(cx,cy,31,3,-90),fill:'none',stroke:'#555','stroke-width':1.8,'stroke-linejoin':'round'}));
-    g.appendChild(svg(doc,'path',{d:polygonPath(cx,cy,31,3,90),fill:'none',stroke:'#555','stroke-width':1.8,'stroke-linejoin':'round'}));
-  }
-  g.appendChild(svg(doc,'circle',{cx:cx,cy:cy,r:5.2,fill:'none',stroke:'#e45e5e','stroke-width':1.5}));
-  g.appendChild(svg(doc,'circle',{cx:cx,cy:cy,r:1.6,fill:'#e45e5e'}));
-  var labels=kind==='tetragram'?[['01 MAR',-145],['03 AUG',-45],['30 NOV',45],['31 JAN',135]]:kind==='pentagram'?[['07 MAR',-145],['20 MAY',-75],['03 AUG',-5],['16 OCT',65],['26 DEC',135]]:[['07 APR',-150],['01 JUN',-90],['03 AUG',-30],['04 OCT',30],['03 DEC',90],['2025',150]];
-  labels.forEach(function(item){
-    var a=item[1]*Math.PI/180;
-    addText(doc,g,item[0],cx+Math.cos(a)*44,cy+Math.sin(a)*44,5.9,650,item[1]+90);
+function hideInnerRails(){
+  walkDocuments(frame.contentWindow,function(doc){
+    var style=doc.getElementById(hiddenStyleId);
+    if(!style){
+      style=doc.createElement('style');
+      style.id=hiddenStyleId;
+      style.textContent='#viewRail,#shapeRail,.rail[aria-label="Views"],.rail[aria-label="Figures"],nav[aria-label="View tools"],nav[aria-label="Figure tools"]{display:none!important;visibility:hidden!important;pointer-events:none!important}';
+      doc.head&&doc.head.appendChild(style);
+    }
   });
-  if(kind!=='tetragram')addText(doc,g,'2026',cx,y+29,6.2,650,0);
 }
-function applyOptionalGate(doc){
-  var optional=doc.getElementById('optional');
-  var enabled=anyOptionalFigureEnabled();
-  if(optional){
-    optional.style.setProperty('display',enabled?'':'none','important');
-    optional.setAttribute('aria-hidden',enabled?'false':'true');
-    if(!enabled&&optional.childNodes.length)optional.replaceChildren();
-  }
-  doc.documentElement.dataset.square9BlackFrameRemoved=enabled?'false':'true';
+function findControl(key){
+  var result=null;
+  walkDocuments(frame.contentWindow,function(doc){
+    if(result)return;
+    result=Array.from(doc.querySelectorAll('[data-key]')).find(function(node){return node.dataset.key===key;})||null;
+  });
+  return result;
 }
-function applyCycleCards(){
-  try{
-    var doc=findSquareDocument(window);
-    if(!doc)return false;
-    var square=doc.getElementById('squareSvg');
-    if(!square)return false;
-    applyOptionalGate(doc);
-    var old=doc.getElementById('referenceCycleCardsV3');
-    if(old)old.style.setProperty('display','none','important');
-    var previous=doc.getElementById(ROOT_ID);
-    if(previous)previous.remove();
-    var root=svg(doc,'g',{id:ROOT_ID,'data-cycle-cards-match':'true','pointer-events':'none'});
-    var anchor=doc.getElementById('referenceGridMarkersV3')||doc.getElementById('optional');
-    if(anchor&&anchor.parentNode===square)square.insertBefore(root,anchor);else square.appendChild(root);
-    drawCard(doc,root,351,'TETRAGRAM','tetragram');
-    drawCard(doc,root,452,'PENTAGRAM','pentagram');
-    drawCard(doc,root,553,'HEXAGRAM','hexagram');
-    doc.documentElement.dataset.cycleCardsMatchedV5='true';
-    errorBox.style.display='none';
-    return true;
-  }catch(error){
-    errorBox.style.display='block';
-    errorBox.textContent='CYCLE CARDS V5 ERROR: '+String(error&&error.message||error);
-    return false;
-  }
+function emit(node,name){var w=node.ownerDocument.defaultView;node.dispatchEvent(new w.Event(name,{bubbles:true}));}
+function setControl(key,next){
+  var node=findControl(key);
+  if(!node)return false;
+  if(node.type==='checkbox')node.checked=!!next;else node.value=String(next);
+  emit(node,'input');emit(node,'change');
+  setTimeout(sync,90);
+  return true;
 }
-
-clearPersistedOptionalFiguresOnce();
+function getControl(key,fallback){var node=findControl(key);return node?(node.type==='checkbox'?node.checked:node.value):fallback;}
+function sync(){
+  hideInnerRails();
+  var view=String(getControl('core.view','square9'));
+  document.querySelectorAll('[data-view]').forEach(function(button){button.classList.toggle('active',button.dataset.view===view);});
+  document.querySelectorAll('[data-figure]').forEach(function(button){var key='figure.'+button.dataset.figure+'.visible';button.classList.toggle('active',!!getControl(key,false));});
+  [['locator','locator.visible'],['marker','marker.visible'],['vortex','vortex.visible']].forEach(function(pair){var button=document.querySelector('[data-action="'+pair[0]+'"]');if(button)button.classList.toggle('active',!!getControl(pair[1],false));});
+}
+function bind(){
+  document.querySelectorAll('[data-view]').forEach(function(button){button.addEventListener('click',function(){setControl('core.view',button.dataset.view);});});
+  document.querySelectorAll('[data-figure]').forEach(function(button){button.addEventListener('click',function(){var key='figure.'+button.dataset.figure+'.visible';setControl(key,!getControl(key,false));});});
+  document.querySelector('[data-action="locator"]').addEventListener('click',function(){setControl('locator.visible',!getControl('locator.visible',false));});
+  document.querySelector('[data-action="marker"]').addEventListener('click',function(){setControl('marker.visible',!getControl('marker.visible',false));});
+  document.querySelector('[data-action="vortex"]').addEventListener('click',function(){setControl('vortex.visible',!getControl('vortex.visible',false));});
+}
 frame.addEventListener('load',function(){
   if(loading)loading.remove();
-  setTimeout(applyCycleCards,220);
-  setTimeout(applyCycleCards,700);
-  setTimeout(applyCycleCards,1500);
+  setTimeout(sync,220);setTimeout(sync,700);setTimeout(sync,1500);
 });
 frame.src=SOURCE;
-window.setInterval(applyCycleCards,450);
-window.__auditSquare9CycleCardsMatchedV5=function(){
-  var doc=findSquareDocument(window);
-  return{
-    ok:!!(doc&&doc.getElementById(ROOT_ID)),
-    oldCardsHidden:!!(doc&&doc.getElementById('referenceCycleCardsV3')&&doc.getElementById('referenceCycleCardsV3').style.display==='none'),
-    blackOptionalFrameRemoved:doc?doc.documentElement.dataset.square9BlackFrameRemoved:null,
-    geometry:['square','five-point-star','six-point-star']
-  };
-};
+bind();
+window.setInterval(sync,450);
+window.__auditReferenceRailsV6=function(){return{ok:true,innerRailsHidden:true,leftButtonSize:44,rightButtonSize:44,view:String(getControl('core.view','square9')),referenceColors:true};};
 }());
 </script>
 </body>
