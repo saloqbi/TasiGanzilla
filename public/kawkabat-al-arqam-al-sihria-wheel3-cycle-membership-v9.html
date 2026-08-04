@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic Numbers Constellation — Correct Cycle Membership V9</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+    #appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/4328c7647fd377ff7922466117ce40aa5dc3627a/public/kawkabat-al-arqam-al-sihria-active-view-square4-v1.html"></iframe>
+  <script>
+  (function(){
+    'use strict';
+
+    var appFrame=document.getElementById('appFrame');
+    var wheelObserver=null;
+    var applyTimer=null;
+    var pollTimer=null;
+    var listenerDocument=null;
+    var baseDate=new Date();
+    baseDate.setHours(0,0,0,0);
+
+    var types=[
+      {value:'price',label:'Price'},
+      {value:'date',label:'Date'},
+      {value:'time',label:'Time'},
+      {value:'priceDate',label:'Price and date'},
+      {value:'priceTime',label:'Price and time'}
+    ];
+
+    function numericInput(input,fallback){
+      var text=String(input&&input.value!=null?input.value:'').trim().replace(',','.');
+      var value=Number(text);
+      return Number.isFinite(value)?value:fallback;
+    }
+    function tickSizeForValue(value){
+      var absolute=Math.abs(Number(value));
+      if(!Number.isFinite(absolute)||absolute===0)return 0.001;
+      return absolute<1?0.001:1;
+    }
+    function decimalsForStep(step){
+      if(step>=1)return 0;
+      var text=String(step);
+      if(/[eE]/.test(text)){
+        var parts=text.toLowerCase().split('e');
+        return Math.max(0,(parts[0].split('.')[1]||'').length-Number(parts[1]||0));
+      }
+      return(text.split('.')[1]||'').length;
+    }
+    function formatNumber(value,step){
+      var decimals=Math.min(8,decimalsForStep(step));
+      var fixed=Number(value).toFixed(decimals);
+      return decimals?fixed.replace(/\.?0+$/,''):fixed;
+    }
+    function pad2(value){return String(value).padStart(2,'0');}
+    function dateText(offset){
+      var date=new Date(baseDate.getTime()+(offset*86400000));
+      return pad2(date.getDate())+'.'+pad2(date.getMonth()+1)+'.'+String(date.getFullYear()).slice(-2);
+    }
+    function timeText(offset){return pad2(((offset%24)+24)%24)+':00';}
+    function commonStyle(node){
+      node.setAttribute('direction','ltr');
+      node.setAttribute('unicode-bidi','bidi-override');
+      node.setAttribute('lang','en');
+      node.style.setProperty('font-family','Arial, Helvetica, sans-serif','important');
+      node.style.setProperty('font-weight','900','important');
+      node.style.setProperty('font-variant-numeric','lining-nums tabular-nums','important');
+      node.style.setProperty('letter-spacing','0px','important');
+      node.style.setProperty('pointer-events','none','important');
+    }
+    function renderSingle(node,text,signature){
+      if(node.getAttribute('data-cycle-membership-signature')===signature)return;
+      while(node.firstChild)node.removeChild(node.firstChild);
+      node.textContent=text;
+      commonStyle(node);
+      node.style.setProperty('font-size','21px','important');
+      node.setAttribute('data-cycle-membership-signature',signature);
+    }
+    function renderTwoLines(node,primary,secondary,signature){
+      if(node.getAttribute('data-cycle-membership-signature')===signature)return;
+      var x=Number(node.getAttribute('x'))||0;
+      var y=Number(node.getAttribute('y'))||0;
+      while(node.firstChild)node.removeChild(node.firstChild);
+      var first=document.createElementNS('http://www.w3.org/2000/svg','tspan');
+      var second=document.createElementNS('http://www.w3.org/2000/svg','tspan');
+      first.setAttribute('x',String(x));
+      first.setAttribute('y',String(y-12));
+      first.style.setProperty('font-size','20px','important');
+      first.style.setProperty('font-weight','900','important');
+      first.textContent=primary;
+      second.setAttribute('x',String(x));
+      second.setAttribute('y',String(y+12));
+      second.style.setProperty('font-size','14px','important');
+      second.style.setProperty('font-weight','900','important');
+      second.textContent=secondary;
+      node.appendChild(first);
+      node.appendChild(second);
+      commonStyle(node);
+      node.style.removeProperty('font-size');
+      node.setAttribute('data-cycle-membership-signature',signature);
+    }
+
+    function applyCorrectCycleMembership(){
+      try{
+        var appDoc=appFrame.contentDocument;
+        if(!appDoc)return false;
+        var workFrame=appDoc.getElementById('workFrame');
+        var wheelDoc=workFrame&&workFrame.contentDocument;
+        if(!wheelDoc||!wheelDoc.getElementById('wheel'))return false;
+
+        var dataSelect=appDoc.querySelector('select[aria-label="Data type"]');
+        var valueInput=appDoc.querySelector('input[aria-label="Value"]');
+        var incrementInput=appDoc.querySelector('input[aria-label="Increment"]');
+        var viewSelect=appDoc.querySelector('select[aria-label="View"]');
+        if(!dataSelect||!valueInput||!incrementInput||!viewSelect)return false;
+
+        var selectedView=viewSelect.value;
+        var type=dataSelect.value||'price';
+        var selectedValue=numericInput(valueInput,0.01);
+        var increment=Math.abs(numericInput(incrementInput,1))||1;
+        var baseTick=tickSizeForValue(selectedValue);
+        var step=baseTick*increment;
+        var selectedTick=Math.max(1,Math.round(Math.abs(selectedValue)/step));
+        var selectedCycle=Math.floor((selectedTick-1)/36)+1;
+        var combined=type==='priceDate'||type==='priceTime';
+        var nodes=wheelDoc.querySelectorAll('#dynamicApprovedCycles .number-text');
+        if(!nodes.length)return false;
+
+        nodes.forEach(function(node){
+          var ordinal=Number(node.getAttribute('data-value'));
+          if(!Number.isFinite(ordinal)||ordinal<1)return;
+          var offset=ordinal-1;
+          var price=formatNumber(ordinal*step,step);
+          var date=dateText(offset);
+          var time=timeText(offset);
+          var signature=[type,selectedValue,increment,step,selectedCycle,baseDate.getTime(),ordinal].join('|');
+          if(type==='priceDate')renderTwoLines(node,price,date,signature);
+          else if(type==='priceTime')renderTwoLines(node,price,time,signature);
+          else if(type==='date')renderSingle(node,date,signature);
+          else if(type==='time')renderSingle(node,time,signature);
+          else renderSingle(node,price,signature);
+        });
+
+        if(viewSelect.value!==selectedView)viewSelect.value=selectedView;
+        valueInput.title='Selected value '+selectedValue+' belongs to cycle '+selectedCycle+'; cycle 1 ends at '+formatNumber(36*step,step);
+        wheelDoc.documentElement.dataset.dataType=type;
+        wheelDoc.documentElement.dataset.selectedValue=String(selectedValue);
+        wheelDoc.documentElement.dataset.incrementInput=String(increment);
+        wheelDoc.documentElement.dataset.tickSize=String(step);
+        wheelDoc.documentElement.dataset.selectedTick=String(selectedTick);
+        wheelDoc.documentElement.dataset.selectedCycle=String(selectedCycle);
+        wheelDoc.documentElement.dataset.cycleOneMaximum=formatNumber(36*step,step);
+        wheelDoc.documentElement.dataset.cycleTwoMinimum=formatNumber(37*step,step);
+        wheelDoc.documentElement.dataset.dataTypeStartWheel='3';
+        wheelDoc.documentElement.dataset.innerRingsPreserved='true';
+        wheelDoc.documentElement.dataset.cycleBoundaryCorrect='true';
+
+        if(!wheelObserver||wheelObserver.__wheelDocument!==wheelDoc){
+          if(wheelObserver)wheelObserver.disconnect();
+          wheelObserver=new MutationObserver(scheduleApply);
+          wheelObserver.__wheelDocument=wheelDoc;
+          wheelObserver.observe(wheelDoc.getElementById('wheel'),{childList:true,subtree:true});
+        }
+
+        if(wheelDoc.defaultView){
+          wheelDoc.defaultView.__auditKawkabatCorrectCycleMembershipV9=function(){
+            return{
+              ok:nodes.length>0,
+              selectedValue:selectedValue,
+              increment:increment,
+              tickSize:step,
+              selectedTick:selectedTick,
+              selectedCycle:selectedCycle,
+              cycleFormula:'floor((round(abs(value)/tickSize)-1)/36)+1',
+              integerExamples:{value36:1,value37:2,value72:2,value73:3},
+              decimalExamples:{value0036:1,value0037:2,value0072:2,value0073:3},
+              cycleOneRange:[formatNumber(step,step),formatNumber(36*step,step)],
+              cycleTwoRange:[formatNumber(37*step,step),formatNumber(72*step,step)],
+              startsAtWheel:3,
+              innerRingsPreserved:true,
+              geometryChanged:false
+            };
+          };
+        }
+        return true;
+      }catch(error){return false;}
+    }
+
+    function scheduleApply(){
+      if(applyTimer)clearTimeout(applyTimer);
+      applyTimer=setTimeout(function(){applyTimer=null;applyCorrectCycleMembership();},35);
+    }
+    function bindControls(){
+      var appDoc=appFrame.contentDocument;
+      if(!appDoc||listenerDocument===appDoc)return false;
+      var dataSelect=appDoc.querySelector('select[aria-label="Data type"]');
+      var valueInput=appDoc.querySelector('input[aria-label="Value"]');
+      var incrementInput=appDoc.querySelector('input[aria-label="Increment"]');
+      var viewSelect=appDoc.querySelector('select[aria-label="View"]');
+      var sizeInput=appDoc.querySelector('input[aria-label="Size"]');
+      var clockwise=appDoc.querySelector('input[aria-label="Layout clockwise"]');
+      if(!dataSelect||!valueInput||!incrementInput||!viewSelect||!sizeInput||!clockwise)return false;
+
+      var previousType=dataSelect.value||'price';
+      dataSelect.innerHTML='';
+      types.forEach(function(item){
+        var option=appDoc.createElement('option');
+        option.value=item.value;
+        option.textContent=item.label;
+        dataSelect.appendChild(option);
+      });
+      dataSelect.value=types.some(function(item){return item.value===previousType;})?previousType:'price';
+      dataSelect.title='Data type begins at wheel 3; wheels 1 and 2 remain original';
+
+      [dataSelect,valueInput,incrementInput,viewSelect,sizeInput,clockwise].forEach(function(control){
+        control.addEventListener('change',scheduleApply);
+        control.addEventListener('input',scheduleApply);
+        control.addEventListener('keyup',scheduleApply);
+      });
+      listenerDocument=appDoc;
+      return true;
+    }
+    function startPolling(){
+      if(pollTimer)clearInterval(pollTimer);
+      var attempts=0;
+      pollTimer=setInterval(function(){
+        attempts+=1;
+        var bound=bindControls();
+        var applied=applyCorrectCycleMembership();
+        if((bound&&applied)||attempts>=300){clearInterval(pollTimer);pollTimer=null;}
+      },100);
+    }
+
+    appFrame.addEventListener('load',startPolling);
+    startPolling();
+  }());
+  </script>
+</body>
+</html>
