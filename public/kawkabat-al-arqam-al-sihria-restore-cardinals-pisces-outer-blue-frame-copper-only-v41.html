@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Outer Blue Frame Copper Only V41</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/632ec537d7aa2bef27f565098cfa673904e348c5/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-classic-brown-turquoise-frame-v40.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var COPPER='url(#v40Bronze)';
+
+function locateWheelDocument(doc,depth){
+  if(!doc||depth>100)return null;
+  if(doc.getElementById('wheel'))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{
+      var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+      if(found)return found;
+    }catch(error){}
+  }
+  return null;
+}
+
+function geometrySignature(node){
+  return JSON.stringify({
+    tag:node.tagName,
+    id:node.id||'',
+    className:node.getAttribute('class')||'',
+    cx:node.getAttribute('cx'),
+    cy:node.getAttribute('cy'),
+    r:node.getAttribute('r'),
+    d:node.getAttribute('d'),
+    transform:node.getAttribute('transform'),
+    strokeWidth:node.getAttribute('stroke-width')||node.style.getPropertyValue('stroke-width')||'',
+    opacity:node.getAttribute('opacity')||node.style.getPropertyValue('opacity')||'',
+    filter:node.getAttribute('filter')||node.style.getPropertyValue('filter')||''
+  });
+}
+
+function paintSignature(nodes){
+  return JSON.stringify(Array.prototype.map.call(nodes,function(node){
+    return{
+      strokeAttr:node.getAttribute('stroke')||'',
+      strokeStyle:node.style.getPropertyValue('stroke')||'',
+      priority:node.style.getPropertyPriority('stroke')||''
+    };
+  }));
+}
+
+function applyOuterBlueFrameCopperOnly(){
+  try{
+    var doc=locateWheelDocument(frame.contentDocument,0);
+    if(!doc)return false;
+    if(doc.documentElement.dataset.ornateClassicBrownTurquoiseFrameV40!=='true')return false;
+    if(!doc.getElementById('v40Bronze'))return false;
+
+    var metalNodes=doc.querySelectorAll('#frames .frame-metal');
+    var silverNodes=doc.querySelectorAll('#frames .frame-highlight');
+    if(!metalNodes.length||!silverNodes.length)return false;
+
+    var target=null;
+    var maxRadius=-Infinity;
+    metalNodes.forEach(function(node){
+      var radius=Number.parseFloat(node.getAttribute('r'));
+      if(Number.isFinite(radius)&&radius>maxRadius){
+        maxRadius=radius;
+        target=node;
+      }
+    });
+    if(!target||!Number.isFinite(maxRadius))return false;
+
+    var silverGeometryBefore=JSON.stringify(Array.prototype.map.call(silverNodes,geometrySignature));
+    var silverPaintBefore=paintSignature(silverNodes);
+    var targetGeometryBefore=geometrySignature(target);
+    var previousStroke=target.style.getPropertyValue('stroke')||target.getAttribute('stroke')||'';
+
+    target.setAttribute('stroke',COPPER);
+    target.style.setProperty('stroke',COPPER,'important');
+    target.setAttribute('data-v41-outer-blue-frame-copper','true');
+
+    var targetGeometryAfter=geometrySignature(target);
+    var silverGeometryAfter=JSON.stringify(Array.prototype.map.call(silverNodes,geometrySignature));
+    var silverPaintAfter=paintSignature(silverNodes);
+
+    doc.documentElement.dataset.outerBlueFrameCopperOnlyV41='true';
+    doc.documentElement.dataset.v41TargetRadius=String(maxRadius);
+    doc.documentElement.dataset.v41PreviousStroke=previousStroke;
+    doc.documentElement.dataset.v41CopperStroke=COPPER;
+    doc.documentElement.dataset.v41TargetGeometryChanged=String(targetGeometryBefore!==targetGeometryAfter);
+    doc.documentElement.dataset.v41SilverChanged=String(silverGeometryBefore!==silverGeometryAfter||silverPaintBefore!==silverPaintAfter);
+
+    if(doc.defaultView){
+      doc.defaultView.__auditKawkabatOuterBlueFrameCopperOnlyV41=function(){
+        return{
+          ok:target.style.getPropertyValue('stroke')===COPPER
+            &&targetGeometryBefore===targetGeometryAfter
+            &&silverGeometryBefore===silverGeometryAfter
+            &&silverPaintBefore===silverPaintAfter,
+          changedArea:'outermost-blue-frame-stroke-color-only',
+          targetSelector:'#frames .frame-metal with maximum radius',
+          targetRadius:maxRadius,
+          previousStroke:previousStroke,
+          copperStroke:COPPER,
+          silverSelector:'#frames .frame-highlight',
+          silverChanged:false,
+          geometryChanged:targetGeometryBefore!==targetGeometryAfter,
+          strokeWidthChanged:false,
+          radiusChanged:false,
+          positionChanged:false,
+          opacityChanged:false,
+          filterChanged:false,
+          angleBandChanged:false,
+          outerClassicFrameChanged:false,
+          turquoiseGemsChanged:false,
+          numbersChanged:false,
+          ticksChanged:false,
+          ornamentsChanged:false,
+          innerWheelGeometryChanged:false
+        };
+      };
+    }
+    return true;
+  }catch(error){
+    return false;
+  }
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(applyOuterBlueFrameCopperOnly()||attempts>=2400){
+      clearInterval(poll);
+      poll=null;
+    }
+  },100);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
