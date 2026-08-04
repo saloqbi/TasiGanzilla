@@ -16,48 +16,39 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/c7044a13f800ff9c469cedabee348c1536ec40eb';
+    var wheelUrl='https://raw.githack.com/saloqbi/TasiGanzilla/c668b86a2735413ba74d79f8c0361ab39f9db87b/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9.html';
     function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes);}
-    function bootClockwiseControl(wheelSource){
+    function bindClockwiseControl(){
       var frame=document.getElementById('workFrame');
       var checkbox=document.querySelector('input[aria-label="Layout clockwise"]');
       if(!frame||!checkbox)return;
       checkbox.checked=true;
       function send(){
-        if(frame.contentWindow){
-          frame.contentWindow.postMessage({type:'KAWKABAT_SET_CLOCKWISE',clockwise:checkbox.checked},'*');
-        }
+        if(frame.contentWindow)frame.contentWindow.postMessage({type:'KAWKABAT_SET_CLOCKWISE',clockwise:checkbox.checked},'*');
       }
       checkbox.addEventListener('change',send,false);
-      checkbox.addEventListener('click',function(){setTimeout(send,0);},false);
-      frame.addEventListener('load',function(){setTimeout(send,100);setTimeout(send,500);setTimeout(send,1200);},false);
+      frame.addEventListener('load',function(){setTimeout(send,250);setTimeout(send,900);},false);
       window.addEventListener('message',function(event){
         var data=event.data;
         if(!data)return;
         if(data.type==='KAWKABAT_CLOCKWISE_READY')send();
         if(data.type==='KAWKABAT_CLOCKWISE_APPLIED')frame.setAttribute('data-layout-clockwise',data.clockwise?'true':'false');
-      });
-      frame.srcdoc=wheelSource;
-      window.__auditKawkabatLayoutClockwiseBridgeV2=function(){return{connected:true,checked:checkbox.checked,transport:'same-origin-srcdoc-postMessage',duplicateRuntime:false,frameReady:!!frame.contentWindow};};
+      },false);
+      setTimeout(send,1200);
     }
     try{
-      var responses=await Promise.all([
-        fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}}),
-        fetch(wheelApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}})
-      ]);
-      if(!responses[0].ok)throw new Error('APPROVED_HTTP_'+responses[0].status);
-      if(!responses[1].ok)throw new Error('WHEEL_HTTP_'+responses[1].status);
-      var payloads=await Promise.all([responses[0].json(),responses[1].json()]);
-      var html=decodeBase64(payloads[0].content);
-      var wheelSource=decodeBase64(payloads[1].content);
+      var response=await fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
+      if(!response.ok)throw new Error('APPROVED_HTTP_'+response.status);
+      var payload=await response.json();
+      var html=decodeBase64(payload.content);
       html=html.replace('</style>',
         '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important}'+
         '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
         '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
         '</style>');
       html=html.replace(/<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
-        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0"></iframe>');
-      html=html.replace('</body>','<script>('+bootClockwiseControl.toString()+')('+JSON.stringify(wheelSource).replace(/<\/script/gi,'<\\/script')+');<\/script></body>');
+        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>');
+      html=html.replace('</body>','<script>('+bindClockwiseControl.toString()+')();<\/script></body>');
       document.open();document.write(html);document.close();
     }catch(error){document.body.innerHTML='<div class="loading">Unable to load structure: '+String(error.message||error)+'</div>';}
   }());
