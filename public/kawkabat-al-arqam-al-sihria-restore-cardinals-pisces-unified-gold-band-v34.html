@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Unified Gold Band V34</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/16b5130fcc6cce80aceb641a9bf21c1296752625/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornamental-black-band-v33.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var GOLD='#D4A246';
+
+function locateWheelDocument(doc,depth){
+  if(!doc||depth>60)return null;
+  if(doc.getElementById('wheel'))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{
+      var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+      if(found)return found;
+    }catch(error){}
+  }
+  return null;
+}
+
+function applyUnifiedGold(){
+  try{
+    var doc=locateWheelDocument(frame.contentDocument,0);
+    if(!doc)return false;
+    var outerFrame=doc.getElementById('outerBlackFrame');
+    var ornamentalBand=doc.getElementById('v33OrnamentalBand');
+    if(!outerFrame||!ornamentalBand)return false;
+
+    var style=doc.getElementById('v34UnifiedGoldStyle');
+    if(!style){
+      style=doc.createElement('style');
+      style.id='v34UnifiedGoldStyle';
+      (doc.head||doc.documentElement).appendChild(style);
+    }
+    style.textContent='\n'
+      +'#outerBlackFrame .outer-gold-line{stroke:'+GOLD+'!important;opacity:1!important;}\n'
+      +'#v33OrnamentalBand>circle{stroke:'+GOLD+'!important;opacity:1!important;}\n';
+
+    var goldLines=outerFrame.querySelectorAll('.outer-gold-line');
+    if(!goldLines.length)return false;
+    goldLines.forEach(function(node){
+      node.setAttribute('stroke',GOLD);
+      node.style.setProperty('stroke',GOLD,'important');
+      node.style.setProperty('opacity','1','important');
+      node.style.removeProperty('filter');
+    });
+
+    var ornamentBorders=ornamentalBand.querySelectorAll(':scope > circle');
+    ornamentBorders.forEach(function(node){
+      node.setAttribute('stroke',GOLD);
+      node.style.setProperty('stroke',GOLD,'important');
+      node.style.setProperty('opacity','1','important');
+    });
+
+    doc.documentElement.dataset.unifiedGoldBandV34='true';
+    doc.documentElement.dataset.unifiedGoldColor=GOLD;
+    doc.documentElement.dataset.goldGeometryChanged='false';
+
+    if(doc.defaultView){
+      doc.defaultView.__auditKawkabatUnifiedGoldBandV34=function(){
+        var allUnified=Array.prototype.every.call(goldLines,function(node){
+          return (node.style.getPropertyValue('stroke')||node.getAttribute('stroke'))===GOLD;
+        });
+        return{
+          ok:allUnified&&goldLines.length>0,
+          changedArea:'outer-gold-frame-color-only',
+          unifiedGoldColor:GOLD,
+          goldLineCount:goldLines.length,
+          ornamentBorderCount:ornamentBorders.length,
+          strokeWidthsChanged:false,
+          radiiChanged:false,
+          positionsChanged:false,
+          blackBandChanged:false,
+          ornamentGeometryChanged:false,
+          angleNumbersChanged:false,
+          angleTicksChanged:false,
+          zodiacChanged:false,
+          wheelNumbersChanged:false,
+          innerWheelGeometryChanged:false
+        };
+      };
+    }
+    return true;
+  }catch(error){
+    return false;
+  }
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(applyUnifiedGold()||attempts>=1800){
+      clearInterval(poll);
+      poll=null;
+    }
+  },100);
+}
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
