@@ -16,7 +16,7 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/b19b776e2ff3219e8ceebc501d470d6ef077dbd5/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9.html';
+    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/d2914da0c93ae549c759ef2922b3907e71864812/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9.html';
     function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes);}
     try{
       var response=await fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
