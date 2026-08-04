@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic Numbers Constellation — Uniform Zodiac Champagne Preserve Cardinals V16</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+    #appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/cb6e2c9a0dd3b8b11f3ba13e567199f699045ea7/public/kawkabat-al-arqam-al-sihria-center-anchor-zodiac-champagne-large-font-v14.html"></iframe>
+  <script>
+  (function(){
+    'use strict';
+
+    var appFrame=document.getElementById('appFrame');
+    var NS='http://www.w3.org/2000/svg';
+    var observer=null;
+    var observedWheel=null;
+    var timer=null;
+    var poll=null;
+
+    function locateWheelDocument(doc,depth){
+      if(!doc||depth>12)return null;
+      if(doc.getElementById('wheel'))return doc;
+      var frames=doc.querySelectorAll('iframe');
+      for(var index=0;index<frames.length;index+=1){
+        try{
+          var found=locateWheelDocument(frames[index].contentDocument,depth+1);
+          if(found)return found;
+        }catch(error){}
+      }
+      return null;
+    }
+
+    function textSignature(node){
+      if(!node)return'';
+      return[
+        node.textContent,
+        node.getAttribute('class')||'',
+        node.getAttribute('x')||'',
+        node.getAttribute('y')||'',
+        node.getAttribute('transform')||''
+      ].join('|');
+    }
+
+    function captureProtectedContent(wheelDoc){
+      var cardinalNumbers=[];
+      wheelDoc.querySelectorAll('.number-text').forEach(function(node){
+        var index=Number(node.getAttribute('data-index'));
+        if(index===0||index===9||index===18||index===27){
+          cardinalNumbers.push(textSignature(node));
+        }
+      });
+      cardinalNumbers.sort();
+
+      var piscesCell=wheelDoc.querySelector('#allBalancedDaysZodiac .day-zodiac-cell[data-index="0"]');
+      return{
+        cardinalNumbers:cardinalNumbers.join('||'),
+        pisces:textSignature(piscesCell&&piscesCell.querySelector('text')),
+        piscesHtml:piscesCell?piscesCell.innerHTML:''
+      };
+    }
+
+    function ensureGradient(wheelDoc){
+      var svg=wheelDoc.getElementById('wheel');
+      var defs=svg&&svg.querySelector('defs');
+      if(!defs)return null;
+
+      var gradient=wheelDoc.getElementById('zodiacChampagneProtectedRadialV16');
+      if(gradient)return gradient;
+
+      gradient=wheelDoc.createElementNS(NS,'radialGradient');
+      gradient.setAttribute('id','zodiacChampagneProtectedRadialV16');
+      gradient.setAttribute('gradientUnits','userSpaceOnUse');
+      gradient.setAttribute('cx','2200');
+      gradient.setAttribute('cy','1800');
+      gradient.setAttribute('r','1610');
+
+      [
+        ['0%','#F7F1E3'],
+        ['93.17%','#C8AA90'],
+        ['95.10%','#E0CEC0'],
+        ['96.58%','#F1E5DB'],
+        ['98.05%','#E0CEC0'],
+        ['100%','#C8AA90']
+      ].forEach(function(item){
+        var stop=wheelDoc.createElementNS(NS,'stop');
+        stop.setAttribute('offset',item[0]);
+        stop.setAttribute('stop-color',item[1]);
+        gradient.appendChild(stop);
+      });
+
+      defs.appendChild(gradient);
+      return gradient;
+    }
+
+    function ensureProtectedLayer(wheelDoc){
+      var wheel=wheelDoc.getElementById('wheel');
+      var divisions=wheelDoc.getElementById('divisions');
+      var specialFills=wheelDoc.getElementById('specialFills');
+      if(!wheel||!divisions||!specialFills)return null;
+
+      var layer=wheelDoc.getElementById('zodiacChampagneProtectedLayerV16');
+      if(!layer){
+        layer=wheelDoc.createElementNS(NS,'circle');
+        layer.setAttribute('id','zodiacChampagneProtectedLayerV16');
+        layer.setAttribute('cx','2200');
+        layer.setAttribute('cy','1800');
+        layer.setAttribute('r','1555');
+        layer.setAttribute('fill','none');
+        layer.setAttribute('stroke','url(#zodiacChampagneProtectedRadialV16)');
+        layer.setAttribute('stroke-width','110');
+        layer.setAttribute('pointer-events','none');
+        layer.setAttribute('data-zodiac-protected-v16','true');
+        wheel.insertBefore(layer,divisions);
+      }
+
+      layer.setAttribute('stroke','url(#zodiacChampagneProtectedRadialV16)');
+      layer.setAttribute('stroke-width','110');
+      layer.style.display='';
+      layer.style.opacity='1';
+      return layer;
+    }
+
+    function applyProtectedUniformColor(){
+      try{
+        var wheelDoc=locateWheelDocument(appFrame.contentDocument,0);
+        if(!wheelDoc)return false;
+        var wheel=wheelDoc.getElementById('wheel');
+        var labels=wheelDoc.getElementById('allBalancedDaysZodiac');
+        if(!wheel||!labels)return false;
+
+        var before=captureProtectedContent(wheelDoc);
+        if(!ensureGradient(wheelDoc))return false;
+        var layer=ensureProtectedLayer(wheelDoc);
+        if(!layer)return false;
+        var after=captureProtectedContent(wheelDoc);
+
+        var cardinalNumbersPreserved=before.cardinalNumbers===after.cardinalNumbers;
+        var piscesPreserved=before.pisces===after.pisces&&before.piscesHtml===after.piscesHtml;
+
+        wheelDoc.documentElement.dataset.zodiacCellPalette='champagne-beige-rose-bronze';
+        wheelDoc.documentElement.dataset.zodiacCellBaseHex='#DAC4B2';
+        wheelDoc.documentElement.dataset.zodiacUniformProtected='true';
+        wheelDoc.documentElement.dataset.cardinalNumbersPreserved=cardinalNumbersPreserved?'true':'false';
+        wheelDoc.documentElement.dataset.piscesLabelPreserved=piscesPreserved?'true':'false';
+
+        if(observedWheel!==wheel){
+          if(observer)observer.disconnect();
+          observer=new MutationObserver(scheduleApply);
+          observer.observe(wheel,{childList:true,subtree:true});
+          observedWheel=wheel;
+        }
+
+        if(wheelDoc.defaultView){
+          wheelDoc.defaultView.__auditKawkabatZodiacUniformPreserveCardinalsV16=function(){
+            return{
+              ok:cardinalNumbersPreserved&&piscesPreserved&&layer.getAttribute('stroke')==='url(#zodiacChampagneProtectedRadialV16)',
+              changedArea:'zodiac-background-color-layer-only',
+              palette:'champagne-beige-rose-bronze',
+              baseHex:'#DAC4B2',
+              cardinalNumbersPreserved:cardinalNumbersPreserved,
+              piscesLabelPreserved:piscesPreserved,
+              cardinalDirections:[0,90,180,270],
+              numbersChanged:false,
+              valuesChanged:false,
+              labelsChanged:false,
+              geometryChanged:false,
+              positionsChanged:false,
+              frameChanged:false,
+              fontChanged:false
+            };
+          };
+        }
+        return cardinalNumbersPreserved&&piscesPreserved;
+      }catch(error){
+        return false;
+      }
+    }
+
+    function scheduleApply(){
+      if(timer)clearTimeout(timer);
+      timer=setTimeout(function(){timer=null;applyProtectedUniformColor();},40);
+    }
+
+    function startPolling(){
+      if(poll)clearInterval(poll);
+      var attempts=0;
+      poll=setInterval(function(){
+        attempts+=1;
+        if(applyProtectedUniformColor()||attempts>=400){
+          clearInterval(poll);
+          poll=null;
+        }
+      },100);
+    }
+
+    appFrame.addEventListener('load',startPolling);
+    startPolling();
+  }());
+  </script>
+</body>
+</html>
