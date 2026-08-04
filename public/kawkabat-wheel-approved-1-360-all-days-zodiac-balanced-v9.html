@@ -83,8 +83,10 @@ function wheelDirectionRuntime(){
 try{
  var response=await fetch(sourceApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});if(!response.ok)throw new Error('SOURCE_HTTP_'+response.status);
  var payload=await response.json(),loader=decodeBase64(payload.content);
- var finalRuntimeHtml='<script>('+wheelDirectionRuntime.toString()+')();<\\/script></body>';
- var finalRuntimePatch="html=html.replace('</body>',"+JSON.stringify(finalRuntimeHtml)+");";
+ var closeTag='</scr'+'ipt>';
+ var finalRuntimeHtml='<script>('+wheelDirectionRuntime.toString()+')();'+closeTag+'</body>';
+ var finalRuntimeLiteral=JSON.stringify(finalRuntimeHtml).replace(/<\/script/gi,'<\\/script');
+ var finalRuntimePatch="html=html.replace('</body>',"+finalRuntimeLiteral+");";
  var cyclesDecodeMarker="var payload=await response.json(),loader=decodeBase64(payload.content);";
  var finalDecodeMarker="var html=new TextDecoder('utf-8').decode(bytes);";
  var layerBridge="\n var finalDecodeMarker="+JSON.stringify(finalDecodeMarker)+";\n var finalRuntimePatch="+JSON.stringify(finalRuntimePatch)+";\n if(loader.indexOf(finalDecodeMarker)<0)throw new Error('FINAL_RUNTIME_DECODE_MARKER_NOT_FOUND');\n loader=loader.replace(finalDecodeMarker,finalDecodeMarker+finalRuntimePatch);";
