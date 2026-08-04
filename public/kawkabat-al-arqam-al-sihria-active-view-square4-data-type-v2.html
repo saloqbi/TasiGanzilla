@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic Numbers Constellation — Active View and Data Type V2</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+    #appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/4328c7647fd377ff7922466117ce40aa5dc3627a/public/kawkabat-al-arqam-al-sihria-active-view-square4-v1.html"></iframe>
+  <script>
+  (function(){
+    'use strict';
+
+    var appFrame=document.getElementById('appFrame');
+    var observer=null;
+    var applyTimer=null;
+    var pollTimer=null;
+    var baseDate=new Date();
+    baseDate.setHours(0,0,0,0);
+
+    var types=[
+      {value:'price',label:'Price'},
+      {value:'date',label:'Date'},
+      {value:'time',label:'Time'},
+      {value:'priceDate',label:'Price and date'},
+      {value:'priceTime',label:'Price and time'}
+    ];
+
+    function numberValue(input,fallback){
+      var value=Number(String(input&&input.value!=null?input.value:'').replace(',','.'));
+      return Number.isFinite(value)?value:fallback;
+    }
+    function decimalPlaces(value){
+      var text=String(value);
+      if(/[eE]/.test(text)){
+        var parts=text.toLowerCase().split('e');
+        var base=(parts[0].split('.')[1]||'').length;
+        var exponent=Number(parts[1]||0);
+        return Math.max(0,base-exponent);
+      }
+      return(text.split('.')[1]||'').length;
+    }
+    function formatPrice(value,startValue,increment){
+      var places=Math.min(8,Math.max(decimalPlaces(startValue),decimalPlaces(increment)));
+      var fixed=Number(value).toFixed(places);
+      return places?fixed.replace(/\.?0+$/,''):fixed;
+    }
+    function pad2(value){return String(value).padStart(2,'0');}
+    function dateText(offset){
+      var date=new Date(baseDate.getTime()+(offset*86400000));
+      return pad2(date.getDate())+'.'+pad2(date.getMonth()+1)+'.'+String(date.getFullYear()).slice(-2);
+    }
+    function timeText(offset){
+      var total=((offset%1440)+1440)%1440;
+      return pad2(Math.floor(total/60))+':'+pad2(total%60);
+    }
+    function displayValue(type,ordinal,startValue,increment){
+      var offset=Math.max(0,ordinal-1);
+      var price=formatPrice(startValue+(offset*increment),startValue,increment);
+      var date=dateText(offset);
+      var time=timeText(offset*60);
+      if(type==='date')return date;
+      if(type==='time')return time;
+      if(type==='priceDate')return price+' · '+date;
+      if(type==='priceTime')return price+' · '+time;
+      return price;
+    }
+    function fontSize(type,text){
+      var length=String(text).length;
+      if(type==='date'||type==='time')return length>8?18:20;
+      if(type==='priceDate'||type==='priceTime')return length>16?11:length>13?13:15;
+      return length>9?16:length>7?18:length>5?21:24;
+    }
+    function scheduleApply(){
+      if(applyTimer)clearTimeout(applyTimer);
+      applyTimer=setTimeout(function(){applyTimer=null;applyPresentation();},35);
+    }
+    function applyPresentation(){
+      try{
+        var appDoc=appFrame.contentDocument;
+        if(!appDoc)return false;
+
+        var typeSelect=appDoc.querySelector('select[aria-label="Data type"]');
+        var valueInput=appDoc.querySelector('input[aria-label="Value"]');
+        var incrementInput=appDoc.querySelector('input[aria-label="Increment"]');
+        var workFrame=appDoc.getElementById('workFrame');
+        var wheelDoc=workFrame&&workFrame.contentDocument;
+        if(!typeSelect||!valueInput||!incrementInput||!wheelDoc||!wheelDoc.getElementById('wheel'))return false;
+
+        if(typeSelect.dataset.activeDataTypeV2!=='true'){
+          typeSelect.innerHTML='';
+          types.forEach(function(item){
+            var option=appDoc.createElement('option');
+            option.value=item.value;
+            option.textContent=item.label;
+            typeSelect.appendChild(option);
+          });
+          typeSelect.value='price';
+          typeSelect.dataset.activeDataTypeV2='true';
+          typeSelect.title='Choose how every cell value is displayed';
+          typeSelect.addEventListener('change',scheduleApply);
+          valueInput.addEventListener('input',scheduleApply);
+          valueInput.addEventListener('change',scheduleApply);
+          incrementInput.addEventListener('input',scheduleApply);
+          incrementInput.addEventListener('change',scheduleApply);
+        }
+
+        var type=typeSelect.value||'price';
+        var startValue=numberValue(valueInput,79680);
+        var increment=numberValue(incrementInput,1);
+        if(increment===0)increment=1;
+
+        var nodes=wheelDoc.querySelectorAll('#dynamicApprovedCycles .number-text');
+        if(!nodes.length)return false;
+        nodes.forEach(function(node,index){
+          var ordinal=Number(node.getAttribute('data-value'));
+          if(!Number.isFinite(ordinal))ordinal=index+1;
+          var shown=displayValue(type,ordinal,startValue,increment);
+          if(node.textContent!==shown)node.textContent=shown;
+          node.setAttribute('direction','ltr');
+          node.setAttribute('unicode-bidi','bidi-override');
+          node.setAttribute('lang','en');
+          node.style.setProperty('font-size',fontSize(type,shown)+'px','important');
+          node.style.setProperty('font-family','Arial,Helvetica,sans-serif','important');
+          node.style.setProperty('font-variant-numeric','lining-nums tabular-nums','important');
+          node.style.setProperty('pointer-events','none','important');
+        });
+
+        wheelDoc.documentElement.dataset.dataType=type;
+        wheelDoc.documentElement.dataset.dataStartValue=String(startValue);
+        wheelDoc.documentElement.dataset.dataIncrement=String(increment);
+
+        if(!observer||observer.__wheelDocument!==wheelDoc){
+          if(observer)observer.disconnect();
+          observer=new MutationObserver(scheduleApply);
+          observer.__wheelDocument=wheelDoc;
+          observer.observe(wheelDoc.getElementById('wheel'),{childList:true,subtree:true});
+        }
+
+        if(wheelDoc.defaultView){
+          wheelDoc.defaultView.__auditKawkabatDataTypeV2=function(){
+            return{
+              ok:nodes.length>0,
+              dataType:type,
+              startValue:startValue,
+              increment:increment,
+              formattedNodeCount:nodes.length,
+              availableTypes:types.map(function(item){return item.value;}),
+              geometryChanged:false,
+              viewControlPreserved:true,
+              sizeControlPreserved:true,
+              clockwiseControlPreserved:true
+            };
+          };
+        }
+        return true;
+      }catch(error){return false;}
+    }
+    function startPolling(){
+      if(pollTimer)clearInterval(pollTimer);
+      var attempts=0;
+      pollTimer=setInterval(function(){
+        attempts+=1;
+        if(applyPresentation()||attempts>=300){clearInterval(pollTimer);pollTimer=null;}
+      },100);
+    }
+
+    appFrame.addEventListener('load',startPolling);
+    startPolling();
+  }());
+  </script>
+</body>
+</html>
