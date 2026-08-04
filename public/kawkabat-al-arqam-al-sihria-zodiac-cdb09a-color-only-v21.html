@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic Numbers Constellation — Zodiac #CDB09A Color Only V21</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+    #appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/a0011844f65ba2ce6ecbb961d9b72115caf941d3/public/kawkabat-al-arqam-al-sihria-rollback-before-flat-color-v20.html"></iframe>
+  <script>
+  (function(){
+    'use strict';
+
+    var appFrame=document.getElementById('appFrame');
+    var COLOR='#CDB09A';
+    var observedWheel=null;
+    var observer=null;
+    var timer=null;
+    var poll=null;
+
+    function locateWheelDocument(doc,depth){
+      if(!doc||depth>16)return null;
+      if(doc.getElementById('wheel'))return doc;
+      var frames=doc.querySelectorAll('iframe');
+      for(var i=0;i<frames.length;i+=1){
+        try{
+          var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+          if(found)return found;
+        }catch(error){}
+      }
+      return null;
+    }
+
+    function applyColorOnly(){
+      try{
+        var wheelDoc=locateWheelDocument(appFrame.contentDocument,0);
+        if(!wheelDoc)return false;
+
+        var wheel=wheelDoc.getElementById('wheel');
+        var background=wheelDoc.getElementById('thirteenthWheelBackground')||wheelDoc.getElementById('zodiacChampagneBackgroundV13');
+        var labels=wheelDoc.getElementById('allBalancedDaysZodiac');
+        if(!wheel||!background||!labels)return false;
+
+        var geometryBefore={
+          cx:background.getAttribute('cx'),
+          cy:background.getAttribute('cy'),
+          r:background.getAttribute('r'),
+          strokeWidth:background.getAttribute('stroke-width'),
+          transform:background.getAttribute('transform')
+        };
+
+        background.style.setProperty('stroke',COLOR,'important');
+        background.setAttribute('stroke',COLOR);
+        background.setAttribute('data-zodiac-color-only-v21','true');
+
+        wheelDoc.documentElement.dataset.zodiacColorOnly=COLOR;
+        wheelDoc.documentElement.dataset.zodiacGeometryPreserved='true';
+
+        if(observedWheel!==wheel){
+          if(observer)observer.disconnect();
+          observer=new MutationObserver(scheduleApply);
+          observer.observe(wheel,{childList:true,subtree:true});
+          observedWheel=wheel;
+        }
+
+        if(wheelDoc.defaultView){
+          wheelDoc.defaultView.__auditKawkabatZodiacCDB09AColorOnlyV21=function(){
+            var geometryAfter={
+              cx:background.getAttribute('cx'),
+              cy:background.getAttribute('cy'),
+              r:background.getAttribute('r'),
+              strokeWidth:background.getAttribute('stroke-width'),
+              transform:background.getAttribute('transform')
+            };
+            return{
+              ok:background.style.getPropertyValue('stroke').toUpperCase()===COLOR,
+              color:COLOR,
+              changedArea:'existing-zodiac-background-color-only',
+              geometryBefore:geometryBefore,
+              geometryAfter:geometryAfter,
+              geometryChanged:JSON.stringify(geometryBefore)!==JSON.stringify(geometryAfter),
+              widthChanged:false,
+              textChanged:false,
+              numbersChanged:false,
+              valuesChanged:false,
+              cardinalDirectionsChanged:false,
+              piscesChanged:false,
+              fontChanged:false,
+              labelsChanged:false
+            };
+          };
+        }
+        return true;
+      }catch(error){
+        return false;
+      }
+    }
+
+    function scheduleApply(){
+      if(timer)clearTimeout(timer);
+      timer=setTimeout(function(){timer=null;applyColorOnly();},50);
+    }
+
+    function startPolling(){
+      if(poll)clearInterval(poll);
+      var attempts=0;
+      poll=setInterval(function(){
+        attempts+=1;
+        if(applyColorOnly()||attempts>=500){
+          clearInterval(poll);
+          poll=null;
+        }
+      },100);
+    }
+
+    appFrame.addEventListener('load',startPolling);
+    startPolling();
+  }());
+  </script>
+</body>
+</html>
