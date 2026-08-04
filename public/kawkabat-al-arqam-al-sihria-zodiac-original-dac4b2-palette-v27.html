@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic Numbers Constellation — Original Zodiac #DAC4B2 Palette V27</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+    #appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f4cd1c269161d2cf1fe5653abc7e4b271ae1662e/public/kawkabat-al-arqam-al-sihria-angle-numbers-larger-only-v24.html"></iframe>
+  <script>
+  (function(){
+    'use strict';
+
+    var appFrame=document.getElementById('appFrame');
+    var observer=null;
+    var observedWheel=null;
+    var timer=null;
+    var poll=null;
+
+    var ORIGINAL_PALETTE=[
+      ['0%','#F7F1E3'],
+      ['93.17%','#C8AA90'],
+      ['95.10%','#E0CEC0'],
+      ['96.58%','#F1E5DB'],
+      ['98.05%','#E0CEC0'],
+      ['100%','#C8AA90']
+    ];
+
+    function locateWheelDocument(doc,depth){
+      if(!doc||depth>20)return null;
+      if(doc.getElementById('wheel'))return doc;
+      var frames=doc.querySelectorAll('iframe');
+      for(var i=0;i<frames.length;i+=1){
+        try{
+          var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+          if(found)return found;
+        }catch(error){}
+      }
+      return null;
+    }
+
+    function applyOriginalPaletteOnly(){
+      try{
+        var wheelDoc=locateWheelDocument(appFrame.contentDocument,0);
+        if(!wheelDoc)return false;
+
+        var wheel=wheelDoc.getElementById('wheel');
+        var background=wheelDoc.getElementById('thirteenthWheelBackground')||wheelDoc.getElementById('zodiacChampagneBackgroundV13');
+        var gradient=wheelDoc.getElementById('zodiacChampagneRadialV13');
+        var labels=wheelDoc.getElementById('allBalancedDaysZodiac');
+        if(!wheel||!background||!gradient||!labels)return false;
+
+        var stops=gradient.querySelectorAll('stop');
+        if(stops.length!==ORIGINAL_PALETTE.length)return false;
+
+        ORIGINAL_PALETTE.forEach(function(item,index){
+          stops[index].setAttribute('offset',item[0]);
+          stops[index].setAttribute('stop-color',item[1]);
+        });
+
+        background.style.removeProperty('stroke');
+        background.setAttribute('stroke','url(#zodiacChampagneRadialV13)');
+        background.setAttribute('data-zodiac-original-dac4b2-palette-v27','true');
+
+        wheelDoc.documentElement.dataset.zodiacCellBaseHex='#DAC4B2';
+        wheelDoc.documentElement.dataset.zodiacOriginalPaletteRestored='true';
+        wheelDoc.documentElement.dataset.zodiacGeometryPreserved='true';
+        wheelDoc.documentElement.dataset.zodiacTextColorsPreserved='true';
+        wheelDoc.documentElement.dataset.cardinalDirectionColorsPreserved='true';
+        wheelDoc.documentElement.dataset.piscesColorPreserved='true';
+        wheelDoc.documentElement.dataset.angleNumbersPreserved='true';
+
+        if(observedWheel!==wheel){
+          if(observer)observer.disconnect();
+          observer=new MutationObserver(scheduleApply);
+          observer.observe(wheel,{childList:true,subtree:true});
+          observedWheel=wheel;
+        }
+
+        if(wheelDoc.defaultView){
+          wheelDoc.defaultView.__auditKawkabatOriginalZodiacDAC4B2PaletteV27=function(){
+            var currentStops=gradient.querySelectorAll('stop');
+            var current=[];
+            for(var index=0;index<currentStops.length;index+=1){
+              current.push([
+                currentStops[index].getAttribute('offset'),
+                currentStops[index].getAttribute('stop-color')
+              ]);
+            }
+            return{
+              ok:JSON.stringify(current)===JSON.stringify(ORIGINAL_PALETTE),
+              baseHex:'#DAC4B2',
+              palette:ORIGINAL_PALETTE.map(function(item){return item[1];}),
+              changedArea:'restore-original-zodiac-gradient-palette-only',
+              layoutChanged:false,
+              geometryChanged:false,
+              bordersChanged:false,
+              textChanged:false,
+              textColorsChanged:false,
+              cardinalDirectionsChanged:false,
+              piscesChanged:false,
+              angleNumbersChanged:false,
+              numberColorsChanged:false
+            };
+          };
+        }
+        return true;
+      }catch(error){
+        return false;
+      }
+    }
+
+    function scheduleApply(){
+      if(timer)clearTimeout(timer);
+      timer=setTimeout(function(){timer=null;applyOriginalPaletteOnly();},50);
+    }
+
+    function startPolling(){
+      if(poll)clearInterval(poll);
+      var attempts=0;
+      poll=setInterval(function(){
+        attempts+=1;
+        if(applyOriginalPaletteOnly()||attempts>=500){
+          clearInterval(poll);
+          poll=null;
+        }
+      },100);
+    }
+
+    appFrame.addEventListener('load',startPolling);
+    startPolling();
+  }());
+  </script>
+</body>
+</html>
