@@ -20,27 +20,20 @@
     function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes);}
     function layoutDirectionController(){
       'use strict';
+      var controlledWheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f3180d32ee4b65e7757e30cb0eb654bf0d6b48a1/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9.html';
       var frame=document.getElementById('workFrame');
       var checkbox=document.querySelector('input[aria-label="Layout clockwise"]');
       if(!frame||!checkbox)return;
       function apply(){
         var clockwise=checkbox.checked;
-        var next=wheelUrl+(clockwise?'#clockwise':'#counterclockwise');
-        if(frame.getAttribute('src')!==next)frame.setAttribute('src',next);
+        var next=controlledWheelUrl+(clockwise?'#clockwise':'#counterclockwise');
+        frame.setAttribute('src',next);
         frame.setAttribute('data-layout-clockwise',clockwise?'true':'false');
       }
       checkbox.checked=true;
-      checkbox.addEventListener('change',apply);
+      checkbox.addEventListener('change',apply,false);
       apply();
-      window.__auditKawkabatLayoutClockwiseControllerV2=function(){
-        return{
-          connected:true,
-          checked:checkbox.checked,
-          clockwise:checkbox.checked,
-          mode:checkbox.checked?'clockwise':'counterclockwise',
-          duplicateRuntime:false
-        };
-      };
+      window.__auditKawkabatLayoutClockwiseControllerV3=function(){return{connected:true,checked:checkbox.checked,clockwise:checkbox.checked,mode:checkbox.checked?'clockwise':'counterclockwise',duplicateRuntime:false};};
     }
     try{
       var response=await fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
