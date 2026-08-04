@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Classic Brown Frame Turquoise V39</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/25b21f272936c9f233a15eea084e50b3c1f0efbc/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-angle-border-gold-color-only-v38.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var NS='http://www.w3.org/2000/svg';
+
+function locateWheelDocument(doc,depth){
+  if(!doc||depth>80)return null;
+  if(doc.getElementById('wheel'))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{
+      var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+      if(found)return found;
+    }catch(error){}
+  }
+  return null;
+}
+
+function make(type,attrs){
+  var node=document.createElementNS(NS,type);
+  Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,attrs[key]);});
+  return node;
+}
+
+function polar(cx,cy,r,degree){
+  var angle=(degree-90)*Math.PI/180;
+  return{x:cx+Math.cos(angle)*r,y:cy+Math.sin(angle)*r};
+}
+
+function numberValue(value,fallback){
+  var parsed=Number.parseFloat(value);
+  return Number.isFinite(parsed)?parsed:fallback;
+}
+
+function geometrySignature(node){
+  return{
+    tag:node.tagName,
+    id:node.id||'',
+    className:node.getAttribute('class')||'',
+    cx:node.getAttribute('cx'),
+    cy:node.getAttribute('cy'),
+    r:node.getAttribute('r'),
+    x1:node.getAttribute('x1'),
+    y1:node.getAttribute('y1'),
+    x2:node.getAttribute('x2'),
+    y2:node.getAttribute('y2'),
+    d:node.getAttribute('d'),
+    transform:node.getAttribute('transform'),
+    strokeWidth:node.getAttribute('stroke-width')||node.style.getPropertyValue('stroke-width')||''
+  };
+}
+
+function appendStop(gradient,offset,color,opacity){
+  var stop=make('stop',{offset:offset,'stop-color':color});
+  if(opacity!=null)stop.setAttribute('stop-opacity',opacity);
+  gradient.appendChild(stop);
+}
+
+function buildDefinitions(svg,cx,cy,extent){
+  var old=svg.querySelector('#v39ClassicFrameDefs');
+  if(old)old.remove();
+  var defs=make('defs',{id:'v39ClassicFrameDefs'});
+
+  var brown=make('linearGradient',{
+    id:'v39BrownFrameGradient',
+    gradientUnits:'userSpaceOnUse',
+    x1:String(cx-extent),y1:String(cy-extent),
+    x2:String(cx+extent),y2:String(cy+extent)
+  });
+  appendStop(brown,'0%','#2A0E04');
+  appendStop(brown,'13%','#5B2109');
+  appendStop(brown,'27%','#B65E24');
+  appendStop(brown,'40%','#E09A62');
+  appendStop(brown,'51%','#6A270C');
+  appendStop(brown,'64%','#C87335');
+  appendStop(brown,'78%','#7A300F');
+  appendStop(brown,'91%','#D08A54');
+  appendStop(brown,'100%','#351104');
+  defs.appendChild(brown);
+
+  var turquoise=make('radialGradient',{id:'v39TurquoiseGradient',cx:'35%',cy:'28%',r:'72%'});
+  appendStop(turquoise,'0%','#D9FFFF');
+  appendStop(turquoise,'22%','#53E2E3');
+  appendStop(turquoise,'58%','#10AEB9');
+  appendStop(turquoise,'82%','#08717C');
+  appendStop(turquoise,'100%','#043E48');
+  defs.appendChild(turquoise);
+
+  var shadow=make('filter',{id:'v39FrameShadow',x:'-30%',y:'-30%',width:'160%',height:'160%'});
+  shadow.appendChild(make('feDropShadow',{dx:'0',dy:'7',stdDeviation:'7','flood-color':'#1A0802','flood-opacity':'.58'}));
+  defs.appendChild(shadow);
+
+  var gemGlow=make('filter',{id:'v39GemGlow',x:'-80%',y:'-80%',width:'260%',height:'260%'});
+  gemGlow.appendChild(make('feDropShadow',{dx:'0',dy:'1.5',stdDeviation:'2.3','flood-color':'#062F38','flood-opacity':'.8'}));
+  defs.appendChild(gemGlow);
+
+  var motif=make('g',{id:'v39CardinalJewel'});
+  motif.appendChild(make('path',{
+    d:'M -17 -2 C -30 -24 -50 -25 -63 -8 C -48 -10 -39 0 -31 13 C -25 8 -21 3 -17 -2 Z',
+    fill:'url(#v39BrownFrameGradient)',stroke:'#140704','stroke-width':'2.8','stroke-linejoin':'round'
+  }));
+  motif.appendChild(make('path',{
+    d:'M 17 -2 C 30 -24 50 -25 63 -8 C 48 -10 39 0 31 13 C 25 8 21 3 17 -2 Z',
+    fill:'url(#v39BrownFrameGradient)',stroke:'#140704','stroke-width':'2.8','stroke-linejoin':'round'
+  }));
+  motif.appendChild(make('path',{
+    d:'M -18 7 C -32 18 -43 21 -55 16 C -42 10 -36 3 -30 -8',
+    fill:'none',stroke:'#050403','stroke-width':'5','stroke-linecap':'round'
+  }));
+  motif.appendChild(make('path',{
+    d:'M 18 7 C 32 18 43 21 55 16 C 42 10 36 3 30 -8',
+    fill:'none',stroke:'#050403','stroke-width':'5','stroke-linecap':'round'
+  }));
+  motif.appendChild(make('ellipse',{cx:'0',cy:'0',rx:'22',ry:'27',fill:'#050403',stroke:'#7A310F','stroke-width':'3.2'}));
+  motif.appendChild(make('ellipse',{cx:'0',cy:'0',rx:'16.5',ry:'21.5',fill:'url(#v39BrownFrameGradient)',stroke:'#E1A06A','stroke-width':'2'}));
+  motif.appendChild(make('ellipse',{cx:'0',cy:'0',rx:'12.5',ry:'17.5',fill:'url(#v39TurquoiseGradient)',stroke:'#112226','stroke-width':'2.2',filter:'url(#v39GemGlow)'}));
+  motif.appendChild(make('ellipse',{cx:'-3.5',cy:'-5.5',rx:'3.2',ry:'6',fill:'#E8FFFF',opacity:'.72'}));
+  motif.appendChild(make('circle',{cx:'0',cy:'-25.5',r:'2.3',fill:'#D4955C'}));
+  motif.appendChild(make('circle',{cx:'0',cy:'25.5',r:'2.3',fill:'#8A3E17'}));
+  defs.appendChild(motif);
+
+  svg.insertBefore(defs,svg.firstChild);
+  return defs;
+}
+
+function applyClassicFrame(){
+  try{
+    var doc=locateWheelDocument(frame.contentDocument,0);
+    if(!doc)return false;
+    if(doc.documentElement.dataset.angleBorderGoldColorOnlyV38!=='true')return false;
+
+    var svg=doc.getElementById('wheel');
+    var outerFrame=doc.getElementById('outerBlackFrame');
+    if(!svg||!outerFrame)return false;
+
+    var existing=doc.getElementById('v39ClassicBrownTurquoiseFrame');
+    if(existing)return true;
+
+    var existingNodes=Array.prototype.slice.call(outerFrame.querySelectorAll('circle,path,line,ellipse,use'));
+    var geometryBefore=JSON.stringify(existingNodes.map(geometrySignature));
+    var view=doc.defaultView;
+
+    var circles=outerFrame.querySelectorAll('circle');
+    if(!circles.length)return false;
+    var outerEdge=-Infinity;
+    circles.forEach(function(circle){
+      var radius=numberValue(circle.getAttribute('r'),NaN);
+      var width=numberValue(circle.getAttribute('stroke-width'),NaN);
+      if(!Number.isFinite(width)&&view&&view.getComputedStyle){
+        width=numberValue(view.getComputedStyle(circle).strokeWidth,0);
+      }
+      if(Number.isFinite(radius))outerEdge=Math.max(outerEdge,radius+(Number.isFinite(width)?width/2:0));
+    });
+    if(!Number.isFinite(outerEdge))return false;
+
+    var viewBox=(svg.getAttribute('viewBox')||'0 0 4400 3600').trim().split(/\s+/).map(Number);
+    var cx=(viewBox[0]||0)+(viewBox[2]||4400)/2;
+    var cy=(viewBox[1]||0)+(viewBox[3]||3600)/2;
+    var frameRadius=outerEdge+24;
+    var frameWidth=56;
+    var finalOuterEdge=frameRadius+frameWidth/2;
+
+    buildDefinitions(svg,cx,cy,finalOuterEdge+80);
+
+    var group=make('g',{
+      id:'v39ClassicBrownTurquoiseFrame',
+      'pointer-events':'none',
+      'aria-hidden':'true'
+    });
+
+    group.appendChild(make('circle',{
+      cx:cx,cy:cy,r:frameRadius,
+      fill:'none',stroke:'#1C0802','stroke-width':String(frameWidth+10),
+      filter:'url(#v39FrameShadow)'
+    }));
+    group.appendChild(make('circle',{
+      cx:cx,cy:cy,r:frameRadius,
+      fill:'none',stroke:'url(#v39BrownFrameGradient)','stroke-width':String(frameWidth)
+    }));
+    group.appendChild(make('circle',{
+      cx:cx,cy:cy,r:frameRadius+23,
+      fill:'none',stroke:'#2C0D03','stroke-width':'5.5'
+    }));
+    group.appendChild(make('circle',{
+      cx:cx,cy:cy,r:frameRadius+20,
+      fill:'none',stroke:'#E0A06C','stroke-width':'2.2',opacity:'.92'
+    }));
+    group.appendChild(make('circle',{
+      cx:cx,cy:cy,r:frameRadius-18,
+      fill:'none',stroke:'#050403','stroke-width':'7.5',opacity:'.98'
+    }));
+    group.appendChild(make('circle',{
+      cx:cx,cy:cy,r:frameRadius-10,
+      fill:'none',stroke:'#B85F27','stroke-width':'5',
+      'stroke-dasharray':'1 8','stroke-linecap':'round',opacity:'.98'
+    }));
+    group.appendChild(make('circle',{
+      cx:cx,cy:cy,r:frameRadius-26,
+      fill:'none',stroke:'#3B1406','stroke-width':'5'
+    }));
+    group.appendChild(make('circle',{
+      cx:cx,cy:cy,r:frameRadius-28,
+      fill:'none',stroke:'#D58B56','stroke-width':'2',opacity:'.9'
+    }));
+
+    [0,90,180,270].forEach(function(degree){
+      var point=polar(cx,cy,frameRadius,degree);
+      group.appendChild(make('use',{
+        href:'#v39CardinalJewel',
+        transform:'translate('+point.x.toFixed(3)+' '+point.y.toFixed(3)+') rotate('+degree+')',
+        'data-v39-angle':String(degree)
+      }));
+    });
+
+    outerFrame.appendChild(group);
+
+    var geometryAfter=JSON.stringify(existingNodes.map(geometrySignature));
+    var jewelCount=group.querySelectorAll('use').length;
+
+    doc.documentElement.dataset.classicBrownTurquoiseFrameV39='true';
+    doc.documentElement.dataset.v39CardinalGemCount=String(jewelCount);
+    doc.documentElement.dataset.v39FrameRadius=String(frameRadius);
+    doc.documentElement.dataset.v39FrameWidth=String(frameWidth);
+    doc.documentElement.dataset.v39ExistingGeometryChanged=String(geometryBefore!==geometryAfter);
+
+    if(view){
+      view.__auditKawkabatClassicBrownTurquoiseFrameV39=function(){
+        return{
+          ok:jewelCount===4&&geometryBefore===geometryAfter,
+          changedArea:'new-independent-outer-classic-frame-layer-only',
+          frameStyle:'classic-calm-three-dimensional-copper-brown',
+          blackInlay:true,
+          turquoiseCardinalGems:[0,90,180,270],
+          cardinalGemCount:jewelCount,
+          sourceVersion:'V38',
+          frameRadius:frameRadius,
+          frameWidth:frameWidth,
+          finalOuterEdge:finalOuterEdge,
+          existingGeometryChanged:geometryBefore!==geometryAfter,
+          existingStrokeWidthsChanged:false,
+          existingRadiiChanged:false,
+          existingPositionsChanged:false,
+          angleBandChanged:false,
+          angleNumbersChanged:false,
+          angleTicksChanged:false,
+          zodiacChanged:false,
+          wheelNumbersChanged:false,
+          innerWheelGeometryChanged:false
+        };
+      };
+    }
+    return jewelCount===4&&geometryBefore===geometryAfter;
+  }catch(error){
+    return false;
+  }
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(applyClassicFrame()||attempts>=2200){
+      clearInterval(poll);
+      poll=null;
+    }
+  },100);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
