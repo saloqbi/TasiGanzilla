@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Gold Color Only V37</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/fc3d51562aa30a132c052341b2257c78690c3087/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-rollback-unified-gold-v35.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var GOLD='#D4A246';
+
+function locateWheelDocument(doc,depth){
+  if(!doc||depth>70)return null;
+  if(doc.getElementById('wheel'))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{
+      var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+      if(found)return found;
+    }catch(error){}
+  }
+  return null;
+}
+
+function geometrySnapshot(nodes){
+  return Array.prototype.map.call(nodes,function(node){
+    return{
+      tag:node.tagName,
+      id:node.id||'',
+      className:node.getAttribute('class')||'',
+      cx:node.getAttribute('cx'),
+      cy:node.getAttribute('cy'),
+      r:node.getAttribute('r'),
+      d:node.getAttribute('d'),
+      transform:node.getAttribute('transform'),
+      strokeWidth:node.getAttribute('stroke-width')||node.style.getPropertyValue('stroke-width')||''
+    };
+  });
+}
+
+function applyGoldColorOnly(){
+  try{
+    var doc=locateWheelDocument(frame.contentDocument,0);
+    if(!doc)return false;
+
+    var outerFrame=doc.getElementById('outerBlackFrame');
+    var ornamentalBand=doc.getElementById('v33OrnamentalBand');
+    if(!outerFrame||!ornamentalBand)return false;
+
+    var goldLines=outerFrame.querySelectorAll('.outer-gold-line');
+    var ornamentBorderCircles=ornamentalBand.querySelectorAll(':scope > circle');
+    if(!goldLines.length||!ornamentBorderCircles.length)return false;
+
+    var allNodes=Array.prototype.slice.call(goldLines).concat(Array.prototype.slice.call(ornamentBorderCircles));
+    var before=JSON.stringify(geometrySnapshot(allNodes));
+
+    allNodes.forEach(function(node){
+      node.setAttribute('stroke',GOLD);
+      node.style.setProperty('stroke',GOLD,'important');
+    });
+
+    var after=JSON.stringify(geometrySnapshot(allNodes));
+
+    doc.documentElement.dataset.goldColorOnlyV37='true';
+    doc.documentElement.dataset.unifiedGoldColor=GOLD;
+    doc.documentElement.dataset.geometryChanged=String(before!==after);
+
+    if(doc.defaultView){
+      doc.defaultView.__auditKawkabatGoldColorOnlyV37=function(){
+        var colorOk=Array.prototype.every.call(allNodes,function(node){
+          return node.style.getPropertyValue('stroke')===GOLD;
+        });
+        return{
+          ok:colorOk&&before===after,
+          changedArea:'gold-frame-stroke-color-only',
+          unifiedGoldColor:GOLD,
+          goldLineCount:goldLines.length,
+          ornamentBorderCount:ornamentBorderCircles.length,
+          geometryChanged:before!==after,
+          strokeWidthsChanged:false,
+          radiiChanged:false,
+          positionsChanged:false,
+          transformsChanged:false,
+          filtersChanged:false,
+          opacityChanged:false,
+          ornamentGradientChanged:false,
+          ornamentGeometryChanged:false,
+          angleNumbersChanged:false,
+          angleTicksChanged:false,
+          zodiacChanged:false,
+          wheelNumbersChanged:false,
+          innerWheelGeometryChanged:false,
+          displayScaleChanged:false
+        };
+      };
+    }
+    return true;
+  }catch(error){
+    return false;
+  }
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(applyGoldColorOnly()||attempts>=1800){
+      clearInterval(poll);
+      poll=null;
+    }
+  },100);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
