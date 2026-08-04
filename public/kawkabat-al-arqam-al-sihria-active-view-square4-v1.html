@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic Numbers Constellation — Active View Modes V1</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
+    body{display:grid;place-items:center;color:#43515a}
+    .loading{font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="loading">Loading active View controls…</div>
+  <script>
+  (async function(){
+    'use strict';
+
+    var panelUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/main/public/kawkabat-panel-base.html';
+    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/ba0f6f1dbb07d2a4e5857c7666ffa042f7547c4a/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9-no-api.html';
+
+    function activeViewController(){
+      'use strict';
+
+      var frame=document.getElementById('workFrame');
+      var clockwiseInput=document.querySelector('input[aria-label="Layout clockwise"]');
+      var sizeInput=document.querySelector('input[aria-label="Size"]');
+      var viewSelect=document.querySelector('select[aria-label="View"]');
+      var NS='http://www.w3.org/2000/svg';
+      var CX=2200,CY=1800;
+      var cycleInner=400,cycleOuter=1500,zodiacOuter=1610;
+      var minCycles=1,maxCycles=30,defaultCycles=10;
+      var retryTimer=null;
+
+      var viewModes={
+        circle12:{label:'Circle of 12',shape:'circle',divisions:12},
+        circle24:{label:'Circle of 24',shape:'circle',divisions:24},
+        circle36:{label:'Circle of 36',shape:'circle',divisions:36},
+        square4:{label:'Square of 4',shape:'square',divisions:4},
+        square9:{label:'Square of 9',shape:'square',divisions:9}
+      };
+
+      function clampCount(value){
+        var count=Math.round(Number(value));
+        if(!Number.isFinite(count))count=defaultCycles;
+        return Math.max(minCycles,Math.min(maxCycles,count));
+      }
+      function polar(radius,degree){
+        var angle=degree*Math.PI/180;
+        return{x:CX+Math.cos(angle)*radius,y:CY+Math.sin(angle)*radius};
+      }
+      function colorClass(value){
+        var mod=((Number(value)%3)+3)%3;
+        return mod===1?'number-red':mod===2?'number-blue':'number-black';
+      }
+      function clearNode(node){while(node&&node.firstChild)node.removeChild(node.firstChild);}
+      function make(name,attrs){
+        var node=document.createElementNS(NS,name);
+        Object.keys(attrs||{}).forEach(function(key){node.setAttribute(key,attrs[key]);});
+        return node;
+      }
+      function polygonVertices(radius){
+        return[-45,45,135,225].map(function(degree){return polar(radius,degree);});
+      }
+      function polygonPath(radius){
+        return polygonVertices(radius).map(function(point,index){return(index===0?'M':'L')+point.x.toFixed(3)+' '+point.y.toFixed(3);}).join(' ')+' Z';
+      }
+      function cross(ax,ay,bx,by){return ax*by-ay*bx;}
+      function squareRayPoint(radius,degree){
+        var points=polygonVertices(radius),angle=degree*Math.PI/180,dx=Math.cos(angle),dy=Math.sin(angle),best=null;
+        for(var index=0;index<points.length;index+=1){
+          var a=points[index],b=points[(index+1)%points.length];
+          var sx=b.x-a.x,sy=b.y-a.y,qx=a.x-CX,qy=a.y-CY,den=cross(dx,dy,sx,sy);
+          if(Math.abs(den)<1e-8)continue;
+          var t=cross(qx,qy,sx,sy)/den,u=cross(qx,qy,dx,dy)/den;
+          if(t>=0&&u>=-1e-7&&u<=1+1e-7&&(best===null||t<best))best=t;
+        }
+        return best===null?polar(radius,degree):{x:CX+(dx*best),y:CY+(dy*best)};
+      }
+      function geometryPoint(mode,radius,degree){
+        return mode.shape==='circle'?polar(radius,degree):squareRayPoint(radius,degree);
+      }
+      function appendFrame(group,mode,radius){
+        ['frame-shadow','frame-metal','frame-highlight'].forEach(function(className,index){
+          var adjusted=index===2?radius-6:radius;
+          group.appendChild(mode.shape==='circle'
+            ?make('circle',{cx:CX,cy:CY,r:adjusted,'class':className})
+            :make('path',{d:polygonPath(adjusted),'class':className}));
+        });
+      }
+      function appendLine(group,className,a,b){
+        group.appendChild(make('line',{x1:a.x.toFixed(3),y1:a.y.toFixed(3),x2:b.x.toFixed(3),y2:b.y.toFixed(3),'class':className}));
+      }
+      function hideCircularAuthority(doc,visible){
+        [
+          'logoImage','angleFrame','angleTicks','angleLabels','outerBlackFrame','cardinalOrnaments',
+          'innerAngleGold3D','outerGoldCrown3D','blackBandOrnaments','thirteenthWheelBackground',
+          'allBalancedDaysZodiac','centerClockPanel','centerToggleHit'
+        ].forEach(function(id){
+          var node=doc.getElementById(id);
+          if(node)node.style.display=visible?'':'none';
+        });
+      }
+      function rebuildGeometry(doc,count,modeKey,clockwise){
+        var mode=viewModes[modeKey]||viewModes.circle36;
+        var svg=doc.getElementById('wheel');
+        var frames=doc.getElementById('frames');
+        var divisions=doc.getElementById('divisions');
+        var specialFills=doc.getElementById('specialFills');
+        var specialArcs=doc.getElementById('specialArcs');
+        var ringOne=doc.getElementById('numbersRingOne');
+        var ringTwo=doc.getElementById('numbersRingTwo');
+        if(!svg||!frames||!divisions||!specialFills||!specialArcs||!ringOne||!ringTwo)return false;
+
+        doc.querySelectorAll('[id^="approvedCycle"][id$="Numbers"],#dynamicApprovedCycles').forEach(function(node){node.remove();});
+        clearNode(frames);clearNode(divisions);clearNode(specialFills);clearNode(specialArcs);clearNode(ringOne);clearNode(ringTwo);
+
+        var divisionsCount=mode.divisions;
+        var step=360/divisionsCount;
+        var sign=clockwise?1:-1;
+        var ringWidth=(cycleOuter-cycleInner)/count;
+        var fontSize=Math.max(14,Math.min(24,29-(count*.5)));
+        var boundaries=[180,290,cycleInner];
+        for(var boundaryIndex=1;boundaryIndex<=count;boundaryIndex+=1)boundaries.push(cycleInner+(boundaryIndex*ringWidth));
+        boundaries.push(zodiacOuter);
+
+        boundaries.forEach(function(radius){appendFrame(frames,mode,radius);});
+
+        for(var rayIndex=0;rayIndex<divisionsCount;rayIndex+=1){
+          var boundaryDegree=sign*((rayIndex*step)-(step/2))-90;
+          var innerPoint=geometryPoint(mode,180,boundaryDegree);
+          var outerPoint=geometryPoint(mode,zodiacOuter,boundaryDegree);
+          var ray=make('g',{'data-ray-index':rayIndex});
+          appendLine(ray,'ray-shadow',innerPoint,outerPoint);
+          appendLine(ray,'ray-metal',innerPoint,outerPoint);
+          appendLine(ray,'ray-highlight',innerPoint,outerPoint);
+          divisions.appendChild(ray);
+        }
+
+        function appendNumber(group,value,index,radius,className){
+          var degree=sign*(index*step)-90;
+          var point=geometryPoint(mode,radius,degree);
+          var cardinal=Math.abs((index*step)%90)<1e-6;
+          var text=make('text',{
+            x:point.x.toFixed(3),y:point.y.toFixed(3),
+            'data-clockwise-x':point.x.toFixed(3),'data-clockwise-y':point.y.toFixed(3),
+            'data-index':index,'data-value':value,
+            direction:'ltr','unicode-bidi':'bidi-override',lang:'en',
+            'class':'number-text '+className+' '+colorClass(value)+(cardinal?' cardinal-number':'')
+          });
+          text.textContent=String(value);
+          group.appendChild(text);
+          return text;
+        }
+
+        for(var innerIndex=0;innerIndex<divisionsCount;innerIndex+=1){
+          var full=innerIndex===0?divisionsCount:innerIndex;
+          var root=((full-1)%9)+1;
+          appendNumber(ringOne,full,innerIndex,235,'ring-one-number');
+          appendNumber(ringTwo,root,innerIndex,345,'ring-two-number');
+        }
+
+        var cycles=make('g',{id:'dynamicApprovedCycles','aria-label':count+' '+mode.label+' cycles'});
+        for(var cycle=1;cycle<=count;cycle+=1){
+          var radius=cycleInner+((cycle-.5)*ringWidth);
+          var start=((cycle-1)*divisionsCount)+1;
+          var end=cycle*divisionsCount;
+          for(var numberIndex=0;numberIndex<divisionsCount;numberIndex+=1){
+            var value=numberIndex===0?end:start+numberIndex-1;
+            var node=appendNumber(cycles,value,numberIndex,radius,'approved-cycle-number');
+            node.setAttribute('data-cycle',cycle);
+            node.style.setProperty('font-size',fontSize.toFixed(2)+'px','important');
+            node.style.setProperty('pointer-events','none','important');
+          }
+        }
+        var anchor=doc.getElementById('allBalancedDaysZodiac');
+        svg.insertBefore(cycles,anchor||null);
+
+        var showCircle36=modeKey==='circle36';
+        hideCircularAuthority(doc,showCircle36);
+        if(showCircle36&&anchor)anchor.style.display='';
+
+        doc.documentElement.dataset.viewMode=modeKey;
+        doc.documentElement.dataset.viewShape=mode.shape;
+        doc.documentElement.dataset.viewDivisions=String(divisionsCount);
+        doc.documentElement.dataset.layoutSize=String(count);
+        doc.documentElement.dataset.layoutDirection=clockwise?'clockwise':'counterclockwise';
+
+        if(doc.defaultView){
+          doc.defaultView.__auditKawkabatActiveViewV1=function(){
+            return{
+              ok:cycles.children.length===count*divisionsCount,
+              view:modeKey,label:mode.label,shape:mode.shape,divisions:divisionsCount,
+              cycleCount:count,numberCount:cycles.children.length,
+              direction:clockwise?'clockwise':'counterclockwise',
+              circle36AuthorityVisible:showCircle36,
+              geometryReplaced:true,
+              sizeControlPreserved:true
+            };
+          };
+        }
+        return true;
+      }
+
+      function applyAll(){
+        try{
+          var doc=frame&&frame.contentDocument;
+          if(!doc||!doc.getElementById('wheel'))return false;
+          var count=clampCount(sizeInput.value);
+          var modeKey=viewModes[viewSelect.value]?viewSelect.value:'square4';
+          sizeInput.value=String(count);
+          return rebuildGeometry(doc,count,modeKey,!!clockwiseInput.checked);
+        }catch(error){return false;}
+      }
+      function syncWithRetry(){
+        if(retryTimer){clearInterval(retryTimer);retryTimer=null;}
+        var attempts=0;
+        function run(){
+          attempts+=1;
+          if(applyAll()||attempts>=240){if(retryTimer){clearInterval(retryTimer);retryTimer=null;}}
+        }
+        run();
+        if(attempts<240&&!applyAll())retryTimer=setInterval(run,100);
+      }
+      function applySizeNow(){sizeInput.value=String(clampCount(sizeInput.value));syncWithRetry();}
+
+      if(!frame||!clockwiseInput||!sizeInput||!viewSelect)return;
+
+      viewSelect.innerHTML='';
+      ['circle12','circle24','circle36','square4','square9'].forEach(function(key){
+        var option=document.createElement('option');
+        option.value=key;option.textContent=viewModes[key].label;
+        viewSelect.appendChild(option);
+      });
+      viewSelect.value='square4';
+      viewSelect.title='Select the active wheel geometry';
+
+      sizeInput.min=String(minCycles);sizeInput.max=String(maxCycles);sizeInput.step='1';sizeInput.value=String(defaultCycles);
+      clockwiseInput.addEventListener('change',syncWithRetry);
+      viewSelect.addEventListener('change',syncWithRetry);
+      sizeInput.addEventListener('change',applySizeNow);
+      sizeInput.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();applySizeNow();}});
+      frame.addEventListener('load',syncWithRetry);
+
+      window.__setKawkabatView=function(value){if(viewModes[value])viewSelect.value=value;syncWithRetry();return viewSelect.value;};
+      window.__setKawkabatLayoutClockwise=function(value){clockwiseInput.checked=!!value;syncWithRetry();return clockwiseInput.checked;};
+      window.__setKawkabatWheelCount=function(value){sizeInput.value=String(clampCount(value));syncWithRetry();return Number(sizeInput.value);};
+      syncWithRetry();
+    }
+
+    try{
+      var response=await fetch(panelUrl,{cache:'no-store'});
+      if(!response.ok)throw new Error('PANEL_HTTP_'+response.status);
+      var html=await response.text();
+      html=html.replace('</style>',
+        '.work-frame{right:0!important;width:calc(100% - 390px)!important;overflow:hidden!important;outline:none!important}'+
+        '.page-scrollbar{right:auto!important;left:375px!important;top:7px!important;bottom:7px!important}'+
+        '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
+        '</style>');
+      html=html.replace(/<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
+        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>');
+      var runtime='<scr'+'ipt>('+activeViewController.toString()+')();</scr'+'ipt>';
+      html=html.replace('</body>',runtime+'</body>');
+      document.open();document.write(html);document.close();
+    }catch(error){
+      document.body.innerHTML='<div class="loading">Unable to load structure: '+String(error.message||error)+'</div>';
+    }
+  }());
+  </script>
+</body>
+</html>
