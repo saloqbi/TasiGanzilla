@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic Numbers Constellation — Readable Data Type V3</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+    #appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/4328c7647fd377ff7922466117ce40aa5dc3627a/public/kawkabat-al-arqam-al-sihria-active-view-square4-v1.html"></iframe>
+  <script>
+  (function(){
+    'use strict';
+
+    var appFrame=document.getElementById('appFrame');
+    var wheelObserver=null;
+    var applyTimer=null;
+    var pollTimer=null;
+    var listenerDocument=null;
+    var baseDate=new Date();
+    baseDate.setHours(0,0,0,0);
+
+    var types=[
+      {value:'price',label:'Price'},
+      {value:'date',label:'Date'},
+      {value:'time',label:'Time'},
+      {value:'priceDate',label:'Price and date'},
+      {value:'priceTime',label:'Price and time'}
+    ];
+
+    function numberValue(input,fallback){
+      var value=Number(String(input&&input.value!=null?input.value:'').replace(',','.'));
+      return Number.isFinite(value)?value:fallback;
+    }
+    function decimalPlaces(value){
+      var text=String(value);
+      if(/[eE]/.test(text)){
+        var parts=text.toLowerCase().split('e');
+        var base=(parts[0].split('.')[1]||'').length;
+        var exponent=Number(parts[1]||0);
+        return Math.max(0,base-exponent);
+      }
+      return(text.split('.')[1]||'').length;
+    }
+    function formatPrice(value,start,increment){
+      var decimals=Math.min(8,Math.max(decimalPlaces(start),decimalPlaces(increment)));
+      var fixed=Number(value).toFixed(decimals);
+      return decimals?fixed.replace(/\.?0+$/,''):fixed;
+    }
+    function pad2(value){return String(value).padStart(2,'0');}
+    function dateText(offset){
+      var date=new Date(baseDate.getTime()+(offset*86400000));
+      return pad2(date.getDate())+'.'+pad2(date.getMonth()+1)+'.'+String(date.getFullYear()).slice(-2);
+    }
+    function timeText(offset){
+      var hours=((offset%24)+24)%24;
+      return pad2(hours)+':00';
+    }
+    function getOrdinal(node,wheelDoc){
+      var parent=node.parentNode&&node.parentNode.id;
+      if(parent==='numbersRingOne'||parent==='numbersRingTwo'){
+        var index=Number(node.getAttribute('data-index'));
+        var divisions=Number(wheelDoc.documentElement.dataset.viewDivisions)||36;
+        return index===0?divisions:index;
+      }
+      var value=Number(node.getAttribute('data-value'));
+      if(Number.isFinite(value)&&value>0)return value;
+      var textValue=Number(String(node.textContent||'').replace(/[^0-9.-]/g,''));
+      return Number.isFinite(textValue)&&textValue>0?textValue:1;
+    }
+    function nodeTier(node){
+      var parent=node.parentNode&&node.parentNode.id;
+      if(parent==='numbersRingTwo')return 'innerTwo';
+      if(parent==='numbersRingOne')return 'innerOne';
+      return 'cycle';
+    }
+    function fontMetrics(tier,combined){
+      if(!combined){
+        if(tier==='innerTwo')return{main:19,secondary:0,gap:0};
+        if(tier==='innerOne')return{main:18,secondary:0,gap:0};
+        return{main:17,secondary:0,gap:0};
+      }
+      if(tier==='innerTwo')return{main:12.5,secondary:8.5,gap:8.2};
+      if(tier==='innerOne')return{main:13.5,secondary:9,gap:8.8};
+      return{main:15.5,secondary:10.5,gap:10.5};
+    }
+    function setCommonTextStyle(node){
+      node.setAttribute('direction','ltr');
+      node.setAttribute('unicode-bidi','bidi-override');
+      node.setAttribute('lang','en');
+      node.style.setProperty('font-family','Arial, Helvetica, sans-serif','important');
+      node.style.setProperty('font-variant-numeric','lining-nums tabular-nums','important');
+      node.style.setProperty('letter-spacing','0px','important');
+      node.style.setProperty('pointer-events','none','important');
+    }
+    function renderSingle(node,text,metric,signature){
+      if(node.getAttribute('data-readable-signature')===signature)return;
+      node.textContent=text;
+      setCommonTextStyle(node);
+      node.style.setProperty('font-size',metric.main+'px','important');
+      node.setAttribute('data-readable-signature',signature);
+    }
+    function renderTwoLines(node,primary,secondary,metric,signature){
+      if(node.getAttribute('data-readable-signature')===signature)return;
+      var x=Number(node.getAttribute('x'))||0;
+      var y=Number(node.getAttribute('y'))||0;
+      while(node.firstChild)node.removeChild(node.firstChild);
+      var first=document.createElementNS('http://www.w3.org/2000/svg','tspan');
+      var second=document.createElementNS('http://www.w3.org/2000/svg','tspan');
+      first.setAttribute('x',String(x));
+      first.setAttribute('y',String(y-metric.gap));
+      first.style.setProperty('font-size',metric.main+'px','important');
+      first.style.setProperty('font-weight','900','important');
+      first.textContent=primary;
+      second.setAttribute('x',String(x));
+      second.setAttribute('y',String(y+metric.gap));
+      second.style.setProperty('font-size',metric.secondary+'px','important');
+      second.style.setProperty('font-weight','800','important');
+      second.textContent=secondary;
+      node.appendChild(first);
+      node.appendChild(second);
+      setCommonTextStyle(node);
+      node.style.removeProperty('font-size');
+      node.setAttribute('data-readable-signature',signature);
+    }
+    function applyReadableData(){
+      try{
+        var appDoc=appFrame.contentDocument;
+        if(!appDoc)return false;
+        var workFrame=appDoc.getElementById('workFrame');
+        var wheelDoc=workFrame&&workFrame.contentDocument;
+        if(!wheelDoc||!wheelDoc.getElementById('wheel'))return false;
+
+        var dataSelect=appDoc.querySelector('select[aria-label="Data type"]');
+        var valueInput=appDoc.querySelector('input[aria-label="Value"]');
+        var incrementInput=appDoc.querySelector('input[aria-label="Increment"]');
+        var viewSelect=appDoc.querySelector('select[aria-label="View"]');
+        if(!dataSelect||!valueInput||!incrementInput||!viewSelect)return false;
+
+        var selectedView=viewSelect.value;
+        var type=dataSelect.value||'price';
+        var start=numberValue(valueInput,1);
+        var increment=numberValue(incrementInput,1);
+        var combined=type==='priceDate'||type==='priceTime';
+        var nodes=wheelDoc.querySelectorAll('#dynamicApprovedCycles .number-text,#numbersRingOne .number-text,#numbersRingTwo .number-text');
+
+        nodes.forEach(function(node){
+          var ordinal=getOrdinal(node,wheelDoc);
+          var offset=Math.max(0,ordinal-1);
+          var price=formatPrice(start+(offset*increment),start,increment);
+          var date=dateText(offset);
+          var time=timeText(offset);
+          var tier=nodeTier(node);
+          var metric=fontMetrics(tier,combined);
+          var signature=[type,start,increment,baseDate.getTime(),ordinal,tier].join('|');
+          if(type==='priceDate')renderTwoLines(node,price,date,metric,signature);
+          else if(type==='priceTime')renderTwoLines(node,price,time,metric,signature);
+          else if(type==='date')renderSingle(node,date,metric,signature);
+          else if(type==='time')renderSingle(node,time,metric,signature);
+          else renderSingle(node,price,metric,signature);
+        });
+
+        if(viewSelect.value!==selectedView)viewSelect.value=selectedView;
+        wheelDoc.documentElement.dataset.dataType=type;
+        wheelDoc.documentElement.dataset.readableTwoLine=combined?'true':'false';
+        wheelDoc.documentElement.dataset.innerRingsFormatted='true';
+        wheelDoc.documentElement.dataset.viewSelectionPreserved=selectedView;
+
+        if(!wheelObserver||wheelObserver.__wheelDocument!==wheelDoc){
+          if(wheelObserver)wheelObserver.disconnect();
+          wheelObserver=new MutationObserver(scheduleApply);
+          wheelObserver.__wheelDocument=wheelDoc;
+          wheelObserver.observe(wheelDoc.getElementById('wheel'),{childList:true,subtree:true});
+        }
+
+        if(wheelDoc.defaultView){
+          wheelDoc.defaultView.__auditKawkabatReadableDataTypeV3=function(){
+            return{
+              ok:nodes.length>0,
+              dataType:type,
+              formattedNodeCount:nodes.length,
+              twoLineCombinedMode:combined,
+              innerRingsFormatted:true,
+              viewSelection:selectedView,
+              viewSelectionPreserved:true,
+              geometryChanged:false,
+              startValue:start,
+              increment:increment
+            };
+          };
+        }
+        return true;
+      }catch(error){
+        return false;
+      }
+    }
+    function scheduleApply(){
+      if(applyTimer)clearTimeout(applyTimer);
+      applyTimer=setTimeout(function(){applyTimer=null;applyReadableData();},40);
+    }
+    function bindControls(){
+      var appDoc=appFrame.contentDocument;
+      if(!appDoc||listenerDocument===appDoc)return false;
+      var dataSelect=appDoc.querySelector('select[aria-label="Data type"]');
+      var valueInput=appDoc.querySelector('input[aria-label="Value"]');
+      var incrementInput=appDoc.querySelector('input[aria-label="Increment"]');
+      var viewSelect=appDoc.querySelector('select[aria-label="View"]');
+      var sizeInput=appDoc.querySelector('input[aria-label="Size"]');
+      var clockwise=appDoc.querySelector('input[aria-label="Layout clockwise"]');
+      if(!dataSelect||!valueInput||!incrementInput||!viewSelect||!sizeInput||!clockwise)return false;
+
+      var previousType=dataSelect.value||'price';
+      dataSelect.innerHTML='';
+      types.forEach(function(item){
+        var option=appDoc.createElement('option');
+        option.value=item.value;
+        option.textContent=item.label;
+        dataSelect.appendChild(option);
+      });
+      dataSelect.value=types.some(function(item){return item.value===previousType;})?previousType:'price';
+      dataSelect.title='Choose how values are displayed inside every wheel cell';
+
+      [dataSelect,valueInput,incrementInput,viewSelect,sizeInput,clockwise].forEach(function(control){
+        control.addEventListener('change',scheduleApply);
+        control.addEventListener('input',scheduleApply);
+      });
+      listenerDocument=appDoc;
+      return true;
+    }
+    function startPolling(){
+      if(pollTimer)clearInterval(pollTimer);
+      var attempts=0;
+      pollTimer=setInterval(function(){
+        attempts+=1;
+        var bound=bindControls();
+        var applied=applyReadableData();
+        if((bound&&applied)||attempts>=300){
+          clearInterval(pollTimer);
+          pollTimer=null;
+        }
+      },100);
+    }
+
+    appFrame.addEventListener('load',startPolling);
+    startPolling();
+  }());
+  </script>
+</body>
+</html>
