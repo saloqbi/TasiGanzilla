@@ -7,77 +7,27 @@ var sourceApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/69d0a
 function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes)}
 function wheelDirectionRuntime(){
   'use strict';
-  var groupIds=[
-    'numbersRingOne','numbersRingTwo',
-    'approvedCycleOneNumbers','approvedCycleTwoNumbers','approvedCycleThreeNumbers','approvedCycleFourNumbers','approvedCycleFiveNumbers',
-    'approvedCycleSixNumbers','approvedCycleSevenNumbers','approvedCycleEightNumbers','approvedCycleNineNumbers','approvedCycleTenNumbers'
-  ];
-  var snapshot=null;
-  var timer=null;
-  function colorClass(node){
-    if(node.classList.contains('number-red'))return 'number-red';
-    if(node.classList.contains('number-blue'))return 'number-blue';
-    if(node.classList.contains('number-black'))return 'number-black';
-    return '';
-  }
+  var groupIds=['numbersRingOne','numbersRingTwo','approvedCycleOneNumbers','approvedCycleTwoNumbers','approvedCycleThreeNumbers','approvedCycleFourNumbers','approvedCycleFiveNumbers','approvedCycleSixNumbers','approvedCycleSevenNumbers','approvedCycleEightNumbers','approvedCycleNineNumbers','approvedCycleTenNumbers'];
+  var snapshot=null,currentClockwise=true,timer=null;
+  function colorClass(node){if(node.classList.contains('number-red'))return 'number-red';if(node.classList.contains('number-blue'))return 'number-blue';if(node.classList.contains('number-black'))return 'number-black';return ''}
   function capture(){
     var groups=[];
-    for(var groupIndex=0;groupIndex<groupIds.length;groupIndex+=1){
-      var group=document.getElementById(groupIds[groupIndex]);
-      if(!group||group.children.length!==36)return false;
-      var nodes=Array.prototype.slice.call(group.children);
-      groups.push({
-        nodes:nodes,
-        values:nodes.map(function(node){return{text:node.textContent,color:colorClass(node)};})
-      });
-    }
-    var labelsGroup=document.getElementById('allBalancedDaysZodiac');
-    if(!labelsGroup||labelsGroup.children.length!==36)return false;
-    var labelNodes=Array.prototype.slice.call(labelsGroup.children);
-    snapshot={
-      groups:groups,
-      labels:{nodes:labelNodes,values:labelNodes.map(function(node){return node.innerHTML;})}
-    };
-    return true;
+    for(var groupIndex=0;groupIndex<groupIds.length;groupIndex+=1){var group=document.getElementById(groupIds[groupIndex]);if(!group||group.children.length!==36)return false;var nodes=Array.prototype.slice.call(group.children);groups.push({nodes:nodes,values:nodes.map(function(node){return{text:node.textContent,color:colorClass(node)}})})}
+    var labelsGroup=document.getElementById('allBalancedDaysZodiac');if(!labelsGroup||labelsGroup.children.length!==36)return false;var labelNodes=Array.prototype.slice.call(labelsGroup.children);
+    snapshot={groups:groups,labels:{nodes:labelNodes,values:labelNodes.map(function(node){return node.innerHTML})}};return true
   }
-  function clockwiseRequested(){return String(location.hash||'').toLowerCase()!=='#counterclockwise';}
   function apply(){
     if(!snapshot&&!capture())return false;
-    var clockwise=clockwiseRequested();
-    snapshot.groups.forEach(function(group){
-      group.nodes.forEach(function(node,index){
-        var source=group.values[clockwise?index:(36-index)%36];
-        node.textContent=source.text;
-        node.classList.remove('number-red','number-blue','number-black');
-        if(source.color)node.classList.add(source.color);
-      });
-    });
-    snapshot.labels.nodes.forEach(function(node,index){
-      node.innerHTML=snapshot.labels.values[clockwise?index:(36-index)%36];
-    });
-    document.documentElement.setAttribute('data-layout-clockwise',clockwise?'true':'false');
-    window.__auditKawkabatLayoutClockwiseControlV2=function(){
-      return{
-        connected:true,
-        clockwise:clockwise,
-        numberGroupCount:snapshot.groups.length,
-        numberCount:snapshot.groups.length*36,
-        labelCount:snapshot.labels.nodes.length,
-        topAnchorPreserved:true,
-        geometryChanged:false
-      };
-    };
-    return true;
+    snapshot.groups.forEach(function(group){group.nodes.forEach(function(node,index){var source=group.values[currentClockwise?index:(36-index)%36];node.textContent=source.text;node.classList.remove('number-red','number-blue','number-black');if(source.color)node.classList.add(source.color)})});
+    snapshot.labels.nodes.forEach(function(node,index){node.innerHTML=snapshot.labels.values[currentClockwise?index:(36-index)%36]});
+    document.documentElement.setAttribute('data-layout-clockwise',currentClockwise?'true':'false');
+    window.parent.postMessage({type:'KAWKABAT_CLOCKWISE_APPLIED',clockwise:currentClockwise},'*');
+    window.__auditKawkabatLayoutClockwiseControlV3=function(){return{connected:true,clockwise:currentClockwise,numberGroupCount:snapshot.groups.length,numberCount:snapshot.groups.length*36,labelCount:snapshot.labels.nodes.length,topAnchorPreserved:true,geometryChanged:false,transport:'postMessage'}};
+    return true
   }
-  function start(){
-    if(timer)clearInterval(timer);
-    var attempts=0;
-    timer=setInterval(function(){
-      attempts+=1;
-      if(apply()||attempts>=300){clearInterval(timer);timer=null;}
-    },50);
-  }
-  window.addEventListener('hashchange',function(){if(!apply())start();});
+  function start(){if(timer)clearInterval(timer);var attempts=0;timer=setInterval(function(){attempts+=1;if(apply()||attempts>=300){clearInterval(timer);timer=null}},50)}
+  window.addEventListener('message',function(event){var data=event.data;if(!data||data.type!=='KAWKABAT_SET_CLOCKWISE')return;currentClockwise=!!data.clockwise;if(!apply())start()});
+  window.parent.postMessage({type:'KAWKABAT_CLOCKWISE_READY'},'*');
   start();
 }
 try{
