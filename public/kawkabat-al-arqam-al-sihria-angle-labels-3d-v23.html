@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic Numbers Constellation — Comfortable 3D Angle Labels V23</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+    #appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/23cef112b5ad5bf6eb1b0afc42d1bc8718c7268f/public/kawkabat-al-arqam-al-sihria-zodiac-cdb09a-gradient-preserve-display-v22.html"></iframe>
+  <script>
+  (function(){
+    'use strict';
+
+    var appFrame=document.getElementById('appFrame');
+    var NS='http://www.w3.org/2000/svg';
+    var observer=null;
+    var observedWheel=null;
+    var timer=null;
+    var poll=null;
+
+    function locateWheelDocument(doc,depth){
+      if(!doc||depth>18)return null;
+      if(doc.getElementById('wheel'))return doc;
+      var frames=doc.querySelectorAll('iframe');
+      for(var i=0;i<frames.length;i+=1){
+        try{
+          var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+          if(found)return found;
+        }catch(error){}
+      }
+      return null;
+    }
+
+    function ensureDefs(wheelDoc){
+      var svg=wheelDoc.getElementById('wheel');
+      if(!svg)return null;
+      var defs=svg.querySelector('defs');
+      if(!defs){
+        defs=wheelDoc.createElementNS(NS,'defs');
+        svg.insertBefore(defs,svg.firstChild);
+      }
+
+      var gradient=wheelDoc.getElementById('angleNumbersGold3DV23');
+      if(!gradient){
+        gradient=wheelDoc.createElementNS(NS,'linearGradient');
+        gradient.setAttribute('id','angleNumbersGold3DV23');
+        gradient.setAttribute('x1','0%');
+        gradient.setAttribute('y1','0%');
+        gradient.setAttribute('x2','0%');
+        gradient.setAttribute('y2','100%');
+        [
+          ['0%','#FFF7D8'],
+          ['22%','#F8D989'],
+          ['48%','#C9852F'],
+          ['70%','#FFE8A8'],
+          ['100%','#8D4B17']
+        ].forEach(function(item){
+          var stop=wheelDoc.createElementNS(NS,'stop');
+          stop.setAttribute('offset',item[0]);
+          stop.setAttribute('stop-color',item[1]);
+          gradient.appendChild(stop);
+        });
+        defs.appendChild(gradient);
+      }
+
+      var filter=wheelDoc.getElementById('angleNumbersDepthV23');
+      if(!filter){
+        filter=wheelDoc.createElementNS(NS,'filter');
+        filter.setAttribute('id','angleNumbersDepthV23');
+        filter.setAttribute('x','-40%');
+        filter.setAttribute('y','-60%');
+        filter.setAttribute('width','180%');
+        filter.setAttribute('height','220%');
+
+        var shadow=wheelDoc.createElementNS(NS,'feDropShadow');
+        shadow.setAttribute('dx','0');
+        shadow.setAttribute('dy','1.3');
+        shadow.setAttribute('stdDeviation','0.75');
+        shadow.setAttribute('flood-color','#4A250D');
+        shadow.setAttribute('flood-opacity','0.65');
+        filter.appendChild(shadow);
+
+        var highlight=wheelDoc.createElementNS(NS,'feDropShadow');
+        highlight.setAttribute('dx','0');
+        highlight.setAttribute('dy','-0.55');
+        highlight.setAttribute('stdDeviation','0.25');
+        highlight.setAttribute('flood-color','#FFF7D3');
+        highlight.setAttribute('flood-opacity','0.9');
+        filter.appendChild(highlight);
+
+        defs.appendChild(filter);
+      }
+
+      return defs;
+    }
+
+    function ensureStyle(wheelDoc){
+      var style=wheelDoc.getElementById('angleLabelsComfort3DV23Style');
+      if(!style){
+        style=wheelDoc.createElement('style');
+        style.id='angleLabelsComfort3DV23Style';
+        (wheelDoc.head||wheelDoc.documentElement).appendChild(style);
+      }
+      style.textContent='\n'
+        + '.angle-label{font-size:22px!important;font-weight:900!important;fill:url(#angleNumbersGold3DV23)!important;stroke:#5A2F12!important;stroke-width:1.15!important;stroke-opacity:.92!important;paint-order:stroke fill!important;filter:url(#angleNumbersDepthV23)!important;}\n'
+        + '.angle-label.ten-degree{font-size:24px!important;font-weight:900!important;}\n'
+        + '.crest-label{font-size:31px!important;font-weight:900!important;filter:url(#angleNumbersDepthV23)!important;}\n'
+        + '.crest-label.side{font-size:27px!important;}\n';
+      return style;
+    }
+
+    function applyAngleLabels(){
+      try{
+        var wheelDoc=locateWheelDocument(appFrame.contentDocument,0);
+        if(!wheelDoc)return false;
+        var wheel=wheelDoc.getElementById('wheel');
+        if(!wheel)return false;
+        if(!ensureDefs(wheelDoc))return false;
+        ensureStyle(wheelDoc);
+
+        var regular=wheelDoc.querySelectorAll('.angle-label');
+        var crest=wheelDoc.querySelectorAll('.crest-label');
+        if(!regular.length&&!crest.length)return false;
+
+        wheelDoc.documentElement.dataset.angleLabelsComfort3D='true';
+        wheelDoc.documentElement.dataset.angleLabelRegularSize='22';
+        wheelDoc.documentElement.dataset.angleLabelTenDegreeSize='24';
+        wheelDoc.documentElement.dataset.crestLabelSize='31';
+        wheelDoc.documentElement.dataset.geometryPreserved='true';
+
+        if(observedWheel!==wheel){
+          if(observer)observer.disconnect();
+          observer=new MutationObserver(scheduleApply);
+          observer.observe(wheel,{childList:true,subtree:true});
+          observedWheel=wheel;
+        }
+
+        if(wheelDoc.defaultView){
+          wheelDoc.defaultView.__auditKawkabatAngleLabels3DV23=function(){
+            return{
+              ok:regular.length>0,
+              regularAngleLabelCount:regular.length,
+              crestLabelCount:crest.length,
+              regularFontSize:'22px',
+              tenDegreeFontSize:'24px',
+              crestFontSize:'31px',
+              style:'subtle-gold-3d',
+              changedArea:'angle-label-appearance-only',
+              positionsChanged:false,
+              transformsChanged:false,
+              geometryChanged:false,
+              cellWidthChanged:false,
+              wheelChanged:false,
+              zodiacChanged:false,
+              numbersChanged:false,
+              valuesChanged:false
+            };
+          };
+        }
+        return true;
+      }catch(error){
+        return false;
+      }
+    }
+
+    function scheduleApply(){
+      if(timer)clearTimeout(timer);
+      timer=setTimeout(function(){timer=null;applyAngleLabels();},50);
+    }
+
+    function startPolling(){
+      if(poll)clearInterval(poll);
+      var attempts=0;
+      poll=setInterval(function(){
+        attempts+=1;
+        if(applyAngleLabels()||attempts>=500){
+          clearInterval(poll);
+          poll=null;
+        }
+      },100);
+    }
+
+    appFrame.addEventListener('load',startPolling);
+    startPolling();
+  }());
+  </script>
+</body>
+</html>
