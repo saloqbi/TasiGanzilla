@@ -16,101 +16,31 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/d2914da0c93ae549c759ef2922b3907e71864812/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9.html';
+    var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f47b3ab4994629f03f24dc473bf870d84a6ad73d/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9.html';
     function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes);}
-    function clockwiseBindingRuntime(){
+    function layoutDirectionController(){
       'use strict';
       var frame=document.getElementById('workFrame');
       var checkbox=document.querySelector('input[aria-label="Layout clockwise"]');
-      var boundDocument=null;
-      var snapshot=null;
-      var pollTimer=null;
-      var textGroupIds=[
-        'numbersRingOne','numbersRingTwo',
-        'approvedCycleOneNumbers','approvedCycleTwoNumbers','approvedCycleThreeNumbers','approvedCycleFourNumbers','approvedCycleFiveNumbers',
-        'approvedCycleSixNumbers','approvedCycleSevenNumbers','approvedCycleEightNumbers','approvedCycleNineNumbers','approvedCycleTenNumbers'
-      ];
       if(!frame||!checkbox)return;
-      function getColorClass(node){
-        if(node.classList.contains('number-red'))return 'number-red';
-        if(node.classList.contains('number-blue'))return 'number-blue';
-        if(node.classList.contains('number-black'))return 'number-black';
-        return '';
-      }
-      function capture(documentRef){
-        var textGroups=[];
-        for(var groupIndex=0;groupIndex<textGroupIds.length;groupIndex+=1){
-          var group=documentRef.getElementById(textGroupIds[groupIndex]);
-          if(!group||group.children.length!==36)return false;
-          var nodes=Array.prototype.slice.call(group.children);
-          textGroups.push({
-            id:textGroupIds[groupIndex],
-            nodes:nodes,
-            values:nodes.map(function(node){return{text:node.textContent,color:getColorClass(node)};})
-          });
-        }
-        var labelsGroup=documentRef.getElementById('allBalancedDaysZodiac');
-        if(!labelsGroup||labelsGroup.children.length!==36)return false;
-        var labelNodes=Array.prototype.slice.call(labelsGroup.children);
-        boundDocument=documentRef;
-        snapshot={
-          textGroups:textGroups,
-          labels:{nodes:labelNodes,values:labelNodes.map(function(node){return node.innerHTML;})}
-        };
-        applyDirection(checkbox.checked);
-        window.__auditKawkabatLayoutClockwiseControlV1=function(){
-          return{
-            connected:true,
-            checked:checkbox.checked,
-            clockwise:checkbox.checked,
-            textGroupCount:textGroups.length,
-            numberCount:textGroups.length*36,
-            labelCount:labelNodes.length,
-            geometryChanged:false,
-            frameChanged:false,
-            centerChanged:false
-          };
-        };
-        return true;
-      }
-      function applyDirection(isClockwise){
-        if(!snapshot)return;
-        snapshot.textGroups.forEach(function(group){
-          group.nodes.forEach(function(node,index){
-            var sourceIndex=isClockwise?index:(36-index)%36;
-            var source=group.values[sourceIndex];
-            node.textContent=source.text;
-            node.classList.remove('number-red','number-blue','number-black');
-            if(source.color)node.classList.add(source.color);
-          });
-        });
-        snapshot.labels.nodes.forEach(function(node,index){
-          var sourceIndex=isClockwise?index:(36-index)%36;
-          node.innerHTML=snapshot.labels.values[sourceIndex];
-        });
-        frame.setAttribute('data-layout-clockwise',isClockwise?'true':'false');
-      }
-      function tryBind(){
-        try{
-          var documentRef=frame.contentDocument;
-          if(!documentRef||!documentRef.getElementById('wheel'))return false;
-          if(documentRef!==boundDocument||!snapshot)return capture(documentRef);
-          applyDirection(checkbox.checked);
-          return true;
-        }catch(error){return false;}
-      }
-      function startPolling(){
-        if(pollTimer)clearInterval(pollTimer);
-        var attempts=0;
-        pollTimer=setInterval(function(){
-          attempts+=1;
-          if(tryBind()||attempts>=300){clearInterval(pollTimer);pollTimer=null;}
-        },100);
+      function apply(){
+        var clockwise=checkbox.checked;
+        var next=wheelUrl+(clockwise?'#clockwise':'#counterclockwise');
+        if(frame.getAttribute('src')!==next)frame.setAttribute('src',next);
+        frame.setAttribute('data-layout-clockwise',clockwise?'true':'false');
       }
       checkbox.checked=true;
-      checkbox.addEventListener('change',function(){if(!tryBind())startPolling();});
-      frame.addEventListener('load',startPolling);
-      startPolling();
+      checkbox.addEventListener('change',apply);
+      apply();
+      window.__auditKawkabatLayoutClockwiseControllerV2=function(){
+        return{
+          connected:true,
+          checked:checkbox.checked,
+          clockwise:checkbox.checked,
+          mode:checkbox.checked?'clockwise':'counterclockwise',
+          duplicateRuntime:false
+        };
+      };
     }
     try{
       var response=await fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
@@ -123,8 +53,8 @@
         '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
         '</style>');
       html=html.replace(/<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
-        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>');
-      html=html.replace('</body>','<script>('+clockwiseBindingRuntime.toString()+')();<\/script></body>');
+        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'#clockwise"></iframe>');
+      html=html.replace('</body>','<script>('+layoutDirectionController.toString()+')();<\/script></body>');
       document.open();document.write(html);document.close();
     }catch(error){document.body.innerHTML='<div class="loading">Unable to load structure: '+String(error.message||error)+'</div>';}
   }());
