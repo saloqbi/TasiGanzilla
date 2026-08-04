@@ -16,25 +16,23 @@
   (async function(){
     'use strict';
     var approvedApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/d9af47f4be4649f4bb687fc937476c40a9b1c54a';
-    var wheelUrl='https://raw.githack.com/saloqbi/TasiGanzilla/c668b86a2735413ba74d79f8c0361ab39f9db87b/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9.html';
+    var clockwiseWheelUrl='https://raw.githack.com/saloqbi/TasiGanzilla/c668b86a2735413ba74d79f8c0361ab39f9db87b/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9.html';
+    var counterclockwiseWheelUrl='https://raw.githack.com/saloqbi/TasiGanzilla/8c45f8ca389c81b2553856e9eb7be3b5b193dcd4/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9-counterclockwise.html';
     function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes);}
     function bindClockwiseControl(){
       var frame=document.getElementById('workFrame');
       var checkbox=document.querySelector('input[aria-label="Layout clockwise"]');
       if(!frame||!checkbox)return;
       checkbox.checked=true;
-      function send(){
-        if(frame.contentWindow)frame.contentWindow.postMessage({type:'KAWKABAT_SET_CLOCKWISE',clockwise:checkbox.checked},'*');
+      function apply(){
+        var next=checkbox.checked?clockwiseWheelUrl:counterclockwiseWheelUrl;
+        if(frame.src!==next)frame.src=next;
+        frame.setAttribute('data-layout-clockwise',checkbox.checked?'true':'false');
       }
-      checkbox.addEventListener('change',send,false);
-      frame.addEventListener('load',function(){setTimeout(send,250);setTimeout(send,900);},false);
-      window.addEventListener('message',function(event){
-        var data=event.data;
-        if(!data)return;
-        if(data.type==='KAWKABAT_CLOCKWISE_READY')send();
-        if(data.type==='KAWKABAT_CLOCKWISE_APPLIED')frame.setAttribute('data-layout-clockwise',data.clockwise?'true':'false');
-      },false);
-      setTimeout(send,1200);
+      checkbox.addEventListener('change',apply,false);
+      checkbox.addEventListener('click',function(){setTimeout(apply,0);},false);
+      apply();
+      window.__auditKawkabatLayoutClockwiseVariantSwitchV1=function(){return{connected:true,checked:checkbox.checked,clockwiseUrl:clockwiseWheelUrl,counterclockwiseUrl:counterclockwiseWheelUrl,transport:'fixed-variant-src-switch',duplicateRuntime:false};};
     }
     try{
       var response=await fetch(approvedApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});
@@ -47,7 +45,7 @@
         '@media(max-width:950px){.work-frame{left:330px!important;width:calc(100% - 330px)!important}.page-scrollbar{left:315px!important}}'+
         '</style>');
       html=html.replace(/<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
-        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>');
+        '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+clockwiseWheelUrl+'"></iframe>');
       html=html.replace('</body>','<script>('+bindClockwiseControl.toString()+')();<\/script></body>');
       document.open();document.write(html);document.close();
     }catch(error){document.body.innerHTML='<div class="loading">Unable to load structure: '+String(error.message||error)+'</div>';}
