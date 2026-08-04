@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Magic Numbers Constellation — 10 default wheels, up to 30</title>
+  <title>Magic Numbers Constellation — 10 default wheels, outward expansion up to 30</title>
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
     body{display:grid;place-items:center;color:#43515a}
@@ -18,12 +18,6 @@
     var panelUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/main/public/kawkabat-panel-base.html';
     var wheelUrl='https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/ba0f6f1dbb07d2a4e5857c7666ffa042f7547c4a/public/kawkabat-wheel-approved-1-360-all-days-zodiac-balanced-v9-no-api.html';
 
-    function decodeBase64(value){
-      var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);
-      for(var i=0;i<binary.length;i+=1)bytes[i]=binary.charCodeAt(i);
-      return new TextDecoder('utf-8').decode(bytes);
-    }
-
     function layoutController(){
       'use strict';
       var frame=document.getElementById('workFrame');
@@ -31,7 +25,7 @@
       var sizeInput=document.querySelector('input[aria-label="Size"]');
       var NS='http://www.w3.org/2000/svg';
       var centerX=2200,centerY=1800;
-      var cycleInner=400,cycleOuter=1500,zodiacOuter=1610;
+      var cycleInner=400,ringWidth=110,baseZodiacOuter=1610;
       var minCycles=1,maxCycles=30,defaultCycles=10;
       var retryTimer=null;
 
@@ -76,12 +70,134 @@
         var start=polar(radius,startDegree),end=polar(radius,endDegree);
         return ['M',start.x,start.y,'A',radius,radius,0,0,1,end.x,end.y].join(' ');
       }
+      function metrics(count){
+        var cycleOuter=cycleInner+(count*ringWidth);
+        var zodiacOuter=cycleOuter+ringWidth;
+        return{
+          cycleOuter:cycleOuter,
+          zodiacOuter:zodiacOuter,
+          zodiacTextRadius:cycleOuter+53,
+          delta:zodiacOuter-baseZodiacOuter,
+          angleInner:cycleOuter+13,
+          angleText:cycleOuter+58,
+          angleBand:cycleOuter+60,
+          angleTickOuter:cycleOuter+108,
+          angleOuter:cycleOuter+107
+        };
+      }
       function uniqueBoundaries(count){
-        var values=[180,290,cycleInner],width=(cycleOuter-cycleInner)/count;
-        for(var index=1;index<=count;index+=1)values.push(cycleInner+(index*width));
-        values.push(zodiacOuter);
-        return values.filter(function(value,index,array){
-          return index===0||Math.abs(value-array[index-1])>.001;
+        var values=[180,290,cycleInner];
+        for(var index=1;index<=count;index+=1)values.push(cycleInner+(index*ringWidth));
+        values.push(cycleInner+((count+1)*ringWidth));
+        return values;
+      }
+      function setCircleRadius(node,radius){if(node)node.setAttribute('r',String(radius));}
+      function setBaseAdjustedRadius(node,delta){
+        if(!node)return;
+        if(!node.hasAttribute('data-base-radius'))node.setAttribute('data-base-radius',node.getAttribute('r')||'0');
+        node.setAttribute('r',String(Number(node.getAttribute('data-base-radius'))+delta));
+      }
+      function updateCanvas(doc,svg,m){
+        var viewWidth=4400+(m.delta*2),viewHeight=3600+(m.delta*2);
+        var displayWidth=3960+(m.delta*1.8),displayHeight=3240+(m.delta*1.8);
+        svg.setAttribute('viewBox',(-m.delta)+' '+(-m.delta)+' '+viewWidth+' '+viewHeight);
+        svg.style.width=Math.max(900,displayWidth)+'px';
+        svg.style.height=Math.max(736,displayHeight)+'px';
+        svg.style.maxWidth='none';
+        svg.style.maxHeight='none';
+        doc.body.style.minWidth=Math.max(1000,viewWidth)+'px';
+        doc.body.style.minHeight=Math.max(820,viewHeight)+'px';
+        doc.documentElement.style.minWidth=Math.max(1000,viewWidth)+'px';
+        doc.documentElement.style.minHeight=Math.max(820,viewHeight)+'px';
+      }
+      function updateDivisionRays(doc,m){
+        doc.querySelectorAll('#divisions [data-ray-index]').forEach(function(group){
+          var index=Number(group.getAttribute('data-ray-index'))||0;
+          var degree=(index*10)-95;
+          var inner=polar(180,degree),outer=polar(m.zodiacOuter,degree);
+          group.querySelectorAll('line').forEach(function(line){
+            line.setAttribute('x1',inner.x.toFixed(3));
+            line.setAttribute('y1',inner.y.toFixed(3));
+            line.setAttribute('x2',outer.x.toFixed(3));
+            line.setAttribute('y2',outer.y.toFixed(3));
+          });
+        });
+      }
+      function updateZodiac(doc,m){
+        var background=doc.getElementById('thirteenthWheelBackground');
+        if(background)background.setAttribute('r',String(m.cycleOuter+55));
+        doc.querySelectorAll('#allBalancedDaysZodiac .day-zodiac-cell').forEach(function(node){
+          var index=Number(node.getAttribute('data-index'))||0;
+          var angle=(index*10)-90,point=polar(m.zodiacTextRadius,angle),rotation=index*10;
+          if(rotation>90&&rotation<270)rotation+=180;
+          var transform='translate('+point.x.toFixed(3)+' '+point.y.toFixed(3)+') rotate('+rotation+')';
+          node.setAttribute('data-clockwise-transform',transform);
+          node.setAttribute('transform',transform);
+        });
+      }
+      function updateAngleTicksAndLabels(doc,m){
+        doc.querySelectorAll('#angleTicks line').forEach(function(line,degree){
+          var length=degree%10===0?25:degree%5===0?16:8;
+          var outer=polar(m.angleTickOuter,degree-90),inner=polar(m.angleTickOuter-length,degree-90);
+          line.setAttribute('x1',outer.x.toFixed(3));
+          line.setAttribute('y1',outer.y.toFixed(3));
+          line.setAttribute('x2',inner.x.toFixed(3));
+          line.setAttribute('y2',inner.y.toFixed(3));
+        });
+        doc.querySelectorAll('#angleLabels text').forEach(function(text){
+          var degree=Number(String(text.textContent||'').replace(/[^0-9.-]/g,''));
+          if(!Number.isFinite(degree))return;
+          var point=polar(m.angleText,degree-90),rotation=degree;
+          if(degree>90&&degree<270)rotation+=180;
+          text.setAttribute('x',point.x.toFixed(3));
+          text.setAttribute('y',point.y.toFixed(3));
+          text.setAttribute('transform','rotate('+rotation+' '+point.x.toFixed(3)+' '+point.y.toFixed(3)+')');
+        });
+      }
+      function updateOuterStructure(doc,m){
+        var angleFrame=doc.getElementById('angleFrame');
+        if(angleFrame){
+          setCircleRadius(angleFrame.querySelector('.angle-band-shadow'),m.angleBand);
+          setCircleRadius(angleFrame.querySelector('.angle-band'),m.angleBand);
+          setCircleRadius(angleFrame.querySelector('.angle-band-inner-line'),m.angleInner);
+          setCircleRadius(angleFrame.querySelector('.angle-band-outer-line'),m.angleOuter);
+          setCircleRadius(angleFrame.querySelector('.angle-band-highlight'),m.angleOuter-8);
+        }
+        var innerGold=doc.getElementById('innerAngleGold3D');
+        if(innerGold){
+          var innerCircles=innerGold.querySelectorAll('circle');
+          if(innerCircles[0])setCircleRadius(innerCircles[0],m.angleInner);
+          if(innerCircles[1])setCircleRadius(innerCircles[1],m.angleInner);
+          if(innerCircles[2])setCircleRadius(innerCircles[2],m.angleInner-2.2);
+        }
+        doc.querySelectorAll('#outerBlackFrame circle,#outerGoldCrown3D circle').forEach(function(circle){setBaseAdjustedRadius(circle,m.delta);});
+        var ornaments=doc.getElementById('blackBandOrnaments');
+        if(ornaments){
+          ornaments.querySelectorAll('circle').forEach(function(circle){setBaseAdjustedRadius(circle,m.delta);});
+          ornaments.querySelectorAll('use').forEach(function(use){
+            if(!use.hasAttribute('data-base-transform'))use.setAttribute('data-base-transform',use.getAttribute('transform')||'');
+            use.setAttribute('transform',use.getAttribute('data-base-transform')+' translate(0 '+(-m.delta)+')');
+          });
+        }
+        doc.querySelectorAll('#cardinalOrnaments .cardinal-ornament').forEach(function(group){
+          var angle=Number(group.getAttribute('data-angle'));
+          var transform='';
+          if(angle===360)transform='translate(0 '+(-m.delta)+')';
+          else if(angle===90)transform='translate('+m.delta+' 0)';
+          else if(angle===180)transform='translate(0 '+m.delta+')';
+          else if(angle===270)transform='translate('+(-m.delta)+' 0)';
+          group.setAttribute('transform',transform);
+        });
+        updateAngleTicksAndLabels(doc,m);
+      }
+      function recenter(doc){
+        var view=doc.defaultView;
+        if(!view)return;
+        view.requestAnimationFrame(function(){
+          view.scrollTo(
+            Math.max(0,(doc.documentElement.scrollWidth-view.innerWidth)/2),
+            Math.max(0,(doc.documentElement.scrollHeight-view.innerHeight)/2)
+          );
         });
       }
       function rebuildGeometry(doc,count){
@@ -90,17 +206,14 @@
         var specialFills=doc.getElementById('specialFills');
         var specialArcs=doc.getElementById('specialArcs');
         if(!svg||!frames||!specialFills||!specialArcs)return false;
+        var m=metrics(count);
 
-        doc.querySelectorAll('[id^="approvedCycle"][id$="Numbers"],#dynamicApprovedCycles').forEach(function(node){
-          node.remove();
-        });
+        doc.querySelectorAll('[id^="approvedCycle"][id$="Numbers"],#dynamicApprovedCycles').forEach(function(node){node.remove();});
 
         var cycleGroup=doc.createElementNS(NS,'g');
         cycleGroup.setAttribute('id','dynamicApprovedCycles');
         cycleGroup.setAttribute('aria-label',count+' numbered wheels from 1 to '+(count*36));
 
-        var ringWidth=(cycleOuter-cycleInner)/count;
-        var fontSize=Math.max(14,Math.min(24,29-(count*.5)));
         for(var cycle=1;cycle<=count;cycle+=1){
           var radius=cycleInner+((cycle-.5)*ringWidth);
           for(var index=0;index<36;index+=1){
@@ -116,7 +229,7 @@
             text.setAttribute('data-index',index);
             text.setAttribute('data-value',value);
             text.setAttribute('class','number-text approved-cycle-number '+colorClass(value)+(index%9===0?' cardinal-number':''));
-            text.setAttribute('style','font-size:'+fontSize.toFixed(2)+'px!important;pointer-events:none!important');
+            text.setAttribute('style','font-size:24px!important;pointer-events:none!important');
             text.textContent=value;
             cycleGroup.appendChild(text);
           }
@@ -136,9 +249,7 @@
         clearGroup(specialArcs);
         [0,9,18,27].forEach(function(cardinalIndex){
           var start=(cardinalIndex*10)-95,end=(cardinalIndex*10)-85;
-          for(var ring=0;ring<boundaries.length-1;ring+=1){
-            appendPath(specialFills,'special-fill',sector(boundaries[ring],boundaries[ring+1],start,end));
-          }
+          for(var ring=0;ring<boundaries.length-1;ring+=1){appendPath(specialFills,'special-fill',sector(boundaries[ring],boundaries[ring+1],start,end));}
           boundaries.forEach(function(radius){
             var data=arc(radius,start,end);
             appendPath(specialArcs,'special-arc-shadow',data);
@@ -147,19 +258,30 @@
           });
         });
 
+        updateCanvas(doc,svg,m);
+        updateDivisionRays(doc,m);
+        updateZodiac(doc,m);
+        updateOuterStructure(doc,m);
         doc.documentElement.dataset.layoutSize=String(count);
+        doc.documentElement.dataset.constantRingWidth=String(ringWidth);
         if(doc.defaultView){
-          doc.defaultView.__auditKawkabatDynamicSizeV1=function(){
+          doc.defaultView.__auditKawkabatDynamicSizeV2=function(){
             return{
               ok:cycleGroup.children.length===count*36,
               cycleCount:count,
               numberCount:cycleGroup.children.length,
               range:[1,count*36],
               maximumCycleCount:maxCycles,
-              dynamicSize:true
+              dynamicSize:true,
+              outwardExpansion:true,
+              constantRingWidth:ringWidth,
+              cycleOuterRadius:m.cycleOuter,
+              zodiacOuterRadius:m.zodiacOuter,
+              compressedCells:false
             };
           };
         }
+        recenter(doc);
         return true;
       }
 
@@ -179,15 +301,10 @@
           node.setAttribute('y',y);
         });
         doc.querySelectorAll('#allBalancedDaysZodiac .day-zodiac-cell').forEach(function(node){
-          if(!node.hasAttribute('data-clockwise-transform')){
-            node.setAttribute('data-clockwise-transform',node.getAttribute('transform')||'');
-          }
-          if(clockwise){
-            node.setAttribute('transform',node.getAttribute('data-clockwise-transform'));
-            return;
-          }
+          var base=node.getAttribute('data-clockwise-transform')||node.getAttribute('transform')||'';
+          if(clockwise){node.setAttribute('transform',base);return;}
           var index=Number(node.getAttribute('data-index'))||0;
-          var match=node.getAttribute('data-clockwise-transform').match(/translate\(([-\d.]+)\s+([-\d.]+)\)/);
+          var match=base.match(/translate\(([-\d.]+)\s+([-\d.]+)\)/);
           if(!match)return;
           var rotation=(((-index*10)%360)+360)%360;
           if(rotation>90&&rotation<270)rotation+=180;
@@ -214,9 +331,7 @@
         var tries=0;
         function run(){
           tries+=1;
-          if(applyAll()||tries>=240){
-            if(retryTimer){clearInterval(retryTimer);retryTimer=null;}
-          }
+          if(applyAll()||tries>=240){if(retryTimer){clearInterval(retryTimer);retryTimer=null;}}
         }
         run();
         if(tries<240&&!applyAll())retryTimer=setInterval(run,100);
@@ -232,13 +347,11 @@
       sizeInput.max=String(maxCycles);
       sizeInput.step='1';
       sizeInput.value=String(defaultCycles);
-      sizeInput.title='Number of displayed wheels: 1 to 30';
+      sizeInput.title='Number of displayed wheels: 1 to 30; cells expand outward at a fixed width';
 
       clockwiseInput.addEventListener('change',syncWithRetry);
       sizeInput.addEventListener('change',applySizeNow);
-      sizeInput.addEventListener('keydown',function(event){
-        if(event.key==='Enter'){event.preventDefault();applySizeNow();}
-      });
+      sizeInput.addEventListener('keydown',function(event){if(event.key==='Enter'){event.preventDefault();applySizeNow();}});
       frame.addEventListener('load',syncWithRetry);
 
       window.__setKawkabatLayoutClockwise=function(value){
