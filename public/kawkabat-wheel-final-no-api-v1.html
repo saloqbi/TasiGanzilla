@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>كوكبة الأرقام السحرية — الهيكل النهائي بدون GitHub API</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;background:#F7F1E3}
+    body{display:grid;place-items:center;font-family:Arial,Tahoma,sans-serif;color:#5A4C44}
+    .loading{font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="loading">جاري تحميل الهيكل النهائي…</div>
+  <script>
+    (async function(){
+      'use strict';
+      var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/main/public/kawkabat-wheel-static-base.html';
+      try{
+        var response=await fetch(sourceUrl,{cache:'no-store'});
+        if(!response.ok)throw new Error('SOURCE_HTTP_'+response.status);
+        var html=await response.text();
+
+        html=html.replace(/<linearGradient id="blueSteelStroke"[\s\S]*?<\/linearGradient>/,
+          '<linearGradient id="blueSteelStroke" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8FA8B6"/><stop offset="100%" stop-color="#8FA8B6"/></linearGradient>');
+        html=html.replace(/<linearGradient id="blueSteelHighlight"[\s\S]*?<\/linearGradient>/,
+          '<linearGradient id="blueSteelHighlight" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8FA8B6"/><stop offset="100%" stop-color="#8FA8B6"/></linearGradient>');
+        html=html.replace(/<linearGradient id="angleGoldBand"[\s\S]*?<\/linearGradient>/,
+          '<linearGradient id="angleGoldBand" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#8E8078"/><stop offset="100%" stop-color="#8E8078"/></linearGradient>');
+
+        var unifiedGold='<linearGradient id="ornateGold" x1="0%" y1="0%" x2="100%" y2="100%">'+
+          '<stop offset="0%" stop-color="#5A2A07"/>'+
+          '<stop offset="14%" stop-color="#9A5516"/>'+
+          '<stop offset="30%" stop-color="#D9962F"/>'+
+          '<stop offset="46%" stop-color="#FFE09A"/>'+
+          '<stop offset="58%" stop-color="#E7B24C"/>'+
+          '<stop offset="74%" stop-color="#B86B1D"/>'+
+          '<stop offset="88%" stop-color="#F2C86E"/>'+
+          '<stop offset="100%" stop-color="#642D09"/>'+
+        '</linearGradient>';
+        var unifiedGoldFill='<linearGradient id="ornamentFill" x1="0%" y1="0%" x2="0%" y2="100%">'+
+          '<stop offset="0%" stop-color="#FFE09A"/>'+
+          '<stop offset="28%" stop-color="#E7B24C"/>'+
+          '<stop offset="58%" stop-color="#B86B1D"/>'+
+          '<stop offset="82%" stop-color="#7A3B0D"/>'+
+          '<stop offset="100%" stop-color="#4A2105"/>'+
+        '</linearGradient>';
+        html=html.replace(/<linearGradient id="ornateGold"[\s\S]*?<\/linearGradient>/,unifiedGold);
+        html=html.replace(/<linearGradient id="ornamentFill"[\s\S]*?<\/linearGradient>/,unifiedGoldFill);
+        html=html.replace('.outer-gold-line{fill:none;stroke:url(#ornateGold);','.outer-gold-line{fill:none;stroke:url(#blueSteelStroke);');
+
+        html=html.replace('</style>',
+          '.angle-band-inner-line{stroke:none!important}'+
+          '.inner-angle-gold-shadow{fill:none;stroke:#5A2A07;stroke-width:9;opacity:.96;vector-effect:non-scaling-stroke}'+
+          '.inner-angle-gold-metal{fill:none;stroke:url(#ornateGold);stroke-width:6;vector-effect:non-scaling-stroke;filter:drop-shadow(0 1.5px 1.2px rgba(0,0,0,.48))}'+
+          '.inner-angle-gold-highlight{fill:none;stroke:#FFE7A7;stroke-width:1.35;opacity:.96;vector-effect:non-scaling-stroke}'+
+          '.outer-gold-line.thick{stroke:#5A2A07!important;stroke-width:12!important;filter:drop-shadow(0 2px 1.5px rgba(0,0,0,.58))}'+
+          '.outer-crown-metal{fill:none;stroke:url(#ornateGold);stroke-width:8;vector-effect:non-scaling-stroke;filter:drop-shadow(0 1.5px 1.2px rgba(0,0,0,.48))}'+
+          '.outer-crown-highlight{fill:none;stroke:#FFE7A7;stroke-width:1.55;opacity:.96;vector-effect:non-scaling-stroke}'+
+          '.black-band-vine-ring{fill:none;stroke:url(#ornateGold);stroke-width:2.2;opacity:.96;vector-effect:non-scaling-stroke}'+
+          '.black-band-mini-gold{fill:none;stroke:url(#ornateGold);stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}'+
+          '.black-band-mini-frame{fill:url(#ornamentFill);stroke:url(#ornateGold);stroke-width:2.3;vector-effect:non-scaling-stroke}'+
+          '.black-band-mini-gem{fill:url(#blueGem);stroke:#FFF1BA;stroke-width:2;vector-effect:non-scaling-stroke}'+
+          '.ornament-fine{stroke:url(#ornateGold)!important}.crest-label{fill:url(#ornateGold)!important}'+
+          '#blackBandOrnaments,#outerGoldCrown3D,#innerAngleGold3D{pointer-events:none;filter:drop-shadow(0 1.5px 1.5px rgba(0,0,0,.55))}'+
+          '#centerClockPanel{display:none;pointer-events:none}'+
+          '#centerToggleHit{fill:#fff;fill-opacity:.001;cursor:pointer;pointer-events:all;stroke:none!important;outline:none}'+
+          '.clock-face-bg{fill:url(#clockFaceFill);stroke:#3A1804;stroke-width:5;filter:drop-shadow(0 3px 3px rgba(0,0,0,.42))}'+
+          '.clock-ring-shadow{fill:none;stroke:#321304;stroke-width:15;opacity:.96}'+
+          '.clock-ring-metal{fill:none;stroke:url(#ornateGold);stroke-width:9}'+
+          '.clock-ring-mid{fill:none;stroke:#B66A1C;stroke-width:3.2;opacity:.95}'+
+          '.clock-ring-highlight{fill:none;stroke:#FFE7A7;stroke-width:2;opacity:.98}'+
+          '.clock-ring-beads{fill:none;stroke:#7A3B0D;stroke-width:1.35;stroke-dasharray:2 5;opacity:.88}'+
+          '.clock-ornament{fill:url(#ornamentFill);stroke:url(#ornateGold);stroke-width:2.4;filter:drop-shadow(0 1px 1px rgba(0,0,0,.42))}'+
+          '.clock-filigree{fill:none;stroke:url(#ornateGold);stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}'+
+          '.clock-mini-gem{fill:url(#blueGem);stroke:#FFF1BA;stroke-width:1.25}'+
+          '.clock-text{font-family:Arial,Tahoma,sans-serif;fill:#17110D;text-anchor:middle;dominant-baseline:central;direction:ltr;unicode-bidi:bidi-override;font-weight:900;paint-order:stroke fill;stroke:#F6E8C8;stroke-width:.45}'+
+          '.clock-date{font-size:23px;letter-spacing:1.4px;font-weight:900}.clock-angle{font-size:31px;font-weight:900}'+
+          '.clock-time{font-size:29px;font-weight:900;font-variant-numeric:tabular-nums}'+
+          '.clock-hijri{font-size:16px;font-weight:900;direction:rtl;unicode-bidi:plaintext}'+
+          '.clock-divider{stroke:url(#ornateGold);stroke-width:2.8;stroke-linecap:round}'+
+          '.clock-divider-ornament{fill:url(#ornamentFill);stroke:#FFE09A;stroke-width:1.2}'+
+          '</style>');
+
+        html=html.replace('</defs>',
+          '<radialGradient id="clockFaceFill" cx="42%" cy="34%" r="72%">'+
+            '<stop offset="0%" stop-color="#FFFDF4"/><stop offset="48%" stop-color="#F0E2CF"/><stop offset="82%" stop-color="#D5BC98"/><stop offset="100%" stop-color="#AD8458"/>'+
+          '</radialGradient>'+
+          '<g id="blackBandMiniOrnament">'+
+            '<path class="black-band-mini-gold" d="M2148 48 H2183 M2217 48 H2252"/>'+
+            '<path class="black-band-mini-gold" d="M2157 48 C2165 35 2176 36 2184 48 C2176 60 2165 61 2157 48"/>'+
+            '<path class="black-band-mini-gold" d="M2243 48 C2235 35 2224 36 2216 48 C2224 60 2235 61 2243 48"/>'+
+            '<path class="black-band-mini-frame" d="M2183 48 L2200 30 L2217 48 L2200 66 Z"/>'+
+            '<path class="black-band-mini-gem" d="M2191 48 L2200 39 L2209 48 L2200 57 Z"/>'+
+          '</g></defs>');
+
+        html=html.replace('<g id="specialFills"></g>',
+          '<circle id="thirteenthWheelBackground" cx="2200" cy="1800" r="1555" fill="none" stroke="#E4D3C2" stroke-width="110"/><g id="specialFills"></g>');
+
+        html=html.replace('<g id="angleTicks"></g>',
+          '<g id="innerAngleGold3D" aria-label="حافة داخلية ذهبية ثلاثية الأبعاد مطابقة للإطار العلوي">'+
+            '<circle class="inner-angle-gold-shadow" cx="2200" cy="1800" r="1623"/>'+
+            '<circle class="inner-angle-gold-metal" cx="2200" cy="1800" r="1623"/>'+
+            '<circle class="inner-angle-gold-highlight" cx="2200" cy="1800" r="1620.8"/>'+
+          '</g><g id="angleTicks"></g>');
+
+        html=html.replace('<g id="cardinalOrnaments">',
+          '<g id="outerGoldCrown3D" aria-label="حافة ذهبية موحدة ثلاثية الأبعاد">'+
+            '<circle class="outer-crown-metal" cx="2200" cy="1800" r="1784"/>'+
+            '<circle class="outer-crown-highlight" cx="2200" cy="1800" r="1781.5"/>'+
+          '</g>'+
+          '<g id="blackBandOrnaments" aria-label="زخارف ذهبية وفيروزية داخل الإطار الأسود">'+
+            '<circle class="black-band-vine-ring" cx="2200" cy="1800" r="1752"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(30 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(60 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(120 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(150 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(210 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(240 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(300 2200 1800)"/>'+
+            '<use href="#blackBandMiniOrnament" transform="rotate(330 2200 1800)"/>'+
+          '</g><g id="cardinalOrnaments">');
+
+        html=html.replace('</svg>',
+          '<g id="centerClockPanel" aria-label="ساعة 24 و12 ساعة مع الزاوية والاختزال">'+
+            '<circle class="clock-face-bg" cx="2200" cy="1800" r="176"/>'+
+            '<circle class="clock-ring-shadow" cx="2200" cy="1800" r="173"/>'+
+            '<circle class="clock-ring-metal" cx="2200" cy="1800" r="170"/>'+
+            '<circle class="clock-ring-mid" cx="2200" cy="1800" r="164"/>'+
+            '<circle class="clock-ring-highlight" cx="2200" cy="1800" r="166.5"/>'+
+            '<circle class="clock-ring-beads" cx="2200" cy="1800" r="159"/>'+
+            '<path class="clock-ornament" d="M2200 1625 L2213 1642 L2200 1659 L2187 1642 Z"/>'+
+            '<path class="clock-ornament" d="M2375 1800 L2358 1813 L2341 1800 L2358 1787 Z"/>'+
+            '<path class="clock-ornament" d="M2200 1975 L2187 1958 L2200 1941 L2213 1958 Z"/>'+
+            '<path class="clock-ornament" d="M2025 1800 L2042 1787 L2059 1800 L2042 1813 Z"/>'+
+            '<path class="clock-filigree" d="M2183 1650 C2168 1638 2150 1642 2140 1657 C2152 1650 2163 1655 2171 1666"/>'+
+            '<path class="clock-filigree" d="M2217 1650 C2232 1638 2250 1642 2260 1657 C2248 1650 2237 1655 2229 1666"/>'+
+            '<path class="clock-filigree" d="M2183 1950 C2168 1962 2150 1958 2140 1943 C2152 1950 2163 1945 2171 1934"/>'+
+            '<path class="clock-filigree" d="M2217 1950 C2232 1962 2250 1958 2260 1943 C2248 1950 2237 1945 2229 1934"/>'+
+            '<circle class="clock-mini-gem" cx="2140" cy="1657" r="4.4"/>'+
+            '<circle class="clock-mini-gem" cx="2260" cy="1657" r="4.4"/>'+
+            '<circle class="clock-mini-gem" cx="2140" cy="1943" r="4.4"/>'+
+            '<circle class="clock-mini-gem" cx="2260" cy="1943" r="4.4"/>'+
+            '<text id="clockDate" class="clock-text clock-date" x="2200" y="1679">-- - -- - ----</text>'+
+            '<text id="clockAngleTop" class="clock-text clock-angle" x="2200" y="1724">0° = 0</text>'+
+            '<text id="clockTime24" class="clock-text clock-time" x="2200" y="1768">00:00:00 = 0</text>'+
+            '<line class="clock-divider" x1="2127" y1="1802" x2="2273" y2="1802"/>'+
+            '<path class="clock-divider-ornament" d="M2191 1802 L2200 1795 L2209 1802 L2200 1809 Z"/>'+
+            '<text id="clockTime12" class="clock-text clock-time" x="2200" y="1838">00:00:00 = 0</text>'+
+            '<text id="clockAngleBottom" class="clock-text clock-angle" x="2200" y="1882">0° = 0</text>'+
+            '<text id="clockHijri" class="clock-text clock-hijri" x="2200" y="1928">اليوم والتاريخ الهجري</text>'+
+          '</g>'+
+          '<circle id="centerToggleHit" cx="2200" cy="1800" r="190" role="button" aria-label="التبديل بين الشعار والساعة" aria-pressed="false"/>'+
+          '</svg>');
+
+        html=html.replace('window.__auditKawkabatFinalStructureV3=function(){return{',
+          'window.__auditKawkabatFinalStructureV25=function(){return{flattenedSingleLoader:true,sourceTransport:\'raw-content\',fullWheelRestored:true,centerLogoClockToggle:true,clockRuntimeInsideOriginalScript:true,clockDateFirst:true,clockDateFontSize:23,clockTimeFontSize:29,clockHijriFontSize:16,clockFrameStyle:\'layered-gold-filigree\',clockReductionRule:\'digital-root(hour+minute)\',clockAngleRule:\'minute*6\',blueFrameUniform:true,angleBandUniform:true,innerAngleGold3D:true,outerGoldCrown3D:true,');
+        html=html.replace('build:27,','build:51,');
+
+        var clockRuntime='\n'+
+          'var centerLogo=document.getElementById("logoImage"),centerPanel=document.getElementById("centerClockPanel"),centerHit=document.getElementById("centerToggleHit"),centerShowingClock=false,centerClockTimer=null;'+
+          'function centerPad(n){return String(n).padStart(2,"0")}'+
+          'function centerRoot(n){n=Math.abs(Math.trunc(Number(n)||0));return n===0?0:1+((n-1)%9)}'+
+          'function centerLatin(v){var m={"٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9"};return String(v).replace(/[٠-٩]/g,function(d){return m[d]})}'+
+          'function centerHijri(now){try{var p=new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).formatToParts(now),v={};p.forEach(function(x){if(x.type!=="literal")v[x.type]=centerLatin(x.value)});return [v.weekday,v.day,v.month,v.year].filter(Boolean).join(" ")}catch(e){return ""}}'+
+          'function centerUpdateClock(){var n=new Date(),h24=n.getHours(),m=n.getMinutes(),s=n.getSeconds(),h12=h24%12||12,a=m*6,ar=centerRoot(a);document.getElementById("clockDate").textContent=centerPad(n.getDate())+" - "+centerPad(n.getMonth()+1)+" - "+n.getFullYear();document.getElementById("clockAngleTop").textContent=a+"° = "+ar;document.getElementById("clockTime24").textContent=centerPad(h24)+":"+centerPad(m)+":"+centerPad(s)+" = "+centerRoot(h24+m);document.getElementById("clockTime12").textContent=centerPad(h12)+":"+centerPad(m)+":"+centerPad(s)+" = "+centerRoot(h12+m);document.getElementById("clockAngleBottom").textContent=a+"° = "+ar;document.getElementById("clockHijri").textContent=centerHijri(n)}'+
+          'function centerSetMode(v){centerShowingClock=!!v;centerLogo.style.visibility=centerShowingClock?"hidden":"visible";centerPanel.style.display=centerShowingClock?"inline":"none";centerHit.setAttribute("aria-pressed",centerShowingClock?"true":"false");if(centerShowingClock){centerUpdateClock();if(!centerClockTimer)centerClockTimer=setInterval(centerUpdateClock,1000)}else if(centerClockTimer){clearInterval(centerClockTimer);centerClockTimer=null}}'+
+          'if(centerLogo&&centerPanel&&centerHit){centerHit.addEventListener("click",function(e){e.preventDefault();e.stopPropagation();centerSetMode(!centerShowingClock)});centerSetMode(false);window.__toggleKawkabatCenterClock=function(){centerSetMode(!centerShowingClock);return centerShowingClock}}\n';
+        var closeTag='</scr'+'ipt>';
+        var marker='}());\n'+closeTag;
+        if(html.indexOf(marker)<0)marker='}());\r\n'+closeTag;
+        if(html.indexOf(marker)<0)throw new Error('BASE_SCRIPT_TAIL_NOT_FOUND');
+        html=html.replace(marker,clockRuntime+'}());\n'+closeTag);
+
+        document.open();
+        document.write(html);
+        document.close();
+      }catch(error){
+        document.body.innerHTML='<div class="loading">تعذر تحميل الهيكل: '+String(error.message||error)+'</div>';
+      }
+    }());
+  </script>
+</body>
+</html>
