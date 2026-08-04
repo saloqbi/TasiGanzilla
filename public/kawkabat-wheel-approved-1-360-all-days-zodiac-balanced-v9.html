@@ -5,9 +5,91 @@
 (async function(){'use strict';
 var sourceApi='https://api.github.com/repos/saloqbi/TasiGanzilla/git/blobs/69d0a2215b79fd13cd45a476eea933ccfc035448';
 function decodeBase64(value){var binary=atob(String(value||'').replace(/\s/g,'')),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new TextDecoder('utf-8').decode(bytes)}
+function wheelDirectionRuntime(){
+  'use strict';
+  var groupIds=[
+    'numbersRingOne','numbersRingTwo',
+    'approvedCycleOneNumbers','approvedCycleTwoNumbers','approvedCycleThreeNumbers','approvedCycleFourNumbers','approvedCycleFiveNumbers',
+    'approvedCycleSixNumbers','approvedCycleSevenNumbers','approvedCycleEightNumbers','approvedCycleNineNumbers','approvedCycleTenNumbers'
+  ];
+  var snapshot=null;
+  var timer=null;
+  function colorClass(node){
+    if(node.classList.contains('number-red'))return 'number-red';
+    if(node.classList.contains('number-blue'))return 'number-blue';
+    if(node.classList.contains('number-black'))return 'number-black';
+    return '';
+  }
+  function capture(){
+    var groups=[];
+    for(var groupIndex=0;groupIndex<groupIds.length;groupIndex+=1){
+      var group=document.getElementById(groupIds[groupIndex]);
+      if(!group||group.children.length!==36)return false;
+      var nodes=Array.prototype.slice.call(group.children);
+      groups.push({
+        nodes:nodes,
+        values:nodes.map(function(node){return{text:node.textContent,color:colorClass(node)};})
+      });
+    }
+    var labelsGroup=document.getElementById('allBalancedDaysZodiac');
+    if(!labelsGroup||labelsGroup.children.length!==36)return false;
+    var labelNodes=Array.prototype.slice.call(labelsGroup.children);
+    snapshot={
+      groups:groups,
+      labels:{nodes:labelNodes,values:labelNodes.map(function(node){return node.innerHTML;})}
+    };
+    return true;
+  }
+  function clockwiseRequested(){return String(location.hash||'').toLowerCase()!=='#counterclockwise';}
+  function apply(){
+    if(!snapshot&&!capture())return false;
+    var clockwise=clockwiseRequested();
+    snapshot.groups.forEach(function(group){
+      group.nodes.forEach(function(node,index){
+        var source=group.values[clockwise?index:(36-index)%36];
+        node.textContent=source.text;
+        node.classList.remove('number-red','number-blue','number-black');
+        if(source.color)node.classList.add(source.color);
+      });
+    });
+    snapshot.labels.nodes.forEach(function(node,index){
+      node.innerHTML=snapshot.labels.values[clockwise?index:(36-index)%36];
+    });
+    document.documentElement.setAttribute('data-layout-clockwise',clockwise?'true':'false');
+    window.__auditKawkabatLayoutClockwiseControlV2=function(){
+      return{
+        connected:true,
+        clockwise:clockwise,
+        numberGroupCount:snapshot.groups.length,
+        numberCount:snapshot.groups.length*36,
+        labelCount:snapshot.labels.nodes.length,
+        topAnchorPreserved:true,
+        geometryChanged:false
+      };
+    };
+    return true;
+  }
+  function start(){
+    if(timer)clearInterval(timer);
+    var attempts=0;
+    timer=setInterval(function(){
+      attempts+=1;
+      if(apply()||attempts>=300){clearInterval(timer);timer=null;}
+    },50);
+  }
+  window.addEventListener('hashchange',function(){if(!apply())start();});
+  start();
+}
 try{
  var response=await fetch(sourceApi,{cache:'no-store',headers:{Accept:'application/vnd.github+json'}});if(!response.ok)throw new Error('SOURCE_HTTP_'+response.status);
  var payload=await response.json(),loader=decodeBase64(payload.content);
+ var finalRuntimeHtml='<script>('+wheelDirectionRuntime.toString()+')();<\\/script></body>';
+ var finalRuntimePatch="html=html.replace('</body>',"+JSON.stringify(finalRuntimeHtml)+");";
+ var cyclesDecodeMarker="var payload=await response.json(),loader=decodeBase64(payload.content);";
+ var finalDecodeMarker="var html=new TextDecoder('utf-8').decode(bytes);";
+ var layerBridge="\n var finalDecodeMarker="+JSON.stringify(finalDecodeMarker)+";\n var finalRuntimePatch="+JSON.stringify(finalRuntimePatch)+";\n if(loader.indexOf(finalDecodeMarker)<0)throw new Error('FINAL_RUNTIME_DECODE_MARKER_NOT_FOUND');\n loader=loader.replace(finalDecodeMarker,finalDecodeMarker+finalRuntimePatch);";
+ if(loader.indexOf(cyclesDecodeMarker)<0)throw new Error('CYCLES_DECODE_MARKER_NOT_FOUND');
+ loader=loader.replace(cyclesDecodeMarker,cyclesDecodeMarker+layerBridge);
  var target="html=html.replace('</svg>',cycleGroups+'</svg>');";
  var replacement="var days=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],zodiac=['نار الحمل','تراب الثور','هواء الجوزاء','ماء السرطان','نار الأسد','تراب السنبلة','هواء الميزان','ماء العقرب','نار القوس','تراب الجدي','هواء الدلو','ماء الحوت'],labels='',cx=2200,cy=1800,radius=1553;for(var labelIndex=0;labelIndex<36;labelIndex+=1){var day=labelIndex===0?'الجمعة':days[(labelIndex-1)%7],sign=labelIndex===0?'ماء الحوت':zodiac[(labelIndex-1)%12],angle=labelIndex*10-90,rad=angle*Math.PI/180,x=cx+Math.cos(rad)*radius,y=cy+Math.sin(rad)*radius,rotation=labelIndex*10;if(rotation>90&&rotation<270)rotation+=180;var mod=labelIndex%3,fill=mod===1?'#B52128':mod===2?'#174F8A':'#111111';labels+='<g class=\\\"day-zodiac-cell\\\" data-index=\\\"'+labelIndex+'\\\" transform=\\\"translate('+x.toFixed(3)+' '+y.toFixed(3)+') rotate('+rotation+')\\\"><text x=\\\"0\\\" text-anchor=\\\"middle\\\" direction=\\\"rtl\\\" unicode-bidi=\\\"plaintext\\\" fill=\\\"'+fill+'\\\" style=\\\"font-family:Arial,Tahoma,sans-serif;font-size:26px;font-weight:700;pointer-events:none\\\"><tspan x=\\\"0\\\" y=\\\"-18\\\">'+day+'</tspan><tspan x=\\\"0\\\" y=\\\"18\\\">'+sign+'</tspan></text></g>';}var allLabels='<g id=\\\"allBalancedDaysZodiac\\\" aria-label=\\\"الأيام والأبراج في 36 خلية مع الميلان\\\">'+labels+'</g>';html=html.replace('</svg>',cycleGroups+allLabels+'</svg>');";
  if(loader.indexOf(target)<0)throw new Error('CYCLE_SVG_INSERT_MARKER_NOT_FOUND');
