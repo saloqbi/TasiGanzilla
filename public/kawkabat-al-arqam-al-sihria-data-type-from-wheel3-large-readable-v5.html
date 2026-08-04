@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic Numbers Constellation — Larger Readable Values from Wheel 3 V5</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+    #appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/13b087d6fc40aeaed65fef89493f5296d2f15bab/public/kawkabat-al-arqam-al-sihria-data-type-from-wheel3-v4.html"></iframe>
+  <script>
+  (function(){
+    'use strict';
+
+    var appFrame=document.getElementById('appFrame');
+    var observer=null;
+    var timer=null;
+    var poll=null;
+
+    function enlargeValues(){
+      try{
+        var outerDoc=appFrame.contentDocument;
+        if(!outerDoc)return false;
+        var innerApp=outerDoc.getElementById('appFrame');
+        var appDoc=innerApp&&innerApp.contentDocument;
+        if(!appDoc)return false;
+        var workFrame=appDoc.getElementById('workFrame');
+        var wheelDoc=workFrame&&workFrame.contentDocument;
+        if(!wheelDoc||!wheelDoc.getElementById('wheel'))return false;
+
+        var nodes=wheelDoc.querySelectorAll('#dynamicApprovedCycles .number-text');
+        if(!nodes.length)return false;
+
+        nodes.forEach(function(node){
+          node.style.setProperty('font-family','Arial, Helvetica, sans-serif','important');
+          node.style.setProperty('font-weight','900','important');
+          node.style.setProperty('font-variant-numeric','lining-nums tabular-nums','important');
+          node.style.setProperty('letter-spacing','0px','important');
+          var lines=node.querySelectorAll('tspan');
+          if(lines.length>=2){
+            lines[0].style.setProperty('font-size','19px','important');
+            lines[0].style.setProperty('font-weight','900','important');
+            lines[1].style.setProperty('font-size','13px','important');
+            lines[1].style.setProperty('font-weight','900','important');
+            node.style.removeProperty('font-size');
+          }else{
+            node.style.setProperty('font-size','20px','important');
+          }
+          node.setAttribute('data-large-readable-v5','true');
+        });
+
+        wheelDoc.documentElement.dataset.dataTypeLargeReadable='true';
+        wheelDoc.documentElement.dataset.dataTypeLargeReadableScope='wheel3-and-outward';
+        wheelDoc.documentElement.dataset.geometryChanged='false';
+
+        if(!observer||observer.__wheelDocument!==wheelDoc){
+          if(observer)observer.disconnect();
+          observer=new MutationObserver(schedule);
+          observer.__wheelDocument=wheelDoc;
+          observer.observe(wheelDoc.getElementById('wheel'),{childList:true,subtree:true,characterData:true});
+        }
+
+        if(wheelDoc.defaultView){
+          wheelDoc.defaultView.__auditKawkabatLargeReadableFromWheel3V5=function(){
+            return{
+              ok:nodes.length>0,
+              enlargedNodeCount:nodes.length,
+              singleLineFontSize:20,
+              combinedPrimaryFontSize:19,
+              combinedSecondaryFontSize:13,
+              startsAtWheel:3,
+              innerRingOneChanged:false,
+              innerRingTwoChanged:false,
+              geometryChanged:false
+            };
+          };
+        }
+        return true;
+      }catch(error){
+        return false;
+      }
+    }
+
+    function schedule(){
+      if(timer)clearTimeout(timer);
+      timer=setTimeout(function(){timer=null;enlargeValues();},35);
+    }
+
+    function start(){
+      if(poll)clearInterval(poll);
+      var attempts=0;
+      poll=setInterval(function(){
+        attempts+=1;
+        if(enlargeValues()||attempts>=300){
+          clearInterval(poll);
+          poll=null;
+        }
+      },100);
+    }
+
+    appFrame.addEventListener('load',start);
+    start();
+  }());
+  </script>
+</body>
+</html>
