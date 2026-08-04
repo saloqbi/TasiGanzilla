@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Magic Numbers Constellation — Larger Angle Numbers Only V24</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+    #appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+  </style>
+</head>
+<body>
+  <iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/23cef112b5ad5bf6eb1b0afc42d1bc8718c7268f/public/kawkabat-al-arqam-al-sihria-zodiac-cdb09a-gradient-preserve-display-v22.html"></iframe>
+  <script>
+  (function(){
+    'use strict';
+
+    var appFrame=document.getElementById('appFrame');
+    var poll=null;
+
+    function locateWheelDocument(doc,depth){
+      if(!doc||depth>18)return null;
+      if(doc.getElementById('wheel'))return doc;
+      var frames=doc.querySelectorAll('iframe');
+      for(var i=0;i<frames.length;i+=1){
+        try{
+          var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+          if(found)return found;
+        }catch(error){}
+      }
+      return null;
+    }
+
+    function applyLargerNumbersOnly(){
+      try{
+        var wheelDoc=locateWheelDocument(appFrame.contentDocument,0);
+        if(!wheelDoc)return false;
+
+        var angleLabels=wheelDoc.querySelectorAll('.angle-label');
+        if(!angleLabels.length)return false;
+
+        var style=wheelDoc.getElementById('angleNumbersLargerOnlyV24Style');
+        if(!style){
+          style=wheelDoc.createElement('style');
+          style.id='angleNumbersLargerOnlyV24Style';
+          (wheelDoc.head||wheelDoc.documentElement).appendChild(style);
+        }
+
+        style.textContent='\n'
+          + '.angle-label{font-size:20px!important;font-weight:900!important;}\n'
+          + '.angle-label.ten-degree{font-size:22px!important;font-weight:900!important;}\n';
+
+        wheelDoc.documentElement.dataset.angleNumbersLargerOnly='true';
+        wheelDoc.documentElement.dataset.angleNumberRegularSize='20';
+        wheelDoc.documentElement.dataset.angleNumberTenDegreeSize='22';
+        wheelDoc.documentElement.dataset.angleNumberColorPreserved='true';
+        wheelDoc.documentElement.dataset.angleNumberEffectsPreserved='true';
+        wheelDoc.documentElement.dataset.geometryPreserved='true';
+
+        if(wheelDoc.defaultView){
+          wheelDoc.defaultView.__auditKawkabatAngleNumbersLargerOnlyV24=function(){
+            return{
+              ok:angleLabels.length>0,
+              changedArea:'angle-number-font-size-only',
+              regularFontSize:'20px',
+              tenDegreeFontSize:'22px',
+              colorChanged:false,
+              fillChanged:false,
+              strokeChanged:false,
+              filterChanged:false,
+              shadowChanged:false,
+              positionChanged:false,
+              transformChanged:false,
+              geometryChanged:false,
+              cellWidthChanged:false,
+              zodiacChanged:false,
+              numbersChanged:false,
+              valuesChanged:false,
+              crest360Changed:false
+            };
+          };
+        }
+        return true;
+      }catch(error){
+        return false;
+      }
+    }
+
+    function startPolling(){
+      if(poll)clearInterval(poll);
+      var attempts=0;
+      poll=setInterval(function(){
+        attempts+=1;
+        if(applyLargerNumbersOnly()||attempts>=500){
+          clearInterval(poll);
+          poll=null;
+        }
+      },100);
+    }
+
+    appFrame.addEventListener('load',startPolling);
+    startPolling();
+  }());
+  </script>
+</body>
+</html>
