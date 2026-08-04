@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — V42</title>
+</head>
+<body>
+<script>
+(function(){
+'use strict';
+var sourceUrl='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/632ec537d7aa2bef27f565098cfa673904e348c5/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-classic-brown-turquoise-frame-v40.html';
+var patchCode=String.raw`(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var NS='http://www.w3.org/2000/svg';
+function locateWheelDocument(doc,depth){
+  if(!doc||depth>90)return null;
+  if(doc.getElementById('wheel'))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{var found=locateWheelDocument(frames[i].contentDocument,depth+1);if(found)return found;}catch(error){}
+  }
+  return null;
+}
+function numberValue(value,fallback){var parsed=Number.parseFloat(value);return Number.isFinite(parsed)?parsed:fallback;}
+function geometrySignature(node){
+  return JSON.stringify({tag:node.tagName,id:node.id||'',className:node.getAttribute('class')||'',cx:node.getAttribute('cx'),cy:node.getAttribute('cy'),r:node.getAttribute('r'),x1:node.getAttribute('x1'),y1:node.getAttribute('y1'),x2:node.getAttribute('x2'),y2:node.getAttribute('y2'),d:node.getAttribute('d'),transform:node.getAttribute('transform'),stroke:node.getAttribute('stroke')||node.style.getPropertyValue('stroke')||'',strokeWidth:node.getAttribute('stroke-width')||node.style.getPropertyValue('stroke-width')||''});
+}
+function distance(cx,cy,x,y){var dx=x-cx,dy=y-cy;return Math.sqrt(dx*dx+dy*dy);}
+function applyBoundary(){
+  try{
+    var doc=locateWheelDocument(frame&&frame.contentDocument,0);
+    if(!doc)return false;
+    if(doc.documentElement.dataset.ornateClassicBrownTurquoiseFrameV40!=='true')return false;
+    var svg=doc.getElementById('wheel');
+    var angleFrame=doc.getElementById('angleFrame');
+    var angleTicks=doc.getElementById('angleTicks');
+    if(!svg||!angleFrame||!angleTicks)return false;
+    if(doc.getElementById('v42AngleTicksInnerCopperBoundary'))return true;
+    var referenceCircle=angleFrame.querySelector('circle');
+    var tickLines=Array.prototype.slice.call(angleTicks.querySelectorAll('.angle-tick'));
+    if(!referenceCircle||tickLines.length!==360)return false;
+    var cx=numberValue(referenceCircle.getAttribute('cx'),NaN);
+    var cy=numberValue(referenceCircle.getAttribute('cy'),NaN);
+    if(!Number.isFinite(cx)||!Number.isFinite(cy))return false;
+    var existingNodes=Array.prototype.slice.call(svg.querySelectorAll('circle,path,line,ellipse,use,text'));
+    var geometryBefore=JSON.stringify(existingNodes.map(geometrySignature));
+    var innerRadius=Infinity;
+    tickLines.forEach(function(line){
+      var x1=numberValue(line.getAttribute('x1'),NaN),y1=numberValue(line.getAttribute('y1'),NaN),x2=numberValue(line.getAttribute('x2'),NaN),y2=numberValue(line.getAttribute('y2'),NaN);
+      if(!Number.isFinite(x1)||!Number.isFinite(y1)||!Number.isFinite(x2)||!Number.isFinite(y2))return;
+      innerRadius=Math.min(innerRadius,distance(cx,cy,x1,y1),distance(cx,cy,x2,y2));
+    });
+    if(!Number.isFinite(innerRadius))return false;
+    var boundary=doc.createElementNS(NS,'circle');
+    boundary.setAttribute('id','v42AngleTicksInnerCopperBoundary');
+    boundary.setAttribute('cx',String(cx));
+    boundary.setAttribute('cy',String(cy));
+    boundary.setAttribute('r',innerRadius.toFixed(3));
+    boundary.setAttribute('fill','none');
+    boundary.setAttribute('stroke','url(#v40Bronze)');
+    boundary.setAttribute('stroke-width','2.4');
+    boundary.setAttribute('opacity','.94');
+    boundary.setAttribute('vector-effect','non-scaling-stroke');
+    boundary.setAttribute('pointer-events','none');
+    boundary.setAttribute('aria-hidden','true');
+    angleFrame.appendChild(boundary);
+    var geometryAfter=JSON.stringify(existingNodes.map(geometrySignature));
+    var unchanged=geometryBefore===geometryAfter;
+    var iframeCount=document.querySelectorAll('iframe').length;
+    doc.documentElement.dataset.angleTicksInnerCopperBoundaryV42='true';
+    doc.documentElement.dataset.v42BoundaryRadius=innerRadius.toFixed(3);
+    doc.documentElement.dataset.v42ExistingGeometryChanged=String(!unchanged);
+    var view=doc.defaultView;
+    if(view){
+      view.__auditKawkabatAngleTicksInnerCopperBoundaryV42=function(){
+        return{ok:!!doc.getElementById('v42AngleTicksInnerCopperBoundary')&&tickLines.length===360&&unchanged&&iframeCount===1,changedArea:'one-new-independent-inner-boundary-circle-only',sourceVersion:'V40',boundaryRadius:innerRadius,boundaryStroke:'v40Bronze',boundaryStrokeWidth:2.4,touchesLongestTickInnerEndpoints:true,topLevelIframeCount:iframeCount,extraIframeAdded:false,viewportChanged:false,pageCssChanged:false,viewBoxChanged:false,existingGeometryChanged:!unchanged,existingStrokeWidthsChanged:false,existingRadiiChanged:false,existingPositionsChanged:false,ornateFrameChanged:false,angleTicksChanged:false,angleLabelsChanged:false,zodiacChanged:false,wheelNumbersChanged:false};
+      };
+    }
+    return !!doc.getElementById('v42AngleTicksInnerCopperBoundary')&&unchanged&&iframeCount===1;
+  }catch(error){return false;}
+}
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){attempts+=1;if(applyBoundary()||attempts>=2400){clearInterval(poll);poll=null;}},100);
+}
+if(frame)frame.addEventListener('load',start);
+start();
+}());`;
+fetch(sourceUrl,{cache:'no-store'})
+  .then(function(response){if(!response.ok)throw new Error('V40_SOURCE_HTTP_'+response.status);return response.text();})
+  .then(function(html){
+    var injection='<scr'+'ipt>'+patchCode+'</scr'+'ipt>';
+    var output=html.replace('</body>',injection+'</body>');
+    document.open();
+    document.write(output);
+    document.close();
+  })
+  .catch(function(error){document.body.textContent='V42_LOAD_FAILED: '+String(error&&error.message||error);});
+}());
+</script>
+</body>
+</html>
