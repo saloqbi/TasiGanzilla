@@ -30,6 +30,16 @@
         '</style>');
       html=html.replace(/<iframe class="work-frame"[^>]*>[\s\S]*?<\/iframe>/,
         '<iframe id="workFrame" class="work-frame" title="Magic Numbers Constellation" tabindex="0" src="'+wheelUrl+'"></iframe>');
+      var directionRuntime='<scr'+'ipt>'+
+        "(function(){'use strict';"+
+        "var frame=document.getElementById('workFrame'),checkbox=document.querySelector('input[aria-label=\"Layout clockwise\"]'),centerX=2200,retryTimer=null;"+
+        "function mirroredX(value){return String((centerX*2)-Number(value));}"+
+        "function applyDirection(clockwise){try{var doc=frame&&frame.contentDocument;if(!doc||!doc.getElementById('wheel'))return false;var numbers=doc.querySelectorAll('#numbersRingOne text,#numbersRingTwo text,[id^=\"approvedCycle\"][id$=\"Numbers\"] text');if(numbers.length<432)return false;numbers.forEach(function(node){if(!node.hasAttribute('data-clockwise-x')){node.setAttribute('data-clockwise-x',node.getAttribute('x'));node.setAttribute('data-clockwise-y',node.getAttribute('y'));}var x=node.getAttribute('data-clockwise-x'),y=node.getAttribute('data-clockwise-y');node.setAttribute('x',clockwise?x:mirroredX(x));node.setAttribute('y',y);});var labels=doc.querySelectorAll('#allBalancedDaysZodiac .day-zodiac-cell');labels.forEach(function(node){if(!node.hasAttribute('data-clockwise-transform'))node.setAttribute('data-clockwise-transform',node.getAttribute('transform')||'');if(clockwise){node.setAttribute('transform',node.getAttribute('data-clockwise-transform'));return;}var index=Number(node.getAttribute('data-index'))||0,match=node.getAttribute('data-clockwise-transform').match(/translate\\(([-\\d.]+)\\s+([-\\d.]+)\\)/);if(!match)return;var rotation=(((-index*10)%360)+360)%360;if(rotation>90&&rotation<270)rotation+=180;node.setAttribute('transform','translate('+mirroredX(match[1])+' '+match[2]+') rotate('+rotation+')');});doc.documentElement.dataset.layoutDirection=clockwise?'clockwise':'counterclockwise';return true;}catch(error){return false;}}"+
+        "function syncWithRetry(){if(retryTimer){clearInterval(retryTimer);retryTimer=null;}var tries=0;function run(){tries+=1;if(applyDirection(!!checkbox.checked)||tries>=200){if(retryTimer){clearInterval(retryTimer);retryTimer=null;}}}run();if(tries<200&&!applyDirection(!!checkbox.checked))retryTimer=setInterval(run,100);}"+
+        "if(!frame||!checkbox)return;checkbox.title='Checked: clockwise; unchecked: counterclockwise';checkbox.addEventListener('change',syncWithRetry);frame.addEventListener('load',syncWithRetry);window.__setKawkabatLayoutClockwise=function(value){checkbox.checked=!!value;syncWithRetry();return checkbox.checked;};syncWithRetry();"+
+        "}());"+
+        '</scr'+'ipt>';
+      html=html.replace('</body>',directionRuntime+'</body>');
       document.open();document.write(html);document.close();
     }catch(error){document.body.innerHTML='<div class="loading">Unable to load structure: '+String(error.message||error)+'</div>';}
   }());
