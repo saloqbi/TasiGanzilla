@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Wheel Only No Panel V80</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3;opacity:0;transition:none}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/7e288121e3cd3fa9dc4701ca0cb96f3814f0db8d/public/kawkabat-al-arqam-al-sihria-v74-hide-wheel-scrollbars-test-v75.html"></iframe>
+<script>
+(function(){
+'use strict';
+
+var frame=document.getElementById('appFrame');
+var bootTimer=null;
+var attempts=0;
+var observer=null;
+var observerStopTimer=null;
+var applied=false;
+var PANEL_ATTR='data-v80-removed-panel';
+var PANEL_BRANCH_ATTR='data-v80-removed-panel-branch';
+var WHEEL_BRANCH_ATTR='data-v80-wheel-only-branch';
+var LAYOUT_ATTR='data-v80-wheel-only-layout';
+var STYLE_ID='v80WheelOnlyNoPanelStyle';
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function wheelTarget(doc){
+  var wheel=doc.getElementById('wheel');
+  if(wheel){
+    var tag=String(wheel.tagName||'').toLowerCase();
+    return (tag==='g'||tag==='path')?(wheel.closest('svg')||wheel):wheel;
+  }
+  var best=null,bestArea=0;
+  var canvases=doc.querySelectorAll('canvas');
+  for(var i=0;i<canvases.length;i+=1){
+    var canvas=canvases[i];
+    if(canvas.closest&&canvas.closest('aside'))continue;
+    if(/DrawingOverlay/i.test(canvas.id||''))continue;
+    var rect=canvas.getBoundingClientRect();
+    var area=rect.width*rect.height;
+    if(canvas.width>300&&canvas.height>300&&rect.width>180&&rect.height>180&&area>bestArea){best=canvas;bestArea=area;}
+  }
+  return best;
+}
+
+function panelScore(node){
+  if(!node||!node.querySelector||!node.querySelector('input,select'))return-1;
+  var text=String(node.textContent||'');
+  var terms=['Default','Layout','Visible','Clockwise','Price','Highlight','Protractor','Counter','Secondary scale','الافتراضي','التخطيط','إظهار','السعر','التمييز','المنقلة','العداد','المقياس الثانوي'];
+  var score=0;
+  for(var i=0;i<terms.length;i+=1)if(text.indexOf(terms[i])!==-1)score+=1;
+  var rect=node.getBoundingClientRect();
+  if(rect.width>80&&rect.width<520&&rect.height>180)score+=2;
+  return score;
+}
+
+function findPanel(doc){
+  var candidates=Array.prototype.slice.call(doc.querySelectorAll('aside,[role="complementary"]'));
+  var best=null,bestScore=-1;
+  for(var i=0;i<candidates.length;i+=1){
+    var score=panelScore(candidates[i]);
+    if(score>bestScore){bestScore=score;best=candidates[i];}
+  }
+  return bestScore>=3?best:null;
+}
+
+function ancestors(node){
+  var list=[];
+  var current=node;
+  while(current&&current.parentElement){list.push(current);current=current.parentElement;}
+  return list;
+}
+
+function commonAncestor(a,b){
+  if(!a||!b)return null;
+  var aList=ancestors(a);
+  var bSet=new Set(ancestors(b));
+  for(var i=0;i<aList.length;i+=1)if(bSet.has(aList[i]))return aList[i];
+  return null;
+}
+
+function directBranch(node,ancestor){
+  if(!node||!ancestor)return null;
+  var current=node;
+  while(current.parentElement&&current.parentElement!==ancestor)current=current.parentElement;
+  return current.parentElement===ancestor?current:null;
+}
+
+function installStyle(doc){
+  if(doc.getElementById(STYLE_ID))return;
+  var style=doc.createElement('style');
+  style.id=STYLE_ID;
+  style.textContent=''
+    +'['+PANEL_ATTR+'="true"],['+PANEL_BRANCH_ATTR+'="true"]{display:none!important;visibility:hidden!important;pointer-events:none!important;width:0!important;min-width:0!important;max-width:0!important;height:0!important;min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important;flex:0 0 0!important;grid-column:auto!important}'
+    +'['+LAYOUT_ATTR+'="true"]{width:100%!important;min-width:0!important;max-width:none!important;margin:0!important;padding-left:0!important;padding-right:0!important;grid-template-columns:minmax(0,1fr)!important;column-gap:0!important;gap:0!important;box-sizing:border-box!important}'
+    +'['+WHEEL_BRANCH_ATTR+'="true"]{display:block!important;position:relative!important;left:0!important;right:auto!important;inset-inline-start:0!important;inset-inline-end:auto!important;width:100%!important;min-width:0!important;max-width:none!important;margin:0!important;padding-left:0!important;padding-right:0!important;flex:1 1 100%!important;grid-column:1/-1!important;transform:none!important;translate:none!important;box-sizing:border-box!important;transition:none!important}'
+    +'#v65PanelToggleBtn,#v66PanelBtn{display:none!important;visibility:hidden!important;pointer-events:none!important;width:0!important;min-width:0!important;height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important}';
+  doc.head.appendChild(style);
+}
+
+function markWheelPath(wheel,branch,layout){
+  var node=wheel;
+  var depth=0;
+  while(node&&node!==layout&&depth<18){
+    if(node instanceof wheel.ownerDocument.defaultView.HTMLElement){
+      node.style.setProperty('max-width','none','important');
+      node.style.setProperty('min-width','0','important');
+      node.style.setProperty('box-sizing','border-box','important');
+    }
+    if(node===branch)break;
+    node=node.parentElement;
+    depth+=1;
+  }
+}
+
+function applyWheelOnly(){
+  var result=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(result)return;
+      var wheel=wheelTarget(doc);
+      if(!wheel)return;
+      var panel=findPanel(doc);
+      if(!panel)return;
+      var layout=commonAncestor(panel,wheel);
+      if(!layout||layout===doc.body||layout===doc.documentElement)return;
+      var panelBranch=directBranch(panel,layout)||panel;
+      var wheelBranch=directBranch(wheel,layout);
+      if(!wheelBranch||panelBranch===wheelBranch)return;
+      result={doc:doc,wheel:wheel,panel:panel,layout:layout,panelBranch:panelBranch,wheelBranch:wheelBranch};
+    },0);
+  }catch(error){}
+
+  if(!result)return false;
+  var doc=result.doc;
+  installStyle(doc);
+
+  result.panel.setAttribute(PANEL_ATTR,'true');
+  result.panel.setAttribute('aria-hidden','true');
+  result.panel.setAttribute('inert','');
+  result.panelBranch.setAttribute(PANEL_BRANCH_ATTR,'true');
+  result.panelBranch.setAttribute('aria-hidden','true');
+  result.layout.setAttribute(LAYOUT_ATTR,'true');
+  result.wheelBranch.setAttribute(WHEEL_BRANCH_ATTR,'true');
+  markWheelPath(result.wheel,result.wheelBranch,result.layout);
+
+  var oldButtons=['v65PanelToggleBtn','v66PanelBtn'];
+  for(var i=0;i<oldButtons.length;i+=1){
+    var button=doc.getElementById(oldButtons[i]);
+    if(button){button.setAttribute('aria-hidden','true');button.tabIndex=-1;}
+  }
+
+  doc.documentElement.dataset.v80WheelOnlyNoPanel='true';
+  try{
+    doc.defaultView.__auditKawkabatWheelOnlyNoPanelV80=function(){
+      var panelHidden=result.panel.getAttribute(PANEL_ATTR)==='true';
+      var branchHidden=result.panelBranch.getAttribute(PANEL_BRANCH_ATTR)==='true';
+      var wheelFull=result.wheelBranch.getAttribute(WHEEL_BRANCH_ATTR)==='true';
+      return{
+        ok:panelHidden&&branchHidden&&wheelFull,
+        sourceVersion:'V75',
+        sidePanelRenderedInLayout:false,
+        sidePanelTogglePresent:false,
+        floatingPanelPresent:false,
+        wheelOnlyWorkspace:true,
+        topToolbarPreserved:true,
+        wheelBranchFullWidth:true,
+        continuousLayoutTimer:false,
+        resizeDispatched:false,
+        fitTriggered:false,
+        wheelGeometryChanged:false,
+        ornateFrameChanged:false
+      };
+    };
+  }catch(error){}
+
+  applied=true;
+  frame.style.opacity='1';
+  return true;
+}
+
+function observeBriefly(){
+  if(observer||!applied)return;
+  var wheelDoc=null;
+  try{
+    visit(frame.contentDocument,function(doc){if(!wheelDoc&&doc.documentElement.dataset.v80WheelOnlyNoPanel==='true')wheelDoc=doc;},0);
+  }catch(error){}
+  if(!wheelDoc||!wheelDoc.body)return;
+  observer=new MutationObserver(function(){applyWheelOnly();});
+  observer.observe(wheelDoc.body,{childList:true,subtree:true});
+  observerStopTimer=setTimeout(function(){
+    if(observer){observer.disconnect();observer=null;}
+    observerStopTimer=null;
+  },4000);
+}
+
+function boot(){
+  attempts+=1;
+  if(applyWheelOnly()){
+    bootTimer=null;
+    observeBriefly();
+    return;
+  }
+  if(attempts<140){bootTimer=setTimeout(boot,100);return;}
+  frame.style.opacity='1';
+}
+
+function start(){
+  if(bootTimer)clearTimeout(bootTimer);
+  if(observer){observer.disconnect();observer=null;}
+  if(observerStopTimer){clearTimeout(observerStopTimer);observerStopTimer=null;}
+  attempts=0;
+  applied=false;
+  frame.style.opacity='0';
+  bootTimer=setTimeout(boot,80);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
