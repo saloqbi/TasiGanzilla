@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — V41 Canonical Scroll Position Lock V48</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/05f68f1bb9eda171517c7180ba659ba89b6200e1/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-frame-angle-ticks-inner-copper-boundary-v41.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var boundDocument=null;
+var correcting=false;
+
+function locateWheelDocument(doc,depth){
+  if(!doc||depth>120)return null;
+  try{if(doc.getElementById('wheel'))return doc;}catch(error){}
+  var frames=[];
+  try{frames=doc.querySelectorAll('iframe');}catch(error){return null;}
+  for(var i=0;i<frames.length;i+=1){
+    try{
+      var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+      if(found)return found;
+    }catch(error){}
+  }
+  return null;
+}
+
+function scrollMetrics(doc){
+  var win=doc.defaultView;
+  var de=doc.documentElement;
+  var body=doc.body;
+  var viewportWidth=Math.max(1,(win&&win.innerWidth)||de.clientWidth||(body&&body.clientWidth)||1);
+  var scrollWidth=Math.max(
+    de.scrollWidth||0,
+    body?body.scrollWidth:0,
+    viewportWidth
+  );
+  return{
+    left:Math.max(0,(scrollWidth-viewportWidth)/2),
+    top:0,
+    viewportWidth:viewportWidth,
+    scrollWidth:scrollWidth
+  };
+}
+
+function currentLeft(doc){
+  var win=doc.defaultView;
+  return Number((win&&win.pageXOffset)||doc.documentElement.scrollLeft||(doc.body&&doc.body.scrollLeft)||0);
+}
+
+function currentTop(doc){
+  var win=doc.defaultView;
+  return Number((win&&win.pageYOffset)||doc.documentElement.scrollTop||(doc.body&&doc.body.scrollTop)||0);
+}
+
+function enforcePosition(doc){
+  if(!doc||correcting)return false;
+  var win=doc.defaultView;
+  if(!win)return false;
+  var target=scrollMetrics(doc);
+  var left=currentLeft(doc);
+  var top=currentTop(doc);
+  if(Math.abs(left-target.left)<=1&&Math.abs(top-target.top)<=1)return true;
+  correcting=true;
+  try{
+    win.scrollTo(target.left,target.top);
+    doc.documentElement.scrollLeft=target.left;
+    doc.documentElement.scrollTop=target.top;
+    if(doc.body){
+      doc.body.scrollLeft=target.left;
+      doc.body.scrollTop=target.top;
+    }
+  }catch(error){}
+  correcting=false;
+  return Math.abs(currentLeft(doc)-target.left)<=2&&Math.abs(currentTop(doc)-target.top)<=2;
+}
+
+function bindWheelDocument(doc){
+  if(boundDocument===doc)return;
+  boundDocument=doc;
+  try{if(doc.defaultView.history)doc.defaultView.history.scrollRestoration='manual';}catch(error){}
+  try{doc.documentElement.style.setProperty('scroll-behavior','auto','important');}catch(error){}
+  if(doc.defaultView){
+    doc.defaultView.addEventListener('scroll',function(){
+      if(correcting)return;
+      requestAnimationFrame(function(){enforcePosition(doc);});
+    },{passive:true});
+    doc.defaultView.addEventListener('resize',function(){
+      requestAnimationFrame(function(){enforcePosition(doc);});
+    },{passive:true});
+  }
+}
+
+function applyCanonicalPositionLock(){
+  try{
+    var root=frame.contentDocument;
+    if(!root)return false;
+    var wheelDoc=locateWheelDocument(root,0);
+    if(!wheelDoc)return false;
+    bindWheelDocument(wheelDoc);
+    var ok=enforcePosition(wheelDoc);
+    var target=scrollMetrics(wheelDoc);
+    wheelDoc.documentElement.dataset.v48CanonicalScrollPositionLocked='true';
+    wheelDoc.documentElement.dataset.v48TargetScrollLeft=target.left.toFixed(3);
+    wheelDoc.documentElement.dataset.v48TargetScrollTop='0';
+    wheelDoc.documentElement.dataset.v48InternalScaleChanged='false';
+    wheelDoc.documentElement.dataset.v48GeometryChanged='false';
+    var view=wheelDoc.defaultView;
+    if(view){
+      view.__auditKawkabatCanonicalScrollPositionLockV48=function(){
+        var liveTarget=scrollMetrics(wheelDoc);
+        return{
+          ok:Math.abs(currentLeft(wheelDoc)-liveTarget.left)<=2&&Math.abs(currentTop(wheelDoc))<=2,
+          baseVersion:'V41',
+          immutableBaseCommit:'05f68f1bb9eda171517c7180ba659ba89b6200e1',
+          horizontalRule:'center-entire-wheel-document',
+          verticalRule:'top-zero',
+          targetScrollLeft:liveTarget.left,
+          targetScrollTop:0,
+          currentScrollLeft:currentLeft(wheelDoc),
+          currentScrollTop:currentTop(wheelDoc),
+          scalingApplied:false,
+          viewportOverrideApplied:false,
+          wheelGeometryChanged:false,
+          numberTextChanged:false,
+          controlPanelChanged:false,
+          ornateOuterFrameChanged:false,
+          innerCopperBoundaryChanged:false
+        };
+      };
+    }
+    return ok;
+  }catch(error){return false;}
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    applyCanonicalPositionLock();
+    if(attempts>=3600){clearInterval(poll);poll=null;}
+  },100);
+}
+
+frame.addEventListener('load',start);
+window.addEventListener('resize',function(){applyCanonicalPositionLock();},{passive:true});
+start();
+}());
+</script>
+</body>
+</html>
