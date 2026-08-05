@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Language Linked Safe Reload V49</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/163adbf3e70442608511ec6f35007fe9c1a32430/public/kawkabat-al-arqam-al-sihria-v42-original-frame-display-top-right-toolbar-v47.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var LANGUAGE_KEY='tasi-gannzilla-language-v1';
+
+function locate(doc,depth,predicate){
+  if(!doc||depth>180)return null;
+  if(predicate(doc))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{
+      var found=locate(frames[i].contentDocument,depth+1,predicate);
+      if(found)return found;
+    }catch(error){}
+  }
+  return null;
+}
+
+function getToolbarDocument(){
+  return locate(frame.contentDocument,0,function(doc){
+    return !!doc.getElementById('v47Language');
+  });
+}
+
+function getWheelDocument(){
+  return locate(frame.contentDocument,0,function(doc){
+    return !!doc.getElementById('wheel');
+  });
+}
+
+function readStoredLanguage(view){
+  try{
+    var value=view.localStorage.getItem(LANGUAGE_KEY);
+    return value==='en'?'en':'ar';
+  }catch(error){
+    return 'ar';
+  }
+}
+
+function writeLanguageToAllAccessibleDocuments(lang){
+  function visit(doc,depth){
+    if(!doc||depth>180)return;
+    try{
+      doc.defaultView.localStorage.setItem(LANGUAGE_KEY,lang);
+      doc.documentElement.lang=lang;
+      doc.documentElement.dir=lang==='ar'?'rtl':'ltr';
+      if(doc.body)doc.body.dir=doc.documentElement.dir;
+    }catch(error){}
+    var frames=doc.querySelectorAll('iframe');
+    for(var i=0;i<frames.length;i+=1){
+      try{visit(frames[i].contentDocument,depth+1);}catch(error){}
+    }
+  }
+  try{visit(frame.contentDocument,0);}catch(error){}
+}
+
+function setSaudiFlag(flag){
+  flag.style.setProperty('font-size','0','important');
+  flag.style.setProperty('width','16px','important');
+  flag.style.setProperty('height','11px','important');
+  flag.style.setProperty('border','1px solid rgba(70,70,70,.38)','important');
+  flag.style.setProperty('border-radius','1px','important');
+  flag.style.setProperty('box-sizing','border-box','important');
+  flag.style.setProperty('background','linear-gradient(#fff,#fff) 50% 72%/10px 1px no-repeat,linear-gradient(#fff,#fff) 50% 30%/8px 3px no-repeat,#006c35','important');
+  flag.style.setProperty('box-shadow','inset 0 0 0 1px rgba(255,255,255,.18)','important');
+}
+
+function setEnglishFlag(flag){
+  flag.style.setProperty('font-size','0','important');
+  flag.style.setProperty('width','16px','important');
+  flag.style.setProperty('height','11px','important');
+  flag.style.setProperty('border','1px solid rgba(70,70,70,.38)','important');
+  flag.style.setProperty('border-radius','1px','important');
+  flag.style.setProperty('box-sizing','border-box','important');
+  flag.style.setProperty('background','linear-gradient(90deg,transparent 0 37%,#fff 37% 63%,transparent 63%),linear-gradient(transparent 0 36%,#fff 36% 64%,transparent 64%),linear-gradient(90deg,transparent 0 43%,#c8102e 43% 57%,transparent 57%),linear-gradient(transparent 0 42%,#c8102e 42% 58%,transparent 58%),#012169','important');
+  flag.style.setProperty('box-shadow','inset 0 0 0 1px rgba(255,255,255,.18)','important');
+}
+
+function updateToolbar(doc,lang){
+  var select=doc.getElementById('v47Language');
+  var flag=doc.querySelector('.v47flag');
+  if(!select)return false;
+
+  if(select.options.length>=2){
+    select.options[0].value='en';
+    select.options[0].text='English';
+    select.options[1].value='ar';
+    select.options[1].text='العربية';
+  }
+  select.value=lang;
+  select.title=lang==='ar'?'اختيار اللغة':'Choose language';
+  select.setAttribute('aria-label',select.title);
+  select.style.cursor='pointer';
+  if(flag){
+    if(lang==='ar')setSaudiFlag(flag);
+    else setEnglishFlag(flag);
+  }
+  doc.documentElement.dataset.v49Language=lang;
+  return true;
+}
+
+function activateOriginalLanguageControl(wdoc,lang){
+  try{
+    var root=wdoc.querySelector('[data-gannzilla-language-control="true"]');
+    if(!root)return false;
+    var opener=root.querySelector('button');
+    if(opener)opener.click();
+    var labels=Array.prototype.slice.call(wdoc.querySelectorAll('button'));
+    var wanted=lang==='ar'?'العربية':'English';
+    for(var i=0;i<labels.length;i+=1){
+      if(String(labels[i].textContent||'').trim()===wanted){
+        try{labels[i].dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true}));}catch(error){}
+        labels[i].click();
+        return true;
+      }
+    }
+  }catch(error){}
+  return false;
+}
+
+function changeLanguage(lang){
+  var safeLang=lang==='en'?'en':'ar';
+  var tdoc=getToolbarDocument();
+  var wdoc=getWheelDocument();
+  if(!tdoc||!wdoc)return false;
+
+  updateToolbar(tdoc,safeLang);
+  writeLanguageToAllAccessibleDocuments(safeLang);
+
+  if(activateOriginalLanguageControl(wdoc,safeLang))return true;
+
+  try{
+    wdoc.defaultView.dispatchEvent(new CustomEvent('gannzilla:language-change',{
+      detail:{lang:safeLang,source:'v49-toolbar-safe-reload'}
+    }));
+  }catch(error){}
+
+  try{
+    wdoc.defaultView.setTimeout(function(){
+      wdoc.defaultView.location.reload();
+    },80);
+    return true;
+  }catch(error){
+    return false;
+  }
+}
+
+function bind(){
+  try{
+    var tdoc=getToolbarDocument();
+    var wdoc=getWheelDocument();
+    if(!tdoc||!wdoc)return false;
+    var select=tdoc.getElementById('v47Language');
+    if(!select)return false;
+
+    var current=readStoredLanguage(wdoc.defaultView);
+    updateToolbar(tdoc,current);
+
+    if(select.dataset.v49Bound!=='true'){
+      select.dataset.v49Bound='true';
+      select.addEventListener('change',function(event){
+        changeLanguage(event.target.value);
+      });
+    }
+
+    var view=tdoc.defaultView;
+    if(view){
+      view.__auditKawkabatLanguageLinkedSafeReloadV49=function(){
+        return{
+          ok:select.dataset.v49Bound==='true',
+          sourceVersion:'V47',
+          supportedLanguages:['ar','en'],
+          currentLanguage:select.value,
+          linkedToWheel:true,
+          officialStorageKey:LANGUAGE_KEY,
+          queryMutationUsed:false,
+          safeSameUrlReloadFallback:true,
+          originalLanguageControlPreferred:true,
+          failedFetchPathRemoved:true,
+          wheelGeometryChanged:false,
+          ornateFrameChanged:false,
+          toolbarPositionChanged:false
+        };
+      };
+    }
+    return true;
+  }catch(error){
+    return false;
+  }
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(bind()||attempts>=2600){
+      clearInterval(poll);
+      poll=null;
+    }
+  },100);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
