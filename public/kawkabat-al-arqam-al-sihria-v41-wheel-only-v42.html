@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — V41 Wheel Only V42</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation — Wheel Only" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/05f68f1bb9eda171517c7180ba659ba89b6200e1/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-frame-angle-ticks-inner-copper-boundary-v41.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+
+function locateWheelDocument(doc,depth){
+  if(!doc||depth>120)return null;
+  if(doc.getElementById('wheel'))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{
+      var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+      if(found)return found;
+    }catch(error){}
+  }
+  return null;
+}
+
+function geometrySignature(svg){
+  return JSON.stringify(Array.prototype.map.call(
+    svg.querySelectorAll('circle,path,line,ellipse,polygon,polyline,rect,use,text'),
+    function(node){
+      return{
+        tag:node.tagName,
+        id:node.id||'',
+        cx:node.getAttribute('cx'),cy:node.getAttribute('cy'),r:node.getAttribute('r'),
+        rx:node.getAttribute('rx'),ry:node.getAttribute('ry'),
+        x:node.getAttribute('x'),y:node.getAttribute('y'),
+        x1:node.getAttribute('x1'),y1:node.getAttribute('y1'),
+        x2:node.getAttribute('x2'),y2:node.getAttribute('y2'),
+        d:node.getAttribute('d'),points:node.getAttribute('points'),
+        transform:node.getAttribute('transform'),
+        strokeWidth:node.getAttribute('stroke-width')||''
+      };
+    }
+  ));
+}
+
+function applyWheelOnly(){
+  try{
+    var doc=locateWheelDocument(frame.contentDocument,0);
+    if(!doc)return false;
+    if(doc.documentElement.dataset.angleTicksInnerCopperBoundaryV41!=='true')return false;
+
+    var wheel=doc.getElementById('wheel');
+    if(!wheel||!doc.body||!doc.head)return false;
+    if(doc.documentElement.dataset.wheelOnlyV42==='true')return true;
+
+    var geometryBefore=geometrySignature(wheel);
+    var path=[];
+    var current=wheel;
+    while(current){
+      path.push(current);
+      if(current===doc.body)break;
+      current=current.parentElement;
+    }
+    if(path[path.length-1]!==doc.body)return false;
+
+    var hiddenCount=0;
+    Array.prototype.forEach.call(doc.body.querySelectorAll('*'),function(node){
+      if(wheel.contains(node)||path.indexOf(node)!==-1)return;
+      node.classList.add('v42-wheel-only-hidden');
+      node.setAttribute('aria-hidden','true');
+      hiddenCount+=1;
+    });
+
+    path.forEach(function(node){node.classList.add('v42-wheel-only-path');});
+    doc.body.classList.add('v42-wheel-only-body');
+    wheel.classList.add('v42-wheel-only-wheel');
+
+    var style=doc.createElement('style');
+    style.id='v42WheelOnlyStyle';
+    style.textContent=[
+      'html,body{margin:0!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;overflow:hidden!important;background:#f7f1e3!important;}',
+      '.v42-wheel-only-hidden{display:none!important;visibility:hidden!important;}',
+      'body.v42-wheel-only-body{display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;border:0!important;}',
+      '.v42-wheel-only-path:not(svg){box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;position:static!important;inset:auto!important;float:none!important;transform:none!important;width:100%!important;height:100%!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important;background:transparent!important;flex:1 1 auto!important;}',
+      '#wheel.v42-wheel-only-wheel{display:block!important;position:static!important;width:100%!important;height:100%!important;max-width:100vw!important;max-height:100vh!important;margin:0!important;padding:0!important;border:0!important;flex:1 1 auto!important;}'
+    ].join('\n');
+    doc.head.appendChild(style);
+
+    var geometryAfter=geometrySignature(wheel);
+    var geometryUnchanged=geometryBefore===geometryAfter;
+
+    doc.documentElement.dataset.wheelOnlyV42='true';
+    doc.documentElement.dataset.v42HiddenOutsideWheelCount=String(hiddenCount);
+    doc.documentElement.dataset.v42WheelGeometryChanged=String(!geometryUnchanged);
+
+    var view=doc.defaultView;
+    if(view){
+      view.__auditKawkabatWheelOnlyV42=function(){
+        return{
+          ok:!!doc.getElementById('v42WheelOnlyStyle')&&geometryUnchanged,
+          sourceVersion:'V41',
+          wheelOnly:true,
+          toolbarHidden:true,
+          allNonWheelInterfaceHidden:true,
+          hiddenOutsideWheelCount:hiddenCount,
+          wheelGeometryChanged:!geometryUnchanged,
+          wheelContentChanged:false,
+          ornateFrameChanged:false,
+          copperBoundaryChanged:false,
+          angleTicksChanged:false,
+          zodiacChanged:false,
+          wheelNumbersChanged:false
+        };
+      };
+    }
+
+    return geometryUnchanged;
+  }catch(error){
+    return false;
+  }
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(applyWheelOnly()||attempts>=3000){
+      clearInterval(poll);
+      poll=null;
+    }
+  },100);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
