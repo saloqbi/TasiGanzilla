@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Wheel Viewport Full Width V68</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/fc3f5bc691e0409575c98f5a2fe450224735250f/public/kawkabat-al-arqam-al-sihria-v66-panel-toggle-cached-responsive-v67.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var timer=null;
+var cached=null;
+var originals=new WeakMap();
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function panelButton(){
+  var found=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(found)return;
+      found=doc.getElementById('v66PanelBtn')||doc.getElementById('v65PanelToggleBtn');
+    },0);
+  }catch(error){}
+  return found;
+}
+
+function visibleAside(root){
+  if(!root)return null;
+  var asides=Array.prototype.slice.call(root.children||[]).filter(function(node){
+    if(!node||node.tagName!=='ASIDE')return false;
+    var style=getComputedStyle(node);
+    var rect=node.getBoundingClientRect();
+    return style.display!=='none'&&style.visibility!=='hidden'&&rect.width>2;
+  });
+  return asides[0]||null;
+}
+
+function findLayout(){
+  var result=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(result)return;
+      var roots=doc.querySelectorAll('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
+      for(var i=0;i<roots.length;i+=1){
+        var root=roots[i];
+        var viewport=root.lastElementChild;
+        if(!(viewport instanceof HTMLElement))continue;
+        var rect=viewport.getBoundingClientRect();
+        if(rect.height<150)continue;
+        result={doc:doc,root:root,viewport:viewport};
+        return;
+      }
+    },0);
+  }catch(error){}
+  return result;
+}
+
+function remember(node,names){
+  if(!node||originals.has(node))return;
+  var record={};
+  for(var i=0;i<names.length;i+=1){
+    record[names[i]]=node.style.getPropertyValue(names[i]);
+  }
+  originals.set(node,record);
+}
+
+function restore(node,names){
+  var record=originals.get(node);
+  if(!record)return;
+  for(var i=0;i<names.length;i+=1){
+    var name=names[i];
+    var value=record[name];
+    if(value)node.style.setProperty(name,value,'important');
+    else node.style.removeProperty(name);
+  }
+}
+
+function panelHidden(){
+  var button=panelButton();
+  if(button&&button.dataset.hidden==='true')return true;
+  if(cached){
+    var aside=visibleAside(cached.root);
+    return !aside;
+  }
+  return false;
+}
+
+function apply(){
+  var layout=findLayout()||cached;
+  if(!layout)return false;
+  cached=layout;
+  var root=layout.root;
+  var viewport=layout.viewport;
+  var doc=layout.doc;
+  var hidden=panelHidden();
+
+  remember(root,['position','width','max-width','margin-left','margin-right','padding-left','padding-right','grid-template-columns']);
+  remember(viewport,['position','top','bottom','left','right','width','max-width','height','overflow','box-sizing','margin-left','margin-right','transform']);
+
+  root.style.setProperty('position','relative','important');
+  root.style.setProperty('width','100%','important');
+  root.style.setProperty('max-width','none','important');
+  root.style.setProperty('margin-left','0','important');
+  root.style.setProperty('margin-right','0','important');
+  root.style.setProperty('padding-left','0','important');
+  root.style.setProperty('padding-right','0','important');
+
+  viewport.style.setProperty('position','absolute','important');
+  viewport.style.setProperty('top','24px','important');
+  viewport.style.setProperty('bottom','0','important');
+  viewport.style.setProperty('height','auto','important');
+  viewport.style.setProperty('width','auto','important');
+  viewport.style.setProperty('max-width','none','important');
+  viewport.style.setProperty('box-sizing','border-box','important');
+  viewport.style.setProperty('overflow','auto','important');
+  viewport.style.setProperty('margin-left','0','important');
+  viewport.style.setProperty('margin-right','0','important');
+  viewport.style.setProperty('transform','none','important');
+
+  if(hidden){
+    root.style.setProperty('grid-template-columns','0 minmax(0,1fr)','important');
+    viewport.style.setProperty('left','0','important');
+    viewport.style.setProperty('right','0','important');
+  }else{
+    var aside=visibleAside(root);
+    if(aside){
+      var rootRect=root.getBoundingClientRect();
+      var asideRect=aside.getBoundingClientRect();
+      var panelWidth=Math.max(0,Math.round(asideRect.width));
+      var leftPanel=Math.abs(asideRect.left-rootRect.left)<=Math.abs(rootRect.right-asideRect.right);
+      if(leftPanel){
+        viewport.style.setProperty('left',panelWidth+'px','important');
+        viewport.style.setProperty('right','0','important');
+      }else{
+        viewport.style.setProperty('left','0','important');
+        viewport.style.setProperty('right',panelWidth+'px','important');
+      }
+    }else{
+      viewport.style.setProperty('left','0','important');
+      viewport.style.setProperty('right','0','important');
+    }
+  }
+
+  viewport.dataset.v68WheelViewportFullWidth=hidden?'true':'false';
+  try{
+    doc.defaultView.dispatchEvent(new CustomEvent('gannzilla:page-scrollbar-edge-sync',{detail:{panelVisible:!hidden,source:'v68'}}));
+    doc.defaultView.dispatchEvent(new Event('resize'));
+    doc.defaultView.__auditKawkabatWheelViewportFullWidthV68=function(){
+      var rect=viewport.getBoundingClientRect();
+      return{
+        ok:true,
+        sourceVersion:'V67',
+        panelHidden:hidden,
+        viewportLeftPx:Math.round(rect.left),
+        viewportRightPx:Math.round(doc.defaultView.innerWidth-rect.right),
+        fullWidthWhenPanelHidden:hidden?Math.abs(rect.left)<=1&&Math.abs(doc.defaultView.innerWidth-rect.right)<=1:null,
+        pageScrollbarKeptVisible:true,
+        wheelGeometryChanged:false,
+        ornateFrameChanged:false
+      };
+    };
+  }catch(error){}
+  return true;
+}
+
+function bindButton(){
+  var button=panelButton();
+  if(!button||button.dataset.v68LayoutBound==='true')return;
+  button.dataset.v68LayoutBound='true';
+  button.addEventListener('click',function(){
+    setTimeout(apply,0);
+    setTimeout(apply,40);
+    setTimeout(apply,160);
+  },true);
+}
+
+function tick(){
+  bindButton();
+  apply();
+}
+
+function start(){
+  if(timer)clearInterval(timer);
+  timer=setInterval(tick,80);
+  tick();
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
