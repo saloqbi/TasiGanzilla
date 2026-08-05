@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Bigger Styled Icon Bar V45</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/729f8d4e166ef333cfd2f85ca0458b7c71a81a62/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-frame-angle-ticks-inner-copper-boundary-hide-toolbar-lock-classic-icon-bar-visible-v44.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+
+function locateToolbarDocument(doc,depth){
+  if(!doc||depth>120)return null;
+  if(doc.getElementById('v44Toolbar'))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{
+      var found=locateToolbarDocument(frames[i].contentDocument,depth+1);
+      if(found)return found;
+    }catch(error){}
+  }
+  return null;
+}
+
+function applyV45(){
+  try{
+    var doc=locateToolbarDocument(frame.contentDocument,0);
+    if(!doc)return false;
+    var bar=doc.getElementById('v44Toolbar');
+    var dock=doc.getElementById('v44ToolbarDock');
+    if(!bar||!dock)return false;
+
+    if(!doc.getElementById('v45BiggerStyledToolbarOverrides')){
+      var style=doc.createElement('style');
+      style.id='v45BiggerStyledToolbarOverrides';
+      style.textContent=''
+        + '#v44ToolbarDock{top:9px!important;right:15px!important;left:238px!important;overflow:visible!important;}'
+        + '#v44Toolbar{transform:scale(1.42)!important;transform-origin:top right!important;gap:2.5px!important;filter:saturate(1.16) contrast(1.04)!important;}'
+        + '#v44Toolbar .v44btn{box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 0 0 1px rgba(89,108,123,.08)!important;}'
+        + '#v44Toolbar .v44btn svg [stroke="#6d96b5"],#v44Toolbar .v44btn svg [stroke="#7897ad"],#v44Toolbar .v44btn svg [stroke="#7696b0"],#v44Toolbar .v44btn svg [stroke="#7898b2"]{stroke:#6f95b5!important;}'
+        + '#v44Toolbar .v44btn svg [stroke="#8b5008"]{stroke:#8b4f08!important;}'
+        + '#v44Toolbar .v44btn svg [fill="#392819"]{fill:#3b2918!important;}'
+        + '#v44Toolbar .v44flag{font-size:0!important;width:16px!important;height:11px!important;top:4px!important;left:5px!important;border:1px solid rgba(70,70,70,.38)!important;border-radius:1px!important;box-sizing:border-box!important;background:'
+        + 'linear-gradient(90deg,transparent 0 37%,#fff 37% 63%,transparent 63% 100%),'
+        + 'linear-gradient(transparent 0 36%,#fff 36% 64%,transparent 64% 100%),'
+        + 'linear-gradient(90deg,transparent 0 43%,#c8102e 43% 57%,transparent 57% 100%),'
+        + 'linear-gradient(transparent 0 42%,#c8102e 42% 58%,transparent 58% 100%),'
+        + 'linear-gradient(33deg,transparent 0 43%,#fff 43% 49%,transparent 49% 51%,#fff 51% 57%,transparent 57% 100%),'
+        + 'linear-gradient(147deg,transparent 0 43%,#fff 43% 49%,transparent 49% 51%,#fff 51% 57%,transparent 57% 100%),'
+        + 'linear-gradient(33deg,transparent 0 46%,#c8102e 46% 48.5%,transparent 48.5% 51.5%,#c8102e 51.5% 54%,transparent 54% 100%),'
+        + 'linear-gradient(147deg,transparent 0 46%,#c8102e 46% 48.5%,transparent 48.5% 51.5%,#c8102e 51.5% 54%,transparent 54% 100%),#012169!important;}'
+        + '#v44Toolbar #v44Language{padding-left:24px!important;}'
+        + '@media(max-width:760px){#v44ToolbarDock{left:8px!important;right:8px!important;justify-content:center!important;}#v44Toolbar{transform:scale(1.18)!important;transform-origin:top center!important;}}';
+      doc.head.appendChild(style);
+    }
+
+    doc.documentElement.dataset.biggerStyledIconBarV45='true';
+    var view=doc.defaultView;
+    if(view){
+      view.__auditKawkabatBiggerStyledIconBarV45=function(){
+        var node=doc.getElementById('v44Toolbar');
+        var rect=node?node.getBoundingClientRect():null;
+        return{
+          ok:!!node&&!!rect&&rect.width>0&&rect.height>0,
+          sourceVersion:'V44',
+          changedArea:'toolbar-scale-flag-and-icon-styling-only',
+          toolbarScale:1.42,
+          cssDrawnUkFlag:true,
+          iconPaletteEnhanced:true,
+          lockButtonIncluded:false,
+          wheelGeometryChanged:false,
+          ornateFrameChanged:false,
+          angleTicksInnerCopperBoundaryChanged:false
+        };
+      };
+    }
+    return true;
+  }catch(error){
+    return false;
+  }
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(applyV45()||attempts>=2600){clearInterval(poll);poll=null;}
+  },100);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
