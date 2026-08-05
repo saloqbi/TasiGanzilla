@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Toolbar Top Right V46</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/491fdd8845cc7946720daf428a3b8bea7c402762/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-frame-angle-ticks-inner-copper-boundary-hide-toolbar-lock-bigger-styled-icon-bar-v45.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+function locateToolbarDocument(doc,depth){
+  if(!doc||depth>140)return null;
+  if(doc.getElementById('v44Toolbar')&&doc.getElementById('v44ToolbarDock'))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{var found=locateToolbarDocument(frames[i].contentDocument,depth+1);if(found)return found;}catch(error){}
+  }
+  return null;
+}
+function applyV46(){
+  try{
+    var doc=locateToolbarDocument(frame.contentDocument,0);
+    if(!doc)return false;
+    var dock=doc.getElementById('v44ToolbarDock');
+    var bar=doc.getElementById('v44Toolbar');
+    if(!dock||!bar)return false;
+    if(!doc.getElementById('v46ToolbarTopRightOverrides')){
+      var style=doc.createElement('style');
+      style.id='v46ToolbarTopRightOverrides';
+      style.textContent=''
+        +'#v44ToolbarDock{position:fixed!important;top:0!important;right:4px!important;left:auto!important;width:auto!important;display:flex!important;justify-content:flex-end!important;overflow:visible!important;z-index:2147483647!important;}'
+        +'#v44Toolbar{transform-origin:top right!important;}'
+        +'@media(max-width:760px){#v44ToolbarDock{top:0!important;right:4px!important;left:auto!important;width:auto!important;justify-content:flex-end!important;}#v44Toolbar{transform-origin:top right!important;}}';
+      doc.head.appendChild(style);
+    }
+    doc.documentElement.dataset.toolbarTopRightV46='true';
+    var view=doc.defaultView;
+    if(view){view.__auditKawkabatToolbarTopRightV46=function(){
+      var rect=bar.getBoundingClientRect();
+      return{ok:rect.width>0&&rect.height>0&&Math.abs(rect.top)<=2,sourceVersion:'V45',changedArea:'toolbar-position-only',toolbarTop:rect.top,toolbarRightGap:Math.max(0,doc.documentElement.clientWidth-rect.right),wheelGeometryChanged:false,ornateFrameChanged:false,iconSizeChanged:false,iconPaletteChanged:false,flagChanged:false,lockButtonIncluded:false};
+    };}
+    return true;
+  }catch(error){return false;}
+}
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){attempts+=1;if(applyV46()||attempts>=2600){clearInterval(poll);poll=null;}},100);
+}
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
