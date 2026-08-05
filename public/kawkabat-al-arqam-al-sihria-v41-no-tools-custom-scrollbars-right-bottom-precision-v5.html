@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — V41 Precision Bottom Scrollbar V5</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f5e70ec83ca9cff3f5ece6f4683f98c2913412af/public/kawkabat-al-arqam-al-sihria-v41-no-tools-custom-scrollbars-right-bottom-v4.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var observer=null;
+var targetDoc=null;
+var horizontalDoc=null;
+var CAP_RATIO=.30;
+var MIN_THUMB_WIDTH=64;
+var TRACK_HEIGHT=17;
+
+function collectDocuments(doc,depth,list){
+  if(!doc||depth>160)return list;
+  list.push(doc);
+  var frames=[];
+  try{frames=doc.querySelectorAll('iframe');}catch(error){return list;}
+  for(var i=0;i<frames.length;i+=1){
+    try{collectDocuments(frames[i].contentDocument,depth+1,list);}catch(error){}
+  }
+  return list;
+}
+
+function locateControlDocument(){
+  var root=frame.contentDocument;
+  if(!root)return null;
+  var docs=collectDocuments(root,0,[]);
+  for(var i=0;i<docs.length;i+=1){
+    try{
+      if(docs[i].getElementById('v41BottomTrack')&&docs[i].getElementById('v41BottomThumb'))return docs[i];
+    }catch(error){}
+  }
+  return null;
+}
+
+function horizontalMetrics(doc){
+  var win=doc&&doc.defaultView;
+  var de=doc&&doc.documentElement;
+  var body=doc&&doc.body;
+  if(!doc||!win||!de)return null;
+  var clientWidth=Math.max(1,win.innerWidth||de.clientWidth||(body&&body.clientWidth)||1);
+  var scrollWidth=Math.max(clientWidth,de.scrollWidth||0,body?body.scrollWidth:0);
+  var scrollLeft=Number(win.scrollX||win.pageXOffset||de.scrollLeft||(body&&body.scrollLeft)||0);
+  return{clientWidth:clientWidth,scrollWidth:scrollWidth,maxScroll:Math.max(0,scrollWidth-clientWidth),scrollLeft:Math.max(0,scrollLeft)};
+}
+
+function locateHorizontalDocument(root){
+  var docs=collectDocuments(root,0,[]);
+  var best=null;
+  var bestMax=0;
+  for(var i=0;i<docs.length;i+=1){
+    var m=horizontalMetrics(docs[i]);
+    if(m&&m.maxScroll>bestMax){best=docs[i];bestMax=m.maxScroll;}
+  }
+  return best;
+}
+
+function setHorizontalScroll(value){
+  if(!horizontalDoc)return false;
+  var m=horizontalMetrics(horizontalDoc);
+  var win=horizontalDoc.defaultView;
+  if(!m||!win)return false;
+  var left=Math.max(0,Math.min(m.maxScroll,value));
+  var top=Number(win.scrollY||win.pageYOffset||0);
+  try{win.scrollTo({left:left,top:top,behavior:'auto'});}catch(error){try{win.scrollTo(left,top);}catch(ignored){}}
+  try{horizontalDoc.documentElement.scrollLeft=left;}catch(error){}
+  try{if(horizontalDoc.body)horizontalDoc.body.scrollLeft=left;}catch(error){}
+  return true;
+}
+
+function enforceThumbGeometry(){
+  if(!targetDoc)return false;
+  var track=targetDoc.getElementById('v41BottomTrack');
+  var thumb=targetDoc.getElementById('v41BottomThumb');
+  if(!track||!thumb)return false;
+
+  track.style.setProperty('height',TRACK_HEIGHT+'px','important');
+  track.style.setProperty('bottom','2px','important');
+  track.style.setProperty('border-radius','9px','important');
+  track.style.setProperty('cursor','pointer','important');
+
+  thumb.style.setProperty('top','2px','important');
+  thumb.style.setProperty('bottom','2px','important');
+  thumb.style.setProperty('min-width',MIN_THUMB_WIDTH+'px','important');
+  thumb.style.setProperty('border-radius','7px','important');
+
+  var trackWidth=Math.max(1,track.clientWidth);
+  var capWidth=Math.max(MIN_THUMB_WIDTH,Math.round(trackWidth*CAP_RATIO));
+  var renderedWidth=Math.max(MIN_THUMB_WIDTH,thumb.getBoundingClientRect().width||capWidth);
+  var targetWidth=Math.min(renderedWidth,capWidth);
+  if(Math.abs(renderedWidth-targetWidth)>.5){
+    thumb.style.setProperty('width',targetWidth+'px','important');
+  }
+
+  thumb.setAttribute('tabindex','0');
+  thumb.setAttribute('role','slider');
+  thumb.setAttribute('aria-label','Horizontal wheel position');
+  targetDoc.documentElement.dataset.v5BottomTrackHeight=String(TRACK_HEIGHT);
+  targetDoc.documentElement.dataset.v5BottomThumbCapRatio=String(CAP_RATIO);
+  targetDoc.documentElement.dataset.v5BottomScrollbarActive='true';
+  return track.style.display!=='none'&&track.clientWidth>0&&thumb.offsetWidth>=MIN_THUMB_WIDTH;
+}
+
+function bindExtraControls(){
+  if(!targetDoc)return false;
+  var track=targetDoc.getElementById('v41BottomTrack');
+  var thumb=targetDoc.getElementById('v41BottomThumb');
+  if(!track||!thumb)return false;
+  horizontalDoc=locateHorizontalDocument(targetDoc);
+  if(!horizontalDoc)return false;
+
+  if(thumb.dataset.v5KeyboardBound!=='true'){
+    thumb.dataset.v5KeyboardBound='true';
+    thumb.addEventListener('keydown',function(event){
+      var m=horizontalMetrics(horizontalDoc);
+      if(!m)return;
+      var step=Math.max(40,Math.round(m.clientWidth*.06));
+      var page=Math.max(step,Math.round(m.clientWidth*.80));
+      var target=m.scrollLeft;
+      if(event.key==='ArrowLeft')target-=step;
+      else if(event.key==='ArrowRight')target+=step;
+      else if(event.key==='PageUp')target-=page;
+      else if(event.key==='PageDown')target+=page;
+      else if(event.key==='Home')target=0;
+      else if(event.key==='End')target=m.maxScroll;
+      else return;
+      event.preventDefault();
+      setHorizontalScroll(target);
+    });
+  }
+
+  if(track.dataset.v5WheelBound!=='true'){
+    track.dataset.v5WheelBound='true';
+    track.addEventListener('wheel',function(event){
+      var m=horizontalMetrics(horizontalDoc);
+      if(!m)return;
+      var delta=Math.abs(event.deltaX)>Math.abs(event.deltaY)?event.deltaX:event.deltaY;
+      if(!delta)return;
+      event.preventDefault();
+      setHorizontalScroll(m.scrollLeft+delta);
+    },{passive:false});
+  }
+  return true;
+}
+
+function installObserver(){
+  if(!targetDoc)return;
+  var thumb=targetDoc.getElementById('v41BottomThumb');
+  var track=targetDoc.getElementById('v41BottomTrack');
+  if(!thumb||!track)return;
+  if(observer)observer.disconnect();
+  observer=new MutationObserver(function(){
+    requestAnimationFrame(function(){enforceThumbGeometry();});
+  });
+  observer.observe(thumb,{attributes:true,attributeFilter:['style','class']});
+  observer.observe(track,{attributes:true,attributeFilter:['style','class']});
+}
+
+function applyEnhancement(){
+  try{
+    var doc=locateControlDocument();
+    if(!doc)return false;
+    if(targetDoc!==doc){targetDoc=doc;installObserver();}
+    var geometryOk=enforceThumbGeometry();
+    var controlsOk=bindExtraControls();
+    var track=doc.getElementById('v41BottomTrack');
+    var thumb=doc.getElementById('v41BottomThumb');
+    var ratio=track&&track.clientWidth?thumb.offsetWidth/track.clientWidth:1;
+    window.__auditKawkabatPrecisionBottomScrollbarV5=function(){
+      var m=horizontalDoc?horizontalMetrics(horizontalDoc):null;
+      return{
+        ok:!!track&&!!thumb&&track.style.display!=='none'&&track.offsetHeight>=TRACK_HEIGHT&&ratio<=CAP_RATIO+.02&&!!m&&m.maxScroll>0,
+        trackHeight:track?track.offsetHeight:null,
+        thumbWidth:thumb?thumb.offsetWidth:null,
+        thumbToTrackRatio:ratio,
+        capRatio:CAP_RATIO,
+        minimumThumbWidth:MIN_THUMB_WIDTH,
+        dragActive:true,
+        trackClickActive:true,
+        keyboardActive:thumb?thumb.dataset.v5KeyboardBound==='true':false,
+        wheelActive:track?track.dataset.v5WheelBound==='true':false,
+        horizontalScrollMetrics:m,
+        wheelGeometryChanged:false,
+        wheelNumbersChanged:false
+      };
+    };
+    return geometryOk&&controlsOk&&ratio<=CAP_RATIO+.02;
+  }catch(error){return false;}
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(applyEnhancement()||attempts>=2600){clearInterval(poll);poll=null;}
+  },100);
+}
+
+frame.addEventListener('load',start);
+window.addEventListener('resize',function(){applyEnhancement();},{passive:true});
+start();
+}());
+</script>
+</body>
+</html>
