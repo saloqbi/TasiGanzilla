@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kawkabat V59 — Bottom Scrollbar Thicker and Shorter</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#v59Frame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="v59Frame" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/v41-display-locked/public/kawkabat-al-arqam-al-sihria-v41-polished-nickel-remove-reset-icon-v58.html"></iframe>
+<script>
+(function(){
+  'use strict';
+  var host=document.getElementById('v59Frame');
+  var timer=null;
+
+  function collect(doc,depth,out){
+    if(!doc||depth>16)return out;
+    out.push(doc);
+    var frames=[];
+    try{frames=doc.querySelectorAll('iframe')}catch(e){return out}
+    for(var i=0;i<frames.length;i++){
+      try{collect(frames[i].contentDocument,depth+1,out)}catch(e){}
+    }
+    return out;
+  }
+
+  function installIn(doc){
+    try{
+      if(doc.getElementById('v59BottomScrollbarStyle'))return true;
+      var style=doc.createElement('style');
+      style.id='v59BottomScrollbarStyle';
+      style.textContent='\
+*{scrollbar-color:#73879a #d7dde2;}\
+*::-webkit-scrollbar:horizontal{height:20px!important;}\
+*::-webkit-scrollbar-track:horizontal{background:linear-gradient(180deg,#eef2f5,#c8d0d7)!important;border-top:1px solid #8f9aa3!important;border-bottom:1px solid #fff!important;}\
+*::-webkit-scrollbar-thumb:horizontal{background:linear-gradient(180deg,#fdfefe 0%,#aebbc5 38%,#758896 56%,#dce4e9 100%)!important;border-top:4px solid transparent!important;border-bottom:4px solid transparent!important;border-left:16px solid transparent!important;border-right:16px solid transparent!important;background-clip:padding-box!important;border-radius:12px!important;min-width:38px!important;box-shadow:inset 0 0 0 1px rgba(64,79,91,.7)!important;}\
+*::-webkit-scrollbar-thumb:horizontal:hover{background:linear-gradient(180deg,#fff 0%,#c2ced6 34%,#6f8493 58%,#edf2f5 100%)!important;background-clip:padding-box!important;}\
+*::-webkit-scrollbar-corner{background:#d7dde2!important;}';
+      (doc.head||doc.documentElement).appendChild(style);
+      doc.documentElement.dataset.bottomScrollbarV59='true';
+      return true;
+    }catch(e){return false}
+  }
+
+  function apply(){
+    try{
+      var root=host.contentDocument;
+      if(!root)return false;
+      var docs=collect(root,0,[]);
+      var applied=0;
+      for(var i=0;i<docs.length;i++)if(installIn(docs[i]))applied++;
+      if(root.defaultView){
+        root.defaultView.__auditKawkabatBottomScrollbarV59=function(){
+          return{ok:applied>0,horizontalThicknessPx:20,visualThumbReductionPx:32,changedArea:'bottom-horizontal-scrollbar-only'};
+        };
+      }
+      return applied>0;
+    }catch(e){return false}
+  }
+
+  function start(){
+    if(timer)clearInterval(timer);
+    var n=0;
+    timer=setInterval(function(){
+      n++;
+      apply();
+      if(n>=900){clearInterval(timer);timer=null;}
+    },100);
+  }
+
+  host.addEventListener('load',start);
+  start();
+}());
+</script>
+</body>
+</html>
