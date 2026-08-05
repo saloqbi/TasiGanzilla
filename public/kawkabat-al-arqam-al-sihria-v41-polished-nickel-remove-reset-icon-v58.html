@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kawkabat V58 — Reset Icon Removed</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#v58Frame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="v58Frame" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/v41-display-locked/public/kawkabat-al-arqam-al-sihria-v41-polished-nickel-zoom-50-300-v57.html"></iframe>
+<script>
+(function(){
+  'use strict';
+  var frame=document.getElementById('v58Frame');
+  var timer=null;
+
+  function documents(root,depth,out){
+    if(!root||depth>12)return out;
+    out.push(root);
+    var frames=[];
+    try{frames=root.querySelectorAll('iframe')}catch(e){return out}
+    for(var i=0;i<frames.length;i++){
+      try{documents(frames[i].contentDocument,depth+1,out)}catch(e){}
+    }
+    return out;
+  }
+
+  function install(){
+    try{
+      var root=frame.contentDocument;
+      if(!root)return false;
+      var docs=documents(root,0,[]);
+      for(var i=0;i<docs.length;i++){
+        var d=docs[i];
+        var reset=d.getElementById('reset');
+        var zoomText=d.getElementById('zoomText');
+        if(reset&&zoomText){
+          reset.style.display='none';
+          reset.setAttribute('aria-hidden','true');
+          reset.tabIndex=-1;
+          d.documentElement.dataset.resetIconRemovedV58='true';
+          if(d.defaultView){
+            d.defaultView.__auditKawkabatResetIconRemovedV58=function(){
+              var r=d.getElementById('reset');
+              return{
+                ok:!!r&&r.style.display==='none',
+                resetIconVisible:false,
+                zoomTextResetPreserved:true,
+                minimumPercent:50,
+                maximumPercent:300
+              };
+            };
+          }
+          return true;
+        }
+      }
+      return false;
+    }catch(e){
+      return false;
+    }
+  }
+
+  function start(){
+    if(timer)clearInterval(timer);
+    var attempts=0;
+    timer=setInterval(function(){
+      attempts++;
+      if(install()||attempts>=900){
+        clearInterval(timer);
+        timer=null;
+      }
+    },100);
+  }
+
+  frame.addEventListener('load',start);
+  start();
+}());
+</script>
+</body>
+</html>
