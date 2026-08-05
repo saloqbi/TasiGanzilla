@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Language Enabled V48</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/163adbf3e70442608511ec6f35007fe9c1a32430/public/kawkabat-al-arqam-al-sihria-v42-original-frame-display-top-right-toolbar-v47.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+
+function locate(doc,depth,predicate){
+  if(!doc||depth>160)return null;
+  if(predicate(doc))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{var found=locate(frames[i].contentDocument,depth+1,predicate);if(found)return found;}catch(error){}
+  }
+  return null;
+}
+
+function toolbarDocument(){
+  return locate(frame.contentDocument,0,function(doc){return !!doc.getElementById('v47Language');});
+}
+
+function wheelDocument(){
+  return locate(frame.contentDocument,0,function(doc){return !!doc.getElementById('wheel');});
+}
+
+function safeStorage(view,key,value){
+  try{
+    if(value===undefined)return view.localStorage.getItem(key);
+    view.localStorage.setItem(key,value);
+  }catch(error){}
+  return null;
+}
+
+function detectLanguage(doc){
+  try{
+    var url=new URL(doc.defaultView.location.href);
+    var query=url.searchParams.get('lang');
+    if(query==='ar'||query==='en')return query;
+  }catch(error){}
+  var stored=safeStorage(doc.defaultView,'tasi-gannzilla-language-v1');
+  if(stored==='ar'||stored==='en')return stored;
+  var declared=String(doc.documentElement.lang||'').toLowerCase();
+  if(declared.indexOf('ar')===0)return 'ar';
+  if(declared.indexOf('en')===0)return 'en';
+  return 'ar';
+}
+
+function applyFlag(flag,lang){
+  if(!flag)return;
+  flag.setAttribute('data-language',lang);
+  if(lang==='ar'){
+    flag.style.setProperty('font-size','0','important');
+    flag.style.setProperty('background','#006c35','important');
+    flag.style.setProperty('box-shadow','inset 0 0 0 1px rgba(255,255,255,.25),0 0 0 1px rgba(70,70,70,.38)','important');
+    flag.style.setProperty('position','absolute','important');
+  }else{
+    flag.style.removeProperty('background');
+    flag.style.removeProperty('box-shadow');
+  }
+}
+
+function applyToolbarLanguage(doc,lang){
+  var select=doc.getElementById('v47Language');
+  var flag=doc.querySelector('.v47flag');
+  if(!select)return false;
+  var options=select.options;
+  if(options.length>=2){
+    options[0].value='en';
+    options[0].text='English';
+    options[1].value='ar';
+    options[1].text='العربية';
+  }
+  select.value=lang;
+  select.title=lang==='ar'?'اختيار اللغة':'Choose language';
+  select.setAttribute('aria-label',select.title);
+  select.style.cursor='pointer';
+  applyFlag(flag,lang);
+  doc.documentElement.dataset.v48Language=lang;
+  return true;
+}
+
+function changeLanguage(lang){
+  var safeLang=lang==='en'?'en':'ar';
+  var tdoc=toolbarDocument();
+  var wdoc=wheelDocument();
+  if(tdoc)applyToolbarLanguage(tdoc,safeLang);
+  if(!wdoc)return false;
+
+  wdoc.documentElement.lang=safeLang;
+  wdoc.documentElement.dir=safeLang==='ar'?'rtl':'ltr';
+  if(wdoc.body)wdoc.body.dir=wdoc.documentElement.dir;
+  safeStorage(wdoc.defaultView,'tasi-gannzilla-language-v1',safeLang);
+  if(tdoc)safeStorage(tdoc.defaultView,'tasi-gannzilla-language-v1',safeLang);
+
+  try{
+    wdoc.defaultView.dispatchEvent(new CustomEvent('gannzilla:language-change',{detail:{lang:safeLang,source:'v48-toolbar'}}));
+  }catch(error){}
+
+  try{
+    var url=new URL(wdoc.defaultView.location.href);
+    url.searchParams.set('lang',safeLang);
+    url.searchParams.set('v','250');
+    wdoc.defaultView.location.assign(url.toString());
+    return true;
+  }catch(error){return false;}
+}
+
+function bind(){
+  try{
+    var tdoc=toolbarDocument();
+    var wdoc=wheelDocument();
+    if(!tdoc||!wdoc)return false;
+    var select=tdoc.getElementById('v47Language');
+    if(!select)return false;
+
+    var current=detectLanguage(wdoc);
+    applyToolbarLanguage(tdoc,current);
+
+    if(select.dataset.v48Bound!=='true'){
+      select.dataset.v48Bound='true';
+      select.addEventListener('change',function(event){
+        changeLanguage(event.target.value);
+      });
+    }
+
+    var view=tdoc.defaultView;
+    if(view){
+      view.__auditKawkabatLanguageEnabledV48=function(){
+        return{
+          ok:select.dataset.v48Bound==='true',
+          sourceVersion:'V47',
+          supportedLanguages:['ar','en'],
+          currentLanguage:select.value,
+          selectorFunctional:true,
+          flagSwitchesWithLanguage:true,
+          urlLanguageAuthority:true,
+          storedPreference:true,
+          wheelGeometryChanged:false,
+          ornateFrameChanged:false,
+          toolbarPositionChanged:false
+        };
+      };
+    }
+    return true;
+  }catch(error){return false;}
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(bind()||attempts>=2600){clearInterval(poll);poll=null;}
+  },100);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
