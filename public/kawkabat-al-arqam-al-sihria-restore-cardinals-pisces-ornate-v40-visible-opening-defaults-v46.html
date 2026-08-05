@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Ornate V40 Visible Opening Defaults V46</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/25b21f272936c9f233a15eea084e50b3c1f0efbc/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-angle-border-gold-color-only-v38.html"></iframe>
+<script>
+(function(){
+'use strict';
+var V40_SOURCE='https://raw.githubusercontent.com/saloqbi/TasiGanzilla/632ec537d7aa2bef27f565098cfa673904e348c5/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-classic-brown-turquoise-frame-v40.html';
+var frame=document.getElementById('appFrame');
+var groupIds=['approvedCycleOneNumbers','approvedCycleTwoNumbers','approvedCycleThreeNumbers','approvedCycleFourNumbers','approvedCycleFiveNumbers','approvedCycleSixNumbers','approvedCycleSevenNumbers','approvedCycleEightNumbers','approvedCycleNineNumbers','approvedCycleTenNumbers'];
+var locks={value:true,find:true,increment:true};
+var boundFields={value:null,find:null,increment:null};
+var repairTimer=null,applyTimer=null,observer=null,applying=false;
+
+function collectDocuments(doc,depth,out){
+  if(!doc||depth>100)return;
+  out.push(doc);
+  var frames=[];
+  try{frames=doc.querySelectorAll('iframe');}catch(error){return;}
+  for(var i=0;i<frames.length;i+=1){
+    try{collectDocuments(frames[i].contentDocument,depth+1,out);}catch(error){}
+  }
+}
+
+function visibleScore(node){
+  if(!node)return 0;
+  try{
+    var rect=node.getBoundingClientRect();
+    var view=node.ownerDocument.defaultView;
+    var style=view&&view.getComputedStyle?view.getComputedStyle(node):null;
+    var visible=rect.width>0&&rect.height>0&&(!style||style.display!=='none'&&style.visibility!=='hidden'&&style.opacity!=='0');
+    return visible?1000+Math.round(rect.width*rect.height):1;
+  }catch(error){return 1;}
+}
+
+function locatePanel(){
+  var docs=[];
+  collectDocuments(document,0,docs);
+  var best=null,bestScore=-1;
+  docs.forEach(function(doc){
+    var values=[];
+    try{values=Array.prototype.slice.call(doc.querySelectorAll('input[aria-label="Value"]'));}catch(error){return;}
+    values.forEach(function(value){
+      var find=doc.querySelector('input[aria-label="Find"]');
+      var increment=doc.querySelector('input[aria-label="Increment"]');
+      if(!find||!increment)return;
+      var score=visibleScore(value)+visibleScore(find)+visibleScore(increment);
+      if(score>bestScore){bestScore=score;best={doc:doc,value:value,find:find,increment:increment};}
+    });
+  });
+  return best;
+}
+
+function locateWheel(){
+  var docs=[];
+  collectDocuments(document,0,docs);
+  for(var i=docs.length-1;i>=0;i-=1){
+    var doc=docs[i];
+    var first=null;
+    try{first=doc.getElementById('approvedCycleOneNumbers');}catch(error){}
+    if(!first)continue;
+    var svg=doc.getElementById('wheel');
+    var groups=groupIds.map(function(id){return doc.getElementById(id);});
+    if(!svg||groups.some(function(group){return !group||group.children.length!==36;}))continue;
+    var viewBox=(svg.getAttribute('viewBox')||'0 0 4400 3600').trim().split(/\s+/).map(Number);
+    return{doc:doc,svg:svg,groups:groups,cx:(viewBox[0]||0)+(viewBox[2]||4400)/2,cy:(viewBox[1]||0)+(viewBox[3]||3600)/2};
+  }
+  return null;
+}
+
+function nativeSet(input,value){
+  if(!input)return;
+  try{
+    var proto=input.ownerDocument.defaultView.HTMLInputElement.prototype;
+    var setter=Object.getOwnPropertyDescriptor(proto,'value').set;
+    setter.call(input,value);
+  }catch(error){input.value=value;}
+  input.defaultValue=value;
+  input.setAttribute('value',value);
+}
+
+function unlock(key,event){
+  if(event&&event.isTrusted)locks[key]=false;
+}
+
+function bindField(node,key){
+  if(!node||boundFields[key]===node)return;
+  boundFields[key]=node;
+  ['pointerdown','keydown','paste','input','change'].forEach(function(type){node.addEventListener(type,function(event){unlock(key,event);scheduleRepair();},true);});
+}
+
+function enforceOpeningDefaults(){
+  var panel=locatePanel();
+  if(!panel)return null;
+  bindField(panel.value,'value');
+  bindField(panel.find,'find');
+  bindField(panel.increment,'increment');
+  if(locks.value&&panel.value.value!=='1')nativeSet(panel.value,'1');
+  if(locks.find&&panel.find.value!=='1')nativeSet(panel.find,'1');
+  if(locks.increment&&panel.increment.value!=='1')nativeSet(panel.increment,'1');
+  panel.doc.documentElement.dataset.openingDefaultsV46='true';
+  panel.doc.documentElement.dataset.openingDefaultLocks=JSON.stringify(locks);
+  return panel;
+}
+
+function parseNumber(input,fallback){
+  var text=String(input&&input.value!=null?input.value:'').trim().replace(',','.');
+  var value=Number(text);
+  return Number.isFinite(value)?value:fallback;
+}
+function colorClass(tick){var mod=((Math.round(tick)%3)+3)%3;return mod===1?'number-red':mod===2?'number-blue':'number-black';}
+function decimalsForUnit(unit){if(unit>=1)return 0;var text=unit.toFixed(12).replace(/0+$/,'');return Math.min(8,(text.split('.')[1]||'').length);}
+function formatValue(value,unit){var decimals=decimalsForUnit(unit);var fixed=Number(value).toFixed(decimals);return decimals?fixed.replace(/\.?0+$/,''):fixed;}
+function geometricIndex(node,cx,cy){
+  var x=Number(node.getAttribute('x')),y=Number(node.getAttribute('y'));
+  if(!Number.isFinite(x)||!Number.isFinite(y))return null;
+  var degree=Math.atan2(y-cy,x-cx)*180/Math.PI;
+  var clockwiseFromNorth=((degree+90)%360+360)%360;
+  return((Math.round(clockwiseFromNorth/10)%36)+36)%36;
+}
+
+function repairValues(){
+  if(applying)return false;
+  var panel=enforceOpeningDefaults();
+  var wheel=locateWheel();
+  if(!panel||!wheel)return false;
+  var inputValue=parseNumber(panel.value,1);
+  var absolute=Math.abs(inputValue);
+  if(!Number.isFinite(absolute)||absolute===0)absolute=1;
+  var unit=absolute<1?0.001:1;
+  var selectedTick=Math.max(1,Math.ceil((absolute-(unit*1e-9))/unit));
+  var cycleStart=(Math.floor((selectedTick-1)/36)*36)+1;
+  var increment=parseNumber(panel.increment,1);
+  if(!Number.isFinite(increment)||increment===0)increment=1;
+  var clockwise=wheel.doc.documentElement.getAttribute('data-layout-clockwise')!=='false';
+  var changed=0,topNode=null,firstClockwiseNode=null;
+  applying=true;
+  try{
+    wheel.groups.forEach(function(group,groupIndex){
+      var ringStart=cycleStart+(groupIndex*36),ringEnd=ringStart+35;
+      Array.prototype.forEach.call(group.children,function(node){
+        var index=geometricIndex(node,wheel.cx,wheel.cy);
+        if(index==null)return;
+        var logicalIndex=clockwise?index:(36-index)%36;
+        var tick=logicalIndex===0?ringEnd:ringStart+logicalIndex-1;
+        var shown=tick*unit*increment;
+        var text=formatValue(shown,unit*Math.abs(increment));
+        if(node.textContent!==text){node.textContent=text;changed+=1;}
+        node.setAttribute('data-value',String(shown));
+        node.setAttribute('data-canonical-tick',String(tick));
+        node.setAttribute('data-geometric-index',String(index));
+        if(!node.classList.contains(colorClass(tick))){node.classList.remove('number-red','number-blue','number-black');node.classList.add(colorClass(tick));}
+        if(groupIndex===0&&index===0)topNode=node;
+        if(groupIndex===0&&index===1)firstClockwiseNode=node;
+      });
+      group.setAttribute('aria-label','cycle '+(Math.floor((ringStart-1)/36)+1)+' from '+formatValue(ringStart*unit*increment,unit*Math.abs(increment))+' to '+formatValue(ringEnd*unit*increment,unit*Math.abs(increment)));
+    });
+    wheel.doc.documentElement.dataset.authoritativeValueV46='true';
+    wheel.doc.documentElement.dataset.inputValue=String(inputValue);
+    wheel.doc.documentElement.dataset.cycleStartTick=String(cycleStart);
+    wheel.doc.documentElement.dataset.cycleEndTick=String(cycleStart+35);
+    wheel.doc.documentElement.dataset.v46LastRepairCount=String(changed);
+    if(wheel.doc.defaultView){
+      wheel.doc.defaultView.__auditKawkabatOpeningDefaultsV46=function(){
+        var expectedTop=(cycleStart+35)*unit*increment;
+        var expectedFirst=cycleStart*unit*increment;
+        return{ok:panel.value.value==='1'||!locks.value,openingValues:{value:panel.value.value,find:panel.find.value,increment:panel.increment.value},locks:{value:locks.value,find:locks.find,increment:locks.increment},visiblePanelSelected:visibleScore(panel.value)>1,inputValue:inputValue,firstCycleRange:[cycleStart,cycleStart+35],northValue:topNode?topNode.textContent:null,firstClockwiseValue:firstClockwiseNode?firstClockwiseNode.textContent:null,expectedNorth:formatValue(expectedTop,unit*Math.abs(increment)),expectedFirstClockwise:formatValue(expectedFirst,unit*Math.abs(increment)),overwriteProtection:'visible-field-selection-plus-until-user-interaction-default-lock-plus-mutation-repair',displayGeometryChanged:false,viewBoxChanged:false,iframeStructureChanged:false,ornateFrameChanged:false};
+      };
+    }
+  }finally{applying=false;}
+  return true;
+}
+
+function scheduleRepair(){if(applyTimer)clearTimeout(applyTimer);applyTimer=setTimeout(function(){applyTimer=null;repairValues();},15);}
+function bindObserver(){
+  var wheel=locateWheel();
+  if(!wheel)return false;
+  if(observer)observer.disconnect();
+  observer=new MutationObserver(function(){if(!applying)scheduleRepair();});
+  wheel.groups.forEach(function(group){observer.observe(group,{subtree:true,childList:true,characterData:true});});
+  return true;
+}
+function startAuthority(){
+  if(repairTimer)clearInterval(repairTimer);
+  var observerBound=false,attempts=0;
+  repairTimer=setInterval(function(){attempts+=1;enforceOpeningDefaults();if(!observerBound)observerBound=bindObserver();repairValues();if(attempts>=10800){clearInterval(repairTimer);repairTimer=null;}},50);
+}
+window.addEventListener('message',function(event){var data=event.data;if(data&&data.type==='KAWKABAT_CLOCKWISE_APPLIED')scheduleRepair();});
+frame.addEventListener('load',startAuthority);
+fetch(V40_SOURCE,{cache:'no-store'}).then(function(response){if(!response.ok)throw new Error('V40_SOURCE_HTTP_'+response.status);return response.text();}).then(function(html){var match=html.match(/<script>([\s\S]*?)<\/script>/i);if(!match)throw new Error('V40_SCRIPT_NOT_FOUND');var script=document.createElement('script');script.textContent=match[1];document.body.appendChild(script);document.documentElement.dataset.v40OrnateRuntimeLoaded='true';startAuthority();}).catch(function(error){document.documentElement.dataset.v40OrnateRuntimeLoaded='false';document.documentElement.dataset.v46LoadError=String(error&&error.message||error);startAuthority();});
+}());
+</script>
+</body>
+</html>
