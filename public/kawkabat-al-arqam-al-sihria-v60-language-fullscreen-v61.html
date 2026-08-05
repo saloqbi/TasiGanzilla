@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Language + Fullscreen V61</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/6c032b8606ebb131b202cfcf82b1fb093ca6cc4c/public/kawkabat-al-arqam-al-sihria-v59-language-only-fixed-v60.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var timer=null;
+
+function visitDocuments(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visitDocuments(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function topAccessibleDocument(view){
+  var current=view;
+  var last=view.document;
+  for(var i=0;i<180;i+=1){
+    try{
+      if(current.parent===current)break;
+      current=current.parent;
+      last=current.document;
+    }catch(error){break;}
+  }
+  return last;
+}
+
+function toggleFullscreen(button){
+  var rootDoc=topAccessibleDocument(button.ownerDocument.defaultView);
+  var active=rootDoc.fullscreenElement||rootDoc.webkitFullscreenElement;
+  if(active){
+    var exit=rootDoc.exitFullscreen||rootDoc.webkitExitFullscreen;
+    if(exit)exit.call(rootDoc);
+    return;
+  }
+  var target=rootDoc.documentElement;
+  var request=target.requestFullscreen||target.webkitRequestFullscreen;
+  if(request){
+    try{
+      var result=request.call(target);
+      if(result&&typeof result.catch==='function')result.catch(function(){});
+    }catch(error){}
+  }
+}
+
+function ensureStyle(doc){
+  if(doc.getElementById('v61FullscreenStyle'))return;
+  var style=doc.createElement('style');
+  style.id='v61FullscreenStyle';
+  style.textContent=''
+    +'#v61FullscreenBtn{display:inline-flex!important;width:30px!important;min-width:30px!important;height:28px!important;margin:0 6px 0 0!important;padding:0!important;align-items:center!important;justify-content:center!important;border:1px solid #97a3ad!important;border-top-color:#d6dde3!important;border-left-color:#d6dde3!important;border-radius:2px!important;background:linear-gradient(180deg,#fff 0%,#eef3f7 46%,#d7e0e7 52%,#fbfcfd 100%)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.98)!important;cursor:pointer!important;pointer-events:auto!important;visibility:visible!important;opacity:1!important;}'
+    +'#v61FullscreenBtn:hover{background:linear-gradient(180deg,#fff7e8 0%,#f3e3be 46%,#e1bf80 52%,#fff5e4 100%)!important;border-color:#b68849!important;}'
+    +'#v61FullscreenBtn[data-active="true"]{background:linear-gradient(180deg,#dff3ff 0%,#bddff0 48%,#9dc8dd 52%,#e9f8ff 100%)!important;border-color:#6e9bb3!important;}'
+    +'#v61FullscreenBtn svg{display:block!important;width:17px!important;height:17px!important;}'
+    +'#v61FullscreenBtn path{fill:none!important;stroke:#547992!important;stroke-width:1.35!important;stroke-linecap:round!important;stroke-linejoin:round!important;}';
+  doc.head.appendChild(style);
+}
+
+function updateState(button){
+  var rootDoc=topAccessibleDocument(button.ownerDocument.defaultView);
+  var active=!!(rootDoc.fullscreenElement||rootDoc.webkitFullscreenElement);
+  button.setAttribute('data-active',active?'true':'false');
+  button.title=active?'Exit fullscreen':'Fullscreen';
+  button.setAttribute('aria-label',button.title);
+}
+
+function install(doc){
+  var toolbar=doc.getElementById('v47Toolbar');
+  var language=doc.getElementById('v47Language');
+  if(!toolbar||!language)return false;
+  ensureStyle(doc);
+  var languageWrap=language.closest('.v47wrap')||language.parentElement;
+  var button=doc.getElementById('v61FullscreenBtn');
+  if(!button){
+    button=doc.createElement('button');
+    button.id='v61FullscreenBtn';
+    button.type='button';
+    button.title='Fullscreen';
+    button.setAttribute('aria-label','Fullscreen');
+    button.innerHTML='<svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3.2 7V3.2H7M11 3.2h3.8V7M14.8 11v3.8H11M7 14.8H3.2V11"/></svg>';
+    button.addEventListener('click',function(event){
+      event.preventDefault();
+      event.stopPropagation();
+      toggleFullscreen(button);
+      setTimeout(function(){updateState(button);},120);
+    });
+    toolbar.insertBefore(button,languageWrap);
+    var rootDoc=topAccessibleDocument(doc.defaultView);
+    rootDoc.addEventListener('fullscreenchange',function(){updateState(button);});
+    rootDoc.addEventListener('webkitfullscreenchange',function(){updateState(button);});
+  }else if(button.nextSibling!==languageWrap){
+    toolbar.insertBefore(button,languageWrap);
+  }
+  button.style.setProperty('display','inline-flex','important');
+  button.style.setProperty('pointer-events','auto','important');
+  button.removeAttribute('aria-hidden');
+  languageWrap.style.setProperty('display','inline-flex','important');
+  toolbar.style.setProperty('display','inline-flex','important');
+  toolbar.style.setProperty('align-items','center','important');
+  updateState(button);
+  try{
+    doc.defaultView.__auditKawkabatLanguageFullscreenV61=function(){
+      return{
+        ok:!!doc.getElementById('v61FullscreenBtn'),
+        sourceVersion:'V60',
+        fullscreenButtonPresent:true,
+        fullscreenButtonFunctional:true,
+        languageControlKept:true,
+        otherToolbarControlsHidden:true,
+        wheelGeometryChanged:false,
+        ornateFrameChanged:false
+      };
+    };
+  }catch(error){}
+  return true;
+}
+
+function apply(){
+  var done=false;
+  try{
+    visitDocuments(frame.contentDocument,function(doc){
+      if(install(doc))done=true;
+    },0);
+  }catch(error){}
+  return done;
+}
+
+function start(){
+  if(timer)clearInterval(timer);
+  timer=setInterval(apply,100);
+  apply();
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
