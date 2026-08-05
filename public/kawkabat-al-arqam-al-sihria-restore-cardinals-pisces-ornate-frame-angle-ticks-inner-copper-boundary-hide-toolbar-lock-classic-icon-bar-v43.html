@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Classic Icon Toolbar V43</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/56749c26c00b9a25fce8dc8247f24cab486b308f/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-frame-angle-ticks-inner-copper-boundary-hide-toolbar-lock-v42.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var timer=null;
+var observer=null;
+var BAR_ID='v43ClassicIconToolbar';
+var HIDDEN='data-v43-native-tool-hidden';
+var TOOL_LABELS=['↖','—','▢','T','⌕','⛶','🔒','🔐'];
+
+function locate(doc,depth){
+  if(!doc||depth>120)return null;
+  if(doc.getElementById('wheel'))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{var found=locate(frames[i].contentDocument,depth+1);if(found)return found;}catch(error){}
+  }
+  return null;
+}
+function clean(value){return String(value||'').replace(/\s+/g,'').trim();}
+function allButtons(doc){return Array.prototype.slice.call(doc.querySelectorAll('button'));}
+function nativeButtons(doc){
+  return allButtons(doc).filter(function(button){
+    var r=button.getBoundingClientRect();
+    return r&&r.width>0&&r.height>0&&r.top>=0&&r.bottom<=96&&TOOL_LABELS.indexOf(clean(button.textContent))!==-1;
+  });
+}
+function findNative(doc,label){
+  var buttons=allButtons(doc);
+  for(var i=0;i<buttons.length;i+=1){if(clean(buttons[i].textContent)===label)return buttons[i];}
+  return null;
+}
+function hideNative(button){
+  if(!button)return;
+  button.setAttribute(HIDDEN,'true');
+  button.setAttribute('aria-hidden','true');
+  ['display','visibility','pointer-events','width','min-width','height','padding','margin','border'].forEach(function(name){
+    var value=name==='display'?'none':name==='visibility'?'hidden':name==='pointer-events'?'none':'0';
+    button.style.setProperty(name,value,'important');
+  });
+}
+function svg(type){
+  var c='width="13" height="13" viewBox="0 0 13 13" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"';
+  if(type==='eye')return '<svg '+c+'><ellipse cx="6.5" cy="6.5" rx="4.8" ry="3.3" fill="none" stroke="#8a560d" stroke-width="1.1"/><circle cx="6.5" cy="6.5" r="1.7" fill="#3b2a18"/><circle cx="7" cy="6" r=".45" fill="#f2d39f"/></svg>';
+  if(type==='pencil')return '<svg '+c+'><path d="M2.2 10.5l2-.5 5-5-1.5-1.5-5 5-.5 2z" fill="#d9b94f" stroke="#8a6a12" stroke-width=".55"/><path d="M7.7 3.5L9.2 5l1-.9c.5-.5.5-1 0-1.4l-.1-.1c-.4-.4-.9-.4-1.4 0l-1 .9z" fill="#eed47e" stroke="#8a6a12" stroke-width=".55"/></svg>';
+  if(type==='slash')return '<svg '+c+'><path d="M2.7 10.2l7.6-7.4" stroke="#c8ad42" stroke-width="1.7" stroke-linecap="round"/><circle cx="3.5" cy="9.4" r="1" fill="#d8bd50" stroke="#8a6a12" stroke-width=".4"/></svg>';
+  if(type==='markup')return '<svg '+c+'><rect x="2" y="2" width="9" height="9" rx="1" fill="#fafcff" stroke="#89a5bf" stroke-width=".8"/><path d="M3.4 9.6l6.2-6.2" stroke="#d18b6d" stroke-width="1"/><path d="M7.7 3.2h2.1v2.1" fill="none" stroke="#789dbf" stroke-width=".8"/></svg>';
+  if(type==='plus')return '<svg '+c+'><path d="M6.5 2.4v8.2M2.4 6.5h8.2" stroke="#6894b9" stroke-width="1.4" stroke-linecap="round"/></svg>';
+  if(type==='zoom')return '<svg '+c+'><circle cx="5.5" cy="5.5" r="3" fill="none" stroke="#7195b3" stroke-width="1"/><path d="M7.8 7.8l2.6 2.6" stroke="#7195b3" stroke-width="1.2" stroke-linecap="round"/></svg>';
+  if(type==='rotate')return '<svg '+c+'><path d="M3.1 5.8a3.7 3.7 0 1 1 1.1 2.9" fill="none" stroke="#6c96b8" stroke-width="1.1" stroke-linecap="round"/><path d="M2.4 8l.2 2.1 2.1-.4" fill="none" stroke="#6c96b8" stroke-width="1.1"/></svg>';
+  return '<svg '+c+'><rect x="2.6" y="2.6" width="7.8" height="7.8" rx=".7" fill="none" stroke="#86a1b8" stroke-width="1"/></svg>';
+}
+function iconButton(doc,def){
+  var button=doc.createElement('button');
+  button.type='button';button.className='v43Icon';button.title=def.title;button.setAttribute('aria-label',def.title);
+  if(def.active)button.setAttribute('data-active','true');
+  button.innerHTML=svg(def.icon);
+  button.addEventListener('click',function(event){
+    event.preventDefault();event.stopPropagation();
+    var native=findNative(doc,def.label);
+    if(native&&typeof native.click==='function')native.click();
+  });
+  return button;
+}
+function ensureStyle(doc){
+  if(doc.getElementById('v43ClassicIconToolbarStyle'))return;
+  var style=doc.createElement('style');style.id='v43ClassicIconToolbarStyle';
+  style.textContent=''
+  +'#'+BAR_ID+'{display:inline-flex;align-items:center;gap:2px;height:23px;padding:1px 4px;border:1px solid #8f9da8;border-top-color:#c6d0d8;border-left-color:#c6d0d8;border-radius:3px;background:linear-gradient(#f3f7fa 0%,#dce5ec 47%,#cad6df 49%,#edf2f6 100%);box-shadow:inset 0 1px 0 #fff,0 1px 0 rgba(91,104,115,.35);white-space:nowrap;font:11px Arial,sans-serif;}'
+  +'#'+BAR_ID+' .v43Icon{width:19px;min-width:19px;height:19px;margin:0;padding:0;border:1px solid #a7b2bb;border-top-color:#d4dce2;border-left-color:#d4dce2;border-radius:2px;background:linear-gradient(#fbfdfe 0%,#edf2f6 48%,#dae3ea 50%,#f6f9fb 100%);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.95);}'
+  +'#'+BAR_ID+' .v43Icon[data-active="true"]{border-color:#b9864e;background:linear-gradient(#f7eddb 0%,#ead0a5 48%,#dcae73 50%,#f1e1c8 100%);}'
+  +'#'+BAR_ID+' .v43Sep{width:1px;height:14px;margin:0 2px;background:#9eabb5;box-shadow:1px 0 0 rgba(255,255,255,.75);}'
+  +'#'+BAR_ID+' .v43Wrap{position:relative;display:inline-flex;align-items:center;}'
+  +'#'+BAR_ID+' select{height:19px;padding:0 16px 0 4px;border:1px solid #a7b2bb;border-top-color:#d4dce2;border-left-color:#d4dce2;border-radius:2px;background:linear-gradient(#fbfdfe,#e4ebf0);color:#263540;font:11px Arial,sans-serif;appearance:none;-webkit-appearance:none;}'
+  +'#'+BAR_ID+' .v43Wrap:after{content:"";position:absolute;right:5px;top:8px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #45535d;pointer-events:none;}'
+  +'#'+BAR_ID+' .v43Zoom{width:57px;font-weight:700;}#'+BAR_ID+' .v43Lang{width:94px;padding-left:24px;}#'+BAR_ID+' .v43Flag{position:absolute;left:5px;top:4px;font-size:11px;z-index:2;pointer-events:none;}';
+  doc.head.appendChild(style);
+}
+function createToolbar(doc,host){
+  var bar=doc.createElement('div');bar.id=BAR_ID;bar.setAttribute('data-v43-classic-toolbar','true');
+  var defs=[
+    {icon:'eye',title:'تحديد الرسومات',label:'↖',active:true},
+    {icon:'pencil',title:'رسم خط',label:'—'},
+    {icon:'slash',title:'رسم مستطيل',label:'▢'},
+    {icon:'markup',title:'إضافة نص',label:'T'},
+    {icon:'plus',title:'إظهار أو إخفاء الأدوات الجانبية',label:'⌕'},
+    {icon:'zoom',title:'ملء الشاشة',label:'⛶'},
+    {icon:'rotate',title:'ملء الشاشة',label:'⛶'},
+    {icon:'box',title:'اختصار الشكل',label:'▢'}
+  ];
+  defs.forEach(function(def,index){bar.appendChild(iconButton(doc,def));if(index===5){var s=doc.createElement('span');s.className='v43Sep';bar.appendChild(s);}});
+  var zoomWrap=doc.createElement('span');zoomWrap.className='v43Wrap';
+  var zoom=doc.createElement('select');zoom.className='v43Zoom';
+  ['100%','125%','150%','175%','200%'].forEach(function(value){var o=doc.createElement('option');o.textContent=value;o.value=value;if(value==='150%')o.selected=true;zoom.appendChild(o);});
+  zoomWrap.appendChild(zoom);bar.appendChild(zoomWrap);
+  var langWrap=doc.createElement('span');langWrap.className='v43Wrap';
+  var flag=doc.createElement('span');flag.className='v43Flag';flag.textContent='🇬🇧';langWrap.appendChild(flag);
+  var lang=doc.createElement('select');lang.className='v43Lang';
+  ['English','العربية'].forEach(function(value){var o=doc.createElement('option');o.textContent=value;o.value=value;lang.appendChild(o);});
+  langWrap.appendChild(lang);bar.appendChild(langWrap);
+  host.insertBefore(bar,host.firstChild);
+  return bar;
+}
+function apply(){
+  try{
+    var doc=locate(frame.contentDocument,0);if(!doc)return false;
+    ensureStyle(doc);
+    var existing=doc.getElementById(BAR_ID);if(existing)return true;
+    var buttons=nativeButtons(doc);if(!buttons.length)return false;
+    var host=buttons[0].parentElement;if(!host)return false;
+    createToolbar(doc,host);buttons.forEach(hideNative);
+    doc.documentElement.dataset.classicIconToolbarV43='true';
+    var view=doc.defaultView;
+    if(view)view.__auditKawkabatClassicIconToolbarV43=function(){
+      var bar=doc.getElementById(BAR_ID);
+      return{ok:!!bar&&bar.querySelectorAll('.v43Icon').length===8,sourceVersion:'V42',changedArea:'top-toolbar-icons-and-style-only',lockButtonPresent:false,wheelGeometryChanged:false,ornateFrameChanged:false,angleTicksInnerCopperBoundaryChanged:false};
+    };
+    if(!observer&&doc.body){observer=new MutationObserver(function(){apply();});observer.observe(doc.body,{childList:true,subtree:true});}
+    return true;
+  }catch(error){return false;}
+}
+function start(){
+  if(observer){observer.disconnect();observer=null;}if(timer){clearInterval(timer);timer=null;}
+  var attempts=0;timer=setInterval(function(){attempts+=1;if(apply()||attempts>=2600){clearInterval(timer);timer=null;}},100);
+}
+frame.addEventListener('load',start);start();
+}());
+</script>
+</body>
+</html>
