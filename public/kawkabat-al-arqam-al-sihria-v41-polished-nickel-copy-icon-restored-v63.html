@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kawkabat V63 — Copy Icon Restored</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
+#shell{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden}
+#toolbar{height:42px;flex:0 0 42px;display:flex;justify-content:flex-end;align-items:stretch;direction:ltr;background:linear-gradient(#fff,#e8ebed 52%,#fff);border-bottom:1px solid #b7bcc0;box-shadow:0 1px 3px #0003;z-index:20}
+.group{display:flex;height:100%}
+.tool{height:100%;min-width:42px;border:0;border-left:1px solid #fff;border-right:1px solid #b9bec355;background:linear-gradient(#fff,#eef0f1 52%,#fff);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:#111;padding:0 10px}
+.tool:hover{background:linear-gradient(#fff,#e1e8ee,#fff)}
+.tool:focus-visible{outline:2px solid #5e8bd8;outline-offset:-3px}
+.tool svg{width:22px;height:22px;display:block}
+#zoomText{min-width:98px;font-size:20px}
+.lang{min-width:150px;font-size:18px}.flag{font-size:20px}.caret{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #222;margin-left:5px}
+#copyBtn.copied{background:linear-gradient(#fff,#d8f4df,#fff);box-shadow:inset 0 0 0 2px #46a35e}
+#viewport{position:relative;flex:1;overflow:auto;background:#f7f1e3}
+#stage{position:relative;min-width:100%;min-height:100%;overflow:hidden}
+#appFrame{display:block;border:0;width:100%;height:100%;transform-origin:top left;background:#f7f1e3}
+#toast{position:fixed;top:50px;right:12px;z-index:100;background:#20272b;color:#fff;padding:7px 12px;border-radius:6px;font-size:13px;opacity:0;transform:translateY(-6px);transition:.18s;pointer-events:none}
+#toast.show{opacity:1;transform:translateY(0)}
+.modal{position:fixed;inset:0;display:none;align-items:flex-start;justify-content:center;padding-top:60px;background:#0005;z-index:1000}.modal.open{display:flex}
+.dialog{width:min(310px,94vw);background:#f4f4f4;color:#111;border:1px solid #8f8f8f;box-shadow:0 20px 50px #0008;direction:ltr}
+.head{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid #c5c5c5;font-size:15px}.x{border:0;background:transparent;font-size:22px;cursor:pointer}.body{padding:11px}
+.row{display:grid;grid-template-columns:1fr 60px;gap:5px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:5px}.label{display:block;font-size:12px;color:#555;margin:6px 0 2px}.field,.select{width:100%;height:24px;border:1px solid #b7b7b7;background:#fff;padding:2px 5px}.buttons{display:flex;justify-content:space-between;margin-top:12px}.right{display:flex;gap:6px}.action{min-width:56px;height:25px;border:1px solid #aaa;background:linear-gradient(#fff,#e7e7e7);cursor:pointer}.primary{border:2px solid #2585d5}
+</style>
+</head>
+<body>
+<div id="shell">
+  <div id="toolbar">
+    <div class="group">
+      <button id="minus" class="tool" type="button" aria-label="Zoom out" title="Zoom out 5%"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="#fff" stroke="#6f91da" stroke-width="2.5"/><path d="M11 16h10" stroke="#315fc5" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+      <button id="zoomText" class="tool" type="button" aria-label="Reset zoom">95%</button>
+      <button id="plus" class="tool" type="button" aria-label="Zoom in" title="Zoom in 5%"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="#fff" stroke="#6f91da" stroke-width="2.5"/><path d="M11 16h10M16 11v10" stroke="#315fc5" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="group">
+      <button id="full" class="tool" type="button" aria-label="Fullscreen" title="Fullscreen"><svg viewBox="0 0 32 32"><path d="M7 13V7h6M19 7h6v6M25 19v6h-6M13 25H7v-6" fill="none" stroke="#6f91da" stroke-width="2.5" stroke-linecap="square"/></svg></button>
+      <button id="copyBtn" class="tool" type="button" aria-label="Copy page link" title="Copy page link"><svg viewBox="0 0 32 32"><rect x="10" y="10" width="13" height="13" rx="1.5" fill="#fff" stroke="#4e6575" stroke-width="2"/><rect x="6" y="6" width="13" height="13" rx="1.5" fill="none" stroke="#7596b0" stroke-width="2"/></svg></button>
+    </div>
+    <div class="group"><button id="language" class="tool lang" type="button" aria-label="Language"><span id="langFlag" class="flag">🇬🇧</span><span id="langText">English</span><span class="caret"></span></button></div>
+    <div class="group"><button id="connection" class="tool" type="button" aria-label="Connection settings" title="Connection settings"><svg viewBox="0 0 32 32"><path d="M10 4c-2 0-4 4-4 7 0 8 7 15 15 15 3 0 7-2 7-4 0-1-4-6-6-6-1 0-3 3-4 3-3 0-7-5-7-7 0-1 3-3 3-4 0-2-3-4-4-4z" fill="#7ea4c8" stroke="#526779" stroke-width="1.5"/><path d="M24 5h5l-2.5 3z" fill="#333"/></svg></button></div>
+    <div class="group"><button id="info" class="tool" type="button" aria-label="Information" title="Information"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#477ee0" stroke="#8baded"/><circle cx="16" cy="10" r="1.6" fill="#fff"/><rect x="14.7" y="13" width="2.6" height="9" rx="1.3" fill="#fff"/></svg></button></div>
+  </div>
+  <div id="viewport"><div id="stage"><iframe id="appFrame" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f25decdf48a5d97fb9dde7afaf0a5e6e791ea3c1/public/kawkabat-al-arqam-al-sihria-v41-polished-nickel-wide-comfort-panel-v62.html"></iframe></div></div>
+</div>
+<div id="toast">Link copied</div>
+<div id="connectionModal" class="modal" aria-hidden="true"><div class="dialog"><div class="head"><span>Connection settings</span><button id="closeConnection" class="x">×</button></div><div class="body"><label class="label">Type:</label><select class="select"><option>HTTP</option><option>SOCKS5</option></select><div class="row"><div><label class="label">Server:</label><input class="field"></div><div><label class="label">Port:</label><input class="field"></div></div><div class="row2"><div><label class="label">Login:</label><input class="field"></div><div><label class="label">Password:</label><input class="field" type="password"></div></div><div class="buttons"><button class="action">Test</button><div class="right"><button id="saveConnection" class="action primary">OK</button><button id="cancelConnection" class="action">Cancel</button></div></div></div></div></div>
+<script>
+(function(){
+'use strict';
+var zoom=.95,MIN=.50,MAX=3.00,STEP=.05;
+var frame=document.getElementById('appFrame'),stage=document.getElementById('stage'),zoomText=document.getElementById('zoomText');
+var copyBtn=document.getElementById('copyBtn'),toast=document.getElementById('toast'),modal=document.getElementById('connectionModal');
+function clamp(v){return Math.min(MAX,Math.max(MIN,v));}
+function applyZoom(next){zoom=clamp(Math.round(next*100)/100);zoomText.textContent=Math.round(zoom*100)+'%';frame.style.transform='scale('+zoom+')';frame.style.width=(100/zoom)+'%';frame.style.height=(100/zoom)+'%';document.getElementById('minus').disabled=zoom<=MIN;document.getElementById('plus').disabled=zoom>=MAX;}
+function showToast(text){toast.textContent=text;toast.classList.add('show');setTimeout(function(){toast.classList.remove('show');},1100);}
+async function copyLink(){var text=location.href;try{await navigator.clipboard.writeText(text);}catch(e){var t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();}copyBtn.classList.add('copied');showToast(document.documentElement.lang==='ar'?'تم نسخ الرابط':'Link copied');setTimeout(function(){copyBtn.classList.remove('copied');},850);}
+document.getElementById('minus').onclick=function(){applyZoom(zoom-STEP);};document.getElementById('plus').onclick=function(){applyZoom(zoom+STEP);};zoomText.onclick=function(){applyZoom(.95);};
+document.getElementById('full').onclick=function(){if(document.fullscreenElement){document.exitFullscreen&&document.exitFullscreen();}else{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();}};
+copyBtn.onclick=copyLink;
+document.getElementById('language').onclick=function(){var ar=document.documentElement.lang!=='ar';document.documentElement.lang=ar?'ar':'en';document.documentElement.dir=ar?'rtl':'ltr';document.getElementById('langFlag').textContent=ar?'🇸🇦':'🇬🇧';document.getElementById('langText').textContent=ar?'العربية':'English';try{frame.contentWindow.postMessage({type:'KAWKABAT_LANGUAGE_CHANGE',language:ar?'ar':'en',direction:ar?'rtl':'ltr'},'*');}catch(e){}};
+document.getElementById('connection').onclick=function(){modal.classList.add('open');modal.setAttribute('aria-hidden','false');};function closeModal(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');}document.getElementById('closeConnection').onclick=closeModal;document.getElementById('cancelConnection').onclick=closeModal;document.getElementById('saveConnection').onclick=closeModal;modal.onclick=function(e){if(e.target===modal)closeModal();};
+document.getElementById('info').onclick=function(){showToast(document.documentElement.lang==='ar'?'كوكبة الأرقام السحرية':'Magic Numbers Constellation');};
+applyZoom(.95);
+}());
+</script>
+</body>
+</html>
