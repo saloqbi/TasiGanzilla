@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Floating Tools Panel V79</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/7e288121e3cd3fa9dc4701ca0cb96f3814f0db8d/public/kawkabat-al-arqam-al-sihria-v74-hide-wheel-scrollbars-test-v75.html"></iframe>
+<script>
+(function(){
+'use strict';
+
+var frame=document.getElementById('appFrame');
+var panelOpen=false;
+var panel=null;
+var panelDoc=null;
+var host=null;
+var button=null;
+var attempts=0;
+var bootTimer=null;
+var styleObserver=null;
+var hostObserver=null;
+var applying=false;
+var PANEL_ATTR='data-v79-floating-tools-panel';
+var HOST_ID='v79FloatingToolsHost';
+var BUTTON_ID='v79FloatingToolsButton';
+var STYLE_ID='v79FloatingToolsStyle';
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function findBar(){
+  var found=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(found)return;
+      var bar=doc.getElementById('v62MetalBar');
+      if(bar)found={doc:doc,bar:bar};
+    },0);
+  }catch(error){}
+  return found;
+}
+
+function panelScore(node){
+  if(!node||!node.querySelector||!node.querySelector('input,select'))return-1;
+  var text=String(node.textContent||'');
+  var terms=[
+    'Default','Layout','Visible','Clockwise','Price','Highlight','Protractor','Counter','Secondary scale',
+    'الافتراضي','التخطيط','إظهار','السعر','التمييز','المنقلة','العداد','المقياس الثانوي'
+  ];
+  var score=0;
+  for(var i=0;i<terms.length;i+=1){if(text.indexOf(terms[i])!==-1)score+=1;}
+  return score;
+}
+
+function findPanel(){
+  var best=null,bestScore=-1;
+  try{
+    visit(frame.contentDocument,function(doc){
+      var nodes=doc.querySelectorAll('aside');
+      for(var i=0;i<nodes.length;i+=1){
+        if(nodes[i].getAttribute(PANEL_ATTR)==='true'){
+          best=nodes[i];bestScore=999;return;
+        }
+        var score=panelScore(nodes[i]);
+        if(score>bestScore){bestScore=score;best=nodes[i];}
+      }
+    },0);
+  }catch(error){}
+  return bestScore>=3?best:null;
+}
+
+function ensureStyle(doc){
+  if(doc.getElementById(STYLE_ID))return;
+  var style=doc.createElement('style');
+  style.id=STYLE_ID;
+  style.textContent=''
+    +'#'+HOST_ID+'{position:fixed!important;left:8px!important;top:44px!important;bottom:8px!important;width:min(372px,calc(100vw - 16px))!important;z-index:2147483500!important;pointer-events:none!important;contain:layout style paint!important;isolation:isolate!important}'
+    +'#'+HOST_ID+'[data-open="true"]{pointer-events:auto!important}'
+    +'#'+HOST_ID+' > ['+PANEL_ATTR+'="true"]{position:absolute!important;inset:0!important;width:100%!important;min-width:0!important;max-width:none!important;height:100%!important;min-height:0!important;max-height:none!important;margin:0!important;box-sizing:border-box!important;overflow:auto!important;overscroll-behavior:contain!important;z-index:1!important;transition:none!important;animation:none!important;will-change:auto!important;box-shadow:0 8px 26px rgba(0,0,0,.34)!important}'
+    +'#'+HOST_ID+'[data-open="false"] > ['+PANEL_ATTR+'="true"]{display:block!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;transform:translateX(calc(-100% - 24px))!important}'
+    +'#'+HOST_ID+'[data-open="true"] > ['+PANEL_ATTR+'="true"]{display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;transform:none!important}'
+    +'#'+BUTTON_ID+'{width:32px;min-width:32px;height:30px;padding:0;margin:0;border:1px solid #95a2ac;border-top-color:#dce2e7;border-left-color:#dce2e7;border-radius:3px;background:linear-gradient(180deg,#fff 0%,#edf3f7 46%,#d5dfe7 52%,#fbfcfd 100%);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.97)}'
+    +'#'+BUTTON_ID+':hover{background:linear-gradient(180deg,#fff8ea 0%,#f3e5c3 46%,#e2c382 52%,#fff5e5 100%);border-color:#b88a4a}'
+    +'#'+BUTTON_ID+' svg{width:20px;height:20px;display:block;pointer-events:none}'
+    +'#'+BUTTON_ID+' .v79Shell{fill:#eaf5ff;stroke:#277fc4;stroke-width:1.25}'
+    +'#'+BUTTON_ID+' .v79Side{fill:#4ea0df;stroke:#246da6;stroke-width:.75}'
+    +'#'+BUTTON_ID+' .v79Line{stroke:#277fc4;stroke-width:1.05;stroke-linecap:round}'
+    +'#'+BUTTON_ID+' .v79Dot{fill:#277fc4}'
+    +'#'+BUTTON_ID+'[data-open="true"]{background:linear-gradient(180deg,#e9f7ff 0%,#c9e8fb 48%,#a8d4ef 52%,#eaf8ff 100%);border-color:#287fbd}'
+    +'#v66PanelBtn,#v65PanelToggleBtn{display:none!important;visibility:hidden!important;pointer-events:none!important;width:0!important;min-width:0!important;height:0!important;margin:0!important;padding:0!important;border:0!important}'
+  ;
+  doc.head.appendChild(style);
+}
+
+function panelIcon(){
+  return '<svg viewBox="0 0 24 24" aria-hidden="true">'
+    +'<rect class="v79Shell" x="3.2" y="4" width="17.6" height="16" rx="1.8"/>'
+    +'<rect class="v79Side" x="4.8" y="5.7" width="4.3" height="12.6" rx=".7"/>'
+    +'<path class="v79Line" d="M11.7 8h6.5M11.7 12h6.5M11.7 16h6.5"/>'
+    +'<circle class="v79Dot" cx="7" cy="8.3" r=".65"/>'
+    +'<circle class="v79Dot" cx="7" cy="11.9" r=".65"/>'
+    +'<circle class="v79Dot" cx="7" cy="15.5" r=".65"/>'
+    +'</svg>';
+}
+
+function ensureButton(info){
+  var doc=info.doc;
+  var bar=info.bar;
+  ensureStyle(doc);
+  button=doc.getElementById(BUTTON_ID);
+  if(button)return button;
+  button=doc.createElement('button');
+  button.id=BUTTON_ID;
+  button.type='button';
+  button.innerHTML=panelIcon();
+  button.setAttribute('data-open','false');
+  button.title='إظهار قائمة الأدوات / Show tools panel';
+  button.setAttribute('aria-label',button.title);
+  button.addEventListener('click',function(event){
+    event.preventDefault();
+    event.stopPropagation();
+    panelOpen=!panelOpen;
+    applyPanelState();
+  });
+  var connection=doc.getElementById('v62ConnectionBtn');
+  if(connection)bar.insertBefore(button,connection);
+  else bar.insertBefore(button,bar.firstChild);
+  return button;
+}
+
+function ensureHost(doc){
+  ensureStyle(doc);
+  host=doc.getElementById(HOST_ID);
+  if(!host){
+    host=doc.createElement('div');
+    host.id=HOST_ID;
+    host.setAttribute('data-open','false');
+    host.setAttribute('aria-hidden','true');
+    doc.body.appendChild(host);
+  }
+  return host;
+}
+
+function hideLegacyPanelButtons(){
+  try{
+    visit(frame.contentDocument,function(doc){
+      ensureStyle(doc);
+      var ids=['v66PanelBtn','v65PanelToggleBtn'];
+      for(var i=0;i<ids.length;i+=1){
+        var old=doc.getElementById(ids[i]);
+        if(old){
+          old.style.setProperty('display','none','important');
+          old.style.setProperty('visibility','hidden','important');
+          old.style.setProperty('pointer-events','none','important');
+          old.setAttribute('aria-hidden','true');
+        }
+      }
+    },0);
+  }catch(error){}
+}
+
+function movePanelToFloatingHost(){
+  var found=findPanel();
+  if(!found)return false;
+  panel=found;
+  panelDoc=panel.ownerDocument;
+  ensureHost(panelDoc);
+  if(panel.parentNode!==host)host.appendChild(panel);
+  panel.setAttribute(PANEL_ATTR,'true');
+  panel.removeAttribute('hidden');
+  panel.setAttribute('aria-hidden',panelOpen?'false':'true');
+  return true;
+}
+
+function enforcePanelState(){
+  if(applying||!panel||!host)return;
+  applying=true;
+  try{
+    host.setAttribute('data-open',panelOpen?'true':'false');
+    host.setAttribute('aria-hidden',panelOpen?'false':'true');
+    panel.setAttribute(PANEL_ATTR,'true');
+    panel.setAttribute('aria-hidden',panelOpen?'false':'true');
+    panel.style.setProperty('position','absolute','important');
+    panel.style.setProperty('inset','0','important');
+    panel.style.setProperty('width','100%','important');
+    panel.style.setProperty('height','100%','important');
+    panel.style.setProperty('margin','0','important');
+    panel.style.setProperty('overflow','auto','important');
+    panel.style.setProperty('transition','none','important');
+    panel.style.setProperty('animation','none','important');
+    panel.style.setProperty('display','block','important');
+    if(panelOpen){
+      panel.style.setProperty('visibility','visible','important');
+      panel.style.setProperty('opacity','1','important');
+      panel.style.setProperty('pointer-events','auto','important');
+      panel.style.setProperty('transform','none','important');
+    }else{
+      panel.style.setProperty('visibility','hidden','important');
+      panel.style.setProperty('opacity','0','important');
+      panel.style.setProperty('pointer-events','none','important');
+      panel.style.setProperty('transform','translateX(calc(-100% - 24px))','important');
+    }
+  }finally{
+    applying=false;
+  }
+}
+
+function syncButton(){
+  if(!button)return;
+  button.setAttribute('data-open',panelOpen?'true':'false');
+  button.title=panelOpen?'إخفاء قائمة الأدوات / Hide tools panel':'إظهار قائمة الأدوات / Show tools panel';
+  button.setAttribute('aria-label',button.title);
+  button.setAttribute('aria-pressed',panelOpen?'true':'false');
+}
+
+function applyPanelState(){
+  if(!panel||!panel.isConnected||!host||!host.isConnected){
+    if(!movePanelToFloatingHost())return false;
+  }
+  enforcePanelState();
+  syncButton();
+  return true;
+}
+
+function bindObservers(){
+  if(styleObserver)styleObserver.disconnect();
+  if(panel){
+    styleObserver=new MutationObserver(function(){
+      if(!applying)enforcePanelState();
+    });
+    styleObserver.observe(panel,{attributes:true,attributeFilter:['style','class','hidden','aria-hidden']});
+  }
+  if(hostObserver)hostObserver.disconnect();
+  if(panelDoc&&panelDoc.body){
+    hostObserver=new MutationObserver(function(){
+      if(panel&&panel.isConnected&&panel.parentNode===host)return;
+      setTimeout(function(){
+        if(movePanelToFloatingHost()){
+          enforcePanelState();
+          bindObservers();
+        }
+      },0);
+    });
+    hostObserver.observe(panelDoc.body,{childList:true,subtree:true});
+  }
+}
+
+function install(){
+  var barInfo=findBar();
+  if(!barInfo)return false;
+  ensureButton(barInfo);
+  hideLegacyPanelButtons();
+  if(!movePanelToFloatingHost())return false;
+  panelOpen=false;
+  applyPanelState();
+  bindObservers();
+
+  try{
+    barInfo.doc.defaultView.__auditKawkabatFloatingToolsPanelV79=function(){
+      return{
+        ok:!!button&&!!panel&&!!host&&panel.parentNode===host,
+        sourceVersion:'V75',
+        floatingPanel:true,
+        panelRemovedFromPageLayout:true,
+        hiddenByDefault:!panelOpen,
+        toolbarButtonPresent:!!button,
+        legacyPanelButtonHidden:true,
+        wheelResizeDispatched:false,
+        autoFitTriggered:false,
+        wheelGeometryChanged:false,
+        ornateFrameChanged:false,
+        panelOpen:panelOpen
+      };
+    };
+  }catch(error){}
+  return true;
+}
+
+function boot(){
+  attempts+=1;
+  if(install()){
+    bootTimer=null;
+    return;
+  }
+  if(attempts<180)bootTimer=setTimeout(boot,100);
+}
+
+function start(){
+  if(bootTimer)clearTimeout(bootTimer);
+  if(styleObserver){styleObserver.disconnect();styleObserver=null;}
+  if(hostObserver){hostObserver.disconnect();hostObserver=null;}
+  panelOpen=false;
+  panel=null;
+  panelDoc=null;
+  host=null;
+  button=null;
+  attempts=0;
+  bootTimer=setTimeout(boot,80);
+}
+
+frame.addEventListener('load',start);
+document.addEventListener('keydown',function(event){
+  if(event.key==='Escape'&&panelOpen){panelOpen=false;applyPanelState();}
+});
+start();
+}());
+</script>
+</body>
+</html>
