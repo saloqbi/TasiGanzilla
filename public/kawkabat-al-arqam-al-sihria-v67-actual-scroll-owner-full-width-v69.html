@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Actual Scroll Owner Full Width V69</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/fc3f5bc691e0409575c98f5a2fe450224735250f/public/kawkabat-al-arqam-al-sihria-v66-panel-toggle-cached-responsive-v67.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var timer=null;
+var cachedOwner=null;
+var cachedDoc=null;
+var cachedTop=null;
+var saved=new WeakMap();
+var alteredAncestors=[];
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function panelButton(){
+  var found=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(found)return;
+      found=doc.getElementById('v66PanelBtn')||doc.getElementById('v65PanelToggleBtn');
+    },0);
+  }catch(error){}
+  return found;
+}
+
+function panelIsHidden(){
+  var button=panelButton();
+  if(button&&button.dataset.hidden==='true')return true;
+  var visible=false;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(visible)return;
+      var asides=doc.querySelectorAll('aside');
+      for(var i=0;i<asides.length;i+=1){
+        var aside=asides[i];
+        if(!aside.querySelector('input,select'))continue;
+        var text=String(aside.textContent||'');
+        if(!(/Default|Layout|Visible|الافتراضي|التخطيط|إظهار/.test(text)))continue;
+        var style=doc.defaultView.getComputedStyle(aside);
+        var rect=aside.getBoundingClientRect();
+        if(style.display!=='none'&&style.visibility!=='hidden'&&rect.width>5){visible=true;return;}
+      }
+    },0);
+  }catch(error){}
+  return !visible;
+}
+
+function wheelTargetInDocument(doc){
+  var wheel=doc.getElementById('wheel');
+  if(wheel){
+    var tag=String(wheel.tagName||'').toLowerCase();
+    return (tag==='g'||tag==='path')?(wheel.closest('svg')||wheel):wheel;
+  }
+  var best=null,bestArea=0;
+  var canvases=doc.querySelectorAll('canvas');
+  for(var i=0;i<canvases.length;i+=1){
+    var canvas=canvases[i];
+    if(canvas.closest&&canvas.closest('aside'))continue;
+    if(/DrawingOverlay/i.test(canvas.id||''))continue;
+    var rect=canvas.getBoundingClientRect();
+    var area=rect.width*rect.height;
+    if(canvas.width>300&&canvas.height>300&&rect.width>250&&rect.height>250&&area>bestArea){best=canvas;bestArea=area;}
+  }
+  return best;
+}
+
+function scoreCandidate(node,target,doc){
+  if(!(node instanceof doc.defaultView.HTMLElement))return -1;
+  var rect=node.getBoundingClientRect();
+  if(rect.width<250||rect.height<250)return -1;
+  var style=doc.defaultView.getComputedStyle(node);
+  var overflow=String(style.overflow||'')+' '+String(style.overflowX||'')+' '+String(style.overflowY||'');
+  var score=0;
+  if(node===target)score+=30;
+  if(node.contains(target))score+=500;
+  if(/auto|scroll/.test(overflow))score+=350;
+  if(node.scrollWidth>node.clientWidth+4)score+=220;
+  if(node.scrollHeight>node.clientHeight+4)score+=150;
+  if(rect.left>80)score+=40;
+  if(rect.right>=doc.documentElement.clientWidth-3)score+=20;
+  score+=Math.min(80,(rect.width*rect.height)/25000);
+  return score;
+}
+
+function findActualScrollOwner(){
+  var best=null,bestScore=-1;
+  try{
+    visit(frame.contentDocument,function(doc){
+      var target=wheelTargetInDocument(doc);
+      if(!target)return;
+      var node=target;
+      for(var depth=0;node&&depth<18;depth+=1,node=node.parentElement){
+        var score=scoreCandidate(node,target,doc);
+        if(score>bestScore){bestScore=score;best={doc:doc,owner:node,target:target,score:score};}
+      }
+      var all=doc.querySelectorAll('div,section,main');
+      for(var i=0;i<all.length;i+=1){
+        var candidate=all[i];
+        if(!candidate.contains(target))continue;
+        var candidateScore=scoreCandidate(candidate,target,doc);
+        if(candidateScore>bestScore){bestScore=candidateScore;best={doc:doc,owner:candidate,target:target,score:candidateScore};}
+      }
+    },0);
+  }catch(error){}
+  return best;
+}
+
+function remember(node,names){
+  if(!node||saved.has(node))return;
+  var record={};
+  for(var i=0;i<names.length;i+=1)record[names[i]]=node.style.getPropertyValue(names[i]);
+  saved.set(node,record);
+}
+
+function restore(node,names){
+  var record=saved.get(node);
+  if(!record)return;
+  for(var i=0;i<names.length;i+=1){
+    var name=names[i],value=record[name];
+    if(value)node.style.setProperty(name,value,'important');
+    else node.style.removeProperty(name);
+  }
+}
+
+var OWNER_PROPS=['position','top','bottom','left','right','inset-inline-start','inset-inline-end','width','min-width','max-width','height','max-height','margin','margin-left','margin-right','transform','overflow','overflow-x','overflow-y','box-sizing','z-index'];
+var ANCESTOR_PROPS=['width','min-width','max-width','margin','margin-left','margin-right','padding-left','padding-right','transform','filter','perspective','contain','overflow','overflow-x','overflow-y'];
+
+function prepareOwner(info){
+  if(!info||!info.owner)return false;
+  if(cachedOwner!==info.owner){
+    restoreLayout();
+    cachedOwner=info.owner;
+    cachedDoc=info.doc;
+    var rect=info.owner.getBoundingClientRect();
+    cachedTop=Math.max(0,Math.round(rect.top));
+    remember(cachedOwner,OWNER_PROPS);
+  }
+  return true;
+}
+
+function forceAncestorsOpen(owner,doc){
+  alteredAncestors=[];
+  var node=owner.parentElement;
+  for(var depth=0;node&&node!==doc.body&&node!==doc.documentElement&&depth<12;depth+=1,node=node.parentElement){
+    remember(node,ANCESTOR_PROPS);
+    alteredAncestors.push(node);
+    node.style.setProperty('width','100%','important');
+    node.style.setProperty('min-width','0','important');
+    node.style.setProperty('max-width','none','important');
+    node.style.setProperty('margin','0','important');
+    node.style.setProperty('margin-left','0','important');
+    node.style.setProperty('margin-right','0','important');
+    node.style.setProperty('padding-left','0','important');
+    node.style.setProperty('padding-right','0','important');
+    node.style.setProperty('transform','none','important');
+    node.style.setProperty('filter','none','important');
+    node.style.setProperty('perspective','none','important');
+    node.style.setProperty('contain','none','important');
+    node.style.setProperty('overflow','visible','important');
+  }
+}
+
+function forceFullWidth(info){
+  if(!prepareOwner(info))return false;
+  var owner=info.owner,doc=info.doc;
+  forceAncestorsOpen(owner,doc);
+  owner.style.setProperty('position','fixed','important');
+  owner.style.setProperty('top',cachedTop+'px','important');
+  owner.style.setProperty('bottom','0','important');
+  owner.style.setProperty('left','0','important');
+  owner.style.setProperty('right','0','important');
+  owner.style.setProperty('inset-inline-start','0','important');
+  owner.style.setProperty('inset-inline-end','0','important');
+  owner.style.setProperty('width','auto','important');
+  owner.style.setProperty('min-width','0','important');
+  owner.style.setProperty('max-width','none','important');
+  owner.style.setProperty('height','auto','important');
+  owner.style.setProperty('max-height','none','important');
+  owner.style.setProperty('margin','0','important');
+  owner.style.setProperty('margin-left','0','important');
+  owner.style.setProperty('margin-right','0','important');
+  owner.style.setProperty('transform','none','important');
+  owner.style.setProperty('overflow','auto','important');
+  owner.style.setProperty('overflow-x','auto','important');
+  owner.style.setProperty('overflow-y','auto','important');
+  owner.style.setProperty('box-sizing','border-box','important');
+  owner.style.setProperty('z-index','1','important');
+  owner.dataset.v69ActualScrollOwnerFullWidth='true';
+  try{
+    doc.defaultView.dispatchEvent(new Event('resize'));
+    doc.defaultView.dispatchEvent(new CustomEvent('gannzilla:page-scrollbar-edge-sync',{detail:{panelVisible:false,source:'v69'}}));
+  }catch(error){}
+  return true;
+}
+
+function restoreLayout(){
+  if(cachedOwner){
+    restore(cachedOwner,OWNER_PROPS);
+    cachedOwner.removeAttribute('data-v69-actual-scroll-owner-full-width');
+  }
+  for(var i=0;i<alteredAncestors.length;i+=1)restore(alteredAncestors[i],ANCESTOR_PROPS);
+  alteredAncestors=[];
+  if(cachedDoc){
+    try{
+      cachedDoc.defaultView.dispatchEvent(new Event('resize'));
+      cachedDoc.defaultView.dispatchEvent(new CustomEvent('gannzilla:page-scrollbar-edge-sync',{detail:{panelVisible:true,source:'v69-restore'}}));
+    }catch(error){}
+  }
+}
+
+function bindButton(){
+  var button=panelButton();
+  if(!button||button.dataset.v69Bound==='true')return;
+  button.dataset.v69Bound='true';
+  button.addEventListener('click',function(){
+    setTimeout(sync,0);
+    setTimeout(sync,40);
+    setTimeout(sync,140);
+    setTimeout(sync,360);
+  },true);
+}
+
+function audit(info,hidden){
+  if(!info||!info.owner)return;
+  try{
+    info.doc.defaultView.__auditKawkabatActualScrollOwnerFullWidthV69=function(){
+      var rect=info.owner.getBoundingClientRect();
+      return{
+        ok:true,
+        sourceVersion:'V67',
+        panelHidden:hidden,
+        actualScrollOwnerTag:info.owner.tagName,
+        candidateScore:info.score,
+        ownerLeftPx:Math.round(rect.left),
+        ownerRightGapPx:Math.round(info.doc.defaultView.innerWidth-rect.right),
+        fullWidthWhenHidden:hidden?Math.abs(rect.left)<=1&&Math.abs(info.doc.defaultView.innerWidth-rect.right)<=1:null,
+        scrollbarKept:true,
+        wheelGeometryChanged:false,
+        ornateFrameChanged:false
+      };
+    };
+  }catch(error){}
+}
+
+function sync(){
+  bindButton();
+  var hidden=panelIsHidden();
+  var info=findActualScrollOwner();
+  if(!info)return false;
+  if(hidden)forceFullWidth(info);
+  else restoreLayout();
+  audit(info,hidden);
+  return true;
+}
+
+function start(){
+  if(timer)clearInterval(timer);
+  timer=setInterval(sync,45);
+  sync();
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
