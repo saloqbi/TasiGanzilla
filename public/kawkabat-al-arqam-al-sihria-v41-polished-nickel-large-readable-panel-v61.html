@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kawkabat V61 — Large Readable Panel</title>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Kawkabat Panel Large Readable" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/v41-display-locked/public/kawkabat-al-arqam-al-sihria-v41-polished-nickel-chart-settings-full-v51.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var timer=null;
+var TEXT_MAP={
+  'Chart Settings':'إعدادات المخطط',
+  'Layout':'التخطيط',
+  'Visible':'مرئي',
+  'Clockwise':'مع عقارب الساعة',
+  'Counterclockwise':'عكس عقارب الساعة',
+  'Size':'الحجم',
+  'View':'نوع العرض',
+  'Data':'نوع البيانات',
+  'Price':'السعر',
+  'Start Value':'قيمة البداية',
+  'Direction':'الاتجاه',
+  'Increment':'الزيادة',
+  'Value':'القيمة',
+  'Find':'بحث',
+  'Highlight':'التمييز',
+  'Fill':'تعبئة',
+  'Show marks':'إظهار العلامات',
+  'Show numbers':'إظهار الأرقام',
+  'Figures':'الأشكال',
+  'Triangle':'مثلث',
+  'Square':'مربع',
+  'Pentagon':'خماسي',
+  'Hexagon':'سداسي',
+  'Septagon':'سباعي',
+  'Octagon':'ثماني',
+  'Nonagon':'تساعي',
+  'Decagon':'عشاري',
+  'Hendecagon':'أحد عشري',
+  'Dodecagon':'اثنا عشري',
+  'Vectors':'متجهات',
+  'Locator':'محدد',
+  'Vortex':'دوامة',
+  'Circle of 36':'دائرة 36',
+  'Price value':'قيمة السعر',
+  'Use price':'استخدام السعر'
+};
+function collectDocs(doc,depth,list){
+  if(!doc||depth>80)return list;
+  list.push(doc);
+  var frames=[];
+  try{frames=doc.querySelectorAll('iframe');}catch(e){return list;}
+  for(var i=0;i<frames.length;i+=1){
+    try{collectDocs(frames[i].contentDocument,depth+1,list);}catch(e){}
+  }
+  return list;
+}
+function findPanelDoc(){
+  var root=frame.contentDocument;
+  if(!root)return null;
+  var docs=collectDocs(root,0,[]);
+  for(var i=0;i<docs.length;i+=1){
+    try{
+      if(docs[i].querySelector('.control-panel')&&docs[i].querySelector('.panel-scroll'))return docs[i];
+    }catch(e){}
+  }
+  return null;
+}
+function translateText(value){
+  var key=String(value||'').trim();
+  return TEXT_MAP[key]||key;
+}
+function translatePanel(doc){
+  var title=doc.querySelector('.panel-title');
+  if(title)title.textContent='إعدادات المخطط';
+  var dot=doc.querySelector('.panel-dot');
+  if(dot)dot.textContent='☰';
+  var textNodes=doc.querySelectorAll('.section-name,.control-label,.v50-figure-head span:last-child,.section-toggle .section-name');
+  Array.prototype.forEach.call(textNodes,function(node){
+    var translated=translateText(node.textContent);
+    if(translated)node.textContent=translated;
+  });
+  var options=doc.querySelectorAll('select option');
+  Array.prototype.forEach.call(options,function(opt){
+    var translated=translateText(opt.textContent);
+    if(translated)opt.textContent=translated;
+  });
+  var selects=doc.querySelectorAll('select');
+  Array.prototype.forEach.call(selects,function(sel){
+    if(sel.value==='clockwise')sel.setAttribute('title','مع عقارب الساعة');
+  });
+}
+function installStyle(doc){
+  if(doc.getElementById('v61LargeReadableStyle'))return;
+  var style=doc.createElement('style');
+  style.id='v61LargeReadableStyle';
+  style.textContent='\
+    .control-panel{width:438px!important;min-width:438px!important;max-width:438px!important;flex:0 0 438px!important;padding:10px 11px!important;box-shadow:12px 0 22px rgba(18,28,35,.22)!important;}\
+    .panel-shell{border-radius:19px!important;}\
+    .panel-topbar{min-height:74px!important;flex-basis:74px!important;margin:8px 8px 7px!important;padding:0 12px!important;}\
+    .panel-dot{width:42px!important;height:42px!important;font-size:34px!important;}\
+    .panel-title{font-size:31px!important;font-weight:900!important;letter-spacing:.15px!important;}\
+    .panel-actions{gap:8px!important;}\
+    .panel-action{width:54px!important;height:54px!important;border-radius:12px!important;font-size:32px!important;}\
+    .panel-scroll{margin:0 8px 8px!important;scrollbar-width:auto!important;}\
+    .panel-scroll::-webkit-scrollbar{width:14px!important;height:14px!important;}\
+    .panel-scroll::-webkit-scrollbar-thumb{border-radius:10px!important;}\
+    .control-section{margin:8px!important;border-radius:14px!important;}\
+    .section-toggle{min-height:55px!important;padding:0 15px!important;font-size:19px!important;font-weight:900!important;}\
+    .section-sign{width:28px!important;font-size:24px!important;}\
+    .section-icon{font-size:24px!important;}\
+    .section-name{font-size:18px!important;}\
+    .control-row{min-height:51px!important;grid-template-columns:45% 55%!important;}\
+    .control-label{padding:9px 12px 9px 17px!important;font-size:18px!important;font-weight:800!important;line-height:1.2!important;text-align:right!important;white-space:normal!important;}\
+    .control-value{padding:5px 9px!important;}\
+    .control-value input[type=text],.control-value input[type=number],.control-value select{height:39px!important;border-radius:9px!important;padding:4px 11px!important;font-size:18px!important;font-weight:800!important;line-height:1.15!important;}\
+    .control-value select{text-align:right!important;}\
+    .control-value input[type=text],.control-value input[type=number]{text-align:center!important;}\
+    .control-value input[type=checkbox],.v50-checkbox{width:24px!important;height:24px!important;}\
+    .v50-figure-head{min-height:34px!important;font-size:14px!important;padding:4px 11px!important;}\
+    .v50-tree-sign{width:18px!important;height:18px!important;font-size:14px!important;}\
+    .v50-compact-row{min-height:32px!important;grid-template-columns:48% 52%!important;}\
+    .v50-compact-row .control-label{font-size:13px!important;padding-left:28px!important;}\
+    .v50-compact-row .control-value{font-size:13px!important;}\
+  ';
+  (doc.head||doc.documentElement).appendChild(style);
+}
+function install(){
+  try{
+    var doc=findPanelDoc();
+    if(!doc)return false;
+    installStyle(doc);
+    translatePanel(doc);
+    doc.documentElement.dataset.largeReadablePanelV61='true';
+    if(doc.defaultView){
+      doc.defaultView.__auditLargeReadablePanelV61=function(){
+        return {ok:true,panelWidth:438,title:'إعدادات المخطط',style:'polished-nickel-large-readable'};
+      };
+    }
+    return true;
+  }catch(e){return false;}
+}
+function start(){
+  if(timer)clearInterval(timer);
+  var attempts=0;
+  timer=setInterval(function(){
+    attempts+=1;
+    install();
+    if(attempts>=300){clearInterval(timer);timer=null;}
+  },120);
+}
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
