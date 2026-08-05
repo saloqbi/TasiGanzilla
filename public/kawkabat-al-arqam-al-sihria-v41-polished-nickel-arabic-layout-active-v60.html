@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kawkabat V60 — Active Arabic RTL Layout</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#v60Frame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="v60Frame" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/v41-display-locked/public/kawkabat-al-arqam-al-sihria-v41-polished-nickel-bottom-scrollbar-thicker-shorter-v59.html"></iframe>
+<script>
+(function(){
+  'use strict';
+  var host=document.getElementById('v60Frame');
+  var language='en';
+  var seenDocs=new WeakSet();
+  var translations={
+    'Chart Settings':'إعدادات المخطط',
+    'Chart settings':'إعدادات المخطط',
+    'Planning':'التخطيط',
+    'Visible':'مرئي',
+    'Movement Direction':'اتجاه الحركة',
+    'Direction of movement':'اتجاه الحركة',
+    'Clockwise':'مع عقارب الساعة',
+    'Counterclockwise':'عكس عقارب الساعة',
+    'Size':'الحجم',
+    'View Type':'نوع العرض',
+    'View type':'نوع العرض',
+    '36 Circles':'36 دائرة',
+    '36 Circle':'36 دائرة',
+    'Data Type':'نوع البيانات',
+    'Data type':'نوع البيانات',
+    'Price':'السعر',
+    'Start Value':'قيمة البداية',
+    'Start value':'قيمة البداية',
+    'Direction':'الاتجاه',
+    'Increment':'الزيادة',
+    'Angle':'الزاوية',
+    'Angles':'الزوايا',
+    'Line':'الخط',
+    'Lines':'الخطوط',
+    'Color':'اللون',
+    'Width':'العرض',
+    'Opacity':'الشفافية',
+    'Enabled':'مفعّل',
+    'Show':'إظهار',
+    'Hide':'إخفاء',
+    'Settings':'الإعدادات',
+    'Advanced':'متقدم',
+    'Reset':'إعادة ضبط',
+    'Apply':'تطبيق',
+    'Close':'إغلاق',
+    'Number':'الرقم',
+    'Numbers':'الأرقام',
+    'Zodiac':'الأبراج',
+    'Time':'الوقت',
+    'Date':'التاريخ',
+    'Connection settings':'إعدادات الاتصال',
+    'Use proxy':'استخدام الوكيل',
+    'Type:':'النوع:',
+    'Server:':'الخادم:',
+    'Port:':'المنفذ:',
+    'Login:':'اسم المستخدم:',
+    'Password:':'كلمة المرور:',
+    'Test':'اختبار',
+    'OK':'موافق',
+    'Cancel':'إلغاء',
+    'About':'حول البرنامج'
+  };
+
+  function documents(root,depth,out){
+    if(!root||depth>30)return out;
+    out.push(root);
+    var frames=[];
+    try{frames=root.querySelectorAll('iframe')}catch(e){return out}
+    for(var i=0;i<frames.length;i++){
+      try{documents(frames[i].contentDocument,depth+1,out)}catch(e){}
+    }
+    return out;
+  }
+
+  function ensureStyle(d){
+    var s=d.getElementById('v60ArabicLayoutStyle');
+    if(!s){
+      s=d.createElement('style');
+      s.id='v60ArabicLayoutStyle';
+      s.textContent='\
+html[data-v60-language="ar"] .control-panel,\
+html[data-v60-language="ar"] .panel-shell,\
+html[data-v60-language="ar"] .panel-scroll,\
+html[data-v60-language="ar"] .panel-topbar,\
+html[data-v60-language="ar"] .section-toggle,\
+html[data-v60-language="ar"] .control-row,\
+html[data-v60-language="ar"] .v50-figure-row,\
+html[data-v60-language="ar"] .v50-color-row{direction:rtl!important;font-family:Tahoma,Arial,sans-serif!important}\
+html[data-v60-language="ar"] .control-label,\
+html[data-v60-language="ar"] .panel-title,\
+html[data-v60-language="ar"] .section-toggle,\
+html[data-v60-language="ar"] label{text-align:right!important;font-family:Tahoma,Arial,sans-serif!important}\
+html[data-v60-language="ar"] .control-value,\
+html[data-v60-language="ar"] input,\
+html[data-v60-language="ar"] select,\
+html[data-v60-language="ar"] option{text-align:right!important;direction:rtl!important;font-family:Tahoma,Arial,sans-serif!important}\
+html[data-v60-language="ar"] #connectionDialog,\
+html[data-v60-language="ar"] #aboutDialog,\
+html[data-v60-language="ar"] .dialog,\
+html[data-v60-language="ar"] .modal{direction:rtl!important}\
+html[data-v60-language="ar"] .dialogHead,\
+html[data-v60-language="ar"] .proxyRow,\
+html[data-v60-language="ar"] .dialogButtons{direction:rtl!important}\
+html[data-v60-language="ar"] #bar{direction:ltr!important}\
+html[data-v60-language="ar"] #language{direction:ltr!important}';
+      (d.head||d.documentElement).appendChild(s);
+    }
+  }
+
+  function translateElement(el,toArabic){
+    if(!el||el.childElementCount!==0)return;
+    var value=(el.textContent||'').trim();
+    if(toArabic){
+      if(translations[value]){
+        if(!el.hasAttribute('data-v60-original-text'))el.setAttribute('data-v60-original-text',value);
+        el.textContent=translations[value];
+      }
+    }else if(el.hasAttribute('data-v60-original-text')){
+      el.textContent=el.getAttribute('data-v60-original-text');
+      el.removeAttribute('data-v60-original-text');
+    }
+  }
+
+  function applyDocument(d){
+    if(!d||!d.documentElement)return;
+    ensureStyle(d);
+    var ar=language==='ar';
+    d.documentElement.setAttribute('data-v60-language',language);
+    d.documentElement.lang=language;
+    d.documentElement.dir='ltr';
+    var all=[];
+    try{all=d.body?d.body.querySelectorAll('*'):[]}catch(e){all=[]}
+    for(var i=0;i<all.length;i++)translateElement(all[i],ar);
+    var langButton=d.getElementById('language');
+    var langText=d.getElementById('langText');
+    var langFlag=d.getElementById('langFlag');
+    if(langText)langText.textContent=ar?'العربية':'English';
+    if(langFlag)langFlag.textContent=ar?'🇸🇦':'🇬🇧';
+    if(langButton&&!langButton.dataset.v60ArabicBound){
+      langButton.dataset.v60ArabicBound='true';
+      langButton.addEventListener('click',function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();
+        language=language==='ar'?'en':'ar';
+        applyAll();
+      },true);
+    }
+    if(!seenDocs.has(d)&&d.body){
+      seenDocs.add(d);
+      try{
+        new MutationObserver(function(){applyDocument(d)}).observe(d.body,{childList:true,subtree:true,characterData:true});
+      }catch(e){}
+    }
+  }
+
+  function applyAll(){
+    var root=null;
+    try{root=host.contentDocument}catch(e){}
+    var docs=documents(root,0,[]);
+    for(var i=0;i<docs.length;i++)applyDocument(docs[i]);
+    document.documentElement.setAttribute('data-v60-language',language);
+  }
+
+  host.addEventListener('load',function(){setTimeout(applyAll,120)});
+  setInterval(applyAll,500);
+  window.__auditKawkabatArabicLayoutV60=function(){
+    var root=null,docs=[];
+    try{root=host.contentDocument;docs=documents(root,0,[])}catch(e){}
+    var panelFound=false,buttonFound=false;
+    for(var i=0;i<docs.length;i++){
+      try{
+        if(docs[i].querySelector('.control-panel,.panel-shell'))panelFound=true;
+        if(docs[i].getElementById('language'))buttonFound=true;
+      }catch(e){}
+    }
+    return{ok:panelFound&&buttonFound,language:language,rtlPanelActive:language==='ar',panelFound:panelFound,languageButtonFound:buttonFound};
+  };
+  applyAll();
+}());
+</script>
+</body>
+</html>
