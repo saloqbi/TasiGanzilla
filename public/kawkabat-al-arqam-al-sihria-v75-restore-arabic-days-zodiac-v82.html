@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>كوكبة الأرقام السحرية — استعادة العربية والأيام والأبراج V82</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="كوكبة الأرقام السحرية" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/7e288121e3cd3fa9dc4701ca0cb96f3814f0db8d/public/kawkabat-al-arqam-al-sihria-v74-hide-wheel-scrollbars-test-v75.html"></iframe>
+<script>
+(function(){
+'use strict';
+
+var frame=document.getElementById('appFrame');
+var timer=null;
+var attempts=0;
+var retries=[];
+
+var DAYS=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+var ZODIAC=['الحمل','الثور','الجوزاء','السرطان','الأسد','العذراء','الميزان','العقرب','القوس','الجدي','الدلو','الحوت'];
+var COLORS=['#c62828','#1d5f91','#111111'];
+var ZODIAC_RE=/(الحمل|الثور|الجوزاء|السرطان|الأسد|العذراء|الميزان|العقرب|القوس|الجدي|الدلو|الحوت)/;
+var DAY_RE=/(الأحد|الاحد|الاثنين|الإثنين|الثلاثاء|الأربعاء|الاربعاء|الخميس|الجمعة|السبت)/;
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function forceArabic(doc){
+  try{
+    doc.documentElement.lang='ar';
+    doc.documentElement.dir='rtl';
+    if(doc.body)doc.body.dir='rtl';
+    doc.defaultView.localStorage.setItem('tasi-gannzilla-language-v1','ar');
+    doc.defaultView.localStorage.setItem('tasi-gannzilla-language','ar');
+  }catch(error){}
+
+  var selects=doc.querySelectorAll('#v62Language,#v47Language,[data-gannzilla-language-control="true"] select,select[aria-label*="Language"],select[title*="Language"]');
+  for(var i=0;i<selects.length;i+=1){
+    var select=selects[i];
+    if(Array.prototype.some.call(select.options||[],function(option){return option.value==='ar';})){
+      select.value='ar';
+    }
+  }
+
+  var flags=doc.querySelectorAll('#v62Flag,[data-lang]');
+  for(var j=0;j<flags.length;j+=1){
+    if(flags[j].id==='v62Flag'||flags[j].closest&&flags[j].closest('[data-gannzilla-language-control="true"]')){
+      flags[j].setAttribute('data-lang','ar');
+    }
+  }
+}
+
+function pointForText(node,svg){
+  try{
+    var box=node.getBBox();
+    var matrix=node.getCTM();
+    if(!matrix)return null;
+    var point=svg.createSVGPoint();
+    point.x=box.x+box.width/2;
+    point.y=box.y+box.height/2;
+    var transformed=point.matrixTransform(matrix);
+    return{x:transformed.x,y:transformed.y};
+  }catch(error){
+    var x=Number(node.getAttribute('x'));
+    var y=Number(node.getAttribute('y'));
+    return Number.isFinite(x)&&Number.isFinite(y)?{x:x,y:y}:null;
+  }
+}
+
+function centerOf(svg){
+  var vb=svg.viewBox&&svg.viewBox.baseVal;
+  if(vb&&vb.width&&vb.height)return{x:vb.x+vb.width/2,y:vb.y+vb.height/2};
+  var values=String(svg.getAttribute('viewBox')||'0 0 4400 3600').trim().split(/\s+/).map(Number);
+  return{x:(values[0]||0)+(values[2]||4400)/2,y:(values[1]||0)+(values[3]||3600)/2};
+}
+
+function angleFromTop(point,center){
+  var angle=Math.atan2(point.y-center.y,point.x-center.x)*180/Math.PI+90;
+  while(angle<0)angle+=360;
+  while(angle>=360)angle-=360;
+  return angle;
+}
+
+function arabicLabelNodes(svg){
+  var all=Array.prototype.slice.call(svg.querySelectorAll('text'));
+  var zodiac=all.filter(function(node){return ZODIAC_RE.test(String(node.textContent||''));});
+  if(zodiac.length>=12)return zodiac;
+
+  var center=centerOf(svg);
+  var candidates=[];
+  for(var i=0;i<all.length;i+=1){
+    var text=String(all[i].textContent||'').trim();
+    if(!/[\u0600-\u06FF]/.test(text)||text.length<3||text.length>40)continue;
+    var point=pointForText(all[i],svg);
+    if(!point)continue;
+    var dx=point.x-center.x,dy=point.y-center.y;
+    candidates.push({node:all[i],radius:Math.sqrt(dx*dx+dy*dy)});
+  }
+  if(!candidates.length)return [];
+  var maxRadius=Math.max.apply(null,candidates.map(function(item){return item.radius;}));
+  return candidates.filter(function(item){return item.radius>=maxRadius*.70;}).map(function(item){return item.node;});
+}
+
+function restoreRing(svg,doc){
+  var center=centerOf(svg);
+  var nodes=arabicLabelNodes(svg).map(function(node){
+    var point=pointForText(node,svg);
+    return point?{node:node,point:point,angle:angleFromTop(point,center)}:null;
+  }).filter(Boolean).sort(function(a,b){return a.angle-b.angle;});
+
+  if(nodes.length<12)return false;
+
+  /* Prefer the canonical 36-label ring. If duplicates exist, keep one label per 10-degree sector. */
+  var sectors=[];
+  for(var i=0;i<36;i+=1){
+    var target=i*10;
+    var best=null,bestDistance=Infinity;
+    for(var j=0;j<nodes.length;j+=1){
+      if(nodes[j].used)continue;
+      var distance=Math.abs(nodes[j].angle-target);
+      distance=Math.min(distance,360-distance);
+      if(distance<bestDistance){bestDistance=distance;best=nodes[j];}
+    }
+    if(best&&bestDistance<=8){best.used=true;sectors.push(best);}
+  }
+
+  var selected=sectors.length>=30?sectors:nodes.slice(0,Math.min(36,nodes.length));
+  selected.sort(function(a,b){return a.angle-b.angle;});
+
+  for(var k=0;k<selected.length;k+=1){
+    var zodiacIndex=k%12;
+    var dayIndex=k%6;
+    var label=DAYS[dayIndex]+' '+ZODIAC[zodiacIndex];
+    var textNode=selected[k].node;
+    textNode.textContent=label;
+    textNode.setAttribute('lang','ar');
+    textNode.setAttribute('direction','rtl');
+    textNode.setAttribute('unicode-bidi','plaintext');
+    textNode.setAttribute('data-v82-day',DAYS[dayIndex]);
+    textNode.setAttribute('data-v82-zodiac',ZODIAC[zodiacIndex]);
+    textNode.style.setProperty('fill',COLORS[zodiacIndex%3],'important');
+    textNode.style.setProperty('font-family','Tahoma,Arial,sans-serif','important');
+    textNode.style.setProperty('font-weight','700','important');
+  }
+
+  doc.documentElement.dataset.v82ArabicDaysZodiacRestored='true';
+  doc.documentElement.dataset.v82RestoredLabelCount=String(selected.length);
+  try{
+    doc.defaultView.__auditKawkabatArabicDaysZodiacV82=function(){
+      var restored=svg.querySelectorAll('text[data-v82-day][data-v82-zodiac]');
+      return{
+        ok:restored.length>=30,
+        sourceVersion:'V75',
+        language:'ar',
+        direction:'rtl',
+        restoredLabelCount:restored.length,
+        canonicalDayCycle:DAYS.slice(),
+        canonicalZodiacCycle:ZODIAC.slice(),
+        colorCycle:['red','blue','black'],
+        wheelGeometryChanged:false,
+        textPositionsChanged:false,
+        ornateFrameChanged:false,
+        numberCellsChanged:false
+      };
+    };
+  }catch(error){}
+  return selected.length>=30;
+}
+
+function apply(){
+  var restored=false;
+  try{
+    visit(frame.contentDocument,function(doc){
+      forceArabic(doc);
+      var svg=doc.getElementById('wheel');
+      if(svg&&restoreRing(svg,doc))restored=true;
+    },0);
+  }catch(error){}
+  return restored;
+}
+
+function reinforce(){
+  [180,600,1400,2600].forEach(function(delay){retries.push(setTimeout(apply,delay));});
+}
+
+function boot(){
+  attempts+=1;
+  if(apply()){
+    timer=null;
+    reinforce();
+    return;
+  }
+  if(attempts<140)timer=setTimeout(boot,100);
+}
+
+function start(){
+  if(timer)clearTimeout(timer);
+  for(var i=0;i<retries.length;i+=1)clearTimeout(retries[i]);
+  retries=[];
+  attempts=0;
+  timer=setTimeout(boot,80);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
