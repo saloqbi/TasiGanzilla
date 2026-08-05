@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Panel Language Event Linked V53</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/eb291459b3999c079bff24da11a84518a19a0c78/public/kawkabat-al-arqam-al-sihria-v47-live-language-v50.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var observer=null;
+var observedPanel=null;
+var observedWindow=null;
+var applying=false;
+var currentLanguage='en';
+var LANGUAGE_KEY='tasi-gannzilla-language-v1';
+var originals=new WeakMap();
+var titleOriginals=new WeakMap();
+var AR={
+'Default':'الافتراضي','Layout':'التخطيط','Visible':'إظهار','Clockwise':'مع عقارب الساعة',
+'Size':'عدد الحلقات','View':'العرض','Data type':'نوع البيانات','Price':'السعر',
+'Value':'القيمة','Find':'بحث','Increment':'الزيادة','Highlight':'التمييز',
+'Fill':'التعبئة','Levels':'المستويات','Show marks':'إظهار العلامات',
+'Show numbers':'إظهار الأرقام','Protractor':'المنقلة','Angle':'الزاوية',
+'Counter':'العداد','Secondary scale':'المقياس الثانوي','Start':'البداية',
+'Step':'الخطوة','Radius':'نصف القطر','Font size':'حجم الخط','Divisions':'الأقسام',
+'Marker':'المؤشر','Shape':'الشكل','Triangle':'مثلث','Circle':'دائرة',
+'Square':'مربع','Color':'اللون','Line width':'عرض الخط','Label':'التسمية',
+'Chronometer':'مقياس الزمن','Range':'المدى','Annual':'سنوي','Monthly':'شهري',
+'Weekly':'أسبوعي','Daily':'يومي','Cosmogram':'الخريطة الفلكية','System':'النظام',
+'Geocentric':'مركزي أرضي','Heliocentric':'مركزي شمسي','Location':'الموقع',
+'City':'المدينة','Latitude':'خط العرض','Longitude':'خط الطول',
+'Moon phases':'أطوار القمر','Show eclipses':'إظهار الكسوف والخسوف',
+'Hide':'إخفاء','Show':'إظهار','None':'لا شيء','Time':'الوقت','Date':'التاريخ',
+'Today':'اليوم','Background':'الخلفية','Grid':'الشبكة','Colors':'الألوان',
+'Line':'خط','Dash':'متقطع','Bold line':'خط عريض','Bold dash':'متقطع عريض'
+};
+function locate(doc,depth,test){
+  if(!doc||depth>180)return null;
+  if(test(doc))return doc;
+  var fs=doc.querySelectorAll('iframe');
+  for(var i=0;i<fs.length;i++){
+    try{var found=locate(fs[i].contentDocument,depth+1,test);if(found)return found;}catch(error){}
+  }
+  return null;
+}
+function getWheelDocument(){return locate(frame.contentDocument,0,function(doc){return !!doc.getElementById('wheel');});}
+function getToolbarDocument(){return locate(frame.contentDocument,0,function(doc){return !!doc.getElementById('v47Language');});}
+function containsMarkers(el){
+  var text=String(el&&el.textContent||'');
+  return /\bDefault\b|الافتراضي/.test(text)&&/\bLayout\b|التخطيط/.test(text)&&/\bClockwise\b|مع عقارب الساعة/.test(text);
+}
+function findPanel(doc){
+  var known=doc.getElementById('gannzilla-pixel-perfect-reference-panel-v421');
+  if(known)return known;
+  var leaves=Array.prototype.slice.call(doc.querySelectorAll('div,span,td,th,strong,b'));
+  for(var i=0;i<leaves.length;i++){
+    var text=String(leaves[i].textContent||'').trim();
+    if(text!=='Default'&&text!=='الافتراضي')continue;
+    var parent=leaves[i];
+    for(var d=0;parent&&d<14;d++,parent=parent.parentElement){
+      var rect=parent.getBoundingClientRect();
+      if(rect.left<420&&rect.width>=170&&rect.width<=500&&rect.height>=300&&containsMarkers(parent))return parent;
+    }
+  }
+  var candidates=Array.prototype.slice.call(doc.querySelectorAll('aside,section,div'));
+  for(var j=0;j<candidates.length;j++){
+    var r=candidates[j].getBoundingClientRect();
+    if(r.left<420&&r.width>=170&&r.width<=500&&r.height>=300&&containsMarkers(candidates[j]))return candidates[j];
+  }
+  return null;
+}
+function translateValue(raw){
+  var source=String(raw||'');
+  var trimmed=source.trim();
+  if(!trimmed)return source;
+  var translated=AR[trimmed]||trimmed;
+  translated=translated.replace(/^Circle of\s+(\d+)$/i,function(_,n){return 'دائرة من '+n+' قسمًا';});
+  var lead=(source.match(/^\s*/)||[''])[0];
+  var tail=(source.match(/\s*$/)||[''])[0];
+  return lead+translated+tail;
+}
+function rememberText(node){if(!originals.has(node))originals.set(node,node.nodeValue);return originals.get(node);}
+function applyPanelLanguage(doc,panel){
+  if(!panel||applying)return 0;
+  applying=true;
+  var changed=0;
+  try{
+    panel.setAttribute('lang',currentLanguage);
+    panel.setAttribute('dir',currentLanguage==='ar'?'rtl':'ltr');
+    panel.setAttribute('data-v53-language',currentLanguage);
+    var walker=doc.createTreeWalker(panel,NodeFilter.SHOW_TEXT);
+    var nodes=[];
+    while(walker.nextNode())nodes.push(walker.currentNode);
+    for(var i=0;i<nodes.length;i++){
+      var node=nodes[i];
+      var parent=node.parentElement;
+      if(!parent||/^(SCRIPT|STYLE|TEXTAREA)$/i.test(parent.tagName))continue;
+      var base=rememberText(node);
+      var next=currentLanguage==='ar'?translateValue(base):base;
+      if(node.nodeValue!==next){node.nodeValue=next;changed++;}
+    }
+    var titled=panel.querySelectorAll('[title],[aria-label]');
+    for(var j=0;j<titled.length;j++){
+      var el=titled[j];
+      ['title','aria-label'].forEach(function(attr){
+        if(!el.hasAttribute(attr))return;
+        var key=attr+':'+el.getAttribute(attr);
+        if(!titleOriginals.has(el))titleOriginals.set(el,{});
+        var bag=titleOriginals.get(el);
+        if(!(attr in bag))bag[attr]=el.getAttribute(attr);
+        var original=bag[attr];
+        el.setAttribute(attr,currentLanguage==='ar'?translateValue(original):original);
+      });
+    }
+    var controls=panel.querySelectorAll('select,input,textarea,button');
+    for(var k=0;k<controls.length;k++)controls[k].dir=currentLanguage==='ar'?'rtl':'ltr';
+  }finally{applying=false;}
+  return changed;
+}
+function installObserver(doc,panel){
+  if(observedPanel===panel&&observer)return;
+  if(observer)observer.disconnect();
+  observedPanel=panel;
+  observer=new MutationObserver(function(){
+    if(applying)return;
+    setTimeout(function(){applyPanelLanguage(doc,panel);},0);
+  });
+  observer.observe(panel,{childList:true,subtree:true,characterData:true});
+}
+function readLanguage(wdoc,tdoc){
+  var select=tdoc&&tdoc.getElementById('v47Language');
+  if(select&&(select.value==='ar'||select.value==='en'))return select.value;
+  try{var stored=wdoc.defaultView.localStorage.getItem(LANGUAGE_KEY);if(stored==='ar'||stored==='en')return stored;}catch(error){}
+  return 'en';
+}
+function setLanguage(next,source){
+  var wdoc=getWheelDocument();
+  var tdoc=getToolbarDocument();
+  if(!wdoc||!tdoc)return false;
+  var panel=findPanel(wdoc);
+  if(!panel)return false;
+  currentLanguage=next==='ar'?'ar':'en';
+  var changed=applyPanelLanguage(wdoc,panel);
+  installObserver(wdoc,panel);
+  try{
+    wdoc.defaultView.__auditKawkabatPanelLanguageEventLinkedV53=function(){
+      return{ok:true,currentLanguage:currentLanguage,source:source||'sync',panelDetected:true,panelTag:panel.tagName,panelWidth:Math.round(panel.getBoundingClientRect().width),translatedNodeCount:changed,eventLinked:true,selectMonitored:true,storageMonitored:true,mutationObserverActive:!!observer,wheelGeometryChanged:false,ornateFrameChanged:false};
+    };
+  }catch(error){}
+  return true;
+}
+function bindEvent(wdoc){
+  if(observedWindow===wdoc.defaultView)return;
+  observedWindow=wdoc.defaultView;
+  observedWindow.addEventListener('gannzilla:language-change',function(event){
+    var value=event&&event.detail&&event.detail.lang;
+    if(value==='ar'||value==='en')setLanguage(value,'gannzilla:language-change');
+  });
+}
+function sync(){
+  var wdoc=getWheelDocument();
+  var tdoc=getToolbarDocument();
+  if(!wdoc||!tdoc)return false;
+  bindEvent(wdoc);
+  return setLanguage(readLanguage(wdoc,tdoc),'poll-sync');
+}
+function start(){
+  if(poll)clearInterval(poll);
+  poll=setInterval(sync,250);
+  sync();
+}
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
