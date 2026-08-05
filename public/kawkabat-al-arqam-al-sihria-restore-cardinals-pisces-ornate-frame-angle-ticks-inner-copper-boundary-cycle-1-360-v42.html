@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Opening Cycle 1–360 V42</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/05f68f1bb9eda171517c7180ba659ba89b6200e1/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-frame-angle-ticks-inner-copper-boundary-v41.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var TARGET_VALUE='1';
+
+function findDocument(doc,predicate,depth){
+  if(!doc||depth>110)return null;
+  try{if(predicate(doc))return doc;}catch(error){}
+  var frames=[];
+  try{frames=doc.querySelectorAll('iframe');}catch(error){return null;}
+  for(var i=0;i<frames.length;i+=1){
+    try{
+      var found=findDocument(frames[i].contentDocument,predicate,depth+1);
+      if(found)return found;
+    }catch(error){}
+  }
+  return null;
+}
+
+function setNativeValue(input,value){
+  var view=input.ownerDocument&&input.ownerDocument.defaultView;
+  try{
+    var prototype=view&&view.HTMLInputElement&&view.HTMLInputElement.prototype;
+    var descriptor=prototype&&Object.getOwnPropertyDescriptor(prototype,'value');
+    if(descriptor&&descriptor.set)descriptor.set.call(input,value);
+    else input.value=value;
+  }catch(error){input.value=value;}
+  input.setAttribute('value',value);
+}
+
+function dispatch(input,type){
+  var doc=input.ownerDocument;
+  var view=doc&&doc.defaultView;
+  try{
+    input.dispatchEvent(new view.Event(type,{bubbles:true,cancelable:false}));
+  }catch(error){
+    try{
+      var event=doc.createEvent('Event');
+      event.initEvent(type,true,false);
+      input.dispatchEvent(event);
+    }catch(ignored){}
+  }
+}
+
+function applyOpeningCycleOneTo360(){
+  try{
+    var root=frame.contentDocument;
+    if(!root)return false;
+
+    var panelDoc=findDocument(root,function(doc){
+      return !!doc.querySelector('input[aria-label="Value"]');
+    },0);
+    if(!panelDoc)return false;
+
+    var valueInput=panelDoc.querySelector('input[aria-label="Value"]');
+    var incrementInput=panelDoc.querySelector('input[aria-label="Increment"]');
+    if(!valueInput||!incrementInput)return false;
+
+    if(valueInput.value!==TARGET_VALUE){
+      setNativeValue(valueInput,TARGET_VALUE);
+      dispatch(valueInput,'input');
+      dispatch(valueInput,'change');
+      dispatch(valueInput,'keyup');
+    }
+
+    var wheelDoc=findDocument(root,function(doc){
+      return !!doc.getElementById('wheel');
+    },0);
+    if(!wheelDoc)return false;
+
+    var valueApplied=wheelDoc.documentElement.dataset.valueInput===TARGET_VALUE;
+    var firstNode=wheelDoc.querySelector('#dynamicApprovedCycles .number-text[data-value="1"]');
+    var lastNode=wheelDoc.querySelector('#dynamicApprovedCycles .number-text[data-value="360"]');
+    var firstText=firstNode?String(firstNode.textContent||'').trim():'';
+    var lastText=lastNode?String(lastNode.textContent||'').trim():'';
+    var sequenceApplied=valueApplied&&firstText==='1'&&lastText==='360';
+
+    panelDoc.documentElement.dataset.openingCycleOneTo360V42='true';
+    panelDoc.documentElement.dataset.v42OpeningValue=TARGET_VALUE;
+    panelDoc.documentElement.dataset.v42IncrementPreserved=String(incrementInput.value);
+    wheelDoc.documentElement.dataset.openingCycleOneTo360V42='true';
+    wheelDoc.documentElement.dataset.v42OpeningValue=TARGET_VALUE;
+    wheelDoc.documentElement.dataset.v42SequenceVerified=String(sequenceApplied);
+
+    var view=wheelDoc.defaultView;
+    if(view){
+      view.__auditKawkabatOpeningCycleOneTo360V42=function(){
+        var currentValueInput=panelDoc.querySelector('input[aria-label="Value"]');
+        var currentIncrementInput=panelDoc.querySelector('input[aria-label="Increment"]');
+        var currentFirst=wheelDoc.querySelector('#dynamicApprovedCycles .number-text[data-value="1"]');
+        var currentLast=wheelDoc.querySelector('#dynamicApprovedCycles .number-text[data-value="360"]');
+        return{
+          ok:!!currentValueInput&&currentValueInput.value===TARGET_VALUE&&wheelDoc.documentElement.dataset.valueInput===TARGET_VALUE,
+          changedArea:'opening-value-only',
+          openingValue:Number(TARGET_VALUE),
+          openingSequence:'1-360',
+          firstDisplayedValue:currentFirst?String(currentFirst.textContent||'').trim():null,
+          lastDisplayedValue:currentLast?String(currentLast.textContent||'').trim():null,
+          incrementPreserved:currentIncrementInput?currentIncrementInput.value:null,
+          findValueChanged:false,
+          panelLayoutChanged:false,
+          wheelGeometryChanged:false,
+          ornateOuterFrameChanged:false,
+          turquoiseGemsChanged:false,
+          innerCopperBoundaryChanged:false,
+          blueAngleBandChanged:false,
+          angleTicksChanged:false,
+          angleLabelsChanged:false,
+          zodiacChanged:false
+        };
+      };
+    }
+
+    return sequenceApplied;
+  }catch(error){
+    return false;
+  }
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(applyOpeningCycleOneTo360()||attempts>=1800){
+      clearInterval(poll);
+      poll=null;
+    }
+  },100);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
