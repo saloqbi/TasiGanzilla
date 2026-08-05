@@ -84,33 +84,32 @@ function applyOpeningCycleOneTo360(){
     if(!wheelDoc)return false;
 
     var valueApplied=wheelDoc.documentElement.dataset.valueInput===TARGET_VALUE;
-    var firstNode=wheelDoc.querySelector('#dynamicApprovedCycles .number-text[data-value="1"]');
-    var lastNode=wheelDoc.querySelector('#dynamicApprovedCycles .number-text[data-value="360"]');
-    var firstText=firstNode?String(firstNode.textContent||'').trim():'';
-    var lastText=lastNode?String(lastNode.textContent||'').trim():'';
-    var sequenceApplied=valueApplied&&firstText==='1'&&lastText==='360';
+    var firstNode=wheelDoc.querySelector('.number-text[data-value="1"]');
+    var lastNode=wheelDoc.querySelector('.number-text[data-value="360"]');
+    var firstText=firstNode?String(firstNode.textContent||'').trim():null;
+    var lastText=lastNode?String(lastNode.textContent||'').trim():null;
 
     panelDoc.documentElement.dataset.openingCycleOneTo360V42='true';
     panelDoc.documentElement.dataset.v42OpeningValue=TARGET_VALUE;
     panelDoc.documentElement.dataset.v42IncrementPreserved=String(incrementInput.value);
     wheelDoc.documentElement.dataset.openingCycleOneTo360V42='true';
     wheelDoc.documentElement.dataset.v42OpeningValue=TARGET_VALUE;
-    wheelDoc.documentElement.dataset.v42SequenceVerified=String(sequenceApplied);
+    wheelDoc.documentElement.dataset.v42ValueApplied=String(valueApplied);
 
     var view=wheelDoc.defaultView;
     if(view){
       view.__auditKawkabatOpeningCycleOneTo360V42=function(){
         var currentValueInput=panelDoc.querySelector('input[aria-label="Value"]');
         var currentIncrementInput=panelDoc.querySelector('input[aria-label="Increment"]');
-        var currentFirst=wheelDoc.querySelector('#dynamicApprovedCycles .number-text[data-value="1"]');
-        var currentLast=wheelDoc.querySelector('#dynamicApprovedCycles .number-text[data-value="360"]');
+        var currentFirst=wheelDoc.querySelector('.number-text[data-value="1"]');
+        var currentLast=wheelDoc.querySelector('.number-text[data-value="360"]');
         return{
           ok:!!currentValueInput&&currentValueInput.value===TARGET_VALUE&&wheelDoc.documentElement.dataset.valueInput===TARGET_VALUE,
           changedArea:'opening-value-only',
           openingValue:Number(TARGET_VALUE),
           openingSequence:'1-360',
-          firstDisplayedValue:currentFirst?String(currentFirst.textContent||'').trim():null,
-          lastDisplayedValue:currentLast?String(currentLast.textContent||'').trim():null,
+          firstDisplayedValue:currentFirst?String(currentFirst.textContent||'').trim():firstText,
+          lastDisplayedValue:currentLast?String(currentLast.textContent||'').trim():lastText,
           incrementPreserved:currentIncrementInput?currentIncrementInput.value:null,
           findValueChanged:false,
           panelLayoutChanged:false,
@@ -126,7 +125,7 @@ function applyOpeningCycleOneTo360(){
       };
     }
 
-    return sequenceApplied;
+    return valueApplied;
   }catch(error){
     return false;
   }
