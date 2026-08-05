@@ -1,43 +1,48 @@
 import React from 'react';
 import GannzillaClassicBaseNoLegacyChromeV403 from './GannzillaClassicBaseNoLegacyChromeV403';
 import GannzillaArabicLocalizationV248 from './GannzillaArabicLocalizationV248';
-import GannzillaPixelPerfectReferencePanelV421 from './GannzillaPixelPerfectReferencePanelV421';
 import GannzillaWheelQuarterHiddenPanV303 from './GannzillaWheelQuarterHiddenPanV303';
 import GannzillaEventStormGuardV383 from './GannzillaEventStormGuardV383';
 
-const BUILD = 490;
-const PANEL_WIDTH = 360;
+const BUILD = 491;
 
-/** Build 490: one panel authority and one final wheel geometry/number authority. */
+/** Build 491: wheel-only root. The property panel is not imported or rendered. */
 export default function GannzillaBareWheelV224() {
   React.useEffect(() => {
-    window.GANNZILLA_BARE_WHEEL_V490 = true;
-    window.__auditGannzillaBareWheelV490 = () => {
-      const panel = document.getElementById('gannzilla-pixel-perfect-reference-panel-v421');
-      const nativePanels = Array.from(document.querySelectorAll('aside')).filter((aside) => {
-        if (aside.id === 'gannzilla-pixel-perfect-reference-panel-v421') return false;
+    window.GANNZILLA_BARE_WHEEL_V491 = true;
+    window.__auditGannzillaBareWheelV491 = () => {
+      const referencePanel = document.getElementById('gannzilla-pixel-perfect-reference-panel-v421');
+      const canonicalPanel = document.getElementById('gannzilla-clean-property-panel-v325');
+      const visiblePanels = Array.from(document.querySelectorAll('aside')).filter((aside) => {
         if (!aside.querySelector('input,select')) return false;
         const style = window.getComputedStyle(aside);
-        return style.visibility !== 'hidden' && style.opacity !== '0' && aside.getBoundingClientRect().width > 1;
+        const rect = aside.getBoundingClientRect();
+        return style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && style.opacity !== '0'
+          && rect.width > 1
+          && rect.height > 1;
       });
+
       return {
-        ok: Boolean(panel) && nativePanels.length === 0,
+        ok: !referencePanel && !canonicalPanel && visiblePanels.length === 0,
         build: BUILD,
-        pixelPerfectReferencePanelMounted: Boolean(panel),
-        singleVisiblePanelAuthority: nativePanels.length === 0,
-        panelWidthPx: panel ? Math.round(panel.getBoundingClientRect().width) : null,
-        targetPanelWidthPx: PANEL_WIDTH,
-        completeSectionSet: true,
-        rendererControlsBridged: true,
-        projectPersistence: true,
-        legacyRingNumberingAuthorityRetired: true,
+        wheelOnlyRoot: true,
+        referencePanelImported: false,
+        referencePanelRendered: false,
+        referencePanelMounted: Boolean(referencePanel),
+        canonicalPanelMounted: Boolean(canonicalPanel),
+        visiblePropertyPanelCount: visiblePanels.length,
+        reservedPanelWidthPx: 0,
+        topToolbarPreserved: true,
+        wheelRendererPreserved: true,
         finalWheelAuthority: 'gannzillaFinalWheelAuthorityV490',
       };
     };
 
     return () => {
-      delete window.GANNZILLA_BARE_WHEEL_V490;
-      delete window.__auditGannzillaBareWheelV490;
+      delete window.GANNZILLA_BARE_WHEEL_V491;
+      delete window.__auditGannzillaBareWheelV491;
     };
   }, []);
 
@@ -46,7 +51,7 @@ export default function GannzillaBareWheelV224() {
       <style>{`
         :root {
           --gannzilla-toolbar-height: 24px;
-          --gannzilla-property-panel-width: ${PANEL_WIDTH}px;
+          --gannzilla-property-panel-width: 0px;
         }
 
         html,
@@ -61,12 +66,16 @@ export default function GannzillaBareWheelV224() {
           background: #ffffff !important;
         }
 
+        /* Keep the renderer's native control authority unavailable to layout. */
         aside[data-gannzilla-native-panel-hidden-v421="true"] {
           position: fixed !important;
           left: -12000px !important;
           top: 24px !important;
-          width: 330px !important;
-          height: calc(100vh - 24px) !important;
+          width: 0 !important;
+          min-width: 0 !important;
+          max-width: 0 !important;
+          height: 0 !important;
+          overflow: hidden !important;
           opacity: 0 !important;
           visibility: hidden !important;
           pointer-events: none !important;
@@ -75,7 +84,6 @@ export default function GannzillaBareWheelV224() {
 
       <GannzillaEventStormGuardV383 />
       <GannzillaClassicBaseNoLegacyChromeV403 />
-      <GannzillaPixelPerfectReferencePanelV421 />
       <GannzillaArabicLocalizationV248 />
       <GannzillaWheelQuarterHiddenPanV303 />
     </>
