@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Magic Numbers Constellation — Remove Wheel Eye Only V76</title>
+<title>Magic Numbers Constellation — Remove Blue Panel Icon Only V76</title>
 <style>
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
 #appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
@@ -17,11 +17,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
 
 var frame=document.getElementById('appFrame');
 var timer=null;
-var WHEEL_KEY='tasi-gannzilla-wheel-visible-v65';
-var BUTTON_ID='v65WheelToggleBtn';
-var STYLE_ID='v76RemoveWheelEyeStyle';
-
-try{localStorage.setItem(WHEEL_KEY,'true');}catch(error){}
+var BUTTON_ID='v65PanelToggleBtn';
+var STYLE_ID='v76RemoveBluePanelIconStyle';
 
 function visit(doc,callback,depth){
   if(!doc||depth>180)return;
@@ -36,10 +33,6 @@ function neutralize(doc){
   var button=doc.getElementById(BUTTON_ID);
   if(!button)return false;
 
-  if(button.dataset.hidden==='true'){
-    try{button.click();}catch(error){}
-  }
-
   var style=doc.getElementById(STYLE_ID);
   if(!style){
     style=doc.createElement('style');
@@ -48,13 +41,12 @@ function neutralize(doc){
     doc.head.appendChild(style);
   }
 
-  if(button.dataset.v76Neutralized!=='true'){
+  if(button.dataset.v76BluePanelNeutralized!=='true'){
     var replacement=button.cloneNode(true);
     replacement.id=BUTTON_ID;
     replacement.type='button';
     replacement.disabled=true;
-    replacement.dataset.hidden='false';
-    replacement.dataset.v76Neutralized='true';
+    replacement.dataset.v76BluePanelNeutralized='true';
     replacement.setAttribute('aria-hidden','true');
     replacement.setAttribute('tabindex','-1');
     replacement.title='';
@@ -63,15 +55,16 @@ function neutralize(doc){
   }
 
   try{
-    doc.defaultView.__auditKawkabatRemoveWheelEyeOnlyV76=function(){
+    doc.defaultView.__auditKawkabatRemoveBluePanelIconOnlyV76=function(){
       var hiddenButton=doc.getElementById(BUTTON_ID);
+      var wheelEye=doc.getElementById('v65WheelToggleBtn');
       return{
-        ok:!!hiddenButton&&hiddenButton.dataset.v76Neutralized==='true'&&hiddenButton.disabled,
+        ok:!!hiddenButton&&hiddenButton.dataset.v76BluePanelNeutralized==='true'&&hiddenButton.disabled&&!!wheelEye,
         sourceVersion:'V75',
-        wheelEyeVisible:false,
-        wheelEyeInteractive:false,
-        wheelForcedVisible:true,
-        panelToggleChanged:false,
+        bluePanelIconVisible:false,
+        bluePanelIconInteractive:false,
+        wheelEyeKept:!!wheelEye,
+        panelVisibilityChanged:false,
         zoomChanged:false,
         drawingToolsChanged:false,
         connectionChanged:false,
@@ -97,7 +90,6 @@ function apply(){
 }
 
 function start(){
-  try{localStorage.setItem(WHEEL_KEY,'true');}catch(error){}
   if(timer)clearInterval(timer);
   timer=setInterval(apply,250);
   apply();
