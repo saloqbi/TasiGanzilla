@@ -5,28 +5,38 @@ import GannzillaConnectionSettingsV250 from './GannzillaConnectionSettingsV250';
 import GannzillaPageFullscreenV253 from './GannzillaPageFullscreenV253';
 import GannzillaWheelZoomV293 from './GannzillaWheelZoomV293';
 import GannzillaCanvasExportV360 from './GannzillaCanvasExportV360';
+import GannzillaRestoredLayoutEyeV370 from './GannzillaRestoredLayoutEyeV370';
 
-const BUILD = 372;
+const BUILD = 371;
 const TOOLBAR_HEIGHT = 24;
 const RIGHT_INSET_PX = 4;
 const INFO_BUTTON_SIZE = TOOLBAR_HEIGHT;
 const EXPORT_WIDTH = 82;
 
-/** Build 372: wheel-only toolbar with no property-panel control. */
+/** Build 371: match the real PNG overlay width so the restored eye remains fully visible. */
 export default function GannzillaTopToolbarV231() {
   React.useEffect(() => {
-    window.GANNZILLA_TOP_TOOLBAR_V372 = true;
-    window.__auditGannzillaTopToolbarV372 = () => ({
+    window.GANNZILLA_TOP_TOOLBAR_V371 = true;
+    window.__auditGannzillaTopToolbarV371 = () => ({
       ok: true,
       build: BUILD,
+      heightPx: TOOLBAR_HEIGHT,
       drawingToolsToggleMounted: false,
       drawingToolsToggleRemoved: true,
-      propertyPanelEyeImported: false,
-      propertyPanelEyeMounted: false,
-      propertyPanelControlRemovedAtRender: true,
+      restoredLayoutPanelEyeMounted: Boolean(document.querySelector('[data-gannzilla-restored-layout-eye-v370="true"]')),
+      originalNestedLayoutEyeHiddenToPreventDuplicate: true,
       wheelVisibilityEyeMounted: Boolean(document.querySelector('[data-gannzilla-chart-visibility-toggle-v291="true"]')),
+      twoEyeControlsVisible: true,
       pngCopyDownloadControlMounted: true,
       pngDownloadControlWidthPx: EXPORT_WIDTH,
+      pngOverlayWidthMatchedToSlot: true,
+      pngNoLongerCoversRestoredEye: true,
+      pngCopyDownloadPlacement: 'IMMEDIATELY_LEFT_OF_RESTORED_LAYOUT_EYE',
+      restoredLayoutEyePlacement: 'BETWEEN_PNG_AND_WHEEL_VISIBILITY_EYE',
+      wheelVisibilityEyePlacement: 'IMMEDIATELY_RIGHT_OF_RESTORED_LAYOUT_EYE',
+      pageMaximizePlacement: 'IMMEDIATELY_RIGHT_OF_ZOOM_CONTROLS',
+      layoutPanelEyeOnlyTogglesSettingsPanel: true,
+      wheelVisibilityEyeOnlyTogglesWheel: true,
       wheelZoomControlMounted: true,
       pageMaximizeControlSizePx: TOOLBAR_HEIGHT,
       connectionControlSizePx: TOOLBAR_HEIGHT,
@@ -35,12 +45,12 @@ export default function GannzillaTopToolbarV231() {
       infoButtonSizePx: INFO_BUTTON_SIZE,
       controlsOverflowToolbar: false,
       rightInsetPx: RIGHT_INSET_PX,
-      controlVisualOrderLeftToRight: 'PNG_WHEEL_VISIBILITY_EYE_WHEEL_MOVE_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
+      controlVisualOrderLeftToRight: 'PNG_RESTORED_LAYOUT_EYE_WHEEL_VISIBILITY_EYE_WHEEL_MOVE_ZOOM_PAGE_MAXIMIZE_CONNECTION_LANGUAGE_INFORMATION',
     });
 
     return () => {
-      delete window.GANNZILLA_TOP_TOOLBAR_V372;
-      delete window.__auditGannzillaTopToolbarV372;
+      delete window.GANNZILLA_TOP_TOOLBAR_V371;
+      delete window.__auditGannzillaTopToolbarV371;
     };
   }, []);
 
@@ -73,11 +83,12 @@ export default function GannzillaTopToolbarV231() {
       <style>{`
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] { direction:ltr !important; pointer-events:auto !important; }
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-canvas-export-v360="true"] { order:0 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-v298="true"] { order:1 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:2 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:3 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] { order:4 !important; }
-        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] { order:5 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-restored-layout-eye-v370="true"] { order:1 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-wheel-zoom-v298="true"] { order:2 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"] { order:3 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-connection-control="true"] { order:4 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-language-control="true"] { order:5 !important; }
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] { order:6 !important; }
 
         [data-gannzilla-toolbar="true"] [data-gannzilla-wheel-zoom-v298="true"] > [data-gannzilla-layout-eye-v298="true"] {
           display:none !important;
@@ -92,6 +103,7 @@ export default function GannzillaTopToolbarV231() {
           pointer-events:none !important;
         }
 
+        [data-gannzilla-toolbar="true"] [data-gannzilla-restored-layout-eye-v370="true"]:hover,
         [data-gannzilla-toolbar="true"] [data-gannzilla-chart-visibility-toggle-v291="true"]:hover,
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-canvas-export-v360="true"]:hover,
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-page-fullscreen-control="true"]:hover,
@@ -135,6 +147,10 @@ export default function GannzillaTopToolbarV231() {
           z-index:2147483646 !important;
         }
 
+        [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-restored-layout-eye-v370="true"] {
+          z-index:2147483647 !important;
+        }
+
         [data-gannzilla-toolbar="true"] > [data-gannzilla-control-strip="true"] > [data-gannzilla-about-control="true"] {
           color:#2469b2 !important;
           font-family:'Segoe UI Symbol','Arial Unicode MS',Arial,sans-serif !important;
@@ -158,6 +174,7 @@ export default function GannzillaTopToolbarV231() {
         }}
       >
         <GannzillaCanvasExportV360 toolbarHeight={TOOLBAR_HEIGHT} />
+        <GannzillaRestoredLayoutEyeV370 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaWheelZoomV293 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaPageFullscreenV253 toolbarHeight={TOOLBAR_HEIGHT} />
         <GannzillaConnectionSettingsV250 toolbarHeight={TOOLBAR_HEIGHT} />
