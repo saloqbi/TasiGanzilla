@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Detected Panel Arabic V52</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/eb291459b3999c079bff24da11a84518a19a0c78/public/kawkabat-al-arqam-al-sihria-v47-live-language-v50.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+var observer=null;
+var currentLanguage='en';
+var panelRef=null;
+var originalText=new WeakMap();
+var originalAttributes=new WeakMap();
+var AR={
+'Default':'الافتراضي','Layout':'التخطيط','Visible':'إظهار','Clockwise':'مع عقارب الساعة','Size':'عدد الحلقات','View':'العرض','Data type':'نوع البيانات','Price':'السعر','Time':'الوقت','Value':'القيمة','Find':'بحث','Increment':'الزيادة','Highlight':'التمييز','Fill':'التعبئة','Levels':'المستويات','Cell':'الخلية','Show marks':'إظهار العلامات','Show numbers':'إظهار الأرقام','Protractor':'المنقلة','Angle':'الزاوية','Counter':'العداد','Secondary scale':'المقياس الثانوي','Start':'البداية','Step':'الخطوة','Radius':'نصف القطر','Font size':'حجم الخط','Divisions':'الأقسام','Marker':'المؤشر','Shape':'الشكل','Triangle':'مثلث','Circle':'دائرة','Square':'مربع','Color':'اللون','Line width':'عرض الخط','Label':'التسمية','Chronometer':'مقياس الزمن','Range':'المدى','Annual':'سنوي','Monthly':'شهري','Weekly':'أسبوعي','Daily':'يومي','Cosmogram':'الخريطة الفلكية','System':'النظام','Geocentric':'مركزي أرضي','Heliocentric':'مركزي شمسي','Location':'الموقع','City':'المدينة','Latitude':'خط العرض','Longitude':'خط الطول','Moon phases':'أطوار القمر','Show eclipses':'إظهار الكسوف والخسوف','Hide':'إخفاء','Show':'إظهار','None':'لا شيء','Today':'اليوم','Date':'التاريخ','Background':'الخلفية','Grid':'الشبكة','Colors':'الألوان','Line':'خط','Dash':'متقطع','Bold line':'خط عريض','Bold dash':'متقطع عريض','North':'شمال','South':'جنوب','East':'شرق','West':'غرب'
+};
+function locate(doc,depth,test){if(!doc||depth>180)return null;if(test(doc))return doc;var fs=doc.querySelectorAll('iframe');for(var i=0;i<fs.length;i++){try{var found=locate(fs[i].contentDocument,depth+1,test);if(found)return found;}catch(e){}}return null;}
+function toolbarDoc(){return locate(frame.contentDocument,0,function(d){return !!d.getElementById('v47Language');});}
+function wheelDoc(){return locate(frame.contentDocument,0,function(d){return !!d.getElementById('wheel');});}
+function containsPanelWords(el){var text=String(el.textContent||'');return /\bDefault\b/.test(text)&&/\bLayout\b/.test(text)&&/\bVisible\b/.test(text)&&/\bClockwise\b/.test(text);}
+function findPanel(doc){
+  var known=doc.getElementById('gannzilla-pixel-perfect-reference-panel-v421');
+  if(known)return known;
+  var defaultNodes=Array.prototype.slice.call(doc.querySelectorAll('*')).filter(function(el){return el.children.length===0&&String(el.textContent||'').trim()==='Default';});
+  for(var i=0;i<defaultNodes.length;i++){
+    var node=defaultNodes[i];
+    var parent=node.parentElement;
+    for(var depth=0;parent&&depth<12;depth++,parent=parent.parentElement){
+      var r=parent.getBoundingClientRect();
+      if(r.width>=160&&r.width<=460&&r.height>=300&&r.left<420&&containsPanelWords(parent))return parent;
+    }
+  }
+  var candidates=Array.prototype.slice.call(doc.querySelectorAll('aside,section,div'));
+  var best=null,bestArea=Infinity;
+  for(var j=0;j<candidates.length;j++){
+    var el=candidates[j];
+    if(!containsPanelWords(el))continue;
+    var rect=el.getBoundingClientRect();
+    if(rect.width<160||rect.width>460||rect.height<300||rect.left>=420)continue;
+    var area=rect.width*rect.height;
+    if(area<bestArea){best=el;bestArea=area;}
+  }
+  return best;
+}
+function digits(value){var map={'0':'٠','1':'١','2':'٢','3':'٣','4':'٤','5':'٥','6':'٦','7':'٧','8':'٨','9':'٩'};return String(value||'').replace(/[0-9]/g,function(d){return map[d];});}
+function translate(value){var raw=String(value||'');var trimmed=raw.trim();if(!trimmed)return raw;var out=AR[trimmed]||trimmed;out=out.replace(/^Circle of\s+(\d+)$/i,function(_,n){return 'دائرة من '+digits(n)+' قسمًا';});out=out.replace(/\bNorth\b/g,'شمال').replace(/\bSouth\b/g,'جنوب').replace(/\bEast\b/g,'شرق').replace(/\bWest\b/g,'غرب');var lead=(raw.match(/^\s*/)||[''])[0];var tail=(raw.match(/\s*$/)||[''])[0];return lead+out+tail;}
+function storeAttributes(el){if(originalAttributes.has(el))return;originalAttributes.set(el,{title:el.getAttribute('title'),aria:el.getAttribute('aria-label'),placeholder:el.getAttribute('placeholder')});}
+function applyPanel(){
+  var doc=wheelDoc();
+  if(!doc)return false;
+  var panel=findPanel(doc);
+  if(!panel)return false;
+  panelRef=panel;
+  panel.setAttribute('data-v52-language',currentLanguage);
+  panel.setAttribute('lang',currentLanguage);
+  var walker=doc.createTreeWalker(panel,NodeFilter.SHOW_TEXT);
+  var nodes=[];
+  while(walker.nextNode())nodes.push(walker.currentNode);
+  var changed=0;
+  for(var i=0;i<nodes.length;i++){
+    var node=nodes[i];
+    var parent=node.parentElement;
+    if(!parent||/^(SCRIPT|STYLE|TEXTAREA)$/i.test(parent.tagName))continue;
+    if(!originalText.has(node))originalText.set(node,node.nodeValue);
+    var base=originalText.get(node);
+    var next=currentLanguage==='ar'?translate(base):base;
+    if(node.nodeValue!==next){node.nodeValue=next;changed++;}
+    if(currentLanguage==='ar'&&/^(LABEL|OPTION|BUTTON|SUMMARY|LEGEND|SPAN|DIV|TH|TD)$/i.test(parent.tagName))parent.setAttribute('dir','rtl');
+    if(currentLanguage==='en')parent.removeAttribute('dir');
+  }
+  var attributed=panel.querySelectorAll('[title],[aria-label],[placeholder]');
+  for(var j=0;j<attributed.length;j++){
+    var el=attributed[j];
+    storeAttributes(el);
+    var saved=originalAttributes.get(el);
+    if(saved.title!==null)el.setAttribute('title',currentLanguage==='ar'?translate(saved.title):saved.title);
+    if(saved.aria!==null)el.setAttribute('aria-label',currentLanguage==='ar'?translate(saved.aria):saved.aria);
+    if(saved.placeholder!==null)el.setAttribute('placeholder',currentLanguage==='ar'?translate(saved.placeholder):saved.placeholder);
+  }
+  var selects=panel.querySelectorAll('select');
+  for(var s=0;s<selects.length;s++)selects[s].dir=currentLanguage==='ar'?'rtl':'ltr';
+  var inputs=panel.querySelectorAll('input');
+  for(var k=0;k<inputs.length;k++)inputs[k].dir=inputs[k].type==='number'?'ltr':(currentLanguage==='ar'?'rtl':'ltr');
+  if(observer)observer.disconnect();
+  observer=new MutationObserver(function(){setTimeout(applyPanel,0);});
+  observer.observe(panel,{childList:true,subtree:true,characterData:true});
+  try{doc.defaultView.__auditKawkabatDetectedPanelArabicV52=function(){var r=panel.getBoundingClientRect();return{ok:true,currentLanguage:currentLanguage,panelDetected:true,panelId:panel.id||null,panelLeft:r.left,panelWidth:r.width,translatedNodeCount:changed,mutationObserverActive:true,wheelDigitsHandledByV50:true,wheelGeometryChanged:false,ornateFrameChanged:false};};}catch(e){}
+  return true;
+}
+function setLanguage(lang){currentLanguage=lang==='ar'?'ar':'en';return applyPanel();}
+function bind(){
+  var td=toolbarDoc();var wd=wheelDoc();if(!td||!wd)return false;
+  var select=td.getElementById('v47Language');if(!select)return false;
+  if(select.dataset.v52Bound!=='true'){
+    select.dataset.v52Bound='true';
+    select.addEventListener('change',function(e){setLanguage(e.target.value);});
+  }
+  var stored=select.value||'en';
+  try{stored=wd.defaultView.localStorage.getItem('tasi-gannzilla-language-v1')||stored;}catch(e){}
+  return setLanguage(stored);
+}
+function start(){if(poll)clearInterval(poll);var n=0;poll=setInterval(function(){n++;if(bind()||n>=2600){clearInterval(poll);poll=null;}},100);}
+frame.addEventListener('load',start);start();
+}());
+</script>
+</body>
+</html>
