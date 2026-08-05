@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — V41 Right Scrollbar Only V3</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+#v41LeftMask{position:fixed;left:0;top:0;bottom:0;width:14px;z-index:2147483646;background:#f7f1e3;pointer-events:none}
+#v41ScrollTrack{position:fixed;top:8px;right:2px;bottom:8px;width:12px;z-index:2147483647;border:1px solid #8b969c;border-radius:7px;background:linear-gradient(90deg,#d5dde1,#f7f9fa 52%,#c4ced3);box-shadow:inset 0 0 0 1px rgba(255,255,255,.8);user-select:none;touch-action:none}
+#v41ScrollThumb{position:absolute;top:0;left:1px;right:1px;min-height:40px;border:1px solid #66737a;border-radius:6px;background:linear-gradient(90deg,#66747b,#aeb9be 48%,#77848a);box-shadow:inset 1px 0 1px rgba(255,255,255,.45),inset -1px 0 1px rgba(0,0,0,.16);cursor:grab}
+#v41ScrollThumb:active{cursor:grabbing}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/40301b75d1fa8f09e2ffc47375d8ecd8c46fafe1/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-frame-angle-ticks-inner-copper-boundary-v41.html"></iframe>
+<div id="v41LeftMask" aria-hidden="true"></div>
+<div id="v41ScrollTrack" role="scrollbar" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="v41ScrollThumb"></div></div>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var track=document.getElementById('v41ScrollTrack');
+var thumb=document.getElementById('v41ScrollThumb');
+var scrollDoc=null;
+var scrollWin=null;
+var poll=null;
+var dragging=false;
+var dragStartY=0;
+var dragStartScroll=0;
+var boundWindow=null;
+
+function collectDocuments(doc,depth,list){
+  if(!doc||depth>120)return list;
+  list.push(doc);
+  var frames=[];
+  try{frames=doc.querySelectorAll('iframe');}catch(error){return list;}
+  for(var i=0;i<frames.length;i+=1){
+    try{collectDocuments(frames[i].contentDocument,depth+1,list);}catch(error){}
+  }
+  return list;
+}
+
+function hideNativeVerticalEverywhere(doc){
+  if(!doc)return;
+  var style=doc.getElementById('v41HideAllNativeVerticalScrollbarsV3');
+  if(!style){
+    style=doc.createElement('style');
+    style.id='v41HideAllNativeVerticalScrollbarsV3';
+    style.textContent='html,body,*{-ms-overflow-style:auto!important;}html::-webkit-scrollbar,body::-webkit-scrollbar,*::-webkit-scrollbar{width:0!important;height:10px!important;}';
+    (doc.head||doc.documentElement).appendChild(style);
+  }
+  try{doc.documentElement.style.setProperty('scrollbar-width','none','important');}catch(error){}
+  try{if(doc.body)doc.body.style.setProperty('scrollbar-width','none','important');}catch(error){}
+  doc.documentElement.dataset.v41NativeVerticalScrollbarHidden='true';
+}
+
+function metrics(doc){
+  var win=doc&&doc.defaultView;
+  var de=doc&&doc.documentElement;
+  var body=doc&&doc.body;
+  if(!doc||!win||!de)return null;
+  var clientHeight=Math.max(1,win.innerHeight||de.clientHeight||(body&&body.clientHeight)||1);
+  var scrollHeight=Math.max(clientHeight,de.scrollHeight||0,body?body.scrollHeight:0);
+  var scrollTop=Number(win.scrollY||win.pageYOffset||de.scrollTop||(body&&body.scrollTop)||0);
+  return{clientHeight:clientHeight,scrollHeight:scrollHeight,maxScroll:Math.max(0,scrollHeight-clientHeight),scrollTop:Math.max(0,scrollTop)};
+}
+
+function discoverDocuments(){
+  var root=frame.contentDocument;
+  if(!root)return[];
+  var docs=collectDocuments(root,0,[]);
+  for(var i=0;i<docs.length;i+=1)hideNativeVerticalEverywhere(docs[i]);
+  return docs;
+}
+
+function locateScrollDocument(docs){
+  var best=null;
+  var bestMax=0;
+  for(var i=0;i<docs.length;i+=1){
+    var m=metrics(docs[i]);
+    if(m&&m.maxScroll>bestMax){best=docs[i];bestMax=m.maxScroll;}
+  }
+  return best;
+}
+
+function setScrollTop(value){
+  if(!scrollDoc||!scrollWin)return;
+  var m=metrics(scrollDoc);
+  if(!m)return;
+  var top=Math.max(0,Math.min(m.maxScroll,value));
+  try{scrollWin.scrollTo({left:scrollWin.scrollX||0,top:top,behavior:'auto'});}catch(error){try{scrollWin.scrollTo(scrollWin.scrollX||0,top);}catch(ignored){}}
+  try{scrollDoc.documentElement.scrollTop=top;}catch(error){}
+  try{if(scrollDoc.body)scrollDoc.body.scrollTop=top;}catch(error){}
+}
+
+function updateThumb(){
+  if(!scrollDoc){track.style.display='none';return;}
+  var m=metrics(scrollDoc);
+  if(!m||m.maxScroll<=1){track.style.display='none';return;}
+  track.style.display='block';
+  var trackHeight=Math.max(1,track.clientHeight);
+  var thumbHeight=Math.max(40,Math.round(trackHeight*(m.clientHeight/m.scrollHeight)));
+  thumbHeight=Math.min(trackHeight,thumbHeight);
+  var travel=Math.max(0,trackHeight-thumbHeight);
+  var progress=m.maxScroll>0?Math.max(0,Math.min(1,m.scrollTop/m.maxScroll)):0;
+  thumb.style.height=thumbHeight+'px';
+  thumb.style.transform='translateY('+Math.round(travel*progress)+'px)';
+  track.setAttribute('aria-valuenow',String(Math.round(progress*100)));
+}
+
+function bindDocument(doc){
+  if(!doc)return;
+  if(scrollDoc!==doc){
+    scrollDoc=doc;
+    scrollWin=doc.defaultView;
+    if(boundWindow&&boundWindow!==scrollWin){
+      try{boundWindow.removeEventListener('scroll',updateThumb);}catch(error){}
+      try{boundWindow.removeEventListener('resize',updateThumb);}catch(error){}
+    }
+    boundWindow=scrollWin;
+    if(scrollWin){
+      scrollWin.addEventListener('scroll',updateThumb,{passive:true});
+      scrollWin.addEventListener('resize',updateThumb,{passive:true});
+    }
+  }
+  updateThumb();
+}
+
+function discover(){
+  try{
+    var docs=discoverDocuments();
+    var doc=locateScrollDocument(docs);
+    if(doc)bindDocument(doc);
+    updateThumb();
+    return !!doc;
+  }catch(error){return false;}
+}
+
+thumb.addEventListener('pointerdown',function(event){
+  if(!scrollDoc)return;
+  dragging=true;
+  dragStartY=event.clientY;
+  var m=metrics(scrollDoc);
+  dragStartScroll=m?m.scrollTop:0;
+  thumb.setPointerCapture(event.pointerId);
+  event.preventDefault();
+});
+thumb.addEventListener('pointermove',function(event){
+  if(!dragging||!scrollDoc)return;
+  var m=metrics(scrollDoc);
+  if(!m)return;
+  var travel=Math.max(1,track.clientHeight-thumb.offsetHeight);
+  setScrollTop(dragStartScroll+((event.clientY-dragStartY)/travel)*m.maxScroll);
+  updateThumb();
+});
+thumb.addEventListener('pointerup',function(event){
+  dragging=false;
+  try{if(thumb.hasPointerCapture(event.pointerId))thumb.releasePointerCapture(event.pointerId);}catch(error){}
+});
+track.addEventListener('pointerdown',function(event){
+  if(event.target===thumb||!scrollDoc)return;
+  var m=metrics(scrollDoc);
+  if(!m)return;
+  var rect=track.getBoundingClientRect();
+  var fraction=Math.max(0,Math.min(1,(event.clientY-rect.top)/rect.height));
+  setScrollTop((fraction*m.maxScroll)-(m.clientHeight/2));
+  updateThumb();
+});
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    discover();
+    if(attempts>=2600){clearInterval(poll);poll=null;}
+  },100);
+}
+
+frame.addEventListener('load',start);
+window.addEventListener('resize',discover,{passive:true});
+window.__auditKawkabatRightScrollbarOnlyV3=function(){
+  var m=scrollDoc?metrics(scrollDoc):null;
+  return{ok:!!scrollDoc&&track.style.display!=='none',rightScrollbarOnly:true,leftNativeScrollbarMasked:true,nativeVerticalScrollbarsHiddenInAllFrames:true,toolsPanelRemoved:true,wheelGeometryChanged:false,wheelNumbersChanged:false,scrollMetrics:m};
+};
+start();
+}());
+</script>
+</body>
+</html>
