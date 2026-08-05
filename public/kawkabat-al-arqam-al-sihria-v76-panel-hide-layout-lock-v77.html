@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Stable Hidden Panel Layout Lock V77</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/2ee0b17b4f735e433829dad3e160cf24b5e33b7a/public/kawkabat-al-arqam-al-sihria-v62-single-authority-stable-wheel-v76.html"></iframe>
+<script>
+(function(){
+'use strict';
+
+var frame=document.getElementById('appFrame');
+var panelHidden=false;
+var panel=null;
+var viewport=null;
+var layoutRoot=null;
+var button=null;
+var bootTimer=null;
+var bootAttempts=0;
+var saved=new WeakMap();
+var PATCH_KEY='__kawkabatV77StyleLockPatch';
+
+var VIEWPORT_PROPS=[
+  'position','left','right','inset-inline-start','inset-inline-end',
+  'width','min-width','max-width','margin-left','margin-right',
+  'transform','translate','z-index','box-sizing','transition'
+];
+var ROOT_PROPS=[
+  'position','width','min-width','max-width','margin-left','margin-right',
+  'padding-left','padding-right','transform','translate','box-sizing'
+];
+var PANEL_PROPS=['opacity','pointer-events','filter','transform','z-index'];
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function findButton(){
+  var found=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(found)return;
+      found=doc.getElementById('v76PanelBtn')||doc.getElementById('v66PanelBtn')||doc.getElementById('v65PanelToggleBtn');
+    },0);
+  }catch(error){}
+  return found;
+}
+
+function panelScore(node){
+  if(!node||!node.querySelector||!node.querySelector('input,select'))return-1;
+  var text=String(node.textContent||'');
+  var terms=['Default','Layout','Visible','Clockwise','Price','Highlight','Protractor','Counter','Secondary scale','الافتراضي','التخطيط','إظهار','السعر','التمييز','المنقلة','العداد','المقياس الثانوي'];
+  var score=0;
+  for(var i=0;i<terms.length;i+=1)if(text.indexOf(terms[i])!==-1)score+=1;
+  return score;
+}
+
+function findPanel(){
+  var best=null,bestScore=-1;
+  try{
+    visit(frame.contentDocument,function(doc){
+      var nodes=doc.querySelectorAll('aside');
+      for(var i=0;i<nodes.length;i+=1){
+        var score=panelScore(nodes[i]);
+        if(score>bestScore){bestScore=score;best=nodes[i];}
+      }
+    },0);
+  }catch(error){}
+  return bestScore>=3?best:null;
+}
+
+function findWheel(){
+  var found=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(found)return;
+      var wheel=doc.getElementById('wheel');
+      if(!wheel)return;
+      var tag=String(wheel.tagName||'').toLowerCase();
+      var node=(tag==='g'||tag==='path')?(wheel.closest('svg')||wheel):wheel;
+      var rect=node.getBoundingClientRect();
+      if(rect.width>100&&rect.height>100)found={doc:doc,node:node};
+    },0);
+  }catch(error){}
+  return found;
+}
+
+function findViewport(info){
+  if(!info)return null;
+  var doc=info.doc;
+  var root=doc.querySelector('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
+  if(root){
+    var children=Array.prototype.slice.call(root.children||[]);
+    for(var i=children.length-1;i>=0;i-=1){
+      if(children[i]===panel||children[i].tagName==='ASIDE')continue;
+      if(children[i].contains(info.node))return{root:root,viewport:children[i]};
+    }
+  }
+  var current=info.node.parentElement;
+  var candidate=null;
+  for(var depth=0;current&&depth<20;depth+=1,current=current.parentElement){
+    if(!(current instanceof doc.defaultView.HTMLElement))continue;
+    var style=doc.defaultView.getComputedStyle(current);
+    var overflow=[style.overflow,style.overflowX,style.overflowY].join(' ');
+    if(/auto|scroll|overlay/.test(overflow)&&current.contains(info.node)){candidate=current;break;}
+  }
+  return candidate?{root:candidate.parentElement,viewport:candidate}:null;
+}
+
+function ensurePatch(doc){
+  var win=doc.defaultView;
+  if(win[PATCH_KEY])return win[PATCH_KEY];
+  var proto=win.CSSStyleDeclaration&&win.CSSStyleDeclaration.prototype;
+  if(!proto||typeof proto.setProperty!=='function')return null;
+  var original=proto.setProperty;
+  var locks=new WeakMap();
+  proto.setProperty=function(name,value,priority){
+    var lock=locks.get(this);
+    var key=String(name||'').toLowerCase();
+    if(lock&&lock.active&&lock.props.has(key))return;
+    return original.call(this,name,value,priority);
+  };
+  var state={original:original,locks:locks,prototype:proto};
+  win[PATCH_KEY]=state;
+  return state;
+}
+
+function remember(node,props){
+  if(!node)return;
+  var record=saved.get(node)||{};
+  for(var i=0;i<props.length;i+=1){
+    if(!(props[i] in record))record[props[i]]=node.style.getPropertyValue(props[i]);
+  }
+  saved.set(node,record);
+}
+
+function directSet(node,name,value,priority){
+  if(!node)return;
+  var patch=ensurePatch(node.ownerDocument);
+  if(patch)patch.original.call(node.style,name,value,priority||'important');
+  else node.style.setProperty(name,value,priority||'important');
+}
+
+function directRemove(node,name){
+  if(!node)return;
+  var patch=ensurePatch(node.ownerDocument);
+  if(patch)patch.original.call(node.style,name,'','');
+  else node.style.removeProperty(name);
+}
+
+function lockNode(node,props){
+  if(!node)return;
+  var patch=ensurePatch(node.ownerDocument);
+  if(!patch)return;
+  patch.locks.set(node.style,{active:true,props:new Set(props.map(function(name){return String(name).toLowerCase();}))});
+}
+
+function unlockNode(node){
+  if(!node)return;
+  var patch=ensurePatch(node.ownerDocument);
+  if(patch)patch.locks.delete(node.style);
+}
+
+function restoreNode(node,props){
+  if(!node)return;
+  unlockNode(node);
+  var record=saved.get(node)||{};
+  for(var i=0;i<props.length;i+=1){
+    var value=record[props[i]];
+    if(value)directSet(node,props[i],value,'important');
+    else directRemove(node,props[i]);
+  }
+}
+
+function syncButton(){
+  if(!button||!button.isConnected)button=findButton();
+  if(!button)return;
+  button.dataset.hidden=panelHidden?'true':'false';
+  button.title=panelHidden?'إظهار لوحة المخطط / Show chart panel':'إخفاء لوحة المخطط / Hide chart panel';
+  button.setAttribute('aria-label',button.title);
+}
+
+function resolveLayout(){
+  panel=findPanel()||panel;
+  var wheel=findWheel();
+  var layout=findViewport(wheel);
+  if(!panel||!wheel||!layout||!layout.viewport)return false;
+  viewport=layout.viewport;
+  layoutRoot=layout.root;
+  return true;
+}
+
+function hidePanelStable(){
+  if(!resolveLayout())return false;
+
+  remember(panel,PANEL_PROPS);
+  remember(viewport,VIEWPORT_PROPS);
+  remember(layoutRoot,ROOT_PROPS);
+
+  /* Keep the panel in layout so legacy observers continue to see a stable visible panel. */
+  directSet(panel,'opacity','0');
+  directSet(panel,'pointer-events','none');
+  directSet(panel,'filter','none');
+  directSet(panel,'transform','none');
+  directSet(panel,'z-index','0');
+
+  /* Let the wheel viewport cover the reserved panel area without changing vertical geometry. */
+  directSet(layoutRoot,'position','relative');
+  directSet(layoutRoot,'width','100%');
+  directSet(layoutRoot,'min-width','0');
+  directSet(layoutRoot,'max-width','none');
+  directSet(layoutRoot,'margin-left','0');
+  directSet(layoutRoot,'margin-right','0');
+  directSet(layoutRoot,'padding-left','0');
+  directSet(layoutRoot,'padding-right','0');
+  directSet(layoutRoot,'transform','none');
+  directSet(layoutRoot,'translate','none');
+  directSet(layoutRoot,'box-sizing','border-box');
+
+  directSet(viewport,'position','absolute');
+  directSet(viewport,'left','0');
+  directSet(viewport,'right','0');
+  directSet(viewport,'inset-inline-start','0');
+  directSet(viewport,'inset-inline-end','0');
+  directSet(viewport,'width','auto');
+  directSet(viewport,'min-width','0');
+  directSet(viewport,'max-width','none');
+  directSet(viewport,'margin-left','0');
+  directSet(viewport,'margin-right','0');
+  directSet(viewport,'transform','none');
+  directSet(viewport,'translate','none');
+  directSet(viewport,'z-index','1');
+  directSet(viewport,'box-sizing','border-box');
+  directSet(viewport,'transition','none');
+  viewport.setAttribute('data-v77-panel-layout-lock','true');
+
+  /* Block old layout authorities from rewriting only the locked horizontal properties. */
+  lockNode(layoutRoot,ROOT_PROPS);
+  lockNode(viewport,VIEWPORT_PROPS);
+
+  panelHidden=true;
+  syncButton();
+  return true;
+}
+
+function showPanelStable(){
+  if(panel)restoreNode(panel,PANEL_PROPS);
+  if(viewport){restoreNode(viewport,VIEWPORT_PROPS);viewport.removeAttribute('data-v77-panel-layout-lock');}
+  if(layoutRoot)restoreNode(layoutRoot,ROOT_PROPS);
+  panelHidden=false;
+  syncButton();
+
+  var doc=(viewport&&viewport.ownerDocument)||(panel&&panel.ownerDocument);
+  if(doc){
+    setTimeout(function(){
+      try{
+        doc.defaultView.dispatchEvent(new CustomEvent('gannzilla:layout-panel-visibility-change',{detail:{visible:true,source:'v77-restore'}}));
+        doc.defaultView.dispatchEvent(new CustomEvent('gannzilla:page-scrollbar-edge-sync',{detail:{panelVisible:true,source:'v77-restore'}}));
+        doc.defaultView.dispatchEvent(new Event('resize'));
+      }catch(error){}
+    },0);
+  }
+}
+
+function togglePanel(event){
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+  if(panelHidden)showPanelStable();
+  else hidePanelStable();
+}
+
+function install(){
+  button=findButton();
+  if(!button)return false;
+  if(button.dataset.v77StableBound!=='true'){
+    button.dataset.v77StableBound='true';
+    button.addEventListener('click',togglePanel,true);
+    var observer=new MutationObserver(function(){syncButton();});
+    observer.observe(button,{attributes:true,attributeFilter:['data-hidden','title','aria-label']});
+    button.__v77Observer=observer;
+  }
+  syncButton();
+  try{
+    button.ownerDocument.defaultView.__auditKawkabatPanelHideLayoutLockV77=function(){
+      var rect=viewport&&viewport.getBoundingClientRect();
+      return{
+        ok:button.dataset.v77StableBound==='true',
+        sourceVersion:'V76',
+        panelHidden:panelHidden,
+        panelRetainedInLayout:!!panel&&panel.style.display!=='none'&&panel.style.visibility!=='hidden',
+        viewportLocked:!!viewport&&viewport.getAttribute('data-v77-panel-layout-lock')==='true',
+        viewportLeftPx:rect?Math.round(rect.left):null,
+        viewportRightGapPx:rect?Math.round(viewport.ownerDocument.defaultView.innerWidth-rect.right):null,
+        resizeDispatchedWhileHiding:false,
+        autoFitTriggeredWhileHiding:false,
+        horizontalLayoutAuthoritiesBlocked:true,
+        wheelGeometryChanged:false,
+        ornateFrameChanged:false
+      };
+    };
+  }catch(error){}
+  return true;
+}
+
+function boot(){
+  bootAttempts+=1;
+  if(install())return;
+  if(bootAttempts<120)bootTimer=setTimeout(boot,100);
+}
+
+frame.addEventListener('load',function(){bootAttempts=0;setTimeout(boot,100);});
+boot();
+}());
+</script>
+</body>
+</html>
