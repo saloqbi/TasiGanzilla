@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+  <title>Polished Nickel Chart Settings + Top Toolbar V52</title>
+  <style>
+    :root{--toolbar-h:58px;--nickel-dark:#50606d;--nickel-mid:#c7cdd2;--nickel-light:#fff;--blue:#245bba}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+    body{font-family:Arial,Helvetica,sans-serif}
+    #pageShell{position:fixed;inset:0;display:flex;flex-direction:column;margin:0;padding:0;overflow:hidden}
+    #viewerToolbar{position:relative;z-index:2147483000;flex:0 0 var(--toolbar-h);width:100%;height:var(--toolbar-h);margin:0;padding:0 7px;display:flex;align-items:stretch;justify-content:flex-end;background:linear-gradient(180deg,#fff 0%,#f6f7f8 17%,#d4d8dc 51%,#f8f9fa 84%,#bcc3c9 100%);border:0;border-bottom:1px solid #7e878e;box-shadow:inset 0 1px 0 #fff,inset 0 -1px 0 rgba(255,255,255,.7),0 2px 5px rgba(24,34,41,.32);user-select:none}
+    .toolGroup{display:flex;align-items:stretch;height:100%;border-left:1px solid rgba(255,255,255,.85);border-right:1px solid rgba(92,104,113,.2)}
+    .toolButton,.languageButton{appearance:none;-webkit-appearance:none;height:100%;min-width:58px;margin:0;padding:0 13px;border:0;border-left:1px solid rgba(255,255,255,.9);border-right:1px solid rgba(86,97,106,.16);background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(231,234,237,.88) 50%,rgba(250,250,250,.95));color:#111;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;outline:none}
+    .toolButton:hover,.languageButton:hover{background:linear-gradient(180deg,#fff,#e1e8ee 48%,#fff)}
+    .toolButton:active,.languageButton:active{box-shadow:inset 0 2px 6px rgba(30,44,56,.3)}
+    .toolButton:focus-visible,.languageButton:focus-visible{box-shadow:inset 0 0 0 3px rgba(36,91,186,.35)}
+    .toolButton svg{width:34px;height:34px;display:block;filter:drop-shadow(0 1px 0 #fff)}
+    .zoomButton svg{width:39px;height:39px}
+    #zoomReadout{height:100%;min-width:92px;padding:0 9px;display:flex;align-items:center;justify-content:center;font-size:29px;line-height:1;font-weight:700;color:#050505;text-shadow:0 1px #fff;border-left:1px solid rgba(255,255,255,.9);border-right:1px solid rgba(86,97,106,.16);font-variant-numeric:tabular-nums;background:linear-gradient(180deg,rgba(255,255,255,.82),rgba(231,234,237,.72) 52%,rgba(250,250,250,.86))}
+    .languageButton{position:relative;min-width:245px;justify-content:flex-start;font-size:25px;padding-right:46px;white-space:nowrap}
+    .languageButton .flag{width:42px;height:28px;flex:0 0 auto;border:1px solid #9ca4aa;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+    .languageButton .chevron{position:absolute;right:15px;width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-top:11px solid #222}
+    #languageMenu{position:absolute;top:calc(var(--toolbar-h) - 1px);right:65px;z-index:2147483001;display:none;min-width:245px;padding:5px;background:#f4f5f6;border:1px solid #7d858c;box-shadow:0 5px 16px rgba(0,0,0,.3)}
+    #languageMenu.open{display:block}
+    .languageOption{width:100%;padding:10px 12px;border:0;background:#fff;text-align:left;font-size:18px;cursor:pointer}
+    .languageOption:hover{background:#dfeaf8}
+    #infoPopover{position:absolute;top:calc(var(--toolbar-h) + 7px);right:8px;z-index:2147483001;display:none;width:min(340px,calc(100vw - 16px));padding:13px 15px;border:1px solid #6f7982;border-radius:5px;background:rgba(255,255,255,.98);box-shadow:0 7px 22px rgba(0,0,0,.32);font-size:14px;line-height:1.55;color:#17202a}
+    #infoPopover.open{display:block}
+    #viewerViewport{position:relative;flex:1 1 auto;min-height:0;width:100%;overflow:auto;background:#f7f1e3}
+    #appFrame{display:block;width:105.2631579%;height:105.2631579%;margin:0;border:0;transform:scale(.95);transform-origin:0 0;background:#f7f1e3}
+    @media(max-width:760px){:root{--toolbar-h:50px}.toolButton{min-width:45px;padding:0 7px}.toolButton svg{width:29px;height:29px}.zoomButton svg{width:32px;height:32px}#zoomReadout{min-width:68px;font-size:22px}.languageButton{min-width:132px;font-size:18px;padding:0 34px 0 8px}.languageButton .flag{width:31px;height:21px}.languageButton .chevron{right:10px;border-left-width:7px;border-right-width:7px;border-top-width:8px}}
+    @media(max-width:520px){.secondaryTool{display:none}.languageButton{min-width:108px}.languageButton .languageText{display:none}}
+  </style>
+</head>
+<body>
+  <div id="pageShell">
+    <header id="viewerToolbar" role="toolbar" aria-label="Page controls">
+      <div class="toolGroup">
+        <button class="toolButton zoomButton" id="zoomOut" type="button" title="Zoom out" aria-label="Zoom out">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="lensMinus" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".52" stop-color="#ddecff"/><stop offset="1" stop-color="#8db2eb"/></linearGradient></defs><circle cx="21" cy="20" r="13.2" fill="url(#lensMinus)" stroke="#2f68c4" stroke-width="3.1"/><path d="M10.6 31.2 4.4 42" stroke="#7b858f" stroke-width="5.2" stroke-linecap="round"/><path d="M13.5 20h15" stroke="#275cb9" stroke-width="3.4" stroke-linecap="round"/></svg>
+        </button>
+        <output id="zoomReadout" aria-live="polite">95%</output>
+        <button class="toolButton zoomButton" id="zoomIn" type="button" title="Zoom in" aria-label="Zoom in">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="lensPlus" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".52" stop-color="#ddecff"/><stop offset="1" stop-color="#8db2eb"/></linearGradient></defs><circle cx="21" cy="20" r="13.2" fill="url(#lensPlus)" stroke="#2f68c4" stroke-width="3.1"/><path d="M10.6 31.2 4.4 42" stroke="#7b858f" stroke-width="5.2" stroke-linecap="round"/><path d="M13.5 20h15M21 12.5v15" stroke="#275cb9" stroke-width="3.4" stroke-linecap="round"/></svg>
+        </button>
+        <button class="toolButton secondaryTool" id="fullscreenButton" type="button" title="Full screen" aria-label="Full screen">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="3.5" y="3.5" width="33" height="33" rx="1.5" fill="#eef5fb" stroke="#8a969f" stroke-width="2"/><path d="M9 16V9h7M24 9h7v7M31 24v7h-7M16 31H9v-7" fill="none" stroke="#386ca6" stroke-width="4" stroke-linecap="square"/></svg>
+        </button>
+        <button class="toolButton secondaryTool" id="resetZoom" type="button" title="Restore 95%" aria-label="Restore zoom to 95 percent">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="5" y="4" width="30" height="32" fill="#f8f8f8" stroke="#a4a7aa" stroke-width="2"/><rect x="11" y="9" width="18" height="22" fill="#d9dde0" stroke="#81878d" stroke-width="2"/><path d="M15 27V13h10v14" fill="#f7f7f7" stroke="#a1a5a8" stroke-width="1.5"/></svg>
+        </button>
+        <button class="languageButton" id="languageButton" type="button" aria-haspopup="menu" aria-expanded="false">
+          <svg class="flag" viewBox="0 0 60 36" aria-hidden="true"><rect width="60" height="36" fill="#123b8b"/><path d="M0 0 60 36M60 0 0 36" stroke="#fff" stroke-width="9"/><path d="M0 0 60 36M60 0 0 36" stroke="#ce1737" stroke-width="4"/><path d="M30 0v36M0 18h60" stroke="#fff" stroke-width="12"/><path d="M30 0v36M0 18h60" stroke="#ce1737" stroke-width="7"/></svg>
+          <span class="languageText" id="languageText">English</span><span class="chevron" aria-hidden="true"></span>
+        </button>
+        <button class="toolButton" id="infoButton" type="button" title="Information" aria-label="Information" aria-expanded="false">
+          <svg viewBox="0 0 40 40" aria-hidden="true"><defs><radialGradient id="infoBlue" cx="35%" cy="25%" r="75%"><stop offset="0" stop-color="#8db8ff"/><stop offset=".48" stop-color="#3269c9"/><stop offset="1" stop-color="#16459f"/></radialGradient></defs><circle cx="20" cy="20" r="17" fill="url(#infoBlue)" stroke="#d9e8ff" stroke-width="2"/><circle cx="20" cy="11" r="2.3" fill="#fff"/><path d="M18 16h4v13h-4z" fill="#fff"/></svg>
+        </button>
+      </div>
+      <div id="languageMenu" role="menu">
+        <button class="languageOption" type="button" data-lang="en" role="menuitem">🇬🇧 English</button>
+        <button class="languageOption" type="button" data-lang="ar" role="menuitem">🇸🇦 العربية</button>
+      </div>
+      <div id="infoPopover" role="status">Viewer toolbar V52 — zoom, full screen, reset, language direction, and information controls. The toolbar is attached directly to the top edge with zero top margin.</div>
+    </header>
+    <main id="viewerViewport">
+      <iframe id="appFrame" title="Kawkabat Al Arqam Al Sihria" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/1791f375a6b9efea2be0b10b14504e4f7b8fb037/public/kawkabat-al-arqam-al-sihria-v41-chrome-chart-settings-full-v50.html"></iframe>
+    </main>
+  </div>
+  <script>
+  (function(){
+    'use strict';
+    var f=document.getElementById('appFrame');
+    var viewport=document.getElementById('viewerViewport');
+    var zoomReadout=document.getElementById('zoomReadout');
+    var languageButton=document.getElementById('languageButton');
+    var languageMenu=document.getElementById('languageMenu');
+    var languageText=document.getElementById('languageText');
+    var infoButton=document.getElementById('infoButton');
+    var infoPopover=document.getElementById('infoPopover');
+    var zoom=.95,t=null;
+
+    function clamp(v,min,max){return Math.min(max,Math.max(min,v))}
+    function applyZoom(next){
+      zoom=clamp(Math.round(next*100)/100,.5,2);
+      f.style.transform='scale('+zoom+')';
+      f.style.width=(100/zoom)+'%';
+      f.style.height=(100/zoom)+'%';
+      zoomReadout.textContent=Math.round(zoom*100)+'%';
+    }
+    document.getElementById('zoomOut').addEventListener('click',function(){applyZoom(zoom-.05)});
+    document.getElementById('zoomIn').addEventListener('click',function(){applyZoom(zoom+.05)});
+    document.getElementById('resetZoom').addEventListener('click',function(){applyZoom(.95);viewport.scrollTop=0;viewport.scrollLeft=0});
+    document.getElementById('fullscreenButton').addEventListener('click',function(){
+      if(!document.fullscreenElement){var el=document.documentElement;if(el.requestFullscreen)el.requestFullscreen()}else if(document.exitFullscreen)document.exitFullscreen();
+    });
+    languageButton.addEventListener('click',function(e){e.stopPropagation();var open=languageMenu.classList.toggle('open');languageButton.setAttribute('aria-expanded',String(open));infoPopover.classList.remove('open');infoButton.setAttribute('aria-expanded','false')});
+    Array.prototype.forEach.call(document.querySelectorAll('.languageOption'),function(btn){btn.addEventListener('click',function(){
+      var lang=btn.getAttribute('data-lang');
+      document.documentElement.lang=lang;
+      document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+      languageText.textContent=lang==='ar'?'العربية':'English';
+      languageMenu.classList.remove('open');languageButton.setAttribute('aria-expanded','false');
+      try{var docsList=docs(f.contentDocument,0,[]);for(var i=0;i<docsList.length;i++){docsList[i].documentElement.lang=lang;docsList[i].documentElement.dir=lang==='ar'?'rtl':'ltr'}}catch(e){}
+    })});
+    infoButton.addEventListener('click',function(e){e.stopPropagation();var open=infoPopover.classList.toggle('open');infoButton.setAttribute('aria-expanded',String(open));languageMenu.classList.remove('open');languageButton.setAttribute('aria-expanded','false')});
+    document.addEventListener('click',function(){languageMenu.classList.remove('open');languageButton.setAttribute('aria-expanded','false');infoPopover.classList.remove('open');infoButton.setAttribute('aria-expanded','false')});
+    document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.key==='+'){e.preventDefault();applyZoom(zoom+.05)}else if((e.ctrlKey||e.metaKey)&&e.key==='-'){e.preventDefault();applyZoom(zoom-.05)}else if((e.ctrlKey||e.metaKey)&&e.key==='0'){e.preventDefault();applyZoom(.95)}else if(e.key==='Escape'){languageMenu.classList.remove('open');infoPopover.classList.remove('open')}});
+
+    function docs(d,n,a){if(!d||n>140)return a;a.push(d);var x=[];try{x=d.querySelectorAll('iframe')}catch(e){return a}for(var i=0;i<x.length;i++){try{docs(x[i].contentDocument,n+1,a)}catch(e){}}return a}
+    function panel(){var r=f.contentDocument;if(!r)return null;var a=docs(r,0,[]);for(var i=0;i<a.length;i++){try{if(a[i].querySelector('.control-panel')&&a[i].querySelector('.panel-shell'))return a[i]}catch(e){}}return null}
+    function applyNickel(){try{var d=panel();if(!d)return false;if(d.getElementById('v51Nickel'))return true;var s=d.createElement('style');s.id='v51Nickel';s.textContent=`.control-panel{background:linear-gradient(90deg,#102a3a 0%,#dff7ff 3%,#627b8b 6%,#fff 10%,#9bacb7 28%,#f8fdff 50%,#879ba8 72%,#fff 90%,#365266 96%,#e9fbff 100%)!important;border-right:2px solid #18384b!important;box-shadow:10px 0 28px rgba(7,21,30,.4),inset 0 0 0 1px #fff,inset 0 0 0 4px #6d8797,inset 0 0 14px #fff!important}.panel-shell{position:relative!important;border:2px solid #294958!important;background:linear-gradient(90deg,#c5d0d7,#fff 16%,#9eacb6 34%,#f8fcfe 50%,#98a8b3 68%,#fff 86%,#c5d0d7)!important;box-shadow:inset 0 0 0 1px #fff,inset 0 0 0 4px #8196a3,inset 0 0 16px rgba(255,255,255,.9),0 2px 5px rgba(8,22,31,.45)!important}.panel-shell:before{content:"";position:absolute;z-index:30;pointer-events:none;left:9px;right:9px;top:5px;height:3px;border-radius:9px;background:linear-gradient(90deg,transparent,#fff 18%,#8fe4ff 50%,#fff 82%,transparent);box-shadow:0 0 6px #8fe4ff}.panel-topbar,.section-toggle{border:1px solid #294452!important;background:linear-gradient(180deg,#fff 0%,#fafdff 11%,#93a4af 20%,#f8fbfd 37%,#8799a5 52%,#fff 68%,#a9b6bf 83%,#eef7fb 100%)!important;box-shadow:inset 0 2px 2px #fff,inset 0 -2px 3px rgba(27,47,60,.48),0 2px 4px rgba(8,22,31,.5)!important;text-shadow:0 1px #fff!important}.panel-action,.panel-info{border:1px solid #203e50!important;background:linear-gradient(135deg,#fff,#b8c8d2 18%,#fff 35%,#718897 52%,#fff 70%,#9fb2bf 84%,#fff)!important;box-shadow:inset 0 0 0 1px #fff,inset 2px 2px 3px #fff,inset -2px -2px 3px rgba(31,53,67,.55),0 2px 4px rgba(7,20,29,.55)!important;color:#101820!important}.control-row,.control-label,.control-value,.v50-figure-row,.v50-color-row{background:linear-gradient(90deg,#cbd5db,#fff 18%,#acb8c0 39%,#f8fbfc 57%,#aab7bf 78%,#eef6f9)!important}.control-value input[type=text],.control-value input[type=number],.control-value select,.v50-angle-input,.v50-color-select{border:1px solid #294452!important;border-radius:6px!important;background:linear-gradient(180deg,#fff 0%,#f8fcfe 16%,#a8b5be 29%,#fff 48%,#cbd4da 66%,#fff 82%,#8fa1ad 100%)!important;box-shadow:inset 0 2px 3px #fff,inset 0 -2px 3px rgba(34,55,68,.35),0 1px 2px rgba(8,21,29,.45)!important;color:#111!important}.section-toggle:before{content:"";position:absolute;left:7px;right:7px;top:2px;height:2px;border-radius:9px;background:linear-gradient(90deg,transparent,#fff 22%,#91e6ff 50%,#fff 78%,transparent)}.panel-scroll{border:1px solid #294452!important;box-shadow:inset 0 0 0 1px #fff,inset 0 0 8px rgba(25,43,54,.38)!important}`;(d.head||d.documentElement).appendChild(s);d.documentElement.dataset.polishedNickelV51='true';if(d.defaultView)d.defaultView.__auditKawkabatPolishedNickelV51=function(){return{ok:!!d.getElementById('v51Nickel'),changedArea:'panel-style-only',geometryChanged:false,wheelChanged:false}};return true}catch(e){return false}}
+    function start(){if(t)clearInterval(t);var n=0;t=setInterval(function(){n++;if(applyNickel()||n>=2600){clearInterval(t);t=null}},100)}
+    f.addEventListener('load',start);
+    applyZoom(.95);start();
+    window.__auditKawkabatTopToolbarV52=function(){return{ok:true,toolbarFlushTop:getComputedStyle(document.body).marginTop==='0px'&&document.getElementById('viewerToolbar').getBoundingClientRect().top===0,toolbarAlignedRight:getComputedStyle(document.getElementById('viewerToolbar')).justifyContent==='flex-end',defaultZoom:Math.round(zoom*100),wheelChanged:false,geometryChanged:false}};
+  }());
+  </script>
+</body>
+</html>
