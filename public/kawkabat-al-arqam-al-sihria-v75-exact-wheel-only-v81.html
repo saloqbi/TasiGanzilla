@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Exact Wheel Only V81</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3;opacity:0;transition:none}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/7e288121e3cd3fa9dc4701ca0cb96f3814f0db8d/public/kawkabat-al-arqam-al-sihria-v74-hide-wheel-scrollbars-test-v75.html"></iframe>
+<script>
+(function(){
+'use strict';
+
+var frame=document.getElementById('appFrame');
+var attempts=0;
+var timer=null;
+var PANEL_ID='gannzilla-pixel-perfect-reference-panel-v421';
+var STYLE_ID='v81ExactWheelOnlyStyle';
+var retryTimers=[];
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function installStyle(doc){
+  if(doc.getElementById(STYLE_ID))return;
+  var style=doc.createElement('style');
+  style.id=STYLE_ID;
+  style.textContent=''
+    +'#'+PANEL_ID+'{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;width:0!important;min-width:0!important;max-width:0!important;height:0!important;overflow:hidden!important;left:-20000px!important;}'
+    +'[data-gannzilla-restored-layout-eye-v370="true"],[data-gannzilla-restored-layout-eye-v372="true"],#v65PanelToggleBtn,#v66PanelBtn,#v76PanelBtn,#v79FloatingPanelBtn{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;width:0!important;min-width:0!important;max-width:0!important;padding:0!important;margin:0!important;border:0!important;}'
+    +'html,body,#root{--gannzilla-property-panel-width:0px!important;}';
+  doc.head.appendChild(style);
+}
+
+function hideExactPanel(doc){
+  installStyle(doc);
+  try{doc.defaultView.localStorage.setItem('gannzilla-layout-panel-visible-v372','false');}catch(error){}
+
+  var panel=doc.getElementById(PANEL_ID);
+  if(!panel)return false;
+
+  panel.dataset.v81ExactWheelOnly='true';
+  panel.setAttribute('aria-hidden','true');
+  panel.style.setProperty('display','none','important');
+  panel.style.setProperty('visibility','hidden','important');
+  panel.style.setProperty('opacity','0','important');
+  panel.style.setProperty('pointer-events','none','important');
+  panel.style.setProperty('width','0','important');
+  panel.style.setProperty('min-width','0','important');
+  panel.style.setProperty('max-width','0','important');
+  panel.style.setProperty('height','0','important');
+  panel.style.setProperty('overflow','hidden','important');
+  panel.style.setProperty('left','-20000px','important');
+
+  doc.documentElement.style.setProperty('--gannzilla-property-panel-width','0px','important');
+  if(doc.body)doc.body.style.setProperty('--gannzilla-property-panel-width','0px','important');
+  var root=doc.getElementById('root');
+  if(root)root.style.setProperty('--gannzilla-property-panel-width','0px','important');
+
+  var selectors='[data-gannzilla-restored-layout-eye-v370="true"],[data-gannzilla-restored-layout-eye-v372="true"],#v65PanelToggleBtn,#v66PanelBtn,#v76PanelBtn,#v79FloatingPanelBtn';
+  var buttons=doc.querySelectorAll(selectors);
+  for(var i=0;i<buttons.length;i+=1){
+    buttons[i].style.setProperty('display','none','important');
+    buttons[i].style.setProperty('visibility','hidden','important');
+    buttons[i].style.setProperty('pointer-events','none','important');
+  }
+
+  doc.documentElement.dataset.v81ExactWheelOnly='true';
+  try{
+    doc.defaultView.__auditKawkabatExactWheelOnlyV81=function(){
+      var node=doc.getElementById(PANEL_ID);
+      var style=node?doc.defaultView.getComputedStyle(node):null;
+      return{
+        ok:!!node&&style.display==='none'&&doc.documentElement.style.getPropertyValue('--gannzilla-property-panel-width')==='0px',
+        sourceVersion:'V75',
+        exactPanelId:PANEL_ID,
+        panelVisible:false,
+        panelWidthReservedPx:0,
+        panelToggleVisible:false,
+        wheelPreserved:true,
+        topToolbarPreserved:true,
+        resizeDispatched:false,
+        fitTriggered:false
+      };
+    };
+  }catch(error){}
+  return true;
+}
+
+function apply(){
+  var success=false;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(hideExactPanel(doc))success=true;
+    },0);
+  }catch(error){}
+  return success;
+}
+
+function reinforce(){
+  [0,60,180,420,900,1800].forEach(function(delay){
+    retryTimers.push(setTimeout(apply,delay));
+  });
+}
+
+function boot(){
+  attempts+=1;
+  if(apply()){
+    if(timer){clearTimeout(timer);timer=null;}
+    reinforce();
+    frame.style.opacity='1';
+    return;
+  }
+  if(attempts<140){
+    timer=setTimeout(boot,100);
+  }else{
+    frame.style.opacity='1';
+  }
+}
+
+function start(){
+  if(timer){clearTimeout(timer);timer=null;}
+  for(var i=0;i<retryTimers.length;i+=1)clearTimeout(retryTimers[i]);
+  retryTimers=[];
+  attempts=0;
+  timer=setTimeout(boot,80);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
