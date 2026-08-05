@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Magic Numbers Constellation — V41 Canonical Fixed Viewport Lock V45</title>
+<style>
+:root{--reference-width:1280;--reference-height:620}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#lockedStage{
+  position:fixed;
+  left:0;
+  top:0;
+  width:1280px;
+  height:620px;
+  transform-origin:0 0;
+  overflow:hidden;
+  background:#f7f1e3;
+  will-change:transform;
+}
+#canonicalFrame{
+  display:block;
+  width:1280px;
+  height:620px;
+  border:0;
+  margin:0;
+  padding:0;
+  background:#f7f1e3;
+}
+</style>
+</head>
+<body>
+<div id="lockedStage" aria-label="Canonical fixed display stage">
+  <iframe
+    id="canonicalFrame"
+    title="Magic Numbers Constellation V41 Canonical Display"
+    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/05f68f1bb9eda171517c7180ba659ba89b6200e1/public/kawkabat-al-arqam-al-sihria-restore-cardinals-pisces-ornate-frame-angle-ticks-inner-copper-boundary-v41.html">
+  </iframe>
+</div>
+<script>
+(function(){
+'use strict';
+var REFERENCE_WIDTH=1280;
+var REFERENCE_HEIGHT=620;
+var stage=document.getElementById('lockedStage');
+var frame=document.getElementById('canonicalFrame');
+var lastSignature='';
+
+function applyCanonicalViewportLock(){
+  var availableWidth=Math.max(1,window.innerWidth||document.documentElement.clientWidth||REFERENCE_WIDTH);
+  var availableHeight=Math.max(1,window.innerHeight||document.documentElement.clientHeight||REFERENCE_HEIGHT);
+  var scale=Math.min(availableWidth/REFERENCE_WIDTH,availableHeight/REFERENCE_HEIGHT);
+  var renderedWidth=REFERENCE_WIDTH*scale;
+  var renderedHeight=REFERENCE_HEIGHT*scale;
+  var left=(availableWidth-renderedWidth)/2;
+  var top=(availableHeight-renderedHeight)/2;
+  var signature=[availableWidth,availableHeight,scale,left,top].join('|');
+  if(signature===lastSignature)return;
+  lastSignature=signature;
+  stage.style.transform='translate('+left.toFixed(3)+'px,'+top.toFixed(3)+'px) scale('+scale.toFixed(8)+')';
+  document.documentElement.dataset.v45CanonicalViewportLocked='true';
+  document.documentElement.dataset.v45ReferenceViewport=REFERENCE_WIDTH+'x'+REFERENCE_HEIGHT;
+  document.documentElement.dataset.v45Scale=scale.toFixed(8);
+  document.documentElement.dataset.v45InternalDomTouched='false';
+}
+
+window.__auditKawkabatCanonicalFixedViewportLockV45=function(){
+  return{
+    ok:!!stage&&!!frame&&frame.getAttribute('src').indexOf('/05f68f1bb9eda171517c7180ba659ba89b6200e1/')!==-1,
+    baseVersion:'V41',
+    immutableBaseCommit:'05f68f1bb9eda171517c7180ba659ba89b6200e1',
+    referenceViewport:{width:REFERENCE_WIDTH,height:REFERENCE_HEIGHT},
+    scalingMode:'uniform-outer-stage-only',
+    internalDomTouched:false,
+    wheelGeometryChanged:false,
+    numberTextChanged:false,
+    panelChanged:false,
+    iframeViewportReflowDisabled:true,
+    laterOverlayRule:'outside-canonicalFrame-only'
+  };
+};
+
+window.addEventListener('resize',applyCanonicalViewportLock,{passive:true});
+window.addEventListener('orientationchange',applyCanonicalViewportLock,{passive:true});
+applyCanonicalViewportLock();
+}());
+</script>
+</body>
+</html>
