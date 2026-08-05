@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — V42 Wheel Only Rings 1 and 2 Numbers V43</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation — Rings 1 and 2 Numbers Only" src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/7f2d7be77f33ca2fe38cb939ea4c24e4533c29bc/public/kawkabat-al-arqam-al-sihria-v41-wheel-only-v42.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var poll=null;
+
+function locateWheelDocument(doc,depth){
+  if(!doc||depth>140)return null;
+  if(doc.getElementById('wheel'))return doc;
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{
+      var found=locateWheelDocument(frames[i].contentDocument,depth+1);
+      if(found)return found;
+    }catch(error){}
+  }
+  return null;
+}
+
+function numberValue(value,fallback){
+  var parsed=Number.parseFloat(value);
+  return Number.isFinite(parsed)?parsed:fallback;
+}
+
+function isNumericOnly(text){
+  return /^\s*[+-]?\d+(?:[.,]\d+)?\s*$/.test(text||'');
+}
+
+function nodeCenterInWheel(node,wheel){
+  try{
+    var box=node.getBBox();
+    var matrix=node.getCTM();
+    if(!matrix)return null;
+    var point=wheel.createSVGPoint();
+    point.x=box.x+box.width/2;
+    point.y=box.y+box.height/2;
+    return point.matrixTransform(matrix);
+  }catch(error){
+    return null;
+  }
+}
+
+function hasExcludedAncestor(node){
+  var current=node;
+  while(current&&current.tagName&&current.tagName.toLowerCase()!=='svg'){
+    var marker=((current.id||'')+' '+(current.getAttribute('class')||'')+' '+(current.getAttribute('data-role')||'')).toLowerCase();
+    if(/angle|degree|tick|cardinal|zodiac|ornament|outer.?frame/.test(marker))return true;
+    current=current.parentElement;
+  }
+  return false;
+}
+
+function clusterRadii(items,tolerance){
+  var clusters=[];
+  items.slice().sort(function(a,b){return a.radius-b.radius;}).forEach(function(item){
+    var cluster=clusters.length?clusters[clusters.length-1]:null;
+    if(!cluster||Math.abs(item.radius-cluster.mean)>tolerance){
+      clusters.push({items:[item],mean:item.radius});
+    }else{
+      cluster.items.push(item);
+      cluster.mean=cluster.items.reduce(function(sum,entry){return sum+entry.radius;},0)/cluster.items.length;
+    }
+  });
+  return clusters;
+}
+
+function applyRingsOneTwoNumbersOnly(){
+  try{
+    var doc=locateWheelDocument(frame.contentDocument,0);
+    if(!doc)return false;
+    if(doc.documentElement.dataset.wheelOnlyV42!=='true')return false;
+
+    var wheel=doc.getElementById('wheel');
+    var angleFrame=doc.getElementById('angleFrame');
+    if(!wheel||!angleFrame||!doc.head)return false;
+    if(doc.documentElement.dataset.ringsOneTwoNumbersOnlyV43==='true')return true;
+
+    var referenceCircle=angleFrame.querySelector('circle');
+    if(!referenceCircle)return false;
+    var cx=numberValue(referenceCircle.getAttribute('cx'),NaN);
+    var cy=numberValue(referenceCircle.getAttribute('cy'),NaN);
+    var boundaryRadius=numberValue(doc.documentElement.dataset.v41BoundaryRadius,numberValue(referenceCircle.getAttribute('r'),NaN));
+    if(!Number.isFinite(cx)||!Number.isFinite(cy)||!Number.isFinite(boundaryRadius))return false;
+
+    var candidates=[];
+    Array.prototype.forEach.call(wheel.querySelectorAll('text'),function(node){
+      if(!isNumericOnly(node.textContent))return;
+      if(hasExcludedAncestor(node))return;
+      var center=nodeCenterInWheel(node,wheel);
+      if(!center)return;
+      var dx=center.x-cx;
+      var dy=center.y-cy;
+      var radius=Math.sqrt(dx*dx+dy*dy);
+      if(radius>=boundaryRadius-8)return;
+      candidates.push({node:node,radius:radius,text:(node.textContent||'').trim()});
+    });
+    if(candidates.length<3)return false;
+
+    var centralCutoff=Math.max(38,boundaryRadius*0.035);
+    var centerItems=candidates.filter(function(item){return item.radius<=centralCutoff;});
+    var ringItems=candidates.filter(function(item){return item.radius>centralCutoff;});
+    var tolerance=Math.max(10,boundaryRadius*0.008);
+    var clusters=clusterRadii(ringItems,tolerance);
+    if(clusters.length<2)return false;
+
+    var keepNodes=new Set();
+    centerItems.forEach(function(item){keepNodes.add(item.node);});
+    clusters.slice(0,2).forEach(function(cluster){
+      cluster.items.forEach(function(item){keepNodes.add(item.node);});
+    });
+
+    var hiddenCount=0;
+    candidates.forEach(function(item){
+      if(keepNodes.has(item.node)){
+        item.node.classList.add('v43-ring-number-kept');
+        item.node.setAttribute('data-v43-number-scope',item.radius<=centralCutoff?'center':'ring-1-or-2');
+      }else{
+        item.node.classList.add('v43-ring-number-hidden');
+        item.node.setAttribute('aria-hidden','true');
+        hiddenCount+=1;
+      }
+    });
+
+    var style=doc.createElement('style');
+    style.id='v43RingsOneTwoNumbersOnlyStyle';
+    style.textContent='.v43-ring-number-hidden{display:none!important;visibility:hidden!important;}';
+    doc.head.appendChild(style);
+
+    doc.documentElement.dataset.ringsOneTwoNumbersOnlyV43='true';
+    doc.documentElement.dataset.v43DetectedNumericCandidates=String(candidates.length);
+    doc.documentElement.dataset.v43DetectedRingClusters=String(clusters.length);
+    doc.documentElement.dataset.v43KeptRingClusters='2';
+    doc.documentElement.dataset.v43HiddenRingNumberCount=String(hiddenCount);
+
+    var view=doc.defaultView;
+    if(view){
+      view.__auditKawkabatRingsOneTwoNumbersOnlyV43=function(){
+        return{
+          ok:!!doc.getElementById('v43RingsOneTwoNumbersOnlyStyle')&&clusters.length>=2&&hiddenCount>0,
+          sourceVersion:'V42',
+          wheelOnly:true,
+          centerNumbersKept:true,
+          keptNumberedRings:[1,2],
+          hiddenNumberedRings:'3-through-last',
+          angleNumbersChanged:false,
+          angleTicksChanged:false,
+          zodiacChanged:false,
+          ornateFrameChanged:false,
+          copperBoundaryChanged:false,
+          detectedNumericCandidates:candidates.length,
+          detectedRingClusters:clusters.length,
+          hiddenRingNumberCount:hiddenCount
+        };
+      };
+    }
+
+    return hiddenCount>0;
+  }catch(error){
+    return false;
+  }
+}
+
+function start(){
+  if(poll)clearInterval(poll);
+  var attempts=0;
+  poll=setInterval(function(){
+    attempts+=1;
+    if(applyRingsOneTwoNumbersOnly()||attempts>=3200){
+      clearInterval(poll);
+      poll=null;
+    }
+  },100);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
