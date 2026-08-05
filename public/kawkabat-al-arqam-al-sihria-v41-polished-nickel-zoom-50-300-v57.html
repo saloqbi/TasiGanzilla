@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kawkabat V57 — Zoom 50 to 300</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#v57Frame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="v57Frame" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/v41-display-locked/public/kawkabat-al-arqam-al-sihria-v41-polished-nickel-fullscreen-connection-v56.html"></iframe>
+<script>
+(function(){
+  'use strict';
+  var hostFrame=document.getElementById('v57Frame');
+  var timer=null;
+  var MIN_ZOOM=0.50;
+  var MAX_ZOOM=3.00;
+  var STEP=0.05;
+  var DEFAULT_ZOOM=0.95;
+
+  function clamp(value){
+    return Math.min(MAX_ZOOM,Math.max(MIN_ZOOM,value));
+  }
+
+  function install(){
+    try{
+      var d=hostFrame.contentDocument;
+      if(!d)return false;
+      var minus=d.getElementById('minus');
+      var plus=d.getElementById('plus');
+      var zoomText=d.getElementById('zoomText');
+      var reset=d.getElementById('reset');
+      var app=d.getElementById('app');
+      var stage=d.getElementById('stage');
+      if(!minus||!plus||!zoomText||!reset||!app||!stage)return false;
+      if(d.documentElement.dataset.zoomRangeV57==='true')return true;
+
+      var style=d.createElement('style');
+      style.id='zoomRangeV57Style';
+      style.textContent='#minus:disabled,#plus:disabled{opacity:.42;cursor:default;background:linear-gradient(#fff,#eceeef 52%,#fff)!important}';
+      (d.head||d.documentElement).appendChild(style);
+
+      var zoom=DEFAULT_ZOOM;
+      function applyZoom(next){
+        zoom=clamp(Math.round(next*100)/100);
+        zoomText.textContent=Math.round(zoom*100)+'%';
+        app.style.transform='scale('+zoom+')';
+        app.style.width=(100/zoom)+'%';
+        app.style.height=(100/zoom)+'%';
+        stage.style.width='100%';
+        stage.style.height='100%';
+        minus.disabled=zoom<=MIN_ZOOM;
+        plus.disabled=zoom>=MAX_ZOOM;
+        minus.setAttribute('aria-disabled',String(minus.disabled));
+        plus.setAttribute('aria-disabled',String(plus.disabled));
+        minus.title=minus.disabled?'Minimum zoom: 50%':'Zoom out 5%';
+        plus.title=plus.disabled?'Maximum zoom: 300%':'Zoom in 5%';
+        zoomText.title='Reset zoom to 95%';
+      }
+
+      minus.onclick=function(){applyZoom(zoom-STEP)};
+      plus.onclick=function(){applyZoom(zoom+STEP)};
+      reset.onclick=function(){applyZoom(DEFAULT_ZOOM)};
+      zoomText.onclick=function(){applyZoom(DEFAULT_ZOOM)};
+
+      d.documentElement.dataset.zoomRangeV57='true';
+      if(d.defaultView){
+        d.defaultView.__auditKawkabatZoomRangeV57=function(){
+          return{
+            ok:d.documentElement.dataset.zoomRangeV57==='true',
+            minimumPercent:50,
+            maximumPercent:300,
+            stepPercent:5,
+            defaultPercent:95
+          };
+        };
+      }
+      applyZoom(DEFAULT_ZOOM);
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+
+  function start(){
+    if(timer)clearInterval(timer);
+    var attempts=0;
+    timer=setInterval(function(){
+      attempts++;
+      if(install()||attempts>=600){
+        clearInterval(timer);
+        timer=null;
+      }
+    },100);
+  }
+
+  hostFrame.addEventListener('load',start);
+  start();
+}());
+</script>
+</body>
+</html>
