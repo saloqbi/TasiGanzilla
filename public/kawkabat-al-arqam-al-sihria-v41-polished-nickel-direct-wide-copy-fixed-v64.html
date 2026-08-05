@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kawkabat V64 — Direct Wide Panel + Copy</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3;font-family:Arial,Tahoma,sans-serif}
+#shell{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden}
+#toolbar{height:42px;flex:0 0 42px;display:flex;justify-content:flex-end;align-items:stretch;direction:ltr;background:linear-gradient(#fff,#e8ebed 52%,#fff);border-bottom:1px solid #b7bcc0;box-shadow:0 1px 3px #0003;z-index:50}
+.group{display:flex;height:100%}
+.tool{height:100%;min-width:42px;border:0;border-left:1px solid #fff;border-right:1px solid #b9bec355;background:linear-gradient(#fff,#eef0f1 52%,#fff);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:#111;padding:0 10px}
+.tool:hover{background:linear-gradient(#fff,#e1e8ee,#fff)}
+.tool svg{width:22px;height:22px;display:block}
+#zoomText{min-width:98px;font-size:20px}.lang{min-width:150px;font-size:18px}.flag{font-size:20px}.caret{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:7px solid #222;margin-left:5px}
+#copyBtn.copied{background:linear-gradient(#fff,#d8f4df,#fff);box-shadow:inset 0 0 0 2px #46a35e}
+#viewport{position:relative;flex:1;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;transform-origin:top left;background:#f7f1e3}
+#loading{position:absolute;inset:0;display:grid;place-items:center;background:#f7f1e3;z-index:10;color:#41515d;font-weight:700;font-size:16px;transition:opacity .25s}
+#loading.done{opacity:0;pointer-events:none}
+.spinner{width:34px;height:34px;margin:0 auto 10px;border:4px solid #cbd4d9;border-top-color:#557b9d;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;top:50px;right:12px;z-index:200;background:#20272b;color:#fff;padding:7px 12px;border-radius:6px;font-size:13px;opacity:0;transform:translateY(-6px);transition:.18s;pointer-events:none}#toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div id="shell">
+  <div id="toolbar">
+    <div class="group">
+      <button id="minus" class="tool" type="button" title="Zoom out"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="#fff" stroke="#6f91da" stroke-width="2.5"/><path d="M11 16h10" stroke="#315fc5" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+      <button id="zoomText" class="tool" type="button">95%</button>
+      <button id="plus" class="tool" type="button" title="Zoom in"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="#fff" stroke="#6f91da" stroke-width="2.5"/><path d="M11 16h10M16 11v10" stroke="#315fc5" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+    </div>
+    <div class="group">
+      <button id="full" class="tool" type="button" title="Fullscreen"><svg viewBox="0 0 32 32"><path d="M7 13V7h6M19 7h6v6M25 19v6h-6M13 25H7v-6" fill="none" stroke="#6f91da" stroke-width="2.5"/></svg></button>
+      <button id="copyBtn" class="tool" type="button" title="Copy page link"><svg viewBox="0 0 32 32"><rect x="10" y="10" width="13" height="13" rx="1.5" fill="#fff" stroke="#4e6575" stroke-width="2"/><rect x="6" y="6" width="13" height="13" rx="1.5" fill="none" stroke="#7596b0" stroke-width="2"/></svg></button>
+    </div>
+    <div class="group"><button id="language" class="tool lang" type="button"><span id="langFlag" class="flag">🇬🇧</span><span id="langText">English</span><span class="caret"></span></button></div>
+    <div class="group"><button id="connection" class="tool" type="button" title="Connection settings"><svg viewBox="0 0 32 32"><path d="M10 4c-2 0-4 4-4 7 0 8 7 15 15 15 3 0 7-2 7-4 0-1-4-6-6-6-1 0-3 3-4 3-3 0-7-5-7-7 0-1 3-3 3-4 0-2-3-4-4-4z" fill="#7ea4c8" stroke="#526779" stroke-width="1.5"/><path d="M24 5h5l-2.5 3z" fill="#333"/></svg></button></div>
+    <div class="group"><button id="info" class="tool" type="button" title="Information"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#477ee0" stroke="#8baded"/><circle cx="16" cy="10" r="1.6" fill="#fff"/><rect x="14.7" y="13" width="2.6" height="9" rx="1.3" fill="#fff"/></svg></button></div>
+  </div>
+  <div id="viewport">
+    <div id="loading"><div><div class="spinner"></div><div>جاري تحميل كوكبة الأرقام السحرية…</div></div></div>
+    <iframe id="appFrame" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/1791f375a6b9efea2be0b10b14504e4f7b8fb037/public/kawkabat-al-arqam-al-sihria-v41-chrome-chart-settings-full-v50.html"></iframe>
+  </div>
+</div>
+<div id="toast">تم نسخ الرابط</div>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame'),loading=document.getElementById('loading'),toast=document.getElementById('toast'),copyBtn=document.getElementById('copyBtn');
+var zoom=.95,MIN=.50,MAX=3,STEP=.05,currentLang='en',poll=null,observer=null;
+var MAP={'Chart Settings':'إعدادات المخطط','Layout':'التخطيط','Visible':'مرئي','Clockwise':'مع عقارب الساعة','Counterclockwise':'عكس عقارب الساعة','Size':'الحجم','View':'نوع العرض','Data':'نوع البيانات','Data type':'نوع البيانات','Price':'السعر','Start Value':'قيمة البداية','Direction':'الاتجاه','Increment':'الزيادة','Value':'القيمة','Find':'بحث','Highlight':'التمييز','Fill':'تعبئة','Show marks':'إظهار العلامات','Show numbers':'إظهار الأرقام','Figures':'الأشكال','Triangle':'مثلث','Square':'مربع','Circle of 36':'دائرة 36','Levels':'المستويات'};
+function docs(d,n,a){if(!d||n>100)return a;a.push(d);var fs=[];try{fs=d.querySelectorAll('iframe')}catch(e){return a}for(var i=0;i<fs.length;i++){try{docs(fs[i].contentDocument,n+1,a)}catch(e){}}return a}
+function panelDoc(){var r=frame.contentDocument;if(!r)return null;var a=docs(r,0,[]);for(var i=0;i<a.length;i++){try{if(a[i].querySelector('.control-panel')&&a[i].querySelector('.panel-shell'))return a[i]}catch(e){}}return null}
+function translate(d){if(currentLang!=='ar')return;var title=d.querySelector('.panel-title');if(title)title.textContent='إعدادات المخطط';d.querySelectorAll('.section-name,.control-label,.v50-figure-head span:last-child').forEach(function(n){var k=(n.textContent||'').trim();if(MAP[k])n.textContent=MAP[k]});d.querySelectorAll('select option').forEach(function(n){var k=(n.textContent||'').trim();if(MAP[k])n.textContent=MAP[k]})}
+function toolbar(d){var actions=d.querySelector('.panel-actions');if(!actions)return;var icons=['+','−','✎','▣'];while(actions.children.length<4){var s=d.createElement('span');s.className='panel-action';actions.appendChild(s)}Array.prototype.forEach.call(actions.children,function(n,i){if(i<4){n.textContent=icons[i];n.style.display='grid'}})}
+function installStyle(d){if(d.getElementById('v64WideStyle'))return;var s=d.createElement('style');s.id='v64WideStyle';s.textContent=`
+.control-panel{width:560px!important;min-width:560px!important;max-width:560px!important;flex:0 0 560px!important;padding:12px!important}
+.work-frame{left:580px!important;width:calc(100% - 600px)!important;min-width:360px!important}
+.panel-shell{width:100%!important;border-radius:20px!important}
+.panel-topbar{flex:0 0 86px!important;min-height:86px!important;margin:9px!important;padding:0 14px!important;display:grid!important;grid-template-columns:48px minmax(0,1fr) auto!important;gap:12px!important}
+.panel-dot{width:44px!important;height:44px!important;transform:none!important;border:0!important;background:transparent!important;display:grid!important;place-items:center!important;font-size:35px!important}
+.panel-title{min-width:0!important;white-space:nowrap!important;font-size:32px!important;font-weight:900!important;text-align:right!important}
+.panel-actions{display:flex!important;align-items:center!important;gap:8px!important;min-width:256px!important;overflow:visible!important}
+.panel-action{display:grid!important;place-items:center!important;flex:0 0 58px!important;width:58px!important;height:58px!important;border-radius:13px!important;font-size:34px!important;font-weight:900!important}
+.panel-info{display:none!important}
+.panel-scroll{margin:0 9px 9px!important;scrollbar-width:auto!important}
+.panel-scroll::-webkit-scrollbar{width:16px!important;height:16px!important}
+.control-section{margin:9px!important;border-radius:14px!important}
+.section-toggle{min-height:62px!important;padding:0 16px!important;font-size:23px!important;font-weight:900!important}
+.section-sign{width:32px!important;font-size:27px!important}.section-icon{font-size:25px!important}.section-name{font-size:22px!important}
+.control-row{min-height:62px!important;grid-template-columns:43% 57%!important}
+.control-label{padding:10px 16px!important;font-size:21px!important;font-weight:800!important;line-height:1.25!important;text-align:right!important;white-space:normal!important}
+.control-value{padding:7px 10px!important;font-size:20px!important}
+.control-value input[type=text],.control-value input[type=number],.control-value select{height:46px!important;border-radius:10px!important;padding:4px 12px!important;font-size:21px!important;font-weight:800!important;text-align:center!important}
+.control-value input[type=checkbox],.v50-checkbox{width:28px!important;height:28px!important}
+.v50-figure-head{min-height:42px!important;font-size:17px!important;padding:6px 12px!important}
+@media(max-width:980px){.control-panel{width:500px!important;min-width:500px!important;max-width:500px!important;flex-basis:500px!important}.work-frame{left:520px!important;width:calc(100% - 540px)!important}.panel-title{font-size:27px!important}.panel-actions{min-width:220px!important}.panel-action{flex-basis:49px!important;width:49px!important;height:49px!important}}
+`;(d.head||d.documentElement).appendChild(s)}
+function applyPanel(){try{var d=panelDoc();if(!d)return false;installStyle(d);toolbar(d);translate(d);d.documentElement.dataset.v64DirectWide='true';if(!observer&&d.body){observer=new MutationObserver(function(){toolbar(d);translate(d)});observer.observe(d.body,{subtree:true,childList:true})}loading.classList.add('done');return true}catch(e){return false}}
+function start(){if(poll)clearInterval(poll);var n=0;poll=setInterval(function(){n++;if(applyPanel()||n>1200){if(applyPanel()||n>1200){clearInterval(poll);poll=null}}},100)}
+function applyZoom(){zoom=Math.max(MIN,Math.min(MAX,Math.round(zoom*100)/100));document.getElementById('zoomText').textContent=Math.round(zoom*100)+'%';frame.style.transform='scale('+zoom+')';frame.style.width=(100/zoom)+'%';frame.style.height=(100/zoom)+'%'}
+function showToast(t){toast.textContent=t;toast.classList.add('show');setTimeout(function(){toast.classList.remove('show')},1100)}
+async function copyLink(){var text=location.href;try{await navigator.clipboard.writeText(text)}catch(e){var ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove()}copyBtn.classList.add('copied');showToast(currentLang==='ar'?'تم نسخ الرابط':'Link copied');setTimeout(function(){copyBtn.classList.remove('copied')},850)}
+document.getElementById('minus').onclick=function(){zoom-=STEP;applyZoom()};document.getElementById('plus').onclick=function(){zoom+=STEP;applyZoom()};document.getElementById('zoomText').onclick=function(){zoom=.95;applyZoom()};document.getElementById('full').onclick=function(){document.fullscreenElement?document.exitFullscreen&&document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()};copyBtn.onclick=copyLink;
+document.getElementById('language').onclick=function(){currentLang=currentLang==='en'?'ar':'en';document.documentElement.lang=currentLang;document.documentElement.dir=currentLang==='ar'?'rtl':'ltr';document.getElementById('langFlag').textContent=currentLang==='ar'?'🇸🇦':'🇬🇧';document.getElementById('langText').textContent=currentLang==='ar'?'العربية':'English';applyPanel()};
+document.getElementById('connection').onclick=function(){showToast(currentLang==='ar'?'إعدادات الاتصال':'Connection settings')};document.getElementById('info').onclick=function(){showToast(currentLang==='ar'?'كوكبة الأرقام السحرية':'Magic Numbers Constellation')};
+frame.addEventListener('load',start);applyZoom();start();
+}());
+</script>
+</body>
+</html>
