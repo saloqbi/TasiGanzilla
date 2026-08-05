@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Toolbar Controls Restored V78</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/2fa3dfdbb8902b3b6ce1b5cf5010efdc6499d94d/public/kawkabat-al-arqam-al-sihria-v76-panel-hide-layout-lock-v77.html"></iframe>
+<script>
+(function(){
+'use strict';
+
+var frame=document.getElementById('appFrame');
+var bootTimer=null;
+var attempts=0;
+var controlsInstalled=false;
+var wheelVisible=true;
+var currentPercent=30;
+var MIN=20,MAX=400,STEP=5;
+var baseByWheel=new WeakMap();
+var fallbackPanelHidden=false;
+var fallbackPanel=null;
+var fallbackViewport=null;
+var fallbackSaved=new WeakMap();
+var DRAWING_TRIGGER='gannzilla-top-center-drawing-trigger-v471';
+var DRAWING_SCRIPT='https://cdn.jsdelivr.net/gh/saloqbi/TasiGanzilla@0d1c7bec15a4ab5223ef2370ea5b472d11b52be4/src/components/GannTools/gannzillaTopCenterDrawingToolbarV471.js';
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function findBar(){
+  var found=null;
+  try{visit(frame.contentDocument,function(doc){if(found)return;var bar=doc.getElementById('v62MetalBar');if(bar)found={doc:doc,bar:bar};},0);}catch(error){}
+  return found;
+}
+
+function findWheel(){
+  var found=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(found)return;
+      var wheel=doc.getElementById('wheel');
+      if(!wheel)return;
+      var tag=String(wheel.tagName||'').toLowerCase();
+      var node=(tag==='g'||tag==='path')?(wheel.closest('svg')||wheel):wheel;
+      var rect=node.getBoundingClientRect();
+      if(rect.width>40&&rect.height>40)found={doc:doc,node:node};
+    },0);
+  }catch(error){}
+  return found;
+}
+
+function findPanel(){
+  var best=null,bestScore=-1;
+  try{
+    visit(frame.contentDocument,function(doc){
+      var nodes=doc.querySelectorAll('aside');
+      for(var i=0;i<nodes.length;i+=1){
+        var node=nodes[i];
+        if(!node.querySelector('input,select'))continue;
+        var text=String(node.textContent||'');
+        var terms=['Default','Layout','Visible','Clockwise','Price','Highlight','Protractor','Counter','الافتراضي','التخطيط','إظهار','السعر','التمييز','المنقلة','العداد'];
+        var score=0;
+        for(var t=0;t<terms.length;t+=1)if(text.indexOf(terms[t])!==-1)score+=1;
+        if(score>bestScore){bestScore=score;best=node;}
+      }
+    },0);
+  }catch(error){}
+  return bestScore>=3?best:null;
+}
+
+function findViewport(wheelInfo){
+  if(!wheelInfo)return null;
+  var node=wheelInfo.node.parentElement;
+  for(var depth=0;node&&depth<20;depth+=1,node=node.parentElement){
+    var style=wheelInfo.doc.defaultView.getComputedStyle(node);
+    if(/auto|scroll|overlay/.test([style.overflow,style.overflowX,style.overflowY].join(' ')))return node;
+    if(node.dataset&&node.dataset.gannzillaPageScrollbarEdgeV296==='true')return node;
+  }
+  return wheelInfo.node.parentElement;
+}
+
+function ensureStyle(doc){
+  if(doc.getElementById('v78ToolbarRestoreStyle'))return;
+  var style=doc.createElement('style');
+  style.id='v78ToolbarRestoreStyle';
+  style.textContent=''
+    +'#v78PencilBtn,#v78WheelBtn,#v78PanelBtn,#v78ZoomOut,#v78ZoomIn{width:32px;min-width:32px;height:30px;padding:0;margin:0;border:1px solid #95a2ac;border-top-color:#dce2e7;border-left-color:#dce2e7;border-radius:3px;background:linear-gradient(180deg,#fff 0%,#edf3f7 46%,#d5dfe7 52%,#fbfcfd 100%);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.97)}'
+    +'#v78PencilBtn:hover,#v78WheelBtn:hover,#v78PanelBtn:hover,#v78ZoomOut:hover,#v78ZoomIn:hover{background:linear-gradient(180deg,#fff8ea 0%,#f3e5c3 46%,#e2c382 52%,#fff5e5 100%);border-color:#b88a4a}'
+    +'#v78PencilBtn svg,#v78WheelBtn svg,#v78PanelBtn svg,#v78ZoomOut svg,#v78ZoomIn svg{width:20px;height:20px;display:block;pointer-events:none}'
+    +'#v78WheelBtn .eye{fill:#f5d447;stroke:#a97d0b;stroke-width:1.15}#v78WheelBtn .iris{fill:#4b91c8;stroke:#246692;stroke-width:.75}#v78WheelBtn .pupil{fill:#173e5a}'
+    +'#v78PanelBtn .shell{fill:#eaf5ff;stroke:#277fc4;stroke-width:1.25}#v78PanelBtn .side{fill:#4ea0df;stroke:#246da6;stroke-width:.75}#v78PanelBtn .line{stroke:#277fc4;stroke-width:1.05;stroke-linecap:round}'
+    +'#v78WheelBtn .slash,#v78PanelBtn .slash{display:none;stroke:#cf3434;stroke-width:2.1;stroke-linecap:round}#v78WheelBtn[data-hidden="true"] .slash,#v78PanelBtn[data-hidden="true"] .slash{display:block}'
+    +'#v78ZoomGroup{display:inline-flex;align-items:stretch;width:122px;min-width:122px;max-width:122px;height:30px;direction:ltr}#v78ZoomOut{border-radius:3px 0 0 3px;border-right:0}#v78ZoomIn{border-radius:0 3px 3px 0;border-left:0}'
+    +'#v78ZoomSelect{width:58px;min-width:58px;max-width:58px;height:30px;margin:0;padding:0 2px;border:1px solid #95a2ac;border-radius:0;background:linear-gradient(180deg,#fff 0%,#edf3f7 46%,#d5dfe7 52%,#fbfcfd 100%);font:700 13px Arial,Tahoma,sans-serif;text-align:center;text-align-last:center;appearance:none;-webkit-appearance:none;cursor:pointer}'
+    +'#v76PencilBtn,#v76WheelBtn,#v76PanelBtn,#v76ZoomGroup{display:none!important}';
+  doc.head.appendChild(style);
+}
+
+function pencilSvg(){return '<svg viewBox="0 0 24 24"><path d="M4.1 16.8 15.8 5.1l3.1 3.1L7.2 19.9l-4.2 1.2z" fill="#d9af42" stroke="#866716" stroke-width=".8"/><path d="m3 21.1 1.1-4.3 3.1 3.1z" fill="#e6bd91" stroke="#9b704d" stroke-width=".6"/></svg>';}
+function eyeSvg(){return '<svg viewBox="0 0 24 24"><path class="eye" d="M2.4 12s3.6-5.3 9.6-5.3 9.6 5.3 9.6 5.3-3.6 5.3-9.6 5.3S2.4 12 2.4 12z"/><circle class="iris" cx="12" cy="12" r="3.45"/><circle class="pupil" cx="12" cy="12" r="1.55"/><path class="slash" d="M4 20 20 4"/></svg>';}
+function panelSvg(){return '<svg viewBox="0 0 24 24"><rect class="shell" x="3.2" y="4" width="17.6" height="16" rx="1.8"/><rect class="side" x="4.8" y="5.7" width="4.3" height="12.6" rx=".7"/><path class="line" d="M11.7 8h6.5M11.7 12h6.5M11.7 16h6.5"/><path class="slash" d="M4 20 20 4"/></svg>';}
+function magnifier(plus){return '<svg viewBox="0 0 24 24"><circle cx="9.2" cy="9.2" r="5.7" fill="#fbfdff" stroke="#3579ad" stroke-width="1.45"/><path d="M13.4 13.4 20 20" fill="none" stroke="#3579ad" stroke-width="2" stroke-linecap="round"/><path d="M6.3 9.2h5.8" fill="none" stroke="#2469a2" stroke-width="1.55"/>'+(plus?'<path d="M9.2 6.3v5.8" fill="none" stroke="#2469a2" stroke-width="1.55"/>':'')+'</svg>';}
+
+function makeButton(doc,id,title,html,handler){
+  var button=doc.createElement('button');
+  button.id=id;button.type='button';button.title=title;button.setAttribute('aria-label',title);button.innerHTML=html;
+  button.addEventListener('click',function(event){handler(event,button);});
+  return button;
+}
+
+function wheelBase(info){
+  var base=baseByWheel.get(info.node);
+  if(base)return base;
+  var rect=info.node.getBoundingClientRect();
+  var known=Number(info.node.dataset.v76StableZoomPercent||info.node.dataset.v73StableZoomPercent||'');
+  var ratio=Number.isFinite(known)&&known>0?known/100:1;
+  base={width:Math.max(1,rect.width/ratio),height:Math.max(1,rect.height/ratio)};
+  baseByWheel.set(info.node,base);
+  if(Number.isFinite(known)&&known>0)currentPercent=Math.max(MIN,Math.min(MAX,known));
+  return base;
+}
+
+function applyZoom(value){
+  var info=findWheel();
+  if(!info)return false;
+  var n=Math.round(Number(value)/STEP)*STEP;
+  currentPercent=Math.max(MIN,Math.min(MAX,Number.isFinite(n)?n:30));
+  var base=wheelBase(info),factor=currentPercent/100;
+  info.node.style.setProperty('zoom','1','important');
+  info.node.style.setProperty('transform','none','important');
+  info.node.style.setProperty('width',(base.width*factor)+'px','important');
+  info.node.style.setProperty('height',(base.height*factor)+'px','important');
+  info.node.style.setProperty('max-width','none','important');
+  info.node.style.setProperty('max-height','none','important');
+  info.node.dataset.v78ZoomPercent=String(currentPercent);
+  syncZoom();
+  return true;
+}
+
+function fitZoom(){
+  var info=findWheel();
+  if(!info)return false;
+  var viewport=findViewport(info),vr=viewport.getBoundingClientRect(),base=wheelBase(info);
+  var percent=Math.min((Math.max(80,vr.width-18)/base.width)*100,(Math.max(80,vr.height-18)/base.height)*100);
+  return applyZoom(percent);
+}
+
+function syncZoom(){
+  var bar=findBar();if(!bar)return;
+  var select=bar.doc.getElementById('v78ZoomSelect');
+  var out=bar.doc.getElementById('v78ZoomOut');
+  var zoomIn=bar.doc.getElementById('v78ZoomIn');
+  if(select)select.value=String(currentPercent);
+  if(out)out.disabled=currentPercent<=MIN;
+  if(zoomIn)zoomIn.disabled=currentPercent>=MAX;
+}
+
+function toggleWheel(event,button){
+  event.preventDefault();event.stopPropagation();
+  var info=findWheel();if(!info)return;
+  wheelVisible=!wheelVisible;
+  info.node.style.setProperty('visibility',wheelVisible?'visible':'hidden','important');
+  info.node.style.setProperty('opacity',wheelVisible?'1':'0','important');
+  info.node.style.setProperty('pointer-events',wheelVisible?'auto':'none','important');
+  button.dataset.hidden=wheelVisible?'false':'true';
+}
+
+function rememberFallback(node,names){
+  if(!node||fallbackSaved.has(node))return;
+  var record={};for(var i=0;i<names.length;i++)record[names[i]]=node.style.getPropertyValue(names[i]);fallbackSaved.set(node,record);
+}
+function restoreFallback(node,names){
+  var record=fallbackSaved.get(node);if(!record)return;
+  for(var i=0;i<names.length;i++){var value=record[names[i]];if(value)node.style.setProperty(names[i],value,'important');else node.style.removeProperty(names[i]);}
+}
+
+function fallbackPanelToggle(button){
+  var panel=findPanel(),wheel=findWheel();if(!panel||!wheel)return;
+  var viewport=findViewport(wheel);if(!viewport)return;
+  var panelProps=['opacity','pointer-events','filter','transform','z-index'];
+  var viewportProps=['position','left','right','width','min-width','max-width','margin-left','margin-right','transform','transition','z-index'];
+  if(!fallbackPanelHidden){
+    fallbackPanel=panel;fallbackViewport=viewport;
+    rememberFallback(panel,panelProps);rememberFallback(viewport,viewportProps);
+    panel.style.setProperty('opacity','0','important');panel.style.setProperty('pointer-events','none','important');panel.style.setProperty('z-index','0','important');
+    viewport.style.setProperty('position','absolute','important');viewport.style.setProperty('left','0','important');viewport.style.setProperty('right','0','important');viewport.style.setProperty('width','auto','important');viewport.style.setProperty('min-width','0','important');viewport.style.setProperty('max-width','none','important');viewport.style.setProperty('margin-left','0','important');viewport.style.setProperty('margin-right','0','important');viewport.style.setProperty('transform','none','important');viewport.style.setProperty('transition','none','important');viewport.style.setProperty('z-index','1','important');
+    fallbackPanelHidden=true;
+  }else{
+    restoreFallback(fallbackPanel,panelProps);restoreFallback(fallbackViewport,viewportProps);fallbackPanelHidden=false;
+  }
+  button.dataset.hidden=fallbackPanelHidden?'true':'false';
+}
+
+function panelClick(event,button){
+  if(button.dataset.v77StableBound==='true')return;
+  event.preventDefault();event.stopPropagation();fallbackPanelToggle(button);
+}
+
+function drawingDoc(){
+  var wheel=findWheel();return wheel?wheel.doc:null;
+}
+function toggleDrawing(event){
+  event.preventDefault();event.stopPropagation();
+  var doc=drawingDoc();if(!doc)return;
+  var trigger=doc.getElementById(DRAWING_TRIGGER);
+  if(trigger){trigger.click();return;}
+  if(doc.documentElement.dataset.v78DrawingLoading==='true')return;
+  doc.documentElement.dataset.v78DrawingLoading='true';
+  try{
+    var url=new URL(doc.defaultView.location.href);
+    url.searchParams.set('gannzillaPro','true');url.searchParams.set('wheelPro','true');url.searchParams.set('showTopCenterDrawingToolbar','true');url.searchParams.set('topDrawingToolbarOpen','false');
+    doc.defaultView.history.replaceState(doc.defaultView.history.state,'',url.pathname+url.search+url.hash);
+  }catch(error){}
+  var script=doc.createElement('script');script.src=DRAWING_SCRIPT;script.async=true;
+  script.onload=function(){
+    var tries=0,poll=setInterval(function(){tries+=1;var loaded=doc.getElementById(DRAWING_TRIGGER);if(loaded){clearInterval(poll);loaded.click();}else if(tries>=100)clearInterval(poll);},50);
+  };
+  doc.head.appendChild(script);
+}
+
+function buildControls(info){
+  var doc=info.doc,bar=info.bar;
+  ensureStyle(doc);
+  if(doc.getElementById('v78PencilBtn'))return true;
+
+  var pencil=makeButton(doc,'v78PencilBtn','Drawing tools',pencilSvg(),toggleDrawing);
+  var eye=makeButton(doc,'v78WheelBtn','Hide wheel',eyeSvg(),toggleWheel);eye.dataset.hidden='false';
+  var panel=makeButton(doc,'v78PanelBtn','Hide chart panel',panelSvg(),panelClick);panel.dataset.hidden='false';
+  /* V77 searches this canonical ID. */
+  panel.id='v76PanelBtn';panel.setAttribute('data-v78-restored','true');
+
+  var zoomGroup=doc.createElement('div');zoomGroup.id='v78ZoomGroup';
+  var out=makeButton(doc,'v78ZoomOut','Zoom out',magnifier(false),function(e){e.preventDefault();e.stopPropagation();applyZoom(currentPercent-STEP);});
+  var select=doc.createElement('select');select.id='v78ZoomSelect';select.title='Wheel zoom';
+  var fit=doc.createElement('option');fit.value='fit';fit.textContent='Fit';select.appendChild(fit);
+  for(var p=MIN;p<=MAX;p+=STEP){var option=doc.createElement('option');option.value=String(p);option.textContent=p+'%';select.appendChild(option);}
+  select.addEventListener('change',function(){if(select.value==='fit')fitZoom();else applyZoom(Number(select.value));});
+  var zoomIn=makeButton(doc,'v78ZoomIn','Zoom in',magnifier(true),function(e){e.preventDefault();e.stopPropagation();applyZoom(currentPercent+STEP);});
+  zoomGroup.append(out,select,zoomIn);
+
+  var connection=doc.getElementById('v62ConnectionBtn');
+  var anchor=connection||bar.firstChild;
+  bar.insertBefore(pencil,anchor);
+  bar.insertBefore(eye,anchor);
+  bar.insertBefore(panel,anchor);
+  bar.insertBefore(zoomGroup,anchor);
+  syncZoom();
+
+  try{doc.defaultView.__auditKawkabatToolbarControlsRestoredV78=function(){return{ok:!!doc.getElementById('v78PencilBtn')&&!!doc.getElementById('v78WheelBtn')&&!!doc.getElementById('v76PanelBtn')&&!!doc.getElementById('v78ZoomGroup'),sourceVersion:'V77',toolbarInstalledWithoutWheelDependency:true,pencilPresent:true,wheelEyePresent:true,panelTogglePresent:true,zoomPresent:true,connectionKept:!!doc.getElementById('v62ConnectionBtn'),fullscreenKept:!!doc.getElementById('v62FullscreenBtn'),languageKept:!!doc.getElementById('v62Language')};};}catch(error){}
+  return true;
+}
+
+function boot(){
+  attempts+=1;
+  var bar=findBar();
+  if(bar&&buildControls(bar)){controlsInstalled=true;return;}
+  if(attempts<600)bootTimer=setTimeout(boot,100);
+}
+
+frame.addEventListener('load',function(){attempts=0;controlsInstalled=false;setTimeout(boot,50);});
+boot();
+}());
+</script>
+</body>
+</html>
