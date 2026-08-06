@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية V92 — حجم أرقام الدورات حسب اللغة</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#f7f1e3}
+    #v92-frame{display:block;width:100%;height:100%;border:0}
+  </style>
+</head>
+<body>
+  <iframe
+    id="v92-frame"
+    title="كوكبة الأرقام السحرية"
+    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/88ea4d9e5bcb60f5b55ecaf10f06efd191556648/public/kawkabat-al-arqam-al-sihria-v87-gold-motifs-inside-black-band.html">
+  </iframe>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var FIRST_RING_ARABIC_FONT_SIZE = '36px';
+    var OUTER_RING_ARABIC_FONT_SIZE = '42px';
+    var frame = document.getElementById('v92-frame');
+    var wheelDocument = null;
+    var wheelObserver = null;
+    var pendingApply = false;
+
+    function getWheelDocument() {
+      try {
+        var doc = frame.contentDocument;
+        if (!doc || !doc.documentElement) return null;
+        if (!doc.querySelector('svg')) return null;
+        if (!doc.documentElement.dataset.v50LiveLanguage) return null;
+        return doc;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function captureOriginalSize(node) {
+      if (node.hasAttribute('data-v92-original-font-size')) return;
+
+      node.setAttribute(
+        'data-v92-original-font-size',
+        node.style.getPropertyValue('font-size') || ''
+      );
+      node.setAttribute(
+        'data-v92-original-font-priority',
+        node.style.getPropertyPriority('font-size') || ''
+      );
+    }
+
+    function restoreOriginalSize(node) {
+      var value = node.getAttribute('data-v92-original-font-size') || '';
+      var priority = node.getAttribute('data-v92-original-font-priority') || '';
+
+      if (value) {
+        node.style.setProperty('font-size', value, priority);
+      } else {
+        node.style.removeProperty('font-size');
+      }
+      node.setAttribute('data-v92-language-size', 'en-original');
+    }
+
+    function applyLanguageSize() {
+      pendingApply = false;
+      if (!wheelDocument || !wheelDocument.documentElement) return;
+
+      var isArabic =
+        wheelDocument.documentElement.dataset.v50LiveLanguage === 'ar';
+      var nodes = wheelDocument.querySelectorAll('.approved-cycle-number');
+
+      nodes.forEach(function (node) {
+        captureOriginalSize(node);
+
+        if (isArabic) {
+          var cycleOffset = Number.parseInt(
+            node.getAttribute('data-cycle-offset') || '0',
+            10
+          );
+          var isFirstRing = cycleOffset === 0;
+          var targetSize = isFirstRing
+            ? FIRST_RING_ARABIC_FONT_SIZE
+            : OUTER_RING_ARABIC_FONT_SIZE;
+
+          node.style.setProperty('font-size', targetSize, 'important');
+          node.setAttribute(
+            'data-v92-language-size',
+            isFirstRing ? 'ar-first-36' : 'ar-outer-42'
+          );
+        } else {
+          restoreOriginalSize(node);
+        }
+      });
+
+      wheelDocument.documentElement.dataset.v92CycleFontMode =
+        isArabic ? 'arabic-first-36px-outer-42px' : 'english-original';
+    }
+
+    function scheduleApply() {
+      if (pendingApply) return;
+      pendingApply = true;
+      requestAnimationFrame(function () {
+        requestAnimationFrame(applyLanguageSize);
+      });
+    }
+
+    function attach(doc) {
+      if (wheelObserver) wheelObserver.disconnect();
+      wheelDocument = doc;
+
+      doc.addEventListener('gannzilla:language-change', scheduleApply);
+
+      var svg = doc.querySelector('svg');
+      wheelObserver = new MutationObserver(scheduleApply);
+      wheelObserver.observe(svg, {
+        childList: true,
+        subtree: true
+      });
+
+      applyLanguageSize();
+    }
+
+    function boot(attempt) {
+      var doc = getWheelDocument();
+      if (doc) {
+        attach(doc);
+        return;
+      }
+      if (attempt < 240) {
+        setTimeout(function () { boot(attempt + 1); }, 50);
+      }
+    }
+
+    frame.addEventListener('load', function () { boot(0); });
+    boot(0);
+
+    window.auditV92CycleFont = function () {
+      var doc = wheelDocument;
+      if (!doc) return { ready: false };
+
+      var language = doc.documentElement.dataset.v50LiveLanguage;
+      var nodes = Array.prototype.slice.call(
+        doc.querySelectorAll('.approved-cycle-number')
+      );
+
+      return {
+        ready: true,
+        version: 'V92',
+        language: language,
+        cycleNumberCount: nodes.length,
+        firstRingArabicFontSizePx: 36,
+        outerRingsArabicFontSizePx: 42,
+        ringSelectionMode: 'data-cycle-offset',
+        englishFontMode: 'original-responsive',
+        activeMode: doc.documentElement.dataset.v92CycleFontMode,
+        appliedCount: nodes.filter(function (node) {
+          if (language !== 'ar') {
+            return node.getAttribute('data-v92-language-size') === 'en-original';
+          }
+          var cycleOffset = Number.parseInt(
+            node.getAttribute('data-cycle-offset') || '0',
+            10
+          );
+          var expectedSize = cycleOffset === 0
+            ? FIRST_RING_ARABIC_FONT_SIZE
+            : OUTER_RING_ARABIC_FONT_SIZE;
+          var expectedMarker = cycleOffset === 0
+            ? 'ar-first-36'
+            : 'ar-outer-42';
+          return node.getAttribute('data-v92-language-size') === expectedMarker &&
+            node.style.getPropertyValue('font-size') === expectedSize;
+        }).length,
+        geometryChanged: false,
+        toolbarChanged: false,
+        panelToggleChanged: false
+      };
+    };
+  }());
+  </script>
+</body>
+</html>
