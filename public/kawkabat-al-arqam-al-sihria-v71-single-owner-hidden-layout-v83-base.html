@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Single Owner Stable Hidden Layout V83 Base</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/fc3f5bc691e0409575c98f5a2fe450224735250f/public/kawkabat-al-arqam-al-sihria-v66-panel-toggle-cached-responsive-v67.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var timer=null;
+var saved=new WeakMap();
+var altered=[];
+var cached=null;
+
+var HORIZONTAL_PROPS=[
+  'position','left','right','inset-inline-start','inset-inline-end',
+  'width','min-width','max-width','margin-left','margin-right',
+  'padding-left','padding-right','transform','translate','box-sizing'
+];
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function findButton(id1,id2){
+  var found=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(found)return;
+      found=doc.getElementById(id1)||(id2?doc.getElementById(id2):null);
+    },0);
+  }catch(error){}
+  return found;
+}
+
+function panelButton(){return findButton('v66PanelBtn','v65PanelToggleBtn');}
+function wheelButton(){return findButton('v66WheelBtn','v65WheelToggleBtn');}
+
+function panelHidden(){
+  var button=panelButton();
+  if(button)return button.dataset.hidden==='true';
+  return false;
+}
+
+function wheelHidden(){
+  var button=wheelButton();
+  return !!(button&&button.dataset.hidden==='true');
+}
+
+function findWheelTarget(doc){
+  var wheel=doc.getElementById('wheel');
+  if(wheel){
+    var tag=String(wheel.tagName||'').toLowerCase();
+    return (tag==='g'||tag==='path')?(wheel.closest('svg')||wheel):wheel;
+  }
+  var best=null,bestArea=0;
+  var canvases=doc.querySelectorAll('canvas');
+  for(var i=0;i<canvases.length;i+=1){
+    var canvas=canvases[i];
+    if(canvas.closest&&canvas.closest('aside'))continue;
+    if(/DrawingOverlay/i.test(canvas.id||''))continue;
+    var rect=canvas.getBoundingClientRect();
+    var area=rect.width*rect.height;
+    if(canvas.width>300&&canvas.height>300&&rect.width>220&&rect.height>220&&area>bestArea){
+      best=canvas;bestArea=area;
+    }
+  }
+  return best;
+}
+
+function findWheelContext(){
+  var result=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(result)return;
+      var target=findWheelTarget(doc);
+      if(!target)return;
+      var root=doc.querySelector('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
+      var viewport=null;
+      if(root&&root.lastElementChild instanceof doc.defaultView.HTMLElement){
+        viewport=root.lastElementChild;
+      }
+      if(!viewport){
+        var node=target;
+        for(var depth=0;node&&depth<18;depth+=1,node=node.parentElement){
+          if(!(node instanceof doc.defaultView.HTMLElement))continue;
+          var style=doc.defaultView.getComputedStyle(node);
+          var overflow=[style.overflow,style.overflowX,style.overflowY].join(' ');
+          if(/auto|scroll/.test(overflow)&&node.contains(target)){
+            viewport=node;
+            break;
+          }
+        }
+      }
+      if(!viewport)return;
+      result={doc:doc,target:target,root:root,viewport:viewport};
+    },0);
+  }catch(error){}
+  return result;
+}
+
+function remember(node){
+  if(!node||saved.has(node))return;
+  var record={};
+  for(var i=0;i<HORIZONTAL_PROPS.length;i++){
+    record[HORIZONTAL_PROPS[i]]=node.style.getPropertyValue(HORIZONTAL_PROPS[i]);
+  }
+  saved.set(node,record);
+}
+
+function mark(node){
+  if(!node)return;
+  remember(node);
+  if(altered.indexOf(node)===-1)altered.push(node);
+}
+
+function restoreNode(node){
+  var record=saved.get(node);
+  if(!record)return;
+  for(var i=0;i<HORIZONTAL_PROPS.length;i++){
+    var name=HORIZONTAL_PROPS[i];
+    var value=record[name];
+    if(value)node.style.setProperty(name,value,'important');
+    else node.style.removeProperty(name);
+  }
+  node.removeAttribute('data-v71-horizontal-full-width');
+}
+
+function restoreAll(){
+  for(var i=altered.length-1;i>=0;i--)restoreNode(altered[i]);
+  altered=[];
+  if(cached){
+    try{
+      cached.doc.defaultView.dispatchEvent(new Event('resize'));
+      cached.doc.defaultView.dispatchEvent(new CustomEvent('gannzilla:page-scrollbar-edge-sync',{detail:{panelVisible:true,source:'v71-restore'}}));
+    }catch(error){}
+  }
+}
+
+function frameChain(doc){
+  var chain=[];
+  var view=doc&&doc.defaultView;
+  for(var depth=0;view&&depth<40;depth+=1){
+    var element=null;
+    try{element=view.frameElement;}catch(error){break;}
+    if(!element)break;
+    chain.push({element:element,parentView:element.ownerDocument.defaultView});
+    try{view=view.parent;}catch(error){break;}
+  }
+  return chain;
+}
+
+function forceHorizontalFullWidth(node){
+  if(!node)return;
+  mark(node);
+  node.style.setProperty('left','0','important');
+  node.style.setProperty('right','0','important');
+  node.style.setProperty('inset-inline-start','0','important');
+  node.style.setProperty('inset-inline-end','0','important');
+  node.style.setProperty('width','auto','important');
+  node.style.setProperty('min-width','0','important');
+  node.style.setProperty('max-width','none','important');
+  node.style.setProperty('margin-left','0','important');
+  node.style.setProperty('margin-right','0','important');
+  node.style.setProperty('padding-left','0','important');
+  node.style.setProperty('padding-right','0','important');
+  node.style.setProperty('transform','none','important');
+  node.style.setProperty('translate','none','important');
+  node.style.setProperty('box-sizing','border-box','important');
+  node.dataset.v71HorizontalFullWidth='true';
+}
+
+function expandFrameHorizontally(item){
+  var element=item.element;
+  var rect=element.getBoundingClientRect();
+  var offset=Math.max(0,Math.round(rect.left));
+  var rightGap=Math.max(0,Math.round(item.parentView.innerWidth-rect.right));
+  if(offset<=2&&rightGap<=2)return;
+  mark(element);
+  /* Keep vertical geometry untouched; move and widen horizontally only. */
+  element.style.setProperty('width','calc(100% + '+offset+'px + '+rightGap+'px)','important');
+  element.style.setProperty('min-width','0','important');
+  element.style.setProperty('max-width','none','important');
+  element.style.setProperty('margin-left','0','important');
+  element.style.setProperty('margin-right','0','important');
+  element.style.setProperty('transform','translateX(-'+offset+'px)','important');
+  element.style.setProperty('translate','none','important');
+  element.style.setProperty('box-sizing','border-box','important');
+  element.dataset.v71HorizontalFullWidth='true';
+}
+
+function keepWheelState(info){
+  if(!info||!info.target)return;
+  var hidden=wheelHidden();
+  var target=info.target;
+  if(hidden){
+    target.style.setProperty('visibility','hidden','important');
+    target.style.setProperty('opacity','0','important');
+    target.style.setProperty('pointer-events','none','important');
+  }else{
+    target.style.setProperty('visibility','visible','important');
+    target.style.setProperty('opacity','1','important');
+    target.style.setProperty('pointer-events','auto','important');
+  }
+}
+
+function applyHiddenLayout(info){
+  if(!info)return false;
+  cached=info;
+  var workFrame=null;
+  try{workFrame=info.doc.defaultView.frameElement;}catch(error){}
+  if(workFrame){
+    mark(workFrame);
+    workFrame.style.setProperty('left','0','important');
+    workFrame.style.setProperty('right','0','important');
+    workFrame.style.setProperty('width','100%','important');
+    workFrame.style.setProperty('min-width','0','important');
+    workFrame.style.setProperty('max-width','none','important');
+    workFrame.style.setProperty('margin-left','0','important');
+    workFrame.style.setProperty('margin-right','0','important');
+    workFrame.style.setProperty('transform','none','important');
+    workFrame.style.setProperty('translate','none','important');
+    workFrame.style.setProperty('box-sizing','border-box','important');
+    workFrame.dataset.v83StableHiddenFullWidth='true';
+  }
+  keepWheelState(info);
+  try{
+    info.doc.defaultView.dispatchEvent(new Event('resize'));
+    info.doc.defaultView.dispatchEvent(new CustomEvent('gannzilla:page-scrollbar-edge-sync',{detail:{panelVisible:false,source:'v83-single-owner'}}));
+  }catch(error){}
+  return true;
+}
+
+function bindPanelButton(){
+  var button=panelButton();
+  if(!button||button.dataset.v71LayoutBound==='true')return;
+  button.dataset.v71LayoutBound='true';
+  button.addEventListener('click',function(){
+    setTimeout(sync,180);
+  },true);
+}
+
+function bindWheelButton(){
+  var button=wheelButton();
+  if(!button||button.dataset.v71WheelBound==='true')return;
+  button.dataset.v71WheelBound='true';
+  button.addEventListener('click',function(){
+    setTimeout(function(){var info=findWheelContext()||cached;if(info)keepWheelState(info);},0);
+    setTimeout(function(){var info=findWheelContext()||cached;if(info)keepWheelState(info);},80);
+  },true);
+}
+
+function audit(info,hidden){
+  if(!info)return;
+  try{
+    info.doc.defaultView.__auditKawkabatPanelOnlyFullWidthWheelIndependentV71=function(){
+      var viewportRect=info.viewport.getBoundingClientRect();
+      var targetStyle=info.doc.defaultView.getComputedStyle(info.target);
+      return{
+        ok:true,
+        sourceVersion:'V67',
+        panelHidden:hidden,
+        wheelHiddenByEyeOnly:wheelHidden(),
+        wheelVisible:targetStyle.visibility!=='hidden'&&targetStyle.opacity!=='0',
+        viewportLeftPx:Math.round(viewportRect.left),
+        viewportRightGapPx:Math.round(info.doc.defaultView.innerWidth-viewportRect.right),
+        horizontalOnlyChanges:true,
+        verticalGeometryChanged:false,
+        panelAndWheelIndependent:true,
+        alteredNodeCount:altered.length,
+        ornateFrameChanged:false
+      };
+    };
+  }catch(error){}
+}
+
+function sync(){
+  bindPanelButton();
+  bindWheelButton();
+  var hidden=panelHidden();
+  var info=findWheelContext()||cached;
+  if(!info)return false;
+  if(hidden)applyHiddenLayout(info);
+  else if(altered.length)restoreAll();
+  keepWheelState(info);
+  audit(info,hidden);
+  return true;
+}
+
+function start(){
+  if(timer)clearTimeout(timer);
+  var attempts=0;
+  function boot(){
+    attempts+=1;
+    if(sync()||attempts>=40){
+      timer=null;
+      return;
+    }
+    timer=setTimeout(boot,100);
+  }
+  boot();
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
