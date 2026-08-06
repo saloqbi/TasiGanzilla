@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية V95 — تفعيل البحث عن الرقم</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#f7f1e3}
+    #v95-frame{display:block;width:100%;height:100%;border:0}
+  </style>
+</head>
+<body>
+  <iframe
+    id="v95-frame"
+    title="كوكبة الأرقام السحرية"
+    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/50975687107dbcc964ec24b7d0a652ec39551aa4/public/kawkabat-al-arqam-al-sihria-v94-center-3600-ten-outer-cycles-to-3960.html">
+  </iframe>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var MAJOR_CYCLE_TICKS = 360;
+    var frame = document.getElementById('v95-frame');
+    var controlDocument = null;
+    var wheelDocument = null;
+    var findInput = null;
+    var valueInput = null;
+    var findAction = null;
+    var lastTarget = null;
+    var lastAnchor = null;
+    var lastFound = false;
+
+    function visitDocuments(doc, callback, depth) {
+      if (!doc || depth > 240) return null;
+
+      var result = callback(doc);
+      if (result) return result;
+
+      var frames = doc.querySelectorAll('iframe');
+      for (var index = 0; index < frames.length; index += 1) {
+        try {
+          var found = visitDocuments(
+            frames[index].contentDocument,
+            callback,
+            depth + 1
+          );
+          if (found) return found;
+        } catch (error) {}
+      }
+      return null;
+    }
+
+    function findDocuments() {
+      try {
+        var root = frame.contentDocument;
+
+        controlDocument = visitDocuments(root, function (doc) {
+          return doc.querySelector('input[aria-label="Find"]') &&
+            doc.querySelector('input[aria-label="Value"]')
+            ? doc
+            : null;
+        }, 0);
+
+        wheelDocument = visitDocuments(root, function (doc) {
+          return doc.getElementById('wheel') &&
+            doc.querySelector('.approved-cycle-number')
+            ? doc
+            : null;
+        }, 0);
+
+        return !!(controlDocument && wheelDocument);
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function normalizeDigits(value) {
+      var map = {
+        '٠':'0','١':'1','٢':'2','٣':'3','٤':'4',
+        '٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
+        '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4',
+        '۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'
+      };
+      return String(value).replace(/[٠-٩۰-۹]/g, function (digit) {
+        return map[digit] || digit;
+      }).replace(/,/g, '').trim();
+    }
+
+    function parseFiniteNumber(value) {
+      var number = Number(normalizeDigits(value));
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function ensureHighlightStyle() {
+      if (wheelDocument.getElementById('v95-find-highlight-style')) return;
+
+      var style = wheelDocument.createElement('style');
+      style.id = 'v95-find-highlight-style';
+      style.textContent =
+        '.approved-cycle-number.v95-found-number{' +
+        'paint-order:stroke fill!important;' +
+        'stroke:#fff4a8!important;' +
+        'stroke-width:8px!important;' +
+        'stroke-linejoin:round!important;' +
+        'filter:drop-shadow(0 0 9px #00cfff) drop-shadow(0 0 3px #ffffff)!important;' +
+        '}';
+      wheelDocument.head.appendChild(style);
+    }
+
+    function clearPreviousResult() {
+      if (!wheelDocument) return;
+      wheelDocument
+        .querySelectorAll('.approved-cycle-number.v95-found-number')
+        .forEach(function (node) {
+          node.classList.remove('v95-found-number');
+          node.removeAttribute('data-v95-found');
+        });
+    }
+
+    function highlightTarget(target, attempt) {
+      if (!findDocuments()) return;
+
+      ensureHighlightStyle();
+      var nodes = wheelDocument.querySelectorAll(
+        '.approved-cycle-number[data-v94-display-value]'
+      );
+      var match = null;
+
+      nodes.forEach(function (node) {
+        if (match) return;
+        var value = Number(node.getAttribute('data-v94-display-value'));
+        if (Number.isFinite(value) && Math.abs(value - target) < 1e-9) {
+          match = node;
+        }
+      });
+
+      if (match) {
+        clearPreviousResult();
+        match.classList.add('v95-found-number');
+        match.setAttribute('data-v95-found', 'true');
+        lastFound = true;
+        wheelDocument.documentElement.dataset.v95FindTarget = String(target);
+        wheelDocument.documentElement.dataset.v95FindStatus = 'found';
+        findInput.setAttribute('aria-invalid', 'false');
+        findInput.title = 'Found: ' + target;
+        return;
+      }
+
+      if (attempt < 120) {
+        setTimeout(function () {
+          highlightTarget(target, attempt + 1);
+        }, 50);
+      } else {
+        lastFound = false;
+        wheelDocument.documentElement.dataset.v95FindStatus = 'not-found';
+        findInput.setAttribute('aria-invalid', 'true');
+        findInput.title = 'Number not found';
+      }
+    }
+
+    function calculateAnchor(target) {
+      var unit = Number(
+        wheelDocument.documentElement.dataset.canonicalUnit || '1'
+      );
+      var increment = Math.abs(Number(
+        wheelDocument.documentElement.dataset.incrementValue || '1'
+      ));
+      if (!Number.isFinite(unit) || unit <= 0) unit = 1;
+      if (!Number.isFinite(increment) || increment === 0) increment = 1;
+
+      var span = MAJOR_CYCLE_TICKS * unit * increment;
+      var epsilon = Math.max(1e-12, span * 1e-12);
+      return Math.floor((target - epsilon) / span) * span;
+    }
+
+    function runFind() {
+      if (!findDocuments()) return false;
+
+      var target = parseFiniteNumber(findInput.value);
+      if (target === null || target <= 0) {
+        findInput.setAttribute('aria-invalid', 'true');
+        findInput.title = 'Enter a positive number';
+        return false;
+      }
+
+      var anchor = calculateAnchor(target);
+      lastTarget = target;
+      lastAnchor = anchor;
+      lastFound = false;
+
+      valueInput.value = String(anchor);
+      valueInput.dispatchEvent(new Event('input', { bubbles: true }));
+      valueInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+      findInput.setAttribute('aria-invalid', 'false');
+      findInput.title = 'Searching for ' + target;
+      setTimeout(function () { highlightTarget(target, 0); }, 80);
+      return true;
+    }
+
+    function attach() {
+      if (!findDocuments()) return false;
+
+      findInput = controlDocument.querySelector('input[aria-label="Find"]');
+      valueInput = controlDocument.querySelector('input[aria-label="Value"]');
+      findAction = findInput.parentElement
+        ? findInput.parentElement.querySelector('.field-action')
+        : null;
+
+      if (!findInput || !valueInput) return false;
+      if (findInput.dataset.v95FindAttached === 'true') return true;
+
+      findInput.dataset.v95FindAttached = 'true';
+      findInput.title = 'Enter a number and press Enter or the search icon';
+
+      findInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          runFind();
+        }
+      });
+
+      if (findAction) {
+        findAction.setAttribute('role', 'button');
+        findAction.setAttribute('tabindex', '0');
+        findAction.setAttribute('aria-label', 'Find number');
+        findAction.title = 'Find number';
+        findAction.style.cursor = 'pointer';
+
+        findAction.addEventListener('click', function (event) {
+          event.preventDefault();
+          runFind();
+        });
+
+        findAction.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            runFind();
+          }
+        });
+      }
+
+      controlDocument.defaultView.__findKawkabatNumberV95 = function (value) {
+        findInput.value = String(value);
+        return runFind();
+      };
+      return true;
+    }
+
+    function boot(attempt) {
+      if (attach()) return;
+      if (attempt < 300) {
+        setTimeout(function () { boot(attempt + 1); }, 100);
+      }
+    }
+
+    frame.addEventListener('load', function () { boot(0); });
+    boot(0);
+
+    window.auditV95Find = function () {
+      return {
+        ready: !!(findInput && valueInput && wheelDocument),
+        version: 'V95',
+        findControlActivated: !!(
+          findInput && findInput.dataset.v95FindAttached === 'true'
+        ),
+        triggerModes: ['Enter', 'search-icon-click', 'search-icon-keyboard'],
+        lastTarget: lastTarget,
+        calculatedAnchor: lastAnchor,
+        lastFound: lastFound,
+        majorCycleTicks: MAJOR_CYCLE_TICKS,
+        example79680Anchor: 79560,
+        example79680RangeStart: 79561,
+        example79680RangeEnd: 79920,
+        sizeChanged: false,
+        geometryChanged: false,
+        toolbarChanged: false,
+        panelToggleChanged: false
+      };
+    };
+  }());
+  </script>
+</body>
+</html>
