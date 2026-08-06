@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية V94 — المركز 3600 وعشر حلقات حتى 3960</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#f7f1e3}
+    #v94-frame{display:block;width:100%;height:100%;border:0}
+  </style>
+</head>
+<body>
+  <iframe
+    id="v94-frame"
+    title="كوكبة الأرقام السحرية"
+    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/88ea4d9e5bcb60f5b55ecaf10f06efd191556648/public/kawkabat-al-arqam-al-sihria-v87-gold-motifs-inside-black-band.html">
+  </iframe>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var DIVISIONS = 36;
+    var RING_3_ARABIC_FONT_SIZE = '36px';
+    var RINGS_4_5_ARABIC_FONT_SIZE = '46px';
+    var RINGS_6_7_ARABIC_FONT_SIZE = '50px';
+    var RINGS_8_PLUS_ARABIC_FONT_SIZE = '54px';
+
+    var frame = document.getElementById('v94-frame');
+    var wheelDocument = null;
+    var wheelObserver = null;
+    var pendingApply = false;
+    var arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+
+    function findWheelDocument(doc, depth) {
+      if (!doc || depth > 220) return null;
+
+      if (
+        doc.getElementById('wheel') &&
+        doc.querySelector('.approved-cycle-number') &&
+        doc.documentElement.dataset.v50LiveLanguage
+      ) {
+        return doc;
+      }
+
+      var frames = doc.querySelectorAll('iframe');
+      for (var index = 0; index < frames.length; index += 1) {
+        try {
+          var found = findWheelDocument(frames[index].contentDocument, depth + 1);
+          if (found) return found;
+        } catch (error) {}
+      }
+      return null;
+    }
+
+    function getWheelDocument() {
+      try {
+        return findWheelDocument(frame.contentDocument, 0);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function decimalPlaces(value) {
+      var text = String(Math.abs(value));
+      if (text.indexOf('e-') !== -1) {
+        return Math.min(8, Number(text.split('e-')[1]) || 0);
+      }
+      var point = text.indexOf('.');
+      return point === -1 ? 0 : Math.min(8, text.length - point - 1);
+    }
+
+    function formatValue(value, step) {
+      var places = decimalPlaces(step);
+      if (!Number.isFinite(value)) return '';
+      return value.toFixed(places);
+    }
+
+    function localizeDigits(value, language) {
+      if (language !== 'ar') return value;
+      return value.replace(/[0-9]/g, function (digit) {
+        return arabicDigits.charAt(Number(digit));
+      });
+    }
+
+    function captureOriginalFont(node) {
+      if (node.hasAttribute('data-v94-original-font-size')) return;
+
+      node.setAttribute(
+        'data-v94-original-font-size',
+        node.style.getPropertyValue('font-size') || ''
+      );
+      node.setAttribute(
+        'data-v94-original-font-priority',
+        node.style.getPropertyPriority('font-size') || ''
+      );
+    }
+
+    function restoreOriginalFont(node) {
+      var value = node.getAttribute('data-v94-original-font-size') || '';
+      var priority = node.getAttribute('data-v94-original-font-priority') || '';
+
+      if (value) {
+        node.style.setProperty('font-size', value, priority);
+      } else {
+        node.style.removeProperty('font-size');
+      }
+      node.setAttribute('data-v94-font-size', 'en-original');
+    }
+
+    function applyArabicFont(node, cycleOffset) {
+      var targetSize;
+      var marker;
+
+      if (cycleOffset === 0) {
+        targetSize = RING_3_ARABIC_FONT_SIZE;
+        marker = 'ar-ring-3-36';
+      } else if (cycleOffset <= 2) {
+        targetSize = RINGS_4_5_ARABIC_FONT_SIZE;
+        marker = 'ar-rings-4-5-46';
+      } else if (cycleOffset <= 4) {
+        targetSize = RINGS_6_7_ARABIC_FONT_SIZE;
+        marker = 'ar-rings-6-7-50';
+      } else {
+        targetSize = RINGS_8_PLUS_ARABIC_FONT_SIZE;
+        marker = 'ar-rings-8-plus-54';
+      }
+
+      node.style.setProperty('font-size', targetSize, 'important');
+      node.setAttribute('data-v94-font-size', marker);
+    }
+
+    function captureSourceTick(node) {
+      if (!node.hasAttribute('data-v94-source-tick')) {
+        node.setAttribute(
+          'data-v94-source-tick',
+          node.getAttribute('data-tick') || ''
+        );
+      }
+      return Number(node.getAttribute('data-v94-source-tick'));
+    }
+
+    function applyCorrection() {
+      pendingApply = false;
+      if (!wheelDocument || !wheelDocument.documentElement) return;
+
+      var root = wheelDocument.documentElement;
+      var language = root.dataset.v50LiveLanguage || 'en';
+      var dataType = root.dataset.dataType || '';
+      var unit = Number(root.dataset.canonicalUnit || '1');
+      var increment = Number(root.dataset.incrementValue || '1');
+      var step = unit * Math.abs(increment);
+      var nodes = wheelDocument.querySelectorAll('.approved-cycle-number');
+
+      nodes.forEach(function (node) {
+        var cycleOffset = Number.parseInt(
+          node.getAttribute('data-cycle-offset') || '0',
+          10
+        );
+
+        captureOriginalFont(node);
+
+        if (dataType === 'price') {
+          var sourceTick = captureSourceTick(node);
+          if (Number.isFinite(sourceTick)) {
+            var correctedTick = sourceTick + DIVISIONS;
+            var correctedValue = correctedTick * unit * increment;
+            var westernValue = formatValue(correctedValue, step);
+
+            node.setAttribute('data-tick', String(correctedTick));
+            node.setAttribute(
+              'data-cycle-number',
+              String(Math.floor((correctedTick - 1) / DIVISIONS) + 1)
+            );
+            node.setAttribute('data-v94-display-value', westernValue);
+            node.textContent = localizeDigits(westernValue, language);
+          }
+        }
+
+        if (language === 'ar') {
+          applyArabicFont(node, cycleOffset);
+        } else {
+          restoreOriginalFont(node);
+        }
+      });
+
+      root.dataset.v94AnchorSemantics = 'center-excluded-from-size';
+      root.dataset.v94OuterCycleShift = String(DIVISIONS);
+      root.dataset.v94CycleFontMode =
+        language === 'ar'
+          ? 'arabic-progressive-36-46-50-54px'
+          : 'english-original';
+    }
+
+    function scheduleApply() {
+      if (pendingApply) return;
+      pendingApply = true;
+      requestAnimationFrame(function () {
+        requestAnimationFrame(applyCorrection);
+      });
+    }
+
+    function attach(doc) {
+      wheelDocument = doc;
+
+      doc.addEventListener('gannzilla:language-change', scheduleApply);
+
+      var svg = doc.getElementById('wheel');
+      wheelObserver = new MutationObserver(scheduleApply);
+      wheelObserver.observe(svg, {
+        childList: true,
+        subtree: true
+      });
+
+      applyCorrection();
+    }
+
+    function boot(attempt) {
+      var doc = getWheelDocument();
+      if (doc) {
+        attach(doc);
+        return;
+      }
+      if (attempt < 300) {
+        setTimeout(function () { boot(attempt + 1); }, 100);
+      }
+    }
+
+    frame.addEventListener('load', function () { boot(0); });
+    boot(0);
+
+    window.auditV94CenterAnchorCycles = function () {
+      if (!wheelDocument) return { ready: false };
+
+      var root = wheelDocument.documentElement;
+      var nodes = Array.prototype.slice.call(
+        wheelDocument.querySelectorAll('.approved-cycle-number')
+      );
+      var values = nodes
+        .map(function (node) {
+          return Number(node.getAttribute('data-v94-display-value'));
+        })
+        .filter(Number.isFinite);
+
+      var anchorValue = Number(root.dataset.inputValue);
+      var configuredSize = Number(root.dataset.layoutSize);
+      var expectedLastValue =
+        anchorValue + (configuredSize * DIVISIONS * Number(root.dataset.incrementValue || '1'));
+
+      return {
+        ready: true,
+        version: 'V94',
+        dataType: root.dataset.dataType,
+        anchorValue: anchorValue,
+        anchorExcludedFromSize: true,
+        configuredOuterCycles: configuredSize,
+        divisionsPerCycle: DIVISIONS,
+        expectedFirstValue: anchorValue + Number(root.dataset.incrementValue || '1'),
+        expectedLastValue: expectedLastValue,
+        actualFirstValue: values.length ? Math.min.apply(Math, values) : null,
+        actualLastValue: values.length ? Math.max.apply(Math, values) : null,
+        correctedNumberCount: values.length,
+        ring3ArabicFontSizePx: 36,
+        rings4To5ArabicFontSizePx: 46,
+        rings6To7ArabicFontSizePx: 50,
+        rings8PlusArabicFontSizePx: 54,
+        englishFontMode: 'original-responsive',
+        recursiveWheelDocumentAccess: true,
+        geometryChanged: false,
+        toolbarChanged: false,
+        panelToggleChanged: false
+      };
+    };
+  }());
+  </script>
+</body>
+</html>
