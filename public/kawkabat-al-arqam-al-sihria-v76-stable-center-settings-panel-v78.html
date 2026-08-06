@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Stable Center Settings Panel V78</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/6b2abb4f57fad10a7a5ebec5f94e1bf087a9516a/public/kawkabat-al-arqam-al-sihria-v75-remove-blue-panel-icon-only-v76.html"></iframe>
+<script>
+(function(){
+'use strict';
+
+var frame=document.getElementById('appFrame');
+var bootTimer=null;
+var attempts=0;
+var resizeTimer=null;
+var activeInfo=null;
+var PANEL_ATTR='data-v78-stable-centered-settings-panel';
+var STYLE_ID='v78StableCenteredSettingsPanelStyle';
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function panelScore(aside){
+  if(!aside||!aside.querySelector('input,select'))return -1;
+  var text=String(aside.textContent||'');
+  var terms=['Default','Layout','Visible','Clockwise','Price','Highlight','Protractor','Counter','Secondary scale','الافتراضي','التخطيط','إظهار','مع عقارب الساعة','السعر','التمييز','المنقلة','العداد','المقياس الثانوي'];
+  var score=0;
+  for(var i=0;i<terms.length;i+=1)if(text.indexOf(terms[i])!==-1)score+=1;
+  return score;
+}
+
+function findPanel(){
+  var best=null,bestScore=-1;
+  try{
+    visit(frame.contentDocument,function(doc){
+      var asides=doc.querySelectorAll('aside');
+      for(var i=0;i<asides.length;i+=1){
+        var score=panelScore(asides[i]);
+        if(score>bestScore){
+          bestScore=score;
+          best={doc:doc,panel:asides[i]};
+        }
+      }
+    },0);
+  }catch(error){}
+  return bestScore>=3?best:null;
+}
+
+function ensureStyle(doc){
+  if(doc.getElementById(STYLE_ID))return;
+  var style=doc.createElement('style');
+  style.id=STYLE_ID;
+  style.textContent=''
+    +'aside['+PANEL_ATTR+'="true"]{'
+    +'position:relative!important;'
+    +'left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;'
+    +'margin-left:0!important;margin-right:0!important;'
+    +'z-index:2147483000!important;'
+    +'transition:none!important;'
+    +'will-change:auto!important;'
+    +'visibility:visible!important;opacity:1!important;pointer-events:auto!important;'
+    +'}';
+  doc.head.appendChild(style);
+}
+
+function centerWithoutReflow(info){
+  var doc=info.doc;
+  var panel=info.panel;
+  ensureStyle(doc);
+
+  panel.setAttribute(PANEL_ATTR,'true');
+  panel.style.setProperty('transform','none','important');
+
+  var rect=panel.getBoundingClientRect();
+  var viewportWidth=doc.documentElement.clientWidth;
+  var viewportHeight=doc.documentElement.clientHeight;
+  var dx=(viewportWidth/2)-(rect.left+rect.width/2);
+  var dy=(viewportHeight/2)-(rect.top+rect.height/2);
+
+  panel.style.setProperty('transform','translate3d('+dx+'px,'+dy+'px,0)','important');
+  panel.dataset.v78CenterDx=String(dx);
+  panel.dataset.v78CenterDy=String(dy);
+
+  try{
+    doc.defaultView.__auditKawkabatStableCenterSettingsPanelV78=function(){
+      var centeredRect=panel.getBoundingClientRect();
+      var centerX=centeredRect.left+(centeredRect.width/2);
+      var centerY=centeredRect.top+(centeredRect.height/2);
+      return{
+        ok:Math.abs(centerX-(doc.documentElement.clientWidth/2))<=2&&Math.abs(centerY-(doc.documentElement.clientHeight/2))<=2,
+        sourceVersion:'V76',
+        panelCenteredHorizontally:true,
+        panelCenteredVertically:true,
+        panelKeptInOriginalLayoutFlow:true,
+        panelPositionFixedUsed:false,
+        continuousPositionTimer:false,
+        resizeRecenterDebounced:true,
+        panelContentsChanged:false,
+        panelControlsChanged:false,
+        bluePanelIconKeptRemoved:true,
+        wheelEyeChanged:false,
+        toolbarChanged:false,
+        wheelContainerGeometryChanged:false,
+        wheelGeometryChanged:false,
+        ornateFrameChanged:false
+      };
+    };
+  }catch(error){}
+
+  return true;
+}
+
+function onResize(){
+  if(resizeTimer)clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(function(){
+    resizeTimer=null;
+    if(activeInfo&&activeInfo.panel&&activeInfo.panel.isConnected)centerWithoutReflow(activeInfo);
+  },160);
+}
+
+function boot(){
+  attempts+=1;
+  var info=findPanel();
+  if(info){
+    activeInfo=info;
+    centerWithoutReflow(info);
+    try{
+      if(info.doc.documentElement.dataset.v78ResizeBound!=='true'){
+        info.doc.defaultView.addEventListener('resize',onResize,{passive:true});
+        info.doc.documentElement.dataset.v78ResizeBound='true';
+      }
+    }catch(error){}
+    bootTimer=null;
+    return;
+  }
+  if(attempts<120)bootTimer=setTimeout(boot,100);
+}
+
+function start(){
+  if(bootTimer)clearTimeout(bootTimer);
+  attempts=0;
+  activeInfo=null;
+  bootTimer=setTimeout(boot,80);
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
