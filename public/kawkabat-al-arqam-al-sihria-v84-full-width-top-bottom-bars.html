@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Full-Width Top and Bottom Bars V84</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/489178c5f2236e5d6b1beda889abc8a24b75fc67/public/kawkabat-al-arqam-al-sihria-v83-stable-bars-no-gap-two-line-zodiac.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var timer=null;
+var observer=null;
+var observedButton=null;
+var saved=new WeakMap();
+var changed=[];
+
+var PROPS=['left','right','width','min-width','max-width','margin-left','margin-right','padding-left','padding-right','transform','translate','box-sizing'];
+
+function visit(doc,callback,depth){
+  if(!doc||depth>220)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function context(){
+  var button=null,wheelDoc=null,dock=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(!button)button=doc.getElementById('v66PanelBtn')||doc.getElementById('v65PanelToggleBtn');
+      if(!dock)dock=doc.getElementById('v62MetalDock');
+      if(!wheelDoc&&doc.getElementById('wheel'))wheelDoc=doc;
+    },0);
+  }catch(error){}
+  if(!button||!wheelDoc)return null;
+  var wheel=wheelDoc.getElementById('wheel');
+  var root=wheelDoc.querySelector('[data-gannzilla-build="248"] > div:not([data-gannzilla-toolbar="true"])');
+  var viewport=null;
+  if(root&&root.lastElementChild instanceof wheelDoc.defaultView.HTMLElement)viewport=root.lastElementChild;
+  if(!viewport){
+    var node=wheel&&wheel.parentElement;
+    for(var depth=0;node&&depth<18;depth+=1,node=node.parentElement){
+      var style=wheelDoc.defaultView.getComputedStyle(node);
+      if(/auto|scroll/.test([style.overflow,style.overflowX,style.overflowY].join(' '))){
+        viewport=node;
+        break;
+      }
+    }
+  }
+  return{button:button,wheelDoc:wheelDoc,root:root,viewport:viewport,dock:dock};
+}
+
+function remember(node){
+  if(!node||saved.has(node))return;
+  var state={};
+  for(var i=0;i<PROPS.length;i+=1){
+    state[PROPS[i]]={value:node.style.getPropertyValue(PROPS[i]),priority:node.style.getPropertyPriority(PROPS[i])};
+  }
+  saved.set(node,state);
+  changed.push(node);
+}
+
+function fullWidth(node){
+  if(!node)return;
+  remember(node);
+  node.style.setProperty('left','0','important');
+  node.style.setProperty('right','0','important');
+  node.style.setProperty('width','100%','important');
+  node.style.setProperty('min-width','0','important');
+  node.style.setProperty('max-width','none','important');
+  node.style.setProperty('margin-left','0','important');
+  node.style.setProperty('margin-right','0','important');
+  node.style.setProperty('padding-left','0','important');
+  node.style.setProperty('padding-right','0','important');
+  node.style.setProperty('transform','none','important');
+  node.style.setProperty('translate','none','important');
+  node.style.setProperty('box-sizing','border-box','important');
+  node.dataset.v84FullWidthBars='true';
+}
+
+function restore(){
+  for(var i=changed.length-1;i>=0;i-=1){
+    var node=changed[i],state=saved.get(node);
+    if(!node||!state)continue;
+    Object.keys(state).forEach(function(name){
+      var item=state[name];
+      if(item.value)node.style.setProperty(name,item.value,item.priority||'');
+      else node.style.removeProperty(name);
+    });
+    node.removeAttribute('data-v84-full-width-bars');
+  }
+  changed=[];
+  saved=new WeakMap();
+}
+
+function apply(){
+  var info=context();
+  if(!info||!info.viewport)return false;
+  var hidden=info.button.dataset.hidden==='true';
+  if(hidden){
+    fullWidth(info.root);
+    fullWidth(info.viewport);
+    if(info.dock){
+      remember(info.dock);
+      info.dock.style.setProperty('left','4px','important');
+      info.dock.style.setProperty('right','auto','important');
+      info.dock.dataset.v84FullWidthBars='true';
+    }
+  }else if(changed.length){
+    restore();
+  }
+  if(observedButton!==info.button){
+    if(observer)observer.disconnect();
+    observer=new info.button.ownerDocument.defaultView.MutationObserver(function(mutations){
+      for(var i=0;i<mutations.length;i+=1){
+        if(mutations[i].attributeName==='data-hidden'){
+          setTimeout(apply,260);
+          break;
+        }
+      }
+    });
+    observer.observe(info.button,{attributes:true,attributeFilter:['data-hidden']});
+    observedButton=info.button;
+  }
+  info.wheelDoc.documentElement.dataset.v84BarsFullWidth=hidden?'true':'false';
+  info.wheelDoc.defaultView.__auditKawkabatFullWidthBarsV84=function(){
+    var rect=info.viewport.getBoundingClientRect();
+    return{
+      ok:!hidden||Math.abs(rect.left)<=2,
+      sourceVersion:'V83',
+      panelHidden:hidden,
+      viewportLeftPx:Math.round(rect.left),
+      viewportRightGapPx:Math.round(info.wheelDoc.defaultView.innerWidth-rect.right),
+      topToolbarAtLeft:!hidden||!info.dock||Math.abs(info.dock.getBoundingClientRect().left)<=6,
+      topAndBottomBarsFullWidth:hidden,
+      wheelGeometryChanged:false,
+      wheelZoomChanged:false,
+      twoLineZodiacPreserved:true
+    };
+  };
+  return true;
+}
+
+function start(){
+  if(timer)clearTimeout(timer);
+  var attempts=0;
+  function boot(){
+    attempts+=1;
+    if(apply()||attempts>=240){
+      timer=null;
+      return;
+    }
+    timer=setTimeout(boot,100);
+  }
+  boot();
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
