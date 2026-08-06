@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Cycle Numbers 28px V88</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/88ea4d9e5bcb60f5b55ecaf10f06efd191556648/public/kawkabat-al-arqam-al-sihria-v87-gold-motifs-inside-black-band.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var timer=null;
+var repairTimer=null;
+var observer=null;
+var observedSvg=null;
+var FONT_SIZE=28;
+
+function visit(doc,callback,depth){
+  if(!doc||depth>240)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function findWheelDocument(){
+  var found=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(!found&&doc.getElementById('wheel')&&doc.querySelector('.approved-cycle-number'))found=doc;
+    },0);
+  }catch(error){}
+  return found;
+}
+
+function applyFont(doc){
+  var numbers=doc.querySelectorAll('.approved-cycle-number');
+  if(!numbers.length)return false;
+  for(var i=0;i<numbers.length;i+=1){
+    numbers[i].style.setProperty('font-size',FONT_SIZE+'px','important');
+    numbers[i].setAttribute('data-v88-cycle-font-size',String(FONT_SIZE));
+  }
+  doc.documentElement.dataset.v88CycleNumbersFontSize=String(FONT_SIZE);
+  doc.defaultView.__auditKawkabatCycleNumbers28V88=function(){
+    var current=doc.querySelectorAll('.approved-cycle-number[data-v88-cycle-font-size="28"]');
+    return{
+      ok:current.length===doc.querySelectorAll('.approved-cycle-number').length&&current.length>0,
+      sourceVersion:'V87',
+      cycleNumberCount:current.length,
+      cycleFontSizePx:FONT_SIZE,
+      cycleNumbersOnly:true,
+      cellGeometryChanged:false,
+      wheelGeometryChanged:false,
+      referenceNumbersChanged:false,
+      zodiacChanged:false,
+      ornateFrameChanged:false,
+      panelLayoutChanged:false,
+      toolbarChanged:false
+    };
+  };
+  return true;
+}
+
+function schedule(doc){
+  if(repairTimer)clearTimeout(repairTimer);
+  repairTimer=setTimeout(function(){
+    repairTimer=null;
+    applyFont(doc);
+  },30);
+}
+
+function install(){
+  var doc=findWheelDocument();
+  if(!doc)return false;
+  var svg=doc.getElementById('wheel');
+  applyFont(doc);
+  if(observedSvg!==svg){
+    if(observer)observer.disconnect();
+    observer=new doc.defaultView.MutationObserver(function(mutations){
+      for(var i=0;i<mutations.length;i+=1){
+        if(mutations[i].addedNodes&&mutations[i].addedNodes.length){
+          schedule(doc);
+          break;
+        }
+      }
+    });
+    observer.observe(svg,{childList:true,subtree:true});
+    observedSvg=svg;
+  }
+  return true;
+}
+
+function start(){
+  if(timer)clearTimeout(timer);
+  var attempts=0;
+  function boot(){
+    attempts+=1;
+    if(install()||attempts>=240){
+      timer=null;
+      return;
+    }
+    timer=setTimeout(boot,100);
+  }
+  boot();
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
