@@ -1,0 +1,964 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية V108 — Levels وCross خفيفة مع Show numbers للدورة 1–360</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#f7f1e3}
+    #v108-frame{display:block;width:100%;height:100%;border:0}
+  </style>
+</head>
+<body>
+  <iframe
+    id="v108-frame"
+    title="كوكبة الأرقام السحرية"
+    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/88ea4d9e5bcb60f5b55ecaf10f06efd191556648/public/kawkabat-al-arqam-al-sihria-v87-gold-motifs-inside-black-band.html">
+  </iframe>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var DIVISIONS = 36;
+    var MAJOR_CYCLE_TICKS = 360;
+    var DEFAULT_OUTER_CYCLES = 10;
+    var RING_0_ARABIC_FONT_SIZE = '36px';
+    var OUTER_RINGS_1_2_ARABIC_FONT_SIZE = '46px';
+    var OUTER_RINGS_3_4_ARABIC_FONT_SIZE = '50px';
+    var OUTER_RINGS_5_PLUS_ARABIC_FONT_SIZE = '54px';
+
+    var frame = document.getElementById('v108-frame');
+    var controlDocument = null;
+    var wheelDocument = null;
+    var wheelObserver = null;
+    var pendingApply = false;
+
+    var findInput = null;
+    var valueInput = null;
+    var incrementInput = null;
+    var actualSizeInput = null;
+    var visibleSizeInput = null;
+    var findAction = null;
+    var highlightVisibleInput = null;
+    var highlightFillSelect = null;
+    var highlightShowNumbersInput = null;
+
+    var defaultsApplied = false;
+    var lastTarget = null;
+    var lastAnchor = null;
+    var lastFound = false;
+    var findInputTimer = null;
+    var arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+
+    function visitDocuments(doc, callback, depth) {
+      if (!doc || depth > 240) return null;
+      var result = callback(doc);
+      if (result) return result;
+
+      var frames = doc.querySelectorAll('iframe');
+      for (var index = 0; index < frames.length; index += 1) {
+        try {
+          var found = visitDocuments(
+            frames[index].contentDocument,
+            callback,
+            depth + 1
+          );
+          if (found) return found;
+        } catch (error) {}
+      }
+      return null;
+    }
+
+    function discoverDocuments() {
+      try {
+        var root = frame.contentDocument;
+
+        controlDocument = visitDocuments(root, function (doc) {
+          return doc.querySelector('input[aria-label="Find"]') &&
+            doc.querySelector('input[aria-label="Value"]') &&
+            doc.querySelector('input[aria-label="Increment"]') &&
+            doc.querySelector('input[aria-label="Size"]')
+            ? doc
+            : null;
+        }, 0);
+
+        wheelDocument = visitDocuments(root, function (doc) {
+          return doc.getElementById('wheel') &&
+            doc.querySelector('.approved-cycle-number') &&
+            doc.documentElement.dataset.v50LiveLanguage
+            ? doc
+            : null;
+        }, 0);
+
+        return !!(controlDocument && wheelDocument);
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function normalizeDigits(value) {
+      var map = {
+        '٠':'0','١':'1','٢':'2','٣':'3','٤':'4',
+        '٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
+        '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4',
+        '۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'
+      };
+      return String(value).replace(/[٠-٩۰-۹]/g, function (digit) {
+        return map[digit] || digit;
+      }).replace(/,/g, '').trim();
+    }
+
+    function parseFiniteNumber(value) {
+      var number = Number(normalizeDigits(value));
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function clampOuterCycles(value) {
+      var number = Math.round(Number(value));
+      if (!Number.isFinite(number)) number = DEFAULT_OUTER_CYCLES;
+      return Math.max(1, Math.min(29, number));
+    }
+
+    function dispatchControl(control) {
+      control.dispatchEvent(new Event('input', { bubbles: true }));
+      control.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function setupOuterCycleProxy() {
+      actualSizeInput =
+        controlDocument.querySelector('input[aria-label="Size"]');
+      if (!actualSizeInput) return false;
+
+      visibleSizeInput =
+        controlDocument.querySelector('input[data-v108-outer-cycle-proxy="true"]');
+
+      if (!visibleSizeInput) {
+        visibleSizeInput = actualSizeInput.cloneNode(true);
+        visibleSizeInput.removeAttribute('aria-label');
+        visibleSizeInput.setAttribute(
+          'aria-label',
+          'Outer cycles after anchor'
+        );
+        visibleSizeInput.setAttribute(
+          'data-v108-outer-cycle-proxy',
+          'true'
+        );
+        visibleSizeInput.min = '1';
+        visibleSizeInput.max = '29';
+        visibleSizeInput.step = '1';
+        visibleSizeInput.value = String(DEFAULT_OUTER_CYCLES);
+        actualSizeInput.parentNode.insertBefore(
+          visibleSizeInput,
+          actualSizeInput
+        );
+        actualSizeInput.hidden = true;
+
+        function syncOuterCycles() {
+          var outerCycles = clampOuterCycles(visibleSizeInput.value);
+          visibleSizeInput.value = String(outerCycles);
+          actualSizeInput.value = String(outerCycles + 1);
+          dispatchControl(actualSizeInput);
+        }
+
+        visibleSizeInput.addEventListener('input', syncOuterCycles);
+        visibleSizeInput.addEventListener('change', syncOuterCycles);
+        visibleSizeInput.addEventListener('keyup', syncOuterCycles);
+      }
+
+      var initialOuterCycles =
+        clampOuterCycles(visibleSizeInput.value || DEFAULT_OUTER_CYCLES);
+      visibleSizeInput.value = String(initialOuterCycles);
+      actualSizeInput.value = String(initialOuterCycles + 1);
+      controlDocument.documentElement.dataset.v108SizeSemantics =
+        'anchor-zero-plus-visible-outer-cycles';
+      return true;
+    }
+
+    function decimalPlaces(value) {
+      var text = String(Math.abs(value));
+      if (text.indexOf('e-') !== -1) {
+        return Math.min(8, Number(text.split('e-')[1]) || 0);
+      }
+      var point = text.indexOf('.');
+      return point === -1 ? 0 : Math.min(8, text.length - point - 1);
+    }
+
+    function formatValue(value, step) {
+      if (!Number.isFinite(value)) return '';
+      return value.toFixed(decimalPlaces(step));
+    }
+
+    function localizeDigits(value, language) {
+      if (language !== 'ar') return value;
+      return value.replace(/[0-9]/g, function (digit) {
+        return arabicDigits.charAt(Number(digit));
+      });
+    }
+
+    function positiveModulo(value, divisor) {
+      return ((value % divisor) + divisor) % divisor;
+    }
+
+    function captureOriginalFont(node) {
+      if (node.hasAttribute('data-v108-original-font-size')) return;
+      node.setAttribute(
+        'data-v108-original-font-size',
+        node.style.getPropertyValue('font-size') || ''
+      );
+      node.setAttribute(
+        'data-v108-original-font-priority',
+        node.style.getPropertyPriority('font-size') || ''
+      );
+    }
+
+    function restoreOriginalFont(node) {
+      var size = node.getAttribute('data-v108-original-font-size') || '';
+      var priority =
+        node.getAttribute('data-v108-original-font-priority') || '';
+      if (size) {
+        node.style.setProperty('font-size', size, priority);
+      } else {
+        node.style.removeProperty('font-size');
+      }
+      node.setAttribute('data-v108-font-size', 'en-original');
+    }
+
+    function applyArabicFont(node, cycleOffset) {
+      var size;
+      var marker;
+      if (cycleOffset === 0) {
+        size = RING_0_ARABIC_FONT_SIZE;
+        marker = 'ar-anchor-ring-0-36';
+      } else if (cycleOffset <= 2) {
+        size = OUTER_RINGS_1_2_ARABIC_FONT_SIZE;
+        marker = 'ar-outer-rings-1-2-46';
+      } else if (cycleOffset <= 4) {
+        size = OUTER_RINGS_3_4_ARABIC_FONT_SIZE;
+        marker = 'ar-outer-rings-3-4-50';
+      } else {
+        size = OUTER_RINGS_5_PLUS_ARABIC_FONT_SIZE;
+        marker = 'ar-outer-rings-5-plus-54';
+      }
+      node.style.setProperty('font-size', size, 'important');
+      node.setAttribute('data-v108-font-size', marker);
+    }
+
+    function captureSourceTick(node) {
+      if (!node.hasAttribute('data-v108-source-tick')) {
+        node.setAttribute(
+          'data-v108-source-tick',
+          node.getAttribute('data-tick') || ''
+        );
+      }
+      return Number(node.getAttribute('data-v108-source-tick'));
+    }
+
+    function renderCycleNumberPair(
+      node,
+      primaryValue,
+      cycleValue,
+      language,
+      enabled,
+      ringCount
+    ) {
+      var localizedCycle = localizeDigits(String(cycleValue), language);
+      var state = enabled
+        ? 'pair|' + primaryValue + '|' + localizedCycle
+        : 'primary|' + primaryValue;
+
+      if (node.getAttribute('data-v108-number-render-state') === state) {
+        return;
+      }
+
+      if (!enabled) {
+        node.textContent = primaryValue;
+        node.setAttribute('data-v108-number-render-state', state);
+        node.removeAttribute('data-v108-cycle-angle-number');
+        return;
+      }
+
+      var x = Number(node.getAttribute('x')) || 0;
+      var y = Number(node.getAttribute('y')) || 0;
+      var dx = x - 2200;
+      var dy = y - 1800;
+      var length = Math.sqrt((dx * dx) + (dy * dy)) || 1;
+      var ringWidth = (1500 - 400) / Math.max(1, ringCount);
+      var outwardOffset = Math.max(
+        20,
+        Math.min(30, ringWidth * 0.28)
+      );
+      var secondaryX = x + ((dx / length) * outwardOffset);
+      var secondaryY = y + ((dy / length) * outwardOffset);
+
+      node.textContent = '';
+
+      var primary = wheelDocument.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'tspan'
+      );
+      primary.setAttribute('x', String(x));
+      primary.setAttribute('y', String(y));
+      primary.setAttribute('data-v108-number-role', 'primary');
+      primary.textContent = primaryValue;
+
+      var secondary = wheelDocument.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'tspan'
+      );
+      secondary.setAttribute('x', secondaryX.toFixed(3));
+      secondary.setAttribute('y', secondaryY.toFixed(3));
+      secondary.setAttribute('data-v108-number-role', 'cycle-angle');
+      secondary.style.setProperty('font-size', '14px', 'important');
+      secondary.style.setProperty('font-weight', '700', 'important');
+      secondary.style.setProperty('fill', '#45545D', 'important');
+      secondary.style.setProperty('opacity', '0.92', 'important');
+      secondary.textContent = localizedCycle;
+
+      node.appendChild(primary);
+      node.appendChild(secondary);
+      node.setAttribute('data-v108-number-render-state', state);
+      node.setAttribute(
+        'data-v108-cycle-angle-number',
+        String(cycleValue)
+      );
+    }
+
+    function calculateAnchorModel(root) {
+      var inputValue = Number(root.dataset.inputValue || '1');
+      var unit = Number(root.dataset.canonicalUnit || '1');
+      var increment = Number(root.dataset.incrementValue || '1');
+      if (!Number.isFinite(inputValue) || inputValue <= 0) inputValue = 1;
+      if (!Number.isFinite(unit) || unit <= 0) unit = 1;
+      if (!Number.isFinite(increment) || increment === 0) increment = 1;
+
+      var step = unit * Math.abs(increment);
+      var anchorEndTick =
+        Math.max(DIVISIONS, Math.ceil(inputValue / step / DIVISIONS) * DIVISIONS);
+      var anchorEndValue = anchorEndTick * step;
+      var anchorBaseValue = anchorEndValue - (DIVISIONS * step);
+
+      return {
+        inputValue: inputValue,
+        step: step,
+        anchorEndTick: anchorEndTick,
+        anchorEndValue: anchorEndValue,
+        anchorBaseValue: anchorBaseValue
+      };
+    }
+
+    function applyWheelModel() {
+      pendingApply = false;
+      if (!wheelDocument || !wheelDocument.documentElement) return;
+
+      var root = wheelDocument.documentElement;
+      var language = root.dataset.v50LiveLanguage || 'en';
+      var dataType = root.dataset.dataType || '';
+      var model = calculateAnchorModel(root);
+      var renderRingCount = Math.max(
+        1,
+        Number(root.dataset.layoutSize || actualSizeInput.value || '11')
+      );
+      var showCycleNumbers = !!(
+        highlightShowNumbersInput &&
+        highlightShowNumbersInput.checked &&
+        dataType === 'price'
+      );
+      var nodes = wheelDocument.querySelectorAll('.approved-cycle-number');
+
+      nodes.forEach(function (node) {
+        var cycleOffset = Number.parseInt(
+          node.getAttribute('data-cycle-offset') || '0',
+          10
+        );
+        var sourceTick = captureSourceTick(node);
+        captureOriginalFont(node);
+
+        if (dataType === 'price' && Number.isFinite(sourceTick)) {
+          var position = positiveModulo(sourceTick - 1, DIVISIONS) + 1;
+          var relativeTick = (cycleOffset * DIVISIONS) + position;
+          var correctedTick =
+            (model.anchorEndTick - DIVISIONS) + relativeTick;
+          var correctedValue =
+            model.anchorBaseValue + (relativeTick * model.step);
+          var westernValue = formatValue(correctedValue, model.step);
+
+          node.setAttribute('data-tick', String(correctedTick));
+          node.setAttribute(
+            'data-cycle-number',
+            String(Math.floor((correctedTick - 1) / DIVISIONS) + 1)
+          );
+          node.setAttribute('data-v108-display-value', westernValue);
+          node.setAttribute(
+            'data-v108-ring-role',
+            cycleOffset === 0 ? 'anchor-0' : 'outer-' + cycleOffset
+          );
+          var localizedValue = localizeDigits(westernValue, language);
+          var cycleAngleNumber =
+            positiveModulo(correctedTick - 1, MAJOR_CYCLE_TICKS) + 1;
+          renderCycleNumberPair(
+            node,
+            localizedValue,
+            cycleAngleNumber,
+            language,
+            showCycleNumbers,
+            renderRingCount
+          );
+        }
+
+        if (language === 'ar') {
+          applyArabicFont(node, cycleOffset);
+        } else {
+          restoreOriginalFont(node);
+        }
+      });
+
+      var outerCycles = visibleSizeInput
+        ? clampOuterCycles(visibleSizeInput.value)
+        : DEFAULT_OUTER_CYCLES;
+
+      root.dataset.v108AnchorRing = '0';
+      root.dataset.v108OuterCycleCount = String(outerCycles);
+      root.dataset.v108AnchorStartValue =
+        String(model.anchorBaseValue + model.step);
+      root.dataset.v108AnchorEndValue = String(model.anchorEndValue);
+      root.dataset.v108OuterStartValue =
+        String(model.anchorEndValue + model.step);
+      root.dataset.v108OuterEndValue =
+        String(model.anchorEndValue + (outerCycles * DIVISIONS * model.step));
+      root.dataset.v108CycleFontMode =
+        language === 'ar'
+          ? 'arabic-anchor-36-outer-46-50-54px'
+          : 'english-original';
+
+      if (lastTarget !== null) {
+        applyFindHighlight(lastTarget);
+      }
+    }
+
+    function scheduleApply() {
+      if (pendingApply) return;
+      pendingApply = true;
+      requestAnimationFrame(function () {
+        requestAnimationFrame(applyWheelModel);
+      });
+    }
+
+    function ensureHighlightStyle() {
+      if (wheelDocument.getElementById('v108-find-highlight-style')) return;
+      var style = wheelDocument.createElement('style');
+      style.id = 'v108-find-highlight-style';
+      style.textContent =
+        '.approved-cycle-number.v108-found-number{' +
+        'fill:#ffffff!important;' +
+        'paint-order:stroke fill!important;' +
+        'stroke:#526c7a!important;' +
+        'stroke-width:1.4px!important;' +
+        'stroke-linejoin:round!important;' +
+        '}';
+      wheelDocument.head.appendChild(style);
+    }
+
+    function polarPoint(radius, degree) {
+      var angle = degree * Math.PI / 180;
+      return {
+        x: 2200 + (Math.cos(angle) * radius),
+        y: 1800 + (Math.sin(angle) * radius)
+      };
+    }
+
+    function annularSectorPath(
+      innerRadius,
+      outerRadius,
+      numberIndex,
+      clockwise
+    ) {
+      var step = 360 / DIVISIONS;
+      var sign = clockwise ? 1 : -1;
+      var centerDegree = (sign * numberIndex * step) - 90;
+      var startDegree = centerDegree - (step / 2);
+      var endDegree = centerDegree + (step / 2);
+
+      var innerStart = polarPoint(innerRadius, startDegree);
+      var outerStart = polarPoint(outerRadius, startDegree);
+      var outerEnd = polarPoint(outerRadius, endDegree);
+      var innerEnd = polarPoint(innerRadius, endDegree);
+
+      return [
+        'M', innerStart.x.toFixed(3), innerStart.y.toFixed(3),
+        'L', outerStart.x.toFixed(3), outerStart.y.toFixed(3),
+        'A', outerRadius.toFixed(3), outerRadius.toFixed(3),
+        '0 0 1', outerEnd.x.toFixed(3), outerEnd.y.toFixed(3),
+        'L', innerEnd.x.toFixed(3), innerEnd.y.toFixed(3),
+        'A', innerRadius.toFixed(3), innerRadius.toFixed(3),
+        '0 0 0', innerStart.x.toFixed(3), innerStart.y.toFixed(3),
+        'Z'
+      ].join(' ');
+    }
+
+    function clearFindHighlight() {
+      if (!wheelDocument) return;
+      var fill = wheelDocument.getElementById('v108FindHighlight');
+      if (fill) fill.remove();
+
+      wheelDocument
+        .querySelectorAll('.approved-cycle-number.v108-found-number')
+        .forEach(function (node) {
+          node.classList.remove('v108-found-number');
+          node.removeAttribute('data-v108-found');
+        });
+
+      lastFound = false;
+      wheelDocument.documentElement.dataset.v108FindStatus = 'clear';
+    }
+
+    function applyFindHighlight(target) {
+      if (!wheelDocument || !findInput) return false;
+      if (!highlightVisibleInput ||
+          !highlightVisibleInput.checked ||
+          !highlightFillSelect ||
+          (highlightFillSelect.value !== 'Cross' &&
+           highlightFillSelect.value !== 'Levels')) {
+        clearFindHighlight();
+        return false;
+      }
+
+      var existingFill = wheelDocument.getElementById('v108FindHighlight');
+      var existingNumber = wheelDocument.querySelector(
+        '.approved-cycle-number.v108-found-number[data-v108-found="' +
+        String(target) + '"]'
+      );
+      if (existingFill &&
+          existingFill.getAttribute('data-v108-target') === String(target) &&
+          existingFill.getAttribute('data-v108-fill-mode') ===
+            highlightFillSelect.value &&
+          existingNumber) {
+        return true;
+      }
+
+      clearFindHighlight();
+      ensureHighlightStyle();
+
+      var match = null;
+      wheelDocument
+        .querySelectorAll('.approved-cycle-number[data-v108-display-value]')
+        .forEach(function (node) {
+          if (match) return;
+          var value = Number(node.getAttribute('data-v108-display-value'));
+          if (Number.isFinite(value) && Math.abs(value - target) < 1e-9) {
+            match = node;
+          }
+        });
+
+      if (!match) {
+        findInput.setAttribute('aria-invalid', 'true');
+        findInput.title = 'Number is outside the displayed wheel';
+        wheelDocument.documentElement.dataset.v108FindStatus = 'not-found';
+        return false;
+      }
+
+      var root = wheelDocument.documentElement;
+      var cycleOffset = Number.parseInt(
+        match.getAttribute('data-cycle-offset') || '0',
+        10
+      );
+      var sourceTick = Number(match.getAttribute('data-v108-source-tick'));
+      var position = positiveModulo(sourceTick - 1, DIVISIONS) + 1;
+      var numberIndex = position === DIVISIONS ? 0 : position;
+      var ringCount = Math.max(
+        1,
+        Number(root.dataset.layoutSize || actualSizeInput.value || '11')
+      );
+      var clockwise = root.dataset.layoutDirection !== 'counterclockwise';
+      var specialFills = wheelDocument.getElementById('specialFills');
+
+      if (!specialFills || root.dataset.viewMode !== 'circle36') {
+        match.classList.add('v108-found-number');
+        match.setAttribute('data-v108-found', String(target));
+        lastFound = true;
+        return true;
+      }
+
+      var fillMode = highlightFillSelect.value;
+      var fill;
+
+      if (fillMode === 'Levels') {
+        var ringWidth = (1500 - 400) / ringCount;
+        fill = wheelDocument.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'g'
+        );
+        fill.setAttribute(
+          'data-v108-highlight-role',
+          'alternating-level-rings'
+        );
+        fill.setAttribute(
+          'data-v108-start-cycle-offset',
+          String(cycleOffset)
+        );
+
+        for (
+          var highlightedRing = cycleOffset;
+          highlightedRing < ringCount;
+          highlightedRing += 2
+        ) {
+          var innerRadius = 400 + (highlightedRing * ringWidth);
+          var outerRadius = innerRadius + ringWidth;
+          var levelCircle = wheelDocument.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'circle'
+          );
+          levelCircle.setAttribute('cx', '2200');
+          levelCircle.setAttribute('cy', '1800');
+          levelCircle.setAttribute(
+            'r',
+            String((innerRadius + outerRadius) / 2)
+          );
+          levelCircle.setAttribute('fill', 'none');
+          levelCircle.setAttribute('stroke', '#8FA8B6');
+          levelCircle.setAttribute('stroke-width', String(ringWidth));
+          levelCircle.setAttribute('stroke-opacity', '0.30');
+          levelCircle.setAttribute(
+            'data-v108-highlighted-ring',
+            String(highlightedRing)
+          );
+          fill.appendChild(levelCircle);
+        }
+      } else {
+        fill = wheelDocument.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'g'
+        );
+        fill.setAttribute(
+          'data-v108-highlight-role',
+          'alternating-radial-rays'
+        );
+        fill.setAttribute(
+          'data-v108-start-ray-index',
+          String(numberIndex)
+        );
+
+        for (
+          var rayStep = 0;
+          rayStep < DIVISIONS;
+          rayStep += 2
+        ) {
+          var highlightedRayIndex = positiveModulo(
+            numberIndex + rayStep,
+            DIVISIONS
+          );
+          var rayPath = wheelDocument.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'path'
+          );
+          rayPath.setAttribute(
+            'd',
+            annularSectorPath(
+              180,
+              1500,
+              highlightedRayIndex,
+              clockwise
+            )
+          );
+          rayPath.setAttribute('fill', '#8FA8B6');
+          rayPath.setAttribute('fill-opacity', '0.30');
+          rayPath.setAttribute('stroke', 'none');
+          rayPath.setAttribute(
+            'data-v108-highlighted-ray',
+            String(highlightedRayIndex)
+          );
+          fill.appendChild(rayPath);
+        }
+      }
+
+      fill.id = 'v108FindHighlight';
+      fill.setAttribute('pointer-events', 'all');
+      fill.setAttribute('cursor', 'pointer');
+      fill.setAttribute('role', 'button');
+      fill.setAttribute('tabindex', '0');
+      fill.setAttribute('aria-label', 'Clear selected highlight');
+      fill.setAttribute('data-v108-target', String(target));
+      fill.setAttribute('data-v108-fill-mode', fillMode);
+      fill.setAttribute('data-v108-frame-color', '#8FA8B6');
+
+      function dismissHighlight(event) {
+        if (event) event.preventDefault();
+        lastTarget = null;
+        clearFindHighlight();
+        findInput.setAttribute('aria-invalid', 'false');
+        findInput.title = 'Selection cleared by clicking the highlight';
+      }
+
+      fill.addEventListener('click', dismissHighlight);
+      fill.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          dismissHighlight(event);
+        }
+      });
+
+      specialFills.appendChild(fill);
+
+      match.classList.add('v108-found-number');
+      match.setAttribute('data-v108-found', String(target));
+      lastFound = true;
+      findInput.setAttribute('aria-invalid', 'false');
+      findInput.title = 'Located: ' + target;
+      root.dataset.v108FindStatus = 'cell-highlighted';
+      root.dataset.v108FindTarget = String(target);
+      return true;
+    }
+
+    function runFind() {
+      if (!discoverDocuments()) return false;
+      var target = parseFiniteNumber(findInput.value);
+      if (target === null || target <= 0) {
+        findInput.setAttribute('aria-invalid', 'true');
+        findInput.title = 'Enter a positive number';
+        return false;
+      }
+
+      lastTarget = target;
+      lastAnchor = null;
+
+      return applyFindHighlight(target);
+    }
+
+    function applyDefaultOnes() {
+      if (defaultsApplied) return;
+      valueInput.value = '1';
+      findInput.value = '1';
+      incrementInput.value = '1';
+      visibleSizeInput.value = String(DEFAULT_OUTER_CYCLES);
+      actualSizeInput.value = String(DEFAULT_OUTER_CYCLES + 1);
+      defaultsApplied = true;
+
+      controlDocument.documentElement.dataset.v108DefaultValues = '1-1-1';
+      dispatchControl(incrementInput);
+      dispatchControl(valueInput);
+      dispatchControl(actualSizeInput);
+    }
+
+    function attachControls() {
+      valueInput = controlDocument.querySelector('input[aria-label="Value"]');
+      findInput = controlDocument.querySelector('input[aria-label="Find"]');
+      incrementInput =
+        controlDocument.querySelector('input[aria-label="Increment"]');
+      highlightVisibleInput =
+        controlDocument.querySelector('input[aria-label="Highlight visible"]');
+      highlightFillSelect =
+        controlDocument.querySelector('select[aria-label="Highlight fill"]');
+      highlightShowNumbersInput =
+        controlDocument.querySelector('input[aria-label="Show numbers"]');
+
+      if (!valueInput ||
+          !findInput ||
+          !incrementInput ||
+          !highlightVisibleInput ||
+          !highlightFillSelect ||
+          !highlightShowNumbersInput) return false;
+      if (!setupOuterCycleProxy()) return false;
+
+      findAction = findInput.parentElement
+        ? findInput.parentElement.querySelector('.field-action')
+        : null;
+
+      if (!Array.prototype.some.call(
+        highlightFillSelect.options,
+        function (option) { return option.value === 'Cross'; }
+      )) {
+        var crossOption = controlDocument.createElement('option');
+        crossOption.value = 'Cross';
+        crossOption.textContent = 'Cross';
+        highlightFillSelect.appendChild(crossOption);
+      }
+
+      highlightVisibleInput.checked = true;
+      highlightFillSelect.value = 'Cross';
+      highlightVisibleInput.dataset.v108HighlightActive = 'true';
+      highlightFillSelect.dataset.v108HighlightFill = 'Cross';
+
+      applyDefaultOnes();
+
+      if (findInput.dataset.v108FindAttached === 'true') return true;
+      findInput.dataset.v108FindAttached = 'true';
+      findInput.title = 'Enter a number and press Enter or the search icon';
+
+      highlightVisibleInput.addEventListener('change', function () {
+        highlightVisibleInput.dataset.v108HighlightActive =
+          highlightVisibleInput.checked ? 'true' : 'false';
+        if (!highlightVisibleInput.checked) {
+          clearFindHighlight();
+          return;
+        }
+        var target = parseFiniteNumber(findInput.value);
+        if (target !== null && target > 0) {
+          lastTarget = target;
+          applyFindHighlight(target);
+        }
+      });
+
+      highlightFillSelect.addEventListener('change', function () {
+        highlightFillSelect.dataset.v108HighlightFill =
+          highlightFillSelect.value;
+        if (highlightFillSelect.value !== 'Cross' &&
+            highlightFillSelect.value !== 'Levels') {
+          clearFindHighlight();
+          return;
+        }
+        var target = parseFiniteNumber(findInput.value);
+        if (highlightVisibleInput.checked &&
+            target !== null &&
+            target > 0) {
+          lastTarget = target;
+          applyFindHighlight(target);
+        }
+      });
+
+      if (
+        highlightShowNumbersInput.dataset.v108CycleNumbersAttached !==
+        'true'
+      ) {
+        highlightShowNumbersInput.dataset.v108CycleNumbersAttached = 'true';
+        highlightShowNumbersInput.addEventListener('change', function () {
+          controlDocument.documentElement.dataset.v108ShowCycleNumbers =
+            highlightShowNumbersInput.checked ? 'true' : 'false';
+          scheduleApply();
+        });
+      }
+
+      findInput.addEventListener('input', function () {
+        if (findInputTimer) clearTimeout(findInputTimer);
+        findInputTimer = setTimeout(function () {
+          findInputTimer = null;
+          runFind();
+        }, 120);
+      });
+
+      findInput.addEventListener('change', function () {
+        if (findInputTimer) {
+          clearTimeout(findInputTimer);
+          findInputTimer = null;
+        }
+        runFind();
+      });
+
+      findInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          if (findInputTimer) {
+            clearTimeout(findInputTimer);
+            findInputTimer = null;
+          }
+          runFind();
+        }
+      });
+
+      if (findAction) {
+        findAction.setAttribute('role', 'button');
+        findAction.setAttribute('tabindex', '0');
+        findAction.setAttribute('aria-label', 'Find number');
+        findAction.title = 'Find number';
+        findAction.style.cursor = 'pointer';
+        findAction.addEventListener('click', function (event) {
+          event.preventDefault();
+          runFind();
+        });
+        findAction.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            runFind();
+          }
+        });
+      }
+      return true;
+    }
+
+    function attachWheel() {
+      if (wheelObserver) wheelObserver.disconnect();
+      wheelDocument.addEventListener('gannzilla:language-change', scheduleApply);
+      wheelObserver = new MutationObserver(scheduleApply);
+      wheelObserver.observe(wheelDocument.getElementById('wheel'), {
+        childList: true,
+        subtree: true
+      });
+      applyWheelModel();
+    }
+
+    function boot(attempt) {
+      if (discoverDocuments()) {
+        attachControls();
+        attachWheel();
+        return;
+      }
+      if (attempt < 300) {
+        setTimeout(function () { boot(attempt + 1); }, 100);
+      }
+    }
+
+    frame.addEventListener('load', function () { boot(0); });
+    boot(0);
+
+    window.auditV108AnchorRing = function () {
+      if (!wheelDocument || !controlDocument) return { ready: false };
+
+      var root = wheelDocument.documentElement;
+      var values = Array.prototype.slice.call(
+        wheelDocument.querySelectorAll(
+          '.approved-cycle-number[data-v108-display-value]'
+        )
+      ).map(function (node) {
+        return Number(node.getAttribute('data-v108-display-value'));
+      }).filter(Number.isFinite);
+
+      return {
+        ready: true,
+        version: 'V108',
+        visibleOuterCycleCount: Number(visibleSizeInput.value),
+        internalRenderedRingCount: Number(actualSizeInput.value),
+        anchorRingNumber: 0,
+        anchorRingCountedInVisibleSize: false,
+        defaultValue: valueInput.value,
+        defaultFind: findInput.value,
+        defaultIncrement: incrementInput.value,
+        actualFirstValue: values.length ? Math.min.apply(Math, values) : null,
+        actualLastValue: values.length ? Math.max.apply(Math, values) : null,
+        value3600Model: {
+          anchorStart: 3565,
+          anchorEnd: 3600,
+          outerStart: 3601,
+          outerEnd: 3960
+        },
+        value1Model: {
+          anchorStart: 1,
+          anchorEnd: 36,
+          outerStart: 37,
+          outerEnd: 396
+        },
+        findActivated: findInput.dataset.v108FindAttached === 'true',
+        highlightVisibleDefault: highlightVisibleInput.checked,
+        highlightFillDefault: highlightFillSelect.value,
+        highlightOptions: ['Levels', 'Cross'],
+        levelsMeaning: 'complete-circular-ring',
+        crossMeaning: 'complete-radial-ray',
+        levelsColor: '#8FA8B6',
+        crossColor: '#8FA8B6',
+        highlightControlsConnected: true,
+        findBehavior: 'auto-highlight-level-or-ray',
+        findTrigger: 'automatic-on-input-change',
+        findChangesValue: false,
+        findCellColor: '#8FA8B6',
+        findOneClearsHighlight: true,
+        highlightedCellClickClears: true,
+        highlightedCellKeyboardClears: true,
+        lastFindTarget: lastTarget,
+        lastFindAnchor: lastAnchor,
+        lastFindFound: lastFound,
+        outerFrameRadiusChanged: false,
+        toolbarChanged: false,
+        panelToggleChanged: false
+      };
+    };
+  }());
+  </script>
+</body>
+</html>
