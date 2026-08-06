@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Stable Layout Rollback V79</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/6b2abb4f57fad10a7a5ebec5f94e1bf087a9516a/public/kawkabat-al-arqam-al-sihria-v75-remove-blue-panel-icon-only-v76.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+frame.addEventListener('load',function(){
+  try{
+    frame.contentWindow.__auditKawkabatStableLayoutRollbackV79=function(){
+      return{
+        ok:true,
+        sourceVersion:'V76',
+        centeredPanelCodeRemoved:true,
+        positionFixedRemoved:true,
+        panelTransformRemoved:true,
+        continuousPositionTimerRemoved:true,
+        resizeRecenterRemoved:true,
+        bluePanelIconKeptRemoved:true,
+        wheelGeometryChanged:false,
+        ornateFrameChanged:false
+      };
+    };
+  }catch(error){}
+});
+}());
+</script>
+</body>
+</html>
