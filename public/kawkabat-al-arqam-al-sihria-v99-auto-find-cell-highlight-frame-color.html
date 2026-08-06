@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية V99 — Find يلوّن الخلية فقط</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#f7f1e3}
+    #v99-frame{display:block;width:100%;height:100%;border:0}
+  </style>
+</head>
+<body>
+  <iframe
+    id="v99-frame"
+    title="كوكبة الأرقام السحرية"
+    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/88ea4d9e5bcb60f5b55ecaf10f06efd191556648/public/kawkabat-al-arqam-al-sihria-v87-gold-motifs-inside-black-band.html">
+  </iframe>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var DIVISIONS = 36;
+    var MAJOR_CYCLE_TICKS = 360;
+    var DEFAULT_OUTER_CYCLES = 10;
+    var RING_0_ARABIC_FONT_SIZE = '36px';
+    var OUTER_RINGS_1_2_ARABIC_FONT_SIZE = '46px';
+    var OUTER_RINGS_3_4_ARABIC_FONT_SIZE = '50px';
+    var OUTER_RINGS_5_PLUS_ARABIC_FONT_SIZE = '54px';
+
+    var frame = document.getElementById('v99-frame');
+    var controlDocument = null;
+    var wheelDocument = null;
+    var wheelObserver = null;
+    var pendingApply = false;
+
+    var findInput = null;
+    var valueInput = null;
+    var incrementInput = null;
+    var actualSizeInput = null;
+    var visibleSizeInput = null;
+    var findAction = null;
+
+    var defaultsApplied = false;
+    var lastTarget = null;
+    var lastAnchor = null;
+    var lastFound = false;
+    var findInputTimer = null;
+    var arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+
+    function visitDocuments(doc, callback, depth) {
+      if (!doc || depth > 240) return null;
+      var result = callback(doc);
+      if (result) return result;
+
+      var frames = doc.querySelectorAll('iframe');
+      for (var index = 0; index < frames.length; index += 1) {
+        try {
+          var found = visitDocuments(
+            frames[index].contentDocument,
+            callback,
+            depth + 1
+          );
+          if (found) return found;
+        } catch (error) {}
+      }
+      return null;
+    }
+
+    function discoverDocuments() {
+      try {
+        var root = frame.contentDocument;
+
+        controlDocument = visitDocuments(root, function (doc) {
+          return doc.querySelector('input[aria-label="Find"]') &&
+            doc.querySelector('input[aria-label="Value"]') &&
+            doc.querySelector('input[aria-label="Increment"]') &&
+            doc.querySelector('input[aria-label="Size"]')
+            ? doc
+            : null;
+        }, 0);
+
+        wheelDocument = visitDocuments(root, function (doc) {
+          return doc.getElementById('wheel') &&
+            doc.querySelector('.approved-cycle-number') &&
+            doc.documentElement.dataset.v50LiveLanguage
+            ? doc
+            : null;
+        }, 0);
+
+        return !!(controlDocument && wheelDocument);
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function normalizeDigits(value) {
+      var map = {
+        '٠':'0','١':'1','٢':'2','٣':'3','٤':'4',
+        '٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
+        '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4',
+        '۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'
+      };
+      return String(value).replace(/[٠-٩۰-۹]/g, function (digit) {
+        return map[digit] || digit;
+      }).replace(/,/g, '').trim();
+    }
+
+    function parseFiniteNumber(value) {
+      var number = Number(normalizeDigits(value));
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function clampOuterCycles(value) {
+      var number = Math.round(Number(value));
+      if (!Number.isFinite(number)) number = DEFAULT_OUTER_CYCLES;
+      return Math.max(1, Math.min(29, number));
+    }
+
+    function dispatchControl(control) {
+      control.dispatchEvent(new Event('input', { bubbles: true }));
+      control.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function setupOuterCycleProxy() {
+      actualSizeInput =
+        controlDocument.querySelector('input[aria-label="Size"]');
+      if (!actualSizeInput) return false;
+
+      visibleSizeInput =
+        controlDocument.querySelector('input[data-v99-outer-cycle-proxy="true"]');
+
+      if (!visibleSizeInput) {
+        visibleSizeInput = actualSizeInput.cloneNode(true);
+        visibleSizeInput.removeAttribute('aria-label');
+        visibleSizeInput.setAttribute(
+          'aria-label',
+          'Outer cycles after anchor'
+        );
+        visibleSizeInput.setAttribute(
+          'data-v99-outer-cycle-proxy',
+          'true'
+        );
+        visibleSizeInput.min = '1';
+        visibleSizeInput.max = '29';
+        visibleSizeInput.step = '1';
+        visibleSizeInput.value = String(DEFAULT_OUTER_CYCLES);
+        actualSizeInput.parentNode.insertBefore(
+          visibleSizeInput,
+          actualSizeInput
+        );
+        actualSizeInput.hidden = true;
+
+        function syncOuterCycles() {
+          var outerCycles = clampOuterCycles(visibleSizeInput.value);
+          visibleSizeInput.value = String(outerCycles);
+          actualSizeInput.value = String(outerCycles + 1);
+          dispatchControl(actualSizeInput);
+        }
+
+        visibleSizeInput.addEventListener('input', syncOuterCycles);
+        visibleSizeInput.addEventListener('change', syncOuterCycles);
+        visibleSizeInput.addEventListener('keyup', syncOuterCycles);
+      }
+
+      var initialOuterCycles =
+        clampOuterCycles(visibleSizeInput.value || DEFAULT_OUTER_CYCLES);
+      visibleSizeInput.value = String(initialOuterCycles);
+      actualSizeInput.value = String(initialOuterCycles + 1);
+      controlDocument.documentElement.dataset.v99SizeSemantics =
+        'anchor-zero-plus-visible-outer-cycles';
+      return true;
+    }
+
+    function decimalPlaces(value) {
+      var text = String(Math.abs(value));
+      if (text.indexOf('e-') !== -1) {
+        return Math.min(8, Number(text.split('e-')[1]) || 0);
+      }
+      var point = text.indexOf('.');
+      return point === -1 ? 0 : Math.min(8, text.length - point - 1);
+    }
+
+    function formatValue(value, step) {
+      if (!Number.isFinite(value)) return '';
+      return value.toFixed(decimalPlaces(step));
+    }
+
+    function localizeDigits(value, language) {
+      if (language !== 'ar') return value;
+      return value.replace(/[0-9]/g, function (digit) {
+        return arabicDigits.charAt(Number(digit));
+      });
+    }
+
+    function positiveModulo(value, divisor) {
+      return ((value % divisor) + divisor) % divisor;
+    }
+
+    function captureOriginalFont(node) {
+      if (node.hasAttribute('data-v99-original-font-size')) return;
+      node.setAttribute(
+        'data-v99-original-font-size',
+        node.style.getPropertyValue('font-size') || ''
+      );
+      node.setAttribute(
+        'data-v99-original-font-priority',
+        node.style.getPropertyPriority('font-size') || ''
+      );
+    }
+
+    function restoreOriginalFont(node) {
+      var size = node.getAttribute('data-v99-original-font-size') || '';
+      var priority =
+        node.getAttribute('data-v99-original-font-priority') || '';
+      if (size) {
+        node.style.setProperty('font-size', size, priority);
+      } else {
+        node.style.removeProperty('font-size');
+      }
+      node.setAttribute('data-v99-font-size', 'en-original');
+    }
+
+    function applyArabicFont(node, cycleOffset) {
+      var size;
+      var marker;
+      if (cycleOffset === 0) {
+        size = RING_0_ARABIC_FONT_SIZE;
+        marker = 'ar-anchor-ring-0-36';
+      } else if (cycleOffset <= 2) {
+        size = OUTER_RINGS_1_2_ARABIC_FONT_SIZE;
+        marker = 'ar-outer-rings-1-2-46';
+      } else if (cycleOffset <= 4) {
+        size = OUTER_RINGS_3_4_ARABIC_FONT_SIZE;
+        marker = 'ar-outer-rings-3-4-50';
+      } else {
+        size = OUTER_RINGS_5_PLUS_ARABIC_FONT_SIZE;
+        marker = 'ar-outer-rings-5-plus-54';
+      }
+      node.style.setProperty('font-size', size, 'important');
+      node.setAttribute('data-v99-font-size', marker);
+    }
+
+    function captureSourceTick(node) {
+      if (!node.hasAttribute('data-v99-source-tick')) {
+        node.setAttribute(
+          'data-v99-source-tick',
+          node.getAttribute('data-tick') || ''
+        );
+      }
+      return Number(node.getAttribute('data-v99-source-tick'));
+    }
+
+    function calculateAnchorModel(root) {
+      var inputValue = Number(root.dataset.inputValue || '1');
+      var unit = Number(root.dataset.canonicalUnit || '1');
+      var increment = Number(root.dataset.incrementValue || '1');
+      if (!Number.isFinite(inputValue) || inputValue <= 0) inputValue = 1;
+      if (!Number.isFinite(unit) || unit <= 0) unit = 1;
+      if (!Number.isFinite(increment) || increment === 0) increment = 1;
+
+      var step = unit * Math.abs(increment);
+      var anchorEndTick =
+        Math.max(DIVISIONS, Math.ceil(inputValue / step / DIVISIONS) * DIVISIONS);
+      var anchorEndValue = anchorEndTick * step;
+      var anchorBaseValue = anchorEndValue - (DIVISIONS * step);
+
+      return {
+        inputValue: inputValue,
+        step: step,
+        anchorEndTick: anchorEndTick,
+        anchorEndValue: anchorEndValue,
+        anchorBaseValue: anchorBaseValue
+      };
+    }
+
+    function applyWheelModel() {
+      pendingApply = false;
+      if (!wheelDocument || !wheelDocument.documentElement) return;
+
+      var root = wheelDocument.documentElement;
+      var language = root.dataset.v50LiveLanguage || 'en';
+      var dataType = root.dataset.dataType || '';
+      var model = calculateAnchorModel(root);
+      var nodes = wheelDocument.querySelectorAll('.approved-cycle-number');
+
+      nodes.forEach(function (node) {
+        var cycleOffset = Number.parseInt(
+          node.getAttribute('data-cycle-offset') || '0',
+          10
+        );
+        var sourceTick = captureSourceTick(node);
+        captureOriginalFont(node);
+
+        if (dataType === 'price' && Number.isFinite(sourceTick)) {
+          var position = positiveModulo(sourceTick - 1, DIVISIONS) + 1;
+          var relativeTick = (cycleOffset * DIVISIONS) + position;
+          var correctedTick =
+            (model.anchorEndTick - DIVISIONS) + relativeTick;
+          var correctedValue =
+            model.anchorBaseValue + (relativeTick * model.step);
+          var westernValue = formatValue(correctedValue, model.step);
+
+          node.setAttribute('data-tick', String(correctedTick));
+          node.setAttribute(
+            'data-cycle-number',
+            String(Math.floor((correctedTick - 1) / DIVISIONS) + 1)
+          );
+          node.setAttribute('data-v99-display-value', westernValue);
+          node.setAttribute(
+            'data-v99-ring-role',
+            cycleOffset === 0 ? 'anchor-0' : 'outer-' + cycleOffset
+          );
+          var localizedValue = localizeDigits(westernValue, language);
+          if (node.textContent !== localizedValue) {
+            node.textContent = localizedValue;
+          }
+        }
+
+        if (language === 'ar') {
+          applyArabicFont(node, cycleOffset);
+        } else {
+          restoreOriginalFont(node);
+        }
+      });
+
+      var outerCycles = visibleSizeInput
+        ? clampOuterCycles(visibleSizeInput.value)
+        : DEFAULT_OUTER_CYCLES;
+
+      root.dataset.v99AnchorRing = '0';
+      root.dataset.v99OuterCycleCount = String(outerCycles);
+      root.dataset.v99AnchorStartValue =
+        String(model.anchorBaseValue + model.step);
+      root.dataset.v99AnchorEndValue = String(model.anchorEndValue);
+      root.dataset.v99OuterStartValue =
+        String(model.anchorEndValue + model.step);
+      root.dataset.v99OuterEndValue =
+        String(model.anchorEndValue + (outerCycles * DIVISIONS * model.step));
+      root.dataset.v99CycleFontMode =
+        language === 'ar'
+          ? 'arabic-anchor-36-outer-46-50-54px'
+          : 'english-original';
+
+      if (lastTarget !== null) {
+        applyFindHighlight(lastTarget);
+      }
+    }
+
+    function scheduleApply() {
+      if (pendingApply) return;
+      pendingApply = true;
+      requestAnimationFrame(function () {
+        requestAnimationFrame(applyWheelModel);
+      });
+    }
+
+    function ensureHighlightStyle() {
+      if (wheelDocument.getElementById('v99-find-highlight-style')) return;
+      var style = wheelDocument.createElement('style');
+      style.id = 'v99-find-highlight-style';
+      style.textContent =
+        '.approved-cycle-number.v99-found-number{' +
+        'fill:#ffffff!important;' +
+        'paint-order:stroke fill!important;' +
+        'stroke:#526c7a!important;' +
+        'stroke-width:1.4px!important;' +
+        'stroke-linejoin:round!important;' +
+        '}';
+      wheelDocument.head.appendChild(style);
+    }
+
+    function polarPoint(radius, degree) {
+      var angle = degree * Math.PI / 180;
+      return {
+        x: 2200 + (Math.cos(angle) * radius),
+        y: 1800 + (Math.sin(angle) * radius)
+      };
+    }
+
+    function cellSectorPath(cycleOffset, numberIndex, ringCount, clockwise) {
+      var innerRadius = 400 + (cycleOffset * ((1500 - 400) / ringCount));
+      var outerRadius =
+        400 + ((cycleOffset + 1) * ((1500 - 400) / ringCount));
+      var step = 360 / DIVISIONS;
+      var sign = clockwise ? 1 : -1;
+      var centerDegree = (sign * numberIndex * step) - 90;
+      var startDegree = centerDegree - (step / 2);
+      var endDegree = centerDegree + (step / 2);
+
+      var innerStart = polarPoint(innerRadius, startDegree);
+      var outerStart = polarPoint(outerRadius, startDegree);
+      var outerEnd = polarPoint(outerRadius, endDegree);
+      var innerEnd = polarPoint(innerRadius, endDegree);
+
+      return [
+        'M', innerStart.x.toFixed(3), innerStart.y.toFixed(3),
+        'L', outerStart.x.toFixed(3), outerStart.y.toFixed(3),
+        'A', outerRadius.toFixed(3), outerRadius.toFixed(3),
+        '0 0 1', outerEnd.x.toFixed(3), outerEnd.y.toFixed(3),
+        'L', innerEnd.x.toFixed(3), innerEnd.y.toFixed(3),
+        'A', innerRadius.toFixed(3), innerRadius.toFixed(3),
+        '0 0 0', innerStart.x.toFixed(3), innerStart.y.toFixed(3),
+        'Z'
+      ].join(' ');
+    }
+
+    function clearFindHighlight() {
+      if (!wheelDocument) return;
+      var fill = wheelDocument.getElementById('v99FindCellFill');
+      if (fill) fill.remove();
+
+      wheelDocument
+        .querySelectorAll('.approved-cycle-number.v99-found-number')
+        .forEach(function (node) {
+          node.classList.remove('v99-found-number');
+          node.removeAttribute('data-v99-found');
+        });
+
+      lastFound = false;
+      wheelDocument.documentElement.dataset.v99FindStatus = 'clear';
+    }
+
+    function applyFindHighlight(target) {
+      if (!wheelDocument || !findInput) return false;
+
+      var existingFill = wheelDocument.getElementById('v99FindCellFill');
+      var existingNumber = wheelDocument.querySelector(
+        '.approved-cycle-number.v99-found-number[data-v99-found="' +
+        String(target) + '"]'
+      );
+      if (existingFill &&
+          existingFill.getAttribute('data-v99-target') === String(target) &&
+          existingNumber) {
+        return true;
+      }
+
+      clearFindHighlight();
+      ensureHighlightStyle();
+
+      var match = null;
+      wheelDocument
+        .querySelectorAll('.approved-cycle-number[data-v99-display-value]')
+        .forEach(function (node) {
+          if (match) return;
+          var value = Number(node.getAttribute('data-v99-display-value'));
+          if (Number.isFinite(value) && Math.abs(value - target) < 1e-9) {
+            match = node;
+          }
+        });
+
+      if (!match) {
+        findInput.setAttribute('aria-invalid', 'true');
+        findInput.title = 'Number is outside the displayed wheel';
+        wheelDocument.documentElement.dataset.v99FindStatus = 'not-found';
+        return false;
+      }
+
+      var root = wheelDocument.documentElement;
+      var cycleOffset = Number.parseInt(
+        match.getAttribute('data-cycle-offset') || '0',
+        10
+      );
+      var sourceTick = Number(match.getAttribute('data-v99-source-tick'));
+      var position = positiveModulo(sourceTick - 1, DIVISIONS) + 1;
+      var numberIndex = position === DIVISIONS ? 0 : position;
+      var ringCount = Math.max(
+        1,
+        Number(root.dataset.layoutSize || actualSizeInput.value || '11')
+      );
+      var clockwise = root.dataset.layoutDirection !== 'counterclockwise';
+      var specialFills = wheelDocument.getElementById('specialFills');
+
+      if (!specialFills || root.dataset.viewMode !== 'circle36') {
+        match.classList.add('v99-found-number');
+        match.setAttribute('data-v99-found', String(target));
+        lastFound = true;
+        return true;
+      }
+
+      var fill = wheelDocument.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'path'
+      );
+      fill.id = 'v99FindCellFill';
+      fill.setAttribute(
+        'd',
+        cellSectorPath(
+          cycleOffset,
+          numberIndex,
+          ringCount,
+          clockwise
+        )
+      );
+      fill.setAttribute('fill', '#8FA8B6');
+      fill.setAttribute('fill-opacity', '0.94');
+      fill.setAttribute('stroke', 'none');
+      fill.setAttribute('pointer-events', 'none');
+      fill.setAttribute('data-v99-target', String(target));
+      fill.setAttribute('data-v99-frame-color', '#8FA8B6');
+      specialFills.appendChild(fill);
+
+      match.classList.add('v99-found-number');
+      match.setAttribute('data-v99-found', String(target));
+      lastFound = true;
+      findInput.setAttribute('aria-invalid', 'false');
+      findInput.title = 'Located: ' + target;
+      root.dataset.v99FindStatus = 'cell-highlighted';
+      root.dataset.v99FindTarget = String(target);
+      return true;
+    }
+
+    function runFind() {
+      if (!discoverDocuments()) return false;
+      var target = parseFiniteNumber(findInput.value);
+      if (target === null || target <= 0) {
+        findInput.setAttribute('aria-invalid', 'true');
+        findInput.title = 'Enter a positive number';
+        return false;
+      }
+
+      lastTarget = target;
+      lastAnchor = null;
+
+      if (Math.abs(target - 1) < 1e-9) {
+        lastTarget = null;
+        clearFindHighlight();
+        findInput.setAttribute('aria-invalid', 'false');
+        findInput.title = 'Selection cleared';
+        return true;
+      }
+
+      return applyFindHighlight(target);
+    }
+
+    function applyDefaultOnes() {
+      if (defaultsApplied) return;
+      valueInput.value = '1';
+      findInput.value = '1';
+      incrementInput.value = '1';
+      visibleSizeInput.value = String(DEFAULT_OUTER_CYCLES);
+      actualSizeInput.value = String(DEFAULT_OUTER_CYCLES + 1);
+      defaultsApplied = true;
+
+      controlDocument.documentElement.dataset.v99DefaultValues = '1-1-1';
+      dispatchControl(incrementInput);
+      dispatchControl(valueInput);
+      dispatchControl(actualSizeInput);
+    }
+
+    function attachControls() {
+      valueInput = controlDocument.querySelector('input[aria-label="Value"]');
+      findInput = controlDocument.querySelector('input[aria-label="Find"]');
+      incrementInput =
+        controlDocument.querySelector('input[aria-label="Increment"]');
+
+      if (!valueInput || !findInput || !incrementInput) return false;
+      if (!setupOuterCycleProxy()) return false;
+
+      findAction = findInput.parentElement
+        ? findInput.parentElement.querySelector('.field-action')
+        : null;
+
+      applyDefaultOnes();
+
+      if (findInput.dataset.v99FindAttached === 'true') return true;
+      findInput.dataset.v99FindAttached = 'true';
+      findInput.title = 'Enter a number and press Enter or the search icon';
+
+      findInput.addEventListener('input', function () {
+        if (findInputTimer) clearTimeout(findInputTimer);
+        findInputTimer = setTimeout(function () {
+          findInputTimer = null;
+          runFind();
+        }, 120);
+      });
+
+      findInput.addEventListener('change', function () {
+        if (findInputTimer) {
+          clearTimeout(findInputTimer);
+          findInputTimer = null;
+        }
+        runFind();
+      });
+
+      findInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          if (findInputTimer) {
+            clearTimeout(findInputTimer);
+            findInputTimer = null;
+          }
+          runFind();
+        }
+      });
+
+      if (findAction) {
+        findAction.setAttribute('role', 'button');
+        findAction.setAttribute('tabindex', '0');
+        findAction.setAttribute('aria-label', 'Find number');
+        findAction.title = 'Find number';
+        findAction.style.cursor = 'pointer';
+        findAction.addEventListener('click', function (event) {
+          event.preventDefault();
+          runFind();
+        });
+        findAction.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            runFind();
+          }
+        });
+      }
+      return true;
+    }
+
+    function attachWheel() {
+      if (wheelObserver) wheelObserver.disconnect();
+      wheelDocument.addEventListener('gannzilla:language-change', scheduleApply);
+      wheelObserver = new MutationObserver(scheduleApply);
+      wheelObserver.observe(wheelDocument.getElementById('wheel'), {
+        childList: true,
+        subtree: true
+      });
+      applyWheelModel();
+    }
+
+    function boot(attempt) {
+      if (discoverDocuments()) {
+        attachControls();
+        attachWheel();
+        return;
+      }
+      if (attempt < 300) {
+        setTimeout(function () { boot(attempt + 1); }, 100);
+      }
+    }
+
+    frame.addEventListener('load', function () { boot(0); });
+    boot(0);
+
+    window.auditV99AnchorRing = function () {
+      if (!wheelDocument || !controlDocument) return { ready: false };
+
+      var root = wheelDocument.documentElement;
+      var values = Array.prototype.slice.call(
+        wheelDocument.querySelectorAll(
+          '.approved-cycle-number[data-v99-display-value]'
+        )
+      ).map(function (node) {
+        return Number(node.getAttribute('data-v99-display-value'));
+      }).filter(Number.isFinite);
+
+      return {
+        ready: true,
+        version: 'V99',
+        visibleOuterCycleCount: Number(visibleSizeInput.value),
+        internalRenderedRingCount: Number(actualSizeInput.value),
+        anchorRingNumber: 0,
+        anchorRingCountedInVisibleSize: false,
+        defaultValue: valueInput.value,
+        defaultFind: findInput.value,
+        defaultIncrement: incrementInput.value,
+        actualFirstValue: values.length ? Math.min.apply(Math, values) : null,
+        actualLastValue: values.length ? Math.max.apply(Math, values) : null,
+        value3600Model: {
+          anchorStart: 3565,
+          anchorEnd: 3600,
+          outerStart: 3601,
+          outerEnd: 3960
+        },
+        value1Model: {
+          anchorStart: 1,
+          anchorEnd: 36,
+          outerStart: 37,
+          outerEnd: 396
+        },
+        findActivated: findInput.dataset.v99FindAttached === 'true',
+        findBehavior: 'auto-highlight-cell-only',
+        findTrigger: 'automatic-on-input-change',
+        findChangesValue: false,
+        findCellColor: '#8FA8B6',
+        findOneClearsHighlight: true,
+        lastFindTarget: lastTarget,
+        lastFindAnchor: lastAnchor,
+        lastFindFound: lastFound,
+        outerFrameRadiusChanged: false,
+        toolbarChanged: false,
+        panelToggleChanged: false
+      };
+    };
+  }());
+  </script>
+</body>
+</html>
