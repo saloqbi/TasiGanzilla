@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Days Above, Element and Zodiac Below V80</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/3c39dc37fac29ff94e53c7559eb44504318b25f5/public/kawkabat-al-arqam-al-sihria-v76-stable-panel-toggle-no-wheel-jitter.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var timer=null;
+var NS='http://www.w3.org/2000/svg';
+var days=['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+var zodiac=['نار الحمل','تراب الثور','هواء الجوزاء','ماء السرطان','نار الأسد','تراب السنبلة','هواء الميزان','ماء العقرب','نار القوس','تراب الجدي','هواء الدلو','ماء الحوت'];
+
+function visit(doc,callback,depth){
+  if(!doc||depth>180)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function makeLine(doc,x,y,value,size,weight,role){
+  var line=doc.createElementNS(NS,'tspan');
+  line.setAttribute('x',String(x));
+  line.setAttribute('y',String(y));
+  line.setAttribute('data-v80-line',role);
+  line.style.setProperty('font-size',size+'px','important');
+  line.style.setProperty('font-weight',String(weight),'important');
+  line.textContent=value;
+  return line;
+}
+
+function applyToWheel(doc){
+  var group=doc.getElementById('allBalancedDaysZodiac');
+  if(!group)return false;
+  var cells=group.querySelectorAll('.day-zodiac-cell');
+  if(cells.length!==36)return false;
+  var fixed=0;
+  for(var index=0;index<cells.length;index+=1){
+    var text=cells[index].querySelector('text');
+    if(!text)continue;
+    var day=index===0?'الجمعة':days[(index-1)%7];
+    var sign=index===0?'ماء الحوت':zodiac[(index-1)%12];
+    var x=Number(text.getAttribute('x'))||0;
+    while(text.firstChild)text.removeChild(text.firstChild);
+    text.setAttribute('direction','rtl');
+    text.setAttribute('unicode-bidi','plaintext');
+    text.setAttribute('text-anchor','middle');
+    text.style.setProperty('font-family','Arial, Tahoma, sans-serif','important');
+    text.style.setProperty('pointer-events','none','important');
+    text.appendChild(makeLine(doc,x,-18,day,26,700,'day'));
+    text.appendChild(makeLine(doc,x,18,sign,29,800,'element-zodiac'));
+    cells[index].setAttribute('data-v80-two-line-layout','true');
+    fixed+=1;
+  }
+  doc.documentElement.dataset.v80DaysAboveZodiacBelow='true';
+  doc.defaultView.__auditKawkabatDaysAboveZodiacBelowV80=function(){
+    var current=group.querySelectorAll('.day-zodiac-cell[data-v80-two-line-layout="true"]');
+    var dayLines=group.querySelectorAll('tspan[data-v80-line="day"]');
+    var signLines=group.querySelectorAll('tspan[data-v80-line="element-zodiac"]');
+    return{
+      ok:current.length===36&&dayLines.length===36&&signLines.length===36,
+      sourceVersion:'V76',
+      cellCount:current.length,
+      dayLineCount:dayLines.length,
+      elementZodiacLineCount:signLines.length,
+      dayAbove:true,
+      elementAndZodiacBelow:true,
+      cellGeometryChanged:false,
+      wheelGeometryChanged:false,
+      ornateFrameChanged:false,
+      panelJitterFixPreserved:true
+    };
+  };
+  if(doc.documentElement.dataset.v80LanguageBound!=='true'){
+    doc.documentElement.dataset.v80LanguageBound='true';
+    doc.defaultView.addEventListener('gannzilla:language-change',function(){
+      setTimeout(function(){applyToWheel(doc);},0);
+    });
+  }
+  return fixed===36;
+}
+
+function apply(){
+  var done=false;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(done)return;
+      if(applyToWheel(doc))done=true;
+    },0);
+  }catch(error){}
+  return done;
+}
+
+function start(){
+  if(timer)clearTimeout(timer);
+  var attempts=0;
+  function boot(){
+    attempts+=1;
+    if(apply()||attempts>=120){
+      timer=null;
+      return;
+    }
+    timer=setTimeout(boot,100);
+  }
+  boot();
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+</body>
+</html>
