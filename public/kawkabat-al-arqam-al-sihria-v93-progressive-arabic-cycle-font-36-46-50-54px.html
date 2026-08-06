@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية V93 — حجم أرقام الدورات حسب اللغة</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#f7f1e3}
+    #v93-frame{display:block;width:100%;height:100%;border:0}
+  </style>
+</head>
+<body>
+  <iframe
+    id="v93-frame"
+    title="كوكبة الأرقام السحرية"
+    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/88ea4d9e5bcb60f5b55ecaf10f06efd191556648/public/kawkabat-al-arqam-al-sihria-v87-gold-motifs-inside-black-band.html">
+  </iframe>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var RING_3_ARABIC_FONT_SIZE = '36px';
+    var RINGS_4_5_ARABIC_FONT_SIZE = '46px';
+    var RINGS_6_7_ARABIC_FONT_SIZE = '50px';
+    var RINGS_8_PLUS_ARABIC_FONT_SIZE = '54px';
+    var frame = document.getElementById('v93-frame');
+    var wheelDocument = null;
+    var wheelObserver = null;
+    var pendingApply = false;
+
+    function getWheelDocument() {
+      try {
+        var doc = frame.contentDocument;
+        if (!doc || !doc.documentElement) return null;
+        if (!doc.querySelector('svg')) return null;
+        if (!doc.documentElement.dataset.v50LiveLanguage) return null;
+        return doc;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function captureOriginalSize(node) {
+      if (node.hasAttribute('data-v93-original-font-size')) return;
+
+      node.setAttribute(
+        'data-v93-original-font-size',
+        node.style.getPropertyValue('font-size') || ''
+      );
+      node.setAttribute(
+        'data-v93-original-font-priority',
+        node.style.getPropertyPriority('font-size') || ''
+      );
+    }
+
+    function restoreOriginalSize(node) {
+      var value = node.getAttribute('data-v93-original-font-size') || '';
+      var priority = node.getAttribute('data-v93-original-font-priority') || '';
+
+      if (value) {
+        node.style.setProperty('font-size', value, priority);
+      } else {
+        node.style.removeProperty('font-size');
+      }
+      node.setAttribute('data-v93-language-size', 'en-original');
+    }
+
+    function applyLanguageSize() {
+      pendingApply = false;
+      if (!wheelDocument || !wheelDocument.documentElement) return;
+
+      var isArabic =
+        wheelDocument.documentElement.dataset.v50LiveLanguage === 'ar';
+      var nodes = wheelDocument.querySelectorAll('.approved-cycle-number');
+
+      nodes.forEach(function (node) {
+        captureOriginalSize(node);
+
+        if (isArabic) {
+          var cycleOffset = Number.parseInt(
+            node.getAttribute('data-cycle-offset') || '0',
+            10
+          );
+          var targetSize;
+          var sizeMarker;
+
+          if (cycleOffset === 0) {
+            targetSize = RING_3_ARABIC_FONT_SIZE;
+            sizeMarker = 'ar-ring-3-36';
+          } else if (cycleOffset <= 2) {
+            targetSize = RINGS_4_5_ARABIC_FONT_SIZE;
+            sizeMarker = 'ar-rings-4-5-46';
+          } else if (cycleOffset <= 4) {
+            targetSize = RINGS_6_7_ARABIC_FONT_SIZE;
+            sizeMarker = 'ar-rings-6-7-50';
+          } else {
+            targetSize = RINGS_8_PLUS_ARABIC_FONT_SIZE;
+            sizeMarker = 'ar-rings-8-plus-54';
+          }
+
+          node.style.setProperty('font-size', targetSize, 'important');
+          node.setAttribute('data-v93-language-size', sizeMarker);
+        } else {
+          restoreOriginalSize(node);
+        }
+      });
+
+      wheelDocument.documentElement.dataset.v93CycleFontMode =
+        isArabic ? 'arabic-progressive-36-46-50-54px' : 'english-original';
+    }
+
+    function scheduleApply() {
+      if (pendingApply) return;
+      pendingApply = true;
+      requestAnimationFrame(function () {
+        requestAnimationFrame(applyLanguageSize);
+      });
+    }
+
+    function attach(doc) {
+      if (wheelObserver) wheelObserver.disconnect();
+      wheelDocument = doc;
+
+      doc.addEventListener('gannzilla:language-change', scheduleApply);
+
+      var svg = doc.querySelector('svg');
+      wheelObserver = new MutationObserver(scheduleApply);
+      wheelObserver.observe(svg, {
+        childList: true,
+        subtree: true
+      });
+
+      applyLanguageSize();
+    }
+
+    function boot(attempt) {
+      var doc = getWheelDocument();
+      if (doc) {
+        attach(doc);
+        return;
+      }
+      if (attempt < 240) {
+        setTimeout(function () { boot(attempt + 1); }, 50);
+      }
+    }
+
+    frame.addEventListener('load', function () { boot(0); });
+    boot(0);
+
+    window.auditV93CycleFont = function () {
+      var doc = wheelDocument;
+      if (!doc) return { ready: false };
+
+      var language = doc.documentElement.dataset.v50LiveLanguage;
+      var nodes = Array.prototype.slice.call(
+        doc.querySelectorAll('.approved-cycle-number')
+      );
+
+      return {
+        ready: true,
+        version: 'V93',
+        language: language,
+        cycleNumberCount: nodes.length,
+        ring3ArabicFontSizePx: 36,
+        rings4To5ArabicFontSizePx: 46,
+        rings6To7ArabicFontSizePx: 50,
+        rings8PlusArabicFontSizePx: 54,
+        ringSelectionMode: 'progressive-data-cycle-offset',
+        englishFontMode: 'original-responsive',
+        activeMode: doc.documentElement.dataset.v93CycleFontMode,
+        appliedCount: nodes.filter(function (node) {
+          if (language !== 'ar') {
+            return node.getAttribute('data-v93-language-size') === 'en-original';
+          }
+          var cycleOffset = Number.parseInt(
+            node.getAttribute('data-cycle-offset') || '0',
+            10
+          );
+          var expectedSize;
+          var expectedMarker;
+          if (cycleOffset === 0) {
+            expectedSize = RING_3_ARABIC_FONT_SIZE;
+            expectedMarker = 'ar-ring-3-36';
+          } else if (cycleOffset <= 2) {
+            expectedSize = RINGS_4_5_ARABIC_FONT_SIZE;
+            expectedMarker = 'ar-rings-4-5-46';
+          } else if (cycleOffset <= 4) {
+            expectedSize = RINGS_6_7_ARABIC_FONT_SIZE;
+            expectedMarker = 'ar-rings-6-7-50';
+          } else {
+            expectedSize = RINGS_8_PLUS_ARABIC_FONT_SIZE;
+            expectedMarker = 'ar-rings-8-plus-54';
+          }
+          return node.getAttribute('data-v93-language-size') === expectedMarker &&
+            node.style.getPropertyValue('font-size') === expectedSize;
+        }).length,
+        geometryChanged: false,
+        toolbarChanged: false,
+        panelToggleChanged: false
+      };
+    };
+  }());
+  </script>
+</body>
+</html>
