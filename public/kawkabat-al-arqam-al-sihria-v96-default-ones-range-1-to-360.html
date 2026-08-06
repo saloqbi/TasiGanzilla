@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية V96 — القيم الافتراضية 1 والنطاق 1 إلى 360</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#f7f1e3}
+    #v96-frame{display:block;width:100%;height:100%;border:0}
+  </style>
+</head>
+<body>
+  <iframe
+    id="v96-frame"
+    title="كوكبة الأرقام السحرية"
+    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/88ea4d9e5bcb60f5b55ecaf10f06efd191556648/public/kawkabat-al-arqam-al-sihria-v87-gold-motifs-inside-black-band.html">
+  </iframe>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var DIVISIONS = 36;
+    var MAJOR_CYCLE_TICKS = 360;
+    var RING_3_ARABIC_FONT_SIZE = '36px';
+    var RINGS_4_5_ARABIC_FONT_SIZE = '46px';
+    var RINGS_6_7_ARABIC_FONT_SIZE = '50px';
+    var RINGS_8_PLUS_ARABIC_FONT_SIZE = '54px';
+
+    var frame = document.getElementById('v96-frame');
+    var controlDocument = null;
+    var wheelDocument = null;
+    var wheelObserver = null;
+    var pendingApply = false;
+    var findInput = null;
+    var valueInput = null;
+    var incrementInput = null;
+    var findAction = null;
+    var defaultsApplied = false;
+    var lastTarget = null;
+    var lastAnchor = null;
+    var lastFound = false;
+    var arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+
+    function visitDocuments(doc, callback, depth) {
+      if (!doc || depth > 240) return null;
+      var result = callback(doc);
+      if (result) return result;
+
+      var frames = doc.querySelectorAll('iframe');
+      for (var index = 0; index < frames.length; index += 1) {
+        try {
+          var found = visitDocuments(
+            frames[index].contentDocument,
+            callback,
+            depth + 1
+          );
+          if (found) return found;
+        } catch (error) {}
+      }
+      return null;
+    }
+
+    function discoverDocuments() {
+      try {
+        var root = frame.contentDocument;
+
+        controlDocument = visitDocuments(root, function (doc) {
+          return doc.querySelector('input[aria-label="Find"]') &&
+            doc.querySelector('input[aria-label="Value"]') &&
+            doc.querySelector('input[aria-label="Increment"]')
+            ? doc
+            : null;
+        }, 0);
+
+        wheelDocument = visitDocuments(root, function (doc) {
+          return doc.getElementById('wheel') &&
+            doc.querySelector('.approved-cycle-number') &&
+            doc.documentElement.dataset.v50LiveLanguage
+            ? doc
+            : null;
+        }, 0);
+
+        return !!(controlDocument && wheelDocument);
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function normalizeDigits(value) {
+      var map = {
+        '٠':'0','١':'1','٢':'2','٣':'3','٤':'4',
+        '٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
+        '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4',
+        '۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'
+      };
+      return String(value).replace(/[٠-٩۰-۹]/g, function (digit) {
+        return map[digit] || digit;
+      }).replace(/,/g, '').trim();
+    }
+
+    function parseFiniteNumber(value) {
+      var number = Number(normalizeDigits(value));
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function decimalPlaces(value) {
+      var text = String(Math.abs(value));
+      if (text.indexOf('e-') !== -1) {
+        return Math.min(8, Number(text.split('e-')[1]) || 0);
+      }
+      var point = text.indexOf('.');
+      return point === -1 ? 0 : Math.min(8, text.length - point - 1);
+    }
+
+    function formatValue(value, step) {
+      if (!Number.isFinite(value)) return '';
+      return value.toFixed(decimalPlaces(step));
+    }
+
+    function localizeDigits(value, language) {
+      if (language !== 'ar') return value;
+      return value.replace(/[0-9]/g, function (digit) {
+        return arabicDigits.charAt(Number(digit));
+      });
+    }
+
+    function positiveModulo(value, divisor) {
+      return ((value % divisor) + divisor) % divisor;
+    }
+
+    function captureOriginalFont(node) {
+      if (node.hasAttribute('data-v96-original-font-size')) return;
+      node.setAttribute(
+        'data-v96-original-font-size',
+        node.style.getPropertyValue('font-size') || ''
+      );
+      node.setAttribute(
+        'data-v96-original-font-priority',
+        node.style.getPropertyPriority('font-size') || ''
+      );
+    }
+
+    function restoreOriginalFont(node) {
+      var size = node.getAttribute('data-v96-original-font-size') || '';
+      var priority =
+        node.getAttribute('data-v96-original-font-priority') || '';
+      if (size) {
+        node.style.setProperty('font-size', size, priority);
+      } else {
+        node.style.removeProperty('font-size');
+      }
+      node.setAttribute('data-v96-font-size', 'en-original');
+    }
+
+    function applyArabicFont(node, cycleOffset) {
+      var size;
+      var marker;
+      if (cycleOffset === 0) {
+        size = RING_3_ARABIC_FONT_SIZE;
+        marker = 'ar-ring-3-36';
+      } else if (cycleOffset <= 2) {
+        size = RINGS_4_5_ARABIC_FONT_SIZE;
+        marker = 'ar-rings-4-5-46';
+      } else if (cycleOffset <= 4) {
+        size = RINGS_6_7_ARABIC_FONT_SIZE;
+        marker = 'ar-rings-6-7-50';
+      } else {
+        size = RINGS_8_PLUS_ARABIC_FONT_SIZE;
+        marker = 'ar-rings-8-plus-54';
+      }
+      node.style.setProperty('font-size', size, 'important');
+      node.setAttribute('data-v96-font-size', marker);
+    }
+
+    function captureSourceTick(node) {
+      if (!node.hasAttribute('data-v96-source-tick')) {
+        node.setAttribute(
+          'data-v96-source-tick',
+          node.getAttribute('data-tick') || ''
+        );
+      }
+      return Number(node.getAttribute('data-v96-source-tick'));
+    }
+
+    function calculateDisplayModel(root) {
+      var inputValue = Number(root.dataset.inputValue || '1');
+      var unit = Number(root.dataset.canonicalUnit || '1');
+      var increment = Number(root.dataset.incrementValue || '1');
+
+      if (!Number.isFinite(inputValue)) inputValue = 1;
+      if (!Number.isFinite(unit) || unit <= 0) unit = 1;
+      if (!Number.isFinite(increment) || increment === 0) increment = 1;
+
+      var step = unit * Math.abs(increment);
+      var majorSpan = MAJOR_CYCLE_TICKS * step;
+      var anchor = Math.floor(inputValue / majorSpan) * majorSpan;
+      var anchorTick = Math.round(anchor / step);
+
+      return {
+        inputValue: inputValue,
+        unit: unit,
+        increment: increment,
+        step: step,
+        majorSpan: majorSpan,
+        anchor: anchor,
+        anchorTick: anchorTick
+      };
+    }
+
+    function applyWheelCorrection() {
+      pendingApply = false;
+      if (!wheelDocument || !wheelDocument.documentElement) return;
+
+      var root = wheelDocument.documentElement;
+      var language = root.dataset.v50LiveLanguage || 'en';
+      var dataType = root.dataset.dataType || '';
+      var model = calculateDisplayModel(root);
+      var nodes = wheelDocument.querySelectorAll('.approved-cycle-number');
+
+      nodes.forEach(function (node) {
+        var cycleOffset = Number.parseInt(
+          node.getAttribute('data-cycle-offset') || '0',
+          10
+        );
+        var sourceTick = captureSourceTick(node);
+        captureOriginalFont(node);
+
+        if (dataType === 'price' && Number.isFinite(sourceTick)) {
+          var position = positiveModulo(sourceTick - 1, DIVISIONS) + 1;
+          var relativeTick = (cycleOffset * DIVISIONS) + position;
+          var correctedTick = model.anchorTick + relativeTick;
+          var correctedValue = model.anchor + (relativeTick * model.step);
+          var westernValue = formatValue(correctedValue, model.step);
+
+          node.setAttribute('data-tick', String(correctedTick));
+          node.setAttribute(
+            'data-cycle-number',
+            String(Math.floor((correctedTick - 1) / DIVISIONS) + 1)
+          );
+          node.setAttribute('data-v96-display-value', westernValue);
+          node.textContent = localizeDigits(westernValue, language);
+        }
+
+        if (language === 'ar') {
+          applyArabicFont(node, cycleOffset);
+        } else {
+          restoreOriginalFont(node);
+        }
+      });
+
+      root.dataset.v96ValueSemantics = 'floor-major-cycle-boundary';
+      root.dataset.v96CalculatedAnchor = String(model.anchor);
+      root.dataset.v96ExpectedFirstValue = String(model.anchor + model.step);
+      root.dataset.v96ExpectedLastValue =
+        String(model.anchor + (MAJOR_CYCLE_TICKS * model.step));
+      root.dataset.v96CycleFontMode =
+        language === 'ar'
+          ? 'arabic-progressive-36-46-50-54px'
+          : 'english-original';
+    }
+
+    function scheduleApply() {
+      if (pendingApply) return;
+      pendingApply = true;
+      requestAnimationFrame(function () {
+        requestAnimationFrame(applyWheelCorrection);
+      });
+    }
+
+    function ensureHighlightStyle() {
+      if (wheelDocument.getElementById('v96-find-highlight-style')) return;
+      var style = wheelDocument.createElement('style');
+      style.id = 'v96-find-highlight-style';
+      style.textContent =
+        '.approved-cycle-number.v96-found-number{' +
+        'paint-order:stroke fill!important;' +
+        'stroke:#fff4a8!important;' +
+        'stroke-width:8px!important;' +
+        'stroke-linejoin:round!important;' +
+        'filter:drop-shadow(0 0 9px #00cfff) drop-shadow(0 0 3px #fff)!important;' +
+        '}';
+      wheelDocument.head.appendChild(style);
+    }
+
+    function clearPreviousResult() {
+      wheelDocument
+        .querySelectorAll('.approved-cycle-number.v96-found-number')
+        .forEach(function (node) {
+          node.classList.remove('v96-found-number');
+          node.removeAttribute('data-v96-found');
+        });
+    }
+
+    function highlightTarget(target, attempt) {
+      if (!discoverDocuments()) return;
+      ensureHighlightStyle();
+
+      var match = null;
+      wheelDocument
+        .querySelectorAll('.approved-cycle-number[data-v96-display-value]')
+        .forEach(function (node) {
+          if (match) return;
+          var value = Number(node.getAttribute('data-v96-display-value'));
+          if (Number.isFinite(value) && Math.abs(value - target) < 1e-9) {
+            match = node;
+          }
+        });
+
+      if (match) {
+        clearPreviousResult();
+        match.classList.add('v96-found-number');
+        match.setAttribute('data-v96-found', 'true');
+        lastFound = true;
+        findInput.setAttribute('aria-invalid', 'false');
+        findInput.title = 'Found: ' + target;
+        wheelDocument.documentElement.dataset.v96FindStatus = 'found';
+        return;
+      }
+
+      if (attempt < 120) {
+        setTimeout(function () { highlightTarget(target, attempt + 1); }, 50);
+      } else {
+        lastFound = false;
+        findInput.setAttribute('aria-invalid', 'true');
+        findInput.title = 'Number not found';
+        wheelDocument.documentElement.dataset.v96FindStatus = 'not-found';
+      }
+    }
+
+    function calculateFindAnchor(target) {
+      var root = wheelDocument.documentElement;
+      var unit = Number(root.dataset.canonicalUnit || '1');
+      var increment = Math.abs(Number(root.dataset.incrementValue || '1'));
+      if (!Number.isFinite(unit) || unit <= 0) unit = 1;
+      if (!Number.isFinite(increment) || increment === 0) increment = 1;
+
+      var span = MAJOR_CYCLE_TICKS * unit * increment;
+      var epsilon = Math.max(1e-12, span * 1e-12);
+      return Math.floor((target - epsilon) / span) * span;
+    }
+
+    function runFind() {
+      if (!discoverDocuments()) return false;
+
+      var target = parseFiniteNumber(findInput.value);
+      if (target === null || target <= 0) {
+        findInput.setAttribute('aria-invalid', 'true');
+        findInput.title = 'Enter a positive number';
+        return false;
+      }
+
+      var anchor = calculateFindAnchor(target);
+      lastTarget = target;
+      lastAnchor = anchor;
+      lastFound = false;
+
+      valueInput.value = String(anchor);
+      valueInput.dispatchEvent(new Event('input', { bubbles: true }));
+      valueInput.dispatchEvent(new Event('change', { bubbles: true }));
+      setTimeout(function () { highlightTarget(target, 0); }, 80);
+      return true;
+    }
+
+    function dispatchControl(control) {
+      control.dispatchEvent(new Event('input', { bubbles: true }));
+      control.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function applyDefaultOnes() {
+      if (defaultsApplied) return;
+      valueInput.value = '1';
+      findInput.value = '1';
+      incrementInput.value = '1';
+      defaultsApplied = true;
+
+      controlDocument.documentElement.dataset.v96DefaultValues = '1-1-1';
+      dispatchControl(incrementInput);
+      dispatchControl(valueInput);
+    }
+
+    function attachControls() {
+      findInput = controlDocument.querySelector('input[aria-label="Find"]');
+      valueInput = controlDocument.querySelector('input[aria-label="Value"]');
+      incrementInput =
+        controlDocument.querySelector('input[aria-label="Increment"]');
+      findAction = findInput && findInput.parentElement
+        ? findInput.parentElement.querySelector('.field-action')
+        : null;
+
+      if (!findInput || !valueInput || !incrementInput) return false;
+      applyDefaultOnes();
+
+      if (findInput.dataset.v96FindAttached === 'true') return true;
+      findInput.dataset.v96FindAttached = 'true';
+      findInput.title = 'Enter a number and press Enter or the search icon';
+
+      findInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          runFind();
+        }
+      });
+
+      if (findAction) {
+        findAction.setAttribute('role', 'button');
+        findAction.setAttribute('tabindex', '0');
+        findAction.setAttribute('aria-label', 'Find number');
+        findAction.title = 'Find number';
+        findAction.style.cursor = 'pointer';
+        findAction.addEventListener('click', function (event) {
+          event.preventDefault();
+          runFind();
+        });
+        findAction.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            runFind();
+          }
+        });
+      }
+      return true;
+    }
+
+    function attachWheel() {
+      if (wheelObserver) wheelObserver.disconnect();
+      wheelDocument.addEventListener('gannzilla:language-change', scheduleApply);
+      wheelObserver = new MutationObserver(scheduleApply);
+      wheelObserver.observe(wheelDocument.getElementById('wheel'), {
+        childList: true,
+        subtree: true
+      });
+      applyWheelCorrection();
+    }
+
+    function boot(attempt) {
+      if (discoverDocuments()) {
+        attachControls();
+        attachWheel();
+        return;
+      }
+      if (attempt < 300) {
+        setTimeout(function () { boot(attempt + 1); }, 100);
+      }
+    }
+
+    frame.addEventListener('load', function () { boot(0); });
+    boot(0);
+
+    window.auditV96DefaultsAndRange = function () {
+      if (!wheelDocument || !controlDocument) return { ready: false };
+
+      var root = wheelDocument.documentElement;
+      var values = Array.prototype.slice.call(
+        wheelDocument.querySelectorAll(
+          '.approved-cycle-number[data-v96-display-value]'
+        )
+      ).map(function (node) {
+        return Number(node.getAttribute('data-v96-display-value'));
+      }).filter(Number.isFinite);
+
+      return {
+        ready: true,
+        version: 'V96',
+        defaultValue: valueInput.value,
+        defaultFind: findInput.value,
+        defaultIncrement: incrementInput.value,
+        configuredSize: Number(root.dataset.layoutSize),
+        calculatedAnchor: Number(root.dataset.v96CalculatedAnchor),
+        actualFirstValue: values.length ? Math.min.apply(Math, values) : null,
+        actualLastValue: values.length ? Math.max.apply(Math, values) : null,
+        expectedForDefaults: { first: 1, last: 360 },
+        value3600Expected: { first: 3601, last: 3960 },
+        findActivated: findInput.dataset.v96FindAttached === 'true',
+        lastFindTarget: lastTarget,
+        lastFindAnchor: lastAnchor,
+        lastFindFound: lastFound,
+        geometryChanged: false,
+        toolbarChanged: false,
+        panelToggleChanged: false
+      };
+    };
+  }());
+  </script>
+</body>
+</html>
