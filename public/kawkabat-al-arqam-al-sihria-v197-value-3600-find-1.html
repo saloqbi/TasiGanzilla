@@ -1,0 +1,2149 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>كوكبة الأرقام السحرية V131 — تصحيح تسلسل 1–36 هندسيًا حسب زاوية الخلية</title>
+  <style>
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#f7f1e3}
+    #v131-frame{display:block;width:100%;height:100%;border:0}
+  </style>
+</head>
+<body>
+  <iframe
+    id="v131-frame"
+    title="كوكبة الأرقام السحرية"
+    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/f77b2e2dbdf01a5af96eed4b632e427fb25d086f/public/kawkabat-v197-layer-01.html">
+  </iframe>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var DIVISIONS = 36;
+    var MAJOR_CYCLE_TICKS = 360;
+    var DEFAULT_OUTER_CYCLES = 10;
+    var RING_0_ARABIC_FONT_SIZE = '36px';
+    var OUTER_RINGS_1_2_ARABIC_FONT_SIZE = '46px';
+    var OUTER_RINGS_3_4_ARABIC_FONT_SIZE = '50px';
+    var OUTER_RINGS_5_PLUS_ARABIC_FONT_SIZE = '54px';
+
+    var frame = document.getElementById('v131-frame');
+    var controlDocument = null;
+    var wheelDocument = null;
+    var wheelObserver = null;
+    var pendingApply = false;
+
+    var findInput = null;
+    var valueInput = null;
+    var incrementInput = null;
+    var actualSizeInput = null;
+    var visibleSizeInput = null;
+    var findAction = null;
+    var highlightVisibleInput = null;
+    var highlightFillSelect = null;
+    var highlightShowNumbersInput = null;
+    var highlightShowMarksInput = null;
+
+    var defaultsApplied = false;
+    var lastTarget = null;
+    var lastAnchor = null;
+    var lastFound = false;
+    var findInputTimer = null;
+    var arabicDigits = '٠١٢٣٤٥٦٧٨٩';
+
+    function visitDocuments(doc, callback, depth) {
+      if (!doc || depth > 240) return null;
+      var result = callback(doc);
+      if (result) return result;
+
+      var frames = doc.querySelectorAll('iframe');
+      for (var index = 0; index < frames.length; index += 1) {
+        try {
+          var found = visitDocuments(
+            frames[index].contentDocument,
+            callback,
+            depth + 1
+          );
+          if (found) return found;
+        } catch (error) {}
+      }
+      return null;
+    }
+
+    function discoverDocuments() {
+      try {
+        var root = frame.contentDocument;
+
+        controlDocument = visitDocuments(root, function (doc) {
+          return doc.querySelector('input[aria-label="Find"]') &&
+            doc.querySelector('input[aria-label="Value"]') &&
+            doc.querySelector('input[aria-label="Increment"]') &&
+            doc.querySelector('input[aria-label="Size"]')
+            ? doc
+            : null;
+        }, 0);
+
+        wheelDocument = visitDocuments(root, function (doc) {
+          return doc.getElementById('wheel') &&
+            doc.querySelector('.approved-cycle-number') &&
+            doc.documentElement.dataset.v50LiveLanguage
+            ? doc
+            : null;
+        }, 0);
+
+        return !!(controlDocument && wheelDocument);
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function normalizeDigits(value) {
+      var map = {
+        '٠':'0','١':'1','٢':'2','٣':'3','٤':'4',
+        '٥':'5','٦':'6','٧':'7','٨':'8','٩':'9',
+        '۰':'0','۱':'1','۲':'2','۳':'3','۴':'4',
+        '۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'
+      };
+      return String(value).replace(/[٠-٩۰-۹]/g, function (digit) {
+        return map[digit] || digit;
+      }).replace(/,/g, '').trim();
+    }
+
+    function parseFiniteNumber(value) {
+      var number = Number(normalizeDigits(value));
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function clampOuterCycles(value) {
+      var number = Math.round(Number(value));
+      if (!Number.isFinite(number)) number = DEFAULT_OUTER_CYCLES;
+      return Math.max(1, Math.min(29, number));
+    }
+
+    function dispatchControl(control) {
+      control.dispatchEvent(new Event('input', { bubbles: true }));
+      control.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    function setupOuterCycleProxy() {
+      actualSizeInput =
+        controlDocument.querySelector('input[aria-label="Size"]');
+      if (!actualSizeInput) return false;
+
+      function normalizeWesternCycleDigits(value) {
+        return String(value == null ? '' : value)
+          .replace(/[٠-٩]/g, function (digit) {
+            return String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit));
+          })
+          .replace(/[۰-۹]/g, function (digit) {
+            return String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit));
+          });
+      }
+
+      visibleSizeInput =
+        controlDocument.querySelector('input[data-v131-outer-cycle-proxy="true"]');
+
+      if (!visibleSizeInput) {
+        visibleSizeInput = actualSizeInput.cloneNode(true);
+        visibleSizeInput.removeAttribute('aria-label');
+        visibleSizeInput.setAttribute(
+          'aria-label',
+          'Outer cycles after anchor'
+        );
+        visibleSizeInput.setAttribute(
+          'data-v131-outer-cycle-proxy',
+          'true'
+        );
+        visibleSizeInput.min = '1';
+        visibleSizeInput.max = '29';
+        visibleSizeInput.step = '1';
+        visibleSizeInput.value = String(DEFAULT_OUTER_CYCLES);
+        actualSizeInput.parentNode.insertBefore(
+          visibleSizeInput,
+          actualSizeInput
+        );
+        actualSizeInput.hidden = true;
+
+        function syncOuterCycles() {
+          var outerCycles = clampOuterCycles(normalizeWesternCycleDigits(visibleSizeInput.value));
+          visibleSizeInput.value = String(outerCycles);
+          actualSizeInput.value = String(outerCycles);
+          dispatchControl(actualSizeInput);
+        }
+
+        visibleSizeInput.addEventListener('input', syncOuterCycles);
+        visibleSizeInput.addEventListener('change', syncOuterCycles);
+        visibleSizeInput.addEventListener('keyup', syncOuterCycles);
+      }
+
+      [actualSizeInput, visibleSizeInput].forEach(function (input) {
+        input.setAttribute('lang', 'en-US');
+        input.setAttribute('dir', 'ltr');
+        input.setAttribute('inputmode', 'numeric');
+        input.style.setProperty('font-family', 'Arial, sans-serif', 'important');
+        input.style.setProperty('font-variant-numeric', 'lining-nums tabular-nums', 'important');
+        input.style.setProperty('unicode-bidi', 'isolate', 'important');
+        input.value = normalizeWesternCycleDigits(input.value);
+      });
+
+      var initialOuterCycles =
+        clampOuterCycles(normalizeWesternCycleDigits(visibleSizeInput.value) || DEFAULT_OUTER_CYCLES);
+      visibleSizeInput.value = String(initialOuterCycles);
+      actualSizeInput.value = String(initialOuterCycles);
+      controlDocument.documentElement.dataset.v131SizeSemantics =
+        'center-zero-excluded-plus-ten-visible-cycles';
+      return true;
+    }
+
+    
+
+    
+
+    function localizeDigits(value, language) {
+      if (language !== 'ar') return value;
+      return value.replace(/[0-9]/g, function (digit) {
+        return arabicDigits.charAt(Number(digit));
+      });
+    }
+
+    function positiveModulo(value, divisor) {
+      return ((value % divisor) + divisor) % divisor;
+    }
+
+    function captureOriginalFont(node) {
+      if (node.hasAttribute('data-v131-original-font-size')) return;
+      node.setAttribute(
+        'data-v131-original-font-size',
+        node.style.getPropertyValue('font-size') || ''
+      );
+      node.setAttribute(
+        'data-v131-original-font-priority',
+        node.style.getPropertyPriority('font-size') || ''
+      );
+    }
+
+    function restoreOriginalFont(node) {
+      var size = node.getAttribute('data-v131-original-font-size') || '';
+      var priority =
+        node.getAttribute('data-v131-original-font-priority') || '';
+      if (size) {
+        node.style.setProperty('font-size', size, priority);
+      } else {
+        node.style.removeProperty('font-size');
+      }
+      node.setAttribute('data-v131-font-size', 'en-original');
+    }
+
+    function applyArabicFont(node, cycleOffset) {
+      var size;
+      var marker;
+      if (cycleOffset === 0) {
+        size = RING_0_ARABIC_FONT_SIZE;
+        marker = 'ar-anchor-ring-0-36';
+      } else if (cycleOffset <= 2) {
+        size = OUTER_RINGS_1_2_ARABIC_FONT_SIZE;
+        marker = 'ar-outer-rings-1-2-46';
+      } else if (cycleOffset <= 4) {
+        size = OUTER_RINGS_3_4_ARABIC_FONT_SIZE;
+        marker = 'ar-outer-rings-3-4-50';
+      } else {
+        size = OUTER_RINGS_5_PLUS_ARABIC_FONT_SIZE;
+        marker = 'ar-outer-rings-5-plus-54';
+      }
+      node.style.setProperty('font-size', size, 'important');
+      node.setAttribute('data-v131-font-size', marker);
+    }
+
+    function captureSourceTick(node) {
+      if (!node.hasAttribute('data-v131-source-tick')) {
+        node.setAttribute(
+          'data-v131-source-tick',
+          node.getAttribute('data-tick') || ''
+        );
+      }
+      return Number(node.getAttribute('data-v131-source-tick'));
+    }
+
+    function renderCycleNumberPair(
+      node,
+      primaryValue,
+      cycleValue,
+      language,
+      enabled,
+      ringCount
+    ) {
+      var localizedCycle = localizeDigits(String(cycleValue), language);
+      var state = enabled
+        ? 'pair|' + primaryValue + '|' + localizedCycle
+        : 'primary|' + primaryValue;
+
+      if (node.getAttribute('data-v131-number-render-state') === state) {
+        return;
+      }
+
+      if (!enabled) {
+        node.textContent = primaryValue;
+        node.setAttribute('data-v131-number-render-state', state);
+        node.removeAttribute('data-v131-cycle-angle-number');
+        return;
+      }
+
+      var x = Number(node.getAttribute('x')) || 0;
+      var y = Number(node.getAttribute('y')) || 0;
+      var dx = x - 2200;
+      var dy = y - 1800;
+      var radius = Math.sqrt((dx * dx) + (dy * dy)) || 1;
+      var radialX = dx / radius;
+      var radialY = dy / radius;
+      var clockwise =
+        wheelDocument.documentElement.dataset.layoutDirection !==
+        'counterclockwise';
+      var tangentX = clockwise ? -radialY : radialY;
+      var tangentY = clockwise ? radialX : -radialX;
+      var ringWidth = (1500 - 400) / Math.max(1, ringCount);
+      var radialOffset = Math.max(10, (ringWidth / 2) - 16);
+      var cornerRadius = radius + radialOffset;
+      var tangentBoundary = cornerRadius * Math.tan(
+        Math.PI / DIVISIONS
+      );
+      var tangentOffset = Math.max(8, tangentBoundary - 18);
+      var secondaryX =
+        x + (radialX * radialOffset) + (tangentX * tangentOffset);
+      var secondaryY =
+        y + (radialY * radialOffset) + (tangentY * tangentOffset);
+
+      node.textContent = '';
+
+      var primary = wheelDocument.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'tspan'
+      );
+      primary.setAttribute('x', String(x));
+      primary.setAttribute('y', String(y));
+      primary.setAttribute('data-v131-number-role', 'primary');
+      primary.textContent = primaryValue;
+
+      var secondary = wheelDocument.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'tspan'
+      );
+      secondary.setAttribute('x', secondaryX.toFixed(3));
+      secondary.setAttribute('y', secondaryY.toFixed(3));
+      secondary.setAttribute('data-v131-number-role', 'cycle-angle');
+      secondary.style.setProperty('font-size', '15px', 'important');
+      secondary.style.setProperty('font-weight', '800', 'important');
+      secondary.style.setProperty('font-style', 'italic', 'important');
+      secondary.style.setProperty('fill', '#784229', 'important');
+      secondary.style.setProperty('stroke', '#4A291B', 'important');
+      secondary.style.setProperty('stroke-width', '0.2px', 'important');
+      secondary.style.setProperty(
+        'paint-order',
+        'stroke fill',
+        'important'
+      );
+      secondary.style.setProperty(
+        'stroke-linejoin',
+        'round',
+        'important'
+      );
+      secondary.style.setProperty('opacity', '1', 'important');
+      secondary.textContent = localizedCycle;
+
+      node.appendChild(primary);
+      node.appendChild(secondary);
+      node.setAttribute('data-v131-number-render-state', state);
+      node.setAttribute(
+        'data-v131-cycle-angle-number',
+        String(cycleValue)
+      );
+    }
+
+    
+
+    function layerNumberForOffset(cycleOffset) {
+      if (cycleOffset === 0) return 0;
+      return positiveModulo(cycleOffset - 1, 10) + 1;
+    }
+
+    function renderLayerMarks(
+      root,
+      language,
+      dataType,
+      ringCount,
+      model
+    ) {
+      var existing = wheelDocument.getElementById('v131LayerMarks');
+      var enabled = !!(
+        highlightShowMarksInput &&
+        highlightShowMarksInput.checked &&
+        dataType === 'price' &&
+        root.dataset.viewMode === 'circle36'
+      );
+
+      if (!enabled) {
+        if (existing) existing.remove();
+        root.dataset.v131LayerMarks = 'hidden';
+        return;
+      }
+
+      var state = [
+        language,
+        ringCount,
+        root.dataset.layoutDirection || 'clockwise',
+        model.anchorEndTick,
+        model.step
+      ].join('|');
+
+      if (
+        existing &&
+        existing.getAttribute('data-v131-render-state') === state
+      ) {
+        return;
+      }
+      if (existing) existing.remove();
+
+      var cycles = wheelDocument.getElementById('dynamicApprovedCycles');
+      if (!cycles) return;
+
+      var group = wheelDocument.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'g'
+      );
+      group.id = 'v131LayerMarks';
+      group.setAttribute('pointer-events', 'none');
+      group.setAttribute('aria-label', 'Wheel layer marks');
+      group.setAttribute('data-v131-render-state', state);
+
+      var clockwise =
+        root.dataset.layoutDirection !== 'counterclockwise';
+      var ringWidth = (1500 - 400) / Math.max(1, ringCount);
+      var eligibleCount = 0;
+
+      wheelDocument
+        .querySelectorAll('.approved-cycle-number[data-tick]')
+        .forEach(function (node) {
+          var correctedTick = Number(node.getAttribute('data-tick'));
+          if (
+            !Number.isFinite(correctedTick) ||
+            Math.abs(correctedTick - Math.round(correctedTick)) > 1e-9 ||
+            positiveModulo(Math.round(correctedTick), 3) !== 0
+          ) {
+            return;
+          }
+
+          var cycleOffset = Number.parseInt(
+            node.getAttribute('data-cycle-offset') || '0',
+            10
+          );
+          var x = Number(node.getAttribute('x')) || 0;
+          var y = Number(node.getAttribute('y')) || 0;
+          var dx = x - 2200;
+          var dy = y - 1800;
+          var radius = Math.sqrt((dx * dx) + (dy * dy)) || 1;
+          var radialX = dx / radius;
+          var radialY = dy / radius;
+          var tangentX = clockwise ? -radialY : radialY;
+          var tangentY = clockwise ? radialX : -radialX;
+          var radialOffset = Math.max(8, (ringWidth / 2) - 28);
+          var cornerRadius = radius + radialOffset;
+          var tangentBoundary = cornerRadius * Math.tan(
+            Math.PI / DIVISIONS
+          );
+          var tangentOffset = Math.max(6, tangentBoundary - 18);
+          var markX =
+            x + (radialX * radialOffset) - (tangentX * tangentOffset);
+          var markY =
+            y + (radialY * radialOffset) - (tangentY * tangentOffset);
+          var layerNumber = layerNumberForOffset(cycleOffset);
+
+          var mark = wheelDocument.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'text'
+          );
+          mark.setAttribute('x', markX.toFixed(3));
+          mark.setAttribute('y', markY.toFixed(3));
+          mark.setAttribute('text-anchor', 'middle');
+          mark.setAttribute('dominant-baseline', 'central');
+          mark.setAttribute('data-v131-layer-mark', String(layerNumber));
+          mark.setAttribute(
+            'data-v131-source-tick',
+            String(correctedTick)
+          );
+          mark.style.setProperty('font-family', 'Arial, sans-serif', 'important');
+          mark.style.setProperty('font-size', '14px', 'important');
+          mark.style.setProperty('font-weight', '800', 'important');
+          mark.style.setProperty('font-style', 'normal', 'important');
+          mark.style.setProperty('fill', '#6F3F68', 'important');
+          mark.style.setProperty('stroke', '#3F233C', 'important');
+          mark.style.setProperty('stroke-width', '0.18px', 'important');
+          mark.style.setProperty('paint-order', 'stroke fill', 'important');
+          mark.style.setProperty('opacity', '1', 'important');
+          mark.textContent = localizeDigits(String(layerNumber), language);
+
+          var badge = wheelDocument.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'rect'
+          );
+          badge.setAttribute('x', (markX - 12).toFixed(3));
+          badge.setAttribute('y', (markY - 10).toFixed(3));
+          badge.setAttribute('width', '24');
+          badge.setAttribute('height', '20');
+          badge.setAttribute('rx', '2.5');
+          badge.setAttribute('ry', '2.5');
+          badge.setAttribute(
+            'data-v131-layer-badge',
+            String(layerNumber)
+          );
+          badge.style.setProperty('fill', '#EAF7F4', 'important');
+          badge.style.setProperty('fill-opacity', '0.92', 'important');
+          badge.style.setProperty('stroke', '#69BEB8', 'important');
+          badge.style.setProperty('stroke-width', '0.9px', 'important');
+          badge.style.setProperty('opacity', '1', 'important');
+
+          var shadow = badge.cloneNode(true);
+          shadow.removeAttribute('data-v131-layer-badge');
+          shadow.setAttribute(
+            'data-v131-layer-shadow',
+            String(layerNumber)
+          );
+          shadow.setAttribute('x', (markX - 10.5).toFixed(3));
+          shadow.setAttribute('y', (markY - 8.5).toFixed(3));
+          shadow.style.setProperty('fill', '#2F625E', 'important');
+          shadow.style.setProperty('fill-opacity', '0.22', 'important');
+          shadow.style.setProperty('stroke', 'none', 'important');
+
+          group.appendChild(shadow);
+          group.appendChild(badge);
+          group.appendChild(mark);
+          eligibleCount += 1;
+        });
+
+      group.setAttribute(
+        'data-v131-eligible-mark-count',
+        String(eligibleCount)
+      );
+      cycles.appendChild(group);
+      root.dataset.v131LayerMarks = 'visible';
+      root.dataset.v131LayerMarkPattern =
+        'black-multiples-of-3-offset-0-then-1-to-10-repeat';
+    }
+
+    function cellPositionFromGeometry(node, clockwise) {
+      var x = Number(node.getAttribute('x'));
+      var y = Number(node.getAttribute('y'));
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+      var angle = Math.atan2(y - 1800, x - 2200) * 180 / Math.PI;
+      var rawIndex = (angle + 90) / (360 / DIVISIONS);
+      /*
+       * Approved price nodes are positioned at cell centres one geometric
+       * step after the north boundary. Converting their angle without this
+       * correction shifts every displayed value forward: 2 appears where
+       * 1 belongs and 37 replaces 36 at the end of the first ring.
+       */
+      var numberIndex = positiveModulo(
+        Math.round(clockwise ? rawIndex : -rawIndex) - 1,
+        DIVISIONS
+      );
+      return numberIndex === 0 ? DIVISIONS : numberIndex;
+    }
+
+    function ensureArabicCardinalDirectionsV142() {
+      if (!wheelDocument) return false;
+      var svg = wheelDocument.getElementById('wheel');
+      if (!svg) return false;
+
+      var existing =
+        wheelDocument.getElementById('v144ArabicCardinalDirections');
+      if (existing) {
+        if (existing.parentNode === svg &&
+            existing !== svg.lastElementChild) {
+          svg.appendChild(existing);
+        }
+        return true;
+      }
+
+      var NS = 'http://www.w3.org/2000/svg';
+      var group = wheelDocument.createElementNS(NS, 'g');
+      group.id = 'v144ArabicCardinalDirections';
+      group.setAttribute('aria-label', 'الاتجاهات الأربعة');
+      group.setAttribute('pointer-events', 'none');
+
+      var directions = [
+        { label: 'الشمال', x: 2200, y: 140, rotation: 0 },
+        { label: 'الشرق', x: 3860, y: 1800, rotation: 90 },
+        { label: 'الجنوب', x: 2200, y: 3460, rotation: 0 },
+        { label: 'الغرب', x: 540, y: 1800, rotation: -90 }
+      ];
+
+      directions.forEach(function (direction) {
+        var text = wheelDocument.createElementNS(NS, 'text');
+        text.setAttribute('x', String(direction.x));
+        text.setAttribute('y', String(direction.y));
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('dominant-baseline', 'middle');
+        text.setAttribute('direction', 'rtl');
+        text.setAttribute('unicode-bidi', 'plaintext');
+        text.setAttribute('lang', 'ar');
+        text.setAttribute('aria-label', direction.label);
+        text.setAttribute(
+          'transform',
+          'rotate(' + direction.rotation + ' ' +
+            direction.x + ' ' + direction.y + ')'
+        );
+        text.style.fontFamily = 'Tahoma, Arial, sans-serif';
+        text.style.fontSize = '32px';
+        text.style.fontWeight = '500';
+        text.style.fill = '#171513';
+        text.style.paintOrder = 'stroke fill';
+        text.style.stroke = 'rgba(255,255,255,0.32)';
+        text.style.strokeWidth = '0.8px';
+        text.textContent = direction.label;
+        group.appendChild(text);
+      });
+
+      svg.appendChild(group);
+      wheelDocument.documentElement.dataset.v144CardinalDirections =
+        'same-wheel-document-safe-overlay';
+      return true;
+    }
+
+
+    // V170: expand the SVG canvas vertically while preserving wheel scale and radius.
+    function ensureVerticalCanvasMarginV170() {
+      if (!wheelDocument || !wheelDocument.body) return false;
+      var svg = wheelDocument.getElementById('wheel');
+      if (!svg || svg.dataset.v170CanvasMargin === 'true') return !!svg;
+
+      var vb = svg.viewBox && svg.viewBox.baseVal;
+      if (!vb || !vb.width || !vb.height) return false;
+
+      var original = {
+        x: vb.x,
+        y: vb.y,
+        width: vb.width,
+        height: vb.height
+      };
+      var PAD_UNITS = 160;
+      var newY = original.y - PAD_UNITS;
+      var newHeight = original.height + PAD_UNITS * 2;
+
+      svg.dataset.v170CanvasMargin = 'true';
+      svg.dataset.v170OriginalViewBox =
+        [original.x, original.y, original.width, original.height].join(' ');
+      svg.dataset.v170PaddingUnits = String(PAD_UNITS);
+      svg.setAttribute(
+        'viewBox',
+        [original.x, newY, original.width, newHeight].join(' ')
+      );
+
+      var style = wheelDocument.createElement('style');
+      style.id = 'v170CanvasMarginStyle';
+      style.textContent =
+        '#wheel[data-v170-canvas-margin="true"]{' +
+        'height:auto!important;' +
+        'aspect-ratio:' + original.width + '/' + newHeight + '!important;' +
+        'background:#f7f1e3!important;' +
+        '}';
+
+      (wheelDocument.head || wheelDocument.documentElement).appendChild(style);
+
+      var computedBody = wheelDocument.defaultView.getComputedStyle(
+        wheelDocument.body
+      );
+      var oldMinHeight = Number.parseFloat(computedBody.minHeight) || 3600;
+      var renderedWidth = svg.getBoundingClientRect().width || original.width;
+      var scale = renderedWidth / original.width;
+      var addedPixels = PAD_UNITS * 2 * scale;
+      wheelDocument.body.style.minHeight =
+        Math.ceil(oldMinHeight + addedPixels) + 'px';
+
+      wheelDocument.documentElement.dataset.v170VerticalCanvasMargin = 'true';
+      return true;
+    }
+
+    function ensureAngleRotationControlV145() {
+      if (!wheelDocument) return false;
+      var svg = wheelDocument.getElementById('wheel');
+      var ticks = wheelDocument.getElementById('angleTicks');
+      var labels = wheelDocument.getElementById('angleLabels');
+      if (!svg || !ticks || !labels) return false;
+
+      var existing = wheelDocument.getElementById('v149AngleDragHandle');
+      var existingReset =
+        wheelDocument.getElementById('v151TurquoiseAngleReset');
+      if (existing && existingReset) {
+        if (existing.parentNode === svg) svg.appendChild(existing);
+        if (existingReset.parentNode === svg) svg.appendChild(existingReset);
+        return true;
+      }
+
+      var NS = 'http://www.w3.org/2000/svg';
+      var CX = 2200;
+      var CY = 1800;
+      var rotation = Number(
+        wheelDocument.documentElement.dataset.v149AngleRotation || '0'
+      );
+      if (!Number.isFinite(rotation)) rotation = 0;
+
+      var handle = wheelDocument.createElementNS(NS, 'g');
+      handle.id = 'v149AngleDragHandle';
+      handle.setAttribute('role', 'slider');
+      handle.setAttribute('aria-label', 'تحريك إطار الزوايا');
+      handle.setAttribute('aria-valuemin', '0');
+      handle.setAttribute('aria-valuemax', '359');
+      handle.setAttribute('aria-valuenow', String(rotation));
+      handle.style.cursor = 'grab';
+      handle.style.pointerEvents = 'all';
+      handle.style.touchAction = 'none';
+
+      var stem = wheelDocument.createElementNS(NS, 'line');
+      stem.setAttribute('x1', '2200');
+      stem.setAttribute('y1', '158');
+      stem.setAttribute('x2', '2200');
+      stem.setAttribute('y2', '178');
+      stem.setAttribute('stroke', '#d7443e');
+      stem.setAttribute('stroke-width', '5');
+      stem.setAttribute('stroke-linecap', 'round');
+      stem.setAttribute('pointer-events', 'none');
+
+      var pin = wheelDocument.createElementNS(NS, 'circle');
+      pin.setAttribute('cx', '2200');
+      pin.setAttribute('cy', '185');
+      pin.setAttribute('r', '9');
+      pin.setAttribute('fill', '#df4b43');
+      pin.setAttribute('stroke', '#fff4ea');
+      pin.setAttribute('stroke-width', '3');
+      pin.setAttribute('pointer-events', 'none');
+
+      var hit = wheelDocument.createElementNS(NS, 'circle');
+      hit.setAttribute('cx', '2200');
+      hit.setAttribute('cy', '178');
+      hit.setAttribute('r', '26');
+      hit.setAttribute('fill', 'transparent');
+      hit.setAttribute('stroke', 'transparent');
+      hit.style.pointerEvents = 'all';
+
+      handle.appendChild(stem);
+      handle.appendChild(pin);
+      handle.appendChild(hit);
+      svg.appendChild(handle);
+
+      function normalize(value) {
+        value %= 360;
+        return value < 0 ? value + 360 : value;
+      }
+
+      function svgPoint(event) {
+        var point = svg.createSVGPoint();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        var matrix = svg.getScreenCTM();
+        return matrix ? point.matrixTransform(matrix.inverse()) : point;
+      }
+
+      function applyRotation(value) {
+        rotation = normalize(value);
+        var transform =
+          'rotate(' + rotation.toFixed(3) + ' ' + CX + ' ' + CY + ')';
+        ticks.setAttribute('transform', transform);
+        labels.setAttribute('transform', transform);
+        handle.setAttribute('transform', transform);
+        handle.setAttribute('aria-valuenow', String(Math.round(rotation)));
+        wheelDocument.documentElement.dataset.v149AngleRotation =
+          rotation.toFixed(3);
+      }
+
+      var activePointerId = null;
+      var lastPointerAngle = 0;
+
+      function pointerAngle(event) {
+        var point = svgPoint(event);
+        return (
+          Math.atan2(point.y - CY, point.x - CX) * 180 / Math.PI
+        ) + 90;
+      }
+
+      function signedAngleDelta(current, start) {
+        var delta = current - start;
+        while (delta > 180) delta -= 360;
+        while (delta < -180) delta += 360;
+        return delta;
+      }
+
+      handle.addEventListener('pointerdown', function (event) {
+        if (activePointerId !== null) return;
+        event.preventDefault();
+        event.stopPropagation();
+        activePointerId = event.pointerId;
+        lastPointerAngle = pointerAngle(event);
+        handle.style.cursor = 'grabbing';
+        wheelDocument.documentElement.dataset.v149AngleDragging = 'true';
+        if (handle.setPointerCapture) {
+          try { handle.setPointerCapture(event.pointerId); } catch (error) {}
+        }
+      });
+
+      wheelDocument.addEventListener('pointermove', function (event) {
+        if (event.pointerId !== activePointerId) return;
+        event.preventDefault();
+        var currentAngle = pointerAngle(event);
+        var delta = signedAngleDelta(currentAngle, lastPointerAngle);
+        lastPointerAngle = currentAngle;
+        applyRotation(rotation + delta);
+      }, { passive: false });
+
+      function finish(event) {
+        if (event.pointerId !== activePointerId) return;
+        activePointerId = null;
+        handle.style.cursor = 'grab';
+        wheelDocument.documentElement.dataset.v149AngleDragging = 'false';
+        if (handle.releasePointerCapture &&
+            handle.hasPointerCapture &&
+            handle.hasPointerCapture(event.pointerId)) {
+          try { handle.releasePointerCapture(event.pointerId); } catch (error) {}
+        }
+      }
+      wheelDocument.addEventListener('pointerup', finish);
+      wheelDocument.addEventListener('pointercancel', finish);
+
+      handle.addEventListener('keydown', function (event) {
+        var step = event.shiftKey ? 10 : 1;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+          event.preventDefault();
+          applyRotation(rotation + step);
+        } else if (
+          event.key === 'ArrowLeft' || event.key === 'ArrowDown'
+        ) {
+          event.preventDefault();
+          applyRotation(rotation - step);
+        } else if (event.key === 'Home') {
+          event.preventDefault();
+          applyRotation(0);
+        }
+      });
+      handle.setAttribute('tabindex', '0');
+
+      applyRotation(rotation);
+
+      var resetHit = wheelDocument.createElementNS(NS, 'circle');
+      resetHit.id = 'v151TurquoiseAngleReset';
+      resetHit.setAttribute('cx', '2200');
+      resetHit.setAttribute('cy', '99');
+      resetHit.setAttribute('r', '42');
+      resetHit.setAttribute('fill', 'transparent');
+      resetHit.setAttribute('stroke', 'transparent');
+      resetHit.setAttribute('role', 'button');
+      resetHit.setAttribute('tabindex', '0');
+      resetHit.setAttribute('aria-label', 'إعادة إطار الزوايا إلى 360 درجة');
+      resetHit.style.pointerEvents = 'all';
+      resetHit.style.cursor = 'pointer';
+
+      function resetAngle(event) {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        applyRotation(0);
+        activePointerId = null;
+        handle.style.cursor = 'grab';
+        wheelDocument.documentElement.dataset.v149AngleDragging = 'false';
+        wheelDocument.documentElement.dataset.v151LastAngleReset =
+          String(Date.now());
+      }
+
+      resetHit.addEventListener('click', resetAngle);
+      resetHit.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          resetAngle(event);
+        }
+      });
+      svg.appendChild(resetHit);
+
+      var northOrnament = wheelDocument.querySelector(
+        '#cardinalOrnaments .cardinal-ornament[data-angle="360"]'
+      );
+      if (northOrnament &&
+          northOrnament.dataset.v151ResetAttached !== 'true') {
+        northOrnament.dataset.v151ResetAttached = 'true';
+        northOrnament.setAttribute('role', 'button');
+        northOrnament.setAttribute('tabindex', '0');
+        northOrnament.setAttribute(
+          'aria-label',
+          'إعادة إطار الزوايا إلى 360 درجة'
+        );
+        northOrnament.style.cursor = 'pointer';
+        northOrnament.style.pointerEvents = 'all';
+        northOrnament.addEventListener('click', resetAngle);
+        northOrnament.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            resetAngle(event);
+          }
+        });
+      }
+
+      wheelDocument.documentElement.dataset.v149AngleHandle =
+        'red-pin-under-360';
+      wheelDocument.documentElement.dataset.v151TurquoiseReset =
+        'click-resets-angle-frame-and-degree-numbers';
+      return true;
+    }
+
+    function applyWheelModel() {
+      pendingApply = false;
+      if (!wheelDocument || !wheelDocument.documentElement) return;
+
+      var root = wheelDocument.documentElement;
+      ensureArabicCardinalDirectionsV142();
+      ensureVerticalCanvasMarginV170();
+      ensureAngleRotationControlV145();
+      var language = root.dataset.v50LiveLanguage || 'en';
+      var dataType = root.dataset.dataType || '';
+      /*
+       * V180 single-writer rule:
+       * the terminal wheel engine owns primary price values and data-tick.
+       * This outer compatibility layer is deliberately read-only.
+       */
+      var model = {
+        step: 0.01,
+        anchorEndTick: 36,
+        anchorEndValue: 0.36,
+        anchorBaseValue: 0
+      };
+      var renderRingCount = Math.max(
+        1,
+        Number(root.dataset.layoutSize || actualSizeInput.value || '11')
+      );
+      var showCycleNumbers = !!(
+        highlightShowNumbersInput &&
+        highlightShowNumbersInput.checked &&
+        dataType === 'price'
+      );
+      var nodes = wheelDocument.querySelectorAll('.approved-cycle-number');
+
+      nodes.forEach(function (node) {
+        var cycleOffset = Number.parseInt(
+          node.getAttribute('data-cycle-offset') || '0',
+          10
+        );
+        captureOriginalFont(node);
+
+        if (dataType === 'price') {
+          var correctedTick = Number(node.getAttribute('data-tick'));
+          var westernValue =
+            node.getAttribute('data-v131-display-value') ||
+            String(node.textContent || '').trim();
+
+          if (westernValue) {
+            node.setAttribute('data-v131-display-value', westernValue);
+            var localizedValue = localizeDigits(westernValue, language);
+            var cycleAngleNumber = Number.isFinite(correctedTick)
+              ? positiveModulo(correctedTick - 1, MAJOR_CYCLE_TICKS) + 1
+              : 1;
+            renderCycleNumberPair(
+              node,
+              localizedValue,
+              cycleAngleNumber,
+              language,
+              showCycleNumbers && Number.isFinite(correctedTick),
+              renderRingCount
+            );
+          }
+        }
+
+        if (language === 'ar') {
+          applyArabicFont(node, cycleOffset);
+        } else {
+          restoreOriginalFont(node);
+        }
+      });
+
+      renderLayerMarks(root, language, dataType, renderRingCount, model);
+
+      var outerCycles = visibleSizeInput
+        ? clampOuterCycles(visibleSizeInput.value)
+        : DEFAULT_OUTER_CYCLES;
+
+      root.dataset.v131AnchorRing = '0';
+      root.dataset.v131OuterCycleCount = String(outerCycles);
+      root.dataset.v131AnchorStartValue = '0.01';
+      root.dataset.v131AnchorEndValue = '0.36';
+      root.dataset.v131OuterStartValue = '0.37';
+      root.dataset.v131OuterEndValue =
+        (0.36 + (outerCycles * DIVISIONS * 0.01)).toFixed(2);
+      root.dataset.v131ValueWriter = 'terminal-v180-only';
+      root.dataset.v131CycleFontMode =
+        language === 'ar'
+          ? 'arabic-anchor-36-outer-46-50-54px'
+          : 'english-original';
+
+      if (lastTarget !== null) {
+        applyFindHighlight(lastTarget);
+      }
+    }
+
+    function scheduleApply() {
+      if (pendingApply) return;
+      pendingApply = true;
+      requestAnimationFrame(function () {
+        requestAnimationFrame(applyWheelModel);
+      });
+    }
+
+    function ensureHighlightStyle() {
+      if (wheelDocument.getElementById('v131-find-highlight-style')) return;
+      var style = wheelDocument.createElement('style');
+      style.id = 'v131-find-highlight-style';
+      style.textContent =
+        '.approved-cycle-number.v131-found-number{' +
+        'fill:#ffffff!important;' +
+        'paint-order:stroke fill!important;' +
+        'stroke:#526c7a!important;' +
+        'stroke-width:1.4px!important;' +
+        'stroke-linejoin:round!important;' +
+        '}';
+      wheelDocument.head.appendChild(style);
+    }
+
+    function polarPoint(radius, degree) {
+      var angle = degree * Math.PI / 180;
+      return {
+        x: 2200 + (Math.cos(angle) * radius),
+        y: 1800 + (Math.sin(angle) * radius)
+      };
+    }
+
+    function annularSectorPath(
+      innerRadius,
+      outerRadius,
+      numberIndex,
+      clockwise
+    ) {
+      var step = 360 / DIVISIONS;
+      var sign = clockwise ? 1 : -1;
+      var centerDegree = (sign * numberIndex * step) - 90;
+      var startDegree = centerDegree - (step / 2);
+      var endDegree = centerDegree + (step / 2);
+
+      var innerStart = polarPoint(innerRadius, startDegree);
+      var outerStart = polarPoint(outerRadius, startDegree);
+      var outerEnd = polarPoint(outerRadius, endDegree);
+      var innerEnd = polarPoint(innerRadius, endDegree);
+
+      return [
+        'M', innerStart.x.toFixed(3), innerStart.y.toFixed(3),
+        'L', outerStart.x.toFixed(3), outerStart.y.toFixed(3),
+        'A', outerRadius.toFixed(3), outerRadius.toFixed(3),
+        '0 0 1', outerEnd.x.toFixed(3), outerEnd.y.toFixed(3),
+        'L', innerEnd.x.toFixed(3), innerEnd.y.toFixed(3),
+        'A', innerRadius.toFixed(3), innerRadius.toFixed(3),
+        '0 0 0', innerStart.x.toFixed(3), innerStart.y.toFixed(3),
+        'Z'
+      ].join(' ');
+    }
+
+    function apply369PatternHighlight() {
+      if (!wheelDocument || !highlightVisibleInput ||
+          !highlightVisibleInput.checked) return false;
+
+      var root = wheelDocument.documentElement;
+      var existing = wheelDocument.getElementById('v131FindHighlight');
+      if (existing &&
+          existing.getAttribute('data-v131-fill-mode') === 'Pattern369') {
+        return true;
+      }
+
+      clearFindHighlight();
+      var specialFills = wheelDocument.getElementById('specialFills');
+      if (!specialFills || root.dataset.viewMode !== 'circle36') {
+        return false;
+      }
+
+      var clockwise =
+        root.dataset.layoutDirection !== 'counterclockwise';
+      var fill = wheelDocument.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'g'
+      );
+      fill.id = 'v131FindHighlight';
+      fill.setAttribute('data-v131-highlight-role', 'pattern-9-18-27-36');
+      fill.setAttribute('data-v131-fill-mode', 'Pattern369');
+      fill.setAttribute('data-v131-pattern-values', '9,18,27,36');
+      fill.setAttribute('data-v131-frame-color', '#8FA8B6');
+      fill.setAttribute('pointer-events', 'all');
+      fill.setAttribute('cursor', 'pointer');
+      fill.setAttribute('role', 'button');
+      fill.setAttribute('tabindex', '0');
+      fill.setAttribute('aria-label', 'Clear 9 18 27 36 highlight');
+
+      [9, 18, 27, 0].forEach(function (highlightedRayIndex) {
+        var rayPath = wheelDocument.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'path'
+        );
+        rayPath.setAttribute(
+          'd',
+          annularSectorPath(
+            180,
+            1500,
+            highlightedRayIndex,
+            clockwise
+          )
+        );
+        rayPath.setAttribute('fill', '#8FA8B6');
+        rayPath.setAttribute('fill-opacity', '0.30');
+        rayPath.setAttribute('stroke', 'none');
+        rayPath.setAttribute(
+          'data-v131-highlighted-pattern-value',
+          String(highlightedRayIndex === 0 ? 36 : highlightedRayIndex)
+        );
+        fill.appendChild(rayPath);
+      });
+
+      function dismissPattern(event) {
+        if (event) event.preventDefault();
+        lastTarget = null;
+        clearFindHighlight();
+        findInput.setAttribute('aria-invalid', 'false');
+        findInput.title = '9-18-27-36 pattern cleared';
+      }
+
+      fill.addEventListener('click', dismissPattern);
+      fill.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          dismissPattern(event);
+        }
+      });
+
+      specialFills.appendChild(fill);
+      lastFound = true;
+      root.dataset.v131FindStatus = 'pattern-9-18-27-36';
+      root.dataset.v131FindTarget = '9,18,27,36';
+      return true;
+    }
+
+    function clearFindHighlight() {
+      if (!wheelDocument) return;
+      var fill = wheelDocument.getElementById('v131FindHighlight');
+      if (fill) fill.remove();
+
+      wheelDocument
+        .querySelectorAll('.approved-cycle-number.v131-found-number')
+        .forEach(function (node) {
+          node.classList.remove('v131-found-number');
+          node.removeAttribute('data-v131-found');
+        });
+
+      lastFound = false;
+      wheelDocument.documentElement.dataset.v131FindStatus = 'clear';
+    }
+
+    function applyFindHighlight(target) {
+      if (!wheelDocument || !findInput) return false;
+      if (!highlightVisibleInput ||
+          !highlightVisibleInput.checked ||
+          !highlightFillSelect ||
+          (highlightFillSelect.value !== 'Cross' &&
+           highlightFillSelect.value !== 'Levels' &&
+           highlightFillSelect.value !== 'Pattern369')) {
+        clearFindHighlight();
+        return false;
+      }
+
+      if (highlightFillSelect.value === 'Pattern369') {
+        return apply369PatternHighlight();
+      }
+
+      var existingFill = wheelDocument.getElementById('v131FindHighlight');
+      var existingNumber = wheelDocument.querySelector(
+        '.approved-cycle-number.v131-found-number[data-v131-found="' +
+        String(target) + '"]'
+      );
+      if (existingFill &&
+          existingFill.getAttribute('data-v131-target') === String(target) &&
+          existingFill.getAttribute('data-v131-fill-mode') ===
+            highlightFillSelect.value &&
+          existingNumber) {
+        return true;
+      }
+
+      clearFindHighlight();
+      ensureHighlightStyle();
+
+      var match = null;
+      wheelDocument
+        .querySelectorAll('.approved-cycle-number[data-v131-display-value]')
+        .forEach(function (node) {
+          if (match) return;
+          var value = Number(node.getAttribute('data-v131-display-value'));
+          if (Number.isFinite(value) && Math.abs(value - target) < 1e-9) {
+            match = node;
+          }
+        });
+
+      if (!match) {
+        findInput.setAttribute('aria-invalid', 'true');
+        findInput.title = 'Number is outside the displayed wheel';
+        wheelDocument.documentElement.dataset.v131FindStatus = 'not-found';
+        return false;
+      }
+
+      var root = wheelDocument.documentElement;
+      var cycleOffset = Number.parseInt(
+        match.getAttribute('data-cycle-offset') || '0',
+        10
+      );
+      var sourceTick = Number(match.getAttribute('data-v131-source-tick'));
+      var position = cellPositionFromGeometry(
+        match,
+        root.dataset.layoutDirection !== 'counterclockwise'
+      );
+          if (!Number.isFinite(position)) return;
+      var numberIndex = position === DIVISIONS ? 0 : position;
+      var ringCount = Math.max(
+        1,
+        Number(root.dataset.layoutSize || actualSizeInput.value || '11')
+      );
+      var clockwise = root.dataset.layoutDirection !== 'counterclockwise';
+      var specialFills = wheelDocument.getElementById('specialFills');
+
+      if (!specialFills || root.dataset.viewMode !== 'circle36') {
+        match.classList.add('v131-found-number');
+        match.setAttribute('data-v131-found', String(target));
+        lastFound = true;
+        return true;
+      }
+
+      var fillMode = highlightFillSelect.value;
+      var fill;
+
+      if (fillMode === 'Levels') {
+        var ringWidth = (1500 - 400) / ringCount;
+        fill = wheelDocument.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'g'
+        );
+        fill.setAttribute(
+          'data-v131-highlight-role',
+          'alternating-level-rings'
+        );
+        fill.setAttribute(
+          'data-v131-start-cycle-offset',
+          String(cycleOffset)
+        );
+
+        for (
+          var highlightedRing = cycleOffset;
+          highlightedRing < ringCount;
+          highlightedRing += 2
+        ) {
+          var innerRadius = 400 + (highlightedRing * ringWidth);
+          var outerRadius = innerRadius + ringWidth;
+          var levelCircle = wheelDocument.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'circle'
+          );
+          levelCircle.setAttribute('cx', '2200');
+          levelCircle.setAttribute('cy', '1800');
+          levelCircle.setAttribute(
+            'r',
+            String((innerRadius + outerRadius) / 2)
+          );
+          levelCircle.setAttribute('fill', 'none');
+          levelCircle.setAttribute('stroke', '#8FA8B6');
+          levelCircle.setAttribute('stroke-width', String(ringWidth));
+          levelCircle.setAttribute('stroke-opacity', '0.30');
+          levelCircle.setAttribute(
+            'data-v131-highlighted-ring',
+            String(highlightedRing)
+          );
+          fill.appendChild(levelCircle);
+        }
+      } else {
+        fill = wheelDocument.createElementNS(
+          'http://www.w3.org/2000/svg',
+          'g'
+        );
+        fill.setAttribute(
+          'data-v131-highlight-role',
+          'alternating-radial-rays'
+        );
+        fill.setAttribute(
+          'data-v131-start-ray-index',
+          String(numberIndex)
+        );
+
+        for (
+          var rayStep = 0;
+          rayStep < DIVISIONS;
+          rayStep += 2
+        ) {
+          var highlightedRayIndex = positiveModulo(
+            numberIndex + rayStep,
+            DIVISIONS
+          );
+          var rayPath = wheelDocument.createElementNS(
+            'http://www.w3.org/2000/svg',
+            'path'
+          );
+          rayPath.setAttribute(
+            'd',
+            annularSectorPath(
+              180,
+              1500,
+              highlightedRayIndex,
+              clockwise
+            )
+          );
+          rayPath.setAttribute('fill', '#8FA8B6');
+          rayPath.setAttribute('fill-opacity', '0.30');
+          rayPath.setAttribute('stroke', 'none');
+          rayPath.setAttribute(
+            'data-v131-highlighted-ray',
+            String(highlightedRayIndex)
+          );
+          fill.appendChild(rayPath);
+        }
+      }
+
+      fill.id = 'v131FindHighlight';
+      fill.setAttribute('pointer-events', 'all');
+      fill.setAttribute('cursor', 'pointer');
+      fill.setAttribute('role', 'button');
+      fill.setAttribute('tabindex', '0');
+      fill.setAttribute('aria-label', 'Clear selected highlight');
+      fill.setAttribute('data-v131-target', String(target));
+      fill.setAttribute('data-v131-fill-mode', fillMode);
+      fill.setAttribute('data-v131-frame-color', '#8FA8B6');
+
+      function dismissHighlight(event) {
+        if (event) event.preventDefault();
+        lastTarget = null;
+        clearFindHighlight();
+        findInput.setAttribute('aria-invalid', 'false');
+        findInput.title = 'Selection cleared by clicking the highlight';
+      }
+
+      fill.addEventListener('click', dismissHighlight);
+      fill.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          dismissHighlight(event);
+        }
+      });
+
+      specialFills.appendChild(fill);
+
+      match.classList.add('v131-found-number');
+      match.setAttribute('data-v131-found', String(target));
+      lastFound = true;
+      findInput.setAttribute('aria-invalid', 'false');
+      findInput.title = 'Located: ' + target;
+      root.dataset.v131FindStatus = 'cell-highlighted';
+      root.dataset.v131FindTarget = String(target);
+      return true;
+    }
+
+    function runFind() {
+      if (!discoverDocuments()) return false;
+      var target = parseFiniteNumber(findInput.value);
+      if (target === null || target <= 0) {
+        findInput.setAttribute('aria-invalid', 'true');
+        findInput.title = 'Enter a positive number';
+        return false;
+      }
+
+      lastTarget = target;
+      lastAnchor = null;
+
+      return applyFindHighlight(target);
+    }
+
+    function applyDefaultOnes() {
+      if (defaultsApplied) return;
+      valueInput.value = '0.01';
+      findInput.value = '0.01';
+      incrementInput.value = '1';
+      visibleSizeInput.value = String(DEFAULT_OUTER_CYCLES);
+      actualSizeInput.value = String(DEFAULT_OUTER_CYCLES + 1);
+      defaultsApplied = true;
+
+      valueInput.readOnly = false;
+      valueInput.title = 'Enter any positive value';
+      incrementInput.readOnly = true;
+      incrementInput.title = 'One cell per step';
+      controlDocument.documentElement.dataset.v131DefaultValues =
+        'isolated-0.01-clean-engine';
+      dispatchControl(incrementInput);
+      dispatchControl(valueInput);
+      dispatchControl(actualSizeInput);
+    }
+
+    function attachControls() {
+      valueInput = controlDocument.querySelector('input[aria-label="Value"]');
+      findInput = controlDocument.querySelector('input[aria-label="Find"]');
+      incrementInput =
+        controlDocument.querySelector('input[aria-label="Increment"]');
+      highlightVisibleInput =
+        controlDocument.querySelector('input[aria-label="Highlight visible"]');
+      highlightFillSelect =
+        controlDocument.querySelector('select[aria-label="Highlight fill"]');
+      highlightShowNumbersInput =
+        controlDocument.querySelector('input[aria-label="Show numbers"]');
+      highlightShowMarksInput =
+        controlDocument.querySelector('input[aria-label="Show marks"]');
+
+      if (!valueInput ||
+          !findInput ||
+          !incrementInput ||
+          !highlightVisibleInput ||
+          !highlightFillSelect ||
+          !highlightShowNumbersInput ||
+          !highlightShowMarksInput) return false;
+      if (!setupOuterCycleProxy()) return false;
+
+      /*
+       * Value and Increment are native panel controls, but the approved
+       * number layer is a separate rendering pass. Bind them explicitly so
+       * every edit recalculates the displayed price values. The delayed
+       * pass also runs after the native wheel has finished its own redraw.
+       */
+      [valueInput, incrementInput].forEach(function (control) {
+        if (control.dataset.v136WheelModelAttached === 'true') return;
+        control.dataset.v136WheelModelAttached = 'true';
+        var refreshTimer = null;
+        var refresh = function () {
+          if (refreshTimer) clearTimeout(refreshTimer);
+          scheduleApply();
+          refreshTimer = setTimeout(function () {
+            refreshTimer = null;
+            scheduleApply();
+          }, 120);
+        };
+        control.addEventListener('input', refresh);
+        control.addEventListener('change', refresh);
+        control.addEventListener('keyup', refresh);
+      });
+
+      findAction = findInput.parentElement
+        ? findInput.parentElement.querySelector('.field-action')
+        : null;
+
+      if (!Array.prototype.some.call(
+        highlightFillSelect.options,
+        function (option) { return option.value === 'Cross'; }
+      )) {
+        var crossOption = controlDocument.createElement('option');
+        crossOption.value = 'Cross';
+        crossOption.textContent = 'Cross';
+        highlightFillSelect.appendChild(crossOption);
+      }
+
+      if (!Array.prototype.some.call(
+        highlightFillSelect.options,
+        function (option) { return option.value === 'Pattern369'; }
+      )) {
+        var pattern369Option = controlDocument.createElement('option');
+        pattern369Option.value = 'Pattern369';
+        pattern369Option.textContent = '9 - 18 - 27 - 36';
+        highlightFillSelect.appendChild(pattern369Option);
+      }
+
+      highlightVisibleInput.checked = false;
+      highlightFillSelect.value = 'Cross';
+      highlightVisibleInput.dataset.v131HighlightActive = 'false';
+      highlightFillSelect.dataset.v131HighlightFill = 'Cross';
+      clearFindHighlight();
+
+      applyDefaultOnes();
+
+      if (findInput.dataset.v131FindAttached === 'true') return true;
+      findInput.dataset.v131FindAttached = 'true';
+      findInput.title = 'Enter a number and press Enter or the search icon';
+
+      highlightVisibleInput.addEventListener('change', function () {
+        highlightVisibleInput.dataset.v131HighlightActive =
+          highlightVisibleInput.checked ? 'true' : 'false';
+        if (!highlightVisibleInput.checked) {
+          clearFindHighlight();
+          return;
+        }
+        var target = parseFiniteNumber(findInput.value);
+        if (target !== null && target > 0) {
+          lastTarget = target;
+          applyFindHighlight(target);
+        }
+      });
+
+      highlightFillSelect.addEventListener('change', function () {
+        highlightFillSelect.dataset.v131HighlightFill =
+          highlightFillSelect.value;
+        if (highlightFillSelect.value !== 'Cross' &&
+            highlightFillSelect.value !== 'Levels' &&
+            highlightFillSelect.value !== 'Pattern369') {
+          clearFindHighlight();
+          return;
+        }
+        var target = parseFiniteNumber(findInput.value);
+        if (highlightVisibleInput.checked &&
+            target !== null &&
+            target > 0) {
+          lastTarget = target;
+          applyFindHighlight(target);
+        }
+      });
+
+      if (
+        highlightShowMarksInput.dataset.v131LayerMarksAttached !==
+        'true'
+      ) {
+        highlightShowMarksInput.dataset.v131LayerMarksAttached = 'true';
+        highlightShowMarksInput.addEventListener('change', function () {
+          controlDocument.documentElement.dataset.v131ShowLayerMarks =
+            highlightShowMarksInput.checked ? 'true' : 'false';
+          scheduleApply();
+        });
+      }
+
+      if (
+        highlightShowNumbersInput.dataset.v131CycleNumbersAttached !==
+        'true'
+      ) {
+        highlightShowNumbersInput.dataset.v131CycleNumbersAttached = 'true';
+        highlightShowNumbersInput.addEventListener('change', function () {
+          controlDocument.documentElement.dataset.v131ShowCycleNumbers =
+            highlightShowNumbersInput.checked ? 'true' : 'false';
+          scheduleApply();
+        });
+      }
+
+      findInput.addEventListener('input', function () {
+        if (findInputTimer) clearTimeout(findInputTimer);
+        findInputTimer = setTimeout(function () {
+          findInputTimer = null;
+          runFind();
+        }, 120);
+      });
+
+      findInput.addEventListener('change', function () {
+        if (findInputTimer) {
+          clearTimeout(findInputTimer);
+          findInputTimer = null;
+        }
+        runFind();
+      });
+
+      findInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          if (findInputTimer) {
+            clearTimeout(findInputTimer);
+            findInputTimer = null;
+          }
+          runFind();
+        }
+      });
+
+      if (findAction) {
+        findAction.setAttribute('role', 'button');
+        findAction.setAttribute('tabindex', '0');
+        findAction.setAttribute('aria-label', 'Find number');
+        findAction.title = 'Find number';
+        findAction.style.cursor = 'pointer';
+        findAction.addEventListener('click', function (event) {
+          event.preventDefault();
+          runFind();
+        });
+        findAction.addEventListener('keydown', function (event) {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            runFind();
+          }
+        });
+      }
+      return true;
+    }
+
+    function attachWheel() {
+      if (wheelObserver) wheelObserver.disconnect();
+      wheelDocument.addEventListener('gannzilla:language-change', scheduleApply);
+      wheelObserver = new MutationObserver(scheduleApply);
+      wheelObserver.observe(wheelDocument.getElementById('wheel'), {
+        childList: true,
+        subtree: true
+      });
+      applyWheelModel();
+    }
+
+    function boot(attempt) {
+      if (discoverDocuments()) {
+        attachControls();
+        attachWheel();
+        return;
+      }
+      if (attempt < 300) {
+        setTimeout(function () { boot(attempt + 1); }, 100);
+      }
+    }
+
+    frame.addEventListener('load', function () { boot(0); });
+    boot(0);
+
+    window.auditV131AnchorRing = function () {
+      if (!wheelDocument || !controlDocument) return { ready: false };
+
+      var root = wheelDocument.documentElement;
+      var values = Array.prototype.slice.call(
+        wheelDocument.querySelectorAll(
+          '.approved-cycle-number[data-v131-display-value]'
+        )
+      ).map(function (node) {
+        return Number(node.getAttribute('data-v131-display-value'));
+      }).filter(Number.isFinite);
+
+      return {
+        ready: true,
+        version: 'V131',
+        visibleOuterCycleCount: Number(visibleSizeInput.value),
+        internalRenderedRingCount: Number(actualSizeInput.value),
+        anchorRingNumber: 0,
+        anchorRingCountedInVisibleSize: false,
+        defaultValue: valueInput.value,
+        defaultFind: findInput.value,
+        defaultIncrement: incrementInput.value,
+        actualFirstValue: values.length ? Math.min.apply(Math, values) : null,
+        actualLastValue: values.length ? Math.max.apply(Math, values) : null,
+        value3600Model: {
+          anchorStart: 3565,
+          anchorEnd: 3600,
+          outerStart: 3601,
+          outerEnd: 3960
+        },
+        value1Model: {
+          anchorStart: 1,
+          anchorEnd: 36,
+          outerStart: 37,
+          outerEnd: 396
+        },
+        findActivated: findInput.dataset.v131FindAttached === 'true',
+        highlightVisibleDefault: highlightVisibleInput.checked,
+        highlightFillDefault: highlightFillSelect.value,
+        highlightOptions: ['Levels', 'Cross'],
+        levelsMeaning: 'complete-circular-ring',
+        crossMeaning: 'complete-radial-ray',
+        levelsColor: '#8FA8B6',
+        crossColor: '#8FA8B6',
+        highlightControlsConnected: true,
+        findBehavior: 'auto-highlight-level-or-ray',
+        findTrigger: 'automatic-on-input-change',
+        findChangesValue: false,
+        findCellColor: '#8FA8B6',
+        findOneClearsHighlight: true,
+        highlightedCellClickClears: true,
+        highlightedCellKeyboardClears: true,
+        lastFindTarget: lastTarget,
+        lastFindAnchor: lastAnchor,
+        lastFindFound: lastFound,
+        outerFrameRadiusChanged: false,
+        toolbarChanged: false,
+        panelToggleChanged: false
+      };
+    };
+  }());
+  </script>
+
+<style>
+#v131AboutBackdrop{position:fixed;inset:0;z-index:2147483646;display:none;align-items:center;justify-content:center;background:rgba(10,14,16,.58);font-family:Tahoma,Arial,sans-serif}
+#v131AboutBackdrop[data-open="true"]{display:flex}
+#v131AboutDialog{position:relative;width:252px;height:443px;max-width:calc(100vw - 24px);max-height:calc(100vh - 24px);box-sizing:border-box;background:#050505;border:1px solid #b57b18;box-shadow:0 12px 34px rgba(0,0,0,.58),0 0 0 1px rgba(223,166,50,.22);overflow:hidden;color:#f4c75c;direction:rtl}
+#v173AboutHeader{height:36px;box-sizing:border-box;display:flex;align-items:center;padding:0 10px;border-bottom:1px solid #8e6218;color:#f4c75c;font-size:12px;font-weight:800;text-align:right}
+#v131AboutImage{display:block;width:220px;height:220px;object-fit:contain;margin:10px auto 4px;border:1px solid #b57b18;background:#020202}
+#v173AboutInfo{text-align:center;color:#f4c75c;font-weight:700;line-height:1.42}
+#v173AboutProduct{color:#ffd86a;font-size:15px;font-weight:900;margin:1px 0 3px}
+#v173AboutVersion,#v173AboutAuthor{font-size:11px}
+#v173AboutEmail{display:block;color:#ffd86a;font:700 11px Arial,sans-serif;text-decoration:none;margin:1px 0 8px;direction:ltr}
+#v173AboutRightsOwner,#v173AboutRights{font-size:11px}
+#v131AboutCloseX{position:absolute;top:0;left:0;width:34px;height:35px;border:0;background:transparent;color:#f4c75c;font-size:19px;line-height:35px;cursor:pointer;z-index:2}
+#v131AboutCloseButton{position:absolute;left:8px;bottom:7px;min-width:43px;height:22px;padding:0 8px;border:1px solid #b57b18;background:#080808;color:#f4c75c;font:700 10px Tahoma,Arial,sans-serif;cursor:pointer}</style>
+<div id="v131AboutBackdrop" role="presentation" aria-hidden="true">
+  <div id="v131AboutDialog" role="dialog" aria-modal="true" aria-label="حول البرنامج">
+    <div id="v173AboutHeader">حول البرنامج</div>
+    <img id="v131AboutImage" alt="شعار كوكبة تاسي GOLD" src="data:image/webp;base64,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">
+    <div id="v173AboutInfo">
+      <div id="v173AboutProduct">كوكبة الأرقام السحرية</div>
+      <div id="v173AboutVersion">الإصدار: 1</div>
+      <div id="v173AboutAuthor">المؤلف: محمود سمان</div>
+      <a id="v173AboutEmail" href="mailto:m.a.m.1392@gmail.com">m.a.m.1392@gmail.com</a>
+      <div id="v173AboutRightsOwner">© 2026 كوكبة تاسي</div>
+      <div id="v173AboutRights">جميع الحقوق محفوظة</div>
+    </div>
+    <button id="v131AboutCloseX" type="button" aria-label="إغلاق نافذة حول البرنامج">×</button>
+    <button id="v131AboutCloseButton" type="button" aria-label="إغلاق">إغلاق</button>
+  </div>
+</div>
+<script>
+(function(){
+'use strict';
+var backdrop=document.getElementById('v131AboutBackdrop');
+var dialog=document.getElementById('v131AboutDialog');
+var closeX=document.getElementById('v131AboutCloseX');
+var closeButton=document.getElementById('v131AboutCloseButton');
+var boundButton=null;
+function openAbout(){backdrop.setAttribute('data-open','true');backdrop.setAttribute('aria-hidden','false');}
+function closeAbout(){backdrop.removeAttribute('data-open');backdrop.setAttribute('aria-hidden','true');}
+window.__v131OpenAbout=openAbout;
+closeX.addEventListener('click',closeAbout);
+closeButton.addEventListener('click',closeAbout);
+backdrop.addEventListener('click',function(e){if(e.target===backdrop)closeAbout();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAbout();});
+function visit(doc,callback,depth){
+  if(!doc||depth>220)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}}
+}
+function isPanel(aside){
+  var text=String(aside&&aside.textContent||'');
+  return !!(aside&&aside.querySelector('input,select')&&(/Default|الافتراضي/.test(text))&&(/Layout|التخطيط/.test(text)));
+}
+function findInfoButton(){
+  var found=null;
+  try{
+    visit(document.getElementById('v131-frame').contentDocument,function(doc){
+      if(found)return;
+      var asides=doc.querySelectorAll('aside');
+      for(var a=0;a<asides.length&&!found;a+=1){
+        var aside=asides[a];
+        if(!isPanel(aside))continue;
+        var panelRect=aside.getBoundingClientRect();
+        var controls=Array.prototype.slice.call(
+          aside.querySelectorAll('button,[role="button"],[title],[aria-label]')
+        ).filter(function(item){
+          var r=item.getBoundingClientRect();
+          return r.width>=14&&r.height>=14&&r.top-panelRect.top<65;
+        }).sort(function(one,two){
+          return one.getBoundingClientRect().left-two.getBoundingClientRect().left;
+        });
+        if(controls.length)found=controls[controls.length-1];
+      }
+    },0);
+  }catch(error){}
+  return found;
+}
+function bind(){return false;}
+var attempts=0;
+var timer=setInterval(function(){attempts+=1;bind();if(attempts>=600)clearInterval(timer);},250);
+bind();
+window.__auditKawkabatAboutDialogV131=function(){return{enabled:true,buttonBound:!!boundButton,dialogPresent:!!dialog,closeX:true,closeButton:true,escapeClose:true,wheelGeometryChanged:false,panelLayoutChanged:false};};
+}());
+</script>
+
+<style>
+#v131ExportToast{position:fixed;left:50%;top:18px;z-index:2147483647;transform:translateX(-50%);display:none;padding:9px 16px;border:1px solid #b77c1e;border-radius:7px;background:rgba(8,12,14,.94);color:#f3d98e;box-shadow:0 6px 22px rgba(0,0,0,.42);font:700 13px Tahoma,Arial,sans-serif;direction:rtl}
+#v131ExportToast[data-show="true"]{display:block}
+</style>
+<div id="v131ExportToast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('v131-frame');
+var toast=document.getElementById('v131ExportToast');
+var boundCopyButton=null;
+var busy=false;
+function showToast(message,delay){
+  toast.textContent=message;
+  toast.setAttribute('data-show','true');
+  clearTimeout(showToast.timer);
+  showToast.timer=setTimeout(function(){toast.removeAttribute('data-show');},delay||2600);
+}
+function visit(doc,callback,depth){
+  if(!doc||depth>220)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}}
+}
+function panelMatches(aside){
+  var text=String(aside&&aside.textContent||'');
+  return !!(aside&&aside.querySelector('input,select')&&/Default|الافتراضي/.test(text)&&/Layout|التخطيط/.test(text));
+}
+function topControls(aside){
+  var panelRect=aside.getBoundingClientRect();
+  return Array.prototype.slice.call(aside.querySelectorAll('button,[role="button"],[title],[aria-label]')).filter(function(item){
+    var r=item.getBoundingClientRect();
+    return r.width>=14&&r.height>=14&&r.top-panelRect.top<65;
+  });
+}
+function keyOf(item){
+  return ((item.textContent||'')+' '+(item.getAttribute('title')||'')+' '+(item.getAttribute('aria-label')||'')).trim();
+}
+function findCopyButton(){
+  var found=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(found)return;
+      var asides=doc.querySelectorAll('aside');
+      for(var a=0;a<asides.length&&!found;a+=1){
+        var aside=asides[a];
+        if(!panelMatches(aside))continue;
+        var controls=topControls(aside).sort(function(one,two){
+          return one.getBoundingClientRect().left-two.getBoundingClientRect().left;
+        });
+        if(controls.length>=2)found=controls[controls.length-2];
+      }
+    },0);
+  }catch(error){}
+  return found;
+}
+function findWheel(){
+  var result=null;
+  try{visit(frame.contentDocument,function(doc){if(!result){var svg=doc.getElementById('wheel');if(svg)result=svg;}},0);}catch(error){}
+  return result;
+}
+function blobToDataUrl(blob){
+  return new Promise(function(resolve,reject){
+    var reader=new FileReader();
+    reader.onload=function(){resolve(reader.result);};
+    reader.onerror=reject;
+    reader.readAsDataURL(blob);
+  });
+}
+async function inlineImages(clone,baseUrl){
+  var images=Array.prototype.slice.call(clone.querySelectorAll('image'));
+  for(var i=0;i<images.length;i+=1){
+    var node=images[i];
+    var href=node.getAttribute('href')||node.getAttributeNS('http://www.w3.org/1999/xlink','href')||'';
+    if(!href||/^data:|^blob:/i.test(href))continue;
+    try{
+      var response=await fetch(new URL(href,baseUrl).href,{mode:'cors',cache:'force-cache'});
+      if(!response.ok)continue;
+      var dataUrl=await blobToDataUrl(await response.blob());
+      node.setAttribute('href',dataUrl);
+      node.setAttributeNS('http://www.w3.org/1999/xlink','href',dataUrl);
+    }catch(error){}
+  }
+}
+function addDocumentStyles(source,clone){
+  var css='';
+  source.ownerDocument.querySelectorAll('style').forEach(function(style){css+='\n'+style.textContent;});
+  if(!css)return;
+  var defs=clone.querySelector('defs');
+  if(!defs){defs=clone.ownerDocument.createElementNS('http://www.w3.org/2000/svg','defs');clone.insertBefore(defs,clone.firstChild);}
+  var styleNode=clone.ownerDocument.createElementNS('http://www.w3.org/2000/svg','style');
+  styleNode.textContent=css;
+  defs.appendChild(styleNode);
+}
+function exportName(){
+  return 'gann-circle-'+new Date().toISOString().replace(/:/g,'-').replace(/\./g,'-')+'.png';
+}
+async function wheelPng(){
+  var source=findWheel();
+  if(!source)throw new Error('WHEEL_NOT_FOUND');
+  var clone=source.cloneNode(true);
+  var logoClone=clone.querySelector('#logoImage');
+  if(!logoClone)throw new Error('LOGO_ELEMENT_NOT_FOUND');
+  var logoHref=logoClone.getAttribute('href')||logoClone.getAttributeNS('http://www.w3.org/1999/xlink','href')||'';
+  if(!/^data:image\/(webp|png|jpeg);base64,/i.test(logoHref))throw new Error('LOGO_DATA_NOT_READY');
+  logoClone.style.setProperty('opacity','1','important');
+  logoClone.style.setProperty('visibility','visible','important');
+  logoClone.style.setProperty('display','inline','important');
+  logoClone.setAttribute('opacity','1');
+  clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  clone.setAttribute('xmlns:xlink','http://www.w3.org/1999/xlink');
+  addDocumentStyles(source,clone);
+  await inlineImages(clone,source.ownerDocument.baseURI);
+  var vb=(source.getAttribute('viewBox')||'0 0 4400 3600').trim().split(/\s+/).map(Number);
+  var width=Math.max(1,Math.round(vb[2]||4400));
+  var height=Math.max(1,Math.round(vb[3]||3600));
+  clone.setAttribute('width',String(width));
+  clone.setAttribute('height',String(height));
+  var svgBlob=new Blob([new XMLSerializer().serializeToString(clone)],{type:'image/svg+xml;charset=utf-8'});
+  var url=URL.createObjectURL(svgBlob);
+  try{
+    var image=await new Promise(function(resolve,reject){var img=new Image();img.onload=function(){resolve(img);};img.onerror=reject;img.src=url;});
+    var canvas=document.createElement('canvas');
+    canvas.width=width;canvas.height=height;
+    var ctx=canvas.getContext('2d',{alpha:false});
+    ctx.fillStyle='#F7F1E3';ctx.fillRect(0,0,width,height);ctx.drawImage(image,0,0,width,height);
+    return await new Promise(function(resolve,reject){canvas.toBlob(function(blob){if(blob)resolve(blob);else reject(new Error('PNG_ENCODING_FAILED'));},'image/png',1);});
+  }finally{URL.revokeObjectURL(url);}
+}
+async function exportWheel(event){
+  if(event){event.preventDefault();event.stopPropagation();}
+  if(busy)return;
+  busy=true;
+  try{
+    var png=await wheelPng();
+    var url=URL.createObjectURL(png);
+    var link=document.createElement('a');
+    link.href=url;
+    link.download=exportName();
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},30000);
+  }catch(error){
+    console.error('V131_PNG_EXPORT_FAILED',error);
+  }finally{
+    busy=false;
+  }
+}
+window.__v131ExportWheel=exportWheel;
+function bind(){return false;}
+var attempts=0;
+var timer=setInterval(function(){attempts+=1;bind();if(attempts>=600)clearInterval(timer);},250);
+bind();
+window.__auditKawkabatPngExportV131=function(){return{enabled:true,buttonBound:!!boundCopyButton,highResolution:true,fileType:'image/png',clipboardAttempt:false,logoForcedVisibleInExport:true,logoDataReadinessRequired:true,automaticPaintLaunch:false,wheelGeometryChanged:false,panelLayoutChanged:false};};
+}());
+</script>
+
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('v131-frame');
+var routed=new WeakSet();
+function visit(doc,callback,depth){
+  if(!doc||depth>220)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}}
+}
+function isPanel(aside){
+  var text=String(aside&&aside.textContent||'');
+  return !!(aside&&aside.querySelector('input,select')&&/Default|الافتراضي/.test(text)&&/Layout|التخطيط/.test(text));
+}
+function routeClick(event){
+  var aside=event.currentTarget;
+  var rect=aside.getBoundingClientRect();
+  var fromTop=event.clientY-rect.top;
+  var fromRight=rect.right-event.clientX;
+  if(fromTop<0||fromTop>48)return;
+  if(fromRight>=4&&fromRight<50){
+    event.preventDefault();event.stopImmediatePropagation();
+    if(typeof window.__v131OpenAbout==='function')window.__v131OpenAbout();
+    return;
+  }
+  if(fromRight>=54&&fromRight<92){
+    event.preventDefault();event.stopImmediatePropagation();
+    if(typeof window.__v131ExportWheel==='function')window.__v131ExportWheel(event);
+  }
+}
+function install(){
+  var count=0;
+  try{
+    visit(frame.contentDocument,function(doc){
+      var asides=doc.querySelectorAll('aside');
+      for(var i=0;i<asides.length;i+=1){
+        var aside=asides[i];
+        if(!isPanel(aside)||routed.has(aside))continue;
+        routed.add(aside);
+        aside.addEventListener('click',routeClick,true);
+        count+=1;
+      }
+    },0);
+  }catch(error){}
+  return count;
+}
+var attempts=0;
+var timer=setInterval(function(){attempts+=1;install();if(attempts>=600)clearInterval(timer);},250);
+install();
+window.__auditKawkabatPanelIconRouterV131=function(){return{installed:true,routedPanels:'weak-set',infoBandFromRight:[4,50],deadGapFromRight:[50,54],copyBandFromRight:[54,92],headerBandFromTop:[0,48],legacyWrongBindingsDisabled:true,wheelGeometryChanged:false,panelLayoutChanged:false};};
+}());
+</script>
+
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('v131-frame');
+var repaired=false;
+function visit(doc,callback,depth){
+  if(!doc||depth>220)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}}
+}
+function repairPencil(){
+  if(repaired)return true;
+  var pencil=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(!pencil)pencil=doc.getElementById('v64PencilBtn');
+    },0);
+  }catch(error){}
+  if(!pencil)return false;
+  if(pencil.getAttribute('data-v131-rebind-requested')==='true'){
+    repaired=true;
+    return true;
+  }
+  pencil.setAttribute('data-v131-rebind-requested','true');
+  pencil.removeAttribute('data-v66-bound');
+  if(pencil.dataset)delete pencil.dataset.v66Bound;
+  repaired=true;
+  return true;
+}
+var attempts=0;
+var timer=setInterval(function(){
+  attempts+=1;
+  if(repairPencil()||attempts>=600)clearInterval(timer);
+},250);
+repairPencil();
+window.__auditKawkabatPencilRepairV131=function(){
+  var pencil=null,toolbar=null,overlay=null;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(!pencil)pencil=doc.getElementById('v64PencilBtn');
+      if(!toolbar)toolbar=doc.getElementById('v66DrawingToolbar');
+      if(!overlay)overlay=doc.getElementById('v66DrawingOverlay');
+    },0);
+  }catch(error){}
+  return{
+    repaired:repaired,
+    pencilPresent:!!pencil,
+    originalV66BindingRestored:!!(pencil&&pencil.dataset&&pencil.dataset.v66Bound==='true'),
+    drawingToolbarPresent:!!toolbar,
+    drawingOverlayPresent:!!overlay,
+    originalDrawingSystemReused:true,
+    wheelGeometryChanged:false,
+    panelLayoutChanged:false
+  };
+};
+}());
+</script>
+
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('v131-frame');
+var state={doc:null,wheel:null,toolbar:null,canvas:null,ctx:null,tool:'pencil',color:'#1b75a8',objects:[],undo:[],redo:[],current:null,observer:null,textEditor:null,selectionMenu:null,selectMode:'rect',selectionCurrent:null};
+function visit(doc,callback,depth){if(!doc||depth>220)return;callback(doc);var fs=doc.querySelectorAll('iframe');for(var i=0;i<fs.length;i+=1){try{visit(fs[i].contentDocument,callback,depth+1);}catch(e){}}}
+function findSystem(){var tb=null,toolbarDoc=null,wheel=null,wheelDoc=null;try{visit(frame.contentDocument,function(doc){if(!tb){var candidateToolbar=doc.getElementById('v66DrawingToolbar');if(candidateToolbar){tb=candidateToolbar;toolbarDoc=doc;}}if(!wheel){var candidateWheel=doc.getElementById('wheel');if(candidateWheel){wheel=candidateWheel;wheelDoc=doc;}}},0);}catch(e){}return tb&&wheel?{toolbarDoc:toolbarDoc,tb:tb,wheelDoc:wheelDoc,wheel:wheel}:null;}
+function css(doc){if(doc.getElementById('v131DrawingCss'))return;var s=doc.createElement('style');s.id='v131DrawingCss';s.textContent=
+'#v66DrawingToolbar[data-v131-full="true"]{top:42px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;height:42px!important;padding:2px 5px!important;gap:1px!important;direction:ltr!important;border:1px solid #9ca9b1!important;border-radius:2px!important;background:linear-gradient(#f8fbfc,#d9e2e7)!important;box-shadow:0 2px 6px rgba(0,0,0,.22)!important;white-space:nowrap!important}'+
+'#v66DrawingToolbar[data-v131-full="true"] button{width:34px!important;min-width:34px!important;height:36px!important;padding:1px!important;margin:0!important;border:0!important;border-right:1px solid #c7d0d5!important;border-radius:0!important;background:transparent!important;color:#32677e!important;font:700 16px Arial,Tahoma!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}'+
+'#v66DrawingToolbar[data-v131-full="true"] button:hover{background:#edf6fa!important}#v66DrawingToolbar[data-v131-full="true"] button[data-active="true"]{background:#d7ebf4!important;box-shadow:inset 0 0 0 1px #69a8c2!important}'+
+'#v66DrawingToolbar button[data-tool="undo"],#v66DrawingToolbar button[data-tool="redo"]{color:#b8d8e5!important}#v66DrawingToolbar button[data-tool="clear"]{color:#b08b34!important}#v66DrawingToolbar button[data-tool="select"]{color:#68b6d3!important}#v66DrawingToolbar button[data-tool="erase"]{color:#df5269!important}#v66DrawingToolbar button[data-tool="pencil"]{color:#58b2d1!important}#v66DrawingToolbar button[data-tool="text"]{color:#174b60!important}#v66DrawingToolbar button[data-tool="line"],#v66DrawingToolbar button[data-tool="ellipse"],#v66DrawingToolbar button[data-tool="rect"],#v66DrawingToolbar button[data-tool="fillRect"],#v66DrawingToolbar button[data-tool="triangle"],#v66DrawingToolbar button[data-tool="color"]{color:#4b9dbb!important}#v66DrawingToolbar button[data-tool="color"]{background:#dcecf3!important;box-shadow:inset 0 0 0 1px #78aec4!important}'+
+'#v66DrawingToolbar .v131-wide{width:54px!important;min-width:54px!important;flex-direction:column!important;font:700 10px Tahoma,Arial!important;line-height:12px!important}'+
+'#v66DrawingToolbar .v131-title{height:36px;min-width:60px;padding:0 7px;border-left:1px solid #b8c4ca;display:flex;align-items:center;justify-content:center;text-align:center;color:#263d49;font:700 10px Tahoma,Arial;line-height:13px;direction:rtl}'+
+'#v66DrawingToolbar .v131-menu{font-size:15px!important;color:#597480!important}#v131DrawingOverlay{position:fixed;z-index:2147483100;touch-action:none}';
+doc.head.appendChild(s);}
+function pushUndo(){state.undo.push(JSON.stringify(state.objects));if(state.undo.length>50)state.undo.shift();state.redo=[];}
+function btn(doc,icon,title,tool,wide){var b=doc.createElement('button');b.type='button';b.innerHTML=icon;b.title=title;b.dataset.tool=tool||'';if(wide)b.className='v131-wide';b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();action(tool);});return b;}
+function action(tool){if(tool==='undo'){if(state.undo.length){state.redo.push(JSON.stringify(state.objects));state.objects=JSON.parse(state.undo.pop());draw();}}else if(tool==='redo'){if(state.redo.length){state.undo.push(JSON.stringify(state.objects));state.objects=JSON.parse(state.redo.pop());draw();}}else if(tool==='clear'){if(state.objects.length){pushUndo();state.objects=[];draw();}}else if(tool==='color'){var p=['#1b75a8','#b3232a','#111111','#c88a22','#6f3f68'];state.color=p[(p.indexOf(state.color)+1)%p.length];}else if(tool==='select'){state.tool='select';showSelectionMenu();}else{state.tool=tool;hideSelectionMenu();}sync();}
+function buildToolbar(sys){var tb=sys.tb;if(tb.dataset.v131Full==='true')return;css(sys.toolbarDoc);tb.innerHTML='';tb.dataset.v131Full='true';
+var items=[
+['↶','تراجع','undo'],['↷','إعادة','redo'],['⌫<small>مسح</small>','مسح الكل','clear',true],['▣<small>تحديد</small>','تحديد/تحريك','select',true],
+['◆','ممحاة','erase'],['✎','قلم حر','pencil'],['A','نص','text'],['╱','خط','line'],['○','دائرة','ellipse'],['□','مربع','rect'],['▢','مستطيل','fillRect'],['△','مثلث','triangle'],['◉','لون الرسم','color']];
+for(var i=0;i<items.length;i++)tb.appendChild(btn(sys.toolbarDoc,items[i][0],items[i][1],items[i][2],items[i][3]));
+var title=sys.toolbarDoc.createElement('span');title.className='v131-title';title.innerHTML='أدوات<br>الرسم';tb.appendChild(title);tb.appendChild(btn(sys.toolbarDoc,'☰','قائمة أدوات الرسم','menu'));tb.lastChild.className='v131-menu';createSelectionMenu(sys.toolbarDoc);sync();}
+function ensureCanvas(sys){state.doc=sys.wheelDoc;state.wheel=sys.wheel;css(sys.wheelDoc);var old=sys.wheelDoc.getElementById('v66DrawingOverlay');if(old)old.style.setProperty('pointer-events','none','important');var cv=sys.wheelDoc.getElementById('v131DrawingOverlay');if(!cv){cv=sys.wheelDoc.createElement('canvas');cv.id='v131DrawingOverlay';sys.wheelDoc.body.appendChild(cv);bindCanvas(cv);}state.canvas=cv;state.ctx=cv.getContext('2d');position();}
+function position(){if(!state.canvas||!state.wheel)return;var r=state.wheel.getBoundingClientRect(),dpr=Math.max(1,Math.min(2,state.doc.defaultView.devicePixelRatio||1));var w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));if(state.canvas.width!==w||state.canvas.height!==h){state.canvas.width=w;state.canvas.height=h;}state.canvas.style.left=r.left+'px';state.canvas.style.top=r.top+'px';state.canvas.style.width=r.width+'px';state.canvas.style.height=r.height+'px';var open=state.toolbar&&!state.toolbar.hidden;state.canvas.style.pointerEvents=open?'auto':'none';state.canvas.style.visibility=open?'visible':'hidden';draw();}
+function pt(e){var r=state.canvas.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width,y:(e.clientY-r.top)/r.height};}
+function createSelectionMenu(doc){
+  if(state.selectionMenu&&state.selectionMenu.isConnected)return state.selectionMenu;
+  var menu=doc.getElementById('v131SelectionMenu');
+  if(!menu){menu=doc.createElement('div');menu.id='v131SelectionMenu';menu.hidden=true;
+    [['تحديد مستطيلي الشكل','rect','▧'],['تحديد شكل حر','free','⌁'],['تحديد الكل','all','▣'],['عكس التحديد','invert','◫']].forEach(function(item){
+      var b=doc.createElement('button');b.type='button';b.innerHTML='<span>'+item[0]+'</span><b>'+item[2]+'</b>';
+      b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();state.selectMode=item[1];if(item[1]==='all')state.objects.forEach(function(o){o.selected=true;});if(item[1]==='invert')state.objects.forEach(function(o){o.selected=!o.selected;});hideSelectionMenu();draw();});
+      menu.appendChild(b);
+    });doc.body.appendChild(menu);
+  }state.selectionMenu=menu;return menu;
+}
+function showSelectionMenu(){
+  var menu=state.selectionMenu;if(!menu||!state.toolbar)return;
+  var b=state.toolbar.querySelector('button[data-tool="select"]');if(!b)return;
+  var r=b.getBoundingClientRect();menu.style.left=r.left+'px';menu.style.top=(r.bottom+3)+'px';menu.hidden=false;
+}
+function hideSelectionMenu(){if(state.selectionMenu)state.selectionMenu.hidden=true;}
+function openTextEditor(e,p){
+  if(state.textEditor)state.textEditor.remove();
+  var input=state.doc.createElement('input');input.id='v131InlineText';input.type='text';input.placeholder='اكتب هنا';
+  input.style.left=e.clientX+'px';input.style.top=e.clientY+'px';state.doc.body.appendChild(input);state.textEditor=input;input.focus();
+  var done=false;function finish(commit){if(done)return;done=true;var value=input.value.trim();if(commit&&value){pushUndo();state.objects.push({type:'text',start:p,text:value,color:state.color});}input.remove();state.textEditor=null;draw();}
+  input.addEventListener('keydown',function(ev){if(ev.key==='Enter'){ev.preventDefault();finish(true);}else if(ev.key==='Escape'){ev.preventDefault();finish(false);}});
+  input.addEventListener('blur',function(){finish(true);});
+}
+function applySelection(sel){
+  var minX=Math.min(sel.start.x,sel.end.x),maxX=Math.max(sel.start.x,sel.end.x),minY=Math.min(sel.start.y,sel.end.y),maxY=Math.max(sel.start.y,sel.end.y);
+  state.objects.forEach(function(o){var p=o.start;o.selected=p.x>=minX&&p.x<=maxX&&p.y>=minY&&p.y<=maxY;});
+}
+function bindCanvas(cv){
+  cv.addEventListener('pointerdown',function(e){
+    if(e.button!==0)return;var p=pt(e);
+    if(state.tool==='text'){openTextEditor(e,p);e.preventDefault();return;}
+    if(state.tool==='erase'){eraseAt(p);return;}
+    if(state.tool==='select'){state.selectionCurrent={type:state.selectMode==='free'?'selectionFree':'selectionRect',start:p,end:p,points:state.selectMode==='free'?[p]:null};cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);e.preventDefault();return;}
+    pushUndo();state.current={type:state.tool,start:p,end:p,points:(state.tool==='pencil'||state.tool==='highlight')?[p]:null,color:state.color};state.objects.push(state.current);cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);e.preventDefault();
+  });
+  cv.addEventListener('pointermove',function(e){var p=pt(e);if(state.selectionCurrent){state.selectionCurrent.end=p;if(state.selectionCurrent.points)state.selectionCurrent.points.push(p);draw();e.preventDefault();return;}if(!state.current)return;state.current.end=p;if(state.current.points)state.current.points.push(p);draw();e.preventDefault();});
+  function end(){if(state.selectionCurrent){applySelection(state.selectionCurrent);state.selectionCurrent=null;}state.current=null;draw();sync();}
+  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+}
+function eraseAt(p){var best=-1,score=.035;for(var i=state.objects.length-1;i>=0;i--){var o=state.objects[i],x=o.start.x,y=o.start.y,d=Math.hypot(p.x-x,p.y-y);if(d<score){best=i;break;}}if(best>=0){pushUndo();state.objects.splice(best,1);draw();}}
+function draw(){if(!state.ctx||!state.canvas)return;var r=state.canvas.getBoundingClientRect(),dpr=state.canvas.width/Math.max(1,r.width),ctx=state.ctx;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,r.width,r.height);state.objects.forEach(function(o){var s={x:o.start.x*r.width,y:o.start.y*r.height},e={x:(o.end||o.start).x*r.width,y:(o.end||o.start).y*r.height};ctx.save();ctx.strokeStyle=o.color||'#1b75a8';ctx.fillStyle=o.color||'#1b75a8';ctx.lineWidth=o.type==='highlight'?10:3;ctx.globalAlpha=o.type==='highlight'?.32:1;ctx.lineCap='round';ctx.lineJoin='round';if(o.type==='pencil'||o.type==='highlight'){var a=o.points||[];if(a.length){ctx.beginPath();ctx.moveTo(a[0].x*r.width,a[0].y*r.height);for(var j=1;j<a.length;j++)ctx.lineTo(a[j].x*r.width,a[j].y*r.height);ctx.stroke();}}else if(o.type==='line'){ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(e.x,e.y);ctx.stroke();}else if(o.type==='rect'||o.type==='fillRect'){var x=Math.min(s.x,e.x),y=Math.min(s.y,e.y),w=Math.abs(e.x-s.x),h=Math.abs(e.y-s.y);o.type==='fillRect'?ctx.fillRect(x,y,w,h):ctx.strokeRect(x,y,w,h);}else if(o.type==='ellipse'){ctx.beginPath();ctx.ellipse((s.x+e.x)/2,(s.y+e.y)/2,Math.max(.5,Math.abs(e.x-s.x)/2),Math.max(.5,Math.abs(e.y-s.y)/2),0,0,Math.PI*2);ctx.stroke();}else if(o.type==='triangle'){ctx.beginPath();ctx.moveTo((s.x+e.x)/2,s.y);ctx.lineTo(e.x,e.y);ctx.lineTo(s.x,e.y);ctx.closePath();ctx.stroke();}else if(o.type==='text'){ctx.font='700 24px Tahoma,Arial';ctx.fillText(o.text,s.x,s.y);}if(o.selected){ctx.globalAlpha=1;ctx.strokeStyle='#5aaec6';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.strokeRect(s.x-7,s.y-18,Math.max(18,Math.abs(e.x-s.x)+14),Math.max(24,Math.abs(e.y-s.y)+28));}ctx.restore();});
+if(state.selectionCurrent){var q=state.selectionCurrent,a={x:q.start.x*r.width,y:q.start.y*r.height},b={x:q.end.x*r.width,y:q.end.y*r.height};ctx.save();ctx.strokeStyle='#4aa8c4';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);if(q.points&&q.points.length){ctx.beginPath();ctx.moveTo(q.points[0].x*r.width,q.points[0].y*r.height);for(var k=1;k<q.points.length;k++)ctx.lineTo(q.points[k].x*r.width,q.points[k].y*r.height);ctx.stroke();}else{ctx.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y));}ctx.restore();}}
+function sync(){if(!state.toolbar)return;state.toolbar.querySelectorAll('button[data-tool]').forEach(function(b){b.dataset.active=b.dataset.tool===state.tool?'true':'false';if(b.dataset.tool==='color')b.style.color=state.color;});position();}
+function install(){var sys=findSystem();if(!sys)return false;state.toolbar=sys.tb;buildToolbar(sys);ensureCanvas(sys);if(!state.observer){state.observer=new MutationObserver(position);state.observer.observe(sys.tb,{attributes:true,attributeFilter:['hidden','style']});}return true;}
+var tries=0;setInterval(function(){tries++;install();position();},300);install();
+window.__auditKawkabatFullDrawingToolbarV131=function(){return{fullToolbar:true,crossDocumentDiscovery:true,oldCompactToolbarContentReplaced:true,toolCount:13,tools:['undo','redo','clear','select','erase','pencil','text','line','ellipse','rect','fillRect','triangle','color'],titleArabic:true,menu:true,inlineTextEditor:true,browserPromptRemoved:true,selectionModes:['rect','free','all','invert'],originalPencilTogglePreserved:true,wheelGeometryChanged:false,panelLayoutChanged:false};};
+}());
+</script>
+
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('v131-frame');
+var NS='http://www.w3.org/2000/svg';
+var CX=2200,CY=1800;
+var colors=['transparent','#5DBB63','#F16F78','#FFE45C','#737876'];
+var opacities=[0.001,0.78,0.76,0.84,0.76];
+var states=new Map();
+var installedSvg=null,lastSignature='';
+function visit(doc,callback,depth){if(!doc||depth>220)return;callback(doc);var fs=doc.querySelectorAll('iframe');for(var i=0;i<fs.length;i+=1){try{visit(fs[i].contentDocument,callback,depth+1);}catch(e){}}}
+function findWheel(){var found=null;try{visit(frame.contentDocument,function(doc){if(!found){var svg=doc.getElementById('wheel');if(svg)found=svg;}},0);}catch(e){}return found;}
+function point(r,degree){var a=degree*Math.PI/180;return{x:CX+Math.cos(a)*r,y:CY+Math.sin(a)*r};}
+function sector(inner,outer,a0,a1){var p1=point(outer,a0),p2=point(outer,a1),p3=point(inner,a1),p4=point(inner,a0);return'M '+p1.x.toFixed(3)+' '+p1.y.toFixed(3)+' A '+outer.toFixed(3)+' '+outer.toFixed(3)+' 0 0 1 '+p2.x.toFixed(3)+' '+p2.y.toFixed(3)+' L '+p3.x.toFixed(3)+' '+p3.y.toFixed(3)+' A '+inner.toFixed(3)+' '+inner.toFixed(3)+' 0 0 0 '+p4.x.toFixed(3)+' '+p4.y.toFixed(3)+' Z';}
+function apply(path,state){path.dataset.state=String(state);path.setAttribute('fill',colors[state]);path.setAttribute('fill-opacity',String(opacities[state]));}
+function keyFor(node,radius,angle,index){var parent=node.parentNode&&node.parentNode.id||'ring';var tick=node.getAttribute('data-tick')||node.textContent||index;return parent+'|'+Math.round(radius*10)/10+'|'+Math.round(angle*10)/10+'|'+tick;}
+function build(svg){
+  var old=svg.querySelector('#v131CellColorLayer');if(old)old.remove();
+  var nodes=Array.prototype.slice.call(svg.querySelectorAll('.approved-cycle-number[data-tick]'));
+  if(!nodes.length)return false;
+  var items=nodes.map(function(node,index){var x=Number(node.getAttribute('x')),y=Number(node.getAttribute('y'));if(!Number.isFinite(x)||!Number.isFinite(y))return null;var dx=x-CX,dy=y-CY,r=Math.hypot(dx,dy),a=Math.atan2(dy,dx)*180/Math.PI;return{node:node,index:index,r:r,a:a};}).filter(Boolean);
+  if(!items.length)return false;
+  var radii=[];items.map(function(i){return i.r;}).sort(function(a,b){return a-b;}).forEach(function(r){if(!radii.length||Math.abs(r-radii[radii.length-1])>4)radii.push(r);else radii[radii.length-1]=(radii[radii.length-1]+r)/2;});
+  var group=svg.ownerDocument.createElementNS(NS,'g');group.id='v131CellColorLayer';group.setAttribute('aria-label','تلوين الخلايا التفاعلي');
+  items.forEach(function(item){
+    var ri=0,best=Infinity;for(var i=0;i<radii.length;i++){var d=Math.abs(radii[i]-item.r);if(d<best){best=d;ri=i;}}
+    var gapIn=ri>0?radii[ri]-radii[ri-1]:(radii[1]?radii[1]-radii[0]:82);
+    var gapOut=ri<radii.length-1?radii[ri+1]-radii[ri]:gapIn;
+    var inner=Math.max(1,radii[ri]-gapIn/2+1.6),outer=radii[ri]+gapOut/2-1.6;
+    var path=svg.ownerDocument.createElementNS(NS,'path');
+    var key=keyFor(item.node,radii[ri],item.a,item.index);
+    path.setAttribute('d',sector(inner,outer,item.a-5,item.a+5));
+    path.setAttribute('data-v131-cell-key',key);
+    path.setAttribute('stroke','none');
+    path.style.pointerEvents='all';
+    path.style.cursor='pointer';
+    apply(path,states.get(key)||0);
+    path.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();var next=((states.get(key)||0)+1)%5;states.set(key,next);apply(path,next);});
+    path.addEventListener('contextmenu',function(e){e.preventDefault();e.stopPropagation();states.delete(key);apply(path,0);});
+    group.appendChild(path);
+  });
+  var firstParent=items[0].node.parentNode;
+  if(firstParent&&firstParent.parentNode===svg)svg.insertBefore(group,firstParent);else svg.appendChild(group);
+  installedSvg=svg;lastSignature=items.length+'|'+radii.map(function(r){return r.toFixed(1);}).join(',');
+  return true;
+}
+function install(){
+  var svg=findWheel();if(!svg)return false;
+  var nodes=svg.querySelectorAll('.approved-cycle-number[data-tick]');
+  var radii=[];for(var i=0;i<nodes.length;i++){var x=Number(nodes[i].getAttribute('x')),y=Number(nodes[i].getAttribute('y'));if(Number.isFinite(x)&&Number.isFinite(y))radii.push(Math.round(Math.hypot(x-CX,y-CY)));}
+  var signature=nodes.length+'|'+Array.from(new Set(radii)).sort(function(a,b){return a-b;}).join(',');
+  if(svg!==installedSvg||!svg.querySelector('#v131CellColorLayer')||signature.split('|')[0]!==lastSignature.split('|')[0])return build(svg);
+  return true;
+}
+var attempts=0;setInterval(function(){attempts+=1;install();},500);install();
+window.__auditKawkabatCellColorCycleV131=function(){return{enabled:true,leftClickCycle:['original','green','red','yellow','dark-gray','original'],rightClickClears:true,browserContextMenuPreventedOnCells:true,numberLayerAboveColor:true,cellGeometryChanged:false,wheelGeometryChanged:false,stateCount:states.size};};
+}());
+</script>
+</body>
+</html>
