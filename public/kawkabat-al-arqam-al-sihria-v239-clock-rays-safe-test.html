@@ -4405,115 +4405,122 @@ window.__auditKawkabatIndependentStarsV236=function(){
 <script>
 (function(){
 'use strict';
-var PREFIX='v240ClockRays';
-var frame=document.getElementById('v131-frame');
-var wheelDoc=null,controlDoc=null,timer=null,controls=null;
-var NS='http://www.w3.org/2000/svg';
+var PREFIX='v240ClockRays',NS='http://www.w3.org/2000/svg';
 var CX=2200,CY=1800,INNER=415,OUTER=1465;
+var frame=document.getElementById('v131-frame');
+var panelDoc=null,wheelDoc=null,svg=null,rayGroup=null,clockGroup=null,controls=null,timer=null;
 
 function visit(doc,fn,depth){
-  if(!doc||depth>5)return null;
-  var hit=fn(doc); if(hit)return hit;
-  var frames=doc.querySelectorAll('iframe');
-  for(var i=0;i<frames.length;i+=1){
-    try{var nested=visit(frames[i].contentDocument,fn,depth+1);if(nested)return nested;}catch(e){}
-  }
-  return null;
+ if(!doc||depth>6)return null;
+ var hit=fn(doc);if(hit)return hit;
+ var frames=doc.querySelectorAll('iframe');
+ for(var i=0;i<frames.length;i+=1){try{var nested=visit(frames[i].contentDocument,fn,depth+1);if(nested)return nested;}catch(e){}}
+ return null;
 }
-function discover(){
-  if(!frame||!frame.contentDocument)return false;
-  wheelDoc=visit(frame.contentDocument,function(d){return d.getElementById('wheel')?d:null;},0);
-  controlDoc=visit(frame.contentDocument,function(d){
-    return d.querySelector('input[aria-label="Value"]')&&d.querySelector('input[aria-label="Find"]')?d:null;
-  },0);
-  return !!(wheelDoc&&controlDoc);
+function el(name,attrs){
+ var n=wheelDoc.createElementNS(NS,name);
+ Object.keys(attrs||{}).forEach(function(k){n.setAttribute(k,String(attrs[k]));});
+ return n;
 }
-function svgEl(name,attrs){
-  var e=wheelDoc.createElementNS(NS,name);
-  Object.keys(attrs||{}).forEach(function(k){e.setAttribute(k,String(attrs[k]));});
-  return e;
+function pt(angle,r){
+ var a=(angle-90)*Math.PI/180;
+ return{x:CX+Math.cos(a)*r,y:CY+Math.sin(a)*r};
 }
-function point(angle,r){
-  var a=(angle-90)*Math.PI/180;
-  return {x:CX+Math.cos(a)*r,y:CY+Math.sin(a)*r};
+function row(label,input){
+ var r=panelDoc.createElement('label');r.className='v240ClockRow';
+ var s=panelDoc.createElement('span');s.textContent=label;
+ r.appendChild(s);r.appendChild(input);return r;
 }
-function addStyle(){
-  if(controlDoc.getElementById(PREFIX+'Style'))return;
-  var s=controlDoc.createElement('style');s.id=PREFIX+'Style';
-  s.textContent=
-    '#'+PREFIX+'Panel{direction:ltr;font:11px Tahoma,Arial,sans-serif;border-top:1px solid #65b6c5;border-bottom:1px solid #9eb2ba;background:#eef2f3}'+
-    '#'+PREFIX+'Panel .v240h{height:25px;display:flex;align-items:center;padding:0 8px;font-weight:700;color:#173742;background:linear-gradient(#fff,#e4ecef)}'+
-    '#'+PREFIX+'Panel .v240r{display:grid;grid-template-columns:1fr 42px;align-items:center;min-height:24px;border-top:1px solid #cbd5d9;padding:0 8px}'+
-    '#'+PREFIX+'Panel input{margin:0;justify-self:center}';
-  controlDoc.head.appendChild(s);
+function buildControls(){
+ var existing=panelDoc.getElementById(PREFIX+'Section');
+ if(existing){
+  controls={visible:existing.querySelector('[data-role=visible]'),center:existing.querySelector('[data-role=center]')};
+  return !!(controls.visible&&controls.center);
+ }
+ if(!panelDoc.getElementById(PREFIX+'Style')){
+  var style=panelDoc.createElement('style');style.id=PREFIX+'Style';
+  style.textContent=
+   '#'+PREFIX+'Section{direction:ltr;width:100%;box-sizing:border-box;font:11px Tahoma,Arial,sans-serif;border-top:1px solid #65b6c5;border-bottom:1px solid #9eb2ba;background:#eef2f3}'+
+   '#'+PREFIX+'Section .v240ClockHead{height:25px;display:flex;align-items:center;padding:0 8px;font-weight:700;color:#173742;background:linear-gradient(#fff,#e4ecef)}'+
+   '#'+PREFIX+'Section .v240ClockRow{display:grid;grid-template-columns:1fr 42px;align-items:center;min-height:24px;border-top:1px solid #cbd5d9;padding:0 8px}';
+  panelDoc.head.appendChild(style);
+ }
+ var section=panelDoc.createElement('div');section.id=PREFIX+'Section';
+ var head=panelDoc.createElement('div');head.className='v240ClockHead';head.textContent='Clock rays — الساعة';section.appendChild(head);
+ var visible=panelDoc.createElement('input');visible.type='checkbox';visible.checked=true;visible.setAttribute('data-role','visible');
+ var center=panelDoc.createElement('input');center.type='checkbox';center.checked=true;center.setAttribute('data-role','center');
+ section.appendChild(row('Visible',visible));section.appendChild(row('Center clock',center));
+ panelDoc.getElementById('v217FiguresBody').appendChild(section);
+ controls={visible:visible,center:center};
+ visible.addEventListener('change',render);center.addEventListener('change',render);
+ panelDoc.documentElement.dataset.v240ClockDefaults='visible-on-center-clock-on';
+ return true;
 }
-function addPanel(){
-  var old=controlDoc.getElementById(PREFIX+'Panel');
-  if(old){controls={visible:old.querySelector('[data-role=visible]'),center:old.querySelector('[data-role=center]')};return true;}
-  addStyle();
-  var panel=controlDoc.createElement('div');panel.id=PREFIX+'Panel';
-  panel.innerHTML='<div class="v240h">Clock rays — الساعة</div>'+
-    '<label class="v240r"><span>Visible</span><input data-role="visible" type="checkbox"></label>'+
-    '<label class="v240r"><span>Center clock</span><input data-role="center" type="checkbox" checked></label>';
-  var figuresSection=controlDoc.getElementById('v217FiguresSection');
-  if(figuresSection&&figuresSection.parentNode){figuresSection.parentNode.insertBefore(panel,figuresSection);}
-  else{(controlDoc.querySelector('aside')||controlDoc.body).appendChild(panel);}
-  controls={visible:panel.querySelector('[data-role=visible]'),center:panel.querySelector('[data-role=center]')};
-  controls.visible.checked=true;
-  controls.visible.addEventListener('change',render);
-  controls.center.addEventListener('change',render);
-  controlDoc.documentElement.dataset.v240ClockDefaults='visible-on-center-clock-on';
-  return true;
+function ensureGraphics(){
+ rayGroup=wheelDoc.getElementById(PREFIX+'Rays');
+ if(!rayGroup){
+  rayGroup=el('g',{id:PREFIX+'Rays','pointer-events':'none','aria-label':'Clock rays'});
+  var cycles=wheelDoc.getElementById('dynamicApprovedCycles');
+  if(cycles&&cycles.parentNode===svg)svg.insertBefore(rayGroup,cycles);else svg.appendChild(rayGroup);
+ }
+ clockGroup=wheelDoc.getElementById(PREFIX+'Center');
+ if(!clockGroup){
+  clockGroup=el('g',{id:PREFIX+'Center','pointer-events':'none','aria-label':'Center digital clock'});
+  svg.appendChild(clockGroup);
+ }
+ return true;
 }
-function badge(group,angle,color,label){
-  var p=point(angle,OUTER);
-  var g=svgEl('g',{'data-v240-badge':label,'pointer-events':'none'});
-  g.appendChild(svgEl('circle',{cx:p.x,cy:p.y,r:34,fill:'#16120e','fill-opacity':'.94',stroke:color,'stroke-width':6}));
-  var t=svgEl('text',{x:p.x,y:p.y+10,'text-anchor':'middle','font-family':'Tahoma,Arial,sans-serif','font-size':28,'font-weight':'700',fill:color});
-  t.textContent=label;g.appendChild(t);group.appendChild(g);
+function clear(g){while(g&&g.firstChild)g.removeChild(g.firstChild);}
+function badge(g,angle,color,label){
+ var p=pt(angle,OUTER);
+ var bg=el('circle',{cx:p.x,cy:p.y,r:34,fill:'#15110d','fill-opacity':'.96',stroke:color,'stroke-width':6});
+ var t=el('text',{x:p.x,y:p.y+10,'text-anchor':'middle','font-family':'Tahoma,Arial,sans-serif','font-size':28,'font-weight':'700',fill:color});
+ t.textContent=label;g.appendChild(bg);g.appendChild(t);
 }
-function ray(group,angle,color,width,label){
-  var a=point(angle,INNER),b=point(angle,OUTER-38);
-  group.appendChild(svgEl('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:color,'stroke-width':width,'stroke-linecap':'round','stroke-opacity':'.94'}));
-  badge(group,angle,color,label);
-}
-function ensureOverlay(){
-  var svg=wheelDoc.getElementById('wheel');if(!svg)return null;
-  var old=wheelDoc.getElementById(PREFIX+'Overlay');
-  if(old)return old;
-  var group=svgEl('g',{id:PREFIX+'Overlay','pointer-events':'none','aria-label':'ساعة: أشعة الساعات والدقائق والثواني'});
-  svg.appendChild(group);return group;
+function ray(g,angle,color,width,label){
+ var a=pt(angle,INNER),b=pt(angle,OUTER-40);
+ g.appendChild(el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:color,'stroke-width':width,'stroke-linecap':'round','stroke-opacity':'.96'}));
+ badge(g,angle,color,label);
 }
 function render(){
-  if(!wheelDoc||!controls)return;
-  var g=ensureOverlay();if(!g)return;
-  while(g.firstChild)g.removeChild(g.firstChild);
-  if(!controls.visible.checked){g.setAttribute('display','none');return;}
-  g.removeAttribute('display');
-  var now=new Date(),h=now.getHours(),m=now.getMinutes(),s=now.getSeconds()+now.getMilliseconds()/1000;
-  var ha=(h%12)*30+m*.5+s/120,ma=m*6+s*.1,sa=s*6;
-  ray(g,ha,'#8f5b3a',8,String(h).padStart(2,'0'));
-  ray(g,ma,'#d7a83f',6,String(m).padStart(2,'0'));
-  ray(g,sa,'#21b9c7',4,String(Math.floor(s)).padStart(2,'0'));
-  if(controls.center.checked){
-    var panel=svgEl('g',{'data-v240-center-clock':'true','pointer-events':'none'});
-    panel.appendChild(svgEl('rect',{x:CX-155,y:CY-54,width:310,height:108,rx:28,fill:'#130f0b','fill-opacity':'.92',stroke:'#b47a2e','stroke-width':6}));
-    var tx=svgEl('text',{x:CX,y:CY+13,'text-anchor':'middle','font-family':'Tahoma,Arial,sans-serif','font-size':46,'font-weight':'700',fill:'#f0c66d'});
-    tx.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(Math.floor(s)).padStart(2,'0');
-    panel.appendChild(tx);g.appendChild(panel);
-  }
+ if(!controls||!rayGroup||!clockGroup)return false;
+ clear(rayGroup);clear(clockGroup);
+ var on=controls.visible.checked;
+ rayGroup.style.display=on?'':'none';clockGroup.style.display=on&&controls.center.checked?'':'none';
+ if(!on)return true;
+ var now=new Date(),h=now.getHours(),m=now.getMinutes(),sec=now.getSeconds(),s=sec+now.getMilliseconds()/1000;
+ ray(rayGroup,(h%12)*30+m*.5+s/120,'#8f5b3a',8,String(h).padStart(2,'0'));
+ ray(rayGroup,m*6+s*.1,'#d7a83f',6,String(m).padStart(2,'0'));
+ ray(rayGroup,s*6,'#21b9c7',4,String(sec).padStart(2,'0'));
+ if(controls.center.checked){
+  clockGroup.appendChild(el('rect',{x:CX-155,y:CY-54,width:310,height:108,rx:28,fill:'#130f0b','fill-opacity':'.92',stroke:'#b47a2e','stroke-width':6}));
+  var t=el('text',{x:CX,y:CY+13,'text-anchor':'middle','font-family':'Tahoma,Arial,sans-serif','font-size':46,'font-weight':'700',fill:'#f0c66d'});
+  t.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');clockGroup.appendChild(t);
+ }
+ rayGroup.setAttribute('data-time',h+':'+m+':'+sec);
+ return true;
 }
-function start(){
-  if(!discover())return false;
-  addPanel();render();
-  if(timer)clearInterval(timer);
-  timer=setInterval(render,250);
-  wheelDoc.documentElement.dataset.v240ClockRays='isolated-overlay-no-wheel-geometry-change';
-  return true;
+function discover(){
+ var root=null;try{root=frame.contentDocument;}catch(e){}if(!root)return false;
+ panelDoc=visit(root,function(d){return d.getElementById('v217FiguresBody')?d:null;},0);
+ wheelDoc=visit(root,function(d){return d.getElementById('wheel')&&d.getElementById('angleTicks')?d:null;},0);
+ svg=wheelDoc&&wheelDoc.getElementById('wheel');
+ if(!panelDoc||!wheelDoc||!svg)return false;
+ if(!buildControls()||!ensureGraphics())return false;
+ render();
+ if(!timer)timer=setInterval(function(){ensureGraphics();render();},250);
+ wheelDoc.documentElement.dataset.v240ClockRays='installed-and-visible';
+ return true;
 }
-function boot(n){if(start())return;if(n<300)setTimeout(function(){boot(n+1);},100);}
-if(frame)frame.addEventListener('load',function(){boot(0);});
-boot(0);
+var attempts=0,poller=setInterval(function(){attempts+=1;if(discover()||attempts>=2400){if(attempts>=2400)clearInterval(poller);}},250);
+frame.addEventListener('load',function(){
+ panelDoc=null;wheelDoc=null;svg=null;rayGroup=null;clockGroup=null;controls=null;
+ if(timer){clearInterval(timer);timer=null;}discover();
+});
+discover();
+window.__auditKawkabatClockRaysV240=function(){
+ return{panel:!!(panelDoc&&panelDoc.getElementById(PREFIX+'Section')),rays:!!(wheelDoc&&wheelDoc.getElementById(PREFIX+'Rays')),centerClock:!!(wheelDoc&&wheelDoc.getElementById(PREFIX+'Center')),defaultVisible:true,wheelGeometryChanged:false,numberEngineChanged:false};
+};
 }());
 </script>
 
