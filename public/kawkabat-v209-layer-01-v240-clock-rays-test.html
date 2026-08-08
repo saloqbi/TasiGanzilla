@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Magic Numbers Constellation — Gold Motifs Inside Black Band V87</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f7f1e3}
+#appFrame{display:block;width:100%;height:100%;border:0;background:#f7f1e3}
+</style>
+</head>
+<body>
+<iframe id="appFrame" title="Magic Numbers Constellation" allowfullscreen src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/b9099a9fec22f6073b2c5c336967a89b0d15d99c/public/kawkabat-v209-layer-02.html"></iframe>
+<script>
+(function(){
+'use strict';
+var frame=document.getElementById('appFrame');
+var timer=null;
+var INWARD_SHIFT=10;
+
+function visit(doc,callback,depth){
+  if(!doc||depth>220)return;
+  callback(doc);
+  var frames=doc.querySelectorAll('iframe');
+  for(var i=0;i<frames.length;i+=1){
+    try{visit(frames[i].contentDocument,callback,depth+1);}catch(error){}
+  }
+}
+
+function polar(cx,cy,r,degree){
+  var angle=(degree-90)*Math.PI/180;
+  return{x:cx+Math.cos(angle)*r,y:cy+Math.sin(angle)*r};
+}
+
+function applyToWheel(doc){
+  var svg=doc.getElementById('wheel');
+  var outerFrame=doc.getElementById('outerBlackFrame');
+  var band=doc.getElementById('v33OrnamentalBand');
+  if(!svg||!outerFrame||!band)return false;
+  var blackBand=outerFrame.querySelector('.outer-black-band');
+  if(!blackBand)return false;
+  var uses=band.querySelectorAll('use');
+  if(uses.length!==64)return false;
+  var viewBox=(svg.getAttribute('viewBox')||'0 0 4400 3600').trim().split(/\s+/).map(Number);
+  var cx=(viewBox[0]||0)+(viewBox[2]||4400)/2;
+  var cy=(viewBox[1]||0)+(viewBox[3]||3600)/2;
+  var bandRadius=Number.parseFloat(blackBand.getAttribute('r'));
+  if(!Number.isFinite(bandRadius))return false;
+  var motifRadius=bandRadius-INWARD_SHIFT;
+  for(var index=0;index<uses.length;index+=1){
+    var degree=index*(360/uses.length);
+    var point=polar(cx,cy,motifRadius,degree);
+    uses[index].setAttribute('transform','translate('+point.x.toFixed(3)+' '+point.y.toFixed(3)+') rotate('+degree.toFixed(3)+')');
+    uses[index].setAttribute('data-v87-inside-black-band','true');
+  }
+  band.dataset.v87MotifRadius=String(motifRadius);
+  doc.documentElement.dataset.v87GoldMotifsInsideBlackBand='true';
+  doc.defaultView.__auditKawkabatGoldMotifsInsideBlackBandV87=function(){
+    return{
+      ok:band.querySelectorAll('use[data-v87-inside-black-band="true"]').length===64,
+      sourceVersion:'V86',
+      motifCount:uses.length,
+      bandRadius:bandRadius,
+      motifRadius:motifRadius,
+      inwardShift:INWARD_SHIFT,
+      motifShapeChanged:false,
+      motifSizeChanged:false,
+      blackBandChanged:false,
+      ornateFrameChanged:false,
+      wheelGeometryChanged:false,
+      toolbarChanged:false,
+      panelLayoutChanged:false,
+      twoLineZodiacPreserved:true
+    };
+  };
+  return true;
+}
+
+function apply(){
+  var done=false;
+  try{
+    visit(frame.contentDocument,function(doc){
+      if(done)return;
+      if(applyToWheel(doc))done=true;
+    },0);
+  }catch(error){}
+  return done;
+}
+
+function start(){
+  if(timer)clearTimeout(timer);
+  var attempts=0;
+  function boot(){
+    attempts+=1;
+    if(apply()||attempts>=240){
+      timer=null;
+      return;
+    }
+    timer=setTimeout(boot,100);
+  }
+  boot();
+}
+
+frame.addEventListener('load',start);
+start();
+}());
+</script>
+
+<script>
+(function(){
+'use strict';
+var P='v240ClockRays',NS='http://www.w3.org/2000/svg',CX=2200,CY=1800,INNER=415,OUTER=1465;
+var frame=document.getElementById('appFrame'),panelDoc,wheelDoc,svg,rays,center,visibleInput,centerInput,clockTimer;
+function walk(doc,fn,depth){
+ if(!doc||depth>220)return null;var hit=fn(doc);if(hit)return hit;
+ var fs=doc.querySelectorAll('iframe');
+ for(var i=0;i<fs.length;i+=1){try{var v=walk(fs[i].contentDocument,fn,depth+1);if(v)return v;}catch(e){}}
+ return null;
+}
+function node(name,a){var n=wheelDoc.createElementNS(NS,name);Object.keys(a||{}).forEach(function(k){n.setAttribute(k,String(a[k]));});return n;}
+function point(deg,r){var a=(deg-90)*Math.PI/180;return{x:CX+Math.cos(a)*r,y:CY+Math.sin(a)*r};}
+function controls(){
+ if(panelDoc.getElementById(P+'Section')){
+  var s=panelDoc.getElementById(P+'Section');visibleInput=s.querySelector('[data-clock-visible]');centerInput=s.querySelector('[data-clock-center]');return true;
+ }
+ var section=panelDoc.createElement('div');section.id=P+'Section';section.style.cssText='direction:ltr;border-top:1px solid #65b6c5;border-bottom:1px solid #9eb2ba;background:#eef2f3;font:11px Tahoma,Arial,sans-serif';
+ section.innerHTML='<div style="height:25px;display:flex;align-items:center;padding:0 8px;font-weight:700;background:linear-gradient(#fff,#e4ecef)">Clock rays — الساعة</div>'+
+ '<label style="display:grid;grid-template-columns:1fr 42px;align-items:center;min-height:24px;padding:0 8px;border-top:1px solid #cbd5d9"><span>Visible</span><input data-clock-visible type="checkbox"></label>'+
+ '<label style="display:grid;grid-template-columns:1fr 42px;align-items:center;min-height:24px;padding:0 8px;border-top:1px solid #cbd5d9"><span>Center clock</span><input data-clock-center type="checkbox" checked></label>';
+ panelDoc.getElementById('v217FiguresBody').appendChild(section);
+ visibleInput=section.querySelector('[data-clock-visible]');centerInput=section.querySelector('[data-clock-center]');
+ visibleInput.checked=false;centerInput.checked=true;
+ visibleInput.addEventListener('change',draw);centerInput.addEventListener('change',draw);
+ return true;
+}
+function graphics(){
+ rays=wheelDoc.getElementById(P+'Rays');
+ if(!rays){rays=node('g',{id:P+'Rays','pointer-events':'none'});var cycles=wheelDoc.getElementById('dynamicApprovedCycles');if(cycles&&cycles.parentNode===svg)svg.insertBefore(rays,cycles);else svg.appendChild(rays);}
+ center=wheelDoc.getElementById(P+'Center');
+ if(!center){center=node('g',{id:P+'Center','pointer-events':'none'});svg.appendChild(center);}
+ return true;
+}
+function empty(g){while(g&&g.firstChild)g.removeChild(g.firstChild);}
+function mark(g,deg,color,text){
+ var p=point(deg,OUTER),c=node('circle',{cx:p.x,cy:p.y,r:34,fill:'#15110d',stroke:color,'stroke-width':6}),t=node('text',{x:p.x,y:p.y+10,'text-anchor':'middle','font-family':'Tahoma,Arial','font-size':28,'font-weight':700,fill:color});
+ t.textContent=text;g.appendChild(c);g.appendChild(t);
+}
+function hand(g,deg,color,width,text){
+ var a=point(deg,INNER),b=point(deg,OUTER-40);g.appendChild(node('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:color,'stroke-width':width,'stroke-linecap':'round'}));mark(g,deg,color,text);
+}
+function draw(){
+ if(!visibleInput||!rays||!center)return false;empty(rays);empty(center);
+ rays.style.display=visibleInput.checked?'':'none';center.style.display=visibleInput.checked&&centerInput.checked?'':'none';
+ if(!visibleInput.checked)return true;
+ var d=new Date(),h=d.getHours(),m=d.getMinutes(),sec=d.getSeconds(),s=sec+d.getMilliseconds()/1000;
+ hand(rays,(h%12)*30+m*.5+s/120,'#8f5b3a',8,String(h).padStart(2,'0'));
+ hand(rays,m*6+s*.1,'#d7a83f',6,String(m).padStart(2,'0'));
+ hand(rays,s*6,'#21b9c7',4,String(sec).padStart(2,'0'));
+ if(centerInput.checked){
+  center.appendChild(node('rect',{x:CX-155,y:CY-54,width:310,height:108,rx:28,fill:'#130f0b','fill-opacity':'.92',stroke:'#b47a2e','stroke-width':6}));
+  var t=node('text',{x:CX,y:CY+13,'text-anchor':'middle','font-family':'Tahoma,Arial','font-size':46,'font-weight':700,fill:'#f0c66d'});
+  t.textContent=String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');center.appendChild(t);
+ }
+ return true;
+}
+function install(){
+ var root=null;try{root=frame.contentDocument;}catch(e){}if(!root)return false;
+ panelDoc=walk(root,function(d){return d.getElementById('v217FiguresBody')?d:null;},0);
+ wheelDoc=walk(root,function(d){return d.getElementById('wheel')&&d.getElementById('angleTicks')?d:null;},0);
+ svg=wheelDoc&&wheelDoc.getElementById('wheel');if(!panelDoc||!wheelDoc||!svg)return false;
+ controls();graphics();draw();
+ if(!clockTimer)clockTimer=setInterval(function(){graphics();draw();},250);
+ wheelDoc.documentElement.dataset.v240InnerClock='ready-default-off';return true;
+}
+var tries=0,poll=setInterval(function(){tries+=1;if(install()||tries>=2400){if(tries>=2400)clearInterval(poll);}},250);
+frame.addEventListener('load',function(){panelDoc=wheelDoc=svg=rays=center=visibleInput=centerInput=null;if(clockTimer){clearInterval(clockTimer);clockTimer=null;}install();});
+install();
+}());
+</script>
+
+</body>
+</html>
