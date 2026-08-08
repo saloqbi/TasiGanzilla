@@ -1734,67 +1734,51 @@
     }
 
     function ensureClockControlsV240() {
-      var existing = controlDocument.getElementById('v240ClockControls');
-      if (existing) {
-        clockVisibleInputV240 =
-          existing.querySelector('[data-v240-clock-visible]');
-        clockCenterInputV240 =
-          existing.querySelector('[data-v240-clock-center]');
-        positionClockControlsV240(existing);
-        return bindClockControlsV240();
-      }
-
-      var panel = controlDocument.createElement('div');
-      panel.id = 'v240ClockControls';
-      panel.style.cssText =
-        'direction:ltr;width:100%;box-sizing:border-box;' +
-        'font:11px Tahoma,Arial,sans-serif;border-top:1px solid #65b6c5;' +
-        'border-bottom:1px solid #9eb2ba;background:#eef2f3;color:#173742';
-
-      var header = controlDocument.createElement('div');
-      header.textContent = 'Clock rays — الساعة';
-      header.style.cssText =
-        'height:25px;display:flex;align-items:center;padding:0 8px;' +
-        'font-weight:700;background:linear-gradient(#fff,#e4ecef)';
-      panel.appendChild(header);
-
-      function addClockRow(label, role, checked) {
-        var row = controlDocument.createElement('label');
-        row.style.cssText =
-          'display:grid;grid-template-columns:1fr 42px;align-items:center;' +
-          'min-height:24px;padding:0 8px;border-top:1px solid #cbd5d9';
-        var text = controlDocument.createElement('span');
-        text.textContent = label;
-        var input = controlDocument.createElement('input');
-        input.type = 'checkbox';
-        input.checked = checked;
-        input.setAttribute(role, '');
-        row.appendChild(text);
-        row.appendChild(input);
-        panel.appendChild(row);
-        return input;
-      }
-
-      clockVisibleInputV240 =
-        addClockRow('Visible', 'data-v240-clock-visible', false);
-      clockCenterInputV240 =
-        addClockRow('Center clock', 'data-v240-clock-center', true);
-
-      positionClockControlsV240(panel);
-      bindClockControlsV240();
+      if (!controlDocument) return false;
 
       /*
-       * The first Visible option in the clock tools is the sole manual
-       * master switch for the complete clock (three rays + center readout).
-       * It is intentionally independent from Layout > Visible.
+       * User-approved master switch:
+       * the FIRST native checkbox under Layout (Layout > Visible).
+       * It keeps its original wheel behaviour and additionally controls
+       * the complete clock. No separate clock Visible option is created.
        */
-      clockVisibleInputV240.checked = false;
-      clockCenterInputV240.checked = true;
-      clockCenterInputV240.closest('label').style.display = 'none';
-      controlDocument.documentElement.dataset.v240ClockDefault =
-        'off-manual-only';
+      var nativeVisible =
+        controlDocument.querySelector(
+          'input[aria-label="Visible"]'
+        );
+
+      if (!nativeVisible) {
+        var nativeCheckboxes =
+          controlDocument.querySelectorAll('input[type="checkbox"]');
+        nativeVisible = nativeCheckboxes.length
+          ? nativeCheckboxes[0]
+          : null;
+      }
+      if (!nativeVisible) return false;
+
+      var obsoletePanel =
+        controlDocument.getElementById('v240ClockControls');
+      if (obsoletePanel) obsoletePanel.remove();
+
+      clockVisibleInputV240 = nativeVisible;
+      clockVisibleInputV240.setAttribute(
+        'data-v240-layout-visible-clock-master',
+        'true'
+      );
+
+      if (!clockCenterInputV240) {
+        clockCenterInputV240 =
+          controlDocument.createElement('input');
+        clockCenterInputV240.type = 'checkbox';
+        clockCenterInputV240.checked = true;
+        clockCenterInputV240.hidden = true;
+      }
+
+      bindClockControlsV240();
       controlDocument.documentElement.dataset.v240ClockMasterControl =
-        'first-visible-in-clock-tools';
+        'layout-first-visible';
+      controlDocument.documentElement.dataset.v240ClockDefault =
+        clockVisibleInputV240.checked ? 'on-with-layout' : 'off-with-layout';
       return true;
     }
 
