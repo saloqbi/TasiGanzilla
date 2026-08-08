@@ -4455,13 +4455,14 @@ function addPanel(){
   panel.innerHTML='<div class="v240h">Clock rays — الساعة</div>'+
     '<label class="v240r"><span>Visible</span><input data-role="visible" type="checkbox"></label>'+
     '<label class="v240r"><span>Center clock</span><input data-role="center" type="checkbox" checked></label>';
-  var host=controlDoc.getElementById('v217FiguresBody')||controlDoc.querySelector('aside')||controlDoc.body;
-  host.appendChild(panel);
+  var figuresSection=controlDoc.getElementById('v217FiguresSection');
+  if(figuresSection&&figuresSection.parentNode){figuresSection.parentNode.insertBefore(panel,figuresSection);}
+  else{(controlDoc.querySelector('aside')||controlDoc.body).appendChild(panel);}
   controls={visible:panel.querySelector('[data-role=visible]'),center:panel.querySelector('[data-role=center]')};
-  controls.visible.checked=false;
+  controls.visible.checked=true;
   controls.visible.addEventListener('change',render);
   controls.center.addEventListener('change',render);
-  controlDoc.documentElement.dataset.v240ClockDefaults='visible-off-center-clock-on';
+  controlDoc.documentElement.dataset.v240ClockDefaults='visible-on-center-clock-on';
   return true;
 }
 function badge(group,angle,color,label){
