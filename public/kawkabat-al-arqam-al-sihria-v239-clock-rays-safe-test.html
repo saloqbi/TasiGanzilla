@@ -1766,6 +1766,18 @@
         'true'
       );
 
+      /*
+       * Start hidden for an unmistakable manual test. Applying the native
+       * events keeps the original wheel state synchronized with the box.
+       */
+      if (
+        clockVisibleInputV240.dataset.v240InitialOffApplied !== 'true'
+      ) {
+        clockVisibleInputV240.dataset.v240InitialOffApplied = 'true';
+        clockVisibleInputV240.checked = false;
+        dispatchControl(clockVisibleInputV240);
+      }
+
       if (!clockCenterInputV240) {
         clockCenterInputV240 =
           controlDocument.createElement('input');
