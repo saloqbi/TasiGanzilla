@@ -2733,7 +2733,7 @@ function buildPanel(doc){
     '#v220TriangleAngle{width:calc(100% - 10px);height:22px;box-sizing:border-box;border:1px solid #aab8bf;border-radius:2px;padding:1px 5px;background:#fff;font:11px Arial,sans-serif;direction:ltr;}';
   doc.head.appendChild(style);
   body.textContent='';
-  var visible=doc.createElement('input');visible.type='checkbox';visible.id='v220TriangleVisible';visible.checked=true;
+  var visible=doc.createElement('input');visible.type='checkbox';visible.id='v220TriangleVisible';visible.checked=false;
   var highlight=doc.createElement('input');highlight.type='checkbox';highlight.id='v220TriangleHighlight';highlight.checked=true;
   var angle=doc.createElement('input');angle.type='text';angle.id='v220TriangleAngle';angle.value='0°';angle.inputMode='decimal';
   body.appendChild(makeRow(doc,'Visible',visible));
@@ -2766,7 +2766,7 @@ window.__auditKawkabatGannTriangleV220=function(){
     spokes:3,
     outerVertices:3,
     verticesTouchAngleFrame:true,
-    defaultVisible:true,
+    defaultVisible:false,
     defaultHighlight:true,
     defaultAngle:'0°',
     wrongSingleSectorRemoved:true,
@@ -4453,7 +4453,7 @@ function buildControls(){
  panelDoc.getElementById('v217FiguresBody').appendChild(section);
  controls={visible:visible,center:center};
  visible.addEventListener('change',render);center.addEventListener('change',render);
- panelDoc.documentElement.dataset.v240ClockDefaults='visible-on-center-clock-on';
+ panelDoc.documentElement.dataset.v240ClockDefaults='visible-off-center-clock-on';
  return true;
 }
 function ensureGraphics(){
