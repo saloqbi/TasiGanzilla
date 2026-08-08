@@ -13,7 +13,7 @@
   <iframe
     id="v131-frame"
     title="كوكبة الأرقام السحرية"
-    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/83f5d21b74a28dd04d68848a7316417e440d0fad/public/kawkabat-v209-layer-01-v240-clock-rays-test.html">
+    src="https://htmlpreview.github.io/?https://github.com/saloqbi/TasiGanzilla/blob/b3508dfab65fa4d9494e2ca497f6b7771ff12540/public/kawkabat-v209-layer-01.html">
   </iframe>
 
   <script>
@@ -44,6 +44,11 @@
     var highlightFillSelect = null;
     var highlightShowNumbersInput = null;
     var highlightShowMarksInput = null;
+
+    // V240 clock rays: isolated controls and SVG elements.
+    var clockVisibleInputV240 = null;
+    var clockCenterInputV240 = null;
+    var clockTimerV240 = null;
 
     var defaultsApplied = false;
     var lastTarget = null;
@@ -1559,6 +1564,7 @@
       clearFindHighlight();
 
       applyDefaultOnes();
+      ensureClockControlsV240();
 
       if (findInput.dataset.v131FindAttached === 'true') return true;
       findInput.dataset.v131FindAttached = 'true';
@@ -1669,7 +1675,276 @@
       return true;
     }
 
+
+    function clockSvgV240(name, attributes) {
+      var node = wheelDocument.createElementNS(
+        'http://www.w3.org/2000/svg',
+        name
+      );
+      Object.keys(attributes || {}).forEach(function (key) {
+        node.setAttribute(key, String(attributes[key]));
+      });
+      return node;
+    }
+
+    function clockPointV240(angle, radius) {
+      var radians = (angle - 90) * Math.PI / 180;
+      return {
+        x: 2200 + Math.cos(radians) * radius,
+        y: 1800 + Math.sin(radians) * radius
+      };
+    }
+
+    function ensureClockControlsV240() {
+      var existing = controlDocument.getElementById('v240ClockControls');
+      if (existing) {
+        clockVisibleInputV240 =
+          existing.querySelector('[data-v240-clock-visible]');
+        clockCenterInputV240 =
+          existing.querySelector('[data-v240-clock-center]');
+        return !!(clockVisibleInputV240 && clockCenterInputV240);
+      }
+
+      var panel = controlDocument.createElement('div');
+      panel.id = 'v240ClockControls';
+      panel.style.cssText =
+        'direction:ltr;width:100%;box-sizing:border-box;' +
+        'font:11px Tahoma,Arial,sans-serif;border-top:1px solid #65b6c5;' +
+        'border-bottom:1px solid #9eb2ba;background:#eef2f3;color:#173742';
+
+      var header = controlDocument.createElement('div');
+      header.textContent = 'Clock rays — الساعة';
+      header.style.cssText =
+        'height:25px;display:flex;align-items:center;padding:0 8px;' +
+        'font-weight:700;background:linear-gradient(#fff,#e4ecef)';
+      panel.appendChild(header);
+
+      function addClockRow(label, role, checked) {
+        var row = controlDocument.createElement('label');
+        row.style.cssText =
+          'display:grid;grid-template-columns:1fr 42px;align-items:center;' +
+          'min-height:24px;padding:0 8px;border-top:1px solid #cbd5d9';
+        var text = controlDocument.createElement('span');
+        text.textContent = label;
+        var input = controlDocument.createElement('input');
+        input.type = 'checkbox';
+        input.checked = checked;
+        input.setAttribute(role, '');
+        row.appendChild(text);
+        row.appendChild(input);
+        panel.appendChild(row);
+        return input;
+      }
+
+      clockVisibleInputV240 =
+        addClockRow('Visible', 'data-v240-clock-visible', false);
+      clockCenterInputV240 =
+        addClockRow('Center clock', 'data-v240-clock-center', true);
+
+      var host =
+        controlDocument.querySelector('aside') ||
+        controlDocument.body;
+      host.appendChild(panel);
+
+      clockVisibleInputV240.addEventListener(
+        'change',
+        renderClockV240
+      );
+      clockCenterInputV240.addEventListener(
+        'change',
+        renderClockV240
+      );
+      controlDocument.documentElement.dataset.v240ClockDefault =
+        'off-manual-only';
+      return true;
+    }
+
+    function ensureClockGraphicV240() {
+      if (!wheelDocument) return false;
+      var svg = wheelDocument.getElementById('wheel');
+      if (!svg) return false;
+
+      var rays = wheelDocument.getElementById('v240ClockRays');
+      if (!rays) {
+        rays = clockSvgV240('g', {
+          id: 'v240ClockRays',
+          'pointer-events': 'none',
+          'aria-label': 'Clock hour minute second rays'
+        });
+
+        [
+          ['hour', '#8f5b3a', 8],
+          ['minute', '#d7a83f', 6],
+          ['second', '#21b9c7', 4]
+        ].forEach(function (definition) {
+          var role = definition[0];
+          var color = definition[1];
+          var width = definition[2];
+
+          rays.appendChild(clockSvgV240('line', {
+            'data-v240-ray': role,
+            stroke: color,
+            'stroke-width': width,
+            'stroke-linecap': 'round',
+            'stroke-opacity': '0.96'
+          }));
+
+          rays.appendChild(clockSvgV240('circle', {
+            'data-v240-badge': role,
+            r: 34,
+            fill: '#15110d',
+            'fill-opacity': '0.96',
+            stroke: color,
+            'stroke-width': 6
+          }));
+
+          var label = clockSvgV240('text', {
+            'data-v240-label': role,
+            'text-anchor': 'middle',
+            'font-family': 'Tahoma,Arial,sans-serif',
+            'font-size': 28,
+            'font-weight': 700,
+            fill: color
+          });
+          label.textContent = '00';
+          rays.appendChild(label);
+        });
+
+        var cycles = wheelDocument.getElementById(
+          'dynamicApprovedCycles'
+        );
+        if (cycles && cycles.parentNode === svg) {
+          svg.insertBefore(rays, cycles);
+        } else {
+          svg.appendChild(rays);
+        }
+      }
+
+      var center = wheelDocument.getElementById(
+        'v240ClockCenter'
+      );
+      if (!center) {
+        center = clockSvgV240('g', {
+          id: 'v240ClockCenter',
+          'pointer-events': 'none'
+        });
+        center.appendChild(clockSvgV240('rect', {
+          x: 2045,
+          y: 1746,
+          width: 310,
+          height: 108,
+          rx: 28,
+          fill: '#130f0b',
+          'fill-opacity': '0.92',
+          stroke: '#b47a2e',
+          'stroke-width': 6
+        }));
+        var time = clockSvgV240('text', {
+          id: 'v240ClockTime',
+          x: 2200,
+          y: 1813,
+          'text-anchor': 'middle',
+          'font-family': 'Tahoma,Arial,sans-serif',
+          'font-size': 46,
+          'font-weight': 700,
+          fill: '#f0c66d'
+        });
+        time.textContent = '00:00:00';
+        center.appendChild(time);
+        svg.appendChild(center);
+      }
+      return true;
+    }
+
+    function setClockRayV240(role, angle, label) {
+      var inner = clockPointV240(angle, 415);
+      var outer = clockPointV240(angle, 1425);
+      var badge = clockPointV240(angle, 1465);
+      var line = wheelDocument.querySelector(
+        '[data-v240-ray="' + role + '"]'
+      );
+      var circle = wheelDocument.querySelector(
+        '[data-v240-badge="' + role + '"]'
+      );
+      var text = wheelDocument.querySelector(
+        '[data-v240-label="' + role + '"]'
+      );
+      if (!line || !circle || !text) return;
+
+      line.setAttribute('x1', inner.x.toFixed(3));
+      line.setAttribute('y1', inner.y.toFixed(3));
+      line.setAttribute('x2', outer.x.toFixed(3));
+      line.setAttribute('y2', outer.y.toFixed(3));
+
+      circle.setAttribute('cx', badge.x.toFixed(3));
+      circle.setAttribute('cy', badge.y.toFixed(3));
+      text.setAttribute('x', badge.x.toFixed(3));
+      text.setAttribute('y', (badge.y + 10).toFixed(3));
+      text.textContent = label;
+    }
+
+    function renderClockV240() {
+      if (!wheelDocument ||
+          !clockVisibleInputV240 ||
+          !ensureClockGraphicV240()) return false;
+
+      var rays = wheelDocument.getElementById('v240ClockRays');
+      var center = wheelDocument.getElementById('v240ClockCenter');
+      var visible = clockVisibleInputV240.checked;
+
+      rays.style.display = visible ? '' : 'none';
+      center.style.display =
+        visible && clockCenterInputV240.checked ? '' : 'none';
+      if (!visible) return true;
+
+      var now = new Date();
+      var hour = now.getHours();
+      var minute = now.getMinutes();
+      var second = now.getSeconds();
+      var preciseSecond =
+        second + now.getMilliseconds() / 1000;
+
+      setClockRayV240(
+        'hour',
+        (hour % 12) * 30 +
+          minute * 0.5 +
+          preciseSecond / 120,
+        String(hour).padStart(2, '0')
+      );
+      setClockRayV240(
+        'minute',
+        minute * 6 + preciseSecond * 0.1,
+        String(minute).padStart(2, '0')
+      );
+      setClockRayV240(
+        'second',
+        preciseSecond * 6,
+        String(second).padStart(2, '0')
+      );
+
+      var time = wheelDocument.getElementById('v240ClockTime');
+      if (time) {
+        time.textContent =
+          String(hour).padStart(2, '0') + ':' +
+          String(minute).padStart(2, '0') + ':' +
+          String(second).padStart(2, '0');
+      }
+      return true;
+    }
+
+    function startClockV240() {
+      ensureClockControlsV240();
+      ensureClockGraphicV240();
+      renderClockV240();
+      if (!clockTimerV240) {
+        clockTimerV240 = setInterval(renderClockV240, 250);
+      }
+      wheelDocument.documentElement.dataset.v240Clock =
+        'main-module-ready-default-off';
+    }
+
     function attachWheel() {
+      startClockV240();
       if (wheelObserver) wheelObserver.disconnect();
       wheelDocument.addEventListener('gannzilla:language-change', scheduleApply);
       wheelObserver = new MutationObserver(scheduleApply);
@@ -2733,7 +3008,7 @@ function buildPanel(doc){
     '#v220TriangleAngle{width:calc(100% - 10px);height:22px;box-sizing:border-box;border:1px solid #aab8bf;border-radius:2px;padding:1px 5px;background:#fff;font:11px Arial,sans-serif;direction:ltr;}';
   doc.head.appendChild(style);
   body.textContent='';
-  var visible=doc.createElement('input');visible.type='checkbox';visible.id='v220TriangleVisible';visible.checked=false;
+  var visible=doc.createElement('input');visible.type='checkbox';visible.id='v220TriangleVisible';visible.checked=true;
   var highlight=doc.createElement('input');highlight.type='checkbox';highlight.id='v220TriangleHighlight';highlight.checked=true;
   var angle=doc.createElement('input');angle.type='text';angle.id='v220TriangleAngle';angle.value='0°';angle.inputMode='decimal';
   body.appendChild(makeRow(doc,'Visible',visible));
@@ -2766,7 +3041,7 @@ window.__auditKawkabatGannTriangleV220=function(){
     spokes:3,
     outerVertices:3,
     verticesTouchAngleFrame:true,
-    defaultVisible:false,
+    defaultVisible:true,
     defaultHighlight:true,
     defaultAngle:'0°',
     wrongSingleSectorRemoved:true,
@@ -4401,8 +4676,5 @@ window.__auditKawkabatIndependentStarsV236=function(){
 };
 }());
 </script>
-
-
-
 </body>
 </html>
