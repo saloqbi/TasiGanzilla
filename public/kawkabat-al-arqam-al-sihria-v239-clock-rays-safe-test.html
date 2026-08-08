@@ -1695,6 +1695,44 @@
       };
     }
 
+    function bindClockControlsV240() {
+      if (!clockVisibleInputV240 || !clockCenterInputV240) return false;
+      if (clockVisibleInputV240.dataset.v240ClockBound !== 'true') {
+        clockVisibleInputV240.dataset.v240ClockBound = 'true';
+        ['input', 'change', 'click'].forEach(function (eventName) {
+          clockVisibleInputV240.addEventListener(eventName, function () {
+            renderClockV240();
+            setTimeout(renderClockV240, 40);
+          });
+        });
+      }
+      if (clockCenterInputV240.dataset.v240ClockBound !== 'true') {
+        clockCenterInputV240.dataset.v240ClockBound = 'true';
+        ['input', 'change'].forEach(function (eventName) {
+          clockCenterInputV240.addEventListener(
+            eventName,
+            renderClockV240
+          );
+        });
+      }
+      return true;
+    }
+
+    function positionClockControlsV240(panel) {
+      if (!panel || !controlDocument) return;
+      var figures =
+        controlDocument.getElementById('v217FiguresSection') ||
+        controlDocument.getElementById('v217FiguresHeader');
+      if (figures && figures.parentNode) {
+        figures.parentNode.insertBefore(panel, figures);
+        return;
+      }
+      var host =
+        controlDocument.querySelector('aside') ||
+        controlDocument.body;
+      if (panel.parentNode !== host) host.appendChild(panel);
+    }
+
     function ensureClockControlsV240() {
       var existing = controlDocument.getElementById('v240ClockControls');
       if (existing) {
@@ -1702,7 +1740,8 @@
           existing.querySelector('[data-v240-clock-visible]');
         clockCenterInputV240 =
           existing.querySelector('[data-v240-clock-center]');
-        return !!(clockVisibleInputV240 && clockCenterInputV240);
+        positionClockControlsV240(existing);
+        return bindClockControlsV240();
       }
 
       var panel = controlDocument.createElement('div');
@@ -1741,21 +1780,21 @@
       clockCenterInputV240 =
         addClockRow('Center clock', 'data-v240-clock-center', true);
 
-      var host =
-        controlDocument.querySelector('aside') ||
-        controlDocument.body;
-      host.appendChild(panel);
+      positionClockControlsV240(panel);
+      bindClockControlsV240();
 
-      clockVisibleInputV240.addEventListener(
-        'change',
-        renderClockV240
-      );
-      clockCenterInputV240.addEventListener(
-        'change',
-        renderClockV240
-      );
+      /*
+       * The first Visible option in the clock tools is the sole manual
+       * master switch for the complete clock (three rays + center readout).
+       * It is intentionally independent from Layout > Visible.
+       */
+      clockVisibleInputV240.checked = false;
+      clockCenterInputV240.checked = true;
+      clockCenterInputV240.closest('label').style.display = 'none';
       controlDocument.documentElement.dataset.v240ClockDefault =
         'off-manual-only';
+      controlDocument.documentElement.dataset.v240ClockMasterControl =
+        'first-visible-in-clock-tools';
       return true;
     }
 
